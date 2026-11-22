@@ -346,7 +346,7 @@ const ODOBRENO = {
   'app/src/lib/planimetriya/prep/generate.ts':
     '5bc7b49d7b659bacdca9767cc7d17480224b4732751ce885dfd811005a1c3c55',
   'app/src/lib/planimetriya/prep/mikro.ts':
-    'e67defa6fcc3f6306dadf43f2c95db3a71d5e86afd2cc9bf7607f1e864ff5942',
+    '1b7d2d859e8f00cf7d1be9f0d7e449e43f5919ba77aafe1d819dad7f324b2b02',
   'app/src/lib/planimetriya/prep/seal.ts':
     'cea9bd3de6ae3de1be3bbf627686b4cd55146b1c5fe3b81583bed76011569d2a',
   'app/src/lib/planimetriya/prep/types.ts':
@@ -466,7 +466,7 @@ const ODOBRENO = {
   'app/src/lib/planimetriya/prep/pool.ts':
     '3c519358fd3e2f040978f63c14355f5cabe8a6867977fd690c58ea32b7df145c',
   'app/src/lib/planimetriya/prep/scenarii.ts':
-    '68fcc6f4f25d5d3615efbfb15a3c075a731cef58cc9b91d5ebc8e40b6806d1b3',
+    'f76c067dc9a6b48afd7348783a70dcbe1c7a18c09e15a0831ff87efc5d775344',
   'app/src/lib/planimetriya/stseny/chasti.ts':
     'b2db181af3ddde18f99d009f9e323ede50f0f7681bd870af5fd31cad007231c9',
 };
