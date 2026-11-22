@@ -32,6 +32,8 @@ sync_files
   printf 'DOCUMENTS_VERSION=%s\n' "$documents_version"
   printf 'ADMIN_EMAIL=%s\n' "$(printf '%s' "${ADMIN_EMAIL:-}" | tr -d '\n ')"
   printf 'DB_ADMIN_PASSWORD=%s\n' "${DB_ADMIN_PASSWORD:-}"
+  printf 'ZHURNAL=%s\n' "${ZHURNAL:-}"
+  printf 'ZHURNAL_RAZDELY=%s\n' "$(printf '%s' "${ZHURNAL_RAZDELY:-}" | tr -d '\n ')"
 } | on_server "$REMOTE_DIR/bin/migrate.sh" | tee "$WORK/migrate.log"
 
 summary <<MD

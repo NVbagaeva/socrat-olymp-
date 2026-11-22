@@ -3,6 +3,8 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { OpornayaZadacha, type OpornyyIshod } from '../../opornye';
 import { tekstyKarty45, tekstyOpornyh45 } from '@/content/veroyatnost45';
+import { zhurnal45 } from '@/lib/veroyatnost/trening/zhurnal45';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { PodskazkaVoprosy } from '../../trening/PodskazkaVoprosy';
 import { assetUrl } from '@/lib/assetUrl';
 import { formatHint, fractionRightHint } from '@/lib/otvet';
@@ -32,10 +34,13 @@ export function Opornye45Blok({
   zadanie,
   zadachi,
   zapomni,
+  blok,
 }: {
   zadanie: Zadanie45;
   zadachi: PrepPoolZadacha[];
   zapomni: ReactNode;
+  /** Блок опорных задач (адрес страницы): для журнала решения задач. */
+  blok?: string;
 }) {
   /* Подписи с функциями — здесь, в браузере: с сервера их не передать. */
   const T = tekstyOpornyh45('');
@@ -70,6 +75,10 @@ export function Opornye45Blok({
         : voprosy45(otkrytPodskazku(z.podskazka, z.seal)),
     [z, hintOpen],
   );
+  /* Журнал решения задач (lib/zhurnal): ученику, который вошёл, при флаге. */
+  const zapis = useZapisZadachi(
+    z === undefined ? null : zhurnal45(zadanie, { ...z, kind: blok ?? z.id }, 'opornye', blok ?? 'opornye', z.id),
+  );
   if (z === undefined) {
     return null;
   }
@@ -86,6 +95,8 @@ export function Opornye45Blok({
 
   function open(next: number) {
     if (next < 0 || next >= zadachi.length) return;
+    /* Ушёл на другую задачу после ошибки — задача закрыта ошибкой. */
+    if (checked === 'wrong') zapis?.zakryt(false);
     setVybrana(next);
     setValue('');
     setChecked(null);
@@ -102,15 +113,19 @@ export function Opornye45Blok({
     const reading = readSealed45(value, zadacha.seal, klyuchZadachi(zadacha.id));
     if (reading.kind === 'format') {
       setFormat(formatHint(reading.problem, reading.meant));
+      zapis?.popytka(value, false, 'format');
       return;
     }
     if (reading.kind === 'fractionRight') {
       setFormat(fractionRightHint(reading.decimal));
+      zapis?.popytka(value, false, 'fraction');
       return;
     }
     setFormat(null);
     setVybrana(index);
     const ok = reading.right;
+    zapis?.popytka(value, ok);
+    if (ok) zapis?.zakryt(true);
     setChecked(ok ? 'right' : 'wrong');
     /* Начисто — если до верного ответа задачу не открывали и не ошибались. */
     zapisat(ok, ok && prepItog(progress, zadacha.id) === null && !hintOpen, ok ? 'right' : 'wrong');
@@ -168,6 +183,7 @@ export function Opornye45Blok({
               open: hintOpen,
               onOpen: () => {
                 setHintOpen(true);
+                zapis?.shagPodskazki(1);
                 /* Подсказка учитывается так же, как открытое решение. */
                 razborOtkryt();
               },
@@ -180,8 +196,12 @@ export function Opornye45Blok({
                     onVerno={() => {
                       setShag(shag + 1);
                       setMimo([]);
+                      zapis?.shagPodskazki(shag + 1);
                     }}
-                    onMimo={(j) => setMimo([...mimo, j])}
+                    onMimo={(j) => {
+                      setMimo([...mimo, j]);
+                      zapis?.oshibkaPodskazki(shag);
+                    }}
                     labels={T.voprosy}
                   />
                   <DerevoPodskazki
@@ -212,6 +232,7 @@ export function Opornye45Blok({
               ),
               open: solutionOpen,
               onToggle: () => {
+                if (!solutionOpen) zapis?.reshenie();
                 if (!solutionOpen && checked !== 'right') razborOtkryt();
                 setSolutionOpen(!solutionOpen);
               },

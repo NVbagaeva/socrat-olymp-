@@ -74,6 +74,13 @@ jobs:
           # С незаполненным app/src/content/legal/prodavets.json сборка
           # остановится (next.config.ts). Нет переменной — не публикуются.
           NEXT_PUBLIC_LEGAL_READY: ${{ vars.NEXT_PUBLIC_LEGAL_READY }}
+          # Кабинет v2 (docs/kabinet-zhurnal.md): журнал решения задач, его
+          # разделы и экраны прогресса. Флаг журнала базы включает та же
+          # Variable через «Сервер: миграции».
+          NEXT_PUBLIC_ZHURNAL: ${{ vars.NEXT_PUBLIC_ZHURNAL }}
+          NEXT_PUBLIC_ZHURNAL_RAZDELY: ${{ vars.NEXT_PUBLIC_ZHURNAL_RAZDELY }}
+          NEXT_PUBLIC_PROGRESS_UCHITEL: ${{ vars.NEXT_PUBLIC_PROGRESS_UCHITEL }}
+          NEXT_PUBLIC_PROGRESS_UCHENIK: ${{ vars.NEXT_PUBLIC_PROGRESS_UCHENIK }}
         run: pnpm build
 
       - name: Проверить, что экспорт не пустой

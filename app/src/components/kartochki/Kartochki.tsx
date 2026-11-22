@@ -26,6 +26,8 @@ import {
   zapisatProgress,
 } from '@/lib/kartochki/progress';
 import { persistent, type PersistentStore } from '@/lib/storage';
+import { idIz } from '@/lib/zhurnal/model';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { KartochkaFlip } from './KartochkaFlip';
 
 /** Начатая сессия: переживает переход в теорию и перезагрузку. */
@@ -83,6 +85,24 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
   const poId = useMemo(() => new Map(koloda.kartochki.map((k) => [k.id, k])), [koloda]);
   const temaPo = useMemo(() => new Map(koloda.podtemy.map((t) => [t.id, t.title])), [koloda]);
   const nachataya = godnaya(sohranennaya, ids) ? sohranennaya : null;
+
+  /* Журнал решения задач (lib/zhurnal): карточка — задача журнала, тип —
+     подтема колоды. Колода базы (klyuch «baza:5») в журнал не пишется. */
+  const tekId = nachataya === null ? null : tekushchaya(nachataya.s);
+  const tekK = tekId === null ? undefined : poId.get(tekId);
+  const zapis = useZapisZadachi(
+    koloda.klyuch !== undefined || nachataya === null || tekK === undefined
+      ? null
+      : {
+          id: idIz(`${koloda.task}|kartochki|${nachataya.seed}|${nachataya.s.poz}|${tekK.id}`),
+          task_no: koloda.task,
+          kind: tekK.topic,
+          task_ref: tekK.id,
+          place: 'kartochki',
+          place_ref: `${nachataya.s.rezhim}:${nachataya.seed}`,
+          level: 1,
+        },
+  );
 
   const [ekran, setEkran] = useState<Ekran>({ vid: 'start' });
   const [rezhim, setRezhim] = useState<Rezhim>('vse');
@@ -154,6 +174,8 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
     if (nachataya === null) return;
     const id = tekushchaya(nachataya.s);
     if (id === null) return;
+    zapis?.popytka(znayu ? 'знаю' : 'не знаю', znayu);
+    zapis?.zakrytKak(znayu ? 'right' : 'wrong');
     if (menyaetKorobki(nachataya.s))
       zapisatProgress(task, otsenit(progress, id, znayu, Date.now()));
     const dalshe = otmetit(nachataya.s, znayu);

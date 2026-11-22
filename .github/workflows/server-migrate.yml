@@ -39,6 +39,9 @@ jobs:
           SIGNUP_EXTRA: ${{ secrets.SIGNUP_EXTRA }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
+          # Журнал решения задач: те же Variables, что у сборки сайта.
+          ZHURNAL: ${{ vars.NEXT_PUBLIC_ZHURNAL }}
+          ZHURNAL_RAZDELY: ${{ vars.NEXT_PUBLIC_ZHURNAL_RAZDELY }}
         run: infra/lite/actions/migrate.sh
 
       - name: Письмо о сбое

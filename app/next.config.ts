@@ -98,6 +98,16 @@ const nextConfig: NextConfig = {
       process.env.NEXT_PUBLIC_AUTH_IN_HEADER === '1'
         ? '1'
         : '0',
+    // Кабинет v2 (docs/plans/cabinet-v2.md): «1» или «0» всегда. Журнал
+    // решения задач и экраны прогресса работают только при включённом
+    // входе. Разделы журнала — номера хранения через запятую.
+    ZHURNAL_ON:
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' && process.env.NEXT_PUBLIC_ZHURNAL === '1'
+        ? '1'
+        : '0',
+    ZHURNAL_RAZDELY: process.env.NEXT_PUBLIC_ZHURNAL_RAZDELY || '5,8',
+    PROGRESS_UCHITEL_ON: process.env.NEXT_PUBLIC_PROGRESS_UCHITEL === '1' ? '1' : '0',
+    PROGRESS_UCHENIK_ON: process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1' ? '1' : '0',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
     // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,

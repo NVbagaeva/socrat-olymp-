@@ -262,6 +262,7 @@
     "test:karta": "node scripts/check-karta.mjs",
     "test:karta-site": "node scripts/check-karta-site.mjs",
     "test:progress-log": "node scripts/check-progress-log.mjs",
+    "test:zhurnal": "node scripts/check-zhurnal.mjs",
     "test:progress-perevod": "node scripts/check-progress-perevod.mjs",
     "test:progress-perevod-site": "node scripts/check-progress-perevod-site.mjs",
     "test:z8-uchenik": "node scripts/check-z8-uchenik.mjs",

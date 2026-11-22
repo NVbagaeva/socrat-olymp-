@@ -35,6 +35,7 @@ import {
   type WorkUi,
 } from '@/lib/variant/online/sessionUi';
 import type { KabinetApi } from '@/lib/kabinet/api';
+import { zapisatResheniyeVarianta } from '@/lib/zhurnal/variant';
 import { kabinetProverka } from '@/lib/variant/online/kabinetProverka';
 import {
   packKabinet,
@@ -420,6 +421,41 @@ function Finished({
           })),
         };
         zapis.current = rec;
+        /* Журнал решения задач (lib/zhurnal): ученику, который вошёл, при флаге. */
+        zapisatResheniyeVarianta({
+          code: payload.code,
+          variant: payload.variant,
+          mode: payload.mode,
+          title,
+          source:
+            payload.kabinet !== undefined
+              ? 'rabota'
+              : nabor !== null
+                ? 'povyshennye'
+                : series
+                  ? 'seriya'
+                  : 'sobrat',
+          tasks: payload.tasks.map((t) => ({
+            taskNo: t.egeNumber,
+            taskId: t.taskId,
+            prototypeId: t.prototypeId,
+          })),
+          answers,
+          second: ui.second,
+          v1: ui.v1,
+          v2: ui.v2,
+          hinted: ui.hinted,
+          steps: ui.steps,
+          times: ui.times,
+          right: c.right,
+          key: c.answers,
+          primary: score.primary,
+          max: score.max,
+          test: score.test,
+          startedAt: ui.startedAt,
+          finishedAt,
+          seconds,
+        });
         void saveWork(rec).then(() => {
           if (alive) setVolatile(archiveVolatile());
         });
@@ -431,7 +467,7 @@ function Finished({
     return () => {
       alive = false;
     };
-  }, [proverka, answers, payload, title, code, seconds, result, ui.hinted]);
+  }, [proverka, answers, payload, title, code, seconds, result, ui, nabor, series]);
 
   /* Оценки части 2 — в ту же запись архива: карточка версии покажет
      «Часть 2: 14/20» или «на проверке». */
