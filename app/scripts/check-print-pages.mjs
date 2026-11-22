@@ -47,6 +47,7 @@ import { startApache } from './lib/apache.mjs';
 import { findRawTex } from './lib/math-markup.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 import { RULES } from '../src/lib/sheet/figureRules.js';
+import { METKA_SKRYTYH } from './lib/metka-skrytyh.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium, webkit);
@@ -169,6 +170,22 @@ const SHEETS = [
     '/zadaniya/13/pechat/',
     's=A:5,B:5,C:5,D:5,T:10&l=all&i=mix&h=net&f=full&v=1&zc=1&seed=print-check',
   ],
+  /* Генератор базы (lib/baza/sheetBazy.ts): №12 с чертежами условий,
+     №16 с формулами — два варианта, QR-код и дата. */
+  [
+    'База №12',
+    '/baza/zadaniya/12/pechat/',
+    'ps=2&s=P01:1,P05:1,P19:1,P31:1,P48:1,P61:1,P77:1,P90:1&i=a&seed=PRINT1&qr=1&d=2026-10-24',
+    null,
+    '',
+  ],
+  [
+    'База №16',
+    '/baza/zadaniya/16/pechat/',
+    'ps=2&s=P01:2,P06:2,P13:2,P23:2&i=a&v=2&seed=PRINT1&k=%D0%94%D0%BE%D0%BC%D0%B0%D1%88%D0%BD%D1%8F%D1%8F+%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0',
+    null,
+    '',
+  ],
   /* «Собрать вариант»: задания 1–13, один вариант (у каждого варианта
      своя нумерация страниц, а проверка сверяет колонтитул с листом). Без
      экрана, открывшего вкладку, лист собирается по коду из адреса. */
@@ -254,7 +271,11 @@ function pdfPages(file) {
 }
 
 async function openSheet(browser, url) {
-  const page = await browser.newPage();
+  /* Листы скрытого раздела (№6 в ЕГЭ-2027) Apache отдаёт только с меткой
+     администратора — её cookie уходит с первым же запросом. */
+  const context = await browser.newContext();
+  await context.addCookies([{ name: METKA_SKRYTYH, value: '1', url }]);
+  const page = await context.newPage();
   await page.addInitScript(() => {
     window.print = () => {};
   });

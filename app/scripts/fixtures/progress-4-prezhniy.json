@@ -1,0 +1,136 @@
+{
+  "_chto": "localStorage ученика, решавшего №4 до редизайна: тренажёр до PR #340 (budetege:veroyatnost-4:v2, счётчики по методам), «Узнай метод» (budetege:veroyatnost-4-uznay:v2), опорные задачи (budetege:veroyatnost-4:prep:v1) и незаконченная тренировка (budetege:trainer:4:session). Записаны кодом main до редизайна (lib/progressStore.ts, sessiyaPayload.upakovat, trainerSession encodeSession) теми же вызовами, что делали прежние экраны. Нужен scripts/check-progress-4.mjs и браузерной проверке переноса.",
+  "budetege:veroyatnost-4:v2": {
+    "kinds": {
+      "klassicheskaya": {
+        "done": 6,
+        "right": 3,
+        "seconds": 424
+      },
+      "geometricheskoe": {
+        "done": 1,
+        "right": 1,
+        "seconds": 33
+      },
+      "protivopolozhnye": {
+        "done": 1,
+        "right": 1,
+        "seconds": 52
+      },
+      "monety": {
+        "done": 1,
+        "right": 1,
+        "seconds": 45
+      },
+      "statisticheskoe": {
+        "done": 1,
+        "right": 1,
+        "seconds": 80
+      }
+    },
+    "mistakes": ["p4-01:3", "p4-03:2", "p4-07:4", "p4-13:1", "p4-19:6"],
+    "outcomes": {}
+  },
+  "budetege:veroyatnost-4-uznay:v2": {
+    "kinds": {
+      "klassicheskaya": {
+        "done": 4,
+        "right": 3,
+        "seconds": 54
+      },
+      "protivopolozhnye": {
+        "done": 1,
+        "right": 1,
+        "seconds": 16
+      },
+      "geometricheskoe": {
+        "done": 1,
+        "right": 0,
+        "seconds": 17
+      }
+    },
+    "mistakes": ["p4-03:1", "p4-05:1"],
+    "outcomes": {}
+  },
+  "budetege:veroyatnost-4:prep:v1": {
+    "kinds": {
+      "k4-01": {
+        "done": 1,
+        "right": 1,
+        "seconds": 0
+      },
+      "k4-02": {
+        "done": 1,
+        "right": 1,
+        "seconds": 0
+      },
+      "k4-03": {
+        "done": 1,
+        "right": 0,
+        "seconds": 0
+      },
+      "k4-04": {
+        "done": 1,
+        "right": 0,
+        "seconds": 0
+      },
+      "k4-11": {
+        "done": 1,
+        "right": 1,
+        "seconds": 0
+      }
+    },
+    "mistakes": ["k4-03", "k4-04"],
+    "outcomes": {
+      "k4-01": "right",
+      "k4-02": "right",
+      "k4-03": "wrong",
+      "k4-04": "revealed",
+      "k4-11": "right"
+    }
+  },
+  "budetege:trainer:4:session": {
+    "schemaVersion": 2,
+    "scope": "4",
+    "id": "prezhnyaya-trenirovka",
+    "createdAt": 1762900000000,
+    "updatedAt": 1762900090000,
+    "rev": 4,
+    "writer": "prezhnyaya-vkladka",
+    "paused": false,
+    "activeMs": 90000,
+    "total": 5,
+    "ui": {
+      "index": 1,
+      "marks": {
+        "0": "right"
+      },
+      "tried": {
+        "1": true
+      },
+      "order": null,
+      "card": {
+        "value": "0,123",
+        "state": "incorrect",
+        "itog": "incorrect",
+        "shagov": 0
+      },
+      "vybor": null,
+      "taskFrom": 61000,
+      "misses": 1
+    },
+    "payload": {
+      "zadanie": 4,
+      "rezhim": "practice",
+      "metod": "klassicheskaya",
+      "podskazki": true,
+      "tasks": [
+        ["p4-02", 2, "80d8a30a193f0dc9"],
+        ["p4-24", 1, "9f250068656bffd4"],
+        ["p4-08", 3, "eeafa874ed00021c"],
+        ["p4-10", 2, "58a518d27c396816"],
+        ["p4-14", 4, "1c6c4e884216d2fc"]
+      ]
+    }
+  }
+}

@@ -1,0 +1,55 @@
+/* Витрина обложек разделов (styleguide/oblozhki). */
+
+.sg-obl {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-5) var(--space-9);
+  display: grid;
+  gap: var(--space-5);
+}
+
+.sg-obl__lead {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--color-text-secondary);
+}
+
+.sg-obl__setka {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-5);
+}
+
+.sg-obl__karta {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* Та же подложка и то же свечение, что за обложкой в шапке раздела. */
+.sg-obl__ramka {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-4);
+  border-radius: 24px;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  --oblozhka-h: 200px;
+}
+
+.sg-obl__ramka::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 60% at 70% 35%, rgb(61 121 224 / 0.3), transparent 70%);
+  pointer-events: none;
+}
+
+.sg-obl__podpis {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}

@@ -1,6 +1,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { tasksPage } from '@/content/tasks';
+import { TELEGRAM_KANAL } from '@/content/tarify';
 import { assetUrl } from '@/lib/assetUrl';
 import {
   DO_EGE,
@@ -12,6 +13,7 @@ import {
   type Rol,
   type Srok,
 } from '@/lib/tarify/config';
+import { yakorDoEge } from '@/lib/tarify/yakor';
 
 /* Украшения — только готовые стеклянные картинки сайта. */
 const KARTINKI: Record<'besplatno' | 'probnyy' | 'platnyy', string> = {
@@ -91,10 +93,18 @@ export function KnopkaTarifa({
   const glavnaya = plashka.id !== 'probnyy';
   const vid = glavnaya ? 'tf-knopka--teplaya' : 'tf-knopka--sinyaya';
   if (!oplata) {
+    /* Оплата выключена: не мёртвая серая кнопка, а следующий шаг —
+       Telegram-канал, где объявим открытие. Почту не собираем. */
     return (
-      <button type="button" className={clsx('tf-knopka', vid)} disabled data-oplata="vyklyuchena">
-        {knopki.skoro}
-      </button>
+      <a
+        className={clsx('tf-knopka', vid)}
+        href={TELEGRAM_KANAL}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-oplata="vyklyuchena"
+      >
+        {knopki.uznat}
+      </a>
     );
   }
   const podpis = glavnaya ? knopki.oplatit : knopki.probnyy;
@@ -129,6 +139,8 @@ export function Plashka({
   const platnyy = plashka.id === 'uchenik' || plashka.id === 'repetitor';
   const summa = platnyy ? tsena(rol, srok, data) : 0;
   const vid = platnyy ? 'platnyy' : plashka.id === 'probnyy' ? 'probnyy' : 'besplatno';
+  /* Якорь «помесячно вышло бы …» — только у платной на сроке «До ЕГЭ». */
+  const yakor = platnyy && srok === 'ege' && rol ? yakorDoEge(rol, data) : null;
 
   return (
     <article className={clsx('tf-plashka', `tf-plashka--${vid}`, className)}>
@@ -142,7 +154,11 @@ export function Plashka({
         loading={platnyy ? 'eager' : 'lazy'}
         decoding="async"
       />
-      {platnyy ? <p className="tf-plashka__metka">{TARIFY_TEXT.metkaGlavnoy}</p> : null}
+      {platnyy ? (
+        <p className="tf-plashka__metka">
+          {yakor ? TARIFY_TEXT.metkaVygodno : TARIFY_TEXT.metkaGlavnoy}
+        </p>
+      ) : null}
       <h3 className="tf-plashka__nazvanie">{plashka.nazvanie}</h3>
       <p className="tf-plashka__tsena">
         <span className="tf-plashka__summa">{summa === null ? '—' : rubli(summa)}</span>
@@ -150,6 +166,14 @@ export function Plashka({
           {platnyy ? (srok === 'd30' ? TARIFY_TEXT.za30 : DO_EGE.podpis) : TARIFY_TEXT.bezKarty}
         </span>
       </p>
+      {yakor ? (
+        <p className="tf-plashka__yakor no-math-check">
+          {TARIFY_TEXT.yakor} <s>{rubli(yakor.pomesyachno)}</s>{' '}
+          {TARIFY_TEXT.yakorRaschet(yakor.oplat, rubli(yakor.tsena30))}
+          <br />
+          <b>{TARIFY_TEXT.vygoda(rubli(yakor.vygoda))}</b>
+        </p>
+      ) : null}
       <p className="tf-plashka__dlya">{plashka.dlyaKogo}</p>
 
       <ul className="tf-punkty">
@@ -176,6 +200,9 @@ export function Plashka({
           {...(predprosmotr === undefined ? {} : { predprosmotr })}
         />
         {platnyy ? <p className="tf-plashka__snoska">{TARIFY_TEXT.bezAvtoprodleniya}</p> : null}
+        {plashka.id !== 'besplatno' && !(oplata ?? PAYMENTS_ENABLED) ? (
+          <p className="tf-plashka__snoska">{TARIFY_TEXT.skoroSnoska}</p>
+        ) : null}
       </div>
     </article>
   );

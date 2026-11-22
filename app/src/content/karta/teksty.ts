@@ -1,5 +1,7 @@
 /** Тексты «Карты ЕГЭ». */
 
+import { nomerRazdela } from '@/content/struktura';
+
 export const KARTA_TEKST = {
   nazvanie: 'Карта ЕГЭ',
   privet: (imya: string) => `Привет, ${imya}!`,
@@ -13,6 +15,8 @@ export const KARTA_TEKST = {
   chast: (n: 1 | 2) => `Часть ${n}`,
   proliv: 'Пролив ЕГЭ',
   skoro: 'Скоро',
+  /** Свободный остров: в действующей структуре экзамена заданий меньше, чем островов. */
+  budetNaEge: 'Будет на ЕГЭ',
   pozzhe: 'Прогресс появится позже',
   pozzheChto:
     'Тренажёр этого задания ещё готовится — теорию и опорные задачи можно смотреть уже сейчас.',
@@ -71,7 +75,7 @@ export function oblastDlyaDiktora(o: {
   povtoritGruppy: readonly string[];
   sleduyushchaya: boolean;
 }): string {
-  const chasti = [`Задание ${o.no}, ${o.nazvanie}`, KARTA_TEKST.status[o.sostoyanie]];
+  const chasti = [`Задание ${nomerRazdela(o.no)}, ${o.nazvanie}`, KARTA_TEKST.status[o.sostoyanie]];
   if (o.sostoyanie === 'v-processe') chasti.push(`освоено ${o.procent} % типов`);
   if (o.povtoritGruppy.length > 0) {
     chasti.push(`стоит повторить: ${o.povtoritGruppy.join(', ').toLowerCase()}`);

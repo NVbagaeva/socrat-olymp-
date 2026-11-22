@@ -5,13 +5,13 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { Opornye9 } from '@/components/tasks/proizvodnaya/Opornye9';
 import { OPORNYE } from '@/content/opornye';
-import { proizvodnayaTitle } from '@/content/proizvodnaya';
 import { OPORNYE9, TIPY_BLOKA9 } from '@/content/proizvodnaya9';
 import { OPORNYE9_HREF, tipHref9 } from '@/lib/proizvodnaya/links';
 import { PREP_BLOCKS } from '@/lib/proizvodnaya/prep/blocks';
 import { prepPool9 } from '@/lib/proizvodnaya/prep/pool';
 import { prototypeById } from '@/lib/proizvodnaya/prototypes';
 import { typeset } from '@/lib/tex';
+import { proizvodnayaZagolovok } from '@/lib/seo-razdely';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -24,7 +24,7 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const block = PREP_BLOCKS.find((item) => item.slug === blok);
-  return { title: proizvodnayaTitle(block === undefined ? OPORNYE.title : block.nazvanie) };
+  return { title: proizvodnayaZagolovok(block === undefined ? OPORNYE.title : block.nazvanie) };
 }
 
 /**

@@ -1,0 +1,9 @@
+# Поисковикам открыто всё; что не для выдачи, закрыто метатегом noindex
+# на самих страницах (печатные листы, кабинет, вход). Закрывать их здесь
+# нельзя: робот не прочитает noindex на странице, куда его не пустили.
+# Карту собирает scripts/build-sitemap.mjs после каждой сборки.
+User-agent: *
+Disallow: /styleguide/
+Disallow: /dev/
+
+Sitemap: https://budetege.ru/sitemap.xml

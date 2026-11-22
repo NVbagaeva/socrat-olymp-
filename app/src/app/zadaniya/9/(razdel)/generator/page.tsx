@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { Generator9 } from '@/components/tasks/proizvodnaya/Generator9';
-import { proizvodnayaTitle } from '@/content/proizvodnaya';
 import { ZADANIYA } from '@/lib/paths';
 import { VariantFromSection } from '@/components/variant/VariantEntry';
+import { proizvodnayaZagolovok } from '@/lib/seo-razdely';
 
 export const metadata: Metadata = {
-  title: proizvodnayaTitle('Генератор'),
+  title: proizvodnayaZagolovok('Генератор'),
 };
 
 /** Вкладка «Генератор» задания №9: общий генератор листов. */

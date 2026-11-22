@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Badge } from '@/components/ui';
+import { KartochkiTipov } from '@/components/ui/KartochkiTipov';
 import { Tex } from '@/components/ui/Tex';
 import { katex } from '@/lib/graph/katex';
 import { O_ZADANII_14, SKORO_14, TIPY_14 } from '@/content/zadanie14';
@@ -58,32 +59,34 @@ export function OZadanii14({ base }: { base: string }) {
           {T.tipyTitle}
         </h3>
         <p>{T.tipyLead}</p>
-        <ul className="z14-tipy">
-          {TIPY_14.map((t) => (
-            <li key={t.id} className={`z14-tip${t.gotovo ? '' : 'z14-tip--skoro'}`}>
-              <Link className="z14-tip__link" href={`${base}/teoriya/#teoriya-${t.id}`}>
-                <span className="z14-tip__head">
-                  <span className="z14-tip__title">{t.title}</span>
-                  {t.gotovo ? null : <Badge tone="neutral">{SKORO_14}</Badge>}
-                </span>
+        <KartochkiTipov
+          label={T.tipyTitle}
+          nomera={false}
+          tipy={TIPY_14.map((t) => ({
+            id: t.id,
+            title: t.title,
+            ...(t.gotovo ? {} : { metka: <Badge tone="neutral">{SKORO_14}</Badge> }),
+            telo: (
+              <>
                 <span
-                  className="z14-tip__primer"
+                  className="tipk__formula"
                   dangerouslySetInnerHTML={{ __html: formula(t.primer) }}
                 />
-                <span className="z14-tip__text">{t.text}</span>
+                <span className="tipk__tekst">{t.text}</span>
                 {t.podtipy === undefined ? null : (
-                  <span className="z14-tip__podtipy">
+                  <span className="tipk__chipy">
                     {t.podtipy.map((p) => (
-                      <span key={p.id} className="z14-tip__podtip">
+                      <span key={p.id} className="tipk__chip">
                         {p.title}
                       </span>
                     ))}
                   </span>
                 )}
-              </Link>
-            </li>
-          ))}
-        </ul>
+              </>
+            ),
+            ssylki: [{ href: `${base}/teoriya/#teoriya-${t.id}`, label: T.kGlave, vid: 'glava' }],
+          }))}
+        />
         <Link className="btn btn--primary" href={`${base}/teoriya/`}>
           {T.kTeorii}
         </Link>

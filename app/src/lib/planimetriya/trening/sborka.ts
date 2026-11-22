@@ -17,6 +17,7 @@ import { BANK_FIPI } from '../bank/fipi';
 import { POROG } from '../figury';
 import { renderPlan, shagovPodskazki } from '../render';
 import { reshenie } from '../reshenie';
+import type { ScenariyHtml } from '../scenariy';
 import { sealAnswer } from '../secret';
 import { PROTOTIPY, prototip } from '../stseny';
 import { planPoKlyuchu1 } from '../trenazher/filtry1';
@@ -24,6 +25,7 @@ import { klyuchProto, nomerAnaloga, type UslovieBanka } from '../trenazher/sessi
 import {
   razreshit,
   sostavZadachi,
+  type FaktShaga,
   type RazreshennayaZadacha,
   type ShagHtml,
 } from '../trenazher/zadacha';
@@ -52,10 +54,14 @@ export interface Shag1T extends ShagHtml {
 export interface Vopros1T extends VoprosPodskazki {
   /** Чертёж вопроса: слой этого шага подсвечен. */
   risunokSvg: string;
+  /** Факт шага: кнопка «Показать свойство». null — шаг без факта. */
+  fakt: FaktShaga | null;
 }
 
 /** Разбор задачи: шаги с чертежами, сверка, ответ, все построения, вопросы. */
 export interface Reshenie1T {
+  /** Подсказка-сценарий (Scenariy1). */
+  scenariy: ScenariyHtml;
   shagi: Shag1T[];
   sverkaHtml: string;
   otvetHtml: string;
@@ -104,12 +110,16 @@ export function razborZadachi(r: RazreshennayaZadacha) {
   const n = shagovPodskazki(scena);
   const alt = `Чертёж к решению: ${pereimenovat(p.nazvanie, r.variant.bukvy).replace(/\$/g, '')}`;
   const posledniy = sostav.razbor.shagi.length - 1;
+  /* Решение двумя способами: у последнего шага каждого способа —
+     все построения этого способа. */
+  const dvaSposoba = shagiResheniya.some((x) => (x.sposob ?? 1) > 1);
   const shagi: Shag1T[] = sostav.razbor.shagi.map((s, i) => {
     const sloy = shagiResheniya[i]?.sloy;
+    const sposob = shagiResheniya[i]?.sposob ?? 1;
     return {
       ...s,
       risunokSvg:
-        i === posledniy
+        i === posledniy && !dvaSposoba
           ? sostav.razbor.risunokSvg
           : sloy !== undefined && sloy <= n
             ? renderPlan(scena, {
@@ -117,11 +127,13 @@ export function razborZadachi(r: RazreshennayaZadacha) {
                 variant: r.variant,
                 chisla: true,
                 alt,
+                sposob,
               })
             : null,
     };
   });
   const s: Reshenie1T = {
+    scenariy: sostav.podskazki.scenariy,
     shagi,
     sverkaHtml: sostav.razbor.sverka,
     otvetHtml: sostav.razbor.otvetHtml,
@@ -131,7 +143,9 @@ export function razborZadachi(r: RazreshennayaZadacha) {
       variantyHtml: v.knopki,
       verno: v.verno,
       ...(v.poyasnenie === '' ? {} : { kommentariyHtml: v.poyasnenie }),
+      ...(v.vvod === '' ? {} : { vvodHtml: v.vvod }),
       risunokSvg: v.risunokSvg,
+      fakt: v.fakt,
     })),
   };
   return { sostav, s };

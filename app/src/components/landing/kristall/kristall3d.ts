@@ -31,7 +31,22 @@ export interface Kristall3d {
   ubrat: () => void;
 }
 
-export function sozdatKristall(host: HTMLElement, az: number, el: number): Kristall3d {
+export interface KristallOpcii {
+  /** Тёмная сцена главной: стекло и кромки светятся ярче. */
+  sumerki?: boolean;
+}
+
+export function sozdatKristall(
+  host: HTMLElement,
+  az: number,
+  el: number,
+  { sumerki = false }: KristallOpcii = {},
+): Kristall3d {
+  /* На тёмном фоне то же стекло гаснет: больше отражений окружения,
+     ярче кромки и внутреннее свечение. На светлом — как было. */
+  const svet = sumerki
+    ? { pered: 1.1, faska: 1.1, linii: 0.75, okruzhenie: 0.7, prozrachnost: 0.62 }
+    : { pered: 0.35, faska: 0.4, linii: 0.45, okruzhenie: 0.3, prozrachnost: 0.8 };
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.NeutralToneMapping;
@@ -51,6 +66,21 @@ export function sozdatKristall(host: HTMLElement, az: number, el: number): Krist
   forma.rotateY(Math.PI / 6);
   const grani = forma.toNonIndexed();
   grani.computeVertexNormals();
+  if (sumerki) {
+    /* Тёмная сцена: грани светлее к верху и глубже к основанию, как
+       стекло на рендере, — иначе большая грань заливается одним цветом. */
+    const p = grani.attributes.position as THREE.BufferAttribute;
+    const cveta = new Float32Array(p.count * 3);
+    const verh = new THREE.Color(0x8fb6ff);
+    const niz = new THREE.Color(0x1238b0);
+    const c = new THREE.Color();
+    for (let i = 0; i < p.count; i += 1) {
+      const t = (p.getY(i) + H / 2) / H;
+      c.copy(niz).lerp(verh, t * t);
+      cveta.set([c.r, c.g, c.b], i * 3);
+    }
+    grani.setAttribute('color', new THREE.BufferAttribute(cveta, 3));
+  }
 
   /* Стекло в два прохода: сначала дальние грани тёмным, потом ближние
      прозрачным синим с лаком — так стекло читается объёмным и на светлом
@@ -61,17 +91,18 @@ export function sozdatKristall(host: HTMLElement, az: number, el: number): Krist
     transparent: true,
     opacity: 1,
     side: THREE.BackSide,
-    envMapIntensity: 0.3,
+    envMapIntensity: svet.okruzhenie,
   });
   const pered = new THREE.MeshPhysicalMaterial({
-    color: 0x0b46d8,
+    color: sumerki ? 0x3a6cf0 : 0x0b46d8,
+    vertexColors: sumerki,
     roughness: 0.02,
     clearcoat: 1,
     clearcoatRoughness: 0.02,
     transparent: true,
-    opacity: 0.8,
+    opacity: svet.prozrachnost,
     side: THREE.FrontSide,
-    envMapIntensity: 0.35,
+    envMapIntensity: svet.pered,
   });
   const gruppa = new THREE.Group();
   const meshZad = new THREE.Mesh(grani, zad);
@@ -87,7 +118,7 @@ export function sozdatKristall(host: HTMLElement, az: number, el: number): Krist
     new THREE.LineBasicMaterial({
       color: 0x9bc0f2,
       transparent: true,
-      opacity: 0.45,
+      opacity: svet.linii,
       depthTest: false,
     }),
   );
@@ -97,7 +128,7 @@ export function sozdatKristall(host: HTMLElement, az: number, el: number): Krist
   const faska = new THREE.MeshPhysicalMaterial({
     color: 0x9bc0f2,
     emissive: 0x3d79e0,
-    emissiveIntensity: 0.4,
+    emissiveIntensity: svet.faska,
     roughness: 0.05,
     clearcoat: 1,
     transparent: true,
@@ -181,6 +212,15 @@ export function sozdatKristall(host: HTMLElement, az: number, el: number): Krist
   const klyuchevoy = new THREE.DirectionalLight(0xffffff, 1.2);
   klyuchevoy.position.set(-2, 3, 3);
   scene.add(tyoplyySvet, klyuchevoy, new THREE.AmbientLight(0x9bc0f2, 0.4));
+  if (sumerki) {
+    /* Контровой синий свет сзади и сверху: на тёмном фоне он рисует
+       силуэт и кромки, как свечение на рендере. */
+    const kontr = new THREE.DirectionalLight(0x7fb0ff, 2.4);
+    kontr.position.set(-1, 2.5, -3);
+    const sverhu = new THREE.DirectionalLight(0xffffff, 1.4);
+    sverhu.position.set(0.5, 4, 1.5);
+    scene.add(kontr, sverhu);
+  }
 
   /* Точки подписей в координатах фигуры. */
   const TOCHKI: Record<TochkaId, THREE.Vector3> = {

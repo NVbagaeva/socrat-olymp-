@@ -1,0 +1,274 @@
+/* Карточки типов задач (KartochkiTipov.tsx) — общие для теории №3 и
+   «О задании» №3, №14, №15. «Стеклянная сцена»: белое и голубое стекло
+   чередуются шахматкой. Колонок 1, 2 или 3 — по ширине контейнера,
+   и для каждого числа колонок своё правило чередования: соседи и в ряду,
+   и по вертикали разного цвета. */
+
+.tipk {
+  container: tipk / inline-size;
+}
+.tipk__setka {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@container tipk (min-width: 540px) {
+  .tipk__setka {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container tipk (min-width: 900px) {
+  .tipk__setka {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+.tipk__karta {
+  --tipk-fon: rgb(255 255 255 / 0.82);
+  position: relative;
+  /* Номер | заголовок и текст; ссылки — рядом ниже на всю ширину
+     карточки: на телефоне обе пилюли встают в одну строку. */
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-xl);
+  background: var(--tipk-fon);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  color: var(--color-text);
+  transition:
+    transform var(--dur-switch) ease,
+    box-shadow var(--dur-switch) ease;
+}
+
+/* Голубое стекло: лёгкий тон --blue-50 → --blue-100 и радиальный блик
+   в верхнем правом углу, как у плашек /tarify/. Тон плотный (0.9+):
+   контраст текста не зависит от того, что под карточкой. */
+.tipk__setka > .tipk__karta:nth-child(even) {
+  --tipk-fon:
+    radial-gradient(110% 90% at 100% 0%, rgb(155 192 242 / 0.36), transparent 62%),
+    linear-gradient(160deg, rgb(242 247 254 / 0.94), rgb(232 240 252 / 0.92));
+  box-shadow:
+    0 0 0 1px rgb(31 95 208 / 0.14),
+    var(--glass-hi),
+    var(--glass-shadow);
+}
+/* Две колонки: шахматка — 1 и 4 белые, 2 и 3 голубые (период 4). */
+@container tipk (min-width: 540px) and (max-width: 899.98px) {
+  .tipk__setka > .tipk__karta:nth-child(4n + 1),
+  .tipk__setka > .tipk__karta:nth-child(4n) {
+    --tipk-fon: rgb(255 255 255 / 0.82);
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  }
+  .tipk__setka > .tipk__karta:nth-child(4n + 2),
+  .tipk__setka > .tipk__karta:nth-child(4n + 3) {
+    --tipk-fon:
+      radial-gradient(110% 90% at 100% 0%, rgb(155 192 242 / 0.36), transparent 62%),
+      linear-gradient(160deg, rgb(242 247 254 / 0.94), rgb(232 240 252 / 0.92));
+    box-shadow:
+      0 0 0 1px rgb(31 95 208 / 0.14),
+      var(--glass-hi),
+      var(--glass-shadow);
+  }
+}
+/* Одна и три колонки (нечётное число) — чётные голубые: правило выше. */
+
+@media (hover: hover) {
+  .tipk__karta:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 0 1px rgb(31 95 208 / 0.16),
+      var(--glass-hi),
+      var(--glass-shadow-hover);
+  }
+}
+.tipk__karta:focus-within {
+  box-shadow:
+    0 0 0 1px rgb(31 95 208 / 0.22),
+    var(--glass-hi),
+    var(--glass-shadow-hover);
+}
+
+/* Номер: насыщенный синий кружок, белая цифра (5,9:1 на --blue-600). */
+.tipk__no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(160deg, var(--blue-600), var(--blue-800));
+  box-shadow: var(--gloss-shadow-soft);
+  color: var(--white);
+  font-size: var(--fs-caption);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.tipk__karta--bez-no {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tipk__telo {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.tipk__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px;
+}
+.tipk__title {
+  min-width: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.tipk__tekst {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  /* Не --color-text-secondary (--grey-700): на голубом блике это 3,7:1.
+     --grey-800 — «второй голос» с запасом AA на обоих оттенках. */
+  color: var(--grey-800);
+}
+.tipk__formula {
+  overflow-x: auto;
+  color: var(--blue-700);
+}
+.tipk__chipy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.tipk__chip {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-border-warm);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-warm);
+  font-size: var(--fs-label);
+  color: var(--color-accent-text);
+}
+
+/* Ссылки — пилюли с иконкой. Высота 40 px, на телефоне 44 px. */
+.tipk__ssylki {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.tipk__ssylka {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 var(--space-3) 0 10px;
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  box-shadow: 0 1px 2px rgb(16 40 100 / 0.06);
+  color: var(--blue-700);
+  font-size: var(--fs-caption);
+  line-height: 1.2;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color var(--dur-hover) ease,
+    border-color var(--dur-hover) ease,
+    transform var(--dur-hover) ease;
+}
+.tipk__ssylka--primer {
+  /* Спокойная пилюля: на пятнадцати карточках подряд залитые синие
+     кнопки слишком плотные. Голубая заливка и тёмно-синий текст
+     (--blue-800 на --blue-100 — около 9:1), без рамки; от белой
+     «Главы» её отличают тон и иконка. Рамка прозрачная, а не нулевая:
+     размер пилюль одинаковый. */
+  border-color: transparent;
+  background: var(--blue-100);
+  color: var(--blue-800);
+}
+.tipk__ik {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+@media (hover: hover) {
+  .tipk__ssylka:hover {
+    border-color: var(--color-primary);
+    background: var(--blue-50);
+  }
+  .tipk__ssylka--primer:hover {
+    border-color: transparent;
+    background: var(--blue-200);
+  }
+}
+.tipk__ssylka:active {
+  transform: translateY(1px);
+}
+.tipk__ssylka:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+@media (max-width: 767.98px) {
+  .tipk__ssylka {
+    min-height: 44px;
+  }
+  .tipk__karta {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tipk__karta,
+  .tipk__ssylka {
+    transition: none;
+  }
+  .tipk__karta:hover,
+  .tipk__ssylka:active {
+    transform: none;
+  }
+}
+
+@media print {
+  .tipk__karta,
+  .tipk__setka > .tipk__karta:nth-child(n) {
+    --tipk-fon: none;
+    border: 1px solid #999;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    break-inside: avoid;
+  }
+  .tipk__no {
+    background: none;
+    box-shadow: none;
+    border: 1px solid #000;
+    color: #000;
+  }
+  .tipk__ssylka,
+  .tipk__ssylka--primer {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    color: #000;
+  }
+  .tipk__ik {
+    display: none;
+  }
+}

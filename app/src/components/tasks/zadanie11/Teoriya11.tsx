@@ -402,6 +402,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
                 <MiniKartinka id={st.id} section={st.section} className="z11-tip__pic" />
                 <span className="z11-tip__body">
                   <span className="z11-tip__title">{st.title}</span>
+                  {st.svoy ? <span className="z11-tip__metka">не из открытого банка</span> : null}
                   <span className="z11-tip__foot">
                     <Zvezdy level={st.level} />
                     <Link

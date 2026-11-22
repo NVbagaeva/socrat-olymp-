@@ -279,3 +279,18 @@
 .trainer:has(.tsess) .trz-pod {
   display: none;
 }
+
+/* Отклик на ответ: плашка проявляется, значок «пружинит»
+   (ключевые кадры — styles/components.css). */
+.trz-verdict {
+  animation: otklik-vhod var(--motion-base) var(--ease-out) both;
+}
+.trz-verdict__ico {
+  animation: otklik-znachok var(--motion-slow) var(--ease-spring) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .trz-verdict,
+  .trz-verdict__ico {
+    animation: none;
+  }
+}

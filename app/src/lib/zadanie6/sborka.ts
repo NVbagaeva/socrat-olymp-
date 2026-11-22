@@ -31,6 +31,7 @@ import {
 import { ZADACH_NA_LIST_MAX } from '@/lib/generator/obshchiy/klyuchi';
 import type { IndeksZadachi } from './dannye';
 import { podStil, type Stil } from './shablony';
+import { nomerRazdela } from '@/content/struktura';
 
 /* ── Общее ──────────────────────────────────────────────────────── */
 
@@ -222,7 +223,7 @@ export function sobratList(z: ZaprosLista, indeks: readonly IndeksZadachi[]): Mo
   bloki.push({ id: 'zadachi', title: 'Задачи', spiski });
   return {
     vid: 'generator',
-    zagolovok: 'Задание №6. Случайные величины и распределения',
+    zagolovok: `Задание №${nomerRazdela('sluchainye-velichiny')}. Случайные величины и распределения`,
     kod: z.seed,
     bloki,
   };
@@ -254,7 +255,7 @@ export function sobratListKlyuchi(z: ZaprosBanka, indeks: readonly IndeksZadachi
   );
   return {
     vid: 'generator',
-    zagolovok: 'Задание №6. Случайные величины и распределения',
+    zagolovok: `Задание №${nomerRazdela('sluchainye-velichiny')}. Случайные величины и распределения`,
     kod: z.seed,
     bloki: blokiBanka(z, l),
     shapka: shapkaBanka(z),
@@ -546,7 +547,7 @@ export function modelUroka(
   }
   return {
     vid: 'urok',
-    zagolovok: `Задание №6 · Урок ${no}. ${urok.title}`,
+    zagolovok: `Задание №${nomerRazdela('sluchainye-velichiny')} · Урок ${no}. ${urok.title}`,
     kod: kodSerii(kod, n.regen),
     bloki,
   };

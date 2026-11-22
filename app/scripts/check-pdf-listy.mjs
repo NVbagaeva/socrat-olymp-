@@ -19,7 +19,7 @@
 
    Листы — №11 «Домашняя работа» с «Повторяем», разобранным примером и
    QR-кодом, в клетку и без; лист учителя №11; генераторы №12, №1, №9,
-   №6 и «Собрать вариант» с местом для решения.
+   №6, генератор базы (№12, №16) и «Собрать вариант» с местом для решения.
 
    WebKit (движок Safari, профили компьютера и iPhone): PDF в нём
    Playwright не печатает — проверяется вёрстка в режиме печати на
@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium, devices, webkit } from 'playwright';
 import { startApache } from './lib/apache.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { METKA_SKRYTYH } from './lib/metka-skrytyh.mjs';
 
 bezBanneraCookieVsyudu(chromium, webkit);
 
@@ -69,6 +70,17 @@ const LISTY = [
   ],
   ['№6 в клетку', '/zadaniya/6/pechat/', 't=P01:2,P02:2,P03:2&i=m&v=1&e=0&st=v&seed=PRINT1&sp=B'],
   ['Вариант в клетку', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00.PB'],
+  /* Генератор базы: чертежи №12 и лист учителя с разбором №16. */
+  [
+    'База №12 в клетку',
+    '/baza/zadaniya/12/pechat/',
+    'ps=2&s=P01:1,P05:1,P19:1,P31:1,P48:1,P61:1&i=a&seed=PRINT1&qr=1&sp=B',
+  ],
+  [
+    'База №16 учитель',
+    '/baza/zadaniya/16/pechat/otvety/',
+    'ps=2&s=P01:2,P13:2,P23:2&i=a&seed=PRINT1',
+  ],
 ];
 
 /* Поля листа: не меньше 12 мм от края бумаги. */
@@ -217,7 +229,12 @@ async function raskladka(page) {
 
 /** Открыть лист и дождаться набора; печать браузера — заглушка. */
 async function otkryt(context, url) {
+  /* Листы скрытого раздела (№6 в ЕГЭ-2027) Apache отдаёт только с меткой
+     администратора — её cookie уходит с первым же запросом. */
   const page = await context.newPage();
+  /* Браузер (Chromium) даёт каждой странице свой контекст, а WebKit
+     сюда приходит контекстом: метка — в контекст самой страницы. */
+  await page.context().addCookies([{ name: METKA_SKRYTYH, value: '1', url: new URL(url).origin }]);
   await page.addInitScript(() => {
     window.print = () => {};
   });

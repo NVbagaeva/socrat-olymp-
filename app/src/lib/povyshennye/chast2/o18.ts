@@ -9,6 +9,7 @@
 
 import { renderPlan } from '@/lib/planimetriya/render';
 import type { Element } from '@/lib/planimetriya/types';
+import { vPredelah } from '@/lib/skhemy/vidimye';
 import { rat, ratTex, toNumber } from '@/lib/zadanie15/core/rational';
 import type { Chast2Zadacha, Shablon2 } from './types';
 
@@ -32,14 +33,21 @@ export function chislaO18(p: PO18) {
 }
 
 function chertezh(p: PO18): string {
-  const ch = chislaO18(p);
-  const k = 6 / ch.c;
-  const A: [number, number] = [0, p.b * k];
+  /* Видимые катеты (lib/skhemy/vidimye.ts): при 20 и 21 точки H, L, M
+     сливаются, при 7 и 24 острый угол — 16°. Отношение катетов на
+     чертеже — от 1,75 до 2,4 (угол HCL не уже 15°), больший остаётся большим; порядок H, L, M
+     на гипотенузе тот же. Чисел на чертеже нет. */
+  const q = vPredelah(Math.max(p.a, p.b) / Math.min(p.a, p.b), 1.75, 2.4);
+  const a = p.a > p.b ? q : 1;
+  const b = p.a > p.b ? 1 : q;
+  const c = Math.hypot(a, b);
+  const k = 6 / c;
+  const A: [number, number] = [0, b * k];
   const C: [number, number] = [0, 0];
-  const B: [number, number] = [p.a * k, 0];
+  const B: [number, number] = [a * k, 0];
   const na = (t: number): [number, number] => [A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t];
-  const H = na(toNumber(ch.AH) / ch.c);
-  const L = na(toNumber(ch.AL) / ch.c);
+  const H = na((b * b) / c / c);
+  const L = na(b / (a + b));
   const M = na(0.5);
   const el: Element[] = [
     { tip: 'mnogougolnik', tochki: ['A', 'B', 'C'] },

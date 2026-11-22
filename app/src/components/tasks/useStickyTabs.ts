@@ -11,9 +11,11 @@ const STRIP_FADE = 32;
    вкладке из панели: --space-4. */
 const CONTENT_GAP = 16;
 /* Сколько после нажатия на вкладку в панели ждать новую вкладку,
-   чтобы подвести к её началу. Переход по сети обычно быстрее; не
-   дождались — значит, перехода не было, и прокрутки тоже не будет. */
-const PENDING_MS = 3000;
+   чтобы подвести к её началу. Уход с тяжёлой теории (№10 — 6 МБ
+   разметки) в WebKit на телефоне занимает 3–4 с: при 3 с ожидание
+   истекало, и ученик оставался не под панелью. Не дождались и за 8 с —
+   значит, перехода не было, и прокрутки тоже не будет. */
+const PENDING_MS = 8000;
 
 const FOCUSABLE = 'a[href],button,[tabindex]';
 
@@ -141,7 +143,11 @@ export function useStickyTabs(
     }
     let current = false;
     let line = -1;
+    /* Низ плиток в координатах страницы (см. zapomnit). */
+    let nizDoc = 0;
     let observer: IntersectionObserver | undefined;
+    /* Сверка следующим кадром после уведомления наблюдателя. */
+    let kadr = 0;
 
     /* Место и высота панели. Нижний край панели — линия, под которую
        уходят плитки: за ней следит IntersectionObserver с отступом
@@ -160,23 +166,57 @@ export function useStickyTabs(
         return;
       }
       line = bottom;
+      zapomnit();
       observer?.disconnect();
       observer = new IntersectionObserver(
-        (entries) => {
-          const box = entries[entries.length - 1]!;
-          const next = !box.isIntersecting && box.boundingClientRect.bottom <= bottom + 0.5;
-          if (next === current) {
-            return;
-          }
-          current = next;
-          const from = next ? tiles! : panel!;
-          const active = document.activeElement as HTMLElement | null;
-          focus.current = active && from.contains(active) ? focusables(from).indexOf(active) : -1;
-          setShown(next);
+        () => {
+          /* Решаем по месту плиток, а не по прямоугольнику из
+             уведомления: в WebKit тот бывает отстающим на кадр. */
+          sverit();
         },
         { rootMargin: `-${bottom}px 0px 0px 0px` },
       );
       observer.observe(tiles!);
+      /* Пока наблюдателя не было (его только что пересоздали), плитки
+         могли уже уйти под линию: сверяем сразу, не дожидаясь
+         первого уведомления. */
+      primenit(poMestu());
+    }
+
+    /* Низ плиток в координатах страницы: с прокруткой он не меняется,
+       поэтому при прокрутке хватает арифметики, без чтения вёрстки. */
+    function zapomnit(): void {
+      nizDoc = tiles!.getBoundingClientRect().bottom + window.scrollY;
+    }
+
+    /* Ушли ли плитки под панель прямо сейчас. */
+    function poMestu(): boolean {
+      return nizDoc - window.scrollY <= line + 0.5;
+    }
+
+    /* Сверка состояния с местом плиток — сейчас и ещё раз следующим
+       кадром. Прямоугольник в WebKit приходит отстающим на кадр, а
+       прокрутка известна точно: сейчас решаем по ней и запомненному
+       низу плиток, а кадром позже перезапоминаем низ и сверяемся
+       снова — на случай, если вёрстка выше плиток переехала. */
+    function sverit(): void {
+      primenit(poMestu());
+      cancelAnimationFrame(kadr);
+      kadr = requestAnimationFrame(() => {
+        zapomnit();
+        primenit(poMestu());
+      });
+    }
+
+    function primenit(next: boolean): void {
+      if (next === current) {
+        return;
+      }
+      current = next;
+      const from = next ? tiles! : panel!;
+      const active = document.activeElement as HTMLElement | null;
+      focus.current = active && from.contains(active) ? focusables(from).indexOf(active) : -1;
+      setShown(next);
     }
 
     relayout();
@@ -184,10 +224,19 @@ export function useStickyTabs(
     sizes.observe(tiles);
     sizes.observe(panel);
     window.addEventListener('resize', relayout);
+    /* Наблюдатель уведомляет не о каждом переходе: когда низ плиток
+       совпадает с линией, пересечение «касанием» и его отсутствие дают
+       одну и ту же долю (ноль), и WebKit следующего уведомления уже не
+       присылает — панель застревала. Поэтому при прокрутке сверяемся
+       сами, по известной прокрутке: вёрстку это не читает, а состояние
+       меняется только когда оно действительно другое. */
+    window.addEventListener('scroll', sverit, { passive: true });
     return () => {
+      cancelAnimationFrame(kadr);
       observer?.disconnect();
       sizes.disconnect();
       window.removeEventListener('resize', relayout);
+      window.removeEventListener('scroll', sverit);
       page.style.removeProperty('--topic-sticky-top');
     };
   }, [tilesRef, panelRef]);

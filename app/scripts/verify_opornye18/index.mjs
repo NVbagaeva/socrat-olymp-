@@ -42,7 +42,7 @@ const PROVERKI = [
 ];
 
 const { OPORNYE_18 } = requireSrc('content/zadanie18/opornye/index');
-const { scenaOpornoy18 } = requireSrc('lib/zadanie18/opornye/index');
+const { scenaOpornoyTochno18: scenaOpornoy18 } = requireSrc('lib/zadanie18/opornye/index');
 const { SOBRANNYE } = requireSrc('content/zadanie18/spisok');
 const { GRUPPY_18 } = requireSrc('content/zadanie18/tipy');
 

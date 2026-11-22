@@ -166,7 +166,8 @@ export function listSheetSpec<Z>(src: ListSource<Z>, vid: ListVid) {
     theme: 'color' as const,
     layout: 'single' as const,
     documentTitle: `${zagolovok} — ${vid === 'uchitel' ? LIST_TEXT.uchitel : LIST_TEXT.uchenik}`,
-    head: LIST_HEAD,
+    /* Курс — строкой: лист базы ставит свой (lib/baza/sheetBazy.ts). */
+    head: { ...LIST_HEAD, course: LIST_HEAD.course as string },
     runner: zagolovok,
     title: {
       chip: src.chip,
@@ -177,7 +178,7 @@ export function listSheetSpec<Z>(src: ListSource<Z>, vid: ListVid) {
     fields: vid === 'uchenik' ? { date: '', group: '' } : null,
     blocks,
     withAnswerLine: vid === 'uchenik',
-    foot: LIST_FOOT,
+    foot: { ...LIST_FOOT, course: LIST_FOOT.course as string },
   };
 }
 

@@ -367,6 +367,7 @@
   gap: var(--space-2);
 }
 .z18-plitka__otkryt {
+  margin-left: auto;
   color: var(--color-primary);
   font-size: var(--fs-caption);
   font-weight: 600;
@@ -468,6 +469,37 @@
   .z18-sk__chertezh .z18-ch__panel {
     border-top: 0;
     padding-top: 0;
+  }
+}
+
+/* Телефон в альбомной ориентации: во всю ширину чертёж выше экрана
+   (462 px при высоте 360–390) и уходит под ленту вкладок. Здесь — две
+   колонки, как на компьютере: чертёж слева прилипает целиком. Правила
+   книжного телефона выше снимаются. */
+@media (max-width: 1023.98px) and (min-width: 600px) and (max-height: 560px) and (orientation: landscape) {
+  .z18-sk__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+  .z18-sk__chertezh {
+    display: block;
+    position: sticky;
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-2));
+  }
+  .z18-sk__chertezh .z18-ch {
+    display: grid;
+  }
+  .z18-sk__chertezh .z18-ch__pole {
+    position: relative;
+    top: auto;
+    z-index: auto;
+    border: 0;
+    box-shadow: none;
+  }
+  .z18-sk__chertezh .z18-ch__panel {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
   }
 }
 
@@ -1164,4 +1196,39 @@
 }
 .z18-op-podskazka__metka {
   font-weight: 600;
+}
+
+/* Прогресс опорных задач: счётчик над списком, отметка на странице, значок на плитке. */
+.z18-op-schet {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-4) 0;
+}
+.z18-op-schet__tekst {
+  margin: 0;
+}
+.z18-op-schet__polosa {
+  grid-column: 1 / -1;
+}
+.z18-op-schet__sbros {
+  grid-row: 1;
+  grid-column: 2;
+}
+.z18-op-otmetka__itog {
+  min-height: 1.4em;
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-op-status {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z18-op-status.is-reshena {
+  color: var(--color-success);
+}
+.z18-op-status.is-ne {
+  color: var(--color-text-tertiary);
 }

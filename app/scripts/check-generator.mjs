@@ -3,7 +3,8 @@
 
    Запуск: pnpm test:generator
 
-   Проверяет логику и подключение разделов (№11, №1, №2, №4, №5, №8, №9, №6, №7, №10, №12, №13) без браузера:
+   Проверяет логику и подключение разделов (№11, №1, №2, №4, №5, №8, №9, №6, №7, №10, №12, №13
+   и разделов базы с банком) без браузера:
      1. Каждый пресет даёт годное состояние: есть задачи, не больше
         ограничений конфига, темы есть в выбранном источнике.
      2. Один seed — один лист: лист собирается дважды одинаково, листы
@@ -518,6 +519,83 @@ const RAZDELY = [
       urok: 'l=all&i=mix&h=net&f=compact&v=1&a=kratko&t=color&seed=K7Q2&u=1',
     };
   })(),
+  /* База: один генератор на все разделы с банком (lib/baza/generatorBazy.ts).
+     Темы — группы, подтипы — прототипы, задачи — банк public/data/baza/N
+     (все — аналоги), ответы и разбор — решатель прототипа. Лист печати —
+     настоящий (sheetBazy.ts на lib/sheetList.ts); варианты листа здесь
+     разложены по заголовкам «Вариант N», как у других разделов. */
+  ...requireSrc('lib/baza/razdely.ts')
+    .napolnennyeRazdely()
+    .filter((razdel) => razdel.prototipy !== undefined)
+    .map((razdel) => {
+      const GB = requireSrc('lib/baza/generatorBazy.ts');
+      const EB = requireSrc('lib/baza/engineBazy.ts');
+      const SB = requireSrc('lib/baza/sheetBazy.ts');
+      const LB = requireSrc('lib/baza/listBazy.ts');
+      const { sShapkoy } = requireSrc('lib/sheetList.ts');
+      const { GENERATOR_BAZY } = requireSrc('content/baza/generator.ts');
+      const { bazaTasks } = requireSrc('content/baza/tasks.ts');
+      const slug = razdel.slug;
+      const task = bazaTasks.find((t) => t.slug === slug);
+      const base = `/baza/zadaniya/${slug}`;
+      const ekran = `${base}/generator/`;
+      const config = GB.configBazy(task, razdel, ekran);
+      const dir = new URL(`../public/data/baza/${slug}/`, import.meta.url);
+      const vse = new Map();
+      for (const f of fs.readdirSync(dir))
+        for (const x of JSON.parse(fs.readFileSync(new URL(f, dir), 'utf8'))) vse.set(x.id, x);
+      const reshit = (x) => razdel.prototipy.find((p) => p.id === x.prototypeId).solve(x.params);
+      const zadachi = { zadacha: (id) => vse.get(id), reshit };
+      const engine = EB.engineBazy(config, base, ekran, async () => zadachi);
+      const parse = (q) => {
+        const z = GB.parseZaprosBazy(q, config);
+        return z === null ? null : { ...z, poKlyucham: true };
+      };
+      const vopros = (id) => LB.uslovieSRisunkom(vse.get(id));
+      return {
+        name: `База №${slug}`,
+        config,
+        engine,
+        params: (st) => parse(new URLSearchParams(engine.hrefs(st).student.split('?')[1])),
+        parse,
+        query: () => null,
+        sobrat: (p) => {
+          const model = GB.modelListaBazy(p, config);
+          const z = model.bloki.find((b) => b.id === 'zadachi');
+          return {
+            model,
+            poVariantam: z.spiski.map((ids) => ids.map((id) => ({ id, questionHtml: vopros(id) }))),
+          };
+        },
+        spec: (p, list, vid, qr) => {
+          const s = sShapkoy(
+            SB.sheetSpecBazy({ config, model: list.model, dannye: zadachi }, vid),
+            /* Шапка — из адреса листа, как на странице печати. */
+            GB.modelListaBazy(p, config).shapka,
+            GENERATOR_BAZY.podzagolovok,
+            qr,
+          );
+          /* Блоки «Вариант N» (level 2) начинают свой вариант листа. */
+          const variants = [];
+          for (const b of s.blocks) {
+            if (b.level === 2 || variants.length === 0)
+              variants.push({ title: s.title, blocks: [] });
+            variants[variants.length - 1].blocks.push(b);
+          }
+          /* У листа учителя строки полей нет. */
+          return { ...s, variants, extraItems: [], fields: s.fields ?? undefined };
+        },
+        primery: (p, list) =>
+          (list.model.bloki.find((b) => b.id === 'teoriya')?.primery ?? []).map(vopros),
+        badge: 'baza-sheet-badge',
+        ist: null,
+        ramka: false,
+        dataTolkoUchenika: true,
+        old: null,
+        urok: null,
+        seeds: ['7K3F', 'Q2M8', 'A1B2'],
+      };
+    }),
 ];
 
 /** Условие и рисунок задачи листа печати — в записи экрана генератора. */
@@ -991,6 +1069,52 @@ async function proverit(R) {
 /* GEN_RAZDEL=№12 — только разделы с этим началом имени (отладка; в CI — все). */
 const FILTR = process.env.GEN_RAZDEL ?? '';
 for (const R of RAZDELY.filter((x) => x.name.startsWith(FILTR))) await proverit(R);
+
+/* ── База: ответы, разбор, чертежи; банк целиком в листах ──────── */
+for (const R of RAZDELY.filter((x) => x.name.startsWith('База') && x.name.startsWith(FILTR))) {
+  console.log(`Лист учителя ${R.name}`);
+  const { config, engine } = R;
+  const ok = (cond, what) => okTop(cond, `${R.name} ${what}`);
+  const st = { ...G.stateFromPreset(config, config.presets[0], 'new'), seed: '7K3F' };
+  const sheet = await engine.build(st);
+  const tasks = sheet.variants.flat();
+  ok(
+    tasks.every((t) => t.answerHtml !== '' && t.solutionHtml.includes('baza-razbor__etap')),
+    'в предпросмотре у каждой задачи ответ и разбор',
+  );
+  ok(
+    tasks.every((t) => !t.fromBank),
+    'все задачи — аналоги, не из открытого банка ФИПИ',
+  );
+  ok(config.extras?.examples === false, 'разобранных примеров у базы нет');
+  /* Примеров нет — под них задачи не откладываются: «Один тип» на весь
+     прототип забирает весь его банк. */
+  const sub = config.topics[0].subtypes[0];
+  /* Не больше страховки адреса (ZADACH_NA_LIST_MAX). */
+  const n = Math.min(sub.bank, 200);
+  const vse = { ...st, plan: G.setSubtypeCount(config, [], sub.id, n), variants: 1 };
+  const ves = (await engine.build(vse)).variants[0];
+  ok(
+    ves.length === n && new Set(ves.map((t) => t.questionHtml)).size === n,
+    `банк прототипа ${sub.id} (${n} из ${sub.bank}) — в одном листе без повторов`,
+  );
+  const p = R.params(st);
+  const list = R.sobrat(p);
+  const blocks = (vid) => R.spec(p, list, vid).variants.flatMap((v) => v.blocks);
+  const uchitel = JSON.stringify(blocks('uchitel'));
+  ok(
+    uchitel.includes('sheet-list-klyuch') && uchitel.includes('baza-sheet-razbor'),
+    'лист учителя: ключ ответов и разбор',
+  );
+  /* Чертёж условия (№12) — рисунок карточки листа, у ученика и учителя. */
+  const sRisunkom = list.poVariantam
+    .flat()
+    .filter((t) => t.questionHtml.includes('baza-list__risunok'));
+  const figury = blocks('uchenik')
+    .flatMap((b) => b.tasks)
+    .filter((t) => t.figureSvg !== null);
+  ok(figury.length === sRisunkom.length, `чертежи условий на листе (${figury.length})`);
+}
 
 /* ── №8: уровень листа и повторы ────────────────────────────────── */
 console.log('№8: уровень и повторы');

@@ -1,3 +1,4 @@
+import { AvtorPlashka } from '@/components/avtor/AvtorPlashka';
 import { TARIFY } from '@/content/tarify';
 import { assetUrl } from '@/lib/assetUrl';
 import { PODSKAZKI } from '@/lib/tarify/config';
@@ -34,6 +35,34 @@ export function PodskazkiBlok() {
           ))}
         </ul>
       </div>
+    </section>
+  );
+}
+
+/**
+ * Доверие рядом с ценами: кто стоит за сайтом и три гарантии. Сразу
+ * под плашками — там, где человек решает, платить ли.
+ */
+export function Garantii() {
+  const { garantii } = TARIFY;
+  return (
+    <section className="tf-garantii" aria-labelledby="tf-garantii-z">
+      <h2 id="tf-garantii-z" className="sr-only">
+        {garantii.zagolovok}
+      </h2>
+      <AvtorPlashka className="tf-garantii__avtor" />
+      <ul className="tf-garantii__spisok">
+        {garantii.punkty.map((punkt) => (
+          <li key={punkt.nazvanie} className="tf-garantii__punkt">
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path d="M4.5 10.5l3.5 3.5 7.5-8" />
+            </svg>
+            <span>
+              <b>{punkt.nazvanie}.</b> {punkt.tekst}
+            </span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

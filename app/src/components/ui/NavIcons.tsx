@@ -31,9 +31,18 @@ export type NavIconName =
   | 'variant'
   | 'povyshennye'
   | 'ezhemesyachnye'
-  | 'cards';
+  | 'cards'
+  | 'schet';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
+  /* Устный счёт: секундомер со знаком умножения внутри. */
+  schet: (
+    <>
+      <circle cx="12" cy="13.5" r="7.5" />
+      <path d="M10 3.5h4M12 3.5V6M18.2 7.3l1.4-1.4" />
+      <path d="m9.7 11.2 4.6 4.6M14.3 11.2l-4.6 4.6" />
+    </>
+  ),
   /* Дом. */
   home: (
     <path d="M4 10.4 12 4l8 6.4V19a1.5 1.5 0 0 1-1.5 1.5H15V14H9v6.5H5.5A1.5 1.5 0 0 1 4 19z" />

@@ -6,6 +6,7 @@
 import { plural } from '@/lib/plural';
 import type { HwStatus } from '@/lib/dz/results';
 import type { SolutionsWhen } from '@/lib/dz/types';
+import { nomerRazdela } from '@/content/struktura';
 
 export const DZ_ERRORS: Record<string, string> = {
   bad_code: 'Такого кода нет или класс сейчас не принимает учеников. Проверьте код у репетитора.',
@@ -157,7 +158,7 @@ export const DZ = {
   /* ── Выдать ДЗ ── */
   issue: {
     title: 'Выдать домашнее задание',
-    lead: 'Задание №8 «Вычисления». Задачи собираются один раз и одинаково попадают ученику, на печать и в результаты.',
+    lead: `Задание №${nomerRazdela('vychisleniya')} «Вычисления». Задачи собираются один раз и одинаково попадают ученику, на печать и в результаты.`,
     who: 'Кому',
     klass: 'Класс',
     noClasses: 'Сначала создайте класс и пригласите учеников — выдавать будет некому.',

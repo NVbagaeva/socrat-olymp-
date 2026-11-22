@@ -13,6 +13,11 @@ export interface AnswerKeypadProps {
   /** Подписи клавиш для скринридера. */
   names: { minus: string; comma: string; erase: string };
   disabled?: boolean;
+  /**
+   * Клавиша «OK» в свободной клетке рядом с нулём — ответить. Нужна
+   * экранам, где кроме клавиатуры кнопки ответа нет (устный счёт).
+   */
+  ok?: { label: string; onOk: () => void };
 }
 
 const ROWS: KeypadKey[][] = [
@@ -33,7 +38,7 @@ const ROWS: KeypadKey[][] = [
  * Кнопки не забирают фокус (preventDefault на pointerdown): курсор
  * остаётся в поле, и ввод с клавиатуры компьютера тоже работает.
  */
-export function AnswerKeypad({ onKey, label, names, disabled = false }: AnswerKeypadProps) {
+export function AnswerKeypad({ onKey, label, names, disabled = false, ok }: AnswerKeypadProps) {
   const name = (k: KeypadKey) =>
     k === '-' ? names.minus : k === ',' ? names.comma : k === 'erase' ? names.erase : k;
   const face = (k: KeypadKey) => (k === '-' ? '−' : k === 'erase' ? '⌫' : k);
@@ -57,6 +62,19 @@ export function AnswerKeypad({ onKey, label, names, disabled = false }: AnswerKe
           {face(k)}
         </button>
       ))}
+      {ok !== undefined && (
+        <button
+          type="button"
+          className="keypad__key keypad__key--ok"
+          aria-label={ok.label}
+          disabled={disabled}
+          data-key="ok"
+          onPointerDown={(e) => e.preventDefault()}
+          onClick={ok.onOk}
+        >
+          OK
+        </button>
+      )}
     </div>
   );
 }

@@ -8,6 +8,8 @@ export type IkonkaName =
   | 'temy'
   | 'oshibki'
   | 'lampa'
+  /** Книга: «Показать свойство» — карточка факта из справочника. */
+  | 'kniga'
   | 'zakladka'
   | 'zakladka-on'
   | 'chasy'
@@ -18,6 +20,8 @@ export type IkonkaName =
   | 'otlozheno'
   | 'plus'
   | 'ruchka'
+  /** Лупа: «Узнай метод» (№4, №5). */
+  | 'uznay'
   /** Узнать тип по условию: лупа (№13, «Определи тип»). */
   | 'tip'
   /** Таблица: первая строка таблицы (№13, «С оформлением»). */
@@ -28,6 +32,8 @@ const PATHS: Record<IkonkaName, string> = {
   temy: 'M4 6h10M4 12h16M4 18h7M17 4v4M14 16v4',
   oshibki: 'M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5',
   lampa: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V15h7v-1.1A6 6 0 0 0 12 3Z',
+  kniga:
+    'M12 6.5C10.4 5.2 8.3 4.5 5 4.5H4v13h1c3.3 0 5.4.7 7 2 1.6-1.3 3.7-2 7-2h1v-13h-1c-3.3 0-5.4.7-7 2ZM12 6.5v13',
   zakladka: 'M7 4h10v16l-5-3.5L7 20V4Z',
   'zakladka-on': 'M7 4h10v16l-5-3.5L7 20V4Z',
   chasy: 'M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z',
@@ -38,6 +44,7 @@ const PATHS: Record<IkonkaName, string> = {
   otlozheno: 'M7 4h10v16l-5-3.5L7 20V4ZM9 9h6',
   plus: 'M12 5v14M5 12h14',
   ruchka: 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01',
+  uznay: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM15.5 15.5 20 20',
   tablica: 'M4 5h16v14H4zM4 10h16M10 5v14',
   tip: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM15.5 15.5 20 20M8 10.5h5',
 };

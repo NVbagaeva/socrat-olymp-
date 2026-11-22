@@ -17,9 +17,11 @@ import {
 } from '@/lib/planimetriya/spravochnik-chertezhi';
 import { renderPlan } from '@/lib/planimetriya/render';
 import { prototip } from '@/lib/planimetriya/stseny';
+import { vyvodHtml } from '@/lib/planimetriya/vyvod';
+import { Vyvod1 } from './Vyvod1';
 
 /** Вид блока карточки: цвет рамки, ярлыка и заливки (spravochnik1-web.css). */
-type Vid = 'def' | 'svo' | 'pri' | 'teo' | 'vaz' | 'pri-men';
+type Vid = 'def' | 'svo' | 'pri' | 'teo' | 'vaz' | 'pri-men' | 'prm';
 
 /**
  * Чертёж движка. Высота фигуры 220 px на компьютере (на узком экране
@@ -72,6 +74,11 @@ function Utverzhdeniya({ spisok }: { spisok: readonly Utverzhdenie[] }) {
           {u.formula === undefined ? null : (
             <span className="spr1-blok__formula">
               <Display tex={u.formula} />
+            </span>
+          )}
+          {u.obosnovanie === undefined ? null : (
+            <span className="spr1-blok__pochemu">
+              <b>{BLOKI_SPRAVOCHNIKA.obosnovanie}.</b> <Tex text={u.obosnovanie} />
             </span>
           )}
         </li>
@@ -173,6 +180,7 @@ function tekstPoiska(t: Tema1): string {
     ...(t.opredeleniya ?? []).map((u) => u.tekst),
     ...(t.svoystva ?? []).map((u) => u.tekst),
     ...(t.priznaki ?? []).map((u) => u.tekst),
+    ...(t.priemy ?? []).map((u) => u.tekst),
     ...(t.teoremy ?? []).flatMap((x) => [x.nazvanie ?? '', x.slovami]),
   ];
   return chasti
@@ -218,6 +226,7 @@ export function TemaKartochka1({
       <h4 className="spr1-card__title">
         <Tex text={t.title} />
       </h4>
+      <Vyvod1 shagi={vyvodHtml(t)} label={BLOKI_SPRAVOCHNIKA.vyvod} />
       <div className="spr1-card__glavnoe">
         <div className="spr1-card__bloki">
           {t.opredeleniya === undefined ? null : (
@@ -262,6 +271,11 @@ export function TemaKartochka1({
           {t.priznaki === undefined ? null : (
             <Blok vid="pri" label={BLOKI_SPRAVOCHNIKA.priznaki}>
               <Utverzhdeniya spisok={t.priznaki} />
+            </Blok>
+          )}
+          {t.priemy === undefined ? null : (
+            <Blok vid="prm" label={BLOKI_SPRAVOCHNIKA.priemy}>
+              <Utverzhdeniya spisok={t.priemy} />
             </Blok>
           )}
         </div>

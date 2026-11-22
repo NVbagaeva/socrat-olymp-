@@ -150,6 +150,13 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
    * сколько шагов открыто (с 1), dalshe — открыть следующий.
    */
   podskazka?: (s: S, ui: { otkryto: number; dalshe: () => void }) => ReactNode;
+  /**
+   * Ответ выбором варианта (№12: «формула по графику»): номер и разметка
+   * варианта. null — ответ числом в поле.
+   */
+  varianty?: (z: Z) => { id: string; html: string }[] | null;
+  /** Пояснение к вердикту, HTML (№12: откуда ответ, что проверить). */
+  poyasnenie?: (z: Z, verno: boolean) => string;
 }
 
 /**

@@ -9,9 +9,11 @@ import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { Uroven19 } from './teoriya19/tipy';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE19 = {
-  no: '19',
+  no: nomerDvumya('parametr'),
   slug: '19',
   title: taskName('19'),
   lead: 'Уравнения, неравенства и системы с параметром: 14 методов решения, разборы и тренировка с полными решениями.',
@@ -27,7 +29,7 @@ export const ZADANIE19 = {
 
 /** Заголовок окна браузера: «Вкладка · Задача с параметром — Будет на ЕГЭ». */
 export function zadanie19Title(tab: string): string {
-  return `${tab} · ${ZADANIE19.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(19, ZADANIE19.title, tab);
 }
 
 export const PROGRESS_19 = {
@@ -36,7 +38,7 @@ export const PROGRESS_19 = {
 } as const;
 
 export const O_ZADANII_19 = {
-  title: 'Задание 19. Задача с параметром',
+  title: `Задание ${nomerRazdela('parametr')}. Задача с параметром`,
   lead: 'Развёрнутый ответ, максимум — 4 балла. Ответ — множество значений параметра.',
   about:
     'В задании нужно найти все значения параметра, при которых уравнение, неравенство или система ведёт себя нужным образом: имеет ровно два решения, хотя бы одно, ни одного. Раздел построен на 14 методах решения. В каждой главе — плашка метода (когда применять, алгоритм, ловушки, образец оформления), подробные разборы с рисунками, опорные задачи и тренировочная работа с проверкой ответа и полным решением.',
@@ -114,6 +116,6 @@ export const OPORNYE_19 = {
 
 export const ZAGLUSHKA_19 = {
   title: 'Вкладка готовится',
-  text: 'Генератор листов №19 пока в работе. Задания всех 14 методов уже собраны в тренажёре.',
+  text: `Генератор листов №${nomerRazdela('parametr')} пока в работе. Задания всех 14 методов уже собраны в тренажёре.`,
   kTrenazher: 'Перейти в тренажёр',
 } as const;

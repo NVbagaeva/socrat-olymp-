@@ -1,5 +1,6 @@
 /**
- * Разделы первой части для экрана фильтров: названия, подтипы и
+ * Разделы со сборщиком задач варианта (номера хранения, types.ts
+ * EGE_NUMBERS) для экрана фильтров: названия, подтипы и
  * возможности. Лёгкие описания (adapters/zNN/info.ts) — движки разделов
  * здесь не грузятся, их тянет lib/variant/load.ts по «Сформировать».
  */
@@ -17,6 +18,7 @@ import { info as z10 } from './adapters/z10/info';
 import { info as z11 } from './adapters/z11/info';
 import { info as z12 } from './adapters/z12/info';
 import { info as z13 } from './adapters/z13/info';
+import { info as z21 } from './adapters/z21/info';
 import type { EgeNo, SectionInfo } from './types';
 
 export const SECTIONS: readonly SectionInfo[] = [
@@ -33,6 +35,7 @@ export const SECTIONS: readonly SectionInfo[] = [
   z11,
   z12,
   z13,
+  z21,
 ];
 
 export function sectionInfo(n: EgeNo): SectionInfo {

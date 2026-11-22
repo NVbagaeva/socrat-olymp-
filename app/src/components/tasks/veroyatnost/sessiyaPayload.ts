@@ -40,6 +40,8 @@ export interface SessiyaZadacha {
   /** «Узнай метод»: отпечаток метода и закрытый список признаков. */
   metodSeal: string;
   hints: string;
+  /** Аналог из «Работы над ошибками»: задача, ошибку в которой он закрывает. */
+  fixes?: string;
 }
 
 /** Задачи тренировки и её настройки: единый payload обоих заданий. */
@@ -50,11 +52,13 @@ export interface SessiyaPayload {
   metod: string;
   /** Подсказки: название метода в шапке и «Показать решение» до ответа. */
   podskazki: boolean;
+  /** Часы на панели («Стеклянная сцена»); в прежних записях поля нет — часы шли. */
+  timer?: boolean;
   tasks: SessiyaZadacha[];
 }
 
 /** Задача банка страницы по прототипу и номеру варианта; нет в банке — null. */
-function zadachaBanka(
+export function zadachaBanka(
   kindId: string,
   n: number,
   rezhim: Rezhim,
@@ -140,9 +144,10 @@ export function pohozhieZadachi(
     const svobodnye = kind.variants.filter((v) => !byli.has(zadachaId(kind.id, v.n)));
     const v = svobodnye[Math.floor(Math.random() * svobodnye.length)];
     const next = v === undefined ? null : zadachaBanka(kind.id, v.n, payload.rezhim, pool, uznay);
-    if (next !== null) {
+    if (next !== null && task !== undefined) {
       byli.add(next.id);
-      tasks.push(next);
+      /* Аналог помнит, какую ошибку закрывает (у аналога аналога — ту же). */
+      tasks.push({ ...next, fixes: task.fixes ?? task.id });
     }
   }
   return tasks.length === 0 ? null : { ...payload, tasks };
@@ -152,8 +157,13 @@ const REZHIMY_SESSII: readonly Rezhim[] = ['practice', 'mixed', 'mistakes', 'uzn
 
 /* ── Запись в хранилище: ссылки на банк страницы ─────────────────── */
 
-/** Задача в записи: прототип, номер варианта, контрольная подпись. */
-type Ssylka = [kind: string, n: number, podpis: string];
+/**
+ * Задача в записи: прототип, номер варианта, контрольная подпись и, у
+ * аналога из «Работы над ошибками», задача, ошибку в которой он закрывает.
+ */
+type Ssylka =
+  | [kind: string, n: number, podpis: string]
+  | [kind: string, n: number, podpis: string, fixes: string];
 
 /** Тренировка в записи: настройки и ссылки на задачи банка. */
 interface Upakovano {
@@ -161,6 +171,7 @@ interface Upakovano {
   rezhim: Rezhim;
   metod: string;
   podskazki: boolean;
+  timer?: boolean;
   tasks: Ssylka[];
 }
 
@@ -182,14 +193,17 @@ export function upakovat(payload: SessiyaPayload): Upakovano {
     rezhim: payload.rezhim,
     metod: payload.metod,
     podskazki: payload.podskazki,
-    tasks: payload.tasks.map((t) => [t.kind, t.n, podpis(t)]),
+    ...(payload.timer === undefined ? {} : { timer: payload.timer }),
+    tasks: payload.tasks.map((t): Ssylka =>
+      t.fixes === undefined ? [t.kind, t.n, podpis(t)] : [t.kind, t.n, podpis(t), t.fixes],
+    ),
   };
 }
 
 function isSsylka(value: unknown): value is Ssylka {
   return (
     Array.isArray(value) &&
-    value.length === 3 &&
+    (value.length === 3 || (value.length === 4 && typeof value[3] === 'string')) &&
     typeof value[0] === 'string' &&
     typeof value[1] === 'number' &&
     typeof value[2] === 'string'
@@ -209,12 +223,12 @@ export function raspakovat(packed: unknown, pool: Pool, uznay: UznayPool): Sessi
     return null;
   }
   const tasks: SessiyaZadacha[] = [];
-  for (const [kind, n, sig] of packed['tasks'] as Ssylka[]) {
+  for (const [kind, n, sig, fixes] of packed['tasks'] as Ssylka[]) {
     const task = zadachaBanka(kind, n, rezhim as Rezhim, pool, uznay);
     if (task === null || podpis(task) !== sig) {
       return null;
     }
-    tasks.push(task);
+    tasks.push(fixes === undefined ? task : { ...task, fixes });
   }
   const payload: unknown = { ...packed, tasks };
   return isSessiyaPayload(payload) ? payload : null;
@@ -247,6 +261,7 @@ function isZadacha(value: unknown): value is SessiyaZadacha {
     typeof value['metodSeal'] === 'string' &&
     typeof value['hints'] === 'string' &&
     (value['podskazka'] === undefined || typeof value['podskazka'] === 'string') &&
+    (value['fixes'] === undefined || typeof value['fixes'] === 'string') &&
     (value['illustration'] === undefined || isIllyustratsiya(value['illustration'])) &&
     (value['model'] === undefined || isModel(value['model']))
   );
@@ -264,6 +279,7 @@ export function isSessiyaPayload(value: unknown): value is SessiyaPayload {
     !(REZHIMY_SESSII as readonly string[]).includes(rezhim) ||
     typeof value['metod'] !== 'string' ||
     typeof value['podskazki'] !== 'boolean' ||
+    (value['timer'] !== undefined && typeof value['timer'] !== 'boolean') ||
     !Array.isArray(tasks) ||
     tasks.length === 0 ||
     !tasks.every(isZadacha)

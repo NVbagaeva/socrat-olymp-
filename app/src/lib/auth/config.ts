@@ -36,6 +36,19 @@ export const AUTH_ENABLED = process.env.AUTH_ON === '1';
  */
 export const AUTH_IN_HEADER = process.env.AUTH_HEADER === '1';
 
+/**
+ * Открыта ли регистрация для всех. true: кнопка «Начать бесплатно»
+ * (первый экран главной, шапка на компьютере) ведёт на вкладку
+ * «Регистрация» страницы входа (AUTH_HREF.registraciya). Сам замок — на
+ * сервере: секрет ALLOWED_EMAILS = «*» (миграция
+ * 20261119120000_otkrytaya_registraciya.sql). Закрыли регистрацию снова —
+ * поставьте false: кнопка поведёт в банк заданий, где занимаются без
+ * аккаунта.
+ * Пока вход на сайте выключен (AUTH_ENABLED), флаг ничего не меняет:
+ * регистрироваться негде. Куда ведёт кнопка — startHref() в content/site.ts.
+ */
+export const REGISTRATION_OPEN: boolean = true;
+
 /** Ключ сессии в хранилище браузера: его читает и SDK, и лёгкий модуль session.ts. */
 export const SESSION_KEY = 'budetege-auth';
 
