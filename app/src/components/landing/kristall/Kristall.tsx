@@ -124,13 +124,16 @@ export function Kristall({
           });
           model.current = m;
           setTochki(m.tochki());
-          setZhivoy(true);
+          /* Модель могла догрузиться, когда фигуру уже отпустили и она
+             «вернулась» (vozvrat): тогда остаётся рендер, иначе живая
+             модель застрянет поверх него. */
+          if (krutyat.current || !vozvrat) setZhivoy(true);
           return m;
         })
         .catch(() => null);
     }
     return zagruzka.current;
-  }, [temnyyFon]);
+  }, [temnyyFon, vozvrat]);
 
   /* Начали крутить: отменить возврат, показать живую модель, сообщить. */
   const nachali = useCallback(() => {
