@@ -346,7 +346,7 @@ const ODOBRENO = {
   'app/src/lib/planimetriya/prep/generate.ts':
     '5bc7b49d7b659bacdca9767cc7d17480224b4732751ce885dfd811005a1c3c55',
   'app/src/lib/planimetriya/prep/mikro.ts':
-    'e67defa6fcc3f6306dadf43f2c95db3a71d5e86afd2cc9bf7607f1e864ff5942',
+    '3c5be51e89dc5666b6d0b084a1cf55440aa14036c38689fa85eb1cc3c527b44a',
   'app/src/lib/planimetriya/prep/seal.ts':
     'cea9bd3de6ae3de1be3bbf627686b4cd55146b1c5fe3b81583bed76011569d2a',
   'app/src/lib/planimetriya/prep/types.ts':
@@ -466,7 +466,26 @@ const ODOBRENO = {
   'app/src/lib/planimetriya/prep/pool.ts':
     '3c519358fd3e2f040978f63c14355f5cabe8a6867977fd690c58ea32b7df145c',
   'app/src/lib/planimetriya/prep/scenarii.ts':
-    '68fcc6f4f25d5d3615efbfb15a3c075a731cef58cc9b91d5ebc8e40b6806d1b3',
+    'cfee723e1896316f6132204764cbcd6e24022a8604ca790c2597515fd689d281',
+  /* Подсказки опорных задач №1 вопросами — все 90 задач (одобрено владельцем
+     22.11.2026: «Разрешаю, переделай остальные тоже»). Условия и ответы те
+     же, кроме P1-1-07: там исправлен угол C (ответ не сходился с суммой). */
+  'app/src/lib/planimetriya/prep/scenarii-p1-12.ts':
+    '631d61eca926bbcfab9e35e39b8ba9fda539082538426de980f85cea993f2601',
+  'app/src/lib/planimetriya/prep/scenarii-p1-3.ts':
+    'be86a6a5e719cbd969dd45f73939458d82fe537498aa2b6343122036189d378e',
+  'app/src/lib/planimetriya/prep/scenarii-p1-4.ts':
+    'e8af459be7ad8389a599b551730172a002db43ea7c140a5aebb7e99ce22c333d',
+  'app/src/lib/planimetriya/prep/scenarii-p1-5.ts':
+    '070be2ec72f0639a127a78ffa0d64d3ba1bcbc9f3d4bfddfe7975849be0a2608',
+  'app/src/lib/planimetriya/prep/scenarii-p1-6.ts':
+    '4a8fc1c236e49dfb81b0fdd44c89314501d5611f50e1b009f43bdde6898a0ef4',
+  'app/src/lib/planimetriya/prep/scenarii-p1-7.ts':
+    '9eda0f8fc1f72c2d0911842e4e650555334434c50ecd6a54d7396343e87dddbc',
+  'app/src/lib/planimetriya/prep/scenarii-p1-8.ts':
+    'e554a2a231534e80b415bb574be58c0e76c2535c7bc8918822b57f7dc7c2968f',
+  'app/src/lib/planimetriya/prep/scenarii-p1-9.ts':
+    'dcc512fbd36ac5ea5e77130ddf6a56bad1aad00debfead66140807f056e30f18',
   'app/src/lib/planimetriya/stseny/chasti.ts':
     'b2db181af3ddde18f99d009f9e323ede50f0f7681bd870af5fd31cad007231c9',
 };
