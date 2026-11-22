@@ -49,6 +49,18 @@ import {
   sootvetstvennyySmezhnyy,
   sosedniyUgolParallelogramma,
 } from './scenarii';
+import {
+  scenariyKatet30,
+  scenariyKatetCherezKosinus,
+  scenariyKatetCherezSinus,
+  scenariyKatetCherezTangens,
+  scenariyKosinus,
+  scenariyKosinusDrugogo,
+  scenariyKosinusPoSinusu,
+  scenariyKosinusRavnobedrennyy,
+  scenariySinus,
+  scenariyTangens,
+} from './scenarii-p1-7';
 import type { Mikro } from './types';
 
 /* ── Помощники ───────────────────────────────────────────────────── */
@@ -1556,10 +1568,15 @@ export const BLOK_PIFAGOR: Mikro[] = [
 
 export const BLOK_TRIG: Mikro[] = (() => {
   const kat = (a: number, b: number) => pryamoyKatety(a, b);
+  /* Подсказка-сценарий, шаг 1 «Где прямой угол?»: значок прямого угла
+     загорается (podsvetka 1). */
   const sc = (a: number, b: number, el: Element[]): Scena => ({
     tochki: kat(a, b),
-    elementy: [tri('A', 'B', 'C'), pryam('A', 'C', 'B'), ...el],
+    elementy: [tri('A', 'B', 'C'), pryam('A', 'C', 'B', { podsvetka: [1] }), ...el],
   });
+  /* Сторона треугольника, которая загорается на шагах подсказки. */
+  const svet = (a: string, b: string, ...shagi: number[]): Element =>
+    otr(a, b, { podsvetka: shagi });
   const desyat = (x: number, y: number) => {
     const v = x / y;
     return Math.abs(v * 100 - Math.round(v * 100)) < 1e-9;
@@ -1573,13 +1590,17 @@ export const BLOK_TRIG: Mikro[] = (() => {
         risunok: sc(a, b, [
           zn('C', 'B', String(b)),
           zn('A', 'B', String(c)),
-          ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
+          ug('C', 'A', 'B', { vydelit: 'iskomoe', podsvetka: [2] }),
+          /* Подсказка: гипотенуза (шаг 1), противолежащий катет (шаг 2). */
+          svet('A', 'B', 1),
+          svet('C', 'B', 2),
         ]),
         otvet: b / c,
         razbor: [
-          'Синус — противолежащий катет к гипотенузе.',
-          `$\\sin A = \\dfrac{${b}}{${c}} = ${t(b / c)}$.`,
+          'Прямой угол — $C$, гипотенуза — $AB$; углу $A$ противолежит катет $BC$.',
+          `Синус — противолежащий катет к гипотенузе: $\\sin A = \\dfrac{BC}{AB} = \\dfrac{${b}}{${c}} = ${t(b / c)}$.`,
         ],
+        scenariy: scenariySinus(b, c),
       };
     }),
     mikro('P1-7-02', 'Косинус по сторонам', '\\cos A = \\dfrac{AC}{AB}', (r) => {
@@ -1590,13 +1611,17 @@ export const BLOK_TRIG: Mikro[] = (() => {
         risunok: sc(a, b, [
           zn('A', 'C', String(a)),
           zn('A', 'B', String(c)),
-          ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
+          ug('C', 'A', 'B', { vydelit: 'iskomoe', podsvetka: [2] }),
+          /* Подсказка: гипотенуза (шаг 1), прилежащий катет (шаг 2). */
+          svet('A', 'B', 1),
+          svet('A', 'C', 2),
         ]),
         otvet: a / c,
         razbor: [
-          'Косинус — прилежащий катет к гипотенузе.',
-          `$\\cos A = \\dfrac{${a}}{${c}} = ${t(a / c)}$.`,
+          'Прямой угол — $C$, гипотенуза — $AB$; к углу $A$ прилежит катет $AC$.',
+          `Косинус — прилежащий катет к гипотенузе: $\\cos A = \\dfrac{AC}{AB} = \\dfrac{${a}}{${c}} = ${t(a / c)}$.`,
         ],
+        scenariy: scenariyKosinus(a, c),
       };
     }),
     mikro('P1-7-03', 'Тангенс по катетам', '\\operatorname{tg} A = \\dfrac{BC}{AC}', (r) => {
@@ -1607,13 +1632,17 @@ export const BLOK_TRIG: Mikro[] = (() => {
         risunok: sc(a, b, [
           zn('A', 'C', String(a)),
           zn('C', 'B', String(b)),
-          ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
+          ug('C', 'A', 'B', { vydelit: 'iskomoe', podsvetka: [2] }),
+          /* Подсказка: катеты (шаг 1). */
+          svet('A', 'C', 1),
+          svet('C', 'B', 1),
         ]),
         otvet: b / a,
         razbor: [
-          'Тангенс — противолежащий катет к прилежащему.',
-          `$\\operatorname{tg} A = \\dfrac{${b}}{${a}} = ${t(b / a)}$.`,
+          'Прямой угол — $C$; углу $A$ противолежит катет $BC$, прилежит — $AC$.',
+          `Тангенс — противолежащий катет к прилежащему: $\\operatorname{tg} A = \\dfrac{BC}{AC} = \\dfrac{${b}}{${a}} = ${t(b / a)}$.`,
         ],
+        scenariy: scenariyTangens(a, b),
       };
     }),
     mikro('P1-7-04', 'Прилежащий катет через косинус', 'AC = AB\\cdot\\cos A', (r) => {
@@ -1623,11 +1652,17 @@ export const BLOK_TRIG: Mikro[] = (() => {
         uslovie: `В треугольнике $ABC$ $\\angle C = 90^\\circ$, $AB = ${c * k}$, $\\cos A = \\dfrac{${a}}{${c}}$. Найдите $AC$.`,
         risunok: sc(a, b, [
           zn('A', 'B', String(c * k)),
-          ug('C', 'A', 'B', { vydelit: 'dano' }),
-          otr('A', 'C', { vydelit: 'iskomoe' }),
+          ug('C', 'A', 'B', { vydelit: 'dano', podsvetka: [2] }),
+          otr('A', 'C', { vydelit: 'iskomoe', podsvetka: [2] }),
+          /* Подсказка: гипотенуза (шаг 1). */
+          svet('A', 'B', 1),
         ]),
         otvet: a * k,
-        razbor: [`$AC = AB\\cdot\\cos A = ${c * k}\\cdot\\dfrac{${a}}{${c}} = ${a * k}$.`],
+        razbor: [
+          'Гипотенуза — $AB$, искомый $AC$ — прилежащий к углу $A$ катет: $\\cos A = \\dfrac{AC}{AB}$.',
+          `$AC = AB\\cdot\\cos A = ${c * k}\\cdot\\dfrac{${a}}{${c}} = ${a * k}$.`,
+        ],
+        scenariy: scenariyKatetCherezKosinus(c * k, c),
       };
     }),
     mikro('P1-7-05', 'Противолежащий катет через синус', 'BC = AB\\cdot\\sin A', (r) => {
@@ -1637,11 +1672,17 @@ export const BLOK_TRIG: Mikro[] = (() => {
         uslovie: `В треугольнике $ABC$ $\\angle C = 90^\\circ$, $AB = ${c * k}$, $\\sin A = \\dfrac{${b}}{${c}}$. Найдите $BC$.`,
         risunok: sc(a, b, [
           zn('A', 'B', String(c * k)),
-          ug('C', 'A', 'B', { vydelit: 'dano' }),
-          otr('C', 'B', { vydelit: 'iskomoe' }),
+          ug('C', 'A', 'B', { vydelit: 'dano', podsvetka: [2] }),
+          otr('C', 'B', { vydelit: 'iskomoe', podsvetka: [2] }),
+          /* Подсказка: гипотенуза (шаг 1). */
+          svet('A', 'B', 1),
         ]),
         otvet: b * k,
-        razbor: [`$BC = AB\\cdot\\sin A = ${c * k}\\cdot\\dfrac{${b}}{${c}} = ${b * k}$.`],
+        razbor: [
+          'Гипотенуза — $AB$, искомый $BC$ — противолежащий углу $A$ катет: $\\sin A = \\dfrac{BC}{AB}$.',
+          `$BC = AB\\cdot\\sin A = ${c * k}\\cdot\\dfrac{${b}}{${c}} = ${b * k}$.`,
+        ],
+        scenariy: scenariyKatetCherezSinus(c * k, c),
       };
     }),
     mikro('P1-7-06', 'Катет через тангенс', 'BC = AC\\cdot\\operatorname{tg} A', (r) => {
@@ -1651,13 +1692,17 @@ export const BLOK_TRIG: Mikro[] = (() => {
         uslovie: `В треугольнике $ABC$ $\\angle C = 90^\\circ$, $AC = ${a * k}$, $\\operatorname{tg} A = \\dfrac{${b}}{${a}}$. Найдите $BC$.`,
         risunok: sc(a, b, [
           zn('A', 'C', String(a * k)),
-          ug('C', 'A', 'B', { vydelit: 'dano' }),
-          otr('C', 'B', { vydelit: 'iskomoe' }),
+          ug('C', 'A', 'B', { vydelit: 'dano', podsvetka: [2] }),
+          otr('C', 'B', { vydelit: 'iskomoe', podsvetka: [1] }),
+          /* Подсказка: катеты (шаг 1). */
+          svet('A', 'C', 1),
         ]),
         otvet: b * k,
         razbor: [
+          'Углу $A$ противолежит искомый катет $BC$, прилежит — данный $AC$: $\\operatorname{tg} A = \\dfrac{BC}{AC}$.',
           `$BC = AC\\cdot\\operatorname{tg} A = ${a * k}\\cdot\\dfrac{${b}}{${a}} = ${b * k}$.`,
         ],
+        scenariy: scenariyKatetCherezTangens(a * k, a),
       };
     }),
     mikro('P1-7-07', 'Косинус по синусу', '\\sin^2 A + \\cos^2 A = 1', (r) => {
@@ -1671,7 +1716,11 @@ export const BLOK_TRIG: Mikro[] = (() => {
         uslovie: `Угол $A$ острый, $\\sin A = ${t(s)}$. Найдите $\\cos A$.`,
         risunok: null,
         otvet: c,
-        razbor: [`$\\cos A = \\sqrt{1 - ${t(s)}^2} = \\sqrt{${t(1 - s * s)}} = ${t(c)}$.`],
+        razbor: [
+          `Основное тождество: $\\cos^2 A = 1 - \\sin^2 A = 1 - ${t(s)}^2 = ${t(1 - s * s)}$.`,
+          `Угол $A$ острый, косинус положителен: $\\cos A = \\sqrt{${t(1 - s * s)}} = ${t(c)}$.`,
+        ],
+        scenariy: scenariyKosinusPoSinusu(s),
       };
     }),
     mikro('P1-7-08', 'Синус одного угла — косинус другого', '\\cos B = \\sin A', (r) => {
@@ -1679,14 +1728,19 @@ export const BLOK_TRIG: Mikro[] = (() => {
       return {
         uslovie: `В треугольнике $ABC$ $\\angle C = 90^\\circ$, $\\sin A = ${t(s)}$. Найдите $\\cos B$.`,
         risunok: sc(3, 4, [
-          ug('C', 'A', 'B', { vydelit: 'dano' }),
-          ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
+          ug('C', 'A', 'B', { vydelit: 'dano', podsvetka: [2] }),
+          ug('A', 'B', 'C', { vydelit: 'iskomoe', podsvetka: [3] }),
+          /* Подсказка: гипотенуза (шаг 1); катет BC — противолежащий
+             углу A (шаг 2) и прилежащий к углу B (шаг 3). */
+          svet('A', 'B', 1),
+          svet('C', 'B', 2, 3),
         ]),
         otvet: s,
         razbor: [
-          'Противолежащий углу $A$ катет $BC$ прилежит к углу $B$: $\\cos B = \\dfrac{BC}{AB} = \\sin A$.',
-          `Ответ: $${t(s)}$.`,
+          'Противолежащий углу $A$ катет $BC$ прилежит к углу $B$: $\\sin A = \\dfrac{BC}{AB}$ и $\\cos B = \\dfrac{BC}{AB}$.',
+          `Значит, $\\cos B = \\sin A = ${t(s)}$.`,
         ],
+        scenariy: scenariyKosinusDrugogo(),
       };
     }),
     mikro('P1-7-09', 'Синус 30° в треугольнике', 'BC = AB\\sin 30^\\circ', (r) => {
@@ -1697,14 +1751,20 @@ export const BLOK_TRIG: Mikro[] = (() => {
           tochki: pryamougolnyy(60, 'katety'),
           elementy: [
             tri('A', 'B', 'C'),
-            pryam('A', 'C', 'B'),
-            ug('C', 'A', 'B', { vydelit: 'dano', znachenie: '30°' }),
+            pryam('A', 'C', 'B', { podsvetka: [1] }),
+            ug('C', 'A', 'B', { vydelit: 'dano', znachenie: '30°', podsvetka: [2] }),
             zn('A', 'B', String(c)),
-            otr('C', 'B', { vydelit: 'iskomoe' }),
+            otr('C', 'B', { vydelit: 'iskomoe', podsvetka: [2] }),
+            /* Подсказка: гипотенуза (шаг 1). */
+            svet('A', 'B', 1),
           ],
         },
         otvet: c / 2,
-        razbor: [`$BC = AB\\cdot\\sin 30^\\circ = ${c}\\cdot\\dfrac12 = ${t(c / 2)}$.`],
+        razbor: [
+          'Гипотенуза — $AB$, против угла $A = 30^\\circ$ лежит катет $BC$.',
+          `Катет против $30^\\circ$ — половина гипотенузы: $BC = \\dfrac{AB}{2} = \\dfrac{${c}}{2} = ${t(c / 2)}$.`,
+        ],
+        scenariy: scenariyKatet30(c),
       };
     }),
     mikro('P1-7-10', 'Косинус в равнобедренном', '\\cos A = \\dfrac{AB/2}{AC}', (r) => {
@@ -1725,13 +1785,19 @@ export const BLOK_TRIG: Mikro[] = (() => {
             zn('A', 'C', String(l)),
             zn('A', 'B', String(c)),
             ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
+            /* Подсказка: высота CH (шаг 1), равные половины основания (шаг 2). */
+            otr('C', 'H', { sloy: 1 }),
+            pryam('C', 'H', 'A', { sloy: 1 }),
+            shtrih('A', 'H', 2, { sloy: 2 }),
+            shtrih('H', 'B', 2, { sloy: 2 }),
           ],
         })),
         otvet: c / (2 * l),
         razbor: [
-          'Высота к основанию делит его пополам.',
-          `$\\cos A = \\dfrac{${c} : 2}{${l}} = ${t(c / (2 * l))}$.`,
+          'Проведём высоту $CH$. Треугольник равнобедренный ($AC = BC$), высота к основанию — и медиана: $AH = \\dfrac{AB}{2}$.',
+          `В прямоугольном треугольнике $ACH$: $\\cos A = \\dfrac{AH}{AC} = \\dfrac{${c} : 2}{${l}} = ${t(c / (2 * l))}$.`,
         ],
+        scenariy: scenariyKosinusRavnobedrennyy(l, c),
       };
     }),
   ];
