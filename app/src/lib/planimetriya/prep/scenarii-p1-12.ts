@@ -118,7 +118,7 @@ export function scenariyTretiyUgol(a: number, b: number): Scenariy {
 /* ── P1-1-02. Острый угол прямоугольного треугольника ────────────── */
 
 /** Слой 1 — подпись $x$ у угла $B$. */
-export function scenariyOstryyUgol(a: number): Scenariy {
+export function scenariyOstryyUgolSumma(a: number): Scenariy {
   const otvet = 90 - a;
   const A = ili(a, otvet, '\\angle A');
   return {

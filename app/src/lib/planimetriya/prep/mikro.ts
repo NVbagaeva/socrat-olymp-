@@ -44,6 +44,7 @@ import {
   bissektrisySmezhnyh,
   neVyrozhdennyy,
   scenariyNaRaznost,
+  scenariyVdvoe,
   scenariyUgolPriVershine,
   smezhnyeVOtnoshenii,
   sootvetstvennyySmezhnyy,
@@ -98,7 +99,7 @@ import {
   scenariyTrapecii,
 } from './scenarii-p1-5';
 import {
-  scenariyKatet30,
+  scenariyKatet30Trig,
   scenariyKatetCherezKosinus,
   scenariyKatetCherezSinus,
   scenariyKatetCherezTangens,
@@ -112,7 +113,7 @@ import {
 import {
   scenariyNakrest,
   scenariyOdnostoronnie,
-  scenariyOstryyUgol,
+  scenariyOstryyUgolSumma,
   scenariyPeresechenie,
   scenariyPolovinaUgla,
   scenariySmezhnyeRaznost,
@@ -256,7 +257,7 @@ export const BLOK_SUMMA: Mikro[] = [
           `Острые углы прямоугольного треугольника в сумме дают $90^\\circ$. Угол $B$ обозначим $x$: $${g(a)} + x = 90^\\circ$.`,
           `$x = \\angle B = 90^\\circ - ${g(a)} = ${g(90 - a)}$.`,
         ],
-        scenariy: scenariyOstryyUgol(a),
+        scenariy: scenariyOstryyUgolSumma(a),
       };
     },
   ),
@@ -387,21 +388,35 @@ export const BLOK_SUMMA: Mikro[] = [
     'Угол вдвое больше другого',
     '\\angle A + \\angle B + \\angle C = 180^\\circ',
     (r) => {
-      const b = r.int(15, 45);
-      const c = r.int(20, 170 - 3 * b);
+      /* B = 36° дал бы ответ 72° = данному углу C, B = 45° — прямой угол A. */
+      let b = r.int(15, 44);
+      if (b === 36) b = 37;
+      /* Угол C — из суммы углов: A + B + C = 2B + B + C = 180°. Прежде C
+         брался случайно, и ответ 2B не сходился с условием. */
+      const c = 180 - 3 * b;
       const a = 2 * b;
       return {
         uslovie: `В треугольнике $ABC$ угол $A$ вдвое больше угла $B$, $\\angle C = ${g(c)}$. Найдите угол $A$.`,
-        risunok: treugolnik([a, b, c], {
-          A: { isk: true },
-          B: { dugi: 2 },
-          C: { zn: gr(c), dugi: 3 },
-        }),
+        risunok: treugolnik(
+          [a, b, c],
+          {
+            A: { isk: true },
+            B: { dugi: 2 },
+            C: { zn: gr(c), dugi: 3 },
+          },
+          [
+            /* Подсказка, шаг «Чему тогда равен угол A?»: x и 2x у углов. */
+            ug('A', 'B', 'C', { sloy: 2, dugi: 2, znachenie: 'x', cvet: 1 }),
+            ug('C', 'A', 'B', { sloy: 2, znachenie: '2x', cvet: 1 }),
+          ],
+        ),
         otvet: a,
         razbor: [
-          `$\\angle A + \\angle B = 180^\\circ - ${g(c)} = ${g(180 - c)}$.`,
-          `Это $3$ части: $\\angle B = ${g((180 - c) / 3)}$, $\\angle A = ${g(a)}$.`,
+          'Меньший угол $B$ обозначим $x$: тогда $\\angle A = 2x$.',
+          `Сумма углов треугольника: $2x + x + ${g(c)} = 180^\\circ$, $3x = ${g(180 - c)}$, $x = ${g(b)}$.`,
+          `$\\angle A = 2x = ${g(a)}$.`,
         ],
+        scenariy: scenariyVdvoe(b, c),
       };
     },
   ),
@@ -1967,7 +1982,7 @@ export const BLOK_TRIG: Mikro[] = (() => {
           'Гипотенуза — $AB$, против угла $A = 30^\\circ$ лежит катет $BC$.',
           `Катет против $30^\\circ$ — половина гипотенузы: $BC = \\dfrac{AB}{2} = \\dfrac{${c}}{2} = ${t(c / 2)}$.`,
         ],
-        scenariy: scenariyKatet30(c),
+        scenariy: scenariyKatet30Trig(c),
       };
     }),
     mikro('P1-7-10', 'Косинус в равнобедренном', '\\cos A = \\dfrac{AB/2}{AC}', (r) => {

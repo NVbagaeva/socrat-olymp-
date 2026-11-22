@@ -515,7 +515,7 @@ export function scenariyKosinusDrugogo(): Scenariy {
 
 /* ── P1-7-09. Катет против угла 30° ──────────────────────────────── */
 
-export function scenariyKatet30(ab: number): Scenariy {
+export function scenariyKatet30Trig(ab: number): Scenariy {
   return {
     sposoby: [
       {
