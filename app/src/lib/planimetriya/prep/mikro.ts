@@ -85,6 +85,18 @@ import {
   scenariyVysotaKatetCA,
   scenariyVysotaKatetCB,
 } from './scenarii-p1-3';
+import {
+  scenariyDveStoronyUgol,
+  scenariyParallelogramma,
+  scenariyParallelogramma30,
+  scenariyPodobnogo,
+  scenariyPryamougolnogo,
+  scenariyRomba,
+  scenariySrednyayaTrapecii,
+  scenariySrednyayaTreugolnika,
+  scenariyStoronaVysota,
+  scenariyTrapecii,
+} from './scenarii-p1-5';
 import type { Mikro } from './types';
 
 /* ── Помощники ───────────────────────────────────────────────────── */
@@ -1165,16 +1177,19 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
         elementy: [
           tri('A', 'B', 'C'),
           pryam('A', 'C', 'B'),
-          zn('A', 'C', String(a)),
-          zn('C', 'B', String(b)),
+          /* Подсказка, шаг 1: данные подсвечены, вершины подписаны. */
+          { ...zn('A', 'C', String(a)), podsvetka: [1] },
+          { ...zn('C', 'B', String(b)), podsvetka: [1] },
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C'],
       })),
       otvet: (a * b) / 2,
       razbor: [
-        'Площадь прямоугольного треугольника — половина произведения катетов.',
-        `$S = \\dfrac{${a}\\cdot ${b}}{2} = ${t((a * b) / 2)}$.`,
+        'Катеты перпендикулярны: катет $CB$ — высота, проведённая к катету $AC$. Площадь — половина произведения катетов.',
+        `$S = \\dfrac12\\cdot AC\\cdot CB = \\dfrac{${a}\\cdot ${b}}{2} = ${t((a * b) / 2)}$.`,
       ],
+      scenariy: scenariyPryamougolnogo(a, b),
     };
   }),
   mikro('P1-5-02', 'Сторона и высота треугольника', 'S = \\dfrac12 a h', (r) => {
@@ -1186,14 +1201,19 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
         tochki: { ...poUglam(60, 50), H: { osnovanie: ['C', 'A', 'B'] } },
         elementy: [
           tri('A', 'B', 'C'),
-          otr('C', 'H', { vydelit: 'dano', znachenie: String(h) }),
+          otr('C', 'H', { vydelit: 'dano', znachenie: String(h), podsvetka: [1] }),
           pryam('C', 'H', 'B'),
-          zn('A', 'B', String(a)),
+          { ...zn('A', 'B', String(a)), podsvetka: [1] },
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'H'],
       },
       otvet: (a * h) / 2,
-      razbor: [`$S = \\dfrac12\\cdot ${a}\\cdot ${h} = ${t((a * h) / 2)}$.`],
+      razbor: [
+        '$CH \\perp AB$: основание — $AB$, высота — $CH$. Площадь — половина основания на высоту.',
+        `$S = \\dfrac12\\cdot AB\\cdot CH = \\dfrac12\\cdot ${a}\\cdot ${h} = ${t((a * h) / 2)}$.`,
+      ],
+      scenariy: scenariyStoronaVysota(a, h),
     };
   }),
   mikro('P1-5-03', 'Площадь параллелограмма', 'S = a h', (r) => {
@@ -1205,14 +1225,19 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
         tochki: { ...parallelogramm(60, 10, 6), H: { osnovanie: ['B', 'A', 'D'] } },
         elementy: [
           mn(['A', 'B', 'C', 'D']),
-          otr('B', 'H', { vydelit: 'dano', znachenie: String(h) }),
+          otr('B', 'H', { vydelit: 'dano', znachenie: String(h), podsvetka: [1] }),
           pryam('B', 'H', 'D'),
-          zn('A', 'D', String(a)),
+          { ...zn('A', 'D', String(a)), podsvetka: [1] },
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'D', 'H'],
       },
       otvet: a * h,
-      razbor: [`$S = ${a}\\cdot ${h} = ${a * h}$.`],
+      razbor: [
+        '$BH \\perp AD$: основание — $AD$, высота — $BH$. Площадь параллелограмма — основание на высоту.',
+        `$S = AD\\cdot BH = ${a}\\cdot ${h} = ${a * h}$.`,
+      ],
+      scenariy: scenariyParallelogramma(a, h),
     };
   }),
   mikro('P1-5-04', 'Площадь трапеции', 'S = \\dfrac{a + b}{2}\\, h', (r) => {
@@ -1228,15 +1253,22 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
         },
         elementy: [
           mn(['A', 'B', 'C', 'D']),
-          otr('B', 'H', { vydelit: 'dano', znachenie: String(h) }),
+          otr('B', 'H', { vydelit: 'dano', znachenie: String(h), podsvetka: [1] }),
           pryam('B', 'H', 'D'),
-          zn('A', 'D', String(a)),
-          zn('B', 'C', String(b)),
+          { ...zn('A', 'D', String(a)), podsvetka: [1] },
+          { ...zn('B', 'C', String(b)), podsvetka: [1] },
+          /* Подсказка, шаг 2: диагональ BD делит трапецию на два треугольника. */
+          otr('B', 'D', { sloy: 2, stil: 'punktir' }),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'D', 'H'],
       })),
       otvet: ((a + b) * h) / 2,
-      razbor: [`$S = \\dfrac{${a} + ${b}}{2}\\cdot ${h} = ${t(((a + b) * h) / 2)}$.`],
+      razbor: [
+        'Диагональ $BD$ делит трапецию на треугольники $ABD$ и $BCD$ с общей высотой $BH$: $S = \\dfrac12\\cdot AD\\cdot BH + \\dfrac12\\cdot BC\\cdot BH = \\dfrac{AD + BC}{2}\\cdot BH$.',
+        `$S = \\dfrac{${a} + ${b}}{2}\\cdot ${h} = ${t(((a + b) * h) / 2)}$.`,
+      ],
+      scenariy: scenariyTrapecii(a, b, h),
     };
   }),
   mikro('P1-5-05', 'Площадь ромба по диагоналям', 'S = \\dfrac{d_1 d_2}{2}', (r) => {
@@ -1245,19 +1277,23 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
     return {
       uslovie: `Диагонали ромба равны $${d1}$ и $${d2}$. Найдите его площадь.`,
       risunok: forma(d1 / d2, 0.45, 2.2, (k) => ({
-        tochki: { A: [-k, 0], C: [k, 0], B: [0, 1], D: [0, -1] },
+        tochki: { A: [-k, 0], C: [k, 0], B: [0, 1], D: [0, -1], O: [0, 0] },
         elementy: [
           mn(['A', 'B', 'C', 'D']),
-          otr('A', 'C', { vydelit: 'dano', znachenie: String(d1) }),
-          otr('B', 'D', { vydelit: 'dano', znachenie: String(d2) }),
+          otr('A', 'C', { vydelit: 'dano', znachenie: String(d1), podsvetka: [1] }),
+          otr('B', 'D', { vydelit: 'dano', znachenie: String(d2), podsvetka: [1] }),
+          /* Подсказка, шаг 2: диагонали перпендикулярны. */
+          pryam('B', 'O', 'C', { sloy: 2 }),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'D', 'O'],
       })),
       otvet: (d1 * d2) / 2,
       razbor: [
-        'Площадь ромба — половина произведения диагоналей.',
+        'Диагонали ромба перпендикулярны: $AC$ делит ромб на треугольники $ABC$ и $ADC$ с высотами $BO$ и $DO$, $BO + DO = BD$. Площадь — половина произведения диагоналей.',
         `$S = \\dfrac{${d1}\\cdot ${d2}}{2} = ${t((d1 * d2) / 2)}$.`,
       ],
+      scenariy: scenariyRomba(d1, d2),
     };
   }),
   mikro('P1-5-06', 'Две стороны и угол 30°', 'S = \\dfrac12 ab\\sin C', (r) => {
@@ -1273,19 +1309,21 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
           tochki: { C: [0, 0], A: polar(0, 10), B: polar(u, 10 * k) },
           elementy: [
             tri('A', 'B', 'C'),
-            ug('A', 'C', 'B', { vydelit: 'dano', znachenie: '30°' }),
-            zn('C', 'A', String(a)),
-            zn('C', 'B', String(b)),
+            ug('A', 'C', 'B', { vydelit: 'dano', znachenie: '30°', podsvetka: [1] }),
+            { ...zn('C', 'A', String(a)), podsvetka: [1] },
+            { ...zn('C', 'B', String(b)), podsvetka: [1] },
           ],
           podpisi: false,
+          podpisiPodskazki: ['A', 'B', 'C'],
         }),
         ZHESTKO,
       ),
       otvet: (a * b) / 4,
       razbor: [
-        '$\\sin 30^\\circ = \\dfrac12$.',
+        'Угол $C$ — между сторонами $CA$ и $CB$: $S = \\dfrac12\\cdot CA\\cdot CB\\cdot \\sin C$, $\\sin 30^\\circ = \\dfrac12$.',
         `$S = \\dfrac12\\cdot ${a}\\cdot ${b}\\cdot \\dfrac12 = ${t((a * b) / 4)}$.`,
       ],
+      scenariy: scenariyDveStoronyUgol(a, b),
     };
   }),
   mikro('P1-5-07', 'Параллелограмм с углом 30°', 'S = ab\\sin\\alpha', (r) => {
@@ -1298,22 +1336,27 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
         { u: 30, k: b / a },
         { u: [28, 65], k: [0.5, 1] },
         ({ u, k }) => ({
-          tochki: parallelogramm(u, 10, 10 * k),
+          tochki: { ...parallelogramm(u, 10, 10 * k), H: { osnovanie: ['B', 'A', 'D'] } },
           elementy: [
             mn(['A', 'B', 'C', 'D']),
-            ug('D', 'A', 'B', { vydelit: 'dano', znachenie: '30°' }),
-            zn('A', 'D', String(a)),
-            zn('A', 'B', String(b)),
+            ug('D', 'A', 'B', { vydelit: 'dano', znachenie: '30°', podsvetka: [1] }),
+            { ...zn('A', 'D', String(a)), podsvetka: [1] },
+            { ...zn('A', 'B', String(b)), podsvetka: [1] },
+            /* Подсказка, шаг 2: высота BH к стороне AD. */
+            otr('B', 'H', { sloy: 2, stil: 'punktir' }),
+            pryam('B', 'H', 'D', { sloy: 2 }),
           ],
           podpisi: false,
+          podpisiPodskazki: ['A', 'B', 'C', 'D', 'H'],
         }),
         ZHESTKO,
       ),
       otvet: (a * b) / 2,
       razbor: [
-        `Высота, проведённая к стороне $${a}$, — катет против угла $30^\\circ$: она равна половине другой стороны, $\\dfrac{${b}}{2}$.`,
-        `$S = ${a}\\cdot \\dfrac{${b}}{2} = ${t((a * b) / 2)}$.`,
+        `Высота $BH$, проведённая к стороне $AD$, — катет против угла $30^\\circ$ в треугольнике $ABH$: она равна половине гипотенузы $AB$, $BH = \\dfrac{${b}}{2}$.`,
+        `$S = AD\\cdot BH = ${a}\\cdot \\dfrac{${b}}{2} = ${t((a * b) / 2)}$.`,
       ],
+      scenariy: scenariyParallelogramma30(a, b),
     };
   }),
   mikro('P1-5-08', 'Средняя линия трапеции', 'm = \\dfrac{a + b}{2}', (r) => {
@@ -1335,13 +1378,18 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
           shtrih('M', 'B', 1),
           shtrih('D', 'N', 2),
           shtrih('N', 'C', 2),
-          zn('A', 'D', String(a)),
-          zn('B', 'C', String(b)),
+          { ...zn('A', 'D', String(a)), podsvetka: [1] },
+          { ...zn('B', 'C', String(b)), podsvetka: [1] },
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'D', 'M', 'N'],
       },
       otvet: (a + b) / 2,
-      razbor: [`Средняя линия: $\\dfrac{${a} + ${b}}{2} = ${t((a + b) / 2)}$.`],
+      razbor: [
+        '$M$ и $N$ — середины боковых сторон: $MN$ — средняя линия, она равна полусумме оснований.',
+        `$MN = \\dfrac{AD + BC}{2} = \\dfrac{${a} + ${b}}{2} = ${t((a + b) / 2)}$.`,
+      ],
+      scenariy: scenariySrednyayaTrapecii(a, b),
     };
   }),
   mikro('P1-5-09', 'Площадь подобного треугольника', 'S_2 = k^2 S_1', (r) => {
@@ -1351,7 +1399,11 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
       uslovie: `Стороны треугольника увеличили в $${k}$ раза. Площадь исходного треугольника равна $${s}$. Найдите площадь нового.`,
       risunok: null,
       otvet: k * k * s,
-      razbor: ['Площадь меняется в $k^2$ раз.', `$${k}^2\\cdot ${s} = ${k * k * s}$.`],
+      razbor: [
+        `Треугольники подобны с коэффициентом $${k}$; площади подобных фигур относятся как квадрат коэффициента подобия.`,
+        `$${k}^2\\cdot ${s} = ${k * k * s}$.`,
+      ],
+      scenariy: scenariyPodobnogo(k, s),
     };
   }),
   mikro('P1-5-10', 'Средняя линия треугольника', 'DE = \\dfrac{AB}{2}', (r) => {
@@ -1368,10 +1420,17 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
           shtrih('B', 'E', 2),
           shtrih('E', 'C', 2),
           zn('A', 'B', String(a)),
+          /* Подсказка, шаг 2: DE ∥ AB — значки параллельности. */
+          { tip: 'otrezok', a: 'D', b: 'E', tolkoShtrihi: true, strelki: 1, sloy: 2 } as Element,
+          { tip: 'otrezok', a: 'A', b: 'B', tolkoShtrihi: true, strelki: 1, sloy: 2 } as Element,
         ],
       },
       otvet: a / 2,
-      razbor: ['$DE$ — средняя линия, она равна половине $AB$.', `$${a} : 2 = ${t(a / 2)}$.`],
+      razbor: [
+        '$DE$ соединяет середины сторон $AC$ и $BC$ — это средняя линия: она параллельна $AB$ и равна её половине.',
+        `$DE = \\dfrac{AB}{2} = ${a} : 2 = ${t(a / 2)}$.`,
+      ],
+      scenariy: scenariySrednyayaTreugolnika(a),
     };
   }),
 ];
