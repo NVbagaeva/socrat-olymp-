@@ -5,11 +5,37 @@
 /* ── Шапка контентной части ─────────────────────────────────── */
 
 .bank-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-8);
+  position: relative;
+  isolation: isolate;
   margin-bottom: var(--space-8);
+}
+/* Свечения за шапкой — та же пара, что у «Собрать вариант»
+   (variant-steklo.css): синее слева, тёплое оранжевое справа. Пятна
+   больше шапки и гаснут к краю, поэтому без обрезки. */
+.bank-aura {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.bank-aura span {
+  position: absolute;
+  border-radius: 50%;
+}
+.bank-aura__siniy {
+  left: -14%;
+  top: -60%;
+  width: 52%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, var(--aura-blue), transparent);
+  opacity: 0.5;
+}
+.bank-aura__oranzh {
+  right: 2%;
+  top: -40%;
+  width: 44%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, var(--aura-orange), transparent);
 }
 .bank-head__eyebrow {
   font-size: 13px;
@@ -17,27 +43,23 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-text-secondary);
+  color: var(--color-accent-text);
   margin-bottom: var(--space-4);
 }
 .bank-head__title {
   margin-bottom: var(--space-4);
 }
+/* Лид и поиск — одной строкой, по центру высоты друг друга. */
+.bank-head__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
 .bank-head__lead {
   font-size: 17px;
   line-height: 26px;
   color: var(--color-text-secondary);
-}
-
-/* ── Строка фильтров ────────────────────────────────────────── */
-
-.bank-filters {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-4);
-  /* Строка примыкает к шапке: между заголовком и фильтрами один
-     отступ, а не два. */
-  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
 }
 
 .bank-search {
@@ -272,15 +294,16 @@
     justify-items: start;
     gap: var(--space-4);
   }
-  .bank-head {
-    display: block;
+  /* Свечение не заходит под шапку сайта. */
+  .bank-aura__oranzh {
+    right: -24%;
+    top: 4%;
+    width: 72%;
   }
-  .bank-head__text {
-    margin-bottom: var(--space-6);
-  }
-  /* Поиск уходит во всю ширину. */
-  .bank-filters {
-    display: block;
+  /* Поиск уходит под лид во всю ширину. */
+  .bank-head__row {
+    display: grid;
+    gap: var(--space-5);
   }
   .bank-search {
     flex: none;
