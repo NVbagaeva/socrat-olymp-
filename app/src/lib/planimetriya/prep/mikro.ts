@@ -43,6 +43,8 @@ import type { Element, Scena, T2 } from '../types';
 import {
   bissektrisySmezhnyh,
   neVyrozhdennyy,
+  scenariyNaRaznost,
+  scenariyUgolPriVershine,
   smezhnyeVOtnoshenii,
   sootvetstvennyySmezhnyy,
   sosedniyUgolParallelogramma,
@@ -194,14 +196,17 @@ export const BLOK_SUMMA: Mikro[] = [
             shtrih('B', 'C', 1),
             ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
             ug('A', 'C', 'B', { vydelit: 'iskomoe' }),
+            /* Подсказка, шаг «Какой угол равен углу A?»: угол B — тот же. */
+            ug('A', 'B', 'C', { sloy: 1, znachenie: gr(a) }),
           ],
           proverki: [ist('A', 'C', 'B', c)],
         })),
         otvet: c,
         razbor: [
-          'Углы при основании $AB$ равны: $\\angle B = \\angle A$.',
+          '$AC = BC$ — треугольник равнобедренный с основанием $AB$; углы при основании равны: $\\angle B = \\angle A$.',
           `$\\angle C = 180^\\circ - 2\\cdot ${g(a)} = ${g(c)}$.`,
         ],
+        scenariy: scenariyUgolPriVershine(a),
       };
     },
   ),
@@ -321,12 +326,18 @@ export const BLOK_SUMMA: Mikro[] = [
       if (c < 15) return null;
       return {
         uslovie: `В треугольнике $ABC$ $\\angle A = ${g(a)}$, а угол $B$ на $${g(d)}$ больше угла $A$. Найдите угол $C$.`,
-        risunok: treugolnik([a, b, c], { A: { zn: gr(a) }, B: { dugi: 2 }, C: { isk: true } }),
+        risunok: treugolnik([a, b, c], { A: { zn: gr(a) }, B: { dugi: 2 }, C: { isk: true } }, [
+          /* Подсказка, шаг «Чему тогда равен угол B?»: x и x + d у углов. */
+          ug('C', 'A', 'B', { sloy: 2, znachenie: 'x', cvet: 1, radiusPx: 26 }),
+          ug('A', 'B', 'C', { sloy: 2, dugi: 2, znachenie: `x + ${gr(d)}`, cvet: 1 }),
+        ]),
         otvet: c,
         razbor: [
-          `$\\angle B = ${g(a)} + ${g(d)} = ${g(b)}$.`,
-          `$\\angle C = 180^\\circ - ${g(a)} - ${g(b)} = ${g(c)}$.`,
+          `Меньший угол $A$ обозначим $x$: тогда $\\angle B = x + ${g(d)}$.`,
+          `Сумма углов треугольника: $x + (x + ${g(d)}) + \\angle C = 180^\\circ$, отсюда $\\angle C = 180^\\circ - 2x - ${g(d)}$.`,
+          `$x = \\angle A = ${g(a)}$: $\\angle C = 180^\\circ - 2\\cdot ${g(a)} - ${g(d)} = ${g(c)}$.`,
         ],
+        scenariy: scenariyNaRaznost(a, d),
       };
     },
   ),
