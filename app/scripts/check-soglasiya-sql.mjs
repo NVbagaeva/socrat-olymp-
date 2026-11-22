@@ -120,10 +120,31 @@ const psql = (file, db) =>
     file,
   ]);
 
+/* Миграции — в порядке infra/lite/migrations.txt: так их применяет
+   сервер. Порядок по имени файла с ним может расходиться (миграцию
+   из долгого PR дописывают в конец списка после более новых по дате). */
 const migrations = fs
-  .readdirSync(path.join(SUPA, 'migrations'))
-  .filter((f) => f.endsWith('.sql'))
-  .sort();
+  .readFileSync(path.join(ROOT, 'infra', 'lite', 'migrations.txt'), 'utf8')
+  .split('\n')
+  .map((line) => line.trim())
+  .filter((line) => line !== '' && !line.startsWith('#'))
+  .map((line) => path.basename(line));
+{
+  const vPapke = fs.readdirSync(path.join(SUPA, 'migrations')).filter((f) => f.endsWith('.sql'));
+  const netVSpiske = vPapke.filter((f) => !migrations.includes(f));
+  const netVPapke = migrations.filter((f) => !vPapke.includes(f));
+  if (netVSpiske.length > 0 || netVPapke.length > 0) {
+    console.error(
+      `infra/lite/migrations.txt и supabase/migrations расходятся.` +
+        (netVSpiske.length > 0 ? `\n  Нет в списке: ${netVSpiske.join(', ')}` : '') +
+        (netVPapke.length > 0 ? `\n  Нет файла: ${netVPapke.join(', ')}` : ''),
+    );
+    process.exit(1);
+  }
+}
+/* Миграции до указанной (по порядку списка) и начиная с неё. */
+const doMigracii = (f) => migrations.slice(0, migrations.indexOf(f));
+const sMigracii = (f) => migrations.slice(migrations.indexOf(f));
 const migration = (f) => [f, path.join(SUPA, 'migrations', f)];
 const stub = ['supabase-stub.sql', path.join(SUPA, 'tests', 'supabase-stub.sql')];
 
@@ -278,12 +299,12 @@ const SUITES = [
     files: [
       stub,
       ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
-      ...migrations.filter((f) => f < DZ_ISTOCHNIKI).map(migration),
+      ...doMigracii(DZ_ISTOCHNIKI).map(migration),
       ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
       ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
       ['dz-lyudi.sql', path.join(SUPA, 'tests', 'dz-lyudi.sql'), dzHelpers],
       ['dz-perenos.setup.sql', path.join(SUPA, 'tests', 'dz-perenos.setup.sql'), dzHelpers],
-      ...migrations.filter((f) => f >= DZ_ISTOCHNIKI).map(migration),
+      ...sMigracii(DZ_ISTOCHNIKI).map(migration),
       ['dz-perenos.test.sql', path.join(SUPA, 'tests', 'dz-perenos.test.sql'), dzHelpers],
     ],
   },
