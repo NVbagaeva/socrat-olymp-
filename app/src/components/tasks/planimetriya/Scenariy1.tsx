@@ -7,6 +7,7 @@ import { SCENARIY1 } from '@/content/planimetriya1';
 import type { ScenariyHtml, ShagScenariyaHtml } from '@/lib/planimetriya/scenariy';
 import { Ikonka } from '../steklo';
 import { FaktKnopka1 } from './fakt/FaktKnopka1';
+import '../trening/trening.css';
 import './scenariy1.css';
 
 const T = SCENARIY1;
