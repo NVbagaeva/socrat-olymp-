@@ -1,0 +1,407 @@
+/* Экраны прогресса: учитель и ученик. Только токены дизайн-системы. */
+
+.pu-zagruzka {
+  padding-block: var(--space-8);
+  color: var(--color-text-secondary);
+}
+.pu-nazad {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  color: var(--color-primary);
+  font-size: var(--text-sm, 0.875rem);
+}
+.pu-lead {
+  margin: 0 0 var(--space-4);
+}
+
+/* Фильтры: чипы периода и выбор задания. На 375 — в две строки. */
+.pu-filtry {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+.pu-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.pu-chip {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+.pu-chip--on {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.pu-select select {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  max-width: 100%;
+}
+
+.pu-vremya {
+  border-bottom: 1px dotted var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+/* Тепловая карта: имена закреплены слева, таблица прокручивается вбок. */
+.pu-karta-wrap {
+  overflow-x: auto;
+  margin-inline: calc(-1 * var(--space-2));
+  padding-inline: var(--space-2);
+}
+.pu-karta {
+  border-collapse: separate;
+  border-spacing: 4px;
+  min-width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.pu-karta th {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  white-space: nowrap;
+}
+.pu-karta__imya {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 128px;
+  max-width: 180px;
+  padding-right: var(--space-3);
+  background: var(--color-surface);
+  text-align: left !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pu-karta__imya a {
+  color: var(--color-text);
+}
+.pu-cell {
+  display: table-cell;
+  min-width: 52px;
+  height: 40px;
+  border-radius: 8px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+i.pu-cell {
+  display: inline-block;
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  border-radius: 4px;
+}
+/* Ступени: оранжевый — слабо, синий — хорошо, серый — не решал. */
+.pu-cell--0 {
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+}
+.pu-cell--1 {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+.pu-cell--2 {
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+}
+.pu-cell--3 {
+  background: var(--heat-3);
+  color: var(--color-text);
+}
+.pu-cell--4 {
+  background: var(--heat-5);
+  color: var(--color-text-inverse);
+}
+.pu-cell--malo {
+  opacity: 0.55;
+}
+.pu-nedelya {
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  padding-left: var(--space-2);
+}
+.pu-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.pu-spisok {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.pu-spisok li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.pu-spisok a {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.pu-vnimanie {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+}
+
+/* Сводка */
+.pu-metriki {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+@media (max-width: 480px) {
+  .pu-metriki {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.pu-polosy {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.pu-polosy li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-1) var(--space-3);
+}
+.pu-polosy__dorozhka {
+  grid-column: 1 / -1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-track);
+  overflow: hidden;
+}
+.pu-polosy__polosa {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+.pu-polosy__chislo {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.pu-spisok--num {
+  list-style: decimal inside;
+}
+.pu-dinamika {
+  width: 100%;
+  height: auto;
+  margin-bottom: var(--space-3);
+}
+
+/* Календарь активности: 7 строк (дни недели), недели — столбцами. */
+.pu-kalendar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, 14px);
+  grid-auto-columns: 14px;
+  gap: 3px;
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+}
+.pu-den {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--color-surface-2);
+}
+.pu-den[data-l='1'] { background: var(--heat-1); }
+.pu-den[data-l='2'] { background: var(--heat-2); }
+.pu-den[data-l='3'] { background: var(--heat-3); }
+.pu-den[data-l='4'] { background: var(--heat-4); }
+.pu-den[data-l='5'] { background: var(--heat-5); }
+
+/* Лента */
+.pu-lenta {
+  display: grid;
+  gap: var(--space-5);
+}
+.pu-lenta__data {
+  margin: 0 0 var(--space-2);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+.pu-lenta__spisok {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.pu-lenta__z {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface);
+}
+.pu-lenta__ssylka {
+  display: flex;
+  gap: var(--space-3);
+  min-width: 0;
+  flex: 1 1 220px;
+  color: inherit;
+  text-decoration: none;
+}
+.pu-lenta__z--ssylka:hover {
+  border-color: var(--color-border-hover);
+}
+.pu-lenta__vremya {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-tertiary);
+}
+.pu-lenta__glavnoe {
+  display: grid;
+  min-width: 0;
+}
+.pu-lenta__zag {
+  font-weight: 600;
+}
+.pu-lenta__itog {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.pu-bystro {
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+/* Задача «как её видел ученик» */
+.pu-risunok {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto var(--space-4);
+}
+.pu-uslovie {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+.pu-otvet {
+  margin: var(--space-4) 0 var(--space-2);
+}
+.pu-popytki {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+}
+.pu-popytki li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+}
+.pu-popytka__otvet {
+  font-weight: 600;
+  white-space: pre;
+}
+.pu-popytka--da .pu-popytka__otvet {
+  color: var(--color-success);
+}
+.pu-popytka--net .pu-popytka__otvet {
+  color: var(--color-error);
+}
+.pu-svoystva {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+.pu-svoystva dt {
+  color: var(--color-text-secondary);
+}
+.pu-svoystva dd {
+  margin: 0;
+}
+
+/* Таблица варианта */
+.pu-tablica {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.pu-tablica th,
+.pu-tablica td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+.pu-tablica thead th {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+.pu-str--da td:nth-child(2) {
+  color: var(--color-success);
+}
+.pu-str--net td:nth-child(2) {
+  color: var(--color-error);
+}
+
+/* Страница для PDF */
+.pu-pechat {
+  display: grid;
+  gap: var(--space-4);
+}
+.pu-pechat__panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+@media print {
+  .pu-pechat__panel,
+  .site-head,
+  .site-foot,
+  .help-fab {
+    display: none !important;
+  }
+  .pu-tablica th,
+  .pu-tablica td {
+    white-space: normal;
+    padding: 4px 6px;
+    font-size: 10pt;
+  }
+}

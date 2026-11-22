@@ -217,6 +217,32 @@ const meta = { id: M.idIz('8|trenazher|r1|0|8.A|s1|base'), task_no: 8, kind: '8.
   check(vse.length === 20 && !vse.includes(6), 'все разделы ЕГЭ-2027 — 20 номеров хранения без №6');
 }
 
+/* ── Показ: номера ЕГЭ-2027, точность, цвет, выгрузка ─────────────── */
+{
+  const P = requireSrc('lib/zhurnal/vid.ts');
+  const X = requireSrc('lib/zhurnal/vygruzka.ts');
+  check(P.podpisRazdela(8).startsWith('№7 · '), `№8 хранения — задание 7 ЕГЭ-2027: ${P.podpisRazdela(8)}`);
+  check(P.podpisRazdela(5).startsWith('№5 · '), `№5 — задание 5: ${P.podpisRazdela(5)}`);
+  check(JSON.stringify(P.razdelyDlyaPokaza([8, 6, 5, 1])) === '[1,5,8]', 'столбцы карты: без №6, по номерам ЕГЭ');
+  check(P.tochnost(2, 2) === null && P.tochnost(2, 3) === 67, 'точность: до трёх задач — «мало»');
+  check(P.stupen(0, 0) === 0 && P.stupen(1, 3) === 1 && P.stupen(1, 2) === 2 && P.stupen(7, 10) === 3
+    && P.stupen(9, 10) === 4, 'ступени цвета тепловой карты');
+  check(P.vremya(45000) === '45 с' && P.vremya(12 * 60000) === '12 мин' && P.vremya(65 * 60000) === '1 ч 05 мин',
+    'время словами');
+  check(P.sdvig('2026-03-01', 1) === '2026-02-28', 'сдвиг дня через конец февраля');
+  check(P.segodnyaMsk(Date.parse('2026-11-22T22:30:00Z')) === '2026-11-23', 'сегодня — по Москве');
+  check(P.dneyBez(undefined) === null, 'не заходил ни разу');
+  const rows = X.strokiUchenika([{ id: 'a', task_no: 8, kind: '8.A', task_ref: 'x', place: 'trenazher',
+    outcome: 'wrong', verified: false, attempts_n: 2, hint_steps: 1, hint_wrong: [], shown_fact: false,
+    shown_solution: true, skipped: false, active_ms: 61000, total_ms: 90000,
+    started_at: '2026-11-22T10:00:00Z', last_answer: '−3,5', answer_key: '-3', bystro: true }]);
+  check(rows.length === 2 && rows[1][5] === '−3,5' && rows[1][6] === '-3' && rows[1][10] === 61,
+    'Excel ученика: ответ как есть, верный ответ, активное время');
+  check(!JSON.stringify(rows).includes('быстро'), 'в выгрузке нет пометки «очень быстро»');
+  check(X.imyaFayla('Петров/Иван: 11"А"', '2026-11-01', '2026-11-22').endsWith('.xlsx')
+    && !/[\\/:*?"<>|]/.test(X.imyaFayla('Петров/Иван: 11"А"', 'a', 'b')), 'имя файла без запрещённых знаков');
+}
+
 console.log(`Журнал решения задач: ${checks} проверок, не прошло ${failures.length}.`);
 if (failures.length > 0) {
   for (const f of failures) console.error(`  НЕТ ${f}`);

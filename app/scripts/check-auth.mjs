@@ -101,6 +101,9 @@ const PORT = 4181;
 const SUPABASE = 'http://127.0.0.1:54321';
 /* Сборка с журналом решения задач (NEXT_PUBLIC_ZHURNAL=1): сценарий журнала. */
 const ZHURNAL_ON = process.env.NEXT_PUBLIC_ZHURNAL === '1';
+/* Сборка с экранами прогресса (NEXT_PUBLIC_PROGRESS_UCHITEL=1 и _UCHENIK=1). */
+const PROGRESS_ON =
+  process.env.NEXT_PUBLIC_PROGRESS_UCHITEL === '1' && process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1';
 const DISABLED = process.argv.includes('--disabled');
 const NO_HEADER = process.argv.includes('--no-header');
 /* Снимки классов и ДЗ №8 для описания PR этапа 3. */
@@ -199,6 +202,8 @@ const ALLOWED = new Set([
   'zhurnal@yandex.ru',
   'zhurnal2@yandex.ru',
   'zhurnal-uchitel@yandex.ru',
+  'zhurnal-uchitel2@yandex.ru',
+  'zhurnal-chuzhoy@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -526,6 +531,16 @@ function makeMock() {
           body: { saved: (pachka.zadachi ?? []).length + (pachka.varianty ?? []).length, skipped: 0 },
         };
       }
+      /* Чтение журнала (функции uchitel_*, moya_*): как в базе — учитель
+         видит только учеников своих классов, ученику не уходит «очень быстро». */
+      const ZHURNAL_RPC = [
+        'uchitel_klass', 'uchitel_uchenik', 'uchitel_lenta', 'uchitel_zadacha', 'uchitel_variant',
+        'moya_statistika', 'moya_lenta', 'moy_variant',
+      ];
+      const rpcName = table.startsWith('rpc/') ? table.slice(4) : '';
+      if (ZHURNAL_RPC.includes(rpcName) && method === 'POST') {
+        return zhurnalRead(rpcName, body, me);
+      }
       if (table === 'rpc/delete_my_account' && method === 'POST') {
         wipe();
         return { status: 204, body: null };
@@ -632,6 +647,139 @@ function makeMock() {
 
   /** Тестовые данные, как их кладёт кнопка «Сервер: тестовые данные». */
   const dz = createDzMock({ profiles, classes, members });
+
+  /* ── Чтение журнала для экранов прогресса ── */
+  const SOLVED = ['right', 'hinted', 'wrong', 'revealed'];
+  const moyStudent = (tutorId, studentId) =>
+    classes.some(
+      (c) => c.tutor_id === tutorId && members.some((m) => m.class_id === c.id && m.user_id === studentId),
+    );
+  const day = (iso) => new Date(Date.parse(iso) + 3 * 3600000).toISOString().slice(0, 10);
+  const bystro = (z) =>
+    z.outcome === 'right' && z.attempts_n <= 1 && z.hint_steps === 0 && !z.shown_solution &&
+    (z.level ?? 1) >= 2 && z.active_ms < 8000;
+  const vid = (z, uchitel, polno) => {
+    const last = [...(z.popytki ?? [])].reverse()[0];
+    const out = { ...z, last_answer: last?.answer, verified: false };
+    delete out.user_id;
+    if (!polno) {
+      delete out.popytki;
+      delete out.uslovie_tex;
+      delete out.risunok;
+    }
+    if (uchitel && bystro(z)) out.bystro = true;
+    return out;
+  };
+  const vPeriode = (z, b) =>
+    day(z.started_at) >= b.p_from && day(z.started_at) <= b.p_to && (b.p_task_no == null || z.task_no === b.p_task_no);
+  function svodka(uid, b) {
+    const rows = zhurnal.filter((z) => z.user_id === uid && vPeriode(z, b));
+    const solved = rows.filter((z) => SOLVED.includes(z.outcome));
+    const group = (key) => {
+      const m = new Map();
+      for (const z of rows) {
+        const k = key(z);
+        const g = m.get(k) ?? { solved: 0, right: 0, active_ms: 0, z };
+        if (SOLVED.includes(z.outcome)) g.solved += 1;
+        if (z.outcome === 'right') g.right += 1;
+        g.active_ms += z.active_ms;
+        m.set(k, g);
+      }
+      return [...m.values()];
+    };
+    return {
+      active_ms: rows.reduce((a, z) => a + z.active_ms, 0),
+      total_ms: rows.reduce((a, z) => a + z.total_ms, 0),
+      solved: solved.length,
+      right: rows.filter((z) => z.outcome === 'right').length,
+      po_zadaniyam: group((z) => z.task_no)
+        .map((g) => ({ task_no: g.z.task_no, solved: g.solved, right: g.right, active_ms: g.active_ms }))
+        .sort((a, c) => a.task_no - c.task_no),
+      dni: group((z) => day(z.started_at)).map((g) => ({
+        day: day(g.z.started_at), solved: g.solved, active_ms: g.active_ms,
+      })),
+      slabye: group((z) => `${z.task_no}|${z.kind}`)
+        .filter((g) => g.solved >= 3)
+        .sort((a, c) => a.right / a.solved - c.right / c.solved)
+        .slice(0, 5)
+        .map((g) => ({ task_no: g.z.task_no, kind: g.z.kind, solved: g.solved, right: g.right })),
+      varianty: zhurnalVarianty
+        .filter((v) => v.user_id === uid && day(v.finished_at) >= b.p_from && day(v.finished_at) <= b.p_to)
+        .map((v) => {
+          const out = { ...v };
+          delete out.user_id;
+          return out;
+        }),
+    };
+  }
+  function lenta(uid, b, uchitel) {
+    return zhurnal
+      .filter((z) => z.user_id === uid && vPeriode(z, b) && (b.p_before == null || z.started_at < b.p_before))
+      .sort((a, c) => (a.started_at < c.started_at ? 1 : -1))
+      .slice(0, 50)
+      .map((z) => vid(z, uchitel, false));
+  }
+  function variant(uid, id, uchitel) {
+    const v = zhurnalVarianty.find((x) => x.user_id === uid && x.id === id);
+    if (v === undefined) return err(400, 'P0002', 'not_found');
+    const out = { ...v, zadachi: zhurnal.filter((z) => z.user_id === uid && z.place_ref === id).map((z) => vid(z, uchitel, true)) };
+    delete out.user_id;
+    return { status: 200, body: out };
+  }
+  function zhurnalRead(name, b, me) {
+    const role = profiles.get(me.id)?.role;
+    if (name.startsWith('uchitel_')) {
+      if (role !== 'tutor') return err(403, '42501', name === 'uchitel_klass' ? 'forbidden' : 'not_your_student');
+      if (name === 'uchitel_klass') {
+        const c = classes.find((x) => x.id === b.p_class && x.tutor_id === me.id);
+        if (c === undefined) return err(403, '42501', 'forbidden');
+        const ids = members.filter((m) => m.class_id === c.id).map((m) => m.user_id);
+        const karta = [];
+        for (const uid of ids) {
+          for (const g of svodka(uid, { ...b, p_task_no: null }).po_zadaniyam) karta.push({ id: uid, ...g });
+        }
+        return {
+          status: 200,
+          body: {
+            class: { id: c.id, name: c.name },
+            ucheniki: ids.map((uid) => {
+              const mine = zhurnal.filter((z) => z.user_id === uid);
+              const last = mine.map((z) => day(z.started_at)).sort().at(-1);
+              const ned = svodka(uid, { p_from: '2000-01-01', p_to: '2100-01-01', p_task_no: null });
+              return {
+                id: uid,
+                name: profiles.get(uid)?.display_name ?? '',
+                s: '2026-01-01',
+                ...(last === undefined ? {} : { last_day: last }),
+                nedelya: { solved: ned.solved, active_ms: ned.active_ms, dni: ned.dni.length },
+              };
+            }),
+            karta,
+            skryto: 0,
+          },
+        };
+      }
+      if (!moyStudent(me.id, b.p_student)) return err(403, '42501', 'not_your_student');
+      const uid = b.p_student;
+      if (name === 'uchitel_uchenik') {
+        return {
+          status: 200,
+          body: { id: uid, name: profiles.get(uid)?.display_name ?? '', s: '2026-01-01', progress_allowed: true,
+            svodka: svodka(uid, b) },
+        };
+      }
+      if (name === 'uchitel_lenta') return { status: 200, body: lenta(uid, b, true) };
+      if (name === 'uchitel_zadacha') {
+        const z = zhurnal.find((x) => x.user_id === uid && x.id === b.p_id);
+        return z === undefined ? err(400, 'P0002', 'not_found') : { status: 200, body: vid(z, true, true) };
+      }
+      return variant(uid, b.p_id, true);
+    }
+    if (role !== 'student') return err(403, '42501', 'forbidden');
+    if (name === 'moya_statistika') return { status: 200, body: svodka(me.id, b) };
+    if (name === 'moya_lenta') return { status: 200, body: lenta(me.id, b, false) };
+    return variant(me.id, b.p_id, false);
+  }
 
   function seedClass(tutorEmail, studentEmails, name = 'Тестовый класс') {
     const id = `class-${classes.length + 1}`;
@@ -2345,6 +2493,7 @@ async function runEnabled() {
   }
 
   if (ZHURNAL_ON) await runZhurnal();
+  if (PROGRESS_ON) await runProgress();
 
   sdkOutsideFirstLoad();
 }
@@ -2462,6 +2611,160 @@ async function runZhurnal() {
   check(mock.zhurnal.length === 0, 'журнал: учитель в журнал не пишет');
   await context.close();
   check(errors.length === 0, `журнал: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
+}
+
+/* ── Экраны прогресса (кабинет v2, этап 1б; docs/kabinet-zhurnal.md) ──
+   Журнал заполнен заранее (как его пишет браузер ученика — это проверяет
+   runZhurnal): учитель открывает класс, ученика, задачу и вариант; чужого
+   ученика ему не показывают; Excel скачивается; ученик видит «Мою
+   статистику» без пометки «очень быстро». Снимки — 375 и 1280. */
+async function runProgress() {
+  const M = requireSrc('lib/zhurnal/model.ts');
+  const mock = makeMock();
+  const emails = ['zhurnal@yandex.ru', 'zhurnal2@yandex.ru', 'zhurnal-chuzhoy@yandex.ru'];
+  const names = ['Аня Смирнова', 'Борис Ким', 'Чужой ученик'];
+  emails.forEach((e, i) =>
+    registerInMock(mock, e, 'zhurnal-parol-1', names[i], 'student', { birth_year: 2000 }),
+  );
+  registerInMock(mock, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2', 'Журнал Учитель', 'tutor');
+  registerInMock(mock, 'zhurnal-uchitel2@yandex.ru', 'zhurnal-parol-2', 'Другой учитель', 'tutor');
+  mock.seedClass('zhurnal-uchitel@yandex.ru', emails.slice(0, 2), '11 «А»');
+  mock.seedClass('zhurnal-uchitel2@yandex.ru', emails.slice(2), 'Чужой класс');
+  const uid = (e) => mock.users.get(e).id;
+
+  /* Журнал: задачи №8 (те же числа собираются по id) и №5, вариант. */
+  const now = Date.now();
+  const iso = (minAgo) => new Date(now - minAgo * 60000).toISOString();
+  const z8 = (i, outcome, activeMs, level, popytki, extra = {}) => {
+    const ref = `8.${'ABCDH'[i % 5]}|zh${i}|${level === 2 ? 'advanced' : 'base'}`;
+    const p = parseTaskId(ref);
+    const g = generate(p.prototype, p.seed, p.level);
+    return {
+      id: M.idIz(ref), task_no: 8, kind: p.prototype, task_ref: ref, place: 'trenazher', place_ref: 'r1',
+      gen_hash: M.otpechatokUsloviya(g.uslovie), uslovie_tex: g.uslovie, level, outcome,
+      answer_key: String(g.otvet), attempts_n: popytki.length, hint_steps: 0, hint_wrong: [],
+      shown_fact: false, shown_solution: false, skipped: false, active_ms: activeMs, total_ms: activeMs + 30000,
+      started_at: iso(60 * 24 * (i % 6) + i), closed_at: iso(60 * 24 * (i % 6) + i - 1),
+      popytki: popytki.map((a, n) => ({ n: n + 1, answer: a === true ? ru(g.otvet) : a, ok: a === true, vid: 'answer',
+        at: iso(i) })),
+      ...extra,
+    };
+  };
+  const a = uid(emails[0]);
+  const rows = [
+    z8(1, 'right', 3000, 2, [true]),
+    z8(2, 'wrong', 95000, 1, ['7', true], { hint_steps: 2, hint_wrong: [1] }),
+    z8(3, 'right', 64000, 1, [true]),
+    z8(4, 'hinted', 120000, 2, [true], { hint_steps: 1 }),
+    z8(5, 'wrong', 80000, 1, ['0,5']),
+    z8(6, 'right', 50000, 1, [true]),
+    z8(7, 'revealed', 150000, 1, [], { shown_solution: true }),
+  ].map((z) => ({ ...z, user_id: a }));
+  for (let i = 0; i < 4; i += 1) {
+    rows.push({
+      id: M.idIz(`5|${i}`), user_id: a, task_no: 5, kind: '5:P03', task_ref: `5:P03:${i + 1}`, place: 'opornye',
+      place_ref: 'summa', uslovie_tex: 'В урне 4 белых и 6 чёрных шаров. Наугад достают два. Найдите вероятность того, что оба белые.',
+      level: 2, outcome: i < 3 ? 'right' : 'wrong', answer_key: '0,13', attempts_n: 1, hint_steps: 0, hint_wrong: [],
+      shown_fact: false, shown_solution: false, skipped: false, active_ms: 70000, total_ms: 90000,
+      started_at: iso(60 * 24 * i + 30), closed_at: iso(60 * 24 * i + 29),
+      popytki: [{ n: 1, answer: i < 3 ? '0,13' : '0,4', ok: i < 3, vid: 'answer', at: iso(30) }],
+    });
+  }
+  const variantId = M.idIz('variant|demo');
+  mock.zhurnalVarianty.push(
+    { id: M.idIz('variant|old'), user_id: a, source: 'sobrat', set_code: 'K7M2', variant_no: 1, title: 'Вариант 1',
+      started_at: iso(60 * 24 * 9), finished_at: iso(60 * 24 * 9 - 200), primary_score: 9, max_score: 32,
+      test_score: 52, active_ms: 9000000, total_ms: 11000000 },
+    { id: variantId, user_id: a, source: 'sobrat', set_code: 'K7M2', variant_no: 2, title: 'Вариант 2',
+      started_at: iso(300), finished_at: iso(100), primary_score: 14, max_score: 32, test_score: 70,
+      active_ms: 10000000, total_ms: 12000000 },
+  );
+  rows.push(
+    { ...z8(9, 'right', 240000, 1, [true]), user_id: a, place: 'variant', place_ref: variantId },
+    { ...z8(10, 'wrong', 300000, 1, ['12']), user_id: a, place: 'variant', place_ref: variantId },
+  );
+  rows.push({ ...z8(11, 'right', 70000, 1, [true]), id: M.idIz('b1'), user_id: uid(emails[1]) });
+  rows.push({ ...z8(12, 'right', 70000, 1, [true]), id: M.idIz('c1'), user_id: uid(emails[2]) });
+  mock.zhurnal.push(...rows);
+  const bystraya = rows[0].id;
+  const klass = mock.classes.find((c) => c.name === '11 «А»').id;
+
+  const errors = [];
+  for (const width of [375, 1280]) {
+    const { context, page } = await newPage(mock, width, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+    const snap = async (name) => {
+      check(await noHorizontalScroll(page), `прогресс ${width} ${name}: без горизонтальной прокрутки страницы`);
+      if (SHOTS === null) return;
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({
+        path: path.join(SHOTS, `progress-${name}-${width}.png`),
+        fullPage: true,
+        style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+      });
+    };
+
+    await page.goto(`${SITE}/kabinet/progress/klass/?id=${klass}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.pu-karta');
+    const imena = await page.locator('.pu-karta tbody th').allTextContents();
+    check(imena.join('|') === 'Аня Смирнова|Борис Ким', `класс ${width}: свои ученики (${imena.join('|')})`);
+    check((await page.locator('.pu-karta thead th').allTextContents()).includes('№7'),
+      `класс ${width}: №8 показан как задание 7 ЕГЭ-2027`);
+    check(!(await page.content()).includes('Чужой ученик'), `класс ${width}: чужого ученика нет`);
+    await snap('klass');
+
+    await page.goto(`${SITE}/kabinet/progress/uchenik/?id=${a}&klass=${klass}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.pu-lenta');
+    check((await page.locator('.pu-bystro').count()) === 1, `ученик ${width}: одна пометка «очень быстро»`);
+    check((await page.locator('.pu-dinamika').count()) === 1, `ученик ${width}: динамика тестового балла`);
+    if (width === 1280) {
+      const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('button:has-text("Excel")').click()]);
+      check(/\.xlsx$/.test(dl.suggestedFilename()) && dl.suggestedFilename().includes('Аня'),
+        `Excel ученика: ${dl.suggestedFilename()}`);
+    }
+    await snap('uchenik');
+
+    await page.goto(`${SITE}/kabinet/progress/zadacha/?u=${a}&id=${bystraya}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.pu-uslovie .katex');
+    check((await page.locator('.pu-vnimanie').count()) === 0, `задача ${width}: собрана заново, не по записи`);
+    check((await page.locator('.pu-bystro').count()) === 1, `задача ${width}: пометка «очень быстро»`);
+    await snap('zadacha');
+
+    await page.goto(`${SITE}/kabinet/progress/variant/?u=${a}&id=${variantId}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.pu-tablica tbody tr');
+    check((await page.locator('.pu-tablica tbody tr').count()) === 2, `вариант ${width}: две задачи`);
+    await snap('variant');
+
+    /* Чужой ученик: база отказывает, экран говорит спокойно. */
+    await page.goto(`${SITE}/kabinet/progress/uchenik/?id=${uid(emails[2])}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('text=Этого ученика нет среди ваших учеников.');
+    check(!(await page.content()).includes('Чужой ученик'), `чужой ученик ${width}: имени и данных нет`);
+    await context.close();
+  }
+
+  /* Ученик: своя статистика, без пометок для учителя. */
+  for (const width of [375, 1280]) {
+    const { context, page } = await newPage(mock, width, errors);
+    await welcomeSeen(context);
+    await login(page, emails[0], 'zhurnal-parol-1');
+    await page.goto(`${SITE}/kabinet/statistika/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.pu-lenta');
+    check((await page.locator('.pu-bystro').count()) === 0 && !(await page.content()).includes('очень быстро'),
+      `статистика ${width}: без пометки «очень быстро»`);
+    check((await page.locator('.pu-lenta a').count()) === 0, `статистика ${width}: лента без ссылок учителя`);
+    check(await noHorizontalScroll(page), `статистика ${width}: без горизонтальной прокрутки`);
+    if (SHOTS !== null) {
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({ path: path.join(SHOTS, `progress-statistika-${width}.png`), fullPage: true,
+        style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+    }
+    /* Ученик не открывает экраны учителя. */
+    await page.goto(`${SITE}/kabinet/progress/uchenik/?id=${a}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('text=Эта страница — для учителя.');
+    await context.close();
+  }
+  check(errors.length === 0, `прогресс: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
 }
 
 /* ── Вход включён, кнопки в шапке нет (пробный режим) ──────────── */
@@ -2843,6 +3146,7 @@ try {
   else if (GALLERY_DZ !== null) await runGalleryDz(GALLERY_DZ);
   else if (NO_HEADER) await runNoHeader();
   else if (process.argv.includes('--zhurnal')) await runZhurnal();
+  else if (process.argv.includes('--progress')) await runProgress();
   else if (SHOTS_KARTA !== null || KARTA_NAZAD) {
     const K = await import('./lib/karta-nazad.mjs');
     const deps = { browser, SITE, mock: makeMock(), installMock, registerInMock, login, check };

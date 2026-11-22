@@ -24,6 +24,9 @@ import type { KlassView } from '@/lib/auth/klassy';
 import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
 import { currentUser, useSessionUser } from '@/lib/auth/session';
 import { KartaUchenika } from '@/components/karta/KartaUchenika';
+import { PROGRESS } from '@/content/progressUchitel';
+import { PROGRESS_UCHENIK_ON } from '@/lib/zhurnal/config';
+import { PROGRESS_HREF } from '@/lib/zhurnal/links';
 import { SkrytyeRazdelyAdmin } from '@/components/tasks/skrytye/SkrytyeRazdelyAdmin';
 import { JoinClassForm, TutorClassesCard, TutorHomeworkCard } from '@/components/dz/KabinetDz';
 import { forgetCode, pendingCode } from '@/components/dz/JoinScreen';
@@ -313,6 +316,12 @@ function StudentHome({ klassy, onJoined }: { klassy: KlassView[] | null; onJoine
       <div className="kabinet__karta" data-section="karta">
         <KartaUchenika />
       </div>
+      {/* «Моя статистика» (кабинет v2, docs/kabinet-zhurnal.md) — за флагом. */}
+      {PROGRESS_UCHENIK_ON ? (
+        <Link className="btn btn--secondary kabinet__statistika" href={PROGRESS_HREF.statistika}>
+          {PROGRESS.statistika.zagolovok}
+        </Link>
+      ) : null}
       {pokazatVstuplenie ? (
         <Card className="kabinet__card" title={t.classes.title} data-section="join">
           <p className="auth-form__text">{t.classes.none}</p>
