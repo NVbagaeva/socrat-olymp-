@@ -108,7 +108,7 @@ select pg_temp.fails($q$select public.issue_homework_parts(pg_temp.smes(jsonb_bu
   pg_temp.part('kartochki', 7, jsonb_build_array(pg_temp.t('7-a', 'self', null, current_setting('dz.s1'))), true)))))$q$,
   'no_tasks');
 select pg_temp.fails($q$select public.issue_homework_parts(pg_temp.smes(jsonb_build_object('parts', jsonb_build_array(
-  pg_temp.part('kartochki', 21, jsonb_build_array(pg_temp.t('7-a', 'self', null)))))))$q$, 'bad_task_no');
+  pg_temp.part('kartochki', 98, jsonb_build_array(pg_temp.t('7-a', 'self', null)))))))$q$, 'bad_task_no');
 select pg_temp.fails($q$select public.issue_homework_parts(pg_temp.smes(jsonb_build_object('parts', jsonb_build_array(
   pg_temp.part('trenazher', 8, jsonb_build_array(pg_temp.t('8.A', 'number', '1')), true)))))$q$, 'bad_task_student');
 select pg_temp.fails($q$select public.issue_homework_parts(pg_temp.smes(jsonb_build_object('parts', jsonb_build_array(

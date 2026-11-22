@@ -92,6 +92,15 @@ jobs:
         working-directory: app
         run: pnpm ${{ matrix.test }} ${{ matrix.shots }}
 
+      # «← К карте» в обоих кабинетах (ученик — /kabinet/, учитель —
+      # /karta/): источник, возврат на то же место карты кнопкой и
+      # «назад», кнопки нет с главной и по прямой ссылке; карта списком
+      # на телефонах 360–414 стоя и лёжа (scripts/lib/karta-nazad.mjs).
+      - name: Проверить «← К карте» и карту на телефоне
+        if: matrix.header == '1'
+        working-directory: app
+        run: pnpm test:karta-nazad snimki-karta-nazad
+
       # Рейтинг устного счёта: гость, серия с буфером и очередью ответов,
       # срок сервера, ошибки старта, страница рейтинга и ник — на моке
       # функций базы (сами функции — pnpm test:soglasiya-sql).

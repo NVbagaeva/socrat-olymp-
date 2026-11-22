@@ -59,28 +59,39 @@ export function useVkladkaPerehod() {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
       return;
     }
-    if (typeof document.startViewTransition !== 'function') {
-      return;
-    }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-    if (bezSlesha(href.split(/[?#]/)[0] ?? href) === bezSlesha(pathname)) {
-      return;
-    }
-    e.preventDefault();
-    document.startViewTransition(
-      () =>
-        new Promise<void>((resolve) => {
-          zavershit();
-          zhdem = resolve;
-          window.setTimeout(() => {
-            if (zhdem === resolve) {
-              zavershit();
-            }
-          }, ZAPAS_MS);
-          router.push(href);
-        }),
-    );
+    if (sPerehodom(href, pathname, () => router.push(href))) e.preventDefault();
   };
+}
+
+/**
+ * Переход на вкладку с плавной сменой (View Transitions): go — сам
+ * переход (router.push или, у пришедших с карты, router.replace —
+ * components/tasks/KartaNazad.tsx). false — перехода не будет (браузер
+ * не умеет, «уменьшить движение», та же вкладка): переходить обычным
+ * способом.
+ */
+export function sPerehodom(href: string, pathname: string, go: () => void): boolean {
+  if (typeof document.startViewTransition !== 'function') {
+    return false;
+  }
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return false;
+  }
+  if (bezSlesha(href.split(/[?#]/)[0] ?? href) === bezSlesha(pathname)) {
+    return false;
+  }
+  document.startViewTransition(
+    () =>
+      new Promise<void>((resolve) => {
+        zavershit();
+        zhdem = resolve;
+        window.setTimeout(() => {
+          if (zhdem === resolve) {
+            zavershit();
+          }
+        }, ZAPAS_MS);
+        go();
+      }),
+  );
+  return true;
 }

@@ -2,7 +2,11 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
+import { estMetka } from '@/lib/kartaNazadKlyuch';
 import { href } from '@/lib/paths';
+
+/* Первая страница во вкладке — открыта загрузкой, а не переходом. */
+let pervayaStranica = true;
 
 /** Сколько ждём перехода внутри сайта, прежде чем открыть страницу целиком. */
 export const NAVIGATION_STUCK_MS = 12_000;
@@ -36,12 +40,17 @@ export function NavigationGuard() {
   const pathname = usePathname();
   const timer = useRef<number | null>(null);
 
-  /* Адрес сменился — переход удался, ждать нечего. */
+  /* Адрес сменился — переход удался, ждать нечего. Заодно сторож
+     метки «← К карте» (lib/kartaNazad.ts) решает, жива ли она: код
+     метки грузится, только когда она есть. */
   useEffect(() => {
     if (timer.current !== null) {
       window.clearTimeout(timer.current);
       timer.current = null;
     }
+    const zagruzka = pervayaStranica;
+    pervayaStranica = false;
+    if (estMetka()) void import('@/lib/kartaNazad').then((m) => m.storozh(pathname, zagruzka));
   }, [pathname]);
 
   useEffect(() => {
