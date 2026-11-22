@@ -16,8 +16,7 @@ import { Razbor7 } from '@/components/tasks/zadanie7/Razbor7';
 import { RamkaPrimer } from '@/components/teoriya/Ramki';
 import { Tex } from '@/components/ui/Tex';
 import { TEORIYA_7_DLYA_PROTOTIPA, vseKartochki7, type Kartochka7 } from '@/content/teoriya7';
-import { GENERATOR_7 } from '@/content/zadanie7';
-import typo from '@/lib/sheet/typography.js';
+import { GEN_UI } from '@/content/generatorUi';
 import { listSheetSpec, razborKuski, type ListVid } from '@/lib/sheetList';
 import type { ZadachaLite } from './dannye';
 import type { ModelLista } from './sborka';
@@ -46,11 +45,7 @@ function ramkiTeorii(prototipy: readonly string[]): string[] {
 }
 
 function uslovie(z: ZadachaLite): string {
-  const metka =
-    z.source === 'analog'
-      ? ` <span class="z7-list__metka">${typo.escape(GENERATOR_7.analogMetka)}</span>`
-      : '';
-  return `<p class="z7-list__uslovie">${renderToStaticMarkup(createElement(Tex, { text: z.text }))}${metka}</p>`;
+  return `<p class="z7-list__uslovie">${renderToStaticMarkup(createElement(Tex, { text: z.text }))}</p>`;
 }
 
 /** Описание листа №7 для buildDocument (lib/sheetList.ts). */
@@ -64,6 +59,11 @@ export function sheetSpec7(o: Sborka7, vid: Vid7) {
       id: (z) => z.id,
       uslovie: (z) => ({ html: uslovie(z), figure: null }),
       otvet: (z) => otvetText7(o.reshit(z).answer),
+      istochnik: (zs) =>
+        GEN_UI.istochnikStroka(
+          zs.flatMap((z, k) => (z.source === 'fipi' ? [k + 1] : [])),
+          zs.length,
+        ),
       razbor: (z) =>
         razborKuski(renderToStaticMarkup(createElement(Razbor7, { s: o.reshit(z) })), 'z7'),
       teoriya: ramkiTeorii,

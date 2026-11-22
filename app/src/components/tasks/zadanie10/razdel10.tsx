@@ -20,7 +20,7 @@ function istochnikZadachi(z: ZadachaLite): string {
 }
 
 /**
- * Под условием задачи №10: картинка сюжета (крупно, как есть), чертёж
+ * Под условием задачи №10: картинка сюжета (компактно, как есть), чертёж
  * моста у задач про мост (движок lib/zadanie10/chertezh) и откуда
  * задача. Картинка больше не прячется в сворачиваемую строку.
  */
@@ -29,7 +29,7 @@ function Pod10({ z, ill }: { z: ZadachaLite; ill: IllInfo | undefined }) {
     <>
       {ill === undefined ? null : (
         <div className="trn-risunok z10-trn-kartinka">
-          <Kartinka10 ill={ill} />
+          <Kartinka10 ill={ill} zadacha />
         </div>
       )}
       {z.prototypeId === 'P01' ? (

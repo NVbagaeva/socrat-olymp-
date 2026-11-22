@@ -15,20 +15,31 @@ export interface IllInfo {
  * по месту, высота — по пропорциям файла; вертикальные рисунки (бак,
  * мяч) — уже, чтобы не занимали весь экран. Подпись — для чтения с
  * экрана в alt, на экране не дублируется.
+ *
+ * zadacha — картинка стоит у условия задачи (тренажёр, опорные задачи,
+ * пример типа): компактная, по общему правилу «картинка к задаче»
+ * (styles/kartinka-zadachi.css) — на телефоне не выше 150 px.
  */
 export function Kartinka10({
   ill,
   alt,
+  zadacha = false,
   className,
 }: {
   ill: IllInfo;
+  zadacha?: boolean;
   /** Пустая строка — картинка-украшение (рядом уже есть название). */
   alt?: string;
   className?: string;
 }) {
   return (
     <picture
-      className={clsx('z10-kartinka', ill.height > ill.width && 'z10-kartinka--vert', className)}
+      className={clsx(
+        'z10-kartinka',
+        ill.height > ill.width && 'z10-kartinka--vert',
+        zadacha && 'zadacha-kartinka',
+        className,
+      )}
     >
       <source type="image/webp" srcSet={ill.webp} />
       <img

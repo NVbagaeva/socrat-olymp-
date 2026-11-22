@@ -44,7 +44,7 @@ export default async function Opornye10Blok({ params }: { params: Promise<{ blok
     if (z.syuzhet !== undefined && ill !== undefined) {
       risunki[z.id] = (
         <figure className="z10-op__syuzhet">
-          <Kartinka10 ill={ill} />
+          <Kartinka10 ill={ill} zadacha />
           <figcaption>
             {OPORNYE10.gdeVstrechaetsya}{' '}
             <Link href={tipHref10(z.syuzhet)}>{prototype(z.syuzhet).title}</Link>

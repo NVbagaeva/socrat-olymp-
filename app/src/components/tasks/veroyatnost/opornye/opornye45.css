@@ -26,13 +26,22 @@
   margin: 0;
   line-height: 1.5;
 }
-/* Картинка блока — как есть, целиком; на широком экране — справа от текста. */
+/* Картинка блока — как есть, целиком; на широком экране — справа от
+   текста. На телефоне — компактно, не выше 160 px, чтобы правило
+   «Запомни» не уезжало за экран (пропорции файла, без обрезки). */
 .z45-op__kartinka {
   display: block;
-  width: 100%;
-  max-width: 320px;
+  width: auto;
+  max-width: min(100%, 320px);
   height: auto;
+  max-height: 160px;
   margin-inline: auto;
+}
+@media (min-width: 720px) {
+  .z45-op__kartinka {
+    width: 100%;
+    max-height: none;
+  }
 }
 .z45-op__primer {
   color: var(--color-text-secondary);

@@ -13,6 +13,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Abzacy, RamkaFormula, RamkaPrimer, RamkaVazhno } from '@/components/teoriya/Ramki';
 import { Tex } from '@/components/ui/Tex';
 import { bezSsylok, RAZDELY_TEORII_10 } from '@/content/teoriya10';
+import { GEN_UI } from '@/content/generatorUi';
 import typo from '@/lib/sheet/typography.js';
 import { listSheetSpec, type ListVid } from '@/lib/sheetList';
 import { chertezhMosta } from './chertezh/most';
@@ -41,8 +42,8 @@ export interface Sborka10 {
   kartinki: boolean;
 }
 
-/** Ширина чертежа моста и иллюстрации на листе, мм. */
-const SHIRINA_MM = { most: 84, kartinka: 100 };
+/** Ширина чертежа моста на листе, мм. */
+const SHIRINA_MM = { most: 84 };
 
 function mostSvg(z: ZadachaLite, rezhim: 'uchenik' | 'uchitel'): string {
   const p = z.params as Record<string, number | string>;
@@ -59,11 +60,16 @@ function tex(text: string): string {
   return renderToStaticMarkup(createElement(Tex, { text }));
 }
 
+/**
+ * Картинка сюжета к условию: справа от текста, компактно — размеры
+ * задаёт общий класс «картинка к задаче» (styles/kartinka-zadachi.css
+ * на экране, lib/sheet/sheet.css на бумаге), а не файл.
+ */
 function kartinka(o: Sborka10, z: ZadachaLite): string {
   const ill = o.ill[z.prototypeId];
   if (!o.kartinki || ill === undefined) return '';
   return (
-    `<picture class="z10-list__kartinka" style="width:${SHIRINA_MM.kartinka}mm">` +
+    `<picture class="zadacha-kartinka zadacha-kartinka--sboku z10-list__kartinka">` +
     `<source type="image/webp" srcset="${typo.attr(ill.webp)}">` +
     `<img src="${typo.attr(ill.png)}" alt="${typo.attr(ill.alt)}" width="${ill.width}" height="${ill.height}"></picture>`
   );
@@ -96,17 +102,20 @@ export function ramkiTeorii10(o: Sborka10, prototipy: readonly string[]): string
   return [...formuly, ...vazhno];
 }
 
-/** Условие: текст с меткой «аналог», картинка сюжета; у моста на листе ученика — чертёж. */
+/** Условие: текст и картинка сюжета (источник — отдельной пометкой листа учителя); у моста на листе ученика — чертёж. */
 export function uslovie10(
   o: Sborka10,
   z: ZadachaLite,
   vid: Vid10,
+  /** Разобранный пример — без картинки сюжета, как рамка примера на бумаге. */
+  bezKartinki = false,
 ): { html: string; figure: { svg: string; width: number } | null } {
-  const metka =
-    z.source === 'analog' ? ' <span class="z10-list__metka">(не из открытого банка)</span>' : '';
   const most = z.prototypeId === 'P01' && vid === 'uchenik';
+  /* Картинка обтекается текстом — в разметке стоит перед ним. У моста
+     на листе ученика справа уже чертёж: вторую картинку не ставим. */
+  const ris = bezKartinki || most ? '' : kartinka(o, z);
   return {
-    html: `<p class="z10-list__uslovie">${tex(z.text)}${metka}</p>${kartinka(o, z)}`,
+    html: `${ris}<p class="z10-list__uslovie">${tex(z.text)}</p>`,
     figure: most ? { svg: mostSvg(z, 'uchenik'), width: SHIRINA_MM.most } : null,
   };
 }
@@ -166,6 +175,11 @@ export function sheetSpec10(o: Sborka10, vid: Vid10) {
       id: (z) => z.id,
       uslovie: (z) => uslovie10(o, z, vid),
       otvet: (z) => otvetText10(o.proto(z.prototypeId).solve(z.params).answer),
+      istochnik: (zs) =>
+        GEN_UI.istochnikStroka(
+          zs.flatMap((z, k) => (z.source === 'fipi' ? [k + 1] : [])),
+          zs.length,
+        ),
       razbor: (z) => razbor10(o, z),
       teoriya: (prototipy) => ramkiTeorii10(o, prototipy),
       primer: (z) => primer10(o, z),

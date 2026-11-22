@@ -7,7 +7,13 @@ import type { Shag } from '../../steklo';
 /** Картинка к задаче — как есть: целиком, прозрачный фон на стекле. */
 export function Kartinka45({ path, alt }: { path: string; alt: string }) {
   return (
-    <img className="z45-kartinka" src={assetUrl(path)} alt={alt} loading="lazy" decoding="async" />
+    <img
+      className="z45-kartinka zadacha-kartinka"
+      src={assetUrl(path)}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+    />
   );
 }
 
