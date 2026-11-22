@@ -140,7 +140,9 @@ export function Opornye45Blok({
     const ok = reading.right;
     zhurnal().popytka(value, ok);
     if (ok) {
-      zhurnal().zakryt(oshibalsya.current ? 'wrong' : hintOpen || solutionOpen ? 'hinted' : 'right');
+      zhurnal().zakryt(
+        oshibalsya.current ? 'wrong' : hintOpen || solutionOpen ? 'hinted' : 'right',
+      );
     } else {
       oshibalsya.current = true;
     }

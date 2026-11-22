@@ -182,13 +182,21 @@ export function MoyaStatistika() {
         <div className="kab2__grid" aria-busy={zagruzheno !== dney}>
           <Card className="stk-glass kab2-card kab2-card--wide" data-section="itogi">
             <MetricRow columns={3}>
-              <Metric value={vremyaSlovami(svodka.active_ms)} label="время за задачами" />
-              <Metric value={svodka.solved} label="решено задач" />
-              <Metric value={obshchaya === null ? '—' : `${obshchaya}%`} label="точность" />
+              <Metric
+                size="compact"
+                value={vremyaSlovami(svodka.active_ms)}
+                label="время за задачами"
+              />
+              <Metric size="compact" value={svodka.solved} label="решено задач" />
+              <Metric
+                size="compact"
+                value={obshchaya === null ? '—' : `${obshchaya}%`}
+                label="точность"
+              />
             </MetricRow>
             <p className="kab2-card__note">
-              Время считается, пока страница открыта и есть действия: после двух минут без
-              действий счёт встаёт на паузу.
+              Время считается, пока страница открыта и есть действия: после двух минут без действий
+              счёт встаёт на паузу.
             </p>
           </Card>
 
@@ -256,7 +264,11 @@ export function MoyaStatistika() {
           </Card>
 
           {svodka.works.length === 0 ? null : (
-            <Card className="stk-glass stk-glass--warm kab2-card" title="Варианты" data-section="varianty">
+            <Card
+              className="stk-glass stk-glass--warm kab2-card"
+              title="Варианты"
+              data-section="varianty"
+            >
               <ul className="kab2-raboty">
                 {svodka.works.map((w) => (
                   <li key={w.id} className="kab2-raboty__row">
@@ -277,7 +289,11 @@ export function MoyaStatistika() {
             </Card>
           )}
 
-          <Card className="stk-glass kab2-card kab2-card--wide" title="Последние задачи" data-section="lenta">
+          <Card
+            className="stk-glass kab2-card kab2-card--wide"
+            title="Последние задачи"
+            data-section="lenta"
+          >
             {data === null || data.lenta.length === 0 ? (
               <p className="kab2-card__note">Задач за период нет.</p>
             ) : (
@@ -289,7 +305,9 @@ export function MoyaStatistika() {
                     <span className="kab2-lenta__ishod" data-ton={ISHOD[r.outcome].ton}>
                       {ISHOD[r.outcome].text}
                     </span>
-                    <span className="kab2-lenta__vremya">{vremyaSlovami(r.active_ms)}</span>
+                    <span className="kab2-lenta__vremya">
+                      {r.active_ms > 0 ? vremyaSlovami(r.active_ms) : '—'}
+                    </span>
                     <span className="kab2-lenta__kogda">{kogda(r.started_at)}</span>
                   </li>
                 ))}

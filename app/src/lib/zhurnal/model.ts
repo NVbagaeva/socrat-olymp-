@@ -219,7 +219,11 @@ export function sobratPachku(ochered: Ochered): Pachka | null {
  * Пачка принята. Изменения, появившиеся за время отправки, остаются:
  * `snimki` — отпечатки записей на момент сборки пачки.
  */
-export function otmetitPrinyatoe(ochered: Ochered, pachka: Pachka, snimki: Map<string, string>): void {
+export function otmetitPrinyatoe(
+  ochered: Ochered,
+  pachka: Pachka,
+  snimki: Map<string, string>,
+): void {
   for (const item of pachka.zapisi) {
     const z = ochered.zapisi.find((zapis) => zapis.id === item.id);
     if (z === undefined) {
@@ -231,9 +235,7 @@ export function otmetitPrinyatoe(ochered: Ochered, pachka: Pachka, snimki: Map<s
     z.dirty = z.sent < z.events.length || snimki.get(z.id) !== otpechatok(z);
   }
   /* Принятые закрытые записи из очереди уходят. */
-  ochered.zapisi = ochered.zapisi.filter(
-    (z) => !(z.created && !z.dirty && z.closedAt !== null),
-  );
+  ochered.zapisi = ochered.zapisi.filter((z) => !(z.created && !z.dirty && z.closedAt !== null));
   ochered.raboty = ochered.raboty.filter(
     (r) => !(pachka.raboty.includes(r.id) && snimki.get(r.id) === otpechatokRaboty(r)),
   );

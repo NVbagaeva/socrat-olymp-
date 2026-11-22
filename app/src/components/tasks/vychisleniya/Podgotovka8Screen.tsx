@@ -168,7 +168,9 @@ export function Podgotovka8Screen({
     setChecked(correct ? 'right' : 'wrong');
     zhurnal().popytka(value, correct);
     if (correct) {
-      zhurnal().zakryt(oshibalsya.current ? 'wrong' : memo || solution !== null ? 'hinted' : 'right');
+      zhurnal().zakryt(
+        oshibalsya.current ? 'wrong' : memo || solution !== null ? 'hinted' : 'right',
+      );
     } else {
       oshibalsya.current = true;
     }
@@ -360,11 +362,14 @@ export function Podgotovka8Screen({
               <Button onClick={check} disabled={!ready}>
                 Проверить
               </Button>
-              <Button variant="ghost" onClick={() => {
+              <Button
+                variant="ghost"
+                onClick={() => {
                   /* «Формула» — свойство, на которое опирается задача. */
                   if (!memo) zhurnal().svoystvo();
                   setMemo(!memo);
-                }}>
+                }}
+              >
                 {memo ? 'Скрыть формулу' : 'Формула'}
               </Button>
               {checked === 'wrong' ? (

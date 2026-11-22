@@ -34,12 +34,18 @@ const MIN = 60_000;
   check(s.obshcheeMs(60_000) === 60_000, 'общее за минуту');
 
   /* Бездействие: последний раз трогал на 50-й секунде, прошло 10 минут. */
-  check(s.aktivnoMs(10 * MIN) === 50_000 + A.PAUZA_MS, `пауза через две минуты: ${s.aktivnoMs(10 * MIN)}`);
+  check(
+    s.aktivnoMs(10 * MIN) === 50_000 + A.PAUZA_MS,
+    `пауза через две минуты: ${s.aktivnoMs(10 * MIN)}`,
+  );
   check(s.obshcheeMs(10 * MIN) === 10 * MIN, 'общее идёт и в паузе');
 
   /* Вернулся: счёт продолжается с действия, простой не добавляется. */
   s.deystvie(10 * MIN);
-  check(s.aktivnoMs(10 * MIN + 30_000) === 50_000 + A.PAUZA_MS + 30_000, 'после паузы — с действия');
+  check(
+    s.aktivnoMs(10 * MIN + 30_000) === 50_000 + A.PAUZA_MS + 30_000,
+    'после паузы — с действия',
+  );
 }
 {
   /* Ровно на границе: действие через 1:59 паузу не включает. */
@@ -102,7 +108,10 @@ function zapis(id, extra = {}) {
   check(z.events[0].answer === ' 0,6 ', 'ответ — как введён');
 
   const p1 = M.sobratPachku(o);
-  check(p1.body.runs.length === 1 && p1.body.runs[0].events.length === 2, 'первая пачка: задача и два события');
+  check(
+    p1.body.runs.length === 1 && p1.body.runs[0].events.length === 2,
+    'первая пачка: задача и два события',
+  );
   check(p1.body.runs[0].snapshot !== null, 'снимок уходит с первой пачкой');
   check(p1.body.runs[0].closed_at === null, 'открытая задача уходит открытой');
 
@@ -113,14 +122,23 @@ function zapis(id, extra = {}) {
   z.outcome = 'hinted';
   z.vremya = { acc: 25000, obshchee: 30000 };
   M.otmetitPrinyatoe(o, p1, snimki);
-  check(o.zapisi.length === 1 && z.created && z.sent === 2 && z.dirty, 'новое за время отправки осталось в очереди');
+  check(
+    o.zapisi.length === 1 && z.created && z.sent === 2 && z.dirty,
+    'новое за время отправки осталось в очереди',
+  );
   check(z.snapshot === null, 'снимок после приёма стёрт');
   check(M.novoeSobytie(z, 'skip', 'x', 0) === null, 'в закрытую задачу события не добавляются');
 
   const p2 = M.sobratPachku(o);
-  check(p2.body.runs[0].events.length === 1 && p2.body.runs[0].events[0].seq === 3, 'вторая пачка — только новое');
+  check(
+    p2.body.runs[0].events.length === 1 && p2.body.runs[0].events[0].seq === 3,
+    'вторая пачка — только новое',
+  );
   check(p2.body.runs[0].snapshot === null, 'снимок второй раз не уходит');
-  check(p2.body.runs[0].closed_at !== null && p2.body.runs[0].outcome === 'hinted', 'закрытие — с последними событиями');
+  check(
+    p2.body.runs[0].closed_at !== null && p2.body.runs[0].outcome === 'hinted',
+    'закрытие — с последними событиями',
+  );
   check(p2.body.runs[0].active_ms === 25000 && p2.body.runs[0].total_ms === 30000, 'время в пачке');
   M.otmetitPrinyatoe(o, p2, new Map([[z.id, M.otpechatok(z)]]));
   check(o.zapisi.length === 0, 'принятая закрытая запись из очереди ушла');
@@ -134,19 +152,29 @@ function zapis(id, extra = {}) {
   z.outcome = 'right';
   const o = { v: 1, user: 'u', zapisi: [z], raboty: [] };
   const p1 = M.sobratPachku(o);
-  check(p1.body.runs[0].events.length === M.PACHKA_SOBYTIY && p1.body.runs[0].closed_at === null,
-    'первая часть событий уходит без закрытия');
+  check(
+    p1.body.runs[0].events.length === M.PACHKA_SOBYTIY && p1.body.runs[0].closed_at === null,
+    'первая часть событий уходит без закрытия',
+  );
   M.otmetitPrinyatoe(o, p1, new Map([[z.id, M.otpechatok(z)]]));
   check(o.zapisi.length === 1, 'запись ждёт остаток событий');
   const p2 = M.sobratPachku(o);
-  check(p2.body.runs[0].events.length === 50 && p2.body.runs[0].closed_at === 't', 'остаток — с закрытием');
+  check(
+    p2.body.runs[0].events.length === 50 && p2.body.runs[0].closed_at === 't',
+    'остаток — с закрытием',
+  );
 }
 {
   /* Предел пачки и тяжёлые снимки. */
   const o = { v: 1, user: 'u', zapisi: [], raboty: [] };
   for (let i = 0; i < 60; i += 1) o.zapisi.push(zapis(`z${i}`));
   check(M.sobratPachku(o).body.runs.length === M.PACHKA_ZADACH, 'в пачке не больше предела задач');
-  const t = { v: 1, user: 'u', zapisi: [0, 1, 2].map((i) => zapis(`t${i}`, { snapshot: { statement: 'x'.repeat(400_000) } })), raboty: [] };
+  const t = {
+    v: 1,
+    user: 'u',
+    zapisi: [0, 1, 2].map((i) => zapis(`t${i}`, { snapshot: { statement: 'x'.repeat(400_000) } })),
+    raboty: [],
+  };
   check(M.sobratPachku(t).body.runs.length === 1, 'тяжёлые снимки — по одному в пачке');
 
   /* Отказ навсегда: пачка убирается, остальное остаётся. */
@@ -155,16 +183,38 @@ function zapis(id, extra = {}) {
   check(o.zapisi.length === 60 - M.PACHKA_ZADACH, 'отказанная пачка убрана, остальное на месте');
 
   /* Забытая открытая запись, уже принятая сервером, уходит через неделю. */
-  const s = { v: 1, user: 'u', zapisi: [zapis('old', { created: true, dirty: false, touchedAt: 0 }), zapis('new')], raboty: [] };
+  const s = {
+    v: 1,
+    user: 'u',
+    zapisi: [zapis('old', { created: true, dirty: false, touchedAt: 0 }), zapis('new')],
+    raboty: [],
+  };
   M.ubratStarye(s, M.SROK_OTKRYTOY_MS + 1);
-  check(s.zapisi.map((z) => z.id).join() === 'new', 'старая принятая запись убрана, неотправленная осталась');
+  check(
+    s.zapisi.map((z) => z.id).join() === 'new',
+    'старая принятая запись убрана, неотправленная осталась',
+  );
 }
 {
   /* Работа (вариант). */
-  const r = { id: 'w', kind: 'sobrat', startedAt: 'a', finishedAt: 'b', primary: 7, max: 12, test: 40, totalMs: 9, activeMs: 8, dirty: true };
+  const r = {
+    id: 'w',
+    kind: 'sobrat',
+    startedAt: 'a',
+    finishedAt: 'b',
+    primary: 7,
+    max: 12,
+    test: 40,
+    totalMs: 9,
+    activeMs: 8,
+    dirty: true,
+  };
   const o = { v: 1, user: 'u', zapisi: [], raboty: [r] };
   const p = M.sobratPachku(o);
-  check(p.body.works.length === 1 && p.body.works[0].primary === 7 && p.body.works[0].test === 40, 'работа в пачке');
+  check(
+    p.body.works.length === 1 && p.body.works[0].primary === 7 && p.body.works[0].test === 40,
+    'работа в пачке',
+  );
   M.otmetitPrinyatoe(o, p, new Map([[r.id, M.otpechatokRaboty(r)]]));
   check(o.raboty.length === 0, 'принятая работа из очереди ушла');
 }

@@ -93,7 +93,13 @@ export function zapisatVariant(itog: ItogVarianta): void {
       startedAt: itog.startedAt,
       closedAt: itog.finishedAt,
       outcome:
-        first === '' ? 'skipped' : itog.right[i] === true ? (podskazka ? 'hinted' : 'right') : 'wrong',
+        first === ''
+          ? 'skipped'
+          : itog.right[i] === true
+            ? podskazka
+              ? 'hinted'
+              : 'right'
+            : 'wrong',
       activeMs: itog.times[i] ?? 0,
       popytki,
       podskazka,

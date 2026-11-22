@@ -78,6 +78,12 @@
   color: var(--color-text-muted, #5b6472);
 }
 
+/* Итоги: значение в одну строку — «1 ч 15 мин» не переносится. */
+.kab2-card .metric__val {
+  font-size: clamp(20px, 5.2vw, 30px);
+  white-space: nowrap;
+}
+
 /* По заданиям: номер, название, счёт, полоса, время. */
 .kab2-zadaniya {
   display: grid;
@@ -243,6 +249,10 @@
   }
   .kab2-period {
     width: 100%;
+  }
+  /* Три итога в ряд не помещаются: столбиком, без переносов. */
+  .kab2-card .metric-row {
+    grid-template-columns: minmax(0, 1fr);
   }
   .kab2-period__btn {
     flex: 1;

@@ -291,7 +291,11 @@ const SUITES = [
       ...migrations.map(migration),
       ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
       ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
-      ['dostup-uchitelya.test.sql', path.join(SUPA, 'tests', 'dostup-uchitelya.test.sql'), zhurnalSetupSql],
+      [
+        'dostup-uchitelya.test.sql',
+        path.join(SUPA, 'tests', 'dostup-uchitelya.test.sql'),
+        zhurnalSetupSql,
+      ],
     ],
   },
 ];

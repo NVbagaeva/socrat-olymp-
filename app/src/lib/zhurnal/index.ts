@@ -99,7 +99,10 @@ function chitat(): Ochered {
       const raw = browserStorage()?.getItem(OCHERED_KEY) ?? null;
       const parsed = raw === null ? null : (JSON.parse(raw) as Ochered);
       ochered =
-        parsed !== null && parsed.v === 1 && Array.isArray(parsed.zapisi) && Array.isArray(parsed.raboty)
+        parsed !== null &&
+        parsed.v === 1 &&
+        Array.isArray(parsed.zapisi) &&
+        Array.isArray(parsed.raboty)
           ? parsed
           : structuredClone(PUSTAYA);
     } catch {
@@ -405,7 +408,12 @@ export interface GotovayaZadacha {
  * вариант записывается целиком, со всеми заданиями.
  */
 export function zapisatGotovye(zadachi: GotovayaZadacha[]): void {
-  if (!ZHURNAL_ON || vyklyucheno || typeof window === 'undefined' || currentUser()?.role !== 'student') {
+  if (
+    !ZHURNAL_ON ||
+    vyklyucheno ||
+    typeof window === 'undefined' ||
+    currentUser()?.role !== 'student'
+  ) {
     return;
   }
   const o = chitat();

@@ -90,14 +90,20 @@ export function stupenDnya(activeMs: number): 0 | 1 | 2 | 3 | 4 {
 export function dniPerioda(from: string, to: string, days: readonly SvodkaDnya[]): SvodkaDnya[] {
   const po = new Map(days.map((d) => [d.day, d]));
   const out: SvodkaDnya[] = [];
-  for (let t = Date.parse(`${from}T00:00:00Z`); t <= Date.parse(`${to}T00:00:00Z`); t += 86_400_000) {
+  for (
+    let t = Date.parse(`${from}T00:00:00Z`);
+    t <= Date.parse(`${to}T00:00:00Z`);
+    t += 86_400_000
+  ) {
     const day = new Date(t).toISOString().slice(0, 10);
     out.push(po.get(day) ?? { day, closed: 0, active_ms: 0 });
   }
   return out;
 }
 
-export async function zagruzitSvodku(dney: number): Promise<{ svodka: Svodka; lenta: StrokaLenty[] }> {
+export async function zagruzitSvodku(
+  dney: number,
+): Promise<{ svodka: Svodka; lenta: StrokaLenty[] }> {
   const { getClient } = await import('../auth/client');
   const supabase = await getClient();
   const { from, to } = period(dney, Date.now());
