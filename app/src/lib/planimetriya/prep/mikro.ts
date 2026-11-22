@@ -49,6 +49,22 @@ import {
   sootvetstvennyySmezhnyy,
   sosedniyUgolParallelogramma,
 } from './scenarii';
+import {
+  scenariyNakrest,
+  scenariyOdnostoronnie,
+  scenariyOstryyUgol,
+  scenariyPeresechenie,
+  scenariyPolovinaUgla,
+  scenariySmezhnyeRaznost,
+  scenariySmezhnyy,
+  scenariyTretiyUgol,
+  scenariyTupoyUgol,
+  scenariyUgolPriOsnovanii,
+  scenariyVertikalnye,
+  scenariyVneshniyDvaUgla,
+  scenariyVneshniyPriVershine,
+  scenariyVneshniyVnutrenniy,
+} from './scenarii-p1-12';
 import type { Mikro } from './types';
 
 /* ── Помощники ───────────────────────────────────────────────────── */
@@ -147,16 +163,18 @@ export const BLOK_SUMMA: Mikro[] = [
       const c = 180 - a - b;
       return {
         uslovie: `В треугольнике $ABC$ $\\angle A = ${g(a)}$, $\\angle B = ${g(b)}$. Найдите угол $C$.`,
-        risunok: treugolnik([a, b, c], {
-          A: { zn: gr(a) },
-          B: { zn: gr(b), dugi: 2 },
-          C: { isk: true },
-        }),
+        risunok: treugolnik(
+          [a, b, c],
+          { A: { zn: gr(a) }, B: { zn: gr(b), dugi: 2 }, C: { isk: true } },
+          /* Подсказка, шаг «Составь уравнение»: x у угла C. */
+          [ug('A', 'C', 'B', { sloy: 1, znachenie: 'x', cvet: 1, radiusPx: 26 })],
+        ),
         otvet: c,
         razbor: [
-          'Сумма углов треугольника $180^\\circ$.',
-          `$\\angle C = 180^\\circ - ${g(a)} - ${g(b)} = ${g(c)}$.`,
+          `Сумма углов треугольника $180^\\circ$. Угол $C$ обозначим $x$: $${g(a)} + ${g(b)} + x = 180^\\circ$.`,
+          `$x = \\angle C = 180^\\circ - ${g(a)} - ${g(b)} = ${g(c)}$.`,
         ],
+        scenariy: scenariyTretiyUgol(a, b),
       };
     },
   ),
@@ -170,12 +188,15 @@ export const BLOK_SUMMA: Mikro[] = [
         uslovie: `В треугольнике $ABC$ угол $C$ прямой, $\\angle A = ${g(a)}$. Найдите угол $B$.`,
         risunok: treugolnik([a, 90 - a, 90], { A: { zn: gr(a) }, B: { isk: true } }, [
           pryam('A', 'C', 'B'),
+          /* Подсказка, шаг «Составь уравнение»: x у угла B. */
+          ug('A', 'B', 'C', { sloy: 1, znachenie: 'x', cvet: 1, radiusPx: 26 }),
         ]),
         otvet: 90 - a,
         razbor: [
-          'Острые углы прямоугольного треугольника в сумме дают $90^\\circ$.',
-          `$\\angle B = 90^\\circ - ${g(a)} = ${g(90 - a)}$.`,
+          `Острые углы прямоугольного треугольника в сумме дают $90^\\circ$. Угол $B$ обозначим $x$: $${g(a)} + x = 90^\\circ$.`,
+          `$x = \\angle B = 90^\\circ - ${g(a)} = ${g(90 - a)}$.`,
         ],
+        scenariy: scenariyOstryyUgol(a),
       };
     },
   ),
@@ -227,14 +248,18 @@ export const BLOK_SUMMA: Mikro[] = [
             shtrih('B', 'C', 1),
             ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(c) }),
             ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
+            /* Подсказка, шаг «Составь уравнение»: x у углов при основании. */
+            ug('C', 'A', 'B', { sloy: 1, znachenie: 'x', cvet: 1, radiusPx: 26 }),
+            ug('A', 'B', 'C', { sloy: 1, znachenie: 'x', cvet: 1, radiusPx: 26 }),
           ],
           proverki: [ist('C', 'A', 'B', a)],
         })),
         otvet: a,
         razbor: [
-          'Углы при основании равны и вместе дают $180^\\circ - \\angle C$.',
-          `$\\angle A = (180^\\circ - ${g(c)}) : 2 = ${g(a)}$.`,
+          `$AC = BC$: углы при основании равны, $\\angle A = \\angle B = x$. Сумма углов: $2x + ${g(c)} = 180^\\circ$.`,
+          `$x = \\angle A = (180^\\circ - ${g(c)}) : 2 = ${g(a)}$.`,
         ],
+        scenariy: scenariyUgolPriOsnovanii(c),
       };
     },
   ),
@@ -254,14 +279,17 @@ export const BLOK_SUMMA: Mikro[] = [
           [
             prod('A', 'C', { doTochki: 'D', sploshnoe: true }),
             ug('B', 'C', 'D', { vydelit: 'dano', znachenie: gr(e) }),
+            /* Подсказка, шаг «Составь уравнение»: x у угла B. */
+            ug('A', 'B', 'C', { sloy: 1, dugi: 2, znachenie: 'x', cvet: 1 }),
           ],
           { D: { naPryamoy: ['A', 'C', 1.4] } },
         ),
         otvet: b,
         razbor: [
-          'Внешний угол равен сумме двух внутренних, не смежных с ним.',
-          `$\\angle B = ${g(e)} - ${g(a)} = ${g(b)}$.`,
+          `Внешний угол равен сумме двух внутренних, не смежных с ним. Угол $B$ обозначим $x$: $${g(a)} + x = ${g(e)}$.`,
+          `$x = \\angle B = ${g(e)} - ${g(a)} = ${g(b)}$.`,
         ],
+        scenariy: scenariyVneshniyDvaUgla(e, a),
       };
     },
   ),
@@ -279,15 +307,18 @@ export const BLOK_SUMMA: Mikro[] = [
           [
             prod('A', 'B', { doTochki: 'D', sploshnoe: true }),
             ug('C', 'B', 'D', { vydelit: 'dano', znachenie: gr(e) }),
+            /* Подсказка, шаг «Составь уравнение»: x у угла ABC. */
+            ug('A', 'B', 'C', { sloy: 1, znachenie: 'x', cvet: 1, radiusPx: 26 }),
           ],
           { D: { naPryamoy: ['A', 'B', 1.3] } },
           false,
         ),
         otvet: 180 - e,
         razbor: [
-          'Внешний и внутренний углы при одной вершине — смежные.',
-          `$\\angle ABC = 180^\\circ - ${g(e)} = ${g(180 - e)}$.`,
+          `Внешний и внутренний углы при одной вершине — смежные. Угол $ABC$ обозначим $x$: $x + ${g(e)} = 180^\\circ$.`,
+          `$x = \\angle ABC = 180^\\circ - ${g(e)} = ${g(180 - e)}$.`,
         ],
+        scenariy: scenariyVneshniyVnutrenniy(e),
       };
     },
   ),
@@ -354,6 +385,9 @@ export const BLOK_SUMMA: Mikro[] = [
           shtrih('B', 'C', 1),
           ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(c) }),
           ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка, шаг «Составь уравнение»: x у углов при основании. */
+          ug('C', 'A', 'B', { sloy: 1, znachenie: 'x', cvet: 1, radiusPx: 26 }),
+          ug('A', 'B', 'C', { sloy: 1, znachenie: 'x', cvet: 1, radiusPx: 26 }),
         ],
         podpisi: false,
         proverki: [ist('C', 'A', 'B', a)],
@@ -361,8 +395,9 @@ export const BLOK_SUMMA: Mikro[] = [
       otvet: a,
       razbor: [
         'Тупой угол не может быть при основании — два тупых угла дали бы больше $180^\\circ$. Значит, он при вершине.',
-        `Угол при основании: $(180^\\circ - ${g(c)}) : 2 = ${g(a)}$.`,
+        `Углы при основании равны, обозначим их $x$: $2x + ${g(c)} = 180^\\circ$, $x = (180^\\circ - ${g(c)}) : 2 = ${g(a)}$.`,
       ],
+      scenariy: scenariyTupoyUgol(c),
     };
   }),
   mikro(
@@ -383,14 +418,18 @@ export const BLOK_SUMMA: Mikro[] = [
             prod('A', 'C', { doTochki: 'D', sploshnoe: true }),
             ug('B', 'C', 'D', { vydelit: 'dano', znachenie: gr(e) }),
             ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
+            /* Подсказка, шаг «Внешний угол»: x у равных углов A и B. */
+            ug('C', 'A', 'B', { sloy: 1, znachenie: 'x', cvet: 1, radiusPx: 26 }),
+            ug('A', 'B', 'C', { sloy: 1, znachenie: 'x', cvet: 1, radiusPx: 26 }),
           ],
           proverki: [ist('C', 'A', 'B', a)],
         })),
         otvet: a,
         razbor: [
-          'Внешний угол при $C$ равен $\\angle A + \\angle B = 2\\angle A$.',
-          `$\\angle A = ${g(e)} : 2 = ${g(a)}$.`,
+          'Углы при основании равны: $\\angle A = \\angle B = x$. Внешний угол при $C$ равен $\\angle A + \\angle B = 2x$.',
+          `$2x = ${g(e)}$, $x = \\angle A = ${g(e)} : 2 = ${g(a)}$.`,
         ],
+        scenariy: scenariyVneshniyPriVershine(e),
       };
     },
   ),
@@ -398,7 +437,7 @@ export const BLOK_SUMMA: Mikro[] = [
 
 /* ── 2. Смежные, вертикальные углы, параллельные прямые ──────────── */
 
-function smezhnye(u: number, metkaCOB: Metka, metkaAOC: Metka): Scena {
+function smezhnye(u: number, metkaCOB: Metka, metkaAOC: Metka, extra: Element[] = []): Scena {
   return forma(u, 28, 152, (v) => ({
     tochki: { A: [-5, 0], O: [0, 0], B: [5, 0], C: polar(v, 5) },
     proverki: [ist('C', 'O', 'B', u), ist('A', 'O', 'C', 180 - u)],
@@ -423,6 +462,7 @@ function smezhnye(u: number, metkaCOB: Metka, metkaAOC: Metka): Scena {
             ? { vydelit: 'dano' as const, znachenie: metkaAOC.zn }
             : {}),
       }),
+      ...extra,
     ],
   }));
 }
@@ -452,12 +492,16 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     const u = neVyrozhdennyy(r.int, 20, 160);
     return {
       uslovie: `Один из смежных углов равен $${g(u)}$. Найдите другой угол.`,
-      risunok: smezhnye(u, { zn: gr(u) }, { isk: true }),
+      risunok: smezhnye(u, { zn: gr(u) }, { isk: true }, [
+        /* Подсказка, шаг «Составь уравнение»: x у искомого угла AOC. */
+        ug('A', 'O', 'C', { sloy: 1, dugi: 2, znachenie: 'x', cvet: 1 }),
+      ]),
       otvet: 180 - u,
       razbor: [
-        'Смежные углы дают в сумме $180^\\circ$.',
-        `$180^\\circ - ${g(u)} = ${g(180 - u)}$.`,
+        `Смежные углы дают в сумме $180^\\circ$. Угол $AOC$ обозначим $x$: $x + ${g(u)} = 180^\\circ$.`,
+        `$x = 180^\\circ - ${g(u)} = ${g(180 - u)}$.`,
       ],
+      scenariy: scenariySmezhnyy(u),
     };
   }),
   mikro('P1-2-02', 'Разность смежных углов', '\\alpha + \\beta = 180^\\circ', (r) => {
@@ -465,12 +509,17 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     const b = (180 + d) / 2;
     return {
       uslovie: `Один из смежных углов на $${g(d)}$ больше другого. Найдите больший угол.`,
-      risunok: smezhnye(180 - b, {}, { isk: true }),
+      risunok: smezhnye(180 - b, {}, { isk: true }, [
+        /* Подсказка, шаг «Чему равен больший угол?»: x и x + d у углов. */
+        ug('C', 'O', 'B', { sloy: 1, znachenie: 'x', cvet: 1 }),
+        ug('A', 'O', 'C', { sloy: 1, dugi: 2, znachenie: `x + ${gr(d)}`, cvet: 1 }),
+      ]),
       otvet: b,
       razbor: [
         `Обозначим меньший угол $x$: $x + (x + ${g(d)}) = 180^\\circ$, $x = ${g((180 - d) / 2)}$.`,
-        `Больший: $${g(b)}$.`,
+        `$x$ — меньший угол. Больший: $x + ${g(d)} = ${g(b)}$.`,
       ],
+      scenariy: scenariySmezhnyeRaznost(d),
     };
   }),
   mikro('P1-2-03', 'Смежные углы в отношении', '\\alpha + \\beta = 180^\\circ', (r) => {
@@ -499,11 +548,18 @@ export const BLOK_SMEZHNYE: Mikro[] = [
           otr('C', 'D'),
           ug('D', 'O', 'B', { vydelit: 'iskomoe' }),
           ug('C', 'O', 'A', { vydelit: 'iskomoe' }),
+          /* Подсказка, шаг «Составь уравнение»: x у обоих углов. */
+          ug('D', 'O', 'B', { sloy: 1, znachenie: 'x', cvet: 1 }),
+          ug('C', 'O', 'A', { sloy: 1, znachenie: 'x', cvet: 1 }),
         ],
         podpisi: false,
       })),
       otvet: s / 2,
-      razbor: ['Вертикальные углы равны — делим сумму пополам.', `$${g(s)} : 2 = ${g(s / 2)}$.`],
+      razbor: [
+        `Вертикальные углы равны, обозначим каждый $x$: $2x = ${g(s)}$.`,
+        `$x = ${g(s)} : 2 = ${g(s / 2)}$.`,
+      ],
+      scenariy: scenariyVertikalnye(s),
     };
   }),
   mikro('P1-2-05', 'Угол при пересечении прямых', '\\alpha + \\beta = 180^\\circ', (r) => {
@@ -524,14 +580,18 @@ export const BLOK_SMEZHNYE: Mikro[] = [
           otr('C', 'D'),
           ug('B', 'O', 'C', { vydelit: 'dano', znachenie: gr(u) }),
           ug('C', 'O', 'A', { vydelit: 'iskomoe' }),
+          /* Подсказка: угол, вертикальный данному (слой 1), x у искомого (слой 2). */
+          ug('A', 'O', 'D', { sloy: 1, znachenie: gr(u), cvet: 1 }),
+          ug('C', 'O', 'A', { sloy: 2, znachenie: 'x', cvet: 1 }),
         ],
         podpisi: false,
       })),
       otvet: 180 - u,
       razbor: [
-        'Соседние углы при пересечении — смежные, противоположные — вертикальные.',
-        `Больший: $180^\\circ - ${g(u)} = ${g(180 - u)}$.`,
+        'Соседние углы при пересечении — смежные, противоположные — вертикальные: остались угол, равный данному, и два равных тупых угла.',
+        `Тупой угол $x$ смежный с данным: $x = 180^\\circ - ${g(u)} = ${g(180 - u)}$.`,
       ],
+      scenariy: scenariyPeresechenie(u),
     };
   }),
   mikro('P1-2-06', 'Накрест лежащие углы', '\\text{накрест лежащие углы равны}', (r) => {
@@ -544,6 +604,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
       ]),
       otvet: u,
       razbor: ['При параллельных прямых накрест лежащие углы равны.', `Ответ: $${g(u)}$.`],
+      scenariy: scenariyNakrest(u),
     };
   }),
   mikro('P1-2-07', 'Односторонние углы', '\\alpha + \\beta = 180^\\circ', (r) => {
@@ -553,12 +614,15 @@ export const BLOK_SMEZHNYE: Mikro[] = [
       risunok: parallel(u, (m, n) => [
         ug('B', m, n, { vydelit: 'dano', znachenie: gr(u) }),
         ug('D', n, m, { vydelit: 'iskomoe' }),
+        /* Подсказка, шаг «Составь уравнение»: x у искомого угла. */
+        ug('D', n, m, { sloy: 1, znachenie: 'x', cvet: 1 }),
       ]),
       otvet: 180 - u,
       razbor: [
-        'Односторонние углы при параллельных прямых дают в сумме $180^\\circ$.',
-        `$180^\\circ - ${g(u)} = ${g(180 - u)}$.`,
+        `Односторонние углы при параллельных прямых дают в сумме $180^\\circ$. Искомый угол обозначим $x$: $x + ${g(u)} = 180^\\circ$.`,
+        `$x = 180^\\circ - ${g(u)} = ${g(180 - u)}$.`,
       ],
+      scenariy: scenariyOdnostoronnie(u),
     };
   }),
   mikro('P1-2-08', 'Половина угла', '\\text{биссектриса делит угол пополам}', (r) => {
@@ -574,11 +638,19 @@ export const BLOK_SMEZHNYE: Mikro[] = [
           otr('O', 'K'),
           ug('A', 'O', 'K', { vydelit: 'iskomoe' }),
           ug('K', 'O', 'B'),
+          /* Подсказка, шаг «Составь уравнение»: x у половинок и весь угол AOB. */
+          ug('A', 'O', 'K', { sloy: 1, znachenie: 'x', cvet: 1 }),
+          ug('K', 'O', 'B', { sloy: 1, znachenie: 'x', cvet: 1 }),
+          ug('A', 'O', 'B', { sloy: 1, znachenie: gr(u), dolyaRadiusa: 0.6 }),
         ],
         proverki: [ist('A', 'O', 'K', u / 2)],
       })),
       otvet: u / 2,
-      razbor: ['Биссектриса делит угол на две равные части.', `$${g(u)} : 2 = ${g(u / 2)}$.`],
+      razbor: [
+        `Биссектриса делит угол на две равные части, обозначим каждую $x$: $2x = ${g(u)}$.`,
+        `$x = \\angle AOK = ${g(u)} : 2 = ${g(u / 2)}$.`,
+      ],
+      scenariy: scenariyPolovinaUgla(u),
     };
   }),
   mikro(
