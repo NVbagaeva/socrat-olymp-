@@ -34,6 +34,7 @@ import {
   type ImportedKey,
   type LocalGroup,
 } from '@/lib/progressImport';
+import { ZHURNAL_ON } from '@/lib/flags';
 
 type View = 'loading' | 'needLogin' | 'ready' | 'removed';
 type Tab = 'home' | 'profile';
@@ -313,6 +314,17 @@ function StudentHome({ klassy, onJoined }: { klassy: KlassView[] | null; onJoine
       <div className="kabinet__karta" data-section="karta">
         <KartaUchenika />
       </div>
+      {ZHURNAL_ON ? (
+        <Card className="kabinet__card" title="Моя статистика" data-section="statistika">
+          <p className="auth-form__text">
+            Время за задачами, точность по заданиям и дни занятий — по решённому в тренажёре,
+            опорных задачах, карточках и вариантах.
+          </p>
+          <Link className="btn btn--secondary" href="/kabinet/statistika/">
+            Открыть статистику
+          </Link>
+        </Card>
+      ) : null}
       {pokazatVstuplenie ? (
         <Card className="kabinet__card" title={t.classes.title} data-section="join">
           <p className="auth-form__text">{t.classes.none}</p>

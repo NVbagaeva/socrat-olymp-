@@ -248,6 +248,13 @@ jobs:
         working-directory: app
         run: pnpm test:progress-log
 
+      # Журнал решения для кабинета (docs/plans/cabinet-v2.md): активное
+      # время с паузой после двух минут бездействия, очередь отправки без
+      # потерь и дублей (lib/zhurnal). Базу проверяет test:soglasiya-sql.
+      - name: Журнал решения — время и очередь
+        working-directory: app
+        run: pnpm test:zhurnal
+
       # «Карта ЕГЭ»: состояния областей, рекомендация, прогноз, пролив и
       # каталог на трёх тестовых учениках (lib/karta).
       - name: Карта ЕГЭ — расчёт

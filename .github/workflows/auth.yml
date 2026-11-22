@@ -121,3 +121,65 @@ jobs:
           name: ${{ matrix.shots }}
           path: app/${{ matrix.shots }}
           if-no-files-found: ignore
+
+  # Кабинет, версия 2 (docs/plans/cabinet-v2.md): сборка со входом и
+  # флагами новых частей. Обычная сборка и сборка «Вход и кабинет» выше
+  # идут без этих флагов — так видно, что без них сайт не меняется.
+  kabinet2:
+    name: Кабинет-2 в браузере (журнал решения)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v5
+
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Поставить зависимости
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+
+      # Адрес и ключ — ненастоящие: все запросы к ним перехватывает мок.
+      - name: Собрать сайт со входом и журналом для №5 и №8
+        working-directory: app
+        env:
+          NEXT_PUBLIC_AUTH_ENABLED: '1'
+          NEXT_PUBLIC_AUTH_IN_HEADER: '1'
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key # не секрет: ключ мока
+          NEXT_PUBLIC_KAB2_ZHURNAL: '1'
+          NEXT_PUBLIC_KAB2_RAZDELY: '5,8'
+        run: pnpm build
+
+      - name: Поставить Chromium
+        working-directory: app
+        run: |
+          bash "$GITHUB_WORKSPACE/.github/scripts/apt-mirror.sh" || true
+          pnpm exec playwright install --with-deps chromium
+
+      # Тренажёр, опорные задачи и №5: попытки, подсказки, пропуск,
+      # активное время, очередь без сети; гостю и репетитору не пишется.
+      - name: Проверить журнал решения
+        working-directory: app
+        run: pnpm test:zhurnal-site --shots snimki-kabinet2
+
+      - name: Проверить первую загрузку с журналом
+        working-directory: app
+        run: pnpm test:first-load
+
+      - name: Сохранить снимки экранов
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snimki-kabinet2
+          path: app/snimki-kabinet2
+          if-no-files-found: ignore

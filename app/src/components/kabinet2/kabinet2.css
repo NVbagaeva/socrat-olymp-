@@ -1,0 +1,275 @@
+/* Кабинет, версия 2 (docs/plans/cabinet-v2.md): статистика ученика.
+   Стеклянные карточки (.stk-glass), синий и оранжевый акценты из токенов.
+   На телефоне 375 px — одна колонка, таблиц нет. */
+
+.kab2 {
+  display: grid;
+  gap: 20px;
+}
+.kab2__back {
+  justify-self: start;
+}
+.kab2__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+.kab2__title {
+  margin: 0;
+}
+.kab2__status {
+  color: var(--color-text-muted, #5b6472);
+}
+
+.kab2-period {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 999px;
+  background: var(--glass-bg, rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 0 0 1px var(--glass-ring, rgba(31, 78, 168, 0.14));
+}
+.kab2-period__btn {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: inherit;
+  cursor: pointer;
+}
+.kab2-period__btn[aria-pressed='true'] {
+  background: var(--color-primary, #1f4ea8);
+  color: #fff;
+}
+.kab2-period__btn:focus-visible {
+  outline: 2px solid var(--color-accent, #e07a2f);
+  outline-offset: 2px;
+}
+
+.kab2__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  transition: opacity 0.15s;
+}
+.kab2__grid[aria-busy='true'] {
+  opacity: 0.6;
+}
+.kab2-card {
+  min-width: 0;
+}
+.kab2-card--wide {
+  grid-column: 1 / -1;
+}
+.kab2-card__note {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text-muted, #5b6472);
+}
+.kab2-card__schet {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted, #5b6472);
+}
+
+/* По заданиям: номер, название, счёт, полоса, время. */
+.kab2-zadaniya {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.kab2-zadaniya__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'no name schet'
+    'bar bar bar'
+    'vremya vremya vremya';
+  align-items: baseline;
+  gap: 4px 10px;
+}
+.kab2-zadaniya__no {
+  grid-area: no;
+  font-weight: 700;
+  color: var(--color-primary, #1f4ea8);
+}
+.kab2-zadaniya__name {
+  grid-area: name;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.kab2-zadaniya__schet {
+  grid-area: schet;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.kab2-zadaniya__bar {
+  grid-area: bar;
+}
+.kab2-zadaniya__vremya {
+  grid-area: vremya;
+  font-size: 12px;
+  color: var(--color-text-muted, #5b6472);
+}
+
+/* Календарь: клетка — день, насыщенность — время за задачами. */
+.kab2-dni {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(22px, 1fr));
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.kab2-dni__den,
+.kab2-dni__legenda i {
+  aspect-ratio: 1;
+  border-radius: 5px;
+  background: rgba(31, 78, 168, 0.08);
+}
+.kab2-dni__den[data-l='1'],
+.kab2-dni__legenda i[data-l='1'] {
+  background: var(--color-heat-2, #c5d8f6);
+}
+.kab2-dni__den[data-l='2'],
+.kab2-dni__legenda i[data-l='2'] {
+  background: var(--color-heat-3, #8fb3ec);
+}
+.kab2-dni__den[data-l='3'],
+.kab2-dni__legenda i[data-l='3'] {
+  background: var(--color-heat-4, #4f82d8);
+}
+.kab2-dni__den[data-l='4'],
+.kab2-dni__legenda i[data-l='4'] {
+  background: var(--color-heat-5, #1f4ea8);
+}
+.kab2-dni__legenda {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--color-text-muted, #5b6472);
+}
+.kab2-dni__legenda i {
+  width: 14px;
+}
+
+/* Варианты и лента: строки-карточки, на телефоне — в два ряда. */
+.kab2-raboty,
+.kab2-lenta {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.kab2-raboty__row,
+.kab2-lenta__row {
+  display: grid;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(31, 78, 168, 0.1);
+  font-size: 14px;
+}
+.kab2-raboty__row:first-child,
+.kab2-lenta__row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.kab2-raboty__row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'title ball'
+    'kogda kogda';
+}
+.kab2-raboty__title {
+  grid-area: title;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.kab2-raboty__ball {
+  grid-area: ball;
+  font-variant-numeric: tabular-nums;
+}
+.kab2-raboty__ball b {
+  color: var(--color-accent-text, #b4581a);
+}
+.kab2-raboty__kogda {
+  grid-area: kogda;
+}
+.kab2-raboty__kogda,
+.kab2-lenta__kogda,
+.kab2-lenta__vremya {
+  font-size: 12px;
+  color: var(--color-text-muted, #5b6472);
+}
+.kab2-lenta__row {
+  grid-template-columns: 44px minmax(0, 1fr) auto auto 110px;
+}
+.kab2-lenta__no {
+  font-weight: 700;
+  color: var(--color-primary, #1f4ea8);
+}
+.kab2-lenta__ishod[data-ton='da'] {
+  color: var(--color-status-done, #1c7c4a);
+}
+.kab2-lenta__ishod[data-ton='net'] {
+  color: var(--color-accent-text, #b4581a);
+}
+.kab2-lenta__ishod[data-ton='tiho'] {
+  color: var(--color-text-muted, #5b6472);
+}
+.kab2-lenta__kogda {
+  text-align: right;
+}
+
+@media (max-width: 720px) {
+  .kab2__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .kab2-period {
+    width: 100%;
+  }
+  .kab2-period__btn {
+    flex: 1;
+    padding: 0 8px;
+  }
+  .kab2-lenta__row {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'no chto ishod'
+      'no kogda vremya';
+  }
+  .kab2-lenta__no {
+    grid-area: no;
+  }
+  .kab2-lenta__chto {
+    grid-area: chto;
+  }
+  .kab2-lenta__ishod {
+    grid-area: ishod;
+    text-align: right;
+  }
+  .kab2-lenta__kogda {
+    grid-area: kogda;
+    text-align: left;
+  }
+  .kab2-lenta__vremya {
+    grid-area: vremya;
+    text-align: right;
+  }
+}

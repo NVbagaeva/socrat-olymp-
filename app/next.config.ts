@@ -40,6 +40,15 @@ const legalReady = process.env.NEXT_PUBLIC_LEGAL_READY === '1';
 const ofertaPage =
   legalReady || process.env.NODE_ENV === 'development' || process.env.OFERTA_PREVIEW === '1';
 
+/* Кабинет, версия 2 (docs/plans/cabinet-v2.md): страницы журнала решения
+   (page.kab2.tsx) есть только в сборке с флагом журнала и включённым
+   входом. Без флага их адреса — 404, а кода в сборке нет. */
+const kab2Zhurnal =
+  process.env.NEXT_PUBLIC_KAB2_ZHURNAL === '1' &&
+  process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' &&
+  (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '') !== '' &&
+  (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '') !== '';
+
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 
@@ -50,6 +59,7 @@ const nextConfig: NextConfig = {
   pageExtensions: [
     ...(devPages ? ['dev.tsx'] : []),
     ...(ofertaPage ? ['oferta.tsx'] : []),
+    ...(kab2Zhurnal ? ['kab2.tsx'] : []),
     'tsx',
     'ts',
     'jsx',
@@ -94,13 +104,7 @@ const nextConfig: NextConfig = {
     // Кабинет, версия 2 (docs/plans/cabinet-v2.md, src/lib/flags.ts): журнал
     // решения задач и список разделов, где он включён («5,8» или «all»).
     // Без включённого входа флаг не действует.
-    KAB2_ZHURNAL:
-      process.env.NEXT_PUBLIC_KAB2_ZHURNAL === '1' &&
-      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' &&
-      (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '') !== '' &&
-      (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '') !== ''
-        ? '1'
-        : '0',
+    KAB2_ZHURNAL: kab2Zhurnal ? '1' : '0',
     KAB2_RAZDELY: /^(all|\d+(,\d+)*)$/.test(process.env.NEXT_PUBLIC_KAB2_RAZDELY ?? '')
       ? (process.env.NEXT_PUBLIC_KAB2_RAZDELY ?? '')
       : '',

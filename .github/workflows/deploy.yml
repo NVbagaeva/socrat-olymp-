@@ -70,6 +70,11 @@ jobs:
           NEXT_PUBLIC_AUTH_IN_HEADER: ${{ vars.NEXT_PUBLIC_AUTH_IN_HEADER }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          # Кабинет, версия 2 (docs/plans/cabinet-v2.md): журнал решения
+          # задач («1») и разделы, где он включён («5,8» или «all»).
+          # Переменных нет — журнала в сборке нет.
+          NEXT_PUBLIC_KAB2_ZHURNAL: ${{ vars.NEXT_PUBLIC_KAB2_ZHURNAL }}
+          NEXT_PUBLIC_KAB2_RAZDELY: ${{ vars.NEXT_PUBLIC_KAB2_RAZDELY }}
           # Оферта /oferta/ и реквизиты продавца в подвале: «1» — опубликовать.
           # С незаполненным app/src/content/legal/prodavets.json сборка
           # остановится (next.config.ts). Нет переменной — не публикуются.
