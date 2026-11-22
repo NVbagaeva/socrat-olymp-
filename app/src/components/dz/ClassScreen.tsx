@@ -25,6 +25,9 @@ import { DZ_HREF, inviteUrl } from '@/lib/dz/links';
 import { Confirm, NeedLogin, dzApi, errorCode, queryParam, useUser } from './common';
 import { ReytingKlassa } from '@/components/ustnyySchet/ReytingKlassa';
 import { USTNYY } from '@/content/ustnyySchet';
+import { PROGRESS } from '@/content/progressUchitel';
+import { PROGRESS_UCHITEL_ON } from '@/lib/zhurnal/config';
+import { progressKlassHref } from '@/lib/zhurnal/links';
 import './dz.css';
 
 const t = DZ.klass;
@@ -240,6 +243,12 @@ function ClassName({
         <Button size="sm" variant="ghost" onClick={() => setEdit(true)}>
           {t.rename}
         </Button>
+        {/* Прогресс класса (кабинет v2, docs/kabinet-zhurnal.md) — за флагом. */}
+        {PROGRESS_UCHITEL_ON ? (
+          <Link className="btn btn--secondary btn--sm" href={progressKlassHref(klass.id)}>
+            {PROGRESS.klass.knopka}
+          </Link>
+        ) : null}
       </header>
     );
   }

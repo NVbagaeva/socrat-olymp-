@@ -83,6 +83,9 @@ jobs:
           # Журнал решения задач (docs/kabinet-zhurnal.md): сценарий журнала
           # в check-auth.mjs идёт на сборке с ним.
           NEXT_PUBLIC_ZHURNAL: '1'
+          # Экраны прогресса (этап 1б): сценарий runProgress в check-auth.mjs.
+          NEXT_PUBLIC_PROGRESS_UCHITEL: '1'
+          NEXT_PUBLIC_PROGRESS_UCHENIK: '1'
         run: pnpm build
 
       - name: Поставить Chromium
@@ -95,6 +98,8 @@ jobs:
         working-directory: app
         env:
           NEXT_PUBLIC_ZHURNAL: '1'
+          NEXT_PUBLIC_PROGRESS_UCHITEL: '1'
+          NEXT_PUBLIC_PROGRESS_UCHENIK: '1'
         run: pnpm ${{ matrix.test }} ${{ matrix.shots }}
 
       # «← К карте» в обоих кабинетах (ученик — /kabinet/, учитель —
