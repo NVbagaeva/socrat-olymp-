@@ -308,6 +308,6 @@ export function JoinClassForm({
   );
 }
 
-const DZ_ERRORS_EMPTY = 'Введи код от репетитора.';
+const DZ_ERRORS_EMPTY = 'Введи код от учителя.';
 
 export { DZ_HREF };

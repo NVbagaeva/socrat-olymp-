@@ -1293,8 +1293,8 @@ async function runEnabled() {
 
     /* Кабинет репетитора: разделы с пустыми состояниями. */
     check(
-      (await page.locator('.kabinet__role').innerText()) === 'Кабинет репетитора',
-      'кабинет: «Кабинет репетитора»',
+      (await page.locator('.kabinet__role').innerText()) === 'Кабинет учителя',
+      'кабинет: «Кабинет учителя»',
     );
     /* Классы и ДЗ грузятся каждый сам (components/dz/KabinetDz.tsx). */
     await page.waitForFunction(() =>
@@ -1329,13 +1329,13 @@ async function runEnabled() {
       (await page.locator('dd[data-field="email"]').innerText()) === 'svoy@yandex.ru',
       'профиль: почта',
     );
-    check((await page.locator('[data-field="role"]').innerText()) === 'Репетитор', 'профиль: роль');
+    check((await page.locator('[data-field="role"]').innerText()) === 'Учитель', 'профиль: роль');
     const savedText = await page.locator('[data-section="saved"]').innerText();
     check(
       savedText.includes('просмотрено'),
       'профиль: факт «приветствие просмотрено» перенесён из браузера',
     );
-    check(savedText.includes('Тур для репетитора — пройден'), 'профиль: пройденный тур перенесён');
+    check(savedText.includes('Тур для учителя — пройден'), 'профиль: пройденный тур перенесён');
     check(savedText.includes('№8 «Вычисления» — перенесён'), 'профиль: перенос №8 виден');
     check(
       (await page.locator('[data-field="consent"]').innerText()).includes('редакция документов от'),
@@ -1706,8 +1706,8 @@ async function runEnabled() {
     await page.waitForSelector('.klass-list');
     const klass = await page.locator('[data-section="classes"]').innerText();
     check(
-      klass.includes('Тестовый класс') && klass.includes('Репетитор: Наталия В.'),
-      'ученик в классе: название класса и имя репетитора (в профиле)',
+      klass.includes('Тестовый класс') && klass.includes('Учитель: Наталия В.'),
+      'ученик в классе: название класса и имя учителя (в профиле)',
     );
     check(await noHorizontalScroll(page), 'профиль 390: горизонтальной прокрутки нет');
     await shot(page, 'kabinet-profil-390');
@@ -2070,8 +2070,8 @@ async function runEnabled() {
 
     /* Ученику форма выдачи недоступна. */
     await st2.page.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
-    await st2.page.waitForSelector('text=Эта страница — для репетитора.');
-    check(true, 'ДЗ: ученику форма выдачи — «Эта страница — для репетитора»');
+    await st2.page.waitForSelector('text=Эта страница — для учителя.');
+    check(true, 'ДЗ: ученику форма выдачи — «Эта страница — для учителя»');
 
     /* Репетитор: таблица, что вводил ученик, комментарий, работа над ошибками. */
     await tutor.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
@@ -2358,7 +2358,7 @@ async function runNoHeader() {
     await shot(page, 'bez-knopki-vhod-390');
     await login(page, 'svoy@yandex.ru', 'moy-dlinnyy-parol');
     check(
-      (await page.locator('.kabinet__role').innerText()) === 'Кабинет репетитора',
+      (await page.locator('.kabinet__role').innerText()) === 'Кабинет учителя',
       'вход по прямой ссылке ведёт в кабинет',
     );
     await page.click('.burger');

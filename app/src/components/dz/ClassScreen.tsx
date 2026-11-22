@@ -73,11 +73,11 @@ export function ClassScreen() {
     }
   }
 
-  if (user === null) return <NeedLogin text="Войдите в кабинет репетитора." />;
+  if (user === null) return <NeedLogin text="Войдите в кабинет учителя." />;
   if (user.role !== 'tutor') {
     return (
       <EmptyState
-        title="Эта страница — для репетитора."
+        title="Эта страница — для учителя."
         description="Ученик видит свой класс в кабинете."
       />
     );
