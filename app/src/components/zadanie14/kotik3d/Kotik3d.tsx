@@ -48,8 +48,11 @@ function mozhno3d(): boolean {
   }
 }
 
+/* Сайт только светлый (color-scheme: only light в base.css): тёмного
+   фона у сцены нет, чтобы котик не становился тёмным островом на
+   светлой странице. */
 function fonStranicy(): string {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? '#2b2321' : '#fbf1ea';
+  return '#fbf1ea';
 }
 
 interface Serdce {
@@ -205,9 +208,6 @@ export function Kotik3d({
     ro.observe(el);
     const vidimost = () => pusk();
     document.addEventListener('visibilitychange', vidimost);
-    const tema = window.matchMedia('(prefers-color-scheme: dark)');
-    const smenaTemy = () => scena.current?.fon(fonStranicy());
-    tema.addEventListener('change', smenaTemy);
     const rad = () => {
       scena.current?.rad(1);
       radDo.current = performance.now() + 2000;
@@ -241,7 +241,6 @@ export function Kotik3d({
       io.disconnect();
       ro.disconnect();
       document.removeEventListener('visibilitychange', vidimost);
-      tema.removeEventListener('change', smenaTemy);
       window.removeEventListener(KOTIK_RAD, rad);
       window.removeEventListener('deviceorientation', naklon);
       scena.current?.ubrat();

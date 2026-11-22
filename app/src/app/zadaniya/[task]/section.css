@@ -90,18 +90,13 @@
 .section-head__media {
   position: relative;
 }
-/* ── Верхний блок с иллюстрацией задания ─────────────────────────
-   Только у заданий с полем hero в конфиге (№12); остальные — прежний
-   график справа. Компьютер: колонка до 460px, картинка по центру,
-   без рамки и подложки (фон у неё прозрачный). */
-.section-head--hero {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
-  gap: var(--space-8);
-}
-.section-head--hero .section-head__media {
-  display: grid;
-  justify-items: center;
-}
+/* ── Иллюстрация задания ─────────────────────────────────────────
+   Только у заданий с полем hero в конфиге (№12); остальные разделы —
+   нарисованная обложка (RisunokRazdela) или чертёж. Место картинке
+   даёт колонка обложки шапки «Стеклянная сцена»
+   (components/tasks/stsena/stsena.css) — она одинаковая у всех
+   разделов, поэтому размеры задаёт колонка, а не картинка. Фон у
+   иллюстрации прозрачный: подложку и свечение даёт карточка шапки. */
 .zadanie-hero {
   display: block;
   width: 100%;
@@ -124,10 +119,6 @@
     animation: none;
     will-change: auto;
   }
-}
-.section-head--hero .section-head__note {
-  text-align: center;
-  margin-top: var(--space-1);
 }
 
 /* Надпись стоит под чертежом и смещена вправо: положение задаёт
@@ -469,21 +460,17 @@ a.subtopic--ikonka:focus-visible .subtopic__ico {
   .section-head--art .section-head__media {
     display: none;
   }
-  /* Планшет и телефон: компактная картинка под заголовком, чтобы
-     список разделов не уезжал вниз. */
-  .section-head--hero {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-4);
-  }
-  .section-head--hero .section-head__media {
-    max-width: none;
-  }
-  .section-head--hero .zadanie-hero {
+  /* Планшет: обложка — узкий столбик справа от текста, как у
+     нарисованных обложек (.rsz в risunok.css). Картинка держит в нём
+     свои пропорции и не растягивает колонку. */
+  .stsena__media .zadanie-hero {
+    grid-column: 1 / -1;
+    justify-self: center;
     width: auto;
-    max-width: 100%;
-    height: 200px;
+    height: var(--oblozhka-h, 180px);
+    aspect-ratio: 1536 / 1024;
   }
-  .section-head--hero .zadanie-hero img {
+  .stsena__media .zadanie-hero img {
     width: auto;
     height: 100%;
     max-width: 100%;
@@ -497,16 +484,21 @@ a.subtopic--ikonka:focus-visible .subtopic__ico {
   .subtopics-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-  /* Телефон: картинка ниже, подпись скрыта, анимации нет (батарея). */
-  .section-head--hero .zadanie-hero {
-    height: 170px;
+  /* Телефон: колонка обложки узкая (108px), поэтому картинка
+     вписывается в неё по ширине, а высоту берёт из своих пропорций —
+     иначе она вылезала бы за колонку. Анимации нет (батарея). */
+  .stsena__media .zadanie-hero {
+    width: 100%;
+    height: auto;
+    aspect-ratio: auto;
   }
-  .section-head--hero .zadanie-hero img {
+  .stsena__media .zadanie-hero img {
+    width: 100%;
+    height: auto;
+  }
+  .zadanie-hero img {
     animation: none;
     will-change: auto;
-  }
-  .section-head--hero .section-head__note {
-    display: none;
   }
   .section-head__note {
     text-align: left;

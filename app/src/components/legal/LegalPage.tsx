@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { legalDocs, legalPageText, type LegalDocId } from '@/content/legal/documents';
 import { legalBlocks } from '@/lib/legal/documents';
+import type { LegalBlock } from '@/lib/legal/markdown';
 import { operator, operatorFilled } from '@/lib/legal/operator';
 import { LegalText } from './LegalText';
 import './legal.css';
@@ -23,9 +24,36 @@ export function legalMetadata(id: LegalDocId): Metadata {
  */
 export function LegalPage({ id }: { id: LegalDocId }) {
   const doc = legalDocs[id];
-  const blocks = legalBlocks(id);
+  return (
+    <LegalLayout
+      title={doc.title}
+      currentHref={doc.href}
+      edition={operator.data}
+      draft={operatorFilled ? null : legalPageText.draft}
+      blocks={legalBlocks(id)}
+      others={Object.values(legalDocs).filter((d) => d.id !== id)}
+    />
+  );
+}
+
+/** Макет документа — общий для политики, согласия, соглашения и оферты. */
+export function LegalLayout({
+  title,
+  currentHref,
+  edition,
+  draft,
+  blocks,
+  others,
+}: {
+  title: string;
+  currentHref: string;
+  edition: string;
+  /** Плашка «черновик» над заголовком; null — документ готов. */
+  draft: string | null;
+  blocks: LegalBlock[];
+  others: { href: string; title: string }[];
+}) {
   const toc = blocks.flatMap((b) => (b.type === 'h' ? [{ id: b.id, text: b.text }] : []));
-  const others = Object.values(legalDocs).filter((d) => d.id !== id);
 
   const tocList = (
     <ol className="legal-toc__list">
@@ -39,18 +67,18 @@ export function LegalPage({ id }: { id: LegalDocId }) {
 
   return (
     <>
-      <SiteHeader currentHref={doc.href} />
+      <SiteHeader currentHref={currentHref} />
       <main className="legal">
         <div className="wrap">
-          {operatorFilled ? null : (
+          {draft === null ? null : (
             <p className="legal__draft" role="note">
-              {legalPageText.draft}
+              {draft}
             </p>
           )}
           <header className="legal__head">
-            <h1 className="legal__title">{doc.title}</h1>
+            <h1 className="legal__title">{title}</h1>
             <p className="legal__edition">
-              {legalPageText.edition} <time>{operator.data}</time>
+              {legalPageText.edition} <time>{edition}</time>
             </p>
           </header>
 
@@ -73,7 +101,7 @@ export function LegalPage({ id }: { id: LegalDocId }) {
                 <p className="legal-toc__t">{legalPageText.otherDocs}</p>
                 <ul>
                   {others.map((d) => (
-                    <li key={d.id}>
+                    <li key={d.href}>
                       <a href={d.href}>{d.title}</a>
                     </li>
                   ))}

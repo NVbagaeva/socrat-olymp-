@@ -86,6 +86,8 @@ for (const file of [
   path.join(src, 'zadanie3', 'podhod.ts'),
   path.join(src, 'sheetPlan.ts'),
   path.join(src, 'paths.ts'),
+  /* Уровень экзамена: его просит content/tasks.ts. */
+  path.join(src, 'level.ts'),
   path.join(src, 'generator', 'obshchiy', 'bank.ts'),
   path.join(src, 'generator', 'obshchiy', 'klyuchi.ts'),
   path.join(src, 'vychisleniya', 'rng.ts'),
@@ -93,11 +95,31 @@ for (const file of [
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     fileName: file,
-  }).outputText.replace(/require\("@\/lib\//g, `require("${out.replace(/\\/g, '/')}/`);
+  }).outputText
+    .replace(/require\("@\/lib\//g, `require("${out.replace(/\\/g, '/')}/`)
+    /* lib/level.ts берёт число заданий профиля из структуры экзамена. */
+    .replace(
+      /require\("@\/content\/struktura"\)/g,
+      `require("${out.replace(/\\/g, '/')}/struktura-ekzamena.js")`,
+    );
   const target = path.join(out, path.relative(src, file).replace(/\.ts$/, '.js'));
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, js);
 }
+
+/* Структура экзамена (content/struktura.js) — простой ES-модуль: во
+   временную папку кладётся его перевод в CommonJS. */
+fs.writeFileSync(
+  path.join(out, 'struktura-ekzamena.js'),
+  ts.transpileModule(fs.readFileSync(path.join(root, 'src', 'content', 'struktura.js'), 'utf8'), {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      allowJs: true,
+    },
+    fileName: 'struktura.js',
+  }).outputText,
+);
 
 const {
   bezPodskazki,
@@ -325,12 +347,21 @@ if (katexPut === undefined) {
      на ровном месте. Лишние файлы просто лежат рядом — требуются
      только те, что кто-то импортирует. */
   const contentDir = path.join(root, 'src', 'content');
-  for (const name of fs.readdirSync(contentDir)) {
-    if (name.endsWith('.ts') || name.endsWith('.js')) {
-      const target = path.join(alias, 'content', name.replace(/\.ts$/, '.js'));
-      perevesti(path.join(contentDir, name), target);
+  /* С подпапками: content/tasks.ts берёт список заданий базы из
+     content/baza/tasks.ts. */
+  const perevestiPapku = (dir, rel) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const from = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        perevestiPapku(from, path.join(rel, entry.name));
+      } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
+        const target = path.join(alias, 'content', rel, entry.name.replace(/\.ts$/, '.js'));
+        fs.mkdirSync(path.dirname(target), { recursive: true });
+        perevesti(from, target);
+      }
     }
-  }
+  };
+  perevestiPapku(contentDir, '');
   for (const [file, target] of [
     ['lib/sheet/marks.js', path.join(out, 'sheet', 'marks.js')],
     ['lib/sheet/typography.js', path.join(out, 'sheet', 'typography.js')],

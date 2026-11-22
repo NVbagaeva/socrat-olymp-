@@ -42,6 +42,21 @@ export const legalDocs: Record<LegalDocId, LegalDoc> = {
   },
 };
 
+/**
+ * Договор-оферта. Отдельно от legalDocs: те три документа принимаются
+ * при регистрации и перечисляются в кабинете, а оферта — при оплате и
+ * опубликована только с флагом NEXT_PUBLIC_LEGAL_READY (lib/legal/prodavets.ts).
+ */
+export const ofertaDoc = {
+  href: '/oferta/',
+  title: 'Договор-оферта',
+  linkLabel: 'Оферта',
+  description:
+    'Условия оплаты доступа к сайту «Будет на ЕГЭ»: тарифы, пробный доступ, срок, возврат денег и реквизиты исполнителя.',
+  /** Раздел «Возврат денег» — на него ссылаются тарифы. */
+  yakorVozvrata: 'razdel-8',
+} as const;
+
 /** Якоря вариантов на странице согласия. */
 export const soglasieAnchors = {
   vzroslyy: 'variant-a',
@@ -54,4 +69,6 @@ export const legalPageText = {
   otherDocs: 'Другие документы',
   draft:
     'Черновик: в файле operator.json не заполнены ФИО, почта или дата редакции. На сайт такая версия не попадёт — сборка остановится.',
+  draftOferta:
+    'Черновик на вычитку: страница не опубликована. Реквизиты — в app/src/content/legal/prodavets.json, публикация — флагом NEXT_PUBLIC_LEGAL_READY=1.',
 };

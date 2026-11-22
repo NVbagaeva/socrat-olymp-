@@ -1,0 +1,89 @@
+{
+  "_chto": "localStorage ученика, решавшего №1 до редизайна: счётчики тренажёра (budetege:planimetriya-1:v1, до PR #340), опорные задачи (budetege:planimetriya-1:opornye:v1) и незаконченная тренировка общей панели фильтров (budetege:trainer:1:session). Записано прежним кодом: lib/progressStore.ts теми же вызовами, что делала карточка прежнего тренажёра, mikroZapisat и perenestiPauzu1. Нужен scripts/check-progress-1.mjs и браузерной проверке переноса.",
+  "budetege:planimetriya-1:v1": {
+    "kinds": {
+      "p01": {
+        "done": 2,
+        "right": 2,
+        "seconds": 79
+      },
+      "p05": {
+        "done": 2,
+        "right": 1,
+        "seconds": 215
+      },
+      "p13": {
+        "done": 1,
+        "right": 1,
+        "seconds": 64
+      },
+      "p24": {
+        "done": 1,
+        "right": 0,
+        "seconds": 150
+      },
+      "p37": {
+        "done": 1,
+        "right": 1,
+        "seconds": 70
+      },
+      "p45": {
+        "done": 1,
+        "right": 0,
+        "seconds": 88
+      },
+      "p58": {
+        "done": 1,
+        "right": 1,
+        "seconds": 102
+      },
+      "p49": {
+        "done": 1,
+        "right": 1,
+        "seconds": 130
+      }
+    },
+    "mistakes": [
+      "p05|b17",
+      "p05|a1503",
+      "p24|b90",
+      "p45|b187",
+      "p49|b211"
+    ],
+    "outcomes": {
+      "p01|b1": "right",
+      "p01|b3": "right",
+      "p05|b17": "wrong",
+      "p05|a1503": "right",
+      "p13|b49": "right",
+      "p24|b90": "wrong",
+      "p37|a4700": "right",
+      "p45|b187": "wrong",
+      "p58|a6805": "right",
+      "p49|b211": "right"
+    }
+  },
+  "budetege:planimetriya-1:opornye:v1": {
+    "kinds": {
+      "P1-1": {
+        "done": 3,
+        "right": 2,
+        "seconds": 0
+      },
+      "P1-3": {
+        "done": 1,
+        "right": 0,
+        "seconds": 0
+      }
+    },
+    "mistakes": [
+      "P1-3:4"
+    ],
+    "outcomes": {
+      "P1-1:1": "right",
+      "P1-1:2": "right",
+      "P1-3:4": "revealed"
+    }
+  },
+  "budetege:trainer:1:session": "{\"schemaVersion\":2,\"scope\":\"1\",\"id\":\"mweyd8l6-vmh11l\",\"createdAt\":1760000000000,\"updatedAt\":1794572895930,\"rev\":1,\"writer\":\"mweyd8km-a4do6m32\",\"paused\":true,\"activeMs\":0,\"total\":3,\"ui\":{\"index\":1,\"marks\":{\"0\":\"right\"},\"tried\":{},\"order\":null,\"z\":{\"0\":{\"v\":\"\",\"oshibok\":0,\"proverka\":null,\"itog\":\"right\",\"podskazka\":false,\"shagi\":{},\"razbor\":false,\"pohozhaya\":0,\"sek\":0}},\"s\":null},\"payload\":{\"v\":1,\"filtr\":\"\",\"rezhim\":\"bez\",\"seed\":\"perenos\",\"items\":[{\"k\":\"p10|b37\"},{\"k\":\"p23|a3302\"},{\"k\":\"p33|n\",\"seed\":\"staryy-seed\"}]}}"
+}

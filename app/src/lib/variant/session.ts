@@ -10,6 +10,7 @@ import { buildVariantSet } from './build';
 import { decodeCode, encodeCode, newSeed } from './code';
 import { loadAdapters } from './load';
 import { SUBTYPE_IDS } from './sections';
+import { VARIANT_NUMBERS } from './struktura';
 import {
   EGE_NUMBERS,
   MAX_VARIANTS,
@@ -22,7 +23,7 @@ import {
 
 export function defaultConfig(): VariantConfig {
   return {
-    tasks: [...EGE_NUMBERS],
+    tasks: [...VARIANT_NUMBERS],
     subtypes: {},
     source: 'mix',
     stars: [],
@@ -54,7 +55,7 @@ export function sanitizeConfig(raw: Partial<VariantConfig> | null): VariantConfi
   const d = defaultConfig();
   if (raw === null) return d;
   const tasks = Array.isArray(raw.tasks)
-    ? EGE_NUMBERS.filter((n) => (raw.tasks as unknown[]).includes(n))
+    ? VARIANT_NUMBERS.filter((n) => (raw.tasks as unknown[]).includes(n))
     : d.tasks;
   const subtypes: VariantConfig['subtypes'] = {};
   if (raw.subtypes !== undefined && typeof raw.subtypes === 'object' && raw.subtypes !== null) {

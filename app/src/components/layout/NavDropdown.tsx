@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import Link from 'next/link';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { NavGroup } from '@/content/site';
+import { NavIcon } from '@/components/ui/NavIcons';
 
 /** Сколько мышь может побыть вне списка, прежде чем он закроется. */
 const HOVER_CLOSE_MS = 160;
@@ -18,7 +19,8 @@ export interface NavDropdownProps {
  * Пункт широкой шапки со списком ссылок («Варианты»). Открывается
  * щелчком, с клавиатуры (Enter, пробел, стрелка вниз) и наведением мыши.
  * Закрывается по Esc, щелчку мимо, уходу фокуса и выбору ссылки.
- * В бургер-меню групп нет: там те же ссылки подряд (navLinks).
+ * У каждой ссылки — значок и пояснение, первая (главное действие)
+ * выделена. В бургер-меню те же пункты собраны иначе (site.menu).
  */
 export function NavDropdown({ group, currentHref }: NavDropdownProps) {
   const [open, setOpen] = useState(false);
@@ -131,7 +133,13 @@ export function NavDropdown({ group, currentHref }: NavDropdownProps) {
               aria-current={item.href === currentHref ? 'page' : undefined}
               onClick={() => setOpen(false)}
             >
-              {item.label}
+              <span className="nav-drop__ico">
+                <NavIcon name={item.icon} />
+              </span>
+              <span className="nav-drop__text">
+                <span className="nav-drop__label">{item.label}</span>
+                <span className="nav-drop__hint">{item.hint}</span>
+              </span>
             </Link>
           </li>
         ))}

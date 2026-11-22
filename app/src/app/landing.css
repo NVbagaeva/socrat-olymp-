@@ -177,8 +177,8 @@
 
 .hero__eyebrow {
   margin-bottom: var(--space-5);
-  font-size: 13px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 19px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -191,12 +191,33 @@
   letter-spacing: -0.025em;
   color: var(--color-text);
 }
+/* Жёрдочка с попугайчиком — в конце последней строки заголовка
+   (Zherdochka.tsx, стили — components/landing/zherdochka.css). Слово и
+   жёрдочка в одной неразрывной обёртке: вместе переносятся, и птица
+   всегда на уровне своей строки. */
+.hero__perch-wrap {
+  white-space: nowrap;
+}
+
 .hero__lead {
   max-width: 56ch;
   margin-top: var(--space-6);
-  font-size: 19px;
+  font-size: 18px;
   line-height: 1.55;
   color: var(--color-text-secondary);
+}
+
+/* «Начать бесплатно» под лидом — только на телефоне, во всю ширину
+   колонки текста; от 768px эта кнопка в шапке. */
+.hero__start {
+  display: none;
+}
+@media (max-width: 767.98px) {
+  .hero__start {
+    display: flex;
+    width: 100%;
+    margin-top: var(--space-5);
+  }
 }
 
 /* Двери: синее стекло ученику, тёплое — учителю. */
@@ -224,21 +245,59 @@
     transform 220ms var(--ease),
     box-shadow 220ms var(--ease);
 }
+.door--uchenik,
+.door--uchitel {
+  border-color: transparent;
+  color: #fff;
+}
+/* Двери залиты так же, как на главной профиля (sumerki.css, .sm-dver):
+   ученику — синяя, учителю — чистая оранжевая, тот же блик и свечение. */
 .door--uchenik {
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgb(61 121 224 / 0.18), transparent 60%), var(--glass-bg);
+  background: linear-gradient(180deg, var(--sumerki-knopka-siniy-1), var(--sumerki-knopka-siniy-2));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.32),
+    inset 0 -1px 0 rgb(0 0 0 / 0.14),
+    0 0 28px -4px rgb(140 185 255 / 0.7),
+    0 16px 36px -12px rgb(16 40 110 / 0.7);
 }
 .door--uchitel {
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgb(245 160 74 / 0.22), transparent 60%), var(--glass-bg);
+  /* Чистый оранжевый, как «Я преподаю» на главной профиля и полоса
+     «Банк заданий»: насыщеннее слева, под текстом, светлее к стрелке. */
+  background: linear-gradient(105deg, #ea5c0a 0%, #f2701c 50%, #fb9442 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.22),
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 0 30px -6px rgb(251 140 60 / 0.65),
+    0 16px 36px -14px rgb(234 92 10 / 0.55);
+  text-shadow: 0 1px 2px rgb(150 50 0 / 0.35);
 }
 .door:hover,
 .door:focus-visible {
   transform: translateY(-3px);
-  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.door--uchenik:hover,
+.door--uchenik:focus-visible {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -1px 0 rgb(0 0 0 / 0.14),
+    0 0 40px -2px rgb(160 200 255 / 0.9),
+    0 22px 44px -12px rgb(16 40 110 / 0.75);
+}
+.door--uchitel:hover,
+.door--uchitel:focus-visible {
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.26),
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    0 0 42px -4px rgb(251 140 60 / 0.85),
+    0 22px 44px -14px rgb(234 92 10 / 0.6);
+}
+.door:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
 }
 .door__title {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.25;
   font-weight: 620;
   letter-spacing: -0.01em;
@@ -246,19 +305,16 @@
 .door__text {
   font-size: 14px;
   line-height: 1.45;
-  color: var(--color-text-secondary);
+  color: rgb(255 255 255 / 0.94);
 }
 .door__action {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   margin-top: var(--space-2);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--color-primary);
-}
-.door--uchitel .door__action {
-  color: var(--color-accent-text);
+  color: #fff;
 }
 .door__action svg {
   width: 18px;
@@ -299,7 +355,7 @@
 }
 .hero__fact dd {
   margin: 0;
-  font-size: 32px;
+  font-size: 30px;
   line-height: 1.15;
   font-weight: 640;
   letter-spacing: -0.02em;
@@ -363,32 +419,30 @@ section.band {
   background: var(--gloss);
   box-shadow: var(--gloss-shadow);
   color: var(--color-text-inverse);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
 .step h3 {
   margin-bottom: var(--space-2);
-  font-size: 19px;
+  font-size: 18px;
   line-height: 1.3;
   font-weight: 620;
 }
 .step p {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 23px;
   color: var(--color-text-secondary);
 }
 
-/* Банк. Четыре колонки по 300px с зазорами 16 требуют 1248px под
-   сетку, общий контейнер даёт 1216 — блок расширяется на 32px. */
-#bank .wrap {
-  max-width: calc(var(--w-container) + var(--space-8));
-}
-#bank .aura__spot--blue {
+/* Банк — в общем контейнере, как герой и «Мы взяли на себя…»: прежнее
+   расширение на 32 px (под четыре колонки, которых на деле три)
+   сдвигало его левый край на 16 px от остальной страницы. */
+.band--bank .aura__spot--blue {
   top: 30%;
   right: -260px;
 }
-#bank .aura__spot--orange {
+.band--bank .aura__spot--orange {
   right: auto;
   left: -200px;
   bottom: 10%;
@@ -459,7 +513,7 @@ section.band {
 /* Ключевая мысль блока — под сеткой, обычным вторичным текстом. */
 .bank-note {
   margin-top: var(--space-8);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 24px;
   color: var(--color-text-secondary);
   max-width: 72ch;
@@ -495,7 +549,7 @@ section.band {
   margin-bottom: var(--space-4);
 }
 .split p {
-  font-size: 17px;
+  font-size: 18px;
   line-height: 27px;
   color: var(--color-text-secondary);
   max-width: 46ch;
@@ -515,7 +569,7 @@ section.band {
 .checklist li {
   display: flex;
   gap: var(--space-3);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 23px;
 }
 .checklist svg {
@@ -653,18 +707,21 @@ section.band {
       'kristall'
       'facts';
     row-gap: var(--space-5);
-    padding: var(--space-8) var(--space-4) var(--space-10);
+    /* Поля 20 px — как у .wrap остальных блоков: край не скачет. */
+    padding: var(--space-8) var(--space-5) var(--space-10);
   }
   .hero__eyebrow {
     margin-bottom: var(--space-3);
   }
+  /* 32 px вместо 38: заголовок в три строки, а не в четыре по два
+     слова, — двери поднимаются на первый экран. */
   .hero__title {
-    font-size: 2.375rem;
-    line-height: 1.08;
+    font-size: 2rem;
+    line-height: 1.12;
   }
   .hero__lead {
     margin-top: var(--space-4);
-    font-size: 17px;
+    font-size: 18px;
   }
   .hero__kristall {
     max-width: 285px;
@@ -678,17 +735,20 @@ section.band {
     border-radius: 18px;
   }
   .door__title {
-    font-size: 19px;
+    font-size: 18px;
   }
   .hero__fact {
     padding: var(--space-4) var(--space-3);
   }
+  /* Число не переносится и не вылезает из ячейки: кегль от ширины
+     экрана, на 320 — 20 px. */
   .hero__fact dd {
-    font-size: 24px;
+    font-size: clamp(20px, 6vw, 24px);
+    white-space: nowrap;
   }
   .hero__fact dt {
-    font-size: 12px;
-    line-height: 16px;
+    font-size: 14px;
+    line-height: 17px;
   }
   .aura__spot--blue {
     width: 520px;
@@ -708,20 +768,33 @@ section.band {
     font-size: 1.625rem;
     line-height: 1.2;
   }
+  /* Телефон: обещания — строками в одну колонку. В две колонки на
+     карточку оставалось 128 px: «Самостоятельные» вылезало за край, а
+     текст шёл по два слова в строке. Номер — слева, текст — справа. */
   .steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3);
   }
   .step {
-    padding: var(--space-4);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-4);
+    align-items: start;
+    padding: var(--space-4) var(--space-5);
     border-radius: 16px;
   }
+  .step b {
+    grid-row: 1 / 3;
+    margin-bottom: 0;
+  }
   .step h3 {
-    font-size: 16px;
+    margin-bottom: var(--space-1);
+    font-size: 18px;
+    line-height: 1.3;
   }
   .step p {
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 16px;
+    line-height: 22px;
   }
   .split h3 {
     font-size: 24px;
@@ -733,25 +806,6 @@ section.band {
   .cta h2 {
     font-size: 30px;
     line-height: 36px;
-  }
-}
-
-/* Телефон: логотип в одну строку — кнопка в шапке плотнее. */
-@media (max-width: 479.98px) {
-  .glavnaya .site-head--steklo .logo {
-    white-space: nowrap;
-  }
-  .glavnaya .site-head--steklo .site-head__cta .btn {
-    padding: 0 var(--space-3);
-    font-size: 14px;
-  }
-}
-/* Уже 380px знак, название, кнопка и бургер в строку не входят — остаётся
-   знак. Название по-прежнему в ссылке (кегль 0): его читает скринридер. */
-@media (max-width: 379.98px) {
-  .glavnaya .site-head--steklo .logo {
-    gap: 0;
-    font-size: 0;
   }
 }
 
@@ -803,5 +857,288 @@ section.band {
   .glavnaya .step,
   .glavnaya .task-card--bank:not(.task-card--soon) {
     background: var(--glass-bg-strong);
+  }
+}
+
+/* ══ Добавки главной (docs/audit-prodazhi.md, волна 2) ══════════════
+   На боевой главной пока выключены (Glavnaya, dobavki). Варианты
+   размещения — /styleguide/prodazhi/. */
+
+/* Тихая ссылка на тарифы в первом экране: текст, не кнопка. */
+.hero-tarify {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.hero-tarify svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 200ms var(--ease);
+}
+.hero-tarify:hover svg {
+  transform: translateX(3px);
+}
+.hero-tarify--pod-dveryami {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: var(--space-1);
+}
+/* Ссылка на тарифы и плашка автора под лидом — одним рядом по центру
+   высоты; на телефоне — столбиком под кнопкой «Начать бесплатно». */
+.hero__dop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  margin-top: var(--space-6);
+}
+@media (max-width: 767.98px) {
+  .hero__dop {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .hero__dop .hero-tarify {
+    justify-content: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-tarify svg {
+    transition: none;
+  }
+}
+
+/* Плашка автора отдельной полосой. */
+.avtor-polosa {
+  padding: var(--space-6) 0 var(--space-2);
+}
+.avtor-polosa .wrap {
+  display: flex;
+  justify-content: center;
+}
+
+/* Короткий блок цен. */
+.tk__karty {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tk__karta {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: 24px 24px 22px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.tk__karta--uchenik {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(61 121 224 / 0.16), transparent 60%), var(--glass-bg);
+}
+.tk__karta--repetitor {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(245 160 74 / 0.2), transparent 60%), var(--glass-bg);
+}
+.tk__nazvanie {
+  font-size: 19px;
+  line-height: 1.25;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.tk__tsena {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.tk__tsena b {
+  font-size: 34px;
+  line-height: 1.1;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.tk__tsena span {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+.tk__punkty {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-4) 0 0;
+  border-top: 1px solid rgb(31 95 208 / 0.1);
+  list-style: none;
+}
+.tk__punkty li {
+  display: flex;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.tk__punkty svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tk__karta--repetitor .tk__punkty svg {
+  stroke: var(--color-accent-text);
+}
+.tk__niz {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  margin-top: var(--space-8);
+}
+.tk__ege {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+}
+@media (max-width: 899.98px) {
+  .tk__karty {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .tk__karta {
+    padding: var(--space-5);
+    border-radius: 18px;
+  }
+}
+
+/* ── Разделитель «Банк заданий» (components/landing/BankRazdelitel.tsx)
+   Между карточками вариантов и сеткой заданий. Сверху — заметно больше
+   воздуха, чем между карточками (16 px): читается «новый раздел»;
+   снизу до сетки — меньше. Чистый яркий оранжевый без коричневого:
+   от мандаринового слева к абрикосовому справа; сверху справа — мягкий
+   блик, по кромке — светлая линия стекла. Крупный белый заголовок — на
+   левом, самом насыщенном краю (контраст 3,5 : 1, крупный текст);
+   мелкий счётчик — на светлой плашке оранжевыми буквами (5 : 1). Якорь
+   не уходит под липкую шапку. */
+.bank-razd {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  scroll-margin-top: 96px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-6);
+  margin: 64px 0 var(--space-6);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-8);
+  border-radius: 24px;
+  /* Стекло: оранжевая заливка полупрозрачная — сквозь неё видны
+     свечения фона, размытые backdrop-filter; сверху — глянцевый
+     отсвет, по кромке — светлая линия. Слева, под заголовком, заливка
+     плотнее: белый текст читается. */
+  background:
+    radial-gradient(130% 80% at 60% -30%, rgb(255 255 255 / 0.34), transparent 62%),
+    linear-gradient(
+      105deg,
+      rgb(234 92 10 / 0.92) 0%,
+      rgb(244 116 32 / 0.82) 40%,
+      rgb(251 148 66 / 0.68) 75%,
+      rgb(255 180 107 / 0.56) 100%
+    );
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    inset 0 -1px 0 rgb(200 70 0 / 0.18),
+    0 0 36px -10px rgb(251 140 60 / 0.55),
+    0 18px 36px -18px rgb(234 92 10 / 0.45);
+  color: var(--white);
+}
+.bank-razd__blik {
+  position: absolute;
+  z-index: -1;
+  right: -60px;
+  top: -140px;
+  width: 420px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 236 214 / 0.55),
+    rgb(255 220 180 / 0.18) 60%,
+    transparent
+  );
+  pointer-events: none;
+}
+.bank-razd__z {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--white);
+}
+.bank-razd__schet {
+  display: inline-block;
+  margin: var(--space-1) 0 0;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 0.92);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #b9460a;
+  font-variant-numeric: tabular-nums;
+}
+.bank-razd__tabs .level-tabs {
+  margin-bottom: 0;
+  border-color: rgb(255 255 255 / 0.7);
+  box-shadow: 0 8px 20px -12px rgb(180 70 10 / 0.45);
+}
+.bank-razd__tabs .level-tabs__range {
+  white-space: nowrap;
+}
+.bank-razd :focus-visible {
+  outline-color: var(--white);
+}
+
+@media (max-width: 760px) {
+  .bank-razd {
+    margin-top: 48px;
+    padding: var(--space-3);
+    padding-left: var(--space-5);
+  }
+  .bank-razd__z {
+    font-size: 1.5rem;
+  }
+  /* Блик — в самом углу: на узкой полосе он иначе ложится под счётчик. */
+  .bank-razd__blik {
+    right: -220px;
+    top: -240px;
+  }
+  .bank-razd__tabs {
+    flex: 1 1 100%;
+  }
+  .bank-razd__tabs .level-tabs__seg {
+    padding-inline: var(--space-2);
   }
 }

@@ -24,6 +24,7 @@ const MODULES: Record<EgeNo, () => Promise<{ section: SectionModule }>> = {
   11: () => import('./adapters/z11'),
   12: () => import('./adapters/z12'),
   13: () => import('./adapters/z13'),
+  21: () => import('./adapters/z21'),
 };
 
 const ready = new Map<EgeNo, Promise<SectionAdapter>>();

@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * Хранилища прогресса задания №2: тренажёр и тренировки навыков.
+ * Хранилища прогресса задания №2: тренировки навыков (опорные задачи).
  *
- * Оба — общая фабрика lib/progressStore.ts со своими ключами: сброс
+ * Общая фабрика lib/progressStore.ts со своими ключами: сброс
  * здесь не трогает другие задания. Ответов в хранилищах нет: счётчики,
  * идентификаторы задач и чем каждая закрылась.
  *
@@ -16,8 +16,11 @@
 import { PROGRESS_2 } from '@/content/vektory';
 import { createProgressStore, type StoreProgress } from '../progressStore';
 
-/** Тренажёр: счётчики по прототипам и список ошибок. */
-export const progress2 = createProgressStore('budetege:vektory-2:v1');
+/*
+ * Тренажёр — общий журнал попыток (lib/vektory/trening/progress.ts).
+ * Прежний ключ тренажёра budetege:vektory-2:v1 больше не пишется: он
+ * сворачивается в журнал при первом чтении и остаётся на месте.
+ */
 
 /** Тренировки навыков: исход каждой микрозадачи. */
 export const opornye2 = createProgressStore('budetege:vektory-2:opornye:v1');

@@ -5,7 +5,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { MAX_TOTAL } from '@/content/variantOnline/bally';
 import { CHAST2_TEXT } from '@/content/variantOnline/chast2Text';
-import { TESTOVYJ_33 } from '@/content/variantOnline/shkala';
+import { TESTOVYJ_RABOTY } from '@/content/variantOnline/shkala';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
@@ -16,6 +16,7 @@ import { scoreWork } from '@/lib/variant/online/proverka';
 import type { ResultData } from '@/lib/variant/online/resultCode';
 import type { VariantTask } from '@/lib/variant/types';
 import { dateText, secondsText } from './format';
+import { podpis1 } from '@/lib/variant/struktura';
 
 export interface WorkResultProps {
   tasks: readonly VariantTask[];
@@ -175,7 +176,7 @@ export function WorkResult({
                         aria-label={`${T.result.razbor}: №${t.egeNumber}`}
                         onClick={() => setOpen(open === i ? null : i)}
                       >
-                        {t.egeNumber}
+                        {podpis1(t.egeNumber)}
                       </button>
                     </th>
                     <td>
@@ -232,7 +233,7 @@ export function WorkResult({
           <ul>
             {links.map((l) => (
               <li key={l.opornye}>
-                <span className="vo-links__no">№{l.no}</span>
+                <span className="vo-links__no">№{podpis1(l.no)}</span>
                 <a href={l.opornye}>{T.result.opornye}</a>
                 <a href={l.trenazher}>{T.result.trenazher}</a>
               </li>
@@ -292,7 +293,7 @@ function Itog2({
       {gotovo && max === MAX_TOTAL ? (
         <div className="vo-score__main" data-testid="vo-test">
           <span className="vo-score__label">{T.result.test}</span>
-          <span className="vo-score__value">{TESTOVYJ_33[vsego] ?? 100}</span>
+          <span className="vo-score__value">{TESTOVYJ_RABOTY[vsego] ?? 100}</span>
           <span className="vo-tag vo-tag--approx" title={T2.approx33}>
             {T.result.approx}
           </span>

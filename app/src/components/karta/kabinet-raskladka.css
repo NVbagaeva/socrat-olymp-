@@ -1,0 +1,185 @@
+/* Раскладка кабинета с картой: левое меню и содержимое под шапкой сайта. Префикс kab-. */
+
+.kab {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: var(--space-6);
+  min-height: calc(100vh - var(--h-site-head));
+  padding: var(--space-6) var(--space-6) var(--space-10);
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgb(255 255 255 / 0.9), transparent 60%),
+    linear-gradient(180deg, #eef5ff 0%, #e4effc 100%);
+}
+
+.kab-menu {
+  position: sticky;
+  top: calc(var(--h-site-head) + var(--space-4));
+  align-self: start;
+}
+.kab-menu__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.kab-menu__spisok {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.kab-menu__punkt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: var(--navy-800);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  white-space: nowrap;
+  transition: background var(--dur-hover) var(--ease);
+}
+.kab-menu__punkt svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+.kab-menu__punkt:hover {
+  background: rgb(255 255 255 / 0.6);
+}
+.kab-menu__punkt.is-tekushchiy {
+  background: var(--glass-bg-strong);
+  color: var(--blue-700);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+
+.kab-skhemy {
+  --stk-r-card: 20px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'kartinka kartinka'
+    'tekst strelka';
+  gap: var(--space-3);
+  padding: var(--space-4);
+  text-decoration: none;
+  color: inherit;
+  align-items: end;
+}
+.kab-skhemy__kartinka {
+  grid-area: kartinka;
+  height: 96px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #dbeafe, #f5f9ff 60%, #ffe9d6);
+  display: grid;
+  place-items: center;
+}
+.kab-skhemy__kartinka svg {
+  width: 84px;
+  height: 84px;
+}
+.kab-skhemy__tekst {
+  grid-area: tekst;
+  display: grid;
+  gap: 2px;
+}
+.kab-skhemy__tekst b {
+  font-size: 0.9375rem;
+  color: var(--navy-900);
+}
+.kab-skhemy__tekst span {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+.kab-skhemy__strelka {
+  grid-area: strelka;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.kab-telo {
+  min-width: 0;
+}
+
+/* Планшет и телефон: меню — полоска вкладок над содержимым. */
+@media (max-width: 1023.98px) {
+  .kab {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4) var(--space-6);
+    min-height: 0;
+  }
+  .kab-menu {
+    position: relative;
+    top: auto;
+  }
+  .kab-menu__nav {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .kab-menu__nav::-webkit-scrollbar {
+    display: none;
+  }
+  .kab-menu__spisok {
+    display: flex;
+    gap: var(--space-1);
+  }
+  .kab-menu__punkt {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    background: rgb(255 255 255 / 0.55);
+  }
+  .kab-menu__punkt svg {
+    width: 18px;
+    height: 18px;
+  }
+  .kab-skhemy {
+    --stk-r-card: 14px;
+    grid-template-columns: auto auto;
+    grid-template-areas: 'kartinka tekst';
+    gap: var(--space-2);
+    padding: 6px 12px 6px 6px;
+    align-items: center;
+    flex: none;
+  }
+  .kab-skhemy__kartinka {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+  }
+  .kab-skhemy__kartinka svg {
+    width: 26px;
+    height: 26px;
+  }
+  .kab-skhemy__tekst b {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  .kab-skhemy__tekst span,
+  .kab-skhemy__strelka {
+    display: none;
+  }
+}
+@media (max-width: 767.98px) {
+  .kab {
+    padding: var(--space-3) var(--space-3) var(--space-5);
+  }
+}

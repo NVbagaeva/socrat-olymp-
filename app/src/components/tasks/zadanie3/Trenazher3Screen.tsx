@@ -248,7 +248,7 @@ export function Trenazher3Screen({
     if (right) {
       if (!zakryta) {
         setMarks({ ...marks, [index]: 'right' });
-        remember(tekushchaya, failed ? 'wrong' : 'right');
+        remember(tekushchaya, failed ? 'wrong' : hintOpen ? 'hinted' : 'right');
       }
     } else {
       setFailed(true);

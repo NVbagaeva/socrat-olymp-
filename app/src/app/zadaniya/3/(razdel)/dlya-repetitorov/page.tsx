@@ -21,7 +21,9 @@ export default function Page() {
   const base = `${ZADANIYA}/3`;
   return (
     <>
-      <ZaglushkaStereo no="3" vkladka={VKLADKA} />
+      <div className="stk-glass z3r-zaglushka">
+        <ZaglushkaStereo no="3" vkladka={VKLADKA} />
+      </div>
       {/* Листы — у разделов с многогранниками: их чертежи — сценарии. */}
       <Pechat3Panel
         razdely={RAZDELY.filter((r) => r.prototipy.some(estScenariy)).map((r) => ({

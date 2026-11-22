@@ -4,3 +4,5 @@ out
 node_modules
 pnpm-lock.yaml
 src/fonts
+# Снимок чертежей «до» для /styleguide/chertezhi-18 — данные, не код
+src/app/styleguide/chertezhi-18/do.json

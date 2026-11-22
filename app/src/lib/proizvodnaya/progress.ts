@@ -10,7 +10,10 @@
 import { createProgressStore } from '../progressStore';
 
 /** Тренажёр: счётчики по прототипам и список ошибок. */
-export const progress9 = createProgressStore('budetege:proizvodnaya-9:v1');
+export const progress9 = createProgressStore(
+  'budetege:proizvodnaya-9:v1',
+  'budetege:proizvodnaya-9:log:v1',
+);
 
 /** Опорные задачи: блок → номера решённых микрозадач. */
 export const PREP9_KEY = 'budetege:proizvodnaya-9:prep:v1';

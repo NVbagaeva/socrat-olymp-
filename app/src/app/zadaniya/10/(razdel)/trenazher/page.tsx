@@ -1,36 +1,17 @@
 import type { Metadata } from 'next';
-import { Trenazher10 } from '@/components/tasks/zadanie10/Trenazher10';
-import type { IllInfo } from '@/components/tasks/zadanie10/Zadacha10';
-import { ZADANIE10, zadanie10Title } from '@/content/zadanie10';
-import { illyustraciya } from '@/lib/zadanie10/illyustracii';
-import { protoInfo10, gruppy10 } from '@/lib/zadanie10/protoInfo';
-import { PROTOTYPES } from '@/lib/zadanie10/prototypes';
-import { ZADANIYA } from '@/lib/paths';
+import { Trenazher10Tab } from '@/components/tasks/zadanie10/Trenazher10Tab';
+import { zadanie10Title } from '@/content/zadanie10';
+import { TRENAZHER10_HREF } from '@/lib/zadanie10/links';
 
 export const metadata: Metadata = {
   title: zadanie10Title('Тренажёр'),
 };
 
 /**
- * Вкладка «Тренажёр» №10. Сервер отдаёт только список прототипов и
- * найденные картинки сюжетов; условия задач тренажёр загружает сам
- * (public/data/zadanie10, без ответов).
+ * Вкладка «Тренажёр» №10. Сервер отдаёт названия типов, каталог ключей
+ * задач и найденные картинки сюжетов; условия тренажёр загружает сам
+ * (public/data/zadanie10, без ответов), разбор строит решатель в браузере.
  */
-export default function Trenazher10Tab() {
-  const prototipy = protoInfo10();
-  const ill: Record<string, IllInfo> = {};
-  for (const p of PROTOTYPES) {
-    const i = illyustraciya(p.id);
-    if (i) {
-      ill[p.id] = { webp: i.webp, png: i.png, alt: i.alt, width: i.width, height: i.height };
-    }
-  }
-  return (
-    <Trenazher10
-      prototipy={prototipy}
-      gruppy={gruppy10()}
-      ill={ill}
-      base={`${ZADANIYA}/${ZADANIE10.slug}`}
-    />
-  );
+export default function Trenazher10Page() {
+  return <Trenazher10Tab base={TRENAZHER10_HREF} />;
 }

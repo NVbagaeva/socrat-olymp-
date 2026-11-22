@@ -155,7 +155,7 @@ export function useSessionUser(): SessionUser | null {
   return useSyncExternalStore(subscribe, currentUser, () => null);
 }
 
-/** Инициалы для кружка в шапке: «Наталья Багаева» → «НБ», без имени — первая буква почты. */
+/** Инициалы для кружка в шапке: «Наталия Багаева» → «НБ», без имени — первая буква почты. */
 export function initialsOf(user: Pick<SessionUser, 'name' | 'email'>): string {
   const words = user.name.trim().split(/\s+/).filter(Boolean);
   if (words.length >= 2) {

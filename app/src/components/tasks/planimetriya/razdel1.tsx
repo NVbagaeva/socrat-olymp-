@@ -1,0 +1,189 @@
+'use client';
+
+import { createContext, useContext } from 'react';
+import { FigureZoom } from '@/components/ui';
+import { TRENAZHER1 } from '@/content/planimetriya1';
+import { estPi } from '@/lib/zadanie7/otvet';
+import { KLYUCH1, prezhnyayaZapis1 } from '@/lib/planimetriya/trening/klyuch';
+import { zadachaHref1 } from '@/lib/planimetriya/trening/links';
+import { readSealed1 } from '@/lib/planimetriya/trening/otvet1';
+import { log1, vybor1 } from '@/lib/planimetriya/trening/progress';
+import type { Reshenie1T, Zadacha1T } from '@/lib/planimetriya/trening/sborka';
+import type { SsylkiTipa1 } from '@/lib/planimetriya/trening/ssylki';
+import { ZAGRUZKA1 } from '@/lib/planimetriya/trening/zagruzka';
+import type { Shag } from '../steklo';
+import type { VoprosPodskazki } from '../trening/PodskazkaVoprosy';
+import { FaktKnopka1, type FaktShaga1 } from './fakt/FaktKnopka1';
+import { Scenariy1 } from './Scenariy1';
+import { Piktogramma } from '../zadanie11/Piktogrammy';
+import type { RazdelBanka, SostoyaniePod } from '../trening/bank/types';
+
+/** Чертёж движка в окне на весь экран по нажатию (мелкие подписи на телефоне). */
+function Chertezh({ svg, label }: { svg: string; label: string }) {
+  return (
+    <FigureZoom className="z1-trn__chertezh" label={label}>
+      <span className="pl-wrap" dangerouslySetInnerHTML={{ __html: svg }} />
+    </FigureZoom>
+  );
+}
+
+/** Ссылки под условием по типу задачи — их даёт вкладка (Trenazher1Bank). */
+export const Ssylki1 = createContext<Record<string, SsylkiTipa1>>({});
+
+/** Материалы к задаче, как в прежнем тренажёре: теория, факт, опорный блок, разбор типа. */
+function Materialy1({ tip }: { tip: string }) {
+  const s = useContext(Ssylki1)[tip];
+  if (s === undefined) return null;
+  const T = TRENAZHER1.ekran;
+  const ssylki: [string | undefined, 'book' | 'bolt' | 'tools' | 'doc', string][] = [
+    [s.teoriya, 'book', T.povtoritTeoriyu],
+    [s.fakt, 'bolt', T.layfhak],
+    [s.opornye, 'tools', T.opornyy],
+    [s.razbor, 'doc', T.razborTipa],
+  ];
+  return (
+    <nav className="z1-trn__materialy" aria-label={T.materialy}>
+      {ssylki.map(([href, ikonka, podpis]) =>
+        href === undefined ? null : (
+          /* Обычная ссылка: тренировка сохранена, «Назад» вернёт к задаче. */
+          <a className="z1-trn__ssylka" href={href} key={ikonka}>
+            <Piktogramma name={ikonka} />
+            {podpis}
+          </a>
+        ),
+      )}
+    </nav>
+  );
+}
+
+/**
+ * Под условием задачи №1 — чертёж условия, как в ФИПИ; при открытом
+ * решении — все построения. У шагов подсказки чертёж свой, внутри шага
+ * (voprosy1): он растёт по шагам и подписан всеми буквами шага. Ниже —
+ * откуда задача.
+ */
+function Pod1({ z, sost }: { z: Zadacha1T; sost: SostoyaniePod<Reshenie1T> }) {
+  const r = sost.razbor;
+  let svg = z.risunokSvg;
+  let label = TRENAZHER1.ekran.risunok;
+  if (r !== null && sost.reshenie) {
+    svg = r.uchitelSvg;
+    label = TRENAZHER1.ekran.risunokReshenie;
+  }
+  return (
+    <>
+      <div className="trn-risunok z1-trn__risunok" aria-live="polite">
+        <Chertezh svg={svg} label={label} />
+      </div>
+      <p className="trn-istochnik">
+        {z.fipi === null ? TRENAZHER1.ekran.neIzBanka : TRENAZHER1.ekran.bank(z.fipi)}
+      </p>
+      <Materialy1 tip={z.prototypeId} />
+    </>
+  );
+}
+
+/** Разбор №1 → шаги сцены: подпись этапа, пояснения, выкладки и чертёж шага. */
+export function shagiIzResheniya1(s: Reshenie1T): Shag[] {
+  return s.shagi.map((shag) => ({
+    zagolovokHtml: shag.zagolovok,
+    chtoHtml: shag.tekst.map((t) => `<p>${t}</p>`).join(''),
+    formulaHtml: shag.formuly.join(''),
+    ...(shag.risunokSvg === null
+      ? {}
+      : { risunok: <Chertezh svg={shag.risunokSvg} label={TRENAZHER1.ekran.risunokShaga} /> }),
+    ...(shag.fakty.length === 0
+      ? {}
+      : {
+          posle: (
+            <div className="fakt1-knopki">
+              {shag.fakty.map((f) => (
+                <FaktKnopka1 fakt={f} key={f.id} />
+              ))}
+            </div>
+          ),
+        }),
+  }));
+}
+
+/**
+ * Вопросы подсказки №1: у каждого шага свой чертёж (движок планиметрии
+ * по данным этой же задачи, растёт по шагам) и кнопка «Показать
+ * свойство» с фактом шага — она подсвечивается после неверного ответа.
+ */
+export function voprosy1(s: Reshenie1T): VoprosPodskazki[] {
+  return s.voprosy.map((v, i) => ({
+    voprosHtml: v.voprosHtml,
+    variantyHtml: v.variantyHtml,
+    verno: v.verno,
+    ...(v.kommentariyHtml === undefined ? {} : { kommentariyHtml: v.kommentariyHtml }),
+    ...(v.vvodHtml === undefined ? {} : { vvodHtml: v.vvodHtml }),
+    risunok: <Chertezh svg={v.risunokSvg} label={TRENAZHER1.ekran.risunokPodskazka(i + 1)} />,
+    ...(v.fakt === null
+      ? {}
+      : {
+          posle: (oshibka: boolean) => (
+            <FaktKnopka1 fakt={v.fakt as FaktShaga1} podsvetit={oshibka} />
+          ),
+        }),
+  }));
+}
+
+/** Под шагами: признаки делимости (если сокращали) и сверка с рисунком. */
+export function posle1(s: Reshenie1T) {
+  const sokr = s.shagi.flatMap((shag) => shag.sokrashchenie);
+  return (
+    <>
+      {sokr.length === 0 ? null : (
+        <details className="trn-posle">
+          <summary className="stk-summary">
+            {TRENAZHER1.ekran.priznaki}
+            <span className="stk-shevron" aria-hidden="true" />
+          </summary>
+          <ul>
+            {sokr.map((k, i) => (
+              <li key={i}>
+                <span dangerouslySetInnerHTML={{ __html: k.tekst }} />
+                {k.formula === '' ? null : (
+                  <span
+                    className="trn-posle__tex"
+                    dangerouslySetInnerHTML={{ __html: k.formula }}
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+      <p className="z1-trn__sverka">
+        <b>{TRENAZHER1.ekran.sverka}.</b>{' '}
+        <span dangerouslySetInnerHTML={{ __html: s.sverkaHtml }} />
+      </p>
+    </>
+  );
+}
+
+/**
+ * №1 для общего тренажёра по банку (components/tasks/trening/bank):
+ * ключи задач, журнал, загрузчик на движке планиметрии, проверка ответа,
+ * чертёж условия по слоям подсказки, разбор шагами с чертежами и
+ * подсказки-вопросы. Читает и незаконченную тренировку прежнего
+ * тренажёра (панель фильтров).
+ */
+export const RAZDEL1: RazdelBanka<Zadacha1T, Reshenie1T> = {
+  razdel: '1',
+  klyuch: KLYUCH1,
+  log: log1,
+  vybor: vybor1,
+  zagruzka: ZAGRUZKA1,
+  T: TRENAZHER1,
+  proverit: (vvod, seal) => (estPi(vvod) ? { kind: 'pi' } : readSealed1(vvod, seal)),
+  pod: (z, _rezhim, sost) => <Pod1 z={z} sost={sost} />,
+  shagi: shagiIzResheniya1,
+  posle: posle1,
+  voprosy: voprosy1,
+  /* Подсказка — сценарий вопросов: уточнение после ошибки, способы, приём. */
+  podskazka: (s) => <Scenariy1 sc={s.scenariy} key={s.uchitelSvg} />,
+  zadachaHref: zadachaHref1,
+  prezhnyayaZapis: prezhnyayaZapis1,
+};

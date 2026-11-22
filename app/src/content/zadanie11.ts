@@ -8,9 +8,11 @@
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from '@/content/struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE11 = {
-  no: '11',
+  no: nomerDvumya('tekstovye-zadachi'),
   slug: '11',
   title: taskName('11'),
   lead: 'Реальные ситуации, которые решаются математическими моделями.',
@@ -27,7 +29,7 @@ export const ZADANIE11 = {
 
 /** Заголовок окна браузера: «Вкладка · Текстовые задачи — Будет на ЕГЭ». */
 export function zadanie11Title(tab: string): string {
-  return `${tab} · ${ZADANIE11.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(11, ZADANIE11.title, tab);
 }
 
 export const PROGRESS_11 = {
@@ -40,7 +42,7 @@ export const PROGRESS_11 = {
 /* ── Вкладка «О задании» ────────────────────────────────────────── */
 
 export const O_ZADANII_11 = {
-  title: 'Задание 11. Текстовые задачи',
+  title: `Задание ${nomerRazdela('tekstovye-zadachi')}. Текстовые задачи`,
   lead: 'Ответ — целое число или конечная десятичная дробь.',
   about:
     'В задании нужно перевести житейскую ситуацию на язык математики: выбрать неизвестную, заполнить таблицу, составить уравнение и ответить ровно на вопрос задачи. Разделы ниже идут в рекомендуемом порядке — от разминки к задачам на работу и прогрессии.',
@@ -54,7 +56,7 @@ export const O_ZADANII_11 = {
     shagi: [
       {
         title: 'Изучи краткую информацию о задании',
-        text: 'Какие типы задач входят в задание 11 и на что обратить внимание.',
+        text: `Какие типы задач входят в задание ${nomerRazdela('tekstovye-zadachi')} и на что обратить внимание.`,
       },
       {
         title: 'Пройди теорию по каждому разделу',
@@ -128,21 +130,4 @@ export const OPORNYE_11 = {
   zapomni: 'Запомни',
   kListu: 'К списку блоков →',
   nazad: '← Все блоки',
-} as const;
-
-/* ── Вкладка «Тренажёр» ─────────────────────────────────────────── */
-
-export const TRENAZHER_11 = {
-  title: 'Тренажёр',
-  shag: (i: number, n: number) => `шаг ${i} из ${n}`,
-  nevernoHint: 'Не совсем. Подумайте ещё и выберите другой вариант.',
-  vseShagi: 'Все шаги пройдены — теперь решите уравнение и введите ответ.',
-  tablitsa: 'Составим таблицу',
-  tablitsaNote:
-    'Заполни остальные клетки таблицы, используя подсказку и условие задачи. Нажми на пустую клетку, чтобы её открыть.',
-  materialy: 'Материалы к задаче',
-  layfhak: 'Лайфхак',
-  teoriya: 'Теория',
-  opornyy: 'Опорный блок',
-  reshenie: 'Решение по этапам',
 } as const;

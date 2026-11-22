@@ -5,6 +5,7 @@ import { PROGRESS_2, TEORIYA_DEKOR_2 } from '@/content/vektory';
 import { stsena, type StsenaId } from '@/lib/vektory/stseny';
 import { QuadraticSection } from '../theory/quadratic/QuadraticSection';
 import { Risunok } from './Risunok';
+import '../teoriya/teoriya-steklo.css';
 
 /**
  * Якорь карточки теории: «t2-koordinaty-opredelenie». Сюда ведёт
@@ -38,12 +39,14 @@ export function Teoriya2({ vkladka }: { vkladka: string }) {
   const tela = Object.fromEntries(
     RAZDELY_TEORII.map((r) => [
       r.id,
-      <QuadraticSection
-        section={r.section}
-        figureFor={figureFor}
-        yakorKartochki={(id) => yakorKartochki2(r.id, id)}
-        key={r.id}
-      />,
+      /* Стеклянный слой теории (teoriya-steklo.css): содержание то же. */
+      <div className="z2-teoriya teor-steklo" key={r.id}>
+        <QuadraticSection
+          section={r.section}
+          figureFor={figureFor}
+          yakorKartochki={(id) => yakorKartochki2(r.id, id)}
+        />
+      </div>,
     ]),
   );
   return (

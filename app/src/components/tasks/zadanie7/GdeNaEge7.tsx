@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Tex } from '@/components/ui/Tex';
 import { TEORIYA_7_TEKSTY } from '@/content/teoriya7';
-import { kodNaSayte, prototype } from '@/lib/zadanie7/prototypes';
+import { prototype } from '@/lib/zadanie7/prototypes';
 
 const T = TEORIYA_7_TEKSTY;
 
@@ -15,7 +15,7 @@ export function GdeNaEge7({ prototipy, trenazher }: { prototipy: string[]; trena
       <span className="z7-gde__label">{T.gdeNaEge}:</span>
       {prototipy.map((id) => (
         <Link className="z7-gde__chip" href={`${trenazher}?tipy=${id}`} key={id}>
-          {kodNaSayte(id)} <Tex text={prototype(id).title} />
+          <Tex text={prototype(id).title} />
         </Link>
       ))}
     </p>

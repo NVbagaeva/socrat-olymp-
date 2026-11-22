@@ -9,7 +9,10 @@
 import { createProgressStore, type StoreProgress } from '../progressStore';
 
 /** Тренажёр: счётчики по прототипам. */
-export const progress1 = createProgressStore('budetege:planimetriya-1:v1');
+export const progress1 = createProgressStore(
+  'budetege:planimetriya-1:v1',
+  'budetege:planimetriya-1:log:v1',
+);
 
 /** Тренировки навыков: исход каждой микрозадачи. */
 export const opornye1 = createProgressStore('budetege:planimetriya-1:opornye:v1');

@@ -28,7 +28,10 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { APP } from './lib/load-ts.mjs';
+import { APP, requireSrc } from './lib/load-ts.mjs';
+
+/* Номер ЕГЭ графиков (номер хранения 12) — по структуре экзамена. */
+const NOMER_GRAFIKOV = requireSrc('content/struktura.js').nomerRazdela(12);
 import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
@@ -416,8 +419,8 @@ for (const size of SIZES) {
         };
   });
   check(
-    drugie !== null && drugie.title === 'Другие разделы №12',
-    where('нет блока «Другие разделы №12»'),
+    drugie !== null && drugie.title === `Другие разделы №${NOMER_GRAFIKOV}`,
+    where(`нет блока «Другие разделы №${NOMER_GRAFIKOV}»`),
   );
   if (drugie !== null) {
     check(
@@ -472,16 +475,19 @@ for (const size of SIZES) {
   });
   check(!longName.cut, where(`название на плашке обрезано: ${longName.text}`));
 
-  /* Иконки разделов на странице «Подтемы»: одна на раздел, из общего
-     компонента, декоративные, с размерами и srcset; «Скоро» — бледные. */
+  /* Иконки разделов на странице «Подтемы» (карта «О задании»: вид функции —
+     группа): одна на раздел, из общего компонента, декоративные, с
+     размерами и srcset; «Скоро» — бледные; шеврон не налезает на иконку. */
   await page.goto(BASE + '/zadaniya/12/', { waitUntil: 'networkidle' });
   const podtemy = await page.evaluate(() => {
-    const cards = Array.from(document.querySelectorAll('.subtopic'));
+    const cards = Array.from(document.querySelectorAll('.z12-karta .kz-gruppa'));
     return {
       cards: cards.length,
       withIcon: cards.filter((c) => c.querySelector('picture.razdel-ico img') !== null).length,
       oldCharts: document.querySelectorAll('.subtopic-card__chart').length,
-      bad: Array.from(document.querySelectorAll('.subtopic picture.razdel-ico img')).filter(
+      bad: Array.from(
+        document.querySelectorAll('.z12-karta .kz-gruppa picture.razdel-ico img'),
+      ).filter(
         (img) =>
           img.getAttribute('alt') !== '' ||
           img.getAttribute('aria-hidden') !== 'true' ||
@@ -494,7 +500,7 @@ for (const size of SIZES) {
       soonDim: document.querySelectorAll('.subtopic--soon picture.razdel-ico--soon').length,
       soonCards: document.querySelectorAll('.subtopic--soon').length,
       overlap: cards.filter((c) => {
-        const go = c.querySelector('.subtopic__go')?.getBoundingClientRect();
+        const go = c.querySelector('.kz-gruppa__summary > .stk-shevron')?.getBoundingClientRect();
         const ico = c.querySelector('picture')?.getBoundingClientRect();
         return (
           go &&
@@ -540,7 +546,8 @@ for (const size of SIZES) {
   );
 
   /* Статистика тренажёра: иконка раздела и только свои наборы. Счётчики
-     всех разделов лежат в одной записи budetege:trainer:v1. */
+     всех разделов №12 лежат в одном журнале; здесь он собирается из
+     прежней записи budetege:trainer:v1. */
   await page.goto(BASE + '/zadaniya/12/quadratic/trenazher/', { waitUntil: 'networkidle' });
   await page.evaluate(() =>
     localStorage.setItem(
@@ -590,15 +597,28 @@ for (const size of SIZES) {
     where('в статистике нет иконки раздела с alt="", aria-hidden и размерами'),
   );
   await page.getByRole('button', { name: 'Сбросить' }).click();
-  const left = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('budetege:trainer:v1') ?? '{}'),
-  );
+  /* Счётчики теперь в журнале попыток №12 (budetege:zadanie-12:log:v1):
+     прежняя запись свернулась в него, а сама осталась как была. */
+  const left = await page.evaluate(() => {
+    const log = JSON.parse(localStorage.getItem('budetege:zadanie-12:log:v1') ?? '{}');
+    const kinds = Object.assign({}, ...Object.values(log.archive ?? {}));
+    return {
+      kinds,
+      mistakes: log.legacyMistakes ?? [],
+      prezhnyaya: JSON.parse(localStorage.getItem('budetege:trainer:v1') ?? '{}'),
+    };
+  });
   check(
-    left.kinds?.['12.A']?.done === 5 &&
-      left.kinds?.['12Q.A'] === undefined &&
-      left.mistakes?.join() === '12.A-01',
+    left.kinds['12.A']?.done === 5 &&
+      left.kinds['12Q.A'] === undefined &&
+      left.mistakes.join() === '12.A-01',
     where('«Сбросить» на параболе стёр счётчики линейной или оставил свои'),
   );
+  check(
+    left.prezhnyaya.kinds?.['12Q.A']?.done === 2,
+    where('перевод на журнал изменил прежнюю запись budetege:trainer:v1'),
+  );
+  await page.evaluate(() => localStorage.removeItem('budetege:zadanie-12:log:v1'));
   await page.evaluate(() => localStorage.removeItem('budetege:trainer:v1'));
 
   /* Закрытый раздел: страница «Скоро» с той же плашкой. */

@@ -18,7 +18,7 @@
   max-width: 640px;
   margin-top: var(--space-2);
   color: var(--color-text-secondary);
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.5;
 }
 
@@ -88,7 +88,7 @@
   background: var(--color-surface-soft);
 }
 .howto__video-title {
-  font-size: 28px;
+  font-size: 30px;
   line-height: 1.2;
   font-weight: 700;
   color: var(--color-text-brand);
@@ -220,7 +220,7 @@
   padding: var(--space-3) var(--space-8) var(--space-3) 0;
   border: 0;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: 16px;
   text-align: left;
 }
 .howto__q .solution-details-toggle::after {
@@ -230,7 +230,7 @@
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-primary);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
 }
 .howto__q.open .solution-details-toggle::after {
@@ -255,7 +255,7 @@
   border: 1px solid var(--color-border-warm);
 }
 .howto__cta-title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
 }
 .howto__cta-text {
@@ -283,7 +283,7 @@
 }
 .howto__cta-note {
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.4;
 }
 
@@ -305,7 +305,7 @@
     padding: var(--space-6) var(--space-5);
   }
   .howto__video-title {
-    font-size: 22px;
+    font-size: 24px;
   }
   .howto__cta {
     padding: var(--space-5);

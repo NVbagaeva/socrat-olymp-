@@ -4,30 +4,54 @@
  * Меняется здесь, в разметке текста нет.
  */
 
-import { legalDocs } from '@/content/legal/documents';
+import { legalDocs, ofertaDoc } from '@/content/legal/documents';
 import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
-import { TARIFY_HREF } from '@/lib/tarify/config';
+import { levelInfo, type Level } from '@/lib/level';
+import { AUTH_HREF, AUTH_IN_HEADER, REGISTRATION_OPEN } from '@/lib/auth/config';
+import { TARIFY_HREF } from '@/lib/tarify/href';
+import type { NavIconName } from '@/components/ui/NavIcons';
+import { nomeraChasti } from '@/content/struktura';
+import { href, USTNYY } from '@/lib/paths';
 
 export interface SiteLink {
   label: string;
   href: string;
+  /**
+   * Адрес в режиме базы (lib/level.ts): «Банк заданий» тогда ведёт на
+   * /baza/zadaniya/. Не задан — адрес от уровня не зависит.
+   */
+  hrefBase?: string;
+  /** Пункт выделен тёплым акцентом (новый раздел, на который зовём). */
+  akcent?: boolean;
 }
 
 /**
- * Группа пунктов меню: в широкой шапке — кнопка с выпадающим списком,
- * в бургер-меню — те же ссылки подряд, без заголовка.
+ * Группа пунктов меню: в широкой шапке — кнопка с выпадающим списком.
+ * Бургер-меню собрано отдельно — см. site.menu.
  */
 export interface NavGroup {
   label: string;
-  items: SiteLink[];
+  items: MenuLink[];
 }
 
 export type NavItem = SiteLink | NavGroup;
+
+/** Пункт бургер-меню: значок, название и строка-пояснение под ним. */
+export interface MenuLink extends SiteLink {
+  hint: string;
+  icon: NavIconName;
+}
+
+/** Группа бургер-меню с подписью над списком. */
+export interface MenuGroup {
+  label: string;
+  items: MenuLink[];
+}
 
 export function isNavGroup(item: NavItem): item is NavGroup {
   return 'items' in item;
@@ -38,62 +62,167 @@ export interface ExternalLink extends SiteLink {
   external: true;
 }
 
+/* Пункты меню заведены по одному разу: широкая шапка и бургер берут
+   их отсюда, поэтому названия и адреса в них не расходятся. Названия
+   вариантов короче заголовков страниц — длинные в бургере переносились
+   на две строки. Пояснения — из лидов самих страниц, без новых
+   обещаний. */
+const LINKS = {
+  bank: {
+    label: 'Банк заданий',
+    hint: 'Все задания по темам',
+    href: tasksPage.href,
+    hrefBase: levelInfo('base').bank,
+    icon: 'tasks',
+  },
+  /* Раздел общий для профиля и базы — адрес от уровня не зависит. */
+  ustnyy: {
+    label: 'Устный счёт',
+    hint: 'Приёмы, таймер и рейтинг',
+    href: href(USTNYY),
+    icon: 'schet',
+    akcent: true,
+  },
+  sobrat: {
+    label: 'Собрать вариант',
+    hint: 'Для домашней и контрольной',
+    href: VARIANT_HREF,
+    icon: 'variant',
+  },
+  onlayn: {
+    label: ONLINE_TEXT.nachalo.menu,
+    hint: `Задания ${nomeraChasti(1)} с автопроверкой`,
+    href: VARIANT_ONLAYN_HREF,
+    icon: 'target',
+  },
+  /* Вариант базовой математики: тот же сборщик, уровень — «База». */
+  baza: {
+    label: 'Вариант базы',
+    hint: '21 задание · отметка 2–5',
+    href: levelInfo('base').variant,
+    icon: 'variant',
+  },
+  mesyaca: {
+    label: 'Варианты месяца',
+    hint: 'По одному на месяц, части 1 и 2',
+    href: EZH_HREF,
+    icon: 'ezhemesyachnye',
+  },
+  slozhnye: {
+    label: 'Сложные варианты',
+    hint: '36 вариантов, по шесть версий',
+    href: POV_HREF,
+    icon: 'povyshennye',
+  },
+  howto: {
+    label: 'Как пользоваться',
+    hint: 'Короткий гид по сайту',
+    href: HOWTO_HREF,
+    icon: 'help',
+  },
+  /* «Учителям» ведёт на блок «Мы взяли на себя то, что обычно забирает
+     ваш вечер» — он про самостоятельные, домашние и проверку. */
+  uchitelyam: {
+    label: 'Учителям',
+    hint: 'Самостоятельные и домашние',
+    href: '/#how',
+    icon: 'homework',
+  },
+  avtor: { label: 'Об авторе', hint: 'Кто делает сайт', href: '/about/', icon: 'teacher' },
+  /* Страница с тарифами; оплата на ней пока выключена
+     (lib/tarify/config.ts, PAYMENTS_ENABLED). */
+  tarify: { label: 'Тарифы', hint: 'Что входит в доступ', href: TARIFY_HREF, icon: 'favourites' },
+} satisfies Record<string, MenuLink>;
+
+/**
+ * Куда ведёт «Начать бесплатно». Регистрация открыта (REGISTRATION_OPEN
+ * в lib/auth/config.ts) и вход показан всем — кнопка «Войти» в шапке
+ * (AUTH_IN_HEADER, он же включает и сам вход) — на регистрацию. Иначе —
+ * в банк заданий уровня: там занимаются бесплатно и без аккаунта, а
+ * страница входа без кнопки в шапке остаётся только по прямой ссылке.
+ */
+export function startHref(level: Level = 'profile'): string {
+  if (AUTH_IN_HEADER && REGISTRATION_OPEN) return AUTH_HREF.registraciya;
+  return level === 'base' ? levelInfo('base').bank : tasksPage.href;
+}
+
+/** Telegram-канал платформы: подвал и разметка для поисковиков (lib/jsonLd.ts). */
+export const TELEGRAM_HREF = 'https://t.me/budet_na_ege_math';
+
 export const site = {
   brand: 'Будет на ЕГЭ',
 
   /**
-   * Пункты меню. Каждый ведёт на работающую страницу или блок.
-   * «Тарифы» — страница с тарифами; оплата на ней пока выключена
-   * (lib/tarify/config.ts, PAYMENTS_ENABLED). «Учителям» ведёт
-   * на блок «Мы взяли на себя то, что обычно забирает ваш вечер» —
-   * он про самостоятельные, домашние и проверку, то есть для учителя.
+   * Пункты широкой шапки. Каждый ведёт на работающую страницу или блок.
+   * Порядок — от дела к справке: сначала задания, устный счёт и
+   * варианты, потом разделы о проекте, «Тарифы» последними. «Об авторе»
+   * живёт в подвале и в бургере: с «Устным счётом» шапка в одну строку
+   * на 1024 px иначе не помещалась.
    */
   nav: [
-    { label: 'Об авторе', href: '/about/' },
-    { label: 'Банк заданий', href: tasksPage.href },
+    LINKS.bank,
+    LINKS.ustnyy,
     /* Всё про варианты — одной группой: семь пунктов в одну строку не
-       помещались даже на 1440 px, и шапка переносилась в две строки. */
+       помещались даже на 1440 px, и шапка переносилась в две строки.
+       Первым — главное действие, оно в списке выделено. */
     {
       label: 'Варианты',
-      items: [
-        { label: 'Собрать вариант', href: VARIANT_HREF },
-        { label: ONLINE_TEXT.nachalo.menu, href: VARIANT_ONLAYN_HREF },
-        { label: 'Варианты повышенной сложности', href: POV_HREF },
-        { label: 'Ежемесячные варианты', href: EZH_HREF },
-      ],
+      items: [LINKS.onlayn, LINKS.sobrat, LINKS.baza, LINKS.mesyaca, LINKS.slozhnye],
     },
-    { label: 'Как пользоваться', href: HOWTO_HREF },
-    { label: 'Учителям', href: '/#how' },
-    { label: 'Тарифы', href: TARIFY_HREF },
+    LINKS.uchitelyam,
+    LINKS.howto,
+    LINKS.tarify,
   ] as NavItem[],
+
+  /**
+   * Бургер-меню: те же пункты, но по смыслу — главное действие
+   * карточкой, дальше группы, «Тарифы» отдельной строкой.
+   */
+  menu: {
+    glavnoe: LINKS.onlayn as MenuLink,
+    groups: [
+      { label: 'Практика', items: [LINKS.bank, LINKS.ustnyy, LINKS.sobrat, LINKS.baza] },
+      { label: 'Готовые варианты', items: [LINKS.mesyaca, LINKS.slozhnye] },
+      { label: 'О проекте', items: [LINKS.howto, LINKS.uchitelyam, LINKS.avtor] },
+    ] as MenuGroup[],
+    tarify: LINKS.tarify as MenuLink,
+    akkaunt: 'Аккаунт',
+  },
 
   /* «Войти» здесь больше нет: вход живёт в components/auth/AuthWidget и
      появляется только при включённом флаге (lib/auth/config.ts).
      «Начать бесплатно» без входа ведёт в банк заданий — платного ничего
      нет; со входом — на регистрацию. */
   headerActions: {
-    signup: { label: 'Начать бесплатно', href: tasksPage.href } satisfies SiteLink,
+    signup: { label: 'Начать бесплатно', href: startHref('profile') } satisfies SiteLink,
   },
 
   footer: {
     copyright: '© 2026 Будет на ЕГЭ',
-    /* Оферты здесь нет: её ссылка и реквизиты — content/legal/rekvizity.ts,
-       подвал покажет их, когда они будут готовы. Правовые документы — свои страницы сайта; связь — через
+    /* Правовые документы — свои страницы сайта; связь — через
        Telegram-канал платформы, тот же, что на печатных листах, он
        открывается в новой вкладке. */
     links: [
       { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
       { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
       { label: 'Тарифы', href: TARIFY_HREF },
-      { label: 'Контакты', href: '#' },
-      { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
+      { label: LINKS.avtor.label, href: LINKS.avtor.href },
+      { label: 'Контакты', href: `${LINKS.avtor.href}#oa-svyaz` },
+      { label: 'Telegram', href: TELEGRAM_HREF, external: true },
     ] satisfies (SiteLink | ExternalLink)[],
+    /**
+     * С флагом NEXT_PUBLIC_LEGAL_READY (lib/legal/prodavets.ts) подвал
+     * показывает реквизиты продавца и под ними — четыре документа; из
+     * общего ряда ссылок правовые тогда убираются.
+     */
+    pravovye: [
+      { label: ofertaDoc.linkLabel, href: ofertaDoc.href },
+      { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
+      { label: legalDocs.soglasie.linkLabel, href: legalDocs.soglasie.href },
+      { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
+    ] satisfies SiteLink[],
+    pravovyeLabel: 'Документы',
     /** Строка под копирайтом; ФИО — из src/content/legal/operator.json. */
     operatorLabel: 'Оператор персональных данных:',
   },
 } as const;
-
-/** Все ссылки меню подряд, группы раскрыты — для бургер-меню. */
-export const navLinks: SiteLink[] = site.nav.flatMap((item) =>
-  isNavGroup(item) ? item.items : [item],
-);

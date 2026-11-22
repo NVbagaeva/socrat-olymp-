@@ -1,12 +1,12 @@
-import type { Metadata } from 'next';
-import { Repetitory7 } from '@/components/tasks/zadanie7/Repetitory7';
-import { ZADANIE7, zadanie7Title } from '@/content/zadanie7';
-import { ZADANIYA } from '@/lib/paths';
+import { RedirectPage, REDIRECT_METADATA } from '@/components/layout';
+import { ZADANIYA, href } from '@/lib/paths';
 
-export const metadata: Metadata = {
-  title: zadanie7Title('Для репетиторов'),
-};
+/* Вкладки «Для репетиторов» у №7 нет: материалов для неё не было
+   (стояла заглушка). Листы ученика и учителя собирает «Генератор» —
+   со старого адреса переход туда. Сервер отвечает 301 раньше
+   (public/.htaccess). */
+export const metadata = REDIRECT_METADATA;
 
-export default function Repetitory7Tab() {
-  return <Repetitory7 base={`${ZADANIYA}/${ZADANIE7.slug}`} />;
+export default function Page() {
+  return <RedirectPage href={href(ZADANIYA, 7, 'generator')} title="Генератор" />;
 }

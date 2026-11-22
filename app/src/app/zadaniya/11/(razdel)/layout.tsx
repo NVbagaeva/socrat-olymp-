@@ -10,6 +10,8 @@ import '../../veroyatnost.css';
 import '../zadanie11.css';
 import '../../komplekt.css';
 import '../procenty.css';
+/* «Стеклянная сцена» №11: своё поверх общих компонентов (karta, trening, opornye). */
+import '@/components/tasks/zadanie11/z11-steklo.css';
 
 /**
  * Оболочка задания №11: крошки, заголовок, кольцо прогресса и лента

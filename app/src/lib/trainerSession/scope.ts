@@ -20,7 +20,12 @@ export function scopeOfPath(path: string): string | null {
     }
     own.push(part);
   }
-  return own.length === 0 ? null : own.join(':');
+  if (own.length === 0) {
+    return null;
+  }
+  /* Разделы базы — со своим префиксом: «/baza/zadaniya/5/» → «baza-5»,
+     иначе тренировка №5 базы легла бы на место №5 профиля. */
+  return (parts[at - 1] === 'baza' ? 'baza-' : '') + own.join(':');
 }
 
 /** Есть ли незавершённая тренировка в этом разделе или в его подразделах. */

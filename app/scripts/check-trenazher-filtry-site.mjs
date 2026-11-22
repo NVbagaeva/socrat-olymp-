@@ -466,11 +466,10 @@ for (const width of [320, 375, 390]) {
   await ctx.close();
 }
 
-/* ── 8. Партия 1: №11, №1, №13 ─────────────────────────────── */
+/* ── 8. Партия 1: №1, №13 (№11 ушёл на общий тренажёр по банку) ── */
 
-console.log('8. Партия 1: №11, №1, №13 — фильтры, тренировка, подсказка');
+console.log('8. Партия 1: №1, №13 — фильтры, тренировка, подсказка');
 const PARTIYA_1 = [
-  { no: '11', url: '/zadaniya/11/trenazher/' },
   { no: '1', url: '/zadaniya/1/trenazher/' },
   { no: '13', url: '/zadaniya/13/trenazher/' },
   { no: '13-oformlenie', url: '/zadaniya/13/trenazher/?d=oformlenie.oformlenie' },

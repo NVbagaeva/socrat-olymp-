@@ -70,6 +70,10 @@ jobs:
           NEXT_PUBLIC_AUTH_IN_HEADER: ${{ vars.NEXT_PUBLIC_AUTH_IN_HEADER }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          # Оферта /oferta/ и реквизиты продавца в подвале: «1» — опубликовать.
+          # С незаполненным app/src/content/legal/prodavets.json сборка
+          # остановится (next.config.ts). Нет переменной — не публикуются.
+          NEXT_PUBLIC_LEGAL_READY: ${{ vars.NEXT_PUBLIC_LEGAL_READY }}
         run: pnpm build
 
       - name: Проверить, что экспорт не пустой

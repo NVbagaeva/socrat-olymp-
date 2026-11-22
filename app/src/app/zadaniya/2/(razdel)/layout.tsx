@@ -14,7 +14,6 @@ import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '@/lib/vektory/vektory.css';
 import '../zadanie2.css';
-import '../ozadanii2.css';
 
 /**
  * Оболочка задания №2: крошки, заголовок, кольцо прогресса и лента

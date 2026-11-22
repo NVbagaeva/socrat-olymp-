@@ -43,94 +43,6 @@
   background: var(--color-surface-soft);
 }
 
-/* ── Вкладка «Опорные задачи» ─────────────────────────────────── */
-
-.z2-prep__sub {
-  margin-top: var(--space-8);
-  margin-bottom: var(--space-2);
-}
-.z2-prep__sub:first-of-type {
-  margin-top: var(--space-6);
-}
-.z2-prep__lead {
-  margin-bottom: var(--space-4);
-  color: var(--color-text-secondary);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-}
-
-/* Рисунок условия микрозадачи: без катетов. */
-.z2-ptask__pic {
-  width: 100%;
-  max-width: 360px;
-}
-/* Варианты ответа с формулами не рвутся. */
-.z2-ptask .popt__text .katex {
-  white-space: nowrap;
-}
-
-/* Разбор микрозадачи: строки и рисунок с катетами рядом. */
-.z2-razbor {
-  margin-top: var(--space-4);
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.z2-razbor__title {
-  margin-bottom: var(--space-2);
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-.z2-razbor__body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(200px, 320px);
-  gap: var(--space-4);
-  align-items: start;
-}
-.z2-razbor__lines {
-  display: grid;
-  gap: var(--space-2);
-}
-.z2-razbor__line,
-.z2-shag__line {
-  font-family: var(--font-serif);
-  font-size: var(--fs-body);
-  line-height: var(--lh-lg);
-}
-.z2-razbor__pic {
-  width: 100%;
-}
-
-/* Плашка «Запомни»: формулы блока. */
-.z2-memo {
-  margin-top: var(--space-6);
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-info);
-  border: 1px solid var(--color-border-info);
-}
-.z2-memo__title {
-  margin-bottom: var(--space-3);
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
-  font-weight: 600;
-  color: var(--color-text-brand);
-}
-.z2-memo__list {
-  display: grid;
-  gap: var(--space-2);
-  padding-left: var(--space-5);
-  font-size: var(--fs-body);
-  line-height: var(--lh-lg);
-  overflow-x: auto;
-}
-.z2-memo__list .katex {
-  white-space: nowrap;
-}
-
 /* Разобранные задачи по прототипам. */
 .z2-op-group {
   margin-top: var(--space-6);
@@ -144,197 +56,10 @@
   line-height: var(--lh-h4);
   font-weight: 600;
 }
-.z2-op {
-  margin-top: var(--space-4);
-  /* Переход по якорю: под прилипшей лентой вкладок (--topic-sticky-top
-     ставит useStickyTabs). */
-  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.z2-op__title {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-  font-weight: 600;
-}
-.z2-op__title .katex {
-  white-space: nowrap;
-}
-.z2-op__code {
-  flex: 0 0 auto;
-  color: var(--color-text-brand);
-  font-weight: 700;
-}
-.z2-op__body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
-  gap: var(--space-5);
-  align-items: start;
-  margin-top: var(--space-3);
-}
-.z2-op__body:has(> .z2-op__uslovie:only-child) {
-  grid-template-columns: minmax(0, 1fr);
-}
-.z2-op__uslovie {
-  font-family: var(--font-serif);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-}
-.z2-op__pic {
-  width: 100%;
-}
-.z2-op__reshenie {
-  margin-top: var(--space-4);
-  border-top: 1px solid var(--color-border);
-  padding-top: var(--space-3);
-}
-.z2-op__summary {
-  cursor: pointer;
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
-  font-weight: 600;
-  color: var(--color-text-brand);
-}
-.z2-shagi {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
-  margin-top: var(--space-3);
-  padding-left: 0;
-  list-style: none;
-}
-.z2-shag__title {
-  margin-bottom: var(--space-1);
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-.z2-shag__title .katex {
-  white-space: nowrap;
-}
 
-/* Блок повышенной сложности внутри группы C. */
-.z2-tri-znaka {
-  margin-top: var(--space-6);
-  padding: var(--space-5);
-  border: 1px dashed var(--color-border-info);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-info);
-}
-.z2-tri-znaka__title {
-  font-size: var(--fs-body);
-}
-.z2-tri-znaka__text {
-  max-width: 72ch;
-  margin-bottom: var(--space-3);
-  font-size: var(--fs-body);
-  line-height: var(--lh-lg);
-}
-
-/* ── Телефон ──────────────────────────────────────────────────── */
-
-@media (max-width: 767.98px) {
-  .z2-razbor__body,
-  .z2-op__body {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .z2-op__pic,
-  .z2-razbor__pic,
-  .z2-ptask__pic {
-    max-width: none;
-  }
-  .z2-proto__formula {
-    justify-content: flex-start;
-    min-height: 0;
-    font-size: var(--fs-caption);
-  }
-  .z2-memo__list,
-  .z2-razbor__line,
-  .z2-shag__line {
-    font-size: var(--fs-caption);
-  }
-  .z2-op__uslovie {
-    font-size: var(--fs-body);
-  }
-}
-
-/* ── Вкладки «Тренажёр» и «Генератор» ─────────────────────────── */
-
-/* Миниатюра прототипа на карточке конфигуратора: рисунок движка или
-   формула — там, где у №12 чертёж. */
-.z2-mini {
-  display: block;
-  width: 100%;
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-}
-.z2-formula {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 56px;
-  color: var(--color-text);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-}
-.z2-formula .katex {
-  white-space: nowrap;
-}
-.z2-summary-chart {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.z2-summary-chart .z2-formula {
-  min-height: 72px;
-  font-size: var(--fs-lg);
-}
-.z2-summary-chart .z2-mini {
-  max-width: 240px;
-}
-
-/* Группа прототипов в конфигураторе: подпись с кодом группы над
-   карточками. */
-.z2-skills + .z2-skills {
-  margin-top: var(--space-5);
-}
-.z2-skills__group {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-  font-weight: 600;
-}
-.z2-skills__all {
-  margin-left: auto;
-}
 .cfg-summary__skill .katex,
-.cfg-summary__list .katex,
-.z2-skills .katex {
+.cfg-summary__list .katex {
   white-space: nowrap;
-}
-
-/* Экран задания тренажёра: рисунок условия, подсказка под ответом. */
-.z2-ttask .ptask__chart {
-  width: 100%;
-  max-width: 420px;
-}
-.z2-ttask__hint {
-  margin-top: var(--space-2);
-  color: var(--color-text-secondary);
-}
-.z2-ttask .z2-razbor__title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
 }
 
 /* ── Вкладка «Для репетиторов» ────────────────────────────────── */
@@ -453,34 +178,163 @@
     justify-content: flex-start;
     margin-top: var(--space-2);
   }
-  .z2-ttask .ptask__chart,
-  .z2-summary-chart .z2-mini {
-    max-width: none;
-  }
-  /* Карточка прототипа на узком экране — столбиком: название, под ним
-     формула или рисунок. В строке длинная формула (B1) наезжала на
-     название. Тот же приём, что у карточек №8. */
-  .z2-skills .cfg-skill {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-2);
-  }
-  .z2-skills .cfg-skill__chart {
-    width: 100%;
-    max-width: none;
-  }
-  .z2-skills .z2-formula {
-    justify-content: flex-start;
-    min-height: 0;
-    font-size: var(--fs-body);
-    overflow-x: auto;
-  }
-  .z2-skills .z2-mini {
-    max-width: 200px;
-  }
 }
 
 /* Карточка теории — якорь «Повторить теорию» из карточек по теории:
    встаёт под липкую ленту, а не под неё. */
 .qth-card[id^='t2-'] {
   scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+
+/* ── «Стеклянная сцена»: карта задания, тренажёр, опорные (общие
+   компоненты components/tasks/karta, trening, opornye и слой
+   teoriya-steklo.css). Здесь — только своё. ───────────────────────── */
+
+/* Рисунок движка векторов: не шире своего места, по центру. */
+.z2-karta .vp-wrap,
+.z2-opornye .vp-wrap,
+.z2-trening .vp-wrap {
+  display: block;
+  max-width: 100%;
+}
+.z2-karta .vp-wrap svg,
+.z2-opornye .vp-wrap svg,
+.z2-trening .vp-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* Общий вид формулы под названием типа: формула, а не текст. */
+.z2-karta .kz-tip__lead {
+  padding-top: 2px;
+  color: var(--color-text);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.z2-karta .kz-primer__risunok {
+  max-width: 420px;
+}
+
+/* «Что нужно знать»: общий рисунок пяти действий — над рамками. */
+.z2-znat__risunok {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: center;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  border-radius: 20px;
+}
+.z2-znat__risunok figcaption {
+  margin: 0;
+  text-align: center;
+}
+
+/* «Типичные ошибки»: рамки «Неверно / Верно» — по две в ряд на широком. */
+.z2-oshibki__setka {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 1024px) {
+  .z2-oshibki__setka {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+/* Тренажёр: рисунок условия — как на бланке, не во всю ширину. */
+.trn-risunok--vektory {
+  max-width: 420px;
+}
+@media (min-width: 768px) {
+  .z2-trening .trn-nastroyki {
+    grid-template-columns: repeat(2, max-content);
+  }
+  .z2-trening .trn-nastroyki > .trn-pereklyuchatel {
+    grid-column: 1 / -1;
+  }
+}
+/* Подсказка шагами: следующий шаг — кнопкой под открытыми. */
+.z2-podskazka {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z2-podskazka > .stk-btn {
+  justify-self: start;
+  min-height: 44px;
+}
+
+/* Опорные задачи. */
+.z2-opornye {
+  display: grid;
+  gap: var(--space-4);
+}
+.z2-opornye__nazad {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--blue-700);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z2-opornye .op-zad__ris {
+  max-width: 420px;
+}
+.z2-zapomni {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  overflow-x: auto;
+}
+.z2-op__gde {
+  max-width: 720px;
+}
+.z2-op__gde-spisok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z2-gde__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-4);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+/* Повышенная сложность: косинус с тремя знаками. */
+.z2-tri {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+.z2-tri__poyasnenie,
+.z2-tri__zadacha {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  border-radius: 20px;
+}
+.z2-tri__poyasnenie p {
+  margin: 0;
+}
+.z2-tri__zadacha .stk-h4 {
+  margin: 0;
+}
+.z2-tri .kz-primer__risunok {
+  max-width: 420px;
 }

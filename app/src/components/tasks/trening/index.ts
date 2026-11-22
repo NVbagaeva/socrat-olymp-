@@ -17,3 +17,8 @@ export {
 export { ItogiSessii, type ItogZadacha, type ItogiLabels, type Otmetka } from './ItogiSessii';
 export { ProgressPanel, type ProgressPanelLabels } from './ProgressPanel';
 export type { GruppaVybora, StrokaGruppy, TipVybora } from './types';
+export {
+  PodskazkaVoprosy,
+  type PodskazkaVoprosyLabels,
+  type VoprosPodskazki,
+} from './PodskazkaVoprosy';

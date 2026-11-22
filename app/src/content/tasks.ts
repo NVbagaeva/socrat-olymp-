@@ -1,15 +1,31 @@
 /**
- * Список заданий ЕГЭ — единый конфиг. Из него строятся плашки банка,
- * список в сайдбаре, страницы-заглушки и счётчики частей. Номера и
- * названия заданы заказчиком и правятся только здесь: в разметке
- * текста заданий нет.
+ * Список заданий ЕГЭ. Из него строятся плашки банка, список в сайдбаре,
+ * страницы-заглушки и счётчики частей.
+ *
+ * Здесь — как раздел выглядит: название, статус, значки. На каком
+ * номере ЕГЭ он стоит и в какой части — записано в одном месте,
+ * content/struktura.js; список заданий собирается по нему. Раздел вне
+ * экзамена в список не попадает, но остаётся в vseRazdely: его страницы
+ * собираются.
  *
  * Раздел описывается данными, а не разметкой. Чтобы открыть новое
  * задание, достаточно поменять статус здесь — страница списка
  * и маршруты подхватят это сами.
  */
 
+import { levelInfo, type Level } from '@/lib/level';
 import { href, ZADANIYA } from '@/lib/paths';
+import { bazaTasks } from './baza/tasks';
+import {
+  RAZDELY,
+  chastRazdela,
+  nomerDvumya,
+  prichinaSkrytiya,
+  razdel,
+  skryt,
+  zadaniyaEge,
+  type RazdelKod,
+} from './struktura';
 
 /**
  * ready — раздел открыт: плашка ведёт в него.
@@ -21,18 +37,14 @@ export type TaskStatus = 'ready' | 'soon';
 /** Часть экзамена: 1 — краткий ответ, 2 — развёрнутый ответ. */
 export type TaskPart = 1 | 2;
 
-export interface ExamTask {
-  /** Номер задания в экзамене, две цифры — как в источнике. */
-  no: string;
+/** Как раздел выглядит в банке и меню. Номера и части здесь нет. */
+interface RazdelVid {
   name: string;
   /**
    * Короткое название для узких мест — списка в сайдбаре. Не задано —
    * берётся полное. На карточках банка всегда полное название.
    */
   shortTitle?: string;
-  /** Часть адреса: /zadaniya/{slug}/. */
-  slug: string;
-  part: TaskPart;
   status: TaskStatus;
   /**
    * У неоткрытого задания есть страница-заглушка /zadaniya/{slug}/:
@@ -43,23 +55,60 @@ export interface ExamTask {
   /** Голубые бейджи на плашке: пометка о смене структуры экзамена и т. п. */
   badges?: readonly string[];
   /**
-   * Иконка плашки: файл /images/task-{no}.{icon}. Не задана — растровый
-   * webp, как у большинства заданий; svg — у векторных чертежей.
+   * Иконка плашки: файл /images/task-{номер файла}.{icon} (taskIconNo).
+   * Не задана — растровый webp; svg — векторный чертёж (сейчас у всех
+   * разделов профиля).
    */
   icon?: 'webp' | 'svg';
+  /**
+   * Номер файла иконки, если он не свой: задание базы берёт картинку
+   * профильного задания той же темы. null — картинки нет.
+   */
+  image?: string | null;
 }
+
+export interface ExamTask extends RazdelVid {
+  /**
+   * Код раздела: постоянное имя (content/struktura.js). Есть у заданий
+   * профиля; у заданий базы своя нумерация, она не менялась.
+   */
+  kod?: RazdelKod;
+  /**
+   * Номер хранения раздела профиля: под ним раздел записан в базе, в
+   * ключах прогресса, в именах файлов. Не меняется вместе со структурой
+   * экзамена.
+   */
+  hranenie?: number;
+  /**
+   * Номер задания в экзамене, две цифры. У раздела профиля вне экзамена
+   * — его номер хранения (nomerRazdela).
+   */
+  no: string;
+  /** Часть адреса: /zadaniya/{slug}/. */
+  slug: string;
+  part: TaskPart;
+  /**
+   * Уровень экзамена. Не задан — профиль; у заданий базы — 'base':
+   * адрес раздела тогда /baza/zadaniya/{slug}/.
+   */
+  level?: Level;
+}
+
+/** Задание профиля: у него всегда есть код раздела и номер хранения. */
+export type ProfilTask = ExamTask & { kod: RazdelKod; hranenie: number };
 
 export const tasksPage = {
   eyebrow: 'Банк заданий',
   title: 'Банк заданий ЕГЭ',
   lead: 'Все задания в одном месте. Выбирайте тему и переходите к изучению.',
-  /* Нижний блок страницы. Диагностики в проекте нет: кнопка ведёт на
-     честную заглушку, а не изображает работающий разбор. */
+  /* Нижний блок страницы. Диагностики пока нет, поэтому блок ведёт не
+     на заглушку, а в первое задание уровня: номер и адрес считает банк
+     (TaskBank), здесь только слова. Диагностика появится — вернуть её
+     сюда (docs/design-audit.md, п. 5.3). */
   start: {
     title: 'Не знаете, с чего начать?',
-    lead: 'Пройдите диагностику и получите персональный план подготовки.',
-    action: 'Пройти диагностику',
-    href: '/diagnostika/',
+    lead: 'Начните с первого задания: теория, опорные задачи и тренажёр идут по порядку.',
+    action: (no: string) => `Открыть задание №${no}`,
   },
 
   /** Адрес страницы списка: шапка, нижняя панель, хлебные крошки разделов. */
@@ -73,6 +122,17 @@ export const tasksPage = {
     action: 'К банку заданий',
   },
 } as const;
+
+/** Тексты и адрес страницы банка уровня. У базы свои заголовок и лид. */
+export function bankPageOf(level: Level) {
+  if (level === 'profile') return tasksPage;
+  return {
+    ...tasksPage,
+    title: 'Банк заданий ЕГЭ. Базовая математика',
+    lead: 'Все 21 задание базового ЕГЭ в одном месте. Выбирайте задание и переходите к изучению.',
+    href: levelInfo('base').bank,
+  };
+}
 
 /**
  * Части экзамена: подписи переключателя и заголовков над сеткой.
@@ -100,12 +160,22 @@ export function taskHasPage(task: ExamTask): boolean {
 
 /** Начало адресов раздела задания без «/» на конце: к нему дописывают вкладку. */
 export function taskBase(task: ExamTask): string {
-  return `${ZADANIYA}/${task.slug}`;
+  return `${levelInfo(task.level ?? 'profile').bankBase}/${task.slug}`;
 }
 
 /** Адрес страницы задания (ссылка): /zadaniya/4/. */
 export function taskHref(task: ExamTask): string {
-  return href(ZADANIYA, task.slug);
+  return href(taskBase(task));
+}
+
+/** Все задания уровня в порядке номеров. */
+export function tasksOf(level: Level): readonly ExamTask[] {
+  return level === 'base' ? bazaTasks : tasks;
+}
+
+/** Задания уровня с кратким ответом: сетка на главной, счётчик «N из M». */
+export function shortTasksOf(level: Level): readonly ExamTask[] {
+  return tasksOf(level).filter((task) => task.part === 1);
 }
 
 /** Задания одной части в порядке номеров. */
@@ -122,137 +192,181 @@ export function partRange(part: TaskPart): string {
 /**
  * Название задания по части адреса — для заголовков разделов, чтобы
  * они собирались из этого же списка, а не из своей копии строки.
+ * Ищет среди всех разделов: и у раздела вне экзамена есть страницы.
  */
 export function taskName(slug: string): string {
-  const task = tasks.find((t) => t.slug === slug);
+  const task = vseRazdely.find((t) => t.slug === slug);
   if (task === undefined) {
     throw new Error(`Нет задания ${slug}`);
   }
   return task.name;
 }
 
-export const tasks = [
-  /* ── Часть 1: задания с кратким ответом ── */
+/**
+ * Номер файла иконки: «07». У раздела профиля — по номеру хранения, а не
+ * по номеру ЕГЭ: номер задания может смениться, а картинка остаётся его.
+ * У задания базы — указанная картинка профиля. null — картинки нет.
+ */
+export function taskIconNo(task: ExamTask): string | null {
+  if (task.image !== undefined) return task.image;
+  return task.hranenie === undefined ? task.no : String(task.hranenie).padStart(2, '0');
+}
+
+/**
+ * Разделы по коду. Порядок в банке задаёт не эта таблица, а структура
+ * экзамена. В комментариях «№7» — номер хранения раздела.
+ */
+const VID: Record<RazdelKod, RazdelVid> = {
+  /* ── Задания с кратким ответом ── */
 
   /* Миниатюра №1 — вектор: чертёж посчитан точно, и в SVG касание
      окружностей не расплывается при любом масштабе. */
-  { no: '01', name: 'Планиметрия', slug: '1', part: 1, status: 'ready', icon: 'svg' },
+  planimetriya: { name: 'Планиметрия', status: 'ready', icon: 'svg' },
   /* Раздел открыт: шесть вкладок, генераторы 19 прототипов и банк
      для репетиторов — в lib/vektory. */
-  { no: '02', name: 'Векторы', slug: '2', part: 1, status: 'ready' },
+  vektory: { name: 'Векторы', status: 'ready', icon: 'svg' },
   /* Раздел собран шаблоном стереометрии вместе с №15
      (components/stereo); банк из 92 прототипов — lib/zadanie3. */
-  { no: '03', name: 'Стереометрия', slug: '3', part: 1, status: 'ready' },
+  stereometriya: { name: 'Стереометрия', status: 'ready', icon: 'svg' },
   /* Названия разделов вероятности — те же слова, что в заголовке
      страницы задания: заголовок раздела собирается из этого же
      списка (content/veroyatnost.ts), и двух имён у одной темы быть
      не должно. */
-  { no: '04', name: 'Вероятность: простая', slug: '4', part: 1, status: 'ready' },
-  { no: '05', name: 'Вероятность: сложная', slug: '5', part: 1, status: 'ready' },
+  veroyatnost: { name: 'Вероятность: простая', status: 'ready', icon: 'svg' },
+  'slozhnaya-veroyatnost': { name: 'Вероятность: сложная', status: 'ready', icon: 'svg' },
   /* Раздел открыт: банк из 15 прототипов (исходные задачи и по 50
      аналогов) в lib/zadanie6, теория с «Проверь себя», опорные задачи,
      тренажёр и генератор. Вкладки «Для репетиторов» пока нет. */
-  {
-    no: '06',
+  'sluchainye-velichiny': {
     name: 'Случайные величины и распределения',
     shortTitle: 'Случайные величины',
-    slug: '6',
-    part: 1,
     status: 'ready',
     badges: ['структура 2027'],
+    icon: 'svg',
   },
   /* Раздел открыт: банк из 30 прототипов в lib/zadanie7, теория с живым
      тригонометрическим кругом, тренажёр, опорные задачи и генератор. */
-  { no: '07', name: 'Уравнения', slug: '7', part: 1, status: 'ready' },
+  uravneniya: { name: 'Уравнения', status: 'ready', icon: 'svg' },
   /* Раздел открыт: банк из 26 прототипов, тренажёр, опорные задачи,
      генератор и листы. Вкладка «Теория» пока с надписью «Материал
      готовится»: текст пишет автор отдельно. */
-  {
-    no: '08',
+  vychisleniya: {
     name: 'Вычисления и преобразования',
     shortTitle: 'Вычисления',
-    slug: '8',
-    part: 1,
     status: 'ready',
+    icon: 'svg',
   },
   /* Раздел открыт: 31 прототип в lib/proizvodnaya, движок графиков
      производной, тренажёр, опорные задачи, генератор и листы. */
-  {
-    no: '09',
+  proizvodnaya: {
     name: 'Производная и первообразная',
     shortTitle: 'Производная',
-    slug: '9',
-    part: 1,
     status: 'ready',
+    icon: 'svg',
   },
   /* Раздел открыт: 34 прототипа (банк ФИПИ + 20 аналогов на каждый),
      теория, опорные задачи, тренажёр, генератор и уроки — lib/zadanie10. */
-  {
-    no: '10',
+  'prikladnye-zadachi': {
     name: 'Задачи с физическим смыслом',
     shortTitle: 'Физический смысл',
-    slug: '10',
-    part: 1,
     status: 'ready',
+    icon: 'svg',
   },
-  { no: '11', name: 'Текстовые задачи', slug: '11', part: 1, status: 'ready' },
-  { no: '12', name: 'Графики функций', slug: '12', part: 1, status: 'ready' },
-  {
-    no: '13',
+  'tekstovye-zadachi': { name: 'Текстовые задачи', status: 'ready', icon: 'svg' },
+  'grafiki-funkciy': { name: 'Графики функций', status: 'ready', icon: 'svg' },
+  ekonomika: {
     name: 'Финансовая грамотность и экономические задачи',
     shortTitle: 'Финансовая грамотность',
-    slug: '13',
-    part: 1,
     status: 'ready',
-    badges: ['структура 2027'],
+    icon: 'svg',
+  },
+  /* Раздел ЕГЭ-2027 из 19 заданий (там — задание 12): теория, опорные,
+     тренажёр (lib/zadanie21). В структуре из 20 заданий он вне экзамена:
+     в банк не попадает, страницы скрыты, администратору открыты
+     (content/struktura.js, skryt). Миниатюра — task-21.svg: отрезок
+     [a; b], на нём наибольшее и наименьшее значения. */
+  'naibolshee-naimenshee': {
+    name: 'Наибольшее и наименьшее значение функции',
+    shortTitle: 'Наибольшее и наименьшее',
+    status: 'ready',
+    icon: 'svg',
   },
 
-  /* ── Часть 2: задания с развёрнутым ответом ──
-     Разделов пока нет: плашки ведут на заглушки /zadaniya/{slug}/.
-     Иконки — векторные чертежи public/images/task-{no}.svg. */
+  /* ── Задания с развёрнутым ответом ──
+     Иконки — векторные чертежи public/images/task-{номер хранения}.svg. */
   /* Раздел открыт главой «Тригонометрические уравнения»: теория,
      опорные задачи, тренажёр и генератор (lib/zadanie14). Остальные
      типы уравнений — главы «Скоро». */
-  { no: '14', name: 'Уравнение', slug: '14', part: 2, status: 'ready', icon: 'svg' },
+  'uravnenie-s-otborom': { name: 'Уравнение', status: 'ready', icon: 'svg' },
   /* Раздел открыт каркасом вместе с №3 (components/stereo): шесть
      вкладок, главы теории с планом. Наполнение — docs/stereometry-plan.md. */
-  { no: '15', name: 'Стереометрия', slug: '15', part: 2, status: 'ready', icon: 'svg' },
+  'stereometriya-dokazatelstvo': { name: 'Стереометрия', status: 'ready', icon: 'svg' },
   /* Раздел открыт каркасом: вкладки «О задании» и «Теория», главы
      с заголовками и движок чертежей (lib/zadanie16). Содержание глав
      наполняется отдельно. */
-  { no: '16', name: 'Неравенство', slug: '16', part: 2, status: 'ready', icon: 'svg' },
-  {
-    no: '17',
+  neravenstvo: { name: 'Неравенство', status: 'ready', icon: 'svg' },
+  /* Раздела нет: плашка ведёт на заглушку /zadaniya/{slug}/. */
+  optimizaciya: {
     name: 'Задача на оптимизацию',
     shortTitle: 'Оптимизация',
-    slug: '17',
-    part: 2,
     status: 'soon',
     stub: true,
     icon: 'svg',
   },
   /* Раздел открыт вкладкой «Ключевые схемы» (lib/zadanie18, движок
      чертежей lib/skhemy); остальные вкладки — заглушки. */
-  { no: '18', name: 'Планиметрия', slug: '18', part: 2, status: 'ready', icon: 'svg' },
+  'planimetriya-dokazatelstvo': { name: 'Планиметрия', status: 'ready', icon: 'svg' },
   /* Раздел открыт: вводные главы и метод 1 из 14, тренажёр по
      открытым главам (content/teoriya19). Генератор — после банка. */
-  {
-    no: '19',
+  parametr: {
     name: 'Задача с параметром',
     shortTitle: 'Параметр',
-    slug: '19',
-    part: 2,
     status: 'ready',
     icon: 'svg',
   },
-  {
-    no: '20',
+  /* Раздела нет: плашка ведёт на заглушку. */
+  chisla: {
     name: 'Олимпиадная задача',
     shortTitle: 'Олимпиадная',
-    slug: '20',
-    part: 2,
     status: 'soon',
     stub: true,
     icon: 'svg',
   },
-] satisfies ExamTask[];
+};
+
+function sobrat(kod: RazdelKod): ProfilTask {
+  const { hranenie } = razdel(kod);
+  return {
+    ...VID[kod],
+    kod,
+    hranenie,
+    no: nomerDvumya(kod),
+    /* Адрес раздела пока по номеру хранения: /zadaniya/7/. */
+    slug: String(hranenie),
+    part: chastRazdela(kod),
+  };
+}
+
+/**
+ * Все разделы, в том числе вне экзамена и идущие внутри другого
+ * раздела: по ним ищут название и адрес страницы самого раздела.
+ * В банк, меню и переключатели идёт tasks.
+ */
+export const vseRazdely: readonly ProfilTask[] = RAZDELY.map((r) => sobrat(r.kod));
+
+/** Задания экзамена по порядку номеров ЕГЭ: банк, меню, сайдбар. */
+export const tasks: readonly ProfilTask[] = zadaniyaEge().map((z) => sobrat(z.kod));
+
+/** Скрытый раздел: его страницы есть, но посетителям закрыты. */
+export type SkrytyyRazdel = ProfilTask & { prichina: string };
+
+/**
+ * Скрытые разделы со страницами (struktura.js, skryt): в действующей
+ * структуре экзамена их нет. Страницы собираются как обычно, но
+ * посетителю адрес отвечает 404; администратор открывает раздел из
+ * кабинета и видит его с плашкой prichina. В структуре из 20 заданий
+ * список пуст.
+ */
+export const skrytyeRazdely: readonly SkrytyyRazdel[] = vseRazdely
+  .filter((task) => skryt(task.kod) && taskHasPage(task))
+  .map((task) => ({ ...task, prichina: prichinaSkrytiya(task.kod) ?? '' }));

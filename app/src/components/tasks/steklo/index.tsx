@@ -92,8 +92,22 @@ export function Metka({
 export interface Shag {
   /** Что делаем и почему: HTML (формулы уже набраны). */
   chtoHtml: string;
-  /** Формула шага: HTML KaTeX. */
+  /** Формула шага: HTML KaTeX. Пустая строка — шаг без выкладки. */
   formulaHtml: string;
+  /** Короткое название шага над подписью: «ОДЗ», «Отбор корней» (уравнения). */
+  zagolovok?: string;
+  /** То же название, набранное KaTeX (у №6 в названии этапа бывает формула). */
+  zagolovokHtml?: string;
+  /**
+   * Шаг, который нельзя пропустить: 'odz' — область допустимых значений,
+   * 'otbor' — отбор корней. Выделяется цветом и на листе, и в тренажёре.
+   * 'vnimanie' — «Внимание на формулировку» (№13): та же тёплая плашка.
+   */
+  ton?: 'odz' | 'otbor' | 'vnimanie';
+  /** Таблица или рисунок шага (№6: таблица решения, дерево с выделением). */
+  risunok?: ReactNode;
+  /** Под шагом: кнопки раздела (№1: «Показать свойство» — факты шага). */
+  posle?: ReactNode;
 }
 
 /** Признак делимости под решением: «На 4» и правило с примером (HTML). */
@@ -112,22 +126,40 @@ export function ShagiResheniya({
   delimost = [],
   delimostTitle = 'Признаки делимости',
   className,
+  posle,
 }: {
   shagi: Shag[];
   delimost?: PriznakDelimosti[];
   delimostTitle?: string;
   className?: string;
+  /** Под шагами: своя сворачиваемая панель раздела («Считаем с умом» у №7). */
+  posle?: ReactNode;
 }) {
   return (
     <div className={clsx('stk-reshenie', className)}>
       <ol className="stk-shagi">
         {shagi.map((shag, i) => (
-          <li className="stk-shag" key={i}>
-            <p className="stk-shag__chto" dangerouslySetInnerHTML={{ __html: shag.chtoHtml }} />
+          <li
+            className={clsx('stk-shag', shag.ton !== undefined && `stk-shag--${shag.ton}`)}
+            key={i}
+          >
+            {shag.zagolovokHtml !== undefined ? (
+              <p
+                className="stk-shag__zag"
+                dangerouslySetInnerHTML={{ __html: shag.zagolovokHtml }}
+              />
+            ) : shag.zagolovok === undefined ? null : (
+              <p className="stk-shag__zag">{shag.zagolovok}</p>
+            )}
+            <div className="stk-shag__chto" dangerouslySetInnerHTML={{ __html: shag.chtoHtml }} />
             <div
               className="stk-shag__formula"
               dangerouslySetInnerHTML={{ __html: shag.formulaHtml }}
             />
+            {shag.risunok === undefined ? null : (
+              <div className="stk-shag__risunok">{shag.risunok}</div>
+            )}
+            {shag.posle === undefined ? null : shag.posle}
           </li>
         ))}
       </ol>
@@ -146,6 +178,7 @@ export function ShagiResheniya({
           </ul>
         </details>
       )}
+      {posle}
     </div>
   );
 }

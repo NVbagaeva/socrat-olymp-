@@ -16,7 +16,7 @@ import { kletkiUsloviya, otvetText, tablitsaHtml } from '../html';
 import { reshenieHtml } from '../reshenieHtml';
 import { choice, SIGN } from '../proto/common';
 import { sealAnswer, sealChoice, sealText } from '../secret';
-import { TYPE_NAMES, type HintStep, type Task13, type TypeCode } from '../types';
+import { TYPE_NAMES, type HintStep, type SolutionStep, type Task13, type TypeCode } from '../types';
 import { tablitsaZapolni13, type TablitsaZapolni13 } from '../zapolni';
 
 export type { ShagHtml };
@@ -108,25 +108,32 @@ function zadachaChislom(t: Task13): Zadacha13Sealed {
   };
 }
 
+/** Решение «Определи тип»: признак из условия и название схемы. */
+export function shagiTipa(type: TypeCode): SolutionStep[] {
+  return [
+    { title: 'Ищем признак', text: `В условии: ${SIGN[type]}.` },
+    { title: 'Называем схему', text: `Это ${nazvanieMalenkoe(type)}.` },
+  ];
+}
+
+/** Подсказка «Определи тип»: что сказано в условии. shift — порядок кнопок. */
+export function podskazkaTipa(type: TypeCode, shift: number): HintStep {
+  return choice(
+    'Что сказано в условии?',
+    SIGN[type],
+    TIPY.filter((x) => x !== type).map((x) => SIGN[x]),
+    shift,
+    `Это ${nazvanieMalenkoe(type)}.`,
+  );
+}
+
 /** «Определи тип»: условие задачи, ответ — схема словами. */
 function zadachaTip(t: Task13, no: number): Zadacha13Sealed {
   const right = String(TIPY.indexOf(t.type) + 1);
   const seal = sealChoice(right);
-  const hint = choice(
-    'Что сказано в условии?',
-    SIGN[t.type],
-    TIPY.filter((x) => x !== t.type).map((x) => SIGN[x]),
-    no,
-    `Это ${nazvanieMalenkoe(t.type)}.`,
-  );
+  const hint = podskazkaTipa(t.type, no);
   const razbor: Razbor13 = {
-    html: reshenieHtml(
-      [
-        { title: 'Ищем признак', text: `В условии: ${SIGN[t.type]}.` },
-        { title: 'Называем схему', text: `Это ${nazvanieMalenkoe(t.type)}.` },
-      ],
-      null,
-    ),
+    html: reshenieHtml(shagiTipa(t.type), null),
     otvet: TYPE_NAMES[t.type],
   };
   return {

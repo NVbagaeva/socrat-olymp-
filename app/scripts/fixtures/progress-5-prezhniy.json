@@ -1,0 +1,146 @@
+{
+  "_chto": "localStorage ученика, решавшего №5 до редизайна: тренажёр до PR #340 (budetege:veroyatnost-5:v2, счётчики по методам), «Узнай метод» (budetege:veroyatnost-5-uznay:v2), опорные задачи (budetege:veroyatnost-5:prep:v1) и незаконченная тренировка (budetege:trainer:5:session). Записаны кодом main до редизайна (lib/progressStore.ts, sessiyaPayload.upakovat, trainerSession encodeSession) теми же вызовами, что делали прежние экраны. Нужен scripts/check-progress-5.mjs и браузерной проверке переноса.",
+  "budetege:veroyatnost-5:v2": {
+    "kinds": {
+      "nesovmestnye": {
+        "done": 2,
+        "right": 2,
+        "seconds": 116
+      },
+      "koordinatnaya": {
+        "done": 1,
+        "right": 0,
+        "seconds": 60
+      },
+      "uslovnaya": {
+        "done": 1,
+        "right": 1,
+        "seconds": 33
+      },
+      "nezavisimye": {
+        "done": 5,
+        "right": 3,
+        "seconds": 373
+      },
+      "dva-predmeta": {
+        "done": 1,
+        "right": 1,
+        "seconds": 52
+      }
+    },
+    "mistakes": ["p5-01:3", "p5-03:2", "p5-07:4", "p5-30:1", "p5-43:6"],
+    "outcomes": {}
+  },
+  "budetege:veroyatnost-5-uznay:v2": {
+    "kinds": {
+      "nesovmestnye": {
+        "done": 1,
+        "right": 1,
+        "seconds": 12
+      },
+      "protivopolozhnoe": {
+        "done": 1,
+        "right": 1,
+        "seconds": 13
+      },
+      "koordinatnaya": {
+        "done": 1,
+        "right": 0,
+        "seconds": 14
+      },
+      "sovmestnye": {
+        "done": 2,
+        "right": 2,
+        "seconds": 31
+      },
+      "uslovnaya": {
+        "done": 1,
+        "right": 0,
+        "seconds": 17
+      }
+    },
+    "mistakes": ["p5-03:1", "p5-05:1"],
+    "outcomes": {}
+  },
+  "budetege:veroyatnost-5:prep:v1": {
+    "kinds": {
+      "k5-21": {
+        "done": 1,
+        "right": 1,
+        "seconds": 0
+      },
+      "k5-sp-1": {
+        "done": 1,
+        "right": 1,
+        "seconds": 0
+      },
+      "k5-19": {
+        "done": 1,
+        "right": 0,
+        "seconds": 0
+      },
+      "k5-sp-2": {
+        "done": 1,
+        "right": 0,
+        "seconds": 0
+      },
+      "k5-sv-1": {
+        "done": 1,
+        "right": 1,
+        "seconds": 0
+      }
+    },
+    "mistakes": ["k5-19", "k5-sp-2"],
+    "outcomes": {
+      "k5-21": "right",
+      "k5-sp-1": "right",
+      "k5-19": "wrong",
+      "k5-sp-2": "revealed",
+      "k5-sv-1": "right"
+    }
+  },
+  "budetege:trainer:5:session": {
+    "schemaVersion": 2,
+    "scope": "5",
+    "id": "prezhnyaya-trenirovka",
+    "createdAt": 1762900000000,
+    "updatedAt": 1762900090000,
+    "rev": 4,
+    "writer": "prezhnyaya-vkladka",
+    "paused": false,
+    "activeMs": 90000,
+    "total": 5,
+    "ui": {
+      "index": 1,
+      "marks": {
+        "0": "right"
+      },
+      "tried": {
+        "1": true
+      },
+      "order": null,
+      "card": {
+        "value": "0,123",
+        "state": "incorrect",
+        "itog": "incorrect",
+        "shagov": 0
+      },
+      "vybor": null,
+      "taskFrom": 61000,
+      "misses": 1
+    },
+    "payload": {
+      "zadanie": 5,
+      "rezhim": "practice",
+      "metod": "protivopolozhnoe",
+      "podskazki": true,
+      "tasks": [
+        ["p5-02", 2, "f75f8b53281693a6"],
+        ["p5-04", 1, "674e747b2c56c61c"],
+        ["p5-08", 3, "06afe8f19429696c"],
+        ["p5-27", 2, "5fb010dca9b6e00a"],
+        ["p5-31", 4, "64778dfd077f5c65"]
+      ]
+    }
+  }
+}

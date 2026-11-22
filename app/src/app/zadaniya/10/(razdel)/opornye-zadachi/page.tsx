@@ -1,58 +1,54 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { ReshenoVBloke } from '@/components/tasks/zadanie10/Opornye10';
-import { ZADANIE10, zadanie10Title } from '@/content/zadanie10';
-import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
+import { TabScrollOnMount } from '@/components/tasks/TabScroll';
+import { Opornye10Spisok } from '@/components/tasks/zadanie10/Opornye10';
+import { NAVYKI10, OPORNYE10 } from '@/content/prikladnye10';
+import { zadanie10Title } from '@/content/zadanie10';
+import { blokHref10 } from '@/lib/zadanie10/links';
 import { BLOKI_OPORNYH } from '@/lib/zadanie10/opornye';
-import { ZADANIYA } from '@/lib/paths';
+import { typeset } from '@/lib/tex';
 
 export const metadata: Metadata = {
   title: zadanie10Title('Опорные задачи'),
 };
 
 /**
- * Опорные задачи №10: семь блоков навыков по 10 задач. На карточке —
- * номер, название, описание, число задач, прогресс и «Начать»; формул
- * на карточках нет (docs/razdel-pravila.md, п. 3).
+ * Опорные задачи №10: четыре навыка, семь блоков по десять задач — на
+ * общих карточках «Стеклянной сцены» (components/tasks/opornye, образец
+ * — №3, как у №7 и №6). На карточке блока — название, значок и
+ * прогресс; формул на карточках нет (docs/razdel-pravila.md, п. 3).
+ * Картинки сюжетов — внутри блока, у задач с сюжетом.
  */
 export default function Opornye10Tab() {
-  const base = `${ZADANIYA}/${ZADANIE10.slug}`;
-  const kartinki = kartinkiPrototipov();
+  const navyki = NAVYKI10.map((navyk) => ({
+    id: navyk.id,
+    nazvanie: navyk.nazvanie,
+    lead: navyk.lead,
+    ton: navyk.ton,
+    bloki: navyk.bloki.flatMap(({ slug, znak }) => {
+      const blok = BLOKI_OPORNYH.find((b) => b.slug === slug);
+      return blok === undefined
+        ? []
+        : [
+            {
+              slug,
+              href: blokHref10(slug),
+              nazvanie: blok.nazvanie,
+              znakHtml: typeset(`$${znak}$`),
+              zadachi: blok.zadachi.map((z) => z.id),
+            },
+          ];
+    }),
+  }));
   return (
-    <div className="z10-op-spisok">
-      <p className="z10-o__lead">
-        Короткие задачи на один навык. Из этих навыков складывается любая прикладная задача.
-      </p>
-      <ul className="z10-op-spisok__setka">
-        {BLOKI_OPORNYH.map((b) => (
-          <li key={b.id} className="z10-op-karta">
-            {(() => {
-              /* Картинка — сюжета, где навык нужен; без формул (правило карточек). */
-              const k = b.prototipy.map((id) => kartinki[id]).find(Boolean);
-              return k ? (
-                <picture className="z10-ill z10-op-karta__ill">
-                  <source type="image/webp" srcSet={k.webp} />
-                  <img
-                    src={k.png}
-                    alt=""
-                    width={k.width}
-                    height={k.height}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </picture>
-              ) : null;
-            })()}
-            <span className="z10-op-karta__no">{b.no}</span>
-            <h3 className="z10-op-karta__title">{b.nazvanie}</h3>
-            <p className="z10-op-karta__opisanie">{b.opisanie}</p>
-            <ReshenoVBloke ids={b.zadachi.map((z) => z.id)} />
-            <Link className="btn btn--primary" href={`${base}/opornye-zadachi/${b.slug}/`}>
-              Начать
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <section className="prep z10-opornye" aria-labelledby="z10-opornye-title">
+      <header className="kz-razdel__head">
+        <h2 className="stk-h3" id="z10-opornye-title">
+          {OPORNYE10.title}
+        </h2>
+        <p className="stk-lead">{OPORNYE10.lead}</p>
+      </header>
+      <TabScrollOnMount />
+      <Opornye10Spisok navyki={navyki} />
+    </section>
   );
 }

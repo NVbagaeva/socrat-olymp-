@@ -1,0 +1,96 @@
+{
+  "_chto": "localStorage ученика, решавшего №13 до редизайна: тренажёр (budetege:zadanie-13:v1, до PR #340 — без журнала), опорные задачи (budetege:zadanie-13:opornye:v1) и незаконченная тренировка прежнего тренажёра с фильтрами (budetege:trainer:13:session, режим «Без подсказок»). Записано прежним кодом lib/progressStore.ts, lib/zadanie13/progress.ts и lib/trainerSession/store.ts теми же вызовами, что делали прежние экраны. Нужен scripts/check-progress-13.mjs и браузерной проверке переноса.",
+  "budetege:zadanie-13:v1": {
+    "kinds": {
+      "A-01": {
+        "done": 2,
+        "right": 2,
+        "seconds": 550
+      },
+      "A-05": {
+        "done": 1,
+        "right": 0,
+        "seconds": 400
+      },
+      "B-04": {
+        "done": 1,
+        "right": 1,
+        "seconds": 520
+      },
+      "B-13": {
+        "done": 1,
+        "right": 0,
+        "seconds": 610
+      },
+      "C-01": {
+        "done": 1,
+        "right": 1,
+        "seconds": 300
+      },
+      "C-08": {
+        "done": 1,
+        "right": 1,
+        "seconds": 450
+      },
+      "D-01": {
+        "done": 1,
+        "right": 1,
+        "seconds": 260
+      },
+      "D-07": {
+        "done": 1,
+        "right": 0,
+        "seconds": 380
+      }
+    },
+    "mistakes": [
+      "A-01|b2",
+      "A-05|b3",
+      "B-13|b2",
+      "C-08|b5",
+      "D-07|b2"
+    ],
+    "outcomes": {
+      "A-01|b1": "right",
+      "A-01|b2": "right",
+      "A-05|b3": "wrong",
+      "B-04|b1": "right",
+      "B-13|b2": "wrong",
+      "C-01|b1": "right",
+      "C-08|b5": "right",
+      "D-01|b1": "right",
+      "D-07|b2": "wrong"
+    }
+  },
+  "budetege:zadanie-13:opornye:v1": {
+    "kinds": {
+      "o13-04": {
+        "done": 3,
+        "right": 2,
+        "seconds": 0
+      },
+      "o13-12": {
+        "done": 1,
+        "right": 0,
+        "seconds": 0
+      },
+      "o13-17": {
+        "done": 1,
+        "right": 1,
+        "seconds": 0
+      }
+    },
+    "mistakes": [
+      "o13-04:2",
+      "o13-12:1"
+    ],
+    "outcomes": {
+      "o13-04:1": "right",
+      "o13-04:2": "wrong",
+      "o13-04:3": "right",
+      "o13-12:1": "revealed",
+      "o13-17:1": "right"
+    }
+  },
+  "budetege:trainer:13:session": "{\"schemaVersion\":2,\"scope\":\"13\",\"id\":\"s-prezhnyaya\",\"createdAt\":1762000000000,\"updatedAt\":1762000300000,\"rev\":4,\"writer\":\"w1\",\"paused\":true,\"activeMs\":300000,\"total\":3,\"ui\":{\"index\":1,\"marks\":{\"0\":\"right\"},\"tried\":{},\"order\":null,\"z\":{},\"s\":{}},\"payload\":{\"v\":1,\"filtr\":\"t=A,C\",\"rezhim\":\"bez\",\"seed\":\"k3j9\",\"items\":[{\"k\":\"A-01|b3\"},{\"k\":\"C-02|b5\"},{\"k\":\"A-08|b1\"}]}}"
+}

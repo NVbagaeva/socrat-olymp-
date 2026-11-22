@@ -14,7 +14,8 @@
        сайте нет ни одной активной кнопки оплаты: ни ссылки на
        регистрацию с тарифом, ни кнопки data-oplata="vklyuchena";
        кнопки оплаты на /tarify/ все неактивны (disabled);
-     — разметки Offer нет, страницы /oferta/ нет;
+     — разметки Offer нет (страницу /oferta/ и ссылки на неё проверяет
+       scripts/check-oferta.mjs);
      — «мягкой стены» нет нигде, кроме служебной витрины.
 
    Запуск: node scripts/check-tarify.mjs (после сборки — обе части). */
@@ -76,9 +77,12 @@ if (config.rubli(1990) !== '1 990 ₽') fail(`rubli(1990) = ${config.rubli(199
 if (
   BESPLATNO.trenazherVDen !== 10 ||
   BESPLATNO.variantovOnlayn !== 1 ||
-  BESPLATNO.generatorVDen !== 1
+  BESPLATNO.generatorProbnyh !== 1
 ) {
   fail('лимиты бесплатного доступа не совпадают с утверждёнными (10 / 1 / 1)');
+}
+if (JSON.stringify(BESPLATNO.generatorNomera) !== JSON.stringify(['1', '2', '10', '11'])) {
+  fail(`генераторы без тарифа: ${BESPLATNO.generatorNomera.join(', ')}, утверждено №1, 2, 10, 11`);
 }
 if (PROBNYY.dney !== 7 || PROBNYY.raz !== 1) fail('пробный доступ — 7 дней, один раз');
 if (KLASS_MAKS !== 30) fail('класс репетитора — до 30 учеников');
@@ -138,13 +142,17 @@ if (!fs.existsSync(path.join(OUT, 'index.html'))) {
     const html = fs.readFileSync(tarify, 'utf8');
     const knopki = [...html.matchAll(/<(button|a|span)\b[^>]*data-oplata="([a-z]+)"[^>]*>/g)];
     if (knopki.length === 0) fail('/tarify/: не найдено ни одной кнопки оплаты');
+    /* Оплата выключена: кнопка — ссылка «Узнать об открытии» на
+       Telegram-канал (или старая неактивная кнопка). Ни одной ссылки на
+       оплату и ни одного поля почты. */
     for (const [tag, el, sostoyanie] of knopki) {
-      if (sostoyanie !== 'vyklyuchena' || el !== 'button' || !/\sdisabled(=""|\s|>)/.test(tag)) {
+      const neaktivnaya = el === 'button' && /\sdisabled(=""|\s|>)/.test(tag);
+      const vKanal = el === 'a' && /\shref="https:\/\/t\.me\/[^"]+"/.test(tag);
+      if (sostoyanie !== 'vyklyuchena' || !(neaktivnaya || vKanal)) {
         fail(`/tarify/: активная кнопка оплаты: ${tag.slice(0, 120)}`);
       }
     }
-    if (!html.includes('Оплата скоро откроется'))
-      fail('/tarify/: нет подписи «Оплата скоро откроется»');
+    if (!html.includes('Узнать об открытии')) fail('/tarify/: нет кнопки «Узнать об открытии»');
     if (!html.includes('Начать заниматься')) fail('/tarify/: нет кнопки «Начать заниматься»');
     if (/<input[^>]+type="email"/.test(html)) fail('/tarify/: на странице есть поле почты');
   }
@@ -153,8 +161,6 @@ if (!fs.existsSync(path.join(OUT, 'index.html'))) {
   const ssylok = (index.match(/href="\/tarify\/"/g) ?? []).length;
   if (ssylok < 2) fail(`главная: ссылок «Тарифы» ${ssylok}, ждали в шапке и подвале`);
   if (!index.includes('Начать бесплатно')) fail('главная: пропала кнопка «Начать бесплатно»');
-
-  if (fs.existsSync(path.join(OUT, 'oferta'))) fail('страница /oferta/ опубликована раньше текста');
 
   for (const file of htmlFiles(OUT)) {
     proverenoStranic++;

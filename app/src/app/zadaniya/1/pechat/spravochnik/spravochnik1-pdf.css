@@ -384,7 +384,9 @@
   list-style: none;
 }
 .spr1p-toc__razdel + .spr1p-toc__razdel {
-  margin-top: 2mm;
+  /* Тем стало больше (новые карточки №1): содержание держится на первой
+     странице за счёт плотнее строк, а не меньшего кегля названий. */
+  margin-top: 1.2mm;
 }
 .spr1p-toc__stroka {
   display: flex;
@@ -413,7 +415,8 @@
 .spr1p-toc__temy {
   display: block;
   margin-left: 8mm;
-  font-size: 8pt;
+  font-size: 7.6pt;
+  line-height: 1.3;
   color: var(--color-text-secondary);
 }
 

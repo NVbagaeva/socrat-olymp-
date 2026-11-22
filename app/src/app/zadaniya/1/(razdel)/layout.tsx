@@ -12,6 +12,9 @@ import '../../veroyatnost.css';
 import '@/lib/planimetriya/planimetriya.css';
 import '../zadanie1.css';
 import '../spravochnik1-web.css';
+/* «Стеклянная сцена» №1: пример с закреплённым чертежом, чертёж в
+   тренажёре и опорных задачах. */
+import '@/components/tasks/planimetriya/steklo1.css';
 
 /**
  * Оболочка задания №1: крошки, заголовок, кольцо прогресса и лента

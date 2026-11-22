@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { LegalDocId } from '@/content/legal/documents';
 import { parseLegal, plainText, section, type LegalBlock } from './markdown';
+import { zapolnitOfertu } from './oferta';
 import { fillPlaceholders } from './operator';
 
 const DIR = path.join(process.cwd(), 'src', 'content', 'legal');
@@ -23,4 +24,9 @@ export function legalBlocks(id: LegalDocId): LegalBlock[] {
 /** Вариант Б согласия — текст письма родителю, уже с данными оператора. */
 export function parentConsentText(): string {
   return plainText(section(legalBlocks('soglasie'), 'variant-b'));
+}
+
+/** Текст оферты с реквизитами, сроками и ценами. */
+export function ofertaBlocks(): LegalBlock[] {
+  return parseLegal(zapolnitOfertu(fs.readFileSync(path.join(DIR, 'oferta.md'), 'utf8')));
 }

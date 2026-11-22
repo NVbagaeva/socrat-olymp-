@@ -19,7 +19,9 @@ const EMPTY: KindStats = {
   done: 0,
   right: 0,
   mistakes: 0,
+  hinted: 0,
   seconds: 0,
+  lastAt: 0,
   recent: [],
   repeat: false,
 };

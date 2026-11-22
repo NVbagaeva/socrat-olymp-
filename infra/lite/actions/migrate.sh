@@ -1,12 +1,14 @@
 #!/bin/bash
 # «Миграции»: свежие файлы миграций на сервер и bin/migrate.sh — новые
-# миграции, каталог банка, список приглашённых (ALLOWED_EMAILS), редакция
+# миграции, каталог банка, список приглашённых (ALLOWED_EMAILS), почта,
+# добавленная вручную (SIGNUP_EXTRA), редакция
 # правовых документов (из app/src/content/legal/operator.json),
 # администратор (ADMIN_EMAIL) и пароль роли туннеля (DB_ADMIN_PASSWORD).
 # Значения идут по SSH на стандартный ввод и нигде не печатаются.
 . "$(dirname "$0")/lib.sh"
 ssh_setup
 mask "${ALLOWED_EMAILS:-}"
+mask "${SIGNUP_EXTRA:-}"
 mask "${ADMIN_EMAIL:-}"
 mask "${DB_ADMIN_PASSWORD:-}"
 
@@ -26,6 +28,7 @@ fi
 sync_files
 {
   printf 'ALLOWED_EMAILS=%s\n' "$(printf '%s' "${ALLOWED_EMAILS:-}" | tr -d '\n ')"
+  printf 'SIGNUP_EXTRA=%s\n' "$(printf '%s' "${SIGNUP_EXTRA:-}" | tr -d '\n ')"
   printf 'DOCUMENTS_VERSION=%s\n' "$documents_version"
   printf 'ADMIN_EMAIL=%s\n' "$(printf '%s' "${ADMIN_EMAIL:-}" | tr -d '\n ')"
   printf 'DB_ADMIN_PASSWORD=%s\n' "${DB_ADMIN_PASSWORD:-}"

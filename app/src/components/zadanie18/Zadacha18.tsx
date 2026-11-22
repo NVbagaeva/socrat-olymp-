@@ -208,6 +208,7 @@ export function kartochka18(bank: readonly Zadacha18[]): KartochkaRazdela<Zadach
         right: itog.right,
         clean: itog.clean,
         seconds: itog.sek,
+        ishod: itog.ishod,
         itog: itog.right ? 'right' : 'wrong',
       });
     },

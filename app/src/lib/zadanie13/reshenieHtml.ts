@@ -182,3 +182,38 @@ export function reshenieHtml(
 ): string {
   return reshenieChasti(solution, tableModel, opts).join('');
 }
+
+/** Шаг решения по частям — для шагов «Стеклянной сцены» (тренажёр, карта задания). */
+export interface ShagChasti13 {
+  /** Подпись шага: «Определяем тип платежа». */
+  zagolovokHtml: string;
+  /** Пояснение шага; пустая строка — пояснения нет. */
+  chtoHtml: string;
+  /** Формула шага (KaTeX, с переносами после «=»). */
+  formulaHtml: string;
+  /** Таблица и куски шага (плашки, пропорции, таблица в буквах) — той же разметкой, что в теории. */
+  dopHtml: string;
+  vid: SolutionStep['vid'];
+}
+
+/**
+ * Те же шаги, что у reshenieChasti, но по частям: подпись, пояснение,
+ * формула и остальное — каждое отдельно. Содержание и разметка частей
+ * — те же; шаг «Ответ» не входит.
+ */
+export function reshenieShagami(
+  solution: readonly SolutionStep[],
+  tableModel: TableModel | null,
+): ShagChasti13[] {
+  return solution
+    .filter((s) => s.title !== 'Ответ')
+    .map((s) => ({
+      zagolovokHtml: typeset(s.title),
+      chtoHtml: s.text.trim() === '' ? '' : typeset(s.text),
+      formulaHtml: s.formula === undefined ? '' : krupno(s.formula),
+      dopHtml:
+        (s.table && tableModel !== null ? tablitsaHtml(kletkiModeli(tableModel)) : '') +
+        (s.bloki ?? []).map((b) => blokHtml(b, false)).join(''),
+      vid: s.vid,
+    }));
+}

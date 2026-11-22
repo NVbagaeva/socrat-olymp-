@@ -1,8 +1,10 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import type { NextConfig } from 'next';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import { assetVersions } from './scripts/lib/asset-versions.mjs';
 import { generatorVersions } from './scripts/lib/generator-versions.mjs';
+import { prodavetsProblems } from './src/lib/legal/prodavetsProblems.mjs';
 import {
   legalConfigError,
   legalConfigProblems,
@@ -29,6 +31,15 @@ const devPages =
   process.env.INTRO_DEV_PAGES === '1' ||
   process.env.KABINET === '1';
 
+/* Оферта (src/app/oferta/page.oferta.tsx) — черновик на вычитку, пока
+   владелец не включит NEXT_PUBLIC_LEGAL_READY=1. До этого маршрут есть
+   только в next dev и в превью pull request (OFERTA_PREVIEW=1,
+   .github/workflows/preview.yml); в сборке для хостинга адрес отдаёт
+   404 — проверяет scripts/check-oferta.mjs. */
+const legalReady = process.env.NEXT_PUBLIC_LEGAL_READY === '1';
+const ofertaPage =
+  legalReady || process.env.NODE_ENV === 'development' || process.env.OFERTA_PREVIEW === '1';
+
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 
@@ -36,7 +47,14 @@ const nextConfig: NextConfig = {
   ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
   output: 'export',
-  pageExtensions: devPages ? ['dev.tsx', 'tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js'],
+  pageExtensions: [
+    ...(devPages ? ['dev.tsx'] : []),
+    ...(ofertaPage ? ['oferta.tsx'] : []),
+    'tsx',
+    'ts',
+    'jsx',
+    'js',
+  ],
   // При экспорте оптимизация изображений недоступна.
   images: { unoptimized: true },
   // Каждая страница выгружается папкой с index.html — так путь работает без правил сервера.
@@ -46,6 +64,15 @@ const nextConfig: NextConfig = {
   // на каждой сборке. lib/assetUrl.ts добавляет его к ссылке как ?v=…,
   // чтобы перезалитый под тем же именем файл не залипал в годовом кеше.
   env: {
+    // Структура экзамена (src/content/struktura.js): всегда одна из двух
+    // строк, чтобы выбор вычислялся на сборке. Сайт собирается по
+    // ЕГЭ-2027 из 19 заданий; STRUKTURA_EGE=2027-20 — сборка по прежней
+    // структуре из 20 заданий, только для сверки (не для выкладки).
+    STRUKTURA_EGE: process.env.STRUKTURA_EGE === '2027-20' ? '2027-20' : '2027-19',
+    // Скрытые разделы (src/lib/skrytye.ts): «1» — открыты всем, с плашкой.
+    // Только для превью pull request (SKRYTYE=1), где войти
+    // администратором нельзя; на хостинг такая сборка не выкладывается.
+    SKRYTYE_VSEM: process.env.SKRYTYE === '1' ? '1' : '0',
     // Вход в кабинет: «1» или «0» всегда, а не undefined. Так условие
     // `process.env.AUTH_ON === '1'` вычисляется на сборке, и без флага
     // webpack не кладёт в сборку ни ветку входа, ни кусок SDK
@@ -101,6 +128,30 @@ const nextConfig: NextConfig = {
    src/content/legal/operator.json. Черновик для превью и проверок
    CI — LEGAL_DRAFT=1 (scripts/lib/legal-config.mjs). */
 export default function config(phase: string): NextConfig {
+  /* Оферта и реквизиты с «[ИНН]» вместо номера не публикуются: с флагом
+     NEXT_PUBLIC_LEGAL_READY=1 сборка падает, пока не заполнен
+     src/content/legal/prodavets.json. LEGAL_DRAFT это не отменяет. */
+  if (phase === PHASE_PRODUCTION_BUILD && legalReady) {
+    const problems = prodavetsProblems(
+      JSON.parse(
+        fs.readFileSync(
+          path.join(process.cwd(), 'src', 'content', 'legal', 'prodavets.json'),
+          'utf8',
+        ),
+      ),
+    );
+    if (problems.length > 0) {
+      throw new Error(
+        [
+          '',
+          'Сборка остановлена: включён NEXT_PUBLIC_LEGAL_READY, но реквизиты продавца не заполнены.',
+          'Заполните файл app/src/content/legal/prodavets.json:',
+          ...problems.map((p) => `  — ${p}`),
+          '',
+        ].join('\n'),
+      );
+    }
+  }
   if (phase === PHASE_PRODUCTION_BUILD && process.env.LEGAL_DRAFT !== '1') {
     const problems = legalConfigProblems(readLegalConfig());
     if (problems.length > 0) {

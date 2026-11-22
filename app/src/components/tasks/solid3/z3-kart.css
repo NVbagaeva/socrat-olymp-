@@ -1,0 +1,19 @@
+/* Вкладка «Карточки» №3 в стеклянной сцене: стекло на карточках раздела.
+   Всё в обёртке .z3-kart — другие номера не затрагиваются. */
+
+.z3-kart .card {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+
+/* Карточка-флип поворачивается: тут только заливка, без backdrop-filter
+   (на повороте он тормозит). */
+.z3-kart .kart-card {
+  background: var(--glass-bg-strong);
+  border-radius: 20px;
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}

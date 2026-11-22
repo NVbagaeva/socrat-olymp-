@@ -1,16 +1,15 @@
 import type { Metadata } from 'next';
-import { OZadanii4 } from '@/components/tasks/veroyatnost/OZadanii4';
+import { OZadanii4Karta } from '@/components/tasks/veroyatnost/karta/OZadanii4Karta';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
-import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('4', vkladka('4', 'o-zadanii')),
 };
 
 /**
- * Вкладка «О задании» задания №4 — живёт на адресе самого раздела,
- * как первая вкладка у задания №12. Содержимое — раздел 01 референса.
+ * Вкладка «О задании» задания №4 — живёт на адресе самого раздела:
+ * карта задания по методам («Стеклянная сцена»).
  */
 export default function OZadanii4Tab() {
-  return <OZadanii4 base={`${ZADANIYA}/4`} />;
+  return <OZadanii4Karta />;
 }

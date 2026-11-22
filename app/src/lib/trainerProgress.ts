@@ -6,7 +6,7 @@
  * Лежит рядом с прогрессом подготовительных задач, но отдельным
  * ключом: «Сбросить» в тренажёре не должен стирать решённые навыки.
  *
- * Хранилище читается через useSyncExternalStore: на сервере снимок
+ * Хранилище — журнал попыток (lib/progressLog): на сервере снимок
  * всегда пустой, поэтому первая отрисовка показывает нули и
  * расхождению при гидратации взяться неоткуда.
  *
@@ -14,9 +14,17 @@
  * и номера заданий, в которых ученик ошибся.
  */
 
-import { useSyncExternalStore } from 'react';
+import {
+  EMPTY_LOG,
+  createLogStore,
+  dropKinds,
+  legacyView,
+  outcomeOf,
+  type LogOutcome,
+  type ProgressLog,
+} from './progressLog';
 
-/** Ключ хранения. Версия в имени: формат ещё может поменяться. */
+/** Прежний ключ хранения (счётчики): теперь только источник для журнала. */
 export const TRAINER_KEY = 'budetege:trainer:v1';
 
 /** Счётчики одного типа заданий. */
@@ -47,100 +55,30 @@ export interface TrainerProgress {
    зациклится, сверяя снимки. */
 const EMPTY: TrainerProgress = { kinds: {}, mistakes: [], solved: [] };
 
-let cache: TrainerProgress | null = null;
-const listeners = new Set<() => void>();
+/**
+ * Журнал попыток №12 (lib/progressLog): счётчики, ошибки и решённые
+ * задачи считаются из него. Прежний ключ TRAINER_KEY (счётчики)
+ * сворачивается в журнал при первом чтении (LEGACY_LOGS) и остаётся как
+ * был. Со входом журнал живёт в аккаунте (lib/progressImport/registry.ts).
+ */
+export const PROGRESS12_KEY = 'budetege:zadanie-12:log:v1';
+export const log12 = createLogStore(PROGRESS12_KEY);
 
-function number(value: unknown): number {
-  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 0;
-}
+let seen: ProgressLog = EMPTY_LOG;
+let view: TrainerProgress = EMPTY;
 
-/** Разбор записи из хранилища. Мусор и чужой формат считаем пустотой. */
-function parse(raw: string | null): TrainerProgress {
-  if (raw === null) {
-    return EMPTY;
+function viewOf(current: ProgressLog): TrainerProgress {
+  if (current !== seen) {
+    seen = current;
+    const { kinds, mistakes, solved } = legacyView(current);
+    view = { kinds, mistakes, solved };
   }
-  try {
-    const value: unknown = JSON.parse(raw);
-    if (typeof value !== 'object' || value === null) {
-      return EMPTY;
-    }
-    const source = value as { kinds?: unknown; mistakes?: unknown; solved?: unknown };
-    const kinds: Record<string, TrainerKindTally> = {};
-    if (typeof source.kinds === 'object' && source.kinds !== null) {
-      Object.entries(source.kinds as Record<string, unknown>).forEach(([id, tally]) => {
-        if (typeof tally === 'object' && tally !== null) {
-          const item = tally as Record<string, unknown>;
-          kinds[id] = {
-            done: number(item.done),
-            right: number(item.right),
-            seconds: number(item.seconds),
-          };
-        }
-      });
-    }
-    const mistakes = Array.isArray(source.mistakes)
-      ? source.mistakes.filter((item): item is string => typeof item === 'string')
-      : [];
-    const solved = Array.isArray(source.solved)
-      ? source.solved.filter((item): item is string => typeof item === 'string')
-      : [];
-    return { kinds, mistakes, solved };
-  } catch {
-    return EMPTY;
-  }
-}
-
-function read(): TrainerProgress {
-  /* Приватный режим и запрет на хранилище: обращение само по себе
-     может бросить исключение, поэтому в try завёрнуто и оно. */
-  try {
-    return parse(window.localStorage.getItem(TRAINER_KEY));
-  } catch {
-    return EMPTY;
-  }
-}
-
-function snapshot(): TrainerProgress {
-  if (cache === null) {
-    cache = read();
-  }
-  return cache;
-}
-
-function serverSnapshot(): TrainerProgress {
-  return EMPTY;
-}
-
-function subscribe(listener: () => void): () => void {
-  listeners.add(listener);
-  /* Вторая вкладка того же браузера: там решали — здесь показываем. */
-  const sync = (event: StorageEvent) => {
-    if (event.key === TRAINER_KEY || event.key === null) {
-      cache = null;
-      listeners.forEach((fn) => fn());
-    }
-  };
-  window.addEventListener('storage', sync);
-  return () => {
-    listeners.delete(listener);
-    window.removeEventListener('storage', sync);
-  };
+  return view;
 }
 
 /** Прогресс целиком. Перерисовка происходит сама при каждой записи. */
 export function useTrainerProgress(): TrainerProgress {
-  return useSyncExternalStore(subscribe, snapshot, serverSnapshot);
-}
-
-function save(next: TrainerProgress): void {
-  cache = next;
-  try {
-    window.localStorage.setItem(TRAINER_KEY, JSON.stringify(next));
-  } catch {
-    /* Хранилище недоступно — счётчики живут до перезагрузки. Экран
-       при этом работает, и это лучше, чем падение. */
-  }
-  listeners.forEach((fn) => fn());
+  return viewOf(log12.use());
 }
 
 export interface TrainerAttempt {
@@ -154,6 +92,8 @@ export interface TrainerAttempt {
   clean: boolean;
   /** Сколько секунд заняло задание. */
   seconds: number;
+  /** Точный исход для журнала попыток (lib/progressLog, ishodOf). */
+  ishod?: LogOutcome;
 }
 
 /**
@@ -164,41 +104,17 @@ export interface TrainerAttempt {
  * в список, даже если верный ответ в итоге нашёлся.
  */
 export function recordAttempt(attempt: TrainerAttempt): void {
-  const current = snapshot();
-  const tally = current.kinds[attempt.kind] ?? { done: 0, right: 0, seconds: 0 };
-
-  const kinds: Record<string, TrainerKindTally> = {
-    ...current.kinds,
-    [attempt.kind]: {
-      done: tally.done + 1,
-      right: tally.right + (attempt.right ? 1 : 0),
-      seconds: tally.seconds + Math.max(0, Math.round(attempt.seconds)),
-    },
-  };
-
-  const mistakes = attempt.clean
-    ? current.mistakes.filter((id) => id !== attempt.taskId)
-    : current.mistakes.includes(attempt.taskId)
-      ? current.mistakes
-      : [...current.mistakes, attempt.taskId];
-
-  const solved =
-    attempt.right && !(current.solved ?? []).includes(attempt.taskId)
-      ? [...(current.solved ?? []), attempt.taskId]
-      : (current.solved ?? []);
-
-  save({ kinds, mistakes, solved });
+  log12.record({
+    task: attempt.taskId,
+    kind: attempt.kind,
+    outcome: outcomeOf(attempt),
+    seconds: Math.max(0, Math.round(attempt.seconds)),
+  });
 }
 
 /** Очистить прогресс тренажёра. Опорные задачи не трогаем. */
 export function resetTrainer(): void {
-  cache = EMPTY;
-  try {
-    window.localStorage.removeItem(TRAINER_KEY);
-  } catch {
-    /* Нечего чистить — значит и записать не удавалось. */
-  }
-  listeners.forEach((fn) => fn());
+  log12.reset();
 }
 
 /** Набор, к которому относится задание: «12Q.C-04» → «12Q.C». */
@@ -224,14 +140,7 @@ export function progressOf(progress: TrainerProgress, sets: readonly string[]): 
 
 /** Сбросить счётчики и ошибки одного раздела: другие разделы не трогаются. */
 export function resetSets(sets: readonly string[]): void {
-  const current = snapshot();
-  save({
-    kinds: Object.fromEntries(
-      Object.entries(current.kinds).filter(([kind]) => !sets.includes(kind)),
-    ),
-    mistakes: current.mistakes.filter((id) => !sets.includes(setOfTask(id))),
-    solved: (current.solved ?? []).filter((id) => !sets.includes(setOfTask(id))),
-  });
+  log12.update((log) => dropKinds(log, (kind) => sets.includes(kind), setOfTask));
 }
 
 export interface TrainerSummary {

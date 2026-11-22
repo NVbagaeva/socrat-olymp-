@@ -16,9 +16,9 @@ import { KOROBOK, type ProgressKolody, type ZapisKartochki } from './leitner';
 
 const PUSTO: ProgressKolody = {};
 
-const stores = new Map<number, PersistentStore<ProgressKolody>>();
+const stores = new Map<number | string, PersistentStore<ProgressKolody>>();
 
-function store(task: number): PersistentStore<ProgressKolody> {
+function store(task: number | string): PersistentStore<ProgressKolody> {
   let s = stores.get(task);
   if (s === undefined) {
     s = persistent<ProgressKolody>(`kartochki:${task}:v1`, PUSTO);
@@ -48,7 +48,7 @@ function chistyy(raw: unknown): ProgressKolody {
 const chistye = new WeakMap<object, ProgressKolody>();
 
 /** Прогресс колоды прямо сейчас — для обработчиков вне отрисовки. */
-export function prochitat(task: number): ProgressKolody {
+export function prochitat(task: number | string): ProgressKolody {
   const raw = store(task).read();
   const known = chistye.get(raw);
   if (known !== undefined) return known;
@@ -57,7 +57,7 @@ export function prochitat(task: number): ProgressKolody {
   return v;
 }
 
-export function useProgressKolody(task: number): ProgressKolody {
+export function useProgressKolody(task: number | string): ProgressKolody {
   const s = store(task);
   return useSyncExternalStore(
     s.subscribe,
@@ -66,10 +66,10 @@ export function useProgressKolody(task: number): ProgressKolody {
   );
 }
 
-export function zapisatProgress(task: number, p: ProgressKolody): void {
+export function zapisatProgress(task: number | string, p: ProgressKolody): void {
   store(task).write(p);
 }
 
-export function sbrositProgress(task: number): void {
+export function sbrositProgress(task: number | string): void {
   store(task).write(PUSTO);
 }

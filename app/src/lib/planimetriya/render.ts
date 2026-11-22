@@ -26,7 +26,7 @@
 import { esc, px } from '@/lib/graph/renderer.js';
 import { KOREN, znakKornyaSvg } from '@/lib/risunki/koren.js';
 import { indeksSvg } from '@/lib/risunki/shrifty.js';
-import { POROG } from './figury';
+import { POROG_ZHESTKIY } from './figury';
 import {
   type Krug,
   RAD,
@@ -229,9 +229,7 @@ function hash(s: string): string {
 
 const ZNACHENIE_CHISLO = /^[\d\s,.√°+\-−]+$/;
 
-/* Знак «°»: в KaTeX_Main его нет, браузер берёт запасной шрифт с
-   широким левым полем — «33 °». Знак набирается шрифтом сайта
-   вплотную к числу. */
+/* Знак «°» внутри записи с корнем: шрифтом сайта вплотную к числу. */
 function gradus(t: string): string {
   return t
     .split('°')
@@ -239,15 +237,88 @@ function gradus(t: string): string {
     .join(`<tspan font-family="${PL.font.slovo}" font-style="normal">°</tspan>`);
 }
 
+/**
+ * Подпись величины со знаком градуса. Знак «°» — кольцо вектором на
+ * высоте цифр, вплотную к числу: шрифтовой знак брался из запасного
+ * шрифта, был мелким и под белой обводкой читался как кавычка («6"»).
+ * Текст — по центру cx; ширины частей — те же, по которым считалась
+ * рамка подписи.
+ */
+function znachenieSGradusom(
+  tekst: string,
+  cx: number,
+  base: number,
+  size: number,
+  color: string,
+  shrift: string,
+): string {
+  const chasti = tekst.split('°');
+  const g = PL.gradus;
+  const levo = cx - shirinaTeksta(tekst, size) / 2;
+  let x = levo;
+  const tspany: string[] = [];
+  const kolca: string[] = [];
+  chasti.forEach((ch, i) => {
+    if (ch !== '') {
+      tspany.push(`<tspan x="${px(x)}">${esc(ch)}</tspan>`);
+      x += shirinaTeksta(ch, size);
+    }
+    if (i < chasti.length - 1) {
+      const kx = x + g.shirina * size * 0.5;
+      const ky = base - g.vysota * size;
+      const r = g.r * size;
+      kolca.push(
+        `<circle cx="${px(kx)}" cy="${px(ky)}" r="${px(r)}" fill="none" stroke="${PL.bg}" stroke-width="${px(g.tolshchina * size + PL.width.halo)}"/>` +
+          `<circle class="pl-gradus" cx="${px(kx)}" cy="${px(ky)}" r="${px(r)}" fill="none" stroke="${color}" stroke-width="${px(g.tolshchina * size)}"/>`,
+      );
+      x += g.shirina * size;
+    }
+  });
+  return (
+    `<text class="pl-znachenie" y="${px(base)}" ${shrift} font-size="${size}" fill="${color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${tspany.join('')}</text>` +
+    kolca.join('')
+  );
+}
+
 /* ── Рендер ──────────────────────────────────────────────────────── */
+
+/* Наблюдатель: автотест разметки получает каждый нарисованный чертёж —
+   сцену, настройки, отчёт и SVG — где бы его ни рисовали (тренажёр,
+   листы, справочник). Пробные рисунки подбора чисел идут мимо него. */
+export interface Nablyudenie {
+  scena: Scena;
+  optsii: Optsii;
+  otchet: Otchet;
+  svg: string;
+}
+let nablyudatel: ((n: Nablyudenie) => void) | null = null;
+export function nablyudat(fn: ((n: Nablyudenie) => void) | null): void {
+  nablyudatel = fn;
+}
+/** Пробный рисунок (подбор чисел, отбраковка): наблюдатель его не видит. */
+export function bezNablyudeniya<T>(fn: () => T): T {
+  const prezhniy = nablyudatel;
+  nablyudatel = null;
+  try {
+    return fn();
+  } finally {
+    nablyudatel = prezhniy;
+  }
+}
 
 export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): string {
   const R = otchet ?? pustoyOtchet();
+  const svg = narisovat(scena, optsii, R);
+  if (nablyudatel !== null) nablyudatel({ scena, optsii, otchet: R, svg });
+  return svg;
+}
+
+function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
   Object.assign(R, pustoyOtchet());
   const zadaniyaZnach: ZadanieZnach[] = [];
   const problems = R.problems;
   const rezhim: Rezhim = optsii.rezhim ?? { rezhim: 'uchenik' };
-  const shag = rezhim.rezhim === 'podskazka' ? rezhim.shag : -1;
+  const shag = rezhim.rezhim === 'podskazka' && rezhim.tiho !== true ? rezhim.shag : -1;
   const variant = optsii.variant;
   const imya = (n: string) => variant?.bukvy[n] ?? n;
 
@@ -274,7 +345,14 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
   };
 
   /* 3. Видимые элементы. */
-  const vidimye = scena.elementy.filter((e) => vidim(sloyOf(e), rezhim));
+  const sposob = optsii.sposob ?? 1;
+  const vidimye = scena.elementy.filter(
+    (e) =>
+      vidim(sloyOf(e), rezhim) &&
+      (e.sposob === undefined || e.sposob === sposob) &&
+      /* Только на чертеже условия: искомая фигура со знаком «?». */
+      (e.tolkoUslovie !== true || rezhim.rezhim === 'uchenik'),
+  );
   R.vidimye = vidimye.length;
   const novoe = (e: Element) =>
     shag > 0 && (sloyOf(e) === shag || (e.podsvetka ?? []).includes(shag));
@@ -285,7 +363,14 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
         `вспомогательное построение (пунктир) в слое условия: ${tochkiElementa(e).join('') || e.tip}`,
       );
     }
-    if (e.tip === 'oblast' && e.vydelit !== 'dano' && e.vydelit !== 'iskomoe') {
+    if (
+      e.tip === 'oblast' &&
+      e.vydelit !== 'dano' &&
+      e.vydelit !== 'iskomoe' &&
+      /* Сплошная заливка равных частей и подпись S — не штриховка. */
+      e.cvet === undefined &&
+      e.tolkoZnachenie !== true
+    ) {
       problems.push('штриховка в условии без роли (данное или искомое)');
     }
   }
@@ -333,6 +418,34 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
   for (const [n, p] of Object.entries(P)) R.ekran[n] = S(p);
   const E = (n: string): T2 => S(pt(n));
 
+  /* Показывается ли значение элемента в этом режиме. */
+  const naUchitel = rezhim.rezhim === 'uchitel';
+  const znachenieVidno = (e: Element): boolean => {
+    if (e.znachenie === undefined) return false;
+    /* Знак «?» у искомого — не число: он стоит и на листе ученика. */
+    if (e.znachenie === '?') return true;
+    /* Вопрос подсказки: элемент шага подсвечен, его число — ответ на
+       вопрос и появится только на следующем шаге. */
+    if (
+      rezhim.rezhim === 'podskazka' &&
+      rezhim.vopros === true &&
+      sloyOf(e) === shag &&
+      /* Буква величины («R», «x», «2r») ответа не выдаёт: её подсказка и называет. */
+      ZNACHENIE_CHISLO.test(e.znachenie)
+    )
+      return false;
+    if (e.otvet && !naUchitel) return false;
+    /* Слой условия: на листе ученика числа — только по настройке chisla;
+       в подсказке подписаны данные, у учителя — данные и ответ. */
+    if (sloyOf(e) === 'uslovie' && !optsii.chisla && !novoe(e)) {
+      return (
+        (rezhim.rezhim === 'podskazka' && e.vydelit === 'dano') ||
+        (naUchitel && (e.vydelit === 'dano' || e.otvet === true))
+      );
+    }
+    return true;
+  };
+
   /* 5. Рисование. Слои SVG: штриховка, окружности, линии, отметки, точки, подписи. */
   const sloyOblast: string[] = [];
   const sloyOkr: string[] = [];
@@ -350,7 +463,17 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const n = novoe(e);
     const iz = e.vydelit === 'iskomoe';
     const vsp = sloyOf(e) !== 'uslovie';
-    const color = n ? PL.podskazka : iz ? PL.iskomoe : vsp ? PL.podskazka : PL.ink;
+    /* Подсказка: новый элемент шага — оранжевый и толще, построения
+       прежних шагов — спокойным цветом линий. */
+    const color = n
+      ? PL.novoe
+      : iz
+        ? PL.iskomoe
+        : vsp
+          ? rezhim.rezhim === 'podskazka'
+            ? PL.ink
+            : PL.podskazka
+          : PL.ink;
     const w = n ? PL.width.novoe : iz ? PL.width.iskomoe : PL.width.line;
     const sl = sloyOf(e);
     const cls = [
@@ -448,7 +571,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     if (e.tip === 'mnogougolnik') {
       const pts = e.tochki.map(E);
       sloyLinii.push(
-        `<path class="${st.cls}"${st.data} d="${pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p[0])} ${px(p[1])}`).join('')}Z" fill="none" stroke="${st.color}" stroke-width="${st.w}" stroke-linejoin="round"/>`,
+        `<path class="${st.cls}"${st.data} d="${pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p[0])} ${px(p[1])}`).join('')}Z" fill="${rezhim.rezhim === 'podskazka' && sloyOf(e) === 'uslovie' ? PL.zalivka : 'none'}" stroke="${st.color}" stroke-width="${st.w}" stroke-linejoin="round"/>`,
       );
       for (let i = 0; i < pts.length; i += 1) {
         const a = pts[i]!;
@@ -493,8 +616,62 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
       }
       if (dist(a, b) < PL.minOtrezok)
         problems.push(`отрезок ${e.a}${e.b} короче ${PL.minOtrezok} px`);
-      if (e.shtrihi) {
+      if (e.strelki) {
+        /* Значок параллельности: «>» (или «>>») посередине, по направлению отрезка. */
         const m: T2 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+        const u = unit(sub(b, a));
+        const nrm: T2 = [-u[1], u[0]];
+        const d: string[] = [];
+        for (let i = 0; i < e.strelki; i += 1) {
+          const c = add(m, mul(u, (i - (e.strelki - 1) / 2) * 5));
+          const k1 = add(sub(c, mul(u, 4)), mul(nrm, 4));
+          const k2 = add(sub(c, mul(u, 4)), mul(nrm, -4));
+          d.push(`M${px(k1[0])} ${px(k1[1])}L${px(c[0])} ${px(c[1])}L${px(k2[0])} ${px(k2[1])}`);
+          prep.push({
+            tip: 'otrezok',
+            a: k1,
+            b: c,
+            r: PL.width.tick / 2,
+            chto: `значок ${e.a}${e.b}`,
+          });
+          prep.push({
+            tip: 'otrezok',
+            a: c,
+            b: k2,
+            r: PL.width.tick / 2,
+            chto: `значок ${e.a}${e.b}`,
+          });
+        }
+        sloyOtmetki.push(
+          `<path class="pl-strelka${novoe(e) ? ' pl-novoe' : ''}" d="${d.join('')}" fill="none" stroke="${novoe(e) ? PL.podskazka : PL.ink}" stroke-width="${PL.width.tick}" stroke-linecap="round" stroke-linejoin="round"/>`,
+        );
+      }
+      if (e.shtrihi) {
+        /* Штрихи — посередине свободной части отрезка: если на нём лежит
+           чужая точка (основание высоты на половине гипотенузы), штрих
+           не прячется в ней, а встаёт в середину большего свободного куска. */
+        const dl = dist(a, b);
+        const rezy = [0, dl];
+        for (const n of new Set(vidimye.flatMap(tochkiElementa))) {
+          if (n === e.a || n === e.b) continue;
+          const q = E(n);
+          const t = ((q[0] - a[0]) * (b[0] - a[0]) + (q[1] - a[1]) * (b[1] - a[1])) / (dl || 1);
+          const cr =
+            Math.abs((q[0] - a[0]) * (b[1] - a[1]) - (q[1] - a[1]) * (b[0] - a[0])) / (dl || 1);
+          if (cr < 1 && t > 1 && t < dl - 1) rezy.push(t);
+        }
+        rezy.sort((x, y) => x - y);
+        let tm = dl / 2;
+        if (rezy.length > 2) {
+          let luchshiy = 0;
+          for (let i = 0; i + 1 < rezy.length; i += 1) {
+            if (rezy[i + 1]! - rezy[i]! > luchshiy) {
+              luchshiy = rezy[i + 1]! - rezy[i]!;
+              tm = (rezy[i]! + rezy[i + 1]!) / 2;
+            }
+          }
+        }
+        const m: T2 = add(a, mul(unit(sub(b, a)), tm));
         const u = unit(sub(b, a));
         const nrm: T2 = [-u[1], u[0]];
         const d: string[] = [];
@@ -513,7 +690,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
           });
         }
         sloyOtmetki.push(
-          `<path class="pl-shtrih${novoe(e) ? ' pl-novoe' : ''}" d="${d.join('')}" stroke="${novoe(e) ? PL.podskazka : PL.ink}" stroke-width="${PL.width.tick}" stroke-linecap="round"/>`,
+          `<path class="pl-shtrih${novoe(e) ? ' pl-novoe' : ''}" d="${d.join('')}" stroke="${novoe(e) ? PL.novoe : PL.ink}" stroke-width="${PL.width.tick}" stroke-linecap="round"/>`,
         );
       }
       if (e.znachenie !== undefined) {
@@ -557,12 +734,26 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
   /* Области со штриховкой. */
   for (const e of vidimye) {
     if (e.tip !== 'oblast') continue;
-    nuzhenUzor = true;
     const pts = e.tochki.map(E);
     const st = stil(e);
-    sloyOblast.push(
-      `<path class="${st.cls}"${st.data} d="${pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p[0])} ${px(p[1])}`).join('')}Z" fill="url(#${patternId})" stroke="none"/>`,
-    );
+    const d = `${pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p[0])} ${px(p[1])}`).join('')}Z`;
+    if (e.tolkoZnachenie === true) {
+      /* Только подпись. */
+    } else if (e.cvet !== undefined) {
+      /* Равные площади — одним цветом: светлая сплошная заливка. В ч/б
+         печати заливок нет (sheet/theme.css), остаются подписи S, 2S. */
+      sloyOblast.push(
+        `<path class="${st.cls} pl-zaliv pl-zaliv-${e.cvet}"${st.data} d="${d}" fill="${PL.zaliv[e.cvet - 1]}" fill-opacity="${PL.zalivProzrachnost}" stroke="none"/>`,
+      );
+    } else {
+      nuzhenUzor = true;
+      sloyOblast.push(
+        `<path class="${st.cls}"${st.data} d="${d}" fill="url(#${patternId})" stroke="none"/>`,
+      );
+    }
+    if (e.znachenie !== undefined) {
+      zadaniyaZnach.push({ e, yakor: centroid(pts), napr: null, vdol: null, vnutri: pts });
+    }
   }
 
   /* Углы: дуги (1–3) и значки прямого угла. */
@@ -572,16 +763,6 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
      всех дуг вложенного. Дуга не задевает чужие линии и окружности —
      иначе радиус уменьшается, но не меньше PL.ugol.min. */
   const radiusUgla = new Map<Element & { tip: 'ugol' }, number>();
-  const vnutriUgla = (vtx: T2, a: T2, b: T2, q: T2) => {
-    const ua = angleOf(sub(a, vtx));
-    let span = (angleOf(sub(b, vtx)) - ua + 360) % 360;
-    let lo = ua;
-    if (span > 180) {
-      lo = angleOf(sub(b, vtx));
-      span = 360 - span;
-    }
-    return (angleOf(sub(q, vtx)) - lo + 360) % 360 <= span + 1e-6;
-  };
   /* Точки дуги радиуса r — ломаная для проверок. */
   const tochkiDugi = (vtx: T2, u: T2, w: T2, r: number, n = 12): T2[] => {
     const th = angleAt(add(vtx, u), vtx, add(vtx, w)) * RAD;
@@ -622,43 +803,93 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     }
     return false;
   };
-  const poRazmeru = ugly
+  /* Значок прямого угла соразмерен фигуре: доля короткой стороны угла. */
+  const razmerPryamogo = (e: Element & { tip: 'ugol' }): number => {
+    const vtx = E(e.v);
+    const korotkaya = Math.min(dist(E(e.a), vtx), dist(E(e.b), vtx));
+    return Math.min(
+      PL.ugol.pryamoyMax,
+      Math.max(PL.ugol.pryamoyMin, korotkaya * PL.ugol.pryamoyDolya),
+    );
+  };
+  /* Все отмеченные углы сцены (не только видимые сейчас): радиус дуги
+     не зависит от режима — чертёж условия и шагов подсказки один. */
+  const vseUgly = scena.elementy.filter((e): e is Element & { tip: 'ugol' } => e.tip === 'ugol');
+  const poRazmeru = vseUgly
     .filter((e) => !e.pryamoy)
     .map((e) => ({ e, th: angleAt(E(e.a), E(e.v), E(e.b)) }))
     .sort((x, y) => x.th - y.th);
+  /* Радиусы, занятые дугами при вершине: [внутренний, внешний]. */
+  const zanyatye = new Map<string, { e: Element & { tip: 'ugol' }; lo: number; hi: number }[]>();
   for (const { e, th } of poRazmeru) {
     const vtx = E(e.v);
     const a = E(e.a);
     const b = E(e.b);
     const korotkaya = Math.min(dist(a, vtx), dist(b, vtx));
+    const dugi = e.dugi ?? 1;
     /* Острый маленький угол: дуга не короче 7,5 px, иначе её не видно. */
     let r = Math.max(PL.ugol.r, 7.5 / (th * RAD));
     r = Math.min(r, Math.max(PL.ugol.min, korotkaya * PL.ugol.korotkaya));
+    /* Узкий угол с подписью: дуга растёт, чтобы число встало внутри
+       угла сразу за ней, а не уезжало вдоль стороны. */
+    if (e.znachenie !== undefined && th < 80) {
+      const zs = PL.font.razmerZnach;
+      const ro = 0.4 * Math.hypot(shirinaTeksta(e.znachenie, zs) + 3, zs * 0.78);
+      const dc = (ro + PL.gap + 1.5) / Math.sin((th / 2) * RAD);
+      const nuzhno = dc - ro - 3 - (dugi - 1) * PL.ugol.shag;
+      const potolok = Math.min(
+        PL.ugol.rMax,
+        Math.max(PL.ugol.min, korotkaya * PL.ugol.korotkayaMax),
+      );
+      r = Math.max(r, Math.min(nuzhno, potolok));
+    }
     if (e.dolyaRadiusa !== undefined) r = Math.max(PL.ugol.min, korotkaya * e.dolyaRadiusa);
     if (e.radiusPx !== undefined) r = e.radiusPx;
-    /* Вложенные (уже посчитанные, меньшие) углы при той же вершине. */
-    for (const { e: o } of poRazmeru) {
-      if (o === e || o.v !== e.v) continue;
-      const ro = radiusUgla.get(o);
-      if (ro === undefined) continue;
-      if (!vnutriUgla(vtx, a, b, E(o.a)) || !vnutriUgla(vtx, a, b, E(o.b))) continue;
-      r = Math.max(r, ro + ((o.dugi ?? 1) - 1) * PL.ugol.shag + PL.ugol.shag + 2);
-    }
+    const svoiDugi = zanyatye.get(e.v) ?? [];
+    const yavno = e.radiusPx !== undefined;
+    const svoi = svoiDugi.length > 0;
     const u = unit(sub(a, vtx));
     const w = unit(sub(b, vtx));
-    const vneshnyaya = (rr: number) => rr + ((e.dugi ?? 1) - 1) * PL.ugol.shag;
-    const svoi = [...radiusUgla.keys()].some((o) => o.v === e.v);
-    if (!svoi) {
+    const vneshnyaya = (rr: number) => rr + (dugi - 1) * PL.ugol.shag;
+    if (!svoi && !yavno) {
       while (r > PL.ugol.min && zadevaet(vtx, u, w, vneshnyaya(r)))
         r = Math.max(PL.ugol.min, r - 0.5);
       /* Совсем тесно (линия в 9–10 px от вершины) — до крайнего минимума. */
       while (r > PL.ugol.minKrayniy && zadevaet(vtx, u, w, vneshnyaya(r)))
         r = Math.max(PL.ugol.minKrayniy, r - 0.5);
-      if (zadevaet(vtx, u, w, vneshnyaya(r))) {
+      if (zadevaet(vtx, u, w, vneshnyaya(r)) && ugly.includes(e)) {
         problems.push(`дуга угла ${e.a}${e.v}${e.b} задевает линию даже при радиусе ${r} px`);
       }
     }
+    if (!yavno) {
+      /* Значок прямого угла при той же вершине: дуга — снаружи квадратика. */
+      for (const o of vseUgly) {
+        if (o.pryamoy && o.v === e.v)
+          r = Math.max(r, razmerPryamogo(o) * Math.SQRT2 + PL.ugol.mezhduDugami - 2);
+      }
+      /* Дуги разных углов при одной вершине — разными радиусами и не
+         пересекаются: больший угол — снаружи. Тот же угол в другом слое
+         (данное в условии и оно же в подсказке) — тем же радиусом. */
+      const tot = svoiDugi.find(
+        (o) =>
+          [o.e.a, o.e.b].sort().join() === [e.a, e.b].sort().join() && (o.e.dugi ?? 1) === dugi,
+      );
+      if (tot !== undefined) r = tot.lo;
+      else {
+        for (let i = 0; i < 12; i += 1) {
+          const meshaet = svoiDugi.find(
+            (o) =>
+              r < o.hi + PL.ugol.mezhduDugami - 1e-9 &&
+              vneshnyaya(r) > o.lo - PL.ugol.mezhduDugami + 1e-9,
+          );
+          if (meshaet === undefined) break;
+          r = meshaet.hi + PL.ugol.mezhduDugami;
+        }
+      }
+    }
     radiusUgla.set(e, r);
+    svoiDugi.push({ e, lo: r, hi: vneshnyaya(r) });
+    zanyatye.set(e.v, svoiDugi);
   }
   for (const e of ugly) {
     const vtx = E(e.v);
@@ -667,19 +898,21 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const st = stil(e);
     const iz = e.vydelit === 'iskomoe';
     const color = novoe(e)
-      ? PL.podskazka
-      : iz
-        ? PL.iskomoe
-        : sloyOf(e) !== 'uslovie'
-          ? PL.podskazka
-          : /* Угол с подписью — дуга цветом своей величины. */
-            e.znachenie !== undefined
-            ? PL.velichina
-            : PL.ink;
+      ? PL.novoe
+      : e.cvet !== undefined
+        ? PL.zaliv[e.cvet - 1]!
+        : iz
+          ? PL.iskomoe
+          : sloyOf(e) !== 'uslovie'
+            ? PL.podskazka
+            : /* Угол с подписью — дуга цветом своей величины. */
+              e.znachenie !== undefined
+              ? PL.velichina
+              : PL.ink;
     const wid = iz || novoe(e) ? PL.width.markIskomoe : PL.width.mark;
     const th = angleAt(E(e.a), vtx, E(e.b));
     if (e.pryamoy) {
-      const k = PL.ugol.rPryamoy;
+      const k = razmerPryamogo(e);
       const p1 = add(vtx, mul(u, k));
       const p2 = add(p1, mul(w, k));
       const p3 = add(vtx, mul(w, k));
@@ -698,9 +931,9 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
       }
       continue;
     }
-    if (th < POROG - 0.01) {
+    if (th < POROG_ZHESTKIY - 0.01) {
       problems.push(
-        `отмеченный угол ${e.a}${e.v}${e.b} = ${th.toFixed(1)}° меньше порога ${POROG}°`,
+        `отмеченный угол ${e.a}${e.v}${e.b} = ${th.toFixed(1)}° меньше порога ${POROG_ZHESTKIY}°`,
       );
     }
     const r0 = radiusUgla.get(e) ?? PL.ugol.r;
@@ -741,6 +974,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
         yakor: add(vtx, mul(bis, r0 + (n - 1) * PL.ugol.shag)),
         napr: bis,
         vdol: null,
+        ugol: { vtx, r: r0 + (n - 1) * PL.ugol.shag, th },
       });
     }
   }
@@ -751,7 +985,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const c = E(e.t);
     const st = stil(e);
     sloyTochki.push(
-      `<circle class="${st.cls}"${st.data} cx="${px(c[0])}" cy="${px(c[1])}" r="${PL.tochkaR}" fill="${novoe(e) ? PL.podskazka : PL.vershina}"/>`,
+      `<circle class="${st.cls}"${st.data} cx="${px(c[0])}" cy="${px(c[1])}" r="${PL.tochkaR}" fill="${novoe(e) ? PL.novoe : PL.vershina}"/>`,
     );
     prep.push({ tip: 'tochka', c, r: PL.tochkaR, chto: `точка ${e.t}` });
   }
@@ -766,8 +1000,13 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
   /* 6. Подписи точек. */
   const podpisi = scena.podpisi ?? true;
   const bez = new Set(scena.bezPodpisi ?? []);
+  /* В подсказке и у учителя подписаны и буквы, которыми их тексты
+     называют точки чертежа без букв (podpisiPodskazki). */
+  const dop = rezhim.rezhim === 'uchenik' ? [] : (scena.podpisiPodskazki ?? []);
   const kPodpisi = imena.filter(
-    (n) => !bez.has(n) && (podpisi === true || (Array.isArray(podpisi) && podpisi.includes(n))),
+    (n) =>
+      !bez.has(n) &&
+      (podpisi === true || (Array.isArray(podpisi) && podpisi.includes(n)) || dop.includes(n)),
   );
   /* Близкие точки: подписанные — не ближе minMezhduTochkami (иначе
      буквы не различить), неподписанные — просто не слипаются. */
@@ -973,29 +1212,18 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
   }
 
   /* Значения у элементов: числа условия (по настройке), подсказки, решение. */
-  const naUchitel = rezhim.rezhim === 'uchitel';
   /* Значения, по которым проверяется «ответ не виден»: данные условия не в счёт. */
   const proverochnye: string[] = [];
   for (const z of zadaniyaZnach) {
     const e = z.e;
-    if (e.znachenie === undefined) continue;
-    /* Вопрос подсказки: элемент шага подсвечен, его число — ответ на
-       вопрос и появится только на следующем шаге. */
-    if (rezhim.rezhim === 'podskazka' && rezhim.vopros === true && sloyOf(e) === shag) continue;
-    if (e.otvet && !naUchitel) continue;
-    /* Слой условия: на листе ученика числа — только по настройке chisla;
-       в подсказке подписаны данные, у учителя — данные и ответ. */
-    if (sloyOf(e) === 'uslovie' && !optsii.chisla && !novoe(e)) {
-      const pokazat =
-        (rezhim.rezhim === 'podskazka' && e.vydelit === 'dano') ||
-        (naUchitel && (e.vydelit === 'dano' || e.otvet === true));
-      if (!pokazat) continue;
-    }
+    if (e.znachenie === undefined || !znachenieVidno(e)) continue;
     const tekst = e.znachenie;
     const chislo = ZNACHENIE_CHISLO.test(tekst);
+    /* Знак «?» у искомого — крупный, жирный, шрифтом сайта. */
+    const vopros = tekst === '?';
     /* Слова («гипотенуза») — шрифтом сайта: в KaTeX_Math нет кириллицы. */
-    const slovo = /[а-яё]/i.test(tekst);
-    const zs = PL.font.razmerZnach;
+    const slovo = /[а-яё]/i.test(tekst) || vopros;
+    const zs = vopros ? PL.font.razmerZnach * 1.35 : PL.font.razmerZnach;
     const w = shirinaTeksta(tekst, zs) + 3;
     /* С корнем запись выше: черта знака над цифрами. */
     const sKornem = tekst.includes('√');
@@ -1025,6 +1253,48 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
           }
         }
       }
+    } else if (z.vnutri) {
+      /* Площадь части (S, 2S, «?») — внутри своей области, у её центра. */
+      const poly = z.vnutri;
+      const s: { r: Ramka; cena: number }[] = [];
+      for (const rr of [0, 6, 12, 18, 26, 34]) {
+        for (let k = 0; k < (rr === 0 ? 1 : 12); k += 1) {
+          const t = (k * 30 * Math.PI) / 180;
+          const c: T2 = [z.yakor[0] + Math.cos(t) * rr, z.yakor[1] + Math.sin(t) * rr];
+          const ugly4: T2[] = [
+            [c[0] - w / 2, c[1] - h / 2],
+            [c[0] + w / 2, c[1] - h / 2],
+            [c[0] + w / 2, c[1] + h / 2],
+            [c[0] - w / 2, c[1] + h / 2],
+          ];
+          if (!ugly4.every((q) => vnutriMnogougolnika(q, poly))) continue;
+          s.push({
+            r: { kind: 'znachenie', id: tekst, x: c[0] - w / 2, y: c[1] - h / 2, w, h },
+            cena: rr,
+          });
+        }
+      }
+      kandidaty.push(...s.map((x) => x.r));
+    } else if (z.napr && z.ugol) {
+      /* Величина угла — внутри угла сразу за своей дугой: на биссектрисе
+         и чуть в стороны от неё, не дальше podpisOtDugi от дуги. Нет
+         места — подпись уходит наружу с выноской (ниже). */
+      const { vtx, r, th } = z.ugol;
+      const ro = Math.hypot(w, h) / 2;
+      const s: { r: Ramka; cena: number }[] = [];
+      for (const otst of [3, 5, 8, 11, PL.ugol.podpisOtDugi]) {
+        for (const dolya of [0, 0.18, -0.18, 0.34, -0.34]) {
+          const dd = rotate(z.napr, [0, 0], dolya * th);
+          const ext2 = (Math.abs(dd[0]) * w) / 2 + (Math.abs(dd[1]) * h) / 2;
+          const c = add(vtx, mul(dd, r + otst + Math.min(ext2, ro)));
+          s.push({
+            r: { kind: 'znachenie', id: tekst, x: c[0] - w / 2, y: c[1] - h / 2, w, h },
+            cena: otst + Math.abs(dolya) * 18,
+          });
+        }
+      }
+      s.sort((x, y) => x.cena - y.cena);
+      kandidaty.push(...s.map((x) => x.r));
     } else if (z.napr) {
       const d = z.napr;
       /* Ближе к биссектрисе и к дуге — лучше; кандидаты по возрастанию цены. */
@@ -1072,7 +1342,10 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
       const d = sub(c, z.yakor);
       const l = Math.hypot(d[0], d[1]);
       const ext = l < 1e-9 ? 0 : (Math.abs(d[0] / l) * w) / 2 + (Math.abs(d[1] / l) * h) / 2;
-      if (l - ext > 26 && !R.vynoski.some((v) => v.id === tekst)) {
+      if (
+        l - ext > (z.ugol ? PL.ugol.podpisOtDugi + 2 : 26) &&
+        !R.vynoski.some((v) => v.id === tekst)
+      ) {
         const v = vynoska(z.yakor, w, h, vse, 'znachenie', tekst);
         if (v !== null) {
           vybran = v.r;
@@ -1085,17 +1358,28 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     if (e.vydelit !== 'dano') proverochnye.push(tekst);
     zanyato.push({ tip: 'pryam', p: stroka(vybran), chto: `значение ${tekst}` });
     const color =
-      novoe(e) || sloyOf(e) !== 'uslovie'
-        ? PL.podskazka
-        : e.vydelit === 'iskomoe'
-          ? PL.iskomoe
-          : PL.velichina;
+      e.tip === 'ugol' && e.cvet !== undefined && !novoe(e)
+        ? PL.zaliv[e.cvet - 1]!
+        : novoe(e) || sloyOf(e) !== 'uslovie'
+          ? PL.podskazka
+          : PL.velichinaTekst;
     if (sKornem) {
       const k = znachenieSKornem(tekst, vybran.x + vybran.w / 2, vybran.y + nizBazy, zs, color);
       sloyPodpisi.push(k.text, ...k.znaki);
+    } else if (tekst.includes('°')) {
+      sloyPodpisi.push(
+        znachenieSGradusom(
+          tekst,
+          vybran.x + vybran.w / 2,
+          vybran.y + nizBazy,
+          zs,
+          color,
+          `font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'}`,
+        ),
+      );
     } else
       sloyPodpisi.push(
-        `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + nizBazy)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'} font-size="${zs}" fill="${color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${gradus(tekst)}</text>`,
+        `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + nizBazy)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'}${vopros ? ' font-weight="700"' : ''} font-size="${zs}" fill="${vopros ? PL.iskomoe : color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${esc(tekst)}</text>`,
       );
     R.teksty.push(tekst);
   }
@@ -1168,11 +1452,38 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
 }
 
 /* Значения ставятся после подписей точек; список заполняется по ходу рисования. */
+/** Центр тяжести вершин многоугольника. */
+function centroid(pts: readonly T2[]): T2 {
+  return [
+    pts.reduce((a, p) => a + p[0], 0) / pts.length,
+    pts.reduce((a, p) => a + p[1], 0) / pts.length,
+  ];
+}
+
+/** Точка внутри многоугольника (луч вправо). */
+function vnutriMnogougolnika(q: T2, poly: readonly T2[]): boolean {
+  let vnutri = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i, i += 1) {
+    const a = poly[i]!;
+    const b = poly[j]!;
+    if (
+      a[1] > q[1] !== b[1] > q[1] &&
+      q[0] < ((b[0] - a[0]) * (q[1] - a[1])) / (b[1] - a[1]) + a[0]
+    )
+      vnutri = !vnutri;
+  }
+  return vnutri;
+}
+
 interface ZadanieZnach {
   e: Element;
   yakor: T2;
   napr: T2 | null;
   vdol: [T2, T2] | null;
+  /* Подпись величины угла: вершина, внешний радиус дуги и величина на экране. */
+  ugol?: { vtx: T2; r: number; th: number };
+  /* Подпись площади части: многоугольник, внутри которого она стоит. */
+  vnutri?: T2[];
 }
 function len2(v: T2): number {
   return v[0] * v[0] + v[1] * v[1];

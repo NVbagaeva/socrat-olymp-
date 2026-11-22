@@ -29,6 +29,8 @@ export function KartaShapka({
   fakty,
   opasnoTitle,
   opasno,
+  oblozhka,
+  oblozhkaShirokaya = false,
 }: {
   nadzagolovok: string;
   zagolovok: string;
@@ -37,9 +39,24 @@ export function KartaShapka({
   opasnoTitle: string;
   /** Пункты «чем опасно», HTML (формулы набраны). */
   opasno: string[];
+  /** Обложка раздела — крупно рядом с заголовком (готовая картинка). */
+  oblozhka?: ReactNode;
+  /**
+   * Обложка — широкая картинка (шапка №1, 1567×1004), а не квадратная
+   * иконка: на телефоне и планшете она во всю ширину над текстом,
+   * целиком; на компьютере — справа, в половину шапки.
+   */
+  oblozhkaShirokaya?: boolean;
 }) {
   return (
-    <header className="kz-shapka stk-glass">
+    <header
+      className={clsx(
+        'kz-shapka stk-glass',
+        oblozhka !== undefined && 'kz-shapka--oblozhka',
+        oblozhka !== undefined && oblozhkaShirokaya && 'kz-shapka--shirokaya',
+      )}
+    >
+      {oblozhka === undefined ? null : <div className="kz-shapka__oblozhka">{oblozhka}</div>}
       <div className="kz-shapka__text">
         <p className="stk-nad">{nadzagolovok}</p>
         <h2 className="kz-h2">{zagolovok}</h2>
@@ -162,6 +179,7 @@ export function KartaTip({
   nazvanieHtml,
   lead,
   kod,
+  miniatyura,
   open = false,
   children,
 }: {
@@ -171,6 +189,8 @@ export function KartaTip({
   lead?: string;
   /** Код прототипа: мелко справа, с подсказкой. */
   kod?: string;
+  /** Маленькая картинка типа слева от названия (сюжеты №10). Необязательна. */
+  miniatyura?: ReactNode;
   open?: boolean;
   children: ReactNode;
 }) {
@@ -180,6 +200,11 @@ export function KartaTip({
         className="kz-tip__summary stk-summary"
         title={kod === undefined ? undefined : `Тип ${kod}`}
       >
+        {miniatyura === undefined ? null : (
+          <span className="kz-tip__miniatyura" aria-hidden="true">
+            {miniatyura}
+          </span>
+        )}
         <span className="kz-tip__text">
           <span className="kz-tip__nazvanie" dangerouslySetInnerHTML={{ __html: nazvanieHtml }} />
           {lead === undefined ? null : (
@@ -207,16 +232,22 @@ export function KartaPrimer({
   uslovieHtml,
   shagi,
   otvet,
+  otvetHtml,
   opasnoHtml,
   trenirovatHref,
   opornyeHref,
   labels,
+  posle,
 }: {
   /** Чертёж к примеру: между условием и шагами (стереометрия). */
   risunok?: ReactNode;
+  /** Под шагами: например, рисунок метода с подсветкой (№4, №5). */
+  posle?: ReactNode;
   uslovieHtml: string;
   shagi: Shag[];
   otvet: string;
+  /** Ответ набранный (KaTeX): отрицательное число — с минусом формулы. Есть — вместо otvet. */
+  otvetHtml?: string;
   /** «Где теряют балл», HTML. */
   opasnoHtml?: string;
   trenirovatHref: string;
@@ -228,14 +259,21 @@ export function KartaPrimer({
       <p className="kz-primer__metka">{labels.primer}</p>
       <div className="kz-uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
       {risunok === undefined ? null : <div className="kz-primer__risunok">{risunok}</div>}
-      <ShagiResheniya shagi={shagi} />
+      <ShagiResheniya shagi={shagi} posle={posle} />
       {opasnoHtml === undefined ? null : (
         <p className="kz-lovushka">
           <b>{labels.lovushka}.</b> <span dangerouslySetInnerHTML={{ __html: opasnoHtml }} />
         </p>
       )}
       <p className="kz-otvet">
-        {labels.otvet}: <b>{otvet}</b>
+        {/* Ответ — формулой (otvetHtml, KaTeX) или числом текстом с
+            типографским минусом («−7»): тогда он не формула для проверки. */}
+        {labels.otvet}:{' '}
+        {otvetHtml === undefined ? (
+          <b className="no-math-check">{otvet}</b>
+        ) : (
+          <b dangerouslySetInnerHTML={{ __html: otvetHtml }} />
+        )}
       </p>
       <div className="kz-knopki">
         {/* Обычная ссылка, а не переход внутри приложения: тренажёр

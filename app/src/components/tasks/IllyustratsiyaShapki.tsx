@@ -32,14 +32,24 @@ const SIZES = '(min-width: 1024px) 400px, 1px';
  * скрыта от скринридера. Она в первом экране — без loading="lazy" и с
  * высоким приоритетом; размеры заданы, вёрстка при загрузке не сдвигается.
  */
-export function IllyustratsiyaShapki({ art }: { art: ShapkaArt }) {
+export function IllyustratsiyaShapki({
+  art,
+  sizes = SIZES,
+  alt = '',
+}: {
+  art: ShapkaArt;
+  /** Ширина в раскладке (sizes): своя, если картинка стоит не в шапке раздела (№1 — «О задании»). */
+  sizes?: string;
+  /** Описание: у картинки шапки раздела — пустое (декор). */
+  alt?: string;
+}) {
   if (art.shiriny === undefined) {
     return (
       <img
         className="shapka-art"
         src={art.src}
-        alt=""
-        aria-hidden="true"
+        alt={alt}
+        aria-hidden={alt === '' ? 'true' : undefined}
         width={art.width}
         height={art.height}
         fetchPriority="high"
@@ -52,13 +62,13 @@ export function IllyustratsiyaShapki({ art }: { art: ShapkaArt }) {
   const fallback = art.shiriny[1] ?? art.shiriny[0] ?? 0;
   return (
     <picture className="shapka-art">
-      <source type="image/webp" srcSet={set('webp')} sizes={SIZES} />
+      <source type="image/webp" srcSet={set('webp')} sizes={sizes} />
       <img
         src={file(fallback, 'png')}
         srcSet={set('png')}
-        sizes={SIZES}
-        alt=""
-        aria-hidden="true"
+        sizes={sizes}
+        alt={alt}
+        aria-hidden={alt === '' ? 'true' : undefined}
         width={art.width}
         height={art.height}
         fetchPriority="high"

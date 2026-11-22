@@ -1,0 +1,87 @@
+{
+  "_chto": "Образец localStorage ученика, решавшего №7 до редизайна. Записан прежним кодом хранилища (lib/progressStore.ts) теми же вызовами, что делал прежний экран задачи. Нужен scripts/check-progress-7.mjs и браузерной проверке переноса.",
+  "budetege:zadanie-7:v1": {
+    "kinds": {
+      "P01": {
+        "done": 2,
+        "right": 2,
+        "seconds": 67
+      },
+      "P02": {
+        "done": 1,
+        "right": 1,
+        "seconds": 52
+      },
+      "P12": {
+        "done": 1,
+        "right": 1,
+        "seconds": 95
+      },
+      "P13": {
+        "done": 3,
+        "right": 2,
+        "seconds": 292
+      },
+      "P18": {
+        "done": 3,
+        "right": 3,
+        "seconds": 163
+      },
+      "P19": {
+        "done": 1,
+        "right": 1,
+        "seconds": 61
+      },
+      "P04": {
+        "done": 1,
+        "right": 0,
+        "seconds": 33
+      },
+      "P21": {
+        "done": 2,
+        "right": 1,
+        "seconds": 270
+      },
+      "P26": {
+        "done": 1,
+        "right": 1,
+        "seconds": 160
+      },
+      "P32": {
+        "done": 1,
+        "right": 0,
+        "seconds": 210
+      }
+    },
+    "mistakes": [
+      "F029",
+      "F113",
+      "F090",
+      "P21-a05",
+      "F131",
+      "P32-a02"
+    ],
+    "outcomes": {}
+  },
+  "budetege:zadanie-7:opornye:v1": {
+    "kinds": {
+      "korni": {
+        "done": 6,
+        "right": 5,
+        "seconds": 0
+      }
+    },
+    "mistakes": [
+      "kr-4",
+      "kr-5"
+    ],
+    "outcomes": {
+      "kr-1": "right",
+      "kr-2": "right",
+      "kr-3": "right",
+      "kr-4": "wrong",
+      "kr-5": "right",
+      "kr-6": "right"
+    }
+  }
+}

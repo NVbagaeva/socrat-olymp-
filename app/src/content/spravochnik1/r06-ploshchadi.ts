@@ -1,3 +1,4 @@
+import { MEDIANA_RAVNOVELIKIE, OBSHCHAYA_VYSOTA } from './novye-temy';
 import type { Razdel1 } from './tipy';
 
 /* ── 6. Площади ───────────────────────────────────────────────── */
@@ -317,5 +318,7 @@ export const R06_PLOSHCHADI: Razdel1 = {
       prototipy: [15, 20],
       zamenyaet: ['ploshchad-trapecii'],
     },
+    MEDIANA_RAVNOVELIKIE,
+    OBSHCHAYA_VYSOTA,
   ],
 };

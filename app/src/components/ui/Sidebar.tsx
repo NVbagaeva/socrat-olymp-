@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { NavIcon, type NavIconName } from './NavIcons';
@@ -9,6 +10,8 @@ export interface NavItem {
   id: string;
   label: string;
   href: string;
+  /** Адрес в режиме базы (lib/level.ts). Не задан — от уровня не зависит. */
+  hrefBase?: string;
   /**
    * Пункт отмечен текущим принудительно. Не задан — считается по
    * адресу открытой страницы, и это обычный случай: меню само знает,
@@ -17,6 +20,8 @@ export interface NavItem {
   active?: boolean;
   /** Значок пункта. Не задан — на его месте пустая метка, как было. */
   icon?: NavIconName;
+  /** Пункт выделен тёплым акцентом (шапка кабинета, нижняя панель). */
+  akcent?: boolean;
   /** Короткая подпись для нижней панели. Не задана — берётся label. */
   short?: string;
   /** Подпись в нижней панели, если она отличается от label и short. */
@@ -49,6 +54,8 @@ export interface SidebarProps {
   groups?: NavGroup[];
   /** Подпись над списком: чему посвящён этот столбец. */
   caption?: { title: string; subtitle: string };
+  /** Сразу под логотипом: переключатель уровня экзамена. */
+  afterBrand?: ReactNode;
   /** Нижняя группа: личные разделы. */
   secondaryItems?: NavItem[];
   user?: { initials: string; name: string };
@@ -194,6 +201,7 @@ export function Sidebar({
   items,
   groups,
   caption,
+  afterBrand,
   secondaryItems,
   user,
   footer,
@@ -202,10 +210,14 @@ export function Sidebar({
 }: SidebarProps): ReactNode {
   return (
     <aside className={clsx('sidebar', className)}>
-      <div className="sidebar__mark">
+      {/* Знак — тот же, что в шапке сайта, и ведёт на главную
+          (docs/audit-prodazhi.md, E2). */}
+      <Link className="sidebar__mark" href="/">
         <span className="sidebar__logo" aria-hidden="true" />
         <span>{brand}</span>
-      </div>
+      </Link>
+
+      {afterBrand}
 
       {caption !== undefined ? (
         <div className="sidebar__caption">

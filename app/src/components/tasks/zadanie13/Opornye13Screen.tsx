@@ -1,42 +1,33 @@
 'use client';
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { clsx } from 'clsx';
-import { Button, Input } from '@/components/ui';
-import { OPORNYE_13 } from '@/content/zadanie13';
-import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
+import { useMemo, useState, type ReactNode } from 'react';
+import { OpornayaZadacha, type OpornyyIshod } from '../opornye';
+import { PodskazkaVoprosy } from '../trening/PodskazkaVoprosy';
+import { OPORNYE13, TRENAZHER13 } from '@/content/ekonomicheskie13';
+import { formatHint, fractionRightHint } from '@/lib/otvet';
 import { scrollTabTo } from '@/lib/tabScroll';
-import { checkSealed, type Verdict } from '@/lib/zadanie13/edinicy';
-import {
-  sealZadacha13,
-  type Razbor13,
-  type ShagHtml,
-  type Zadacha13Sealed,
-} from '@/lib/zadanie13/opornye/seal';
+import { estPi } from '@/lib/zadanie7/otvet';
+import { generate } from '@/lib/zadanie13/generate';
+import { sealZadacha13, shagiTipa, type Zadacha13Sealed } from '@/lib/zadanie13/opornye/seal';
 import { itog13, opornye13, zadachaId13, zapisat13 } from '@/lib/zadanie13/progress';
-import { answerMatches, choiceMatches, openText } from '@/lib/zadanie13/secret';
-import { RightIcon, WrongIcon } from '../prep/PrepIcons';
-import { HintFlow11 } from '../zadanie11/HintFlow11';
+import { reshenieShagami } from '@/lib/zadanie13/reshenieHtml';
+import { openText } from '@/lib/zadanie13/secret';
+import { proverit13 } from '@/lib/zadanie13/trening/otvet13';
+import type { Vopros13 } from '@/lib/zadanie13/trening/zagruzka';
+import { TYPE_NAMES } from '@/lib/zadanie13/types';
+import { otvetText } from '@/lib/zadanie13/html';
+import { shagi13, voprosy13 } from './shagi13';
 import { TablitsaZapolni13, urovenPoNomeru } from './TablitsaZapolni13';
-
-type Attempt = 'wrong' | 'skipped';
+/* Подсказка-вопросы — общий компонент тренажёра; его стили — при тренажёре. */
+import '../trening/trening.css';
 
 export interface Opornye13ScreenProps {
   blockId: string;
-  no: string;
-  title: string;
   vid: 'zadachi' | 'tip';
   /** Десять задач блока в закрытом виде, собраны на сборке. */
   tasks: (Zadacha13Sealed & { no: number })[];
   /** Плашка «Запомни», свёрстана. */
-  zapomniHtml: string[];
-  listHref: string;
-}
-
-function firstOpen(status: TaskStatus[]): number {
-  const found = status.findIndex((item) => item === null || item === 'skipped');
-  return found === -1 ? 0 : found;
+  zapomni: ReactNode;
 }
 
 function izJson<T>(json: string): T | null {
@@ -53,320 +44,218 @@ function sluchaynyySeed(): string {
 }
 
 /**
- * Экран задачи «Опорных задач» №13.
- *
- * Устройство как у №11: ответ сверяется с отпечатком, исходы пишутся
- * в хранилище раздела, подсказка — пошаговые вопросы с кнопками,
- * решение по шагам закрыто и открывается по кнопке. Ответ в чужих
- * единицах — отдельный вердикт «Число верное, единицы нет», он не
- * засчитывается. «Ещё вариант» собирает задачу того же прототипа на
- * новом seed прямо в браузере.
+ * Экран блока «Опорных задач» №13 на общем экране задачи блока
+ * (components/tasks/opornye, образец — №3, №7, №6): «Запомни», условие с
+ * таблицей условия и таблицей «заполни» (блоки 1–3, своя клавиатура),
+ * ответ числом или выбором схемы, вердикт «Число верное, единицы нет»,
+ * подсказка-вопросы, решение по шагам с таблицами, «Ещё вариант» и
+ * точки-номера. Прогресс — прежнее хранилище опорных задач №13.
  */
-export function Opornye13Screen({
-  blockId,
-  no,
-  title,
-  vid,
-  tasks,
-  zapomniHtml,
-  listHref,
-}: Opornye13ScreenProps) {
+export function Opornye13Screen({ blockId, vid, tasks, zapomni }: Opornye13ScreenProps) {
   const progress = opornye13.useProgress();
-  const [attempts, setAttempts] = useState<Record<number, Attempt>>({});
-  const [picked, setPicked] = useState<number | null>(null);
+  const [index, setIndex] = useState(0);
   const [value, setValue] = useState('');
-  const [checked, setChecked] = useState<Verdict | null>(null);
-  const [razbor, setRazbor] = useState<Razbor13 | null>(null);
-  const [shagi, setShagi] = useState<ShagHtml[] | null>(null);
+  const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
+  const [edinicy, setEdinicy] = useState(false);
+  const [format, setFormat] = useState<string | null>(null);
+  const [hintOpen, setHintOpen] = useState(false);
+  const [shag, setShag] = useState(1);
+  const [mimo, setMimo] = useState<number[]>([]);
+  const [solutionOpen, setSolutionOpen] = useState(false);
   /* Свежие варианты по номеру задачи: пока не просили — задача банка. */
   const [fresh, setFresh] = useState<Record<number, Zadacha13Sealed>>({});
 
-  const status: TaskStatus[] = tasks.map((item) => {
-    const itog = itog13(progress, blockId, item.no);
-    if (itog === 'right') return 'right';
-    if (itog !== null) return 'wrong';
-    return attempts[item.no] ?? null;
-  });
-  const index = picked ?? firstOpen(status);
   const base = tasks[index];
-  if (base === undefined) {
+  const task: Zadacha13Sealed | undefined =
+    base === undefined ? undefined : (fresh[base.no] ?? base);
+
+  const voprosy = useMemo(
+    () =>
+      task === undefined || !hintOpen
+        ? []
+        : voprosy13(
+            (izJson<Vopros13[]>(openText(task.podskazki, task.seal)) ?? []).map((v) => ({
+              ...v,
+              comment: v.comment ?? null,
+            })),
+          ),
+    [task, hintOpen],
+  );
+  /* Решение по шагам — та же задача движка (seed тот же), разбитая на шаги. */
+  const reshenie = useMemo(() => {
+    if (task === undefined || !solutionOpen) return null;
+    try {
+      const t = generate(task.prototypeId, task.seed);
+      return vid === 'tip'
+        ? { shagi: shagi13(reshenieShagami(shagiTipa(t.type), null)), otvet: TYPE_NAMES[t.type] }
+        : {
+            shagi: shagi13(reshenieShagami(t.solution, t.tableModel)),
+            otvet: otvetText(t.answer, t.units),
+          };
+    } catch {
+      return null;
+    }
+  }, [task, solutionOpen, vid]);
+
+  if (base === undefined || task === undefined) {
     return null;
   }
-  const task: Zadacha13Sealed = fresh[base.no] ?? base;
-  const total = tasks.length;
-  const nextOpen = nextUnsolved(status, index);
-  const right = status.filter((item) => item === 'right').length;
-  const wrong = status.filter((item) => item === 'wrong').length;
-  const ready = value.trim() !== '';
-  const solved = checked === 'right';
+  const zadacha: Zadacha13Sealed = task;
+  const no = base.no;
+
+  const ishody: OpornyyIshod[] = tasks.map((x) => {
+    const it = itog13(progress, blockId, x.no);
+    return it === 'right' ? 'right' : it === null ? null : 'wrong';
+  });
 
   function reset() {
     setValue('');
     setChecked(null);
-    setRazbor(null);
-    setShagi(null);
+    setEdinicy(false);
+    setFormat(null);
+    setHintOpen(false);
+    setShag(1);
+    setMimo([]);
+    setSolutionOpen(false);
   }
 
   function open(next: number) {
-    setPicked(next);
+    if (next < 0 || next >= tasks.length) return;
+    setIndex(next);
     reset();
-    scrollTabTo('.ptask__card');
+    scrollTabTo('.op-zad');
   }
 
   function check() {
-    if (!ready || base === undefined) {
+    if (value.trim() === '') return;
+    const tip = zadacha.vybory !== null;
+    if (!tip && estPi(value)) {
+      setFormat(TRENAZHER13.ekran.piPodskazka);
       return;
     }
-    const verdict: Verdict =
-      task.vybory === null
-        ? checkSealed(value, { answer: task.seal, wrongUnits: task.wrongUnits }, answerMatches)
-        : choiceMatches(value, task.seal)
-          ? 'right'
-          : 'wrong';
-    setPicked(index);
-    setChecked(verdict);
-    zapisat13(blockId, base.no, verdict === 'right' ? 'right' : 'wrong');
-    if (verdict !== 'right') {
-      setAttempts((prev) => ({ ...prev, [base.no]: 'wrong' }));
+    const reading = proverit13(value, { ...zadacha, sealTip: zadacha.seal }, tip);
+    if (reading.kind === 'format') {
+      setFormat(formatHint(reading.problem, reading.meant));
+      return;
     }
-  }
-
-  function skip() {
-    if (base === undefined) return;
-    setAttempts((prev) => ({ ...prev, [base.no]: 'skipped' }));
-    if (nextOpen !== null) {
-      open(nextOpen);
+    if (reading.kind === 'fractionRight') {
+      setFormat(fractionRightHint(reading.decimal));
+      return;
     }
+    setFormat(null);
+    const ok = reading.kind === 'answer' && reading.right;
+    setEdinicy(reading.kind === 'edinicy');
+    setChecked(ok ? 'right' : 'wrong');
+    zapisat13(blockId, no, ok ? 'right' : 'wrong');
   }
 
   function another() {
-    if (base === undefined) return;
-    setPicked(index);
     setFresh((prev) => ({
       ...prev,
-      [base.no]: sealZadacha13(base.prototypeId, sluchaynyySeed(), vid, base.no),
+      [no]: sealZadacha13(zadacha.prototypeId, sluchaynyySeed(), vid, no),
     }));
     reset();
   }
 
-  function toggleHint() {
-    setShagi(shagi === null ? izJson<ShagHtml[]>(openText(task.podskazki, task.seal)) : null);
-  }
-
-  function showSolution() {
-    if (base === undefined) return;
-    setRazbor(izJson<Razbor13>(openText(task.razbor, task.seal)));
-    if (status[index] !== 'right') {
-      zapisat13(blockId, base.no, 'revealed');
+  function toggleSolution() {
+    if (!solutionOpen && ishody[index] !== 'right') {
+      zapisat13(blockId, no, 'revealed');
     }
+    setSolutionOpen(!solutionOpen);
   }
 
-  return (
-    <section className="ptask z13-ptask">
-      <header className="ptask__head">
-        <span className="z13-ptask__no" aria-hidden="true">
-          {no}
-        </span>
-        <h2 className="ptask__title">{title}</h2>
-        <p className="ptask__score">
-          <span className="ptask__score-item ptask__score-item--right">
-            <RightIcon />
-            <span className="ptask__score-num">{right}</span>
-            <span className="sr-only">верных</span>
-          </span>
-          <span className="ptask__score-item ptask__score-item--wrong">
-            <WrongIcon />
-            <span className="ptask__score-num">{wrong}</span>
-            <span className="sr-only">неверных</span>
-          </span>
-        </p>
-      </header>
-
-      <p className="ptask__counter">
-        Задача <b>{base.no}</b> из {total}
-      </p>
-
-      <ol className="ptask__dots">
-        {tasks.map((item, i) => {
-          const state = status[i] ?? null;
-          return (
-            <li key={`${item.prototypeId}:${item.seed}`}>
-              <button
-                type="button"
-                className={clsx(
-                  'pdot',
-                  state !== null && `is-${state}`,
-                  i === index && 'is-current',
-                )}
-                aria-current={i === index ? 'true' : undefined}
-                onClick={() => open(i)}
-              >
-                {item.no}
-                <span className="sr-only">
-                  {state === 'right' ? ' — решено верно' : null}
-                  {state === 'wrong' ? ' — решено неверно' : null}
-                  {state === 'skipped' ? ' — пропущено' : null}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
-
-      <article className="ptask__card">
-        <div className="ptask__text">
-          {task.metki.length > 0 ? (
-            <p className="z13-metki">
-              {task.metki.map((m) => (
-                <span key={m} className="z13-metka">
-                  {m}
-                </span>
-              ))}
-            </p>
-          ) : null}
-          <div className="ptask__question" dangerouslySetInnerHTML={{ __html: task.uslovieHtml }} />
-          {task.tablitsaHtml === null ? null : (
-            <div
-              className="z13-ptask__tab"
-              dangerouslySetInnerHTML={{ __html: task.tablitsaHtml }}
-            />
-          )}
-          {task.zapolni === null ? null : (
-            <TablitsaZapolni13
-              key={`${task.prototypeId}|${task.seed}`}
-              t={task.zapolni}
-              uroven={urovenPoNomeru(base.no)}
-              oshibkaId={zadachaId13(blockId, base.no)}
-            />
-          )}
-        </div>
-        {shagi === null ? null : (
-          <HintFlow11 key={`${task.prototypeId}|${task.seed}`} shagi={shagi} />
-        )}
-      </article>
-
-      <div className="ptask__answer">
-        <p className="ptask__label" id="p13-answer-label">
-          {task.vybory === null ? 'Ваш ответ:' : OPORNYE_13.vybor}
-        </p>
-
-        {task.vybory !== null ? (
-          <ul className="ptask__options" aria-labelledby="p13-answer-label">
-            {task.vybory.map((option) => (
-              <li key={option.number}>
-                <button
-                  type="button"
-                  className={clsx(
-                    'popt',
-                    value === option.number && 'is-chosen',
-                    value === option.number && checked !== null && `is-${checked}`,
-                  )}
-                  aria-pressed={value === option.number}
-                  onClick={() => {
-                    if (!solved) {
-                      setValue(option.number);
-                      setChecked(null);
-                    }
-                  }}
-                >
-                  <span className="popt__no">{option.number}</span>
-                  <span className="popt__text">{option.label}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <Input
-            className="ptask__input"
-            value={value}
-            state={checked === null ? 'default' : solved ? 'success' : 'error'}
-            inputMode="decimal"
-            autoComplete="off"
-            aria-labelledby="p13-answer-label"
-            onChange={(event) => {
-              setValue(event.target.value);
-              if (checked !== null && !solved) {
-                setChecked(null);
-              }
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                check();
-              }
-            }}
-            readOnly={solved}
+  const risunok =
+    zadacha.tablitsaHtml === null && zadacha.zapolni === null ? undefined : (
+      <>
+        {zadacha.tablitsaHtml === null ? null : (
+          <div
+            className="z13-reshenie z13-op__tablitsa"
+            dangerouslySetInnerHTML={{ __html: zadacha.tablitsaHtml }}
           />
         )}
-
-        {checked === null ? null : (
-          <div
-            className={clsx('pverdict', `pverdict--${checked === 'right' ? 'right' : 'wrong'}`)}
-            role="status"
-          >
-            <p className="pverdict__title">{OPORNYE_13.verdikt[checked].title}</p>
-            <p className="pverdict__lead">{OPORNYE_13.verdikt[checked].lead}</p>
-          </div>
+        {zadacha.zapolni === null ? null : (
+          <TablitsaZapolni13
+            key={`${zadacha.prototypeId}|${zadacha.seed}`}
+            t={zadacha.zapolni}
+            uroven={urovenPoNomeru(no)}
+            oshibkaId={zadachaId13(blockId, no)}
+          />
         )}
+      </>
+    );
 
-        {razbor === null ? null : (
-          <div className="z13-oreshenie" role="region" aria-label={OPORNYE_13.reshenie}>
-            <p className="z13-oreshenie__title">{OPORNYE_13.reshenie}</p>
-            <div className="z13-reshenie" dangerouslySetInnerHTML={{ __html: razbor.html }} />
-            <p className="z13-otvet">
-              {OPORNYE_13.otvet}: {razbor.otvet}
-            </p>
-          </div>
-        )}
-
-        <div className="ptask__actions">
-          {!solved ? (
-            <>
-              <Button onClick={check} disabled={!ready}>
-                Проверить
-              </Button>
-              <Button variant="ghost" onClick={toggleHint}>
-                {shagi === null ? OPORNYE_13.podskazka : OPORNYE_13.skrytPodskazku}
-              </Button>
-              {checked !== null ? (
-                <Button variant="ghost" onClick={showSolution} disabled={razbor !== null}>
-                  Показать решение
-                </Button>
-              ) : (
-                <Button variant="ghost" onClick={skip}>
-                  Пропустить задачу
-                </Button>
-              )}
-            </>
-          ) : (
-            <>
-              {nextOpen === null ? (
-                <Link className="btn btn--primary" href={listHref}>
-                  {OPORNYE_13.kListu}
-                </Link>
-              ) : (
-                <Button onClick={() => open(nextOpen)}>
-                  {nextOpen === index + 1 ? 'Следующая задача →' : 'Следующая нерешённая →'}
-                </Button>
-              )}
-              <Button variant="ghost" onClick={showSolution} disabled={razbor !== null}>
-                Показать решение
-              </Button>
-            </>
-          )}
-          <Button variant="ghost" onClick={another}>
-            {OPORNYE_13.again}
-          </Button>
-        </div>
-      </div>
-
-      <aside className="z13-memo">
-        <p className="z13-memo__title">{OPORNYE_13.zapomni}</p>
-        <ul className="z13-memo__list">
-          {zapomniHtml.map((html, i) => (
-            <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
-          ))}
-        </ul>
-      </aside>
-    </section>
+  return (
+    <OpornayaZadacha
+      index={index}
+      ishody={ishody}
+      onOpen={open}
+      uslovieHtml={
+        (zadacha.metki.length === 0
+          ? ''
+          : `<p class="z13-op__metki">${zadacha.metki.join(' · ')}</p>`) + zadacha.uslovieHtml
+      }
+      {...(risunok === undefined ? {} : { risunok })}
+      value={value}
+      onValue={(next) => {
+        setValue(next);
+        setFormat(null);
+        if (checked === 'wrong') {
+          setChecked(null);
+          setEdinicy(false);
+        }
+      }}
+      checked={checked}
+      onCheck={check}
+      formatHint={format}
+      {...(zadacha.vybory === null
+        ? {}
+        : { vybory: zadacha.vybory.map((v) => ({ number: v.number, labelHtml: v.label })) })}
+      {...(edinicy && checked === 'wrong' ? { verdiktNeverno: TRENAZHER13.ekran.edinicy } : {})}
+      podskazka={{
+        html: '',
+        open: hintOpen,
+        onOpen: () => setHintOpen(true),
+        telo: (
+          <PodskazkaVoprosy
+            voprosy={voprosy}
+            otkryto={shag}
+            mimo={mimo}
+            onVerno={() => {
+              setShag(shag + 1);
+              setMimo([]);
+            }}
+            onMimo={(j) => setMimo([...mimo, j])}
+            labels={TRENAZHER13.ekran.voprosy}
+          />
+        ),
+      }}
+      /* Решение — после ответа: до проверки доступна только подсказка. */
+      reshenie={
+        checked === null
+          ? null
+          : {
+              shagi:
+                reshenie === null
+                  ? []
+                  : [
+                      ...reshenie.shagi,
+                      {
+                        zagolovok: OPORNYE13.otvet,
+                        chtoHtml: `<p>${reshenie.otvet}</p>`,
+                        formulaHtml: '',
+                      },
+                    ],
+              open: solutionOpen,
+              onToggle: toggleSolution,
+            }
+      }
+      dop={
+        <button type="button" className="stk-btn stk-btn--tihaya" onClick={another}>
+          {OPORNYE13.eshcheVariant}
+        </button>
+      }
+      zapomni={zapomni}
+      labels={OPORNYE13.zadacha}
+    />
   );
 }

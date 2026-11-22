@@ -12,13 +12,20 @@ import {
   appNavPrimary,
   bottomNavActive,
   notificationsPage,
+  notificationsReady,
   sidebarExtras,
   topNav,
 } from '@/content/appNav';
-import { taskHasPage, taskHref, taskParts, tasks, type ExamTask } from '@/content/tasks';
+import { taskHasPage, taskHref, taskParts, tasksOf, type ExamTask } from '@/content/tasks';
+import { LevelSwitch } from '@/components/level/LevelSwitch';
+import { levelInfo, type Level } from '@/lib/level';
 import { AuthWidget } from '@/components/auth/AuthWidget';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { SiteMenu } from './SiteMenu';
+import { levelNav, withActive } from './navUrovnya';
+import { NavSpisok } from './NavSpisok';
+import { isNavGroup, site } from '@/content/site';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
   active?: string;
@@ -28,11 +35,12 @@ export interface AppShellProps {
    * Поиск по заданиям есть на странице банка.
    */
   search?: boolean;
+  /**
+   * Уровень экзамена: чьи задания в сайдбаре и куда ведут «Задания» и
+   * «Собрать вариант». Не задан — профиль; страницы /baza/… передают 'base'.
+   */
+  level?: Level;
   children: React.ReactNode;
-}
-
-function withActive(items: NavItem[], active: string | undefined): NavItem[] {
-  return items.map((item) => (item.id === active ? { ...item, active: true } : item));
 }
 
 /* Список заданий в сайдбаре целиком считается из конфига: номера,
@@ -55,13 +63,17 @@ function taskItem(task: ExamTask): NavItem {
   };
 }
 
-/* Список по частям экзамена: «ЧАСТЬ 1», под ней 01–13, разделитель,
-   «ЧАСТЬ 2» и 14–20. */
-function taskGroups(): NavGroup[] {
-  return taskParts.map((part) => ({
-    label: part.title,
-    items: tasks.filter((task) => task.part === part.part).map(taskItem),
-  }));
+/* Список по частям экзамена: «ЧАСТЬ 1» с её номерами, разделитель,
+   «ЧАСТЬ 2» (номера и части — content/struktura.js). */
+function taskGroups(level: Level): NavGroup[] {
+  const tasks = tasksOf(level);
+  return taskParts
+    .map((part) => ({
+      /* В базе частей нет: одна группа с номерами заданий. */
+      label: level === 'base' ? `Задания ${levelInfo(level).range}` : part.title,
+      items: tasks.filter((task) => task.part === part.part).map(taskItem),
+    }))
+    .filter((group) => group.items.length > 0);
 }
 
 /**
@@ -72,18 +84,38 @@ function taskGroups(): NavGroup[] {
  * каждой из них. Ниже 768px сайдбар прячется и его место занимает
  * нижняя панель — пункты у неё те же, что в шапке.
  */
-export function AppShell({ active, search = false, children }: AppShellProps) {
-  const bottomItems = withActive([...appNavPrimary, appNavMorePage], bottomNavActive(active));
+/* «Варианты» в шапке кабинета — тот же выпадающий список, что в шапке
+   сайта (content/site.ts): «Собрать вариант», «Повышенные» и
+   «Ежемесячные» не стоят тремя отдельными пунктами. */
+const VARIANTY = site.nav.find(isNavGroup);
+const V_SPISKE = new Set(['variant', 'povyshennye', 'ezhemesyachnye']);
+
+export function AppShell({ active, search = false, level = 'profile', children }: AppShellProps) {
+  const bottomItems = withActive(
+    levelNav([...appNavPrimary, appNavMorePage], level),
+    bottomNavActive(active),
+  );
+  const tasks = tasksOf(level);
+  const vse = withActive(levelNav(topNav, level), active);
+  const verhnee =
+    VARIANTY === undefined
+      ? vse
+      : vse.filter((item) => item.id === 'variant' || !V_SPISKE.has(item.id));
+  const tekushchiy = vse.find((item) => item.active === true && V_SPISKE.has(item.id))?.href;
 
   return (
     <div className="shell shell--responsive app-shell">
       <Sidebar
         brand="Будет на ЕГЭ"
-        caption={{ title: 'Задания ЕГЭ', subtitle: 'Профильная математика' }}
+        /* Уровень экзамена — сразу после логотипа. В узкой полосе
+           сайдбара (до 1024px) он уходит в верхнюю панель: там меню
+           разделов уже спрятано и место есть (components/level/level.css). */
+        afterBrand={<LevelSwitch className="sidebar__level" />}
+        caption={{ title: 'Задания ЕГЭ', subtitle: levelInfo(level).name }}
         label="Задания ЕГЭ"
         items={tasks.map(taskItem)}
-        groups={taskGroups()}
-        secondaryItems={withActive(sidebarExtras, active)}
+        groups={taskGroups(level)}
+        secondaryItems={sidebarExtras.length > 0 ? withActive(sidebarExtras, active) : undefined}
         footer={
           /* Декор подвала: горы во всю ширину столбца, поверх них
              рукописная подпись. Картинка — фон, поэтому alt пустой.
@@ -105,13 +137,36 @@ export function AppShell({ active, search = false, children }: AppShellProps) {
 
       <div className="app-col">
         <Topbar
-          nav={withActive(topNav, active)}
+          lead={<LevelSwitch className="topbar__level" />}
+          nav={verhnee}
+          {...(VARIANTY === undefined
+            ? {}
+            : {
+                navSlot: {
+                  id: 'variant',
+                  node: (
+                    <NavSpisok
+                      group={VARIANTY}
+                      {...(tekushchiy === undefined ? {} : { currentHref: tekushchiy })}
+                    />
+                  ),
+                },
+              })}
           search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}
+          bell={notificationsReady}
           /* Аккаунт — настоящий: «Войти» или кружок с инициалами.
              Выдуманного пользователя в шапке больше нет. */
-          userSlot={<AuthWidget variant="app" />}
+          userSlot={
+            <>
+              <AuthWidget variant="app" />
+              {/* Три полоски — то же меню сайта, что в шапке главной: на
+                  узком экране (ниже 1024px) оно не пропадает при переходе
+                  в банк заданий и разделы. */}
+              <SiteMenu />
+            </>
+          }
         />
         {children}
       </div>

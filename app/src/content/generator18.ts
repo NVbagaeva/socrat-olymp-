@@ -7,11 +7,12 @@
 import { GEN_UI } from '@/content/generatorUi';
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
 import { head, foot } from './sheet12.js';
+import { nomerRazdela } from './struktura';
 
 export const GENERATOR18_TEXTS = {
-  section: '№18 · Планиметрия',
+  section: `№${nomerRazdela('planimetriya-dokazatelstvo')} · Планиметрия`,
   sheet: {
-    chip: 'Задание 18',
+    chip: `Задание ${nomerRazdela('planimetriya-dokazatelstvo')}`,
     title: 'Планиметрия',
     course: head.course,
     teacher: head.author,
@@ -21,6 +22,10 @@ export const GENERATOR18_TEXTS = {
   cvetnye: {
     title: 'Цветные чертежи',
     note: 'В PDF и на печати — фирменные цвета. Выключено — чёрно-белые чертежи: так их видно на любом принтере.',
+  },
+  chertezh: {
+    title: 'Чертёж к условию',
+    note: 'Под каждым условием — чертёж с данными задачи, без дополнительных построений. Выключено — только текст: чертёж ученик делает сам, это часть решения. У учителя чертёж в решении есть всегда.',
   },
   povtor: (n: number) =>
     `Задач одного типа на листе больше, чем вариантов чисел (по три на тип): ${n} повторяются.`,
@@ -32,7 +37,7 @@ export const GENERATOR18_SOURCES = [
     id: 'new' as const,
     title: 'Наши задачи',
     short: 'наши',
-    note: 'Задачи в формате задания 18: пункт а) — доказать, пункт б) — найти. Составлены для сайта, у каждой три набора чисел.',
+    note: `Задачи в формате задания ${nomerRazdela('planimetriya-dokazatelstvo')}: пункт а) — доказать, пункт б) — найти. Составлены для сайта, у каждой три набора чисел.`,
   },
 ];
 
@@ -77,8 +82,8 @@ export const GENERATOR18_PRESETS: GenPreset[] = [
 export const SHEET_GEN_18 = {
   head,
   foot,
-  title: { chip: 'Задание 18', text: 'Планиметрия' },
-  runner: 'Задание 18 · Планиметрия',
+  title: { chip: `Задание ${nomerRazdela('planimetriya-dokazatelstvo')}`, text: 'Планиметрия' },
+  runner: `Задание ${nomerRazdela('planimetriya-dokazatelstvo')} · Планиметрия`,
   subtitle: 'Задания для отработки',
   vidy: GEN_UI.vidyRaboty,
   otvety: 'Ответы пункта б)',

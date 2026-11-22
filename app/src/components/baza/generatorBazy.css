@@ -1,0 +1,53 @@
+/* Генератор листов базы (GeneratorBazy, lib/baza/listBazy.ts): условие,
+   чертёж условия, краткий разбор в предпросмотре и на листе учителя.
+   Раскладку листа и карточек задаёт общий генератор (generator.css) и
+   шаблон печати (lib/sheet) — здесь только своё. */
+
+.baza-list__uslovie {
+  margin: 0;
+}
+
+/* Чертёж №12 под условием: не шире колонки и не выше полуэкрана. */
+.baza-list__risunok {
+  margin-top: var(--space-2);
+  max-width: 360px;
+}
+.baza-list__risunok svg {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  height: auto;
+}
+
+.baza-razbor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.baza-razbor__etap {
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  break-inside: avoid;
+}
+
+.baza-razbor__title {
+  margin: 0 0 var(--space-1);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.baza-razbor__line {
+  margin: var(--space-1) 0 0;
+  line-height: 1.6;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Знак группы в строке темы — в той же клетке 36 px, что значки тем. */
+.gen-trow__icon .baza-gen-znak {
+  box-shadow: none;
+}

@@ -50,7 +50,7 @@ const KASATELNYE = new Set([37, 38, 39, 40, 58, 59, 60, 73]);
 const FAKTY = RAZDELY_TEORII_1.flatMap((r) => r.fakty ?? []);
 
 /** Опорный блок прототипа: блок типа, для высот и медиан — прямоугольный треугольник. */
-function opornyyDlya(proto: number, blok: Blok): string {
+export function opornyyDlya(proto: number, blok: Blok): string {
   if (ELEMENTY.has(proto)) return 'pryamougolnyy-treugolnik';
   if (KASATELNYE.has(proto)) return 'kasatelnye-i-okruzhnosti';
   return O_ZADANII_1.tipy.find((t) => t.blok === blok)?.prep ?? 'summa-uglov';

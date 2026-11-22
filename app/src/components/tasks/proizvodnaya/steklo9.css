@@ -1,0 +1,267 @@
+/* №9 в «Стеклянной сцене»: только своё. Карта, тренажёр, опорные и
+   рамки теории — общие слои (karta.css, trening.css, opornye.css,
+   teoriya-steklo.css). Чертежи — движок lib/proizvodnaya/render.ts,
+   здесь только место под них. */
+
+/* Выносная строка-формула в шаге решения. */
+.z9-vykladka {
+  max-width: 100%;
+  margin: var(--space-2) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.z9-vykladka .katex {
+  font-size: 1.05em;
+}
+
+/* Чертёж движка в стекле: белая подложка, по ширине колонки. */
+.z9-karta .z9-fig,
+.z9-trening .z9-fig,
+.z9-opornye .z9-fig {
+  display: block;
+  width: 100%;
+  margin-inline: auto;
+}
+.z9-karta .z9-fig__svg,
+.z9-trening .z9-fig__svg,
+.z9-opornye .z9-fig__svg {
+  display: block;
+  margin-inline: auto;
+}
+.z9-karta .z9-fig__svg svg,
+.z9-trening .z9-fig__svg svg,
+.z9-opornye .z9-fig__svg svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── Пример типа: чертёж закреплён рядом с шагами (как у №3). ── */
+/* Карточкам группы и типа — clip вместо hidden (обрезка по скруглению
+   остаётся, sticky работает). */
+.z9-karta .kz-gruppa,
+.z9-karta .kz-tip {
+  overflow: clip;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z9-karta .z9-primer {
+  max-width: none;
+}
+.z9-primer__telo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+.z9-primer__chertezh {
+  min-width: 0;
+  position: sticky;
+  top: calc(var(--topic-sticky-top, 0px) + var(--space-2));
+  z-index: 2;
+  align-self: start;
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+}
+.z9-primer__panel {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.z9-primer__vidy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.z9-vid {
+  flex: none;
+  white-space: nowrap;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--blue-50);
+  color: var(--blue-700);
+  font: inherit;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  cursor: pointer;
+}
+.z9-vid.is-on {
+  background: var(--blue-600);
+  color: var(--white);
+}
+.z9-vid:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z9-primer__svernut {
+  min-height: 44px;
+  white-space: nowrap;
+}
+.z9-primer__shagi {
+  min-width: 0;
+}
+@media (max-width: 767.98px) {
+  /* На телефоне виды чертежа — одной строкой с прокруткой, рядом
+     «Свернуть»: закреплённая панель не выше трети экрана. */
+  .z9-primer__panel {
+    flex-wrap: nowrap;
+  }
+  .z9-primer__vidy {
+    flex-wrap: nowrap;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .z9-vid {
+    padding: 0 var(--space-2);
+  }
+  /* На телефоне закреплённый чертёж — не выше трети экрана. */
+  .z9-primer__holst .z9-fig__svg svg {
+    max-height: 24vh;
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+}
+@media (min-width: 768px) {
+  .z9-primer__telo {
+    grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+    align-items: start;
+  }
+  .z9-primer--bez .z9-primer__telo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Рядом с шагами чертёж не мешает: сворачивать нечего. */
+  .z9-primer__svernut {
+    display: none;
+  }
+}
+@media print {
+  .z9-primer__chertezh {
+    position: static;
+    box-shadow: none;
+  }
+  .z9-primer__panel {
+    display: none;
+  }
+}
+
+/* ── Тренажёр: чертёж под условием. ── */
+.trn-risunok--z9 {
+  max-width: 520px;
+  margin-inline: auto;
+  width: 100%;
+  padding: var(--space-2);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: var(--glass-ring);
+}
+
+/* ── Опорные задачи. ── */
+.z9-opornye {
+  display: grid;
+  gap: var(--space-5);
+}
+.z9-opornye__nazad {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--blue-700);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z9-zapomni {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-1);
+}
+.z9-op__ris {
+  margin-top: var(--space-3);
+  max-width: 460px;
+  width: 100%;
+  margin-inline: auto;
+  padding: var(--space-2);
+  border-radius: 14px;
+  background: var(--white);
+}
+.z9-opornye .op-zad__ris {
+  max-width: 520px;
+  width: 100%;
+  margin-inline: auto;
+}
+.z9-op__gde {
+  max-width: 720px;
+}
+.z9-op__gde-spisok {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z9-op__gde-spisok li {
+  min-width: 0;
+  max-width: 100%;
+}
+.z9-gde__chip {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-4);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+  text-decoration: none;
+}
+.z9-gde__chip:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+
+/* ── Теория: рамки разметки rich-* (topic.css) в общем стеклянном слое. ── */
+@media screen {
+  .teor-steklo .rich-main__frame,
+  .teor-steklo .rich-example,
+  .teor-steklo .nofn-note,
+  .teor-steklo .z9-tabl {
+    --ton: var(--blue-600);
+    --ton-soft: var(--blue-50);
+    --ton-border: var(--blue-200);
+    border: 0;
+    border-radius: var(--teor-r, 18px);
+    background: linear-gradient(160deg, var(--white), var(--ton-soft));
+    box-shadow:
+      inset 0 0 0 1px var(--ton-border),
+      inset 4px 0 0 var(--ton),
+      var(--glass-hi),
+      0 8px 24px rgb(31 95 208 / 0.06);
+  }
+  .teor-steklo .rich-main__frame {
+    --ton: var(--navy-700);
+    --ton-border: var(--blue-300);
+  }
+  .teor-steklo .rich-example {
+    --ton: var(--amber-600);
+    --ton-soft: var(--amber-50);
+    --ton-border: var(--cream-200);
+  }
+  .teor-steklo .nofn-note--warm {
+    --ton: var(--terracotta);
+    --ton-soft: var(--terracotta-50);
+    --ton-border: var(--terracotta-200);
+  }
+}

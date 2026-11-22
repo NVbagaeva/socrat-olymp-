@@ -90,6 +90,8 @@ export interface KartochkaGotovaya {
 
 export interface KolodaGotovaya {
   task: number;
+  /** Ключ прогресса, если он не номер: у колод базы — «baza:5». */
+  klyuch?: string;
   title: string;
   /** Подтемы: title — HTML с формулами, podpis — тот же текст словами (aria). */
   podtemy: { id: string; title: string; podpis: string }[];
@@ -241,6 +243,7 @@ function otvetChislo(k: Kartochka & { type: 'vychislenie' }): number {
 export function podgotovit(koloda: Koloda, base: string): KolodaGotovaya {
   return {
     task: koloda.task,
+    ...(koloda.level === 'base' ? { klyuch: `baza:${koloda.task}` } : {}),
     title: koloda.title,
     podtemy: koloda.podtemy.map((t) => ({
       id: t.id,

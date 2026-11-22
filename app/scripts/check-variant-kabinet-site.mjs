@@ -74,7 +74,7 @@ const form = (name, email) => ({
   acceptSoglashenie: true,
   acceptSoglasie: true,
 });
-await api.bootstrapAdmin(form('Наталья', 'admin@x.ru'));
+await api.bootstrapAdmin(form('Наталия', 'admin@x.ru'));
 await api.register(await api.createInvitation('tutor'), form('Репетитор Анна', 't@x.ru'));
 const tutorId = (await api.me()).id;
 const classId = await api.createClass('11 «А»');

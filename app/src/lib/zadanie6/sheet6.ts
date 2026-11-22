@@ -29,6 +29,7 @@ import { listSheetSpec, razborKuski, type ListVid } from '@/lib/sheetList';
 import type { ZadachaLite } from './dannye';
 import type { ModelLista } from './sborka';
 import type { Ris, Solved, Uslovie } from './types';
+import { nomerRazdela } from '@/content/struktura';
 
 /* ── Рисунок ────────────────────────────────────────────────────── */
 
@@ -135,7 +136,7 @@ function uslovie(o: Sborka6, z: ZadachaLite): { html: string; figure: Figure6 | 
 export function sheetSpec6(o: Sborka6, vid: Vid6) {
   return listSheetSpec<ZadachaLite>(
     {
-      chip: 'Задание 6',
+      chip: `Задание ${nomerRazdela('sluchainye-velichiny')}`,
       cls: 'z6',
       model: o.model,
       zadacha: (id) => o.zadachi.get(id),

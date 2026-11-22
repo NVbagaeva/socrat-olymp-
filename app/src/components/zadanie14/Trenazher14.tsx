@@ -1,5 +1,6 @@
 'use client';
 
+import { ishodOf, type LogOutcome } from '@/lib/progressLog';
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import { TrainerSessionHost, useSessionReport } from '@/components/tasks/session';
@@ -179,13 +180,14 @@ function Ekran14({
   const zakryta = marks[index] !== undefined;
   const reshena = itog !== null && verno14(itog);
 
-  function zapisat(right: boolean, clean: boolean, zad: Zadacha14) {
+  function zapisat(right: boolean, clean: boolean, zad: Zadacha14, ishod: LogOutcome) {
     trenazher14.recordAttempt({
       kind: zad.metody[0] ?? 'prosteyshie',
       taskId: zad.id,
       right,
       clean,
       seconds: (elapsed() - nachalo) / 1000,
+      ishod,
     });
     if (right) setMarks((m) => ({ ...m, [index]: clean ? 'right' : 'hinted' }));
   }
@@ -196,7 +198,17 @@ function Ekran14({
     if (it.a === 'pusto' && (it.b === null || it.b === 'pusto')) return;
     setItog(it);
     if (verno14(it)) {
-      zapisat(true, !oshibalsya && otkryto === 0 && !reshenie, z);
+      zapisat(
+        true,
+        !oshibalsya && otkryto === 0 && !reshenie,
+        z,
+        ishodOf({
+          solved: true,
+          misses: oshibalsya ? 1 : 0,
+          hint: otkryto > 0,
+          revealed: reshenie,
+        }),
+      );
     } else if (it.a !== 'ne-razobrano' && it.b !== 'ne-razobrano') {
       setOshibalsya(true);
       setMisses((n) => n + 1);

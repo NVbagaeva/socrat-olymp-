@@ -5,7 +5,7 @@
  * и решателями.
  */
 
-import type { IllInfo } from '@/components/tasks/zadanie10/Zadacha10';
+import type { IllInfo } from '@/components/tasks/zadanie10/Kartinka10';
 import { GEN_UI } from '@/content/generatorUi';
 import type { ListHtml, SobratListHtml } from '@/lib/generator/obshchiy/bankEngine';
 import { typeset } from '@/lib/tex';

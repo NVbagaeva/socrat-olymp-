@@ -18,7 +18,7 @@
 
 .z10-razbor__title {
   margin: 0 0 var(--space-2);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-text);
 }
@@ -38,7 +38,7 @@
 .z10-dano {
   width: 100%;
   border-collapse: collapse;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .z10-dano th,
@@ -51,7 +51,7 @@
 
 .z10-dano th {
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-secondary);
 }
 

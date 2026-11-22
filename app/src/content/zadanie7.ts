@@ -7,9 +7,11 @@ import type { ShapkaArt } from '@/components/tasks/IllyustratsiyaShapki';
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE7 = {
-  no: '07',
+  no: nomerDvumya('uravneniya'),
   slug: '7',
   title: taskName('7'),
   lead: 'Линейные, дробные, иррациональные, показательные, логарифмические и тригонометрические уравнения: найти корень, проверить ОДЗ и выбрать нужный.',
@@ -27,54 +29,18 @@ export const ZADANIE7 = {
     { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
     { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
     { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
-    { id: 'repetitory', label: 'Для репетиторов', tail: 'dlya-repetitorov/', icon: 'materials' },
   ] as readonly RazdelTab[],
 } as const;
 
 /** Заголовок окна браузера: «Вкладка · Уравнения — Будет на ЕГЭ». */
 export function zadanie7Title(tab: string): string {
-  return `${tab} · ${ZADANIE7.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(7, ZADANIE7.title, tab);
 }
 
 export const PROGRESS_7 = {
   /** Ключ прочитанных разделов теории в lib/theoryRead. */
   teoriyaKey: '7',
 } as const;
-
-/* ── «О задании» ─────────────────────────────────────────────────── */
-
-export const O_ZADANII_7 = {
-  title: 'Задание 7. Простейшие уравнения',
-  lead: 'Ответ — целое число или конечная десятичная дробь.',
-  about:
-    'Нужно решить одно уравнение и записать его корень. Если корней несколько, в условии сказано, какой выбрать: меньший, больший, наименьший положительный или наибольший отрицательный. Типы уравнений разные, но порядок решения один: тип и план, ОДЗ, равносильные переходы, корни, отбор, проверка подстановкой.',
-  gruppy: 'Пять групп уравнений',
-  gruppyLead: 'Нажмите на группу — откроется разобранный пример. Ниже — все прототипы группы.',
-  primer: 'Разобранный пример',
-  shagi: [
-    {
-      title: 'Прочитай теорию',
-      text: 'Шесть шагов на любое уравнение, ОДЗ, посторонние корни и ловушки.',
-    },
-    {
-      title: 'Отработай навыки',
-      text: 'Опорные задачи: степени, корни, логарифмы, пропорция, дискриминант, тригонометрический круг.',
-    },
-    {
-      title: 'Реши задачи ФИПИ',
-      text: 'Тренажёр: задачи открытого банка или новые аналоги, подсказки-вопросы и разбор.',
-    },
-  ],
-} as const;
-
-/** Пример группы на карточке «О задании»: прототип, чей разбор открывается. */
-export const PRIMER_GRUPPY_7: Record<string, string> = {
-  I: 'P01',
-  II: 'P13',
-  III: 'P18',
-  IV: 'P21',
-  V: 'P26',
-};
 
 /* ── Тренажёр ────────────────────────────────────────────────────── */
 
@@ -120,8 +86,8 @@ export const GENERATOR_7 = {
   primery: 'Рамки теории: разобранных примеров на тип',
   primeryBez: '0 — без теории',
   vsego: 'В варианте задач:',
-  section: '№7 · Простейшие уравнения',
-  zagolovok: 'Задание №7. Простейшие уравнения',
+  section: `№${nomerRazdela('uravneniya')} · Простейшие уравнения`,
+  zagolovok: `Задание №${nomerRazdela('uravneniya')}. Простейшие уравнения`,
   teoriya: 'Повторяем теорию',
   zadachi: 'Задачи',
   uchenik: 'лист ученика',
@@ -134,15 +100,4 @@ export const GENERATOR_7 = {
   sobiraem: 'Собираем лист…',
   plohayaSsylka: 'Неверная ссылка на лист.',
   otbor: 'Отбор корней и ОДЗ — в выделенных шагах разбора.',
-} as const;
-
-/* ── Для репетиторов ─────────────────────────────────────────────── */
-
-export const REPETITORY_7 = {
-  title: 'Для репетиторов',
-  lead: 'Материалы разрабатываются.',
-  tekst:
-    'Здесь появятся серии уроков по заданию №7: разминка, разбор, самостоятельная работа и домашнее задание из задач банка, код комплекта и шпаргалки к урокам. Пока листы можно собрать во вкладке «Генератор», а шпаргалку по всем типам — напечатать.',
-  generator: 'Открыть генератор',
-  shpargalka: 'Шпаргалка по №7',
 } as const;

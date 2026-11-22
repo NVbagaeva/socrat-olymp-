@@ -6,6 +6,7 @@ import { IkonkaTela } from '@/components/stereo/IkonkaTela';
 import { config3, engine3 } from '@/lib/zadanie3/gen/generator3';
 import type { Razdel3 } from '@/lib/zadanie3/gen/info';
 import { zagruzitDannye3 } from '@/lib/zadanie3/gen/params3';
+import './z3-gen.css';
 
 /**
  * Вкладка «Генератор» задания №3: общий генератор (components/generator/)
@@ -31,5 +32,9 @@ export function Generator3({ razdely, base }: { razdely: Razdel3[]; base: string
       ),
     [razdely],
   );
-  return <Generator config={config} engine={engine} icons={icons} />;
+  return (
+    <div className="z3-gen">
+      <Generator config={config} engine={engine} icons={icons} />
+    </div>
+  );
 }

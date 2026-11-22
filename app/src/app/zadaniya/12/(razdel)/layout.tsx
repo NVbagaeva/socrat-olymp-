@@ -2,6 +2,7 @@ import { Shell12 } from '@/components/tasks/zadanie12/Shell12';
 import 'katex/dist/katex.min.css';
 import '../../zadaniya.css';
 import '../../[task]/section.css';
+import '@/components/tasks/zadanie12/zadanie12.css';
 
 /**
  * Оболочка задания №12: крошки, заголовок и лента вкладок. Группа

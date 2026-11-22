@@ -13,6 +13,7 @@
   top: 0;
   z-index: 30;
   background: var(--color-bg-translucent-strong);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--color-border);
 }
@@ -24,6 +25,42 @@
   display: flex;
   align-items: center;
   gap: var(--space-8);
+}
+
+/* Шапка на прокрутке (SiteHeadCompact.tsx ставит data-compact): ниже
+   на 12px, плотнее матовое стекло и мягкая тень снизу. Место под шапкой
+   в потоке не меняется: сколько шапка теряет в высоте, столько получает
+   нижнего поля — содержимое под ней не прыгает. Высота и поле меняются
+   одним переходом с одной кривой, поэтому их сумма постоянна и во время
+   перехода. При «уменьшить движение» — без перехода. */
+.site-head {
+  transition:
+    margin-bottom var(--dur-menu) var(--ease),
+    box-shadow var(--dur-menu) var(--ease),
+    background-color var(--dur-menu) var(--ease);
+}
+.site-head__in {
+  transition: height var(--dur-menu) var(--ease);
+}
+/* body — чтобы перебить стеклянные шапки страниц (.glavnaya
+   .site-head--steklo и соседи): у них свой фон и тень без прокрутки. */
+body .site-head[data-compact] {
+  margin-bottom: calc(var(--h-site-head) - var(--h-site-head-compact));
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow:
+    0 1px 0 rgb(31 95 208 / 0.08),
+    0 10px 24px -18px rgb(31 95 208 / 0.45);
+}
+.site-head[data-compact] .site-head__in {
+  height: var(--h-site-head-compact);
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-head,
+  .site-head__in {
+    transition: none;
+  }
 }
 
 .logo {
@@ -78,7 +115,8 @@
 }
 .site-nav > a,
 .nav-drop__button {
-  font-size: 15px;
+  /* Пункты меню — подписи навигации: 14 по шкале (15 → 14). */
+  font-size: 14px;
   color: var(--color-text-secondary);
   text-decoration: none;
 }
@@ -106,7 +144,7 @@
   gap: 4px;
   padding: 0;
   font: inherit;
-  font-size: 15px;
+  font-size: 14px;
   background: none;
   border: 0;
   cursor: pointer;
@@ -131,7 +169,7 @@
   top: 100%;
   left: -16px;
   z-index: 31;
-  min-width: 260px;
+  min-width: 300px;
   margin: 0;
   padding: 12px 0 0;
   list-style: none;
@@ -155,29 +193,86 @@
 .nav-drop__list li:last-child {
   padding-bottom: 6px;
 }
-.site-nav .nav-drop__item {
-  display: block;
+:is(.site-nav, .topnav) .nav-drop__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   margin: 0 6px;
-  padding: 10px 10px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
   border-radius: var(--radius-md);
-  font-size: 15px;
   color: var(--color-text);
   text-decoration: none;
 }
-.site-nav .nav-drop__item:hover,
-.site-nav .nav-drop__item:focus-visible {
+.nav-drop__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
   color: var(--color-primary);
+}
+.nav-drop__ico .nav-ico {
+  width: 20px;
+  height: 20px;
+}
+.nav-drop__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nav-drop__label {
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.nav-drop__hint {
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--color-text-secondary);
+}
+/* Главное действие группы — первая ссылка: значок залит синим. */
+.nav-drop__list li:first-child .nav-drop__ico {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+:is(.site-nav, .topnav) .nav-drop__item:hover,
+:is(.site-nav, .topnav) .nav-drop__item:focus-visible {
   background: var(--color-bg);
 }
-.site-nav .nav-drop__item[aria-current='page'] {
+:is(.site-nav, .topnav) .nav-drop__item:hover .nav-drop__label,
+:is(.site-nav, .topnav) .nav-drop__item:focus-visible .nav-drop__label,
+:is(.site-nav, .topnav) .nav-drop__item[aria-current='page'] .nav-drop__label {
   color: var(--color-primary);
-  font-weight: 600;
 }
 .site-head__cta {
   margin-left: auto;
   display: flex;
+  flex: none;
   align-items: center;
   gap: var(--space-4);
+}
+/* Знак и название — одним блоком; ужимается он, а не кнопки справа. */
+.site-head__in > .logo {
+  min-width: 0;
+}
+/* «Начать бесплатно» — основная кнопка шапки только от 768px. На
+   телефоне в шапке одна кнопка («Войти» или кружок аккаунта) и бургер,
+   а «Начать бесплатно» — на первом экране главной (HeroSection). На
+   компьютере у кнопки тоже полоса касания 44px. */
+.site-head__start {
+  position: relative;
+}
+.site-head__start::before {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
+}
+@media (max-width: 767.98px) {
+  .site-head__start {
+    display: none;
+  }
 }
 
 /* ── Бургер и полноэкранное меню узкой шапки ── */
@@ -211,6 +306,13 @@
 .burger__bar:nth-child(3) {
   transform: translateY(6px);
 }
+/* Меню из верхней строки внутренних страниц (AppShell → Topbar): пока
+   оно открыто, строка над панелью меню (25), как шапка сайта (30), —
+   иначе крестик закрытия оказался бы под панелью. */
+.topbar:has(.burger[aria-expanded='true']) {
+  position: relative;
+  z-index: 30;
+}
 /* Крестик: крайние полоски сходятся и поворачиваются, средняя исчезает. */
 .burger[aria-expanded='true'] .burger__bar:nth-child(1) {
   transform: translateY(0) rotate(45deg);
@@ -232,9 +334,11 @@
   position: absolute;
   inset: 0;
   /* Сплошная поверхность: ни прозрачности, ни размытия — на слабых
-     телефонах backdrop-filter заметно тормозит. */
-  background: var(--color-surface);
-  padding: calc(var(--h-site-head) + var(--space-8)) var(--space-5) var(--space-8);
+     телефонах backdrop-filter заметно тормозит. Фон — подложка
+     страницы, а не белый: на ней белые списки читаются группами. */
+  background: var(--color-bg);
+  padding: calc(var(--h-site-head) + var(--space-5)) var(--space-5)
+    calc(var(--space-10) + env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -255,26 +359,172 @@
   }
 }
 
+/* Пока меню открыто, кнопки «?» (HelpFab) нет: она висела поверх
+   нижних пунктов и перекрывала их. «Как пользоваться» есть в самом
+   меню. */
+body:has(.site-menu) .help-fab {
+  display: none;
+}
+
+/* Меню — колонка: главное действие, группы, тарифы, аккаунт. На
+   планшете колонка не растягивается на весь экран. */
 .site-menu__nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-6);
+  max-width: 480px;
+  margin: 0 auto;
 }
-.site-menu__item {
-  color: var(--color-text);
+.site-menu__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.site-menu__title {
+  margin: 0;
+  padding-left: var(--space-1);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+.site-menu__list {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.site-menu__list--accent {
+  border-color: var(--color-border-info);
+}
+
+/* Строка: плашка со значком, название с пояснением, шеврон. Высота —
+   под палец, нажимается вся строка. */
+.site-menu__row,
+.site-menu__hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   text-decoration: none;
+  color: var(--color-text);
 }
-.site-menu__item:hover {
-  color: var(--color-primary);
+.site-menu__row {
+  position: relative;
+  width: 100%;
+  min-height: 64px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 0;
+  text-align: left;
 }
-/* «Войти» отделён от разделов сайта. */
-.site-menu__item--apart {
-  margin-top: var(--space-4);
-  padding-top: var(--space-8);
+.site-menu__row--plain {
+  min-height: 52px;
+  padding-left: var(--space-4);
+  justify-content: space-between;
+}
+/* «Выйти» — кнопка со своим классом из меню аккаунта (auth-widget.css):
+   здесь она выглядит как соседняя строка. */
+.site-menu__list button.site-menu__row {
+  display: flex;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 0;
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+/* Разделитель начинается от текста, а не от края: значки стоят
+   отдельной колонкой. */
+.site-menu__row + .site-menu__row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: calc(var(--space-3) + 40px + var(--space-3));
   border-top: 1px solid var(--color-border);
 }
-/* Каскад: пункты выходят снизу вверх вслед за панелью. */
-.site-menu[data-state='open'] .site-menu__item {
+.site-menu__row--plain + .site-menu__row--plain::before {
+  left: var(--space-4);
+}
+.site-menu__row:hover,
+.site-menu__row:active {
+  background: var(--color-surface-2);
+}
+.site-menu__row:focus-visible,
+.site-menu__hero:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+.site-menu__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.site-menu__ico .nav-ico {
+  width: 22px;
+  height: 22px;
+}
+.site-menu__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.site-menu__label {
+  font-size: var(--fs-body);
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--color-text);
+}
+.site-menu__hint {
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+  color: var(--color-text-secondary);
+}
+.site-menu__chev {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-tertiary);
+}
+
+/* Главное действие — синяя карточка: единственное залитое пятно в
+   меню, поэтому глаз начинает с него. */
+.site-menu__hero {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.site-menu__hero:hover {
+  background: var(--color-primary-hover);
+}
+.site-menu__hero .site-menu__ico {
+  width: 44px;
+  height: 44px;
+  background: var(--color-on-brand-surface);
+  color: var(--color-text-inverse);
+}
+.site-menu__hero .site-menu__label {
+  font-size: var(--fs-lg);
+  color: var(--color-text-inverse);
+}
+.site-menu__hero .site-menu__hint {
+  color: var(--color-on-brand-strong);
+}
+.site-menu__hero .site-menu__chev {
+  color: var(--color-text-inverse);
+}
+
+/* Каскад: блоки выходят снизу вверх вслед за панелью. */
+.site-menu[data-state='open'] .site-menu__hero,
+.site-menu[data-state='open'] .site-menu__group {
   animation: menu-item-in var(--dur-menu) var(--ease) both;
   animation-delay: calc(var(--dur-menu) + var(--i) * var(--dur-menu-stagger));
 }
@@ -293,21 +543,27 @@
   }
 }
 
-/* Ниже 460px в шапке не помещаются и «Войти», и бургер.
-   «Войти» уходит в меню, «Начать бесплатно» остаётся: слово
-   «бесплатно» работает на конверсию и не сокращается. */
-@media (max-width: 459.98px) {
-  .site-head__cta .btn--ghost {
-    display: none;
+/* Телефон: слева знак с названием в одну строку, справа «Войти» (или
+   кружок аккаунта) и бургер. Промежутки плотнее, чем на компьютере. */
+@media (max-width: 767.98px) {
+  .site-head__in > .logo {
+    white-space: nowrap;
   }
   .site-head__in {
-    gap: var(--space-4);
+    gap: var(--space-3);
+  }
+  .site-head__cta {
+    gap: var(--space-2);
   }
 }
-/* На 320 логотип, кнопка и бургер вместе шире экрана: поля шапки,
-   кнопки и зазор до бургера уже. Запас — под шрифт чуть шире Inter
-   (запасной, пока Inter грузится, или другой растеризатор). */
+/* 320–359px: знак, название, «Войти» и бургер входят в строку, если
+   поля шапки и промежутки плотнее, а название на кегль меньше (запас
+   ~20px — под шрифт чуть шире Inter, пока Inter грузится). */
 @media (max-width: 359.98px) {
+  .site-head__in > .logo {
+    gap: var(--space-2);
+    font-size: 16px;
+  }
   .site-head__in {
     gap: var(--space-2);
   }
@@ -315,11 +571,14 @@
   .site-head .site-head__in {
     padding: 0 var(--space-4);
   }
-  .site-head__cta {
-    gap: var(--space-2);
-  }
-  .site-head__cta .btn {
-    padding: 0 10px;
+}
+
+/* Уже 300px (окно сбоку, складной телефон) название уходит — остаётся
+   знак; название читает скринридер (кегль 0). */
+@media (max-width: 299.98px) {
+  .site-head__in > .logo {
+    gap: 0;
+    font-size: 0;
   }
 }
 
@@ -327,7 +586,7 @@
   /* Снизу — не меньше места кнопки «?»: ссылки подвала не уходят под неё. */
   padding: var(--space-12) 0 max(var(--space-12), var(--fab-reserve));
   border-top: 1px solid var(--color-border);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 .site-foot__in {
@@ -339,6 +598,13 @@
 .site-foot a {
   color: var(--color-text-secondary);
   text-decoration: none;
+}
+/* Зона нажатия ссылок подвала — 44 px по высоте (было 24): поле
+   внутри строки, расстояние между строками на вид то же. */
+.site-foot__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .site-foot a:hover {
   color: var(--color-primary);
@@ -352,6 +618,42 @@
   gap: var(--space-6);
   flex-wrap: wrap;
 }
+/* Реквизиты продавца и документы (флаг NEXT_PUBLIC_LEGAL_READY):
+   мелко, одной строкой через точку; на телефоне — столбиком. */
+.site-foot__rekvizity,
+.site-foot__pravo {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.site-foot__rekvizity span + span::before {
+  content: '·';
+  margin: 0 var(--space-2);
+}
+.site-foot__pravo {
+  gap: var(--space-1) var(--space-4);
+}
+.site-foot__pravo a {
+  /* Цель касания не меньше 24px по высоте (WCAG 2.5.8). */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+@media (max-width: 767.98px) {
+  .site-foot__rekvizity,
+  .site-foot__pravo {
+    flex-direction: column;
+    gap: 0;
+  }
+  .site-foot__rekvizity span + span::before {
+    content: none;
+  }
+  .site-foot__pravo a {
+    min-height: 32px;
+  }
+}
 
 /* Шапка с меню требует ~1004px: логотип, пять пунктов (один из них —
    «Варианты» со списком) и «Начать бесплатно». Ниже меню прячется в
@@ -362,10 +664,11 @@
     display: none;
   }
 }
-/* Со входом в шапке есть ещё «Войти» (AuthWidget): ему нужно на ~40px
-   больше, и до 1100px меню уходит в бургер раньше. Без входа правило
-   не срабатывает. */
-@media (max-width: 1099.98px) {
+/* Со входом в шапке есть ещё «Войти» (AuthWidget, таблетка ~100px):
+   до 1130px меню уходит в бургер раньше. Запас — под самую длинную
+   строку меню и шрифт чуть шире Inter. Без входа правило не
+   срабатывает. */
+@media (max-width: 1129.98px) {
   .site-head__in:has(.auth-widget__login) .site-nav {
     display: none;
   }
@@ -432,4 +735,40 @@
   .cookie-notice {
     display: none;
   }
+}
+
+/* ── Пункт с тёплым акцентом («Устный счёт») ──
+   Стеклянная плашка в стиле иллюстраций сайта: светлое синее стекло и
+   тёплая оранжевая подсветка; цвет текста — терракота для мелкого
+   текста (5,5:1 на белом). */
+.site-nav > a.is-akcent {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(120deg, var(--color-accent-soft-surface), var(--color-surface-info));
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-accent),
+    0 6px 16px -10px var(--color-accent);
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+.site-nav > a.is-akcent:hover,
+.site-nav > a.is-akcent[aria-current='page'] {
+  color: var(--color-accent-text);
+  box-shadow:
+    inset 0 0 0 1px var(--color-accent),
+    0 8px 18px -10px var(--color-accent);
+}
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .site-nav > a.is-akcent {
+    padding: 5px 10px;
+  }
+}
+.site-menu__row--akcent .site-menu__ico {
+  background: radial-gradient(circle at 70% 25%, var(--color-accent-soft-surface), var(--color-surface-soft));
+  box-shadow: inset 0 0 0 1px var(--color-border-accent);
+  color: var(--color-accent-text);
+}
+.site-menu__row--akcent .site-menu__label {
+  color: var(--color-accent-text);
+  font-weight: 600;
 }

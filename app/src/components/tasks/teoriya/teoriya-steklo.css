@@ -1,0 +1,263 @@
+/* Теория в «Стеклянной сцене»: единый вид цветных рамок на экране.
+
+   Образец сделан на №7 и рассчитан на остальные разделы: обёртке
+   теории ставится класс .teor-steklo, содержание и разметка рамок
+   (components/teoriya/Ramki.tsx, styles/ramki.css) не меняются. Печать
+   и листы генератора этот слой не трогает — он действует только внутри
+   .teor-steklo и только на экране.
+
+   Роли рамок и их тона (палитра сайта):
+     определение   — синий;
+     правило       — тёмно-синий (свойство, теорема, главная формула);
+     важно         — терракотовый;
+     пример        — оранжевый, раскрывается;
+     частая ошибка — терракотовый, «Неверно / Верно»;
+     вывод         — зелёный.
+   Роль видна не только цветом: у каждой рамки подпись-плашка. */
+
+@media screen {
+  .teor-steklo {
+    --teor-r: 18px;
+  }
+
+  /* Общая поверхность рамки: стекло, тонкая кромка, полоса тона слева. */
+  .teor-steklo .ramka,
+  .teor-steklo .teor-ramka {
+    --ton: var(--blue-600);
+    --ton-soft: var(--blue-50);
+    --ton-border: var(--blue-200);
+    --ton-text: var(--blue-700);
+    position: relative;
+    border: 0;
+    border-radius: var(--teor-r);
+    background: linear-gradient(160deg, var(--white), var(--ton-soft));
+    box-shadow:
+      inset 0 0 0 1px var(--ton-border),
+      inset 4px 0 0 var(--ton),
+      var(--glass-hi),
+      0 8px 24px rgb(31 95 208 / 0.06);
+  }
+
+  /* Тона ролей. */
+  .teor-steklo .ramka--formula,
+  .teor-steklo .teor-ramka--pravilo {
+    --ton: var(--navy-700);
+    --ton-soft: var(--blue-glass-2, var(--blue-50));
+    --ton-border: var(--blue-300);
+    --ton-text: var(--navy-800);
+  }
+  .teor-steklo .ramka--primer,
+  .teor-steklo .ramka--layfhak,
+  .teor-steklo .teor-ramka--primer {
+    --ton: var(--amber-600);
+    --ton-soft: var(--amber-50);
+    --ton-border: var(--cream-200);
+    --ton-text: var(--amber-700);
+  }
+  .teor-steklo .ramka--vazhno,
+  .teor-steklo .ramka--lovushka,
+  .teor-steklo .teor-ramka--vazhno {
+    --ton: var(--terracotta);
+    --ton-soft: var(--terracotta-50);
+    --ton-border: var(--terracotta-200);
+    --ton-text: var(--terracotta-700);
+  }
+  .teor-steklo .ramka--vyvod,
+  .teor-steklo .teor-ramka--vyvod {
+    --ton: var(--emerald-600);
+    --ton-soft: var(--emerald-50);
+    --ton-border: var(--emerald-200);
+    --ton-text: #06704f;
+  }
+
+  /* Подпись-плашка: тон рамки, а не свой цвет у каждого раздела. */
+  .teor-steklo .ramka__plashka,
+  .teor-steklo .teor-ramka__plashka {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 var(--space-3);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--ton);
+    color: var(--white);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .teor-steklo .ramka__titul {
+    color: var(--ton-text);
+  }
+  .teor-steklo .ramka__znak {
+    background: var(--ton);
+    color: var(--white);
+  }
+  .teor-steklo .ramka__shag::before {
+    background: var(--ton);
+  }
+
+  /* Главная формула: крупно, по центру, без двойной рамки. */
+  .teor-steklo .ramka--formula {
+    box-shadow:
+      inset 0 0 0 1px var(--ton-border),
+      var(--glass-hi),
+      0 8px 24px rgb(31 95 208 / 0.08);
+  }
+  .teor-steklo .ramka__formula {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  /* «Неверно / Верно» в частой ошибке. */
+  .teor-steklo .ramka__neverno {
+    background: var(--terracotta-50);
+    box-shadow: inset 0 0 0 1px var(--terracotta-200);
+  }
+  .teor-steklo .ramka__verno {
+    background: var(--emerald-50);
+    box-shadow: inset 0 0 0 1px var(--emerald-200);
+  }
+
+  /* Раскрывающийся пример: кнопка-таблетка 44 px, внутри — шаги сцены. */
+  .teor-steklo .teor-primer > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-pill);
+    background: var(--amber-50);
+    box-shadow: inset 0 0 0 1px var(--cream-200);
+    color: var(--amber-700);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .teor-steklo .teor-primer > summary::-webkit-details-marker {
+    display: none;
+  }
+  .teor-steklo .teor-primer > summary:focus-visible {
+    outline: 2px solid var(--amber-600);
+    outline-offset: 2px;
+  }
+  .teor-steklo .teor-primer[open] > summary {
+    margin-bottom: var(--space-3);
+  }
+
+  /* Чтение на телефоне: рамка не шире экрана, длинная формула
+     прокручивается внутри рамки, а не толкает страницу. */
+  .teor-steklo .ramka,
+  .teor-steklo .teor-ramka {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .teor-steklo .katex-display {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
+
+/* Карточки теории разметки №12 (QuadraticSection, классы qth-*): №2 и
+   дальше №12. Карточка — стекло с полосой тона; разбор по шагам —
+   оранжевый, «смотри дальше» — тёмно-синий. Разметка не меняется. */
+@media screen {
+  .teor-steklo .qth-card {
+    --ton: var(--blue-600);
+    --ton-soft: var(--blue-50);
+    --ton-border: var(--blue-200);
+    border: 0;
+    border-radius: var(--teor-r);
+    background: linear-gradient(160deg, var(--white), var(--ton-soft));
+    box-shadow:
+      inset 0 0 0 1px var(--ton-border),
+      inset 4px 0 0 var(--ton),
+      var(--glass-hi),
+      0 8px 24px rgb(31 95 208 / 0.06);
+  }
+  .teor-steklo .qth-card--razbor {
+    --ton: var(--amber-600);
+    --ton-soft: var(--amber-50);
+    --ton-border: var(--cream-200);
+  }
+  .teor-steklo .qth-card--forward {
+    --ton: var(--navy-700);
+    --ton-soft: var(--blue-glass-2, var(--blue-50));
+    --ton-border: var(--blue-300);
+  }
+  .teor-steklo .qth-card__formula {
+    border-radius: 14px;
+    background: var(--white);
+    box-shadow: inset 0 0 0 1px var(--ton-border);
+    max-width: 100%;
+  }
+  .teor-steklo .qth-card__lines {
+    border-left-color: var(--ton);
+  }
+}
+
+@media screen and (max-width: 639px) {
+  .teor-steklo .ramka,
+  .teor-steklo .teor-ramka {
+    padding-inline: var(--space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teor-steklo * {
+    scroll-behavior: auto;
+  }
+}
+
+/* Теория №4 и №5 (components/tasks/veroyatnost/teoriya): свои карточки
+   разделов — в тех же ролях и тонах, что рамки выше. Разметка и тексты
+   теории не меняются: слой действует только внутри .teor-steklo.
+     карточка вида события, способа, примера — стекло;
+     «Запомни», итог — тёмно-синяя полоса (правило);
+     «Важно» — терракотовая; идея, факт — оранжевая. */
+@media screen {
+  .teor-steklo
+    :is(
+      .z4-karta,
+      .vvid,
+      .vklass,
+      .vsvyaz,
+      .vcheck-card,
+      .vteor-sluchay,
+      .vizo-sposob,
+      .vizo-eylerblok,
+      .vizo-primer
+    ) {
+    border: 0;
+    border-radius: var(--teor-r);
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  }
+
+  .teor-steklo :is(.vzapomni, .vteor-itog, .vteor-vazhno, .vteor-ideya, .vizo-fakt) {
+    --ton: var(--navy-700);
+    --ton-soft: var(--blue-50);
+    --ton-border: var(--blue-300);
+    border: 0;
+    border-radius: var(--teor-r);
+    background: linear-gradient(160deg, var(--white), var(--ton-soft));
+    box-shadow:
+      inset 0 0 0 1px var(--ton-border),
+      inset 4px 0 0 var(--ton),
+      var(--glass-hi),
+      0 8px 24px rgb(31 95 208 / 0.06);
+  }
+  .teor-steklo .vteor-vazhno {
+    --ton: var(--terracotta);
+    --ton-soft: var(--terracotta-50);
+    --ton-border: var(--terracotta-200);
+  }
+  .teor-steklo :is(.vteor-ideya, .vizo-fakt) {
+    --ton: var(--amber-600);
+    --ton-soft: var(--amber-50);
+    --ton-border: var(--cream-200);
+  }
+}

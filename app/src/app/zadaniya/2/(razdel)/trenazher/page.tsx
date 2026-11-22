@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import { Trenazher2Tab } from '@/components/tasks/vektory/Trenazher2Tab';
-import { TRENAZHER_2, VEKTORY, vektoryTitle } from '@/content/vektory';
-import { ZADANIYA } from '@/lib/paths';
+import { vektoryTitle } from '@/content/vektory';
+import { TRENAZHER2 } from '@/content/vektory2';
+import { TRENAZHER2_HREF } from '@/lib/vektory/links';
 
 export const metadata: Metadata = {
-  title: vektoryTitle(TRENAZHER_2.title),
+  title: vektoryTitle(TRENAZHER2.title),
 };
 
-/** Вкладка «Тренажёр» задания №2: конфигуратор, сессия собирается в браузере. */
+/** Вкладка «Тренажёр» задания №2: общий тренажёр, задачи строит генератор в браузере. */
 export default function Trenazher2Page() {
-  return <Trenazher2Tab base={`${ZADANIYA}/${VEKTORY.slug}/trenazher/`} />;
+  return <Trenazher2Tab base={TRENAZHER2_HREF} />;
 }
