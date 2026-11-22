@@ -1,0 +1,70 @@
+/* «← К карте» в строке вкладок раздела (KartaNazad.tsx). Кнопка стоит
+   первой в обеих копиях строки — в плитках и в липкой панели, — поэтому
+   видна и наверху страницы, и на прокрутке; на телефоне не висит поверх
+   содержимого и не спорит с нижней панелью и «?». */
+
+.topic-tabs-row:has(> .karta-nazad) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.topic-tabs-row:has(> .karta-nazad) > .topic-tabs {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.karta-nazad {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  /* Стеклянная таблетка с синим акцентом: видна, но не кричит. */
+  background: var(--glass-bg-strong, rgb(255 255 255 / 0.85));
+  box-shadow:
+    inset 0 0 0 1px var(--blue-300),
+    var(--glass-hi, 0 0 0 0 transparent);
+  color: var(--blue-700);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
+}
+.karta-nazad__strelka {
+  font-size: 17px;
+  transform: translateY(-1px);
+}
+.karta-nazad:hover {
+  background: var(--blue-50, #eef5ff);
+  box-shadow: inset 0 0 0 1px var(--blue-400, #60a5fa);
+}
+.karta-nazad:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+
+/* Телефон: лента вкладок прокручивается вбок справа от кнопки. */
+@media (max-width: 767.98px) {
+  .karta-nazad {
+    padding: 0 var(--space-3) 0 10px;
+    font-size: 14px;
+  }
+  .topic-tabs-row:has(> .karta-nazad) > .topic-tabs {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .karta-nazad {
+    transition: none;
+  }
+}

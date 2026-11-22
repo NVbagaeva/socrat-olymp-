@@ -185,7 +185,7 @@ function variantSteps(vy: boolean): TourStep[] {
  */
 export const TOUR_REPETITOR: Tour = {
   id: 'repetitor',
-  label: 'Тур для репетитора',
+  label: 'Тур для учителя',
   steps: [
     {
       id: 'bank',
@@ -282,7 +282,7 @@ export const TOUR_REPETITOR: Tour = {
   ],
   final: {
     short: 'Готово',
-    title: 'Вы прошли тур для репетитора',
+    title: 'Вы прошли тур для учителя',
     lead: 'Теперь вы знаете, где что лежит. Вернуться к туру можно кнопкой «?» в углу экрана.',
     skillsTitle: 'Что вы теперь умеете',
     skills: [
@@ -431,7 +431,7 @@ export const TOUR_UI = {
   title: 'Добро пожаловать в «Будет на ЕГЭ»!',
   lead: 'Вы здесь впервые? Покажем за 2 минуты, как всё устроено.',
   student: 'Тур для ученика',
-  tutor: 'Тур для репетитора',
+  tutor: 'Тур для учителя',
   later: 'Сначала осмотрюсь',
   close: 'Закрыть',
   skip: 'Пропустить',
