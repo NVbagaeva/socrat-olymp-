@@ -162,7 +162,7 @@ try {
   ok(tutorInvite.includes('/kabinet/priglashenie/?kod='), 'ссылка-приглашение показана');
   await page.getByRole('button', { name: 'Сменить аккаунт' }).click();
   await go(tutorInvite);
-  await page.getByText('Вы регистрируетесь как репетитор').waitFor();
+  await page.getByText('Вы регистрируетесь как учитель').waitFor();
   ok((await page.getByText('Кто вы').count()) === 0, 'роль не выбирается — она из приглашения');
   await page.getByLabel('Имя', { exact: true }).fill('Репетитор Анна');
   await page.getByLabel('Почта', { exact: true }).fill('tutor@yandex.ru');

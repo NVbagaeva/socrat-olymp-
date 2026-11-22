@@ -103,12 +103,12 @@ export function Konstruktor() {
     })();
   }, [user]);
 
-  if (user === null) return <NeedLogin text="Войдите в кабинет репетитора." />;
+  if (user === null) return <NeedLogin text="Войдите в кабинет учителя." />;
   if (user.role !== 'tutor') {
     return (
       <EmptyState
-        title="Эта страница — для репетитора."
-        description="Задания выдаёт репетитор своим ученикам."
+        title="Эта страница — для учителя."
+        description="Задания выдаёт учитель своим ученикам."
       />
     );
   }

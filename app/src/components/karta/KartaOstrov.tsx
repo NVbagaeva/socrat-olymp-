@@ -23,6 +23,7 @@ export function KartaOstrov({
   vybran,
   sleduyushchaya,
   novaya,
+  vernulis = false,
   onVybor,
 }: {
   /** Место на рисунке: контур, центр подписи. */
@@ -37,6 +38,8 @@ export function KartaOstrov({
   sleduyushchaya: boolean;
   /** Освоена с прошлого визита: «свет заливает остров». */
   novaya: boolean;
+  /** Вернулись с «← К карте» с этого раздела: мягкая подсветка ~1 с. */
+  vernulis?: boolean;
   onVybor: (no: number, sKlaviatury: boolean) => void;
 }) {
   const no = razdel;
@@ -57,10 +60,15 @@ export function KartaOstrov({
         vybran && 'is-vybran',
         sleduyushchaya && 'is-sleduyushchaya',
         novaya && 'is-novaya',
+        vernulis && 'is-vernulis',
       )}
     >
       {/* Заливка состояния: туман, голубое стекло или тёплый свет. */}
-      <path className="karta-ostrov__zalivka" d={ostrov.d} clipPath={`url(#karta-kontur-${mesto})`} />
+      <path
+        className="karta-ostrov__zalivka"
+        d={ostrov.d}
+        clipPath={`url(#karta-kontur-${mesto})`}
+      />
       {novaya ? (
         <circle
           className="karta-ostrov__svet"
@@ -173,7 +181,11 @@ export function KartaOstrov({
 export function KartaSvobodnyyOstrov({ ostrov }: { ostrov: Ostrov }) {
   return (
     <g className="karta-svobodnyy" aria-hidden="true">
-      <path className="karta-ostrov__zalivka" d={ostrov.d} clipPath={`url(#karta-kontur-${ostrov.no})`} />
+      <path
+        className="karta-ostrov__zalivka"
+        d={ostrov.d}
+        clipPath={`url(#karta-kontur-${ostrov.no})`}
+      />
       <g className="karta-ostrov__podpis" transform={`translate(${ostrov.cx} ${ostrov.cy})`}>
         <g className="karta-podpis">
           <text className="karta-podpis__nazvanie" textAnchor="middle">

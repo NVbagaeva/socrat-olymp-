@@ -93,7 +93,8 @@ const { ru } = requireSrc('lib/vychisleniya/numbers.ts');
 /* Областей на «Карте ЕГЭ» — по действующей структуре экзамена. */
 const KARTA_OBLASTEY = requireSrc('lib/karta/katalog.ts').KARTA_RAZDELY.length;
 
-const OUT = path.join(APP, 'out');
+/* SAYT_OUT — другая сборка (снимки «до» со сборки основной ветки). */
+const OUT = process.env.SAYT_OUT ?? path.join(APP, 'out');
 const PORT = 4181;
 const SUPABASE = 'http://127.0.0.1:54321';
 const DISABLED = process.argv.includes('--disabled');
@@ -109,8 +110,17 @@ const GALLERY_Z8 = process.argv.includes('--gallery-z8')
 const GALLERY = process.argv.includes('--gallery')
   ? (process.argv[process.argv.indexOf('--gallery') + 1] ?? 'snimki-pr')
   : null;
+/* «Карта ЕГЭ» на телефонах: снимки до/после (scripts/lib/karta-nazad.mjs). */
+const SHOTS_KARTA = process.argv.includes('--shots-karta')
+  ? {
+      dir: process.argv[process.argv.indexOf('--shots-karta') + 1] ?? 'snimki-karta',
+      pristavka: process.argv[process.argv.indexOf('--shots-karta') + 2] ?? 'posle',
+    }
+  : null;
+/* Сценарии «← К карте» и карты на телефоне (pnpm test:karta-nazad). */
+const KARTA_NAZAD = process.argv.includes('--karta-nazad');
 const SHOTS =
-  GALLERY !== null || GALLERY_Z8 !== null || GALLERY_DZ !== null
+  GALLERY !== null || GALLERY_Z8 !== null || GALLERY_DZ !== null || SHOTS_KARTA !== null
     ? null
     : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null);
 
@@ -994,6 +1004,15 @@ async function runEnabled() {
       (await page.locator('input[name="birth-year"]').count()) === 0,
       'пока роль не выбрана, года рождения в форме нет',
     );
+    {
+      const roleCards = await page.locator('.role-card').allInnerTexts();
+      check(
+        roleCards.some((t) => t.includes('Я учитель')) &&
+          roleCards.some((t) => t.includes('Я ученик')) &&
+          !roleCards.some((t) => /репетитор/i.test(t)),
+        'выбор роли «Кто вы?»: «Я ученик» и «Я учитель», без «репетитора»',
+      );
+    }
     await page.click('.role-card[data-role="student"]');
     check(
       (await page.locator('input[name="birth-year"]').count()) === 1,
@@ -1017,7 +1036,7 @@ async function runEnabled() {
     await page.click('.role-card[data-role="tutor"]');
     check(
       (await page.locator('input[name="birth-year"]').count()) === 0,
-      'репетитору год рождения не нужен',
+      'учителю год рождения не нужен',
     );
     const docLinks = await page
       .locator('.consent-checks a')
@@ -1306,8 +1325,8 @@ async function runEnabled() {
 
     /* Кабинет репетитора: разделы с пустыми состояниями. */
     check(
-      (await page.locator('.kabinet__role').innerText()) === 'Кабинет репетитора',
-      'кабинет: «Кабинет репетитора»',
+      (await page.locator('.kabinet__role').innerText()) === 'Кабинет учителя',
+      'кабинет: «Кабинет учителя»',
     );
     /* Классы и ДЗ грузятся каждый сам (components/dz/KabinetDz.tsx). */
     await page.waitForFunction(() =>
@@ -1342,13 +1361,13 @@ async function runEnabled() {
       (await page.locator('dd[data-field="email"]').innerText()) === 'svoy@yandex.ru',
       'профиль: почта',
     );
-    check((await page.locator('[data-field="role"]').innerText()) === 'Репетитор', 'профиль: роль');
+    check((await page.locator('[data-field="role"]').innerText()) === 'Учитель', 'профиль: роль');
     const savedText = await page.locator('[data-section="saved"]').innerText();
     check(
       savedText.includes('просмотрено'),
       'профиль: факт «приветствие просмотрено» перенесён из браузера',
     );
-    check(savedText.includes('Тур для репетитора — пройден'), 'профиль: пройденный тур перенесён');
+    check(savedText.includes('Тур для учителя — пройден'), 'профиль: пройденный тур перенесён');
     check(savedText.includes('№8 «Вычисления» — перенесён'), 'профиль: перенос №8 виден');
     check(
       (await page.locator('[data-field="consent"]').innerText()).includes('редакция документов от'),
@@ -1665,7 +1684,9 @@ async function runEnabled() {
     );
     /* Главная ученика — «Карта ЕГЭ»: без прогресса — 0 из всех областей и без прогноза;
        карточки ДЗ нет, пока ДЗ не выдано; плашки «Войдите…» у вошедшего нет. */
-    await page.waitForSelector('[data-section="karta"] .karta-holst[data-gotov]');
+    await page.waitForSelector(
+      '[data-section="karta"] .karta-holst[data-gotov], [data-section="karta"] .karta-ps',
+    );
     const kartaItog = (await page.locator('.karta-shapka__itog').innerText()).replace(/\s+/g, ' ');
     check(
       kartaItog.includes(`Освоено 0 из ${KARTA_OBLASTEY}`) &&
@@ -1674,7 +1695,9 @@ async function runEnabled() {
     );
     check((await page.locator('.karta-gost').count()) === 0, 'ученик: плашки «Войдите…» нет');
     check(
-      (await page.locator('[data-section="karta"] .karta-ostrov').count()) === KARTA_OBLASTEY,
+      /* На телефоне карта — список (KartaSpisok), на компьютере — острова. */
+      (await page.locator('[data-section="karta"] :is(.karta-ostrov, .karta-ps__uzel)').count()) ===
+        KARTA_OBLASTEY,
       `ученик: на карте ${KARTA_OBLASTEY} областей`,
     );
     await page.waitForFunction(() => document.querySelector('.karta-dz') === null, null, {
@@ -1702,7 +1725,9 @@ async function runEnabled() {
 
     /* «Нет» запомнено: при следующем заходе вопроса нет. */
     await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
-    await page.waitForSelector('[data-section="karta"] .karta-holst[data-gotov]');
+    await page.waitForSelector(
+      '[data-section="karta"] .karta-holst[data-gotov], [data-section="karta"] .karta-ps',
+    );
     check(
       (await page.locator('[role="dialog"]').count()) === 0,
       '«Нет» запомнено: вопрос не повторяется',
@@ -1719,8 +1744,8 @@ async function runEnabled() {
     await page.waitForSelector('.klass-list');
     const klass = await page.locator('[data-section="classes"]').innerText();
     check(
-      klass.includes('Тестовый класс') && klass.includes('Репетитор: Наталия В.'),
-      'ученик в классе: название класса и имя репетитора (в профиле)',
+      klass.includes('Тестовый класс') && klass.includes('Учитель: Наталия В.'),
+      'ученик в классе: название класса и имя учителя (в профиле)',
     );
     check(await noHorizontalScroll(page), 'профиль 390: горизонтальной прокрутки нет');
     await shot(page, 'kabinet-profil-390');
@@ -1819,7 +1844,7 @@ async function runEnabled() {
       .waitForFunction(
         () =>
           document.querySelector(
-            '.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]',
+            '.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"], .karta-ps__uzel--v-processe[data-no="8"]',
           ) !== null,
         null,
         { timeout: 10000 },
@@ -1827,7 +1852,9 @@ async function runEnabled() {
       .catch(() => {});
     check(
       (await phone.page
-        .locator('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]')
+        .locator(
+          '.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"], .karta-ps__uzel--v-processe[data-no="8"]',
+        )
         .count()) === 1,
       'телефон: на карте №8 «в процессе» — решённое на компьютере приехало',
     );
@@ -1957,8 +1984,8 @@ async function runEnabled() {
 
     /* Ученику конструктор недоступен. */
     await st2.page.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
-    await st2.page.waitForSelector('text=Эта страница — для репетитора.');
-    check(true, 'ДЗ: ученику конструктор — «Эта страница — для репетитора»');
+    await st2.page.waitForSelector('text=Эта страница — для учителя.');
+    check(true, 'ДЗ: ученику конструктор — «Эта страница — для учителя»');
 
     /* Телефон: экраны репетитора без горизонтальной прокрутки. */
     await tutor.page.setViewportSize({ width: 390, height: 844 });
@@ -2180,7 +2207,7 @@ async function runNoHeader() {
     await shot(page, 'bez-knopki-vhod-390');
     await login(page, 'svoy@yandex.ru', 'moy-dlinnyy-parol');
     check(
-      (await page.locator('.kabinet__role').innerText()) === 'Кабинет репетитора',
+      (await page.locator('.kabinet__role').innerText()) === 'Кабинет учителя',
       'вход по прямой ссылке ведёт в кабинет',
     );
     await page.click('.burger');
@@ -2768,7 +2795,12 @@ try {
   else if (GALLERY_DZ !== null) await runGalleryDz(GALLERY_DZ);
   else if (process.argv.includes('--tolko-dz')) await runTolkoDz();
   else if (NO_HEADER) await runNoHeader();
-  else await runEnabled();
+  else if (SHOTS_KARTA !== null || KARTA_NAZAD) {
+    const K = await import('./lib/karta-nazad.mjs');
+    const deps = { browser, SITE, mock: makeMock(), installMock, registerInMock, login, check };
+    if (SHOTS_KARTA !== null) await K.snimkiKarty(deps, SHOTS_KARTA.dir, SHOTS_KARTA.pristavka);
+    else await K.proverkiKartaNazad(deps, SHOTS);
+  } else await runEnabled();
 } finally {
   await browser.close();
   server.close();
