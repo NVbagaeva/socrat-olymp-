@@ -49,6 +49,18 @@ import {
   sootvetstvennyySmezhnyy,
   sosedniyUgolParallelogramma,
 } from './scenarii';
+import {
+  scenariyBissektrisaPryamogo,
+  scenariyGipotenuza30,
+  scenariyGipotenuzaPoMediane,
+  scenariyKatet30,
+  scenariyMedianaKatet,
+  scenariyMedianaPoGipotenuze,
+  scenariyOstryyUgol,
+  scenariyUgolAMC,
+  scenariyVysotaKatetCA,
+  scenariyVysotaKatetCB,
+} from './scenarii-p1-3';
 import type { Mikro } from './types';
 
 /* ── Помощники ───────────────────────────────────────────────────── */
@@ -618,11 +630,15 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           shtrih('A', 'M', 1),
           shtrih('M', 'B', 1),
           zn('A', 'B', t(c).replace('{,}', ',')),
+          /* Подсказка, шаг «Что мы знаем про медиану к гипотенузе?»: CM = AM = MB. */
+          shtrih('C', 'M', 1, { sloy: 2 }),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'M'],
       },
       otvet: c / 2,
       razbor: ['Медиана к гипотенузе равна её половине.', `$${t(c)} : 2 = ${t(c / 2)}$.`],
+      scenariy: scenariyMedianaPoGipotenuze(c),
     };
   }),
   mikro('P1-3-02', 'Гипотенуза по медиане', 'AB = 2\\cdot CM', (r) => {
@@ -639,11 +655,17 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           shtrih('A', 'M', 1),
           shtrih('M', 'B', 1),
           otr('A', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка: CM = AM = MB (слой 2), затем длины половин (слой 3). */
+          shtrih('C', 'M', 1, { sloy: 2 }),
+          { tip: 'otrezok', a: 'A', b: 'M', tolkoShtrihi: true, znachenie: chislo(m), sloy: 3 },
+          { tip: 'otrezok', a: 'M', b: 'B', tolkoShtrihi: true, znachenie: chislo(m), sloy: 3 },
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'M'],
       },
       otvet: 2 * m,
       razbor: ['Медиана к гипотенузе — половина гипотенузы.', `$2\\cdot ${t(m)} = ${t(2 * m)}$.`],
+      scenariy: scenariyGipotenuzaPoMediane(m),
     };
   }),
   mikro('P1-3-03', 'Катет против 30°', 'a = \\dfrac{c}{2}', (r) => {
@@ -665,6 +687,7 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
         'Катет против угла $30^\\circ$ равен половине гипотенузы.',
         `$AC = ${t(c)} : 2 = ${t(c / 2)}$.`,
       ],
+      scenariy: scenariyKatet30(c),
     };
   }),
   mikro('P1-3-04', 'Гипотенуза по катету против 30°', 'c = 2a', (r) => {
@@ -686,6 +709,7 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
         '$AC$ лежит против угла $30^\\circ$ — это половина гипотенузы.',
         `$AB = 2\\cdot ${t(a)} = ${t(2 * a)}$.`,
       ],
+      scenariy: scenariyGipotenuza30(a),
     };
   }),
   mikro('P1-3-05', 'Угол между медианой и катетом', '\\angle MCB = \\angle B', (r) => {
@@ -703,6 +727,10 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           shtrih('M', 'B', 1),
           ug('A', 'B', 'C', { vydelit: 'dano', znachenie: gr(b) }),
           ug('M', 'C', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка: CM = MB (слой 1), равные углы при основании CB (слой 2). */
+          shtrih('C', 'M', 1, { sloy: 1 }),
+          ug('M', 'C', 'B', { sloy: 2, cvet: 1, radiusPx: 30 }),
+          ug('A', 'B', 'C', { sloy: 2, cvet: 1, radiusPx: 30 }),
         ],
       },
       otvet: b,
@@ -710,6 +738,7 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
         '$CM = MB$ — медиана к гипотенузе равна её половине, треугольник $CMB$ равнобедренный.',
         `$\\angle MCB = \\angle B = ${g(b)}$.`,
       ],
+      scenariy: scenariyMedianaKatet(),
     };
   }),
   mikro('P1-3-06', 'Угол между высотой и катетом', '\\angle HCB = \\angle A', (r) => {
@@ -725,6 +754,10 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           pryam('C', 'H', 'B'),
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
           ug('H', 'C', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка: угол B (слой 1), равные углы HCB и A (слой 2). */
+          ug('A', 'B', 'C', { sloy: 1, cvet: 3 }),
+          ug('H', 'C', 'B', { sloy: 2, cvet: 1, radiusPx: 30 }),
+          ug('C', 'A', 'B', { sloy: 2, cvet: 1, radiusPx: 30 }),
         ],
       },
       otvet: a,
@@ -732,6 +765,7 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
         `$\\angle B = 90^\\circ - ${g(a)}$; в треугольнике $CHB$ $\\angle HCB = 90^\\circ - \\angle B$.`,
         `$\\angle HCB = \\angle A = ${g(a)}$.`,
       ],
+      scenariy: scenariyVysotaKatetCB(),
     };
   }),
   mikro('P1-3-07', 'Угол между высотой и катетом $CA$', '\\angle ACH = \\angle B', (r) => {
@@ -747,6 +781,8 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           pryam('C', 'H', 'B'),
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
           ug('A', 'C', 'H', { vydelit: 'iskomoe' }),
+          /* Подсказка, шаг «Какой треугольник ACH?»: угол AHC прямой. */
+          pryam('A', 'H', 'C', { sloy: 1 }),
         ],
       },
       otvet: 90 - a,
@@ -754,6 +790,7 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
         'В треугольнике $ACH$ острые углы дают $90^\\circ$.',
         `$\\angle ACH = 90^\\circ - ${g(a)} = ${g(90 - a)}$.`,
       ],
+      scenariy: scenariyVysotaKatetCA(a),
     };
   }),
   mikro('P1-3-08', 'Биссектриса прямого угла', '\\angle ACL = 45^\\circ', (r) => {
@@ -769,6 +806,9 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           otr('C', 'L'),
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
           ug('A', 'L', 'C', { vydelit: 'iskomoe' }),
+          /* Подсказка, шаг «Как использовать биссектрису?»: по 45° у C. */
+          ug('A', 'C', 'L', { sloy: 1, cvet: 1, znachenie: '45°' }),
+          ug('L', 'C', 'B', { sloy: 1, cvet: 1, znachenie: '45°' }),
         ],
         proverki: [ist('A', 'L', 'C', ans)],
       })),
@@ -777,6 +817,7 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
         'Биссектриса делит прямой угол: $\\angle ACL = 45^\\circ$.',
         `В треугольнике $ACL$: $180^\\circ - 45^\\circ - ${g(a)} = ${g(ans)}$.`,
       ],
+      scenariy: scenariyBissektrisaPryamogo(a),
     };
   }),
   mikro('P1-3-09', 'Угол $AMC$ при медиане', '\\angle AMC = 180^\\circ - 2\\angle A', (r) => {
@@ -796,6 +837,9 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           shtrih('M', 'B', 1),
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
           ug('A', 'M', 'C', { vydelit: 'iskomoe' }),
+          /* Подсказка: AM = CM (слой 1), угол ACM равен углу A (слой 2). */
+          shtrih('C', 'M', 1, { sloy: 1 }),
+          ug('A', 'C', 'M', { sloy: 2, cvet: 1, znachenie: gr(a) }),
         ],
       },
       otvet: ans,
@@ -803,6 +847,7 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
         '$AM = CM$ — треугольник $AMC$ равнобедренный, $\\angle ACM = \\angle A$.',
         `$\\angle AMC = 180^\\circ - 2\\cdot ${g(a)} = ${g(ans)}$.`,
       ],
+      scenariy: scenariyUgolAMC(a),
     };
   }),
   mikro('P1-3-10', 'Острый угол по другому', '\\angle A + \\angle B = 90^\\circ', (r) => {
@@ -818,10 +863,13 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
         ],
         podpisi: false,
+        /* Подсказка называет вершины: буквы — только на её чертежах. */
+        podpisiPodskazki: ['A', 'B', 'C'],
         ...(a < POROG + 2 || a > 90 - POROG - 2 ? { skhematichno: true } : {}),
       },
       otvet: 90 - a,
       razbor: ['Сумма острых углов — $90^\\circ$.', `$90^\\circ - ${g(a)} = ${g(90 - a)}$.`],
+      scenariy: scenariyOstryyUgol(a),
     };
   }),
 ];
