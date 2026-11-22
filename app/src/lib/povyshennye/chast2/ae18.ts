@@ -9,6 +9,7 @@
 
 import { renderPlan } from '@/lib/planimetriya/render';
 import type { Element } from '@/lib/planimetriya/types';
+import { POROGI_CHERTEZHA } from '@/lib/skhemy/vidimye';
 import type { Chast2Zadacha, Shablon2 } from './types';
 
 export interface PAE18 {
@@ -26,9 +27,49 @@ export function chislaAE18(p: PAE18) {
   return { pp, BK: pp - b, BL: pp - c, KL: Math.abs(b - c) };
 }
 
+/** Тип углов треугольника a, b, c (против сторон): «о» — острый, «п», «т». */
+function tipUglov(a: number, b: number, c: number): string {
+  const t = (x: number, y: number, z: number) =>
+    Math.abs(y * y + z * z - x * x) < 1e-9 ? 'п' : y * y + z * z > x * x ? 'о' : 'т';
+  return t(a, b, c) + t(b, a, c) + t(c, a, b);
+}
+
+/**
+ * Видимые стороны (lib/skhemy/vidimye.ts): вневписанная окружность не
+ * больше вписанной в 2,5 раза, а точки касания K, L не жмутся к
+ * вершинам B, C и друг к другу (BK, CL, KL — не меньше 0,18·BC). Стороны
+ * берутся в степени (равные остаются равными, неравенство треугольника
+ * при сжатии — в силе), тип углов — тот же: у тупоугольного треугольника
+ * вневписанная окружность против тупого угла в разы больше вписанной —
+ * тип треугольника важнее пропорции.
+ */
+function vidimyeStorony(p: PAE18): { a: number; b: number; c: number } {
+  const ploho = (x: { a: number; b: number; c: number }) => {
+    const pp = (x.a + x.b + x.c) / 2;
+    const tesno = Math.min(pp - x.b, pp - x.c, Math.abs(x.b - x.c)) < 0.18 * x.a;
+    return pp / (pp - x.a) > POROGI_CHERTEZHA.otnoshenieRadiusov || tesno;
+  };
+  const tip = tipUglov(p.a, p.b, p.c);
+  const x0 = { a: p.a, b: p.b, c: p.c };
+  if (!ploho(x0)) return x0;
+  /* Сжатие (α < 1) сближает окружности, растяжение (α > 1) раздвигает
+     точки касания K и L, когда b и c почти равны. Первая степень, при
+     которой всё в порядке и тип углов тот же; нет такой — ближайшая
+     сжимающая того же типа. */
+  let zapas = x0;
+  for (const al of [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 1.2, 1.4, 1.6]) {
+    const x = { a: p.a ** al, b: p.b ** al, c: p.c ** al };
+    const treug = x.a < x.b + x.c && x.b < x.a + x.c && x.c < x.a + x.b;
+    if (!treug || tipUglov(x.a, x.b, x.c) !== tip) continue;
+    if (!ploho(x)) return x;
+    if (al < 1 && zapas === x0) zapas = x;
+  }
+  return zapas;
+}
+
 function chertezh(p: PAE18): string {
-  const ch = chislaAE18(p);
-  const { a, b, c } = p;
+  const { a, b, c } = vidimyeStorony(p);
+  const ch = chislaAE18({ ...p, a, b, c });
   const xA = (c * c - b * b + a * a) / (2 * a);
   const yA = Math.sqrt(c * c - xA * xA);
   const S = (yA * a) / 2;

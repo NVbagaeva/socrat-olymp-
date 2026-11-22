@@ -31,23 +31,99 @@ export interface Prepyatstviya {
 
 /** Зазор подписи до препятствий, px. */
 export const ZAZOR = 2;
-const OTSTUPY = [3, 6, 10, 15, 21] as const;
+/**
+ * Раскладка держит чуть больший зазор: координаты на экране округляются
+ * до сотых, и буква, поставленная ровно на зазор, после округления
+ * касалась бы линии.
+ */
+const ZAZOR_RASKLADKI = ZAZOR + 0.05;
+const OTSTUPY = [5, 8, 12, 17, 23] as const;
 const NAPRAVLENIY = 24;
+/** Для выноски направлений больше: в тесноте чистое место бывает узким. */
+const NAPRAVLENIY_VYNOSKI = 48;
 /** Отступы подписи с выноской, px. */
-const OTSTUPY_VYNOSKI = [28, 36, 48] as const;
+const OTSTUPY_VYNOSKI = [28, 36, 48, 64, 80] as const;
 /** Выноска начинается на таком расстоянии от точки, px. */
 const OT_TOCHKI = 4;
+
+/**
+ * Буквы вершин — KaTeX_Math полужирным курсивом (тема чертежа). Доли
+ * кегля по замеру рамки текста в Chromium: ширина знака (совпадает с
+ * метриками KaTeX) и свес курсива вправо за неё. Сверка с браузером —
+ * scripts/check-chertezhi-18.mjs --brauzer.
+ */
+const SHIRINA_BUKVY: Readonly<Record<string, number>> = {
+  A: 0.86,
+  B: 0.86,
+  C: 0.82,
+  D: 0.94,
+  E: 0.82,
+  F: 0.68,
+  G: 0.88,
+  H: 0.98,
+  I: 0.52,
+  J: 0.64,
+  K: 0.98,
+  L: 0.76,
+  M: 1.14,
+  N: 0.96,
+  O: 0.84,
+  P: 0.72,
+  Q: 0.86,
+  R: 0.88,
+  S: 0.7,
+  T: 0.64,
+  U: 0.8,
+  V: 0.68,
+  W: 1.1,
+  X: 0.94,
+  Y: 0.68,
+  Z: 0.78,
+};
+const SVES_BUKVY: Readonly<Record<string, number>> = {
+  B: 0.03,
+  C: 0.08,
+  D: 0.01,
+  E: 0.03,
+  F: 0.16,
+  G: 0.01,
+  H: 0.07,
+  I: 0.06,
+  J: 0.1,
+  K: 0.08,
+  M: 0.12,
+  N: 0.1,
+  P: 0.17,
+  R: 0.02,
+  S: 0.04,
+  T: 0.15,
+  U: 0.09,
+  V: 0.22,
+  W: 0.11,
+  X: 0.06,
+  Y: 0.22,
+  Z: 0.07,
+};
 
 export interface Gabarit {
   /** Полуширина и полувысота прямоугольника буквы. */
   hw: number;
   hh: number;
+  /**
+   * На сколько px центр прямоугольника правее точки привязки текста
+   * (text-anchor: middle): свес курсива. Текст рисуется в x − sdvig.
+   */
+  sdvig: number;
 }
 
 export function gabaritBukvy(imya: string, kegl: number): Gabarit {
-  const [, indeks] = imya.split('_');
-  const shirina = kegl * 0.72 + (indeks === undefined ? 0 : indeks.length * kegl * 0.42);
-  return { hw: shirina / 2, hh: kegl * 0.42 };
+  const [bukva = '', indeks] = imya.split('_');
+  const shirina = SHIRINA_BUKVY[bukva] ?? 0.86;
+  /* С индексом свес уходит под индекс — рамка симметрична. */
+  if (indeks !== undefined)
+    return { hw: (kegl * (shirina + indeks.length * 0.42)) / 2, hh: kegl * 0.42, sdvig: 0 };
+  const sves = SVES_BUKVY[bukva] ?? 0.1;
+  return { hw: (kegl * (shirina + sves)) / 2, hh: kegl * 0.42, sdvig: (kegl * sves) / 2 };
 }
 
 type Pryamougolnik = readonly [number, number, number, number];
@@ -102,8 +178,9 @@ export function kasaniya(
   prep: Prepyatstviya,
   zanyato: readonly Pryamougolnik[],
   svoya: T2 | null,
+  zazor: number = ZAZOR,
 ): number {
-  const z: Pryamougolnik = [r[0] - ZAZOR, r[1] - ZAZOR, r[2] + ZAZOR, r[3] + ZAZOR];
+  const z: Pryamougolnik = [r[0] - zazor, r[1] - zazor, r[2] + zazor, r[3] + zazor];
   let n = 0;
   for (const [a, b] of prep.otrezki) if (otrezokVPryamougolnike(a, b, z)) n += 1;
   for (const [c, rad] of prep.okruzhnosti) if (okruzhnostVPryamougolnike(c, rad, z)) n += 1;
@@ -189,6 +266,8 @@ function konecVynoski(p: T2, pr: Pryamougolnik): T2 {
 export interface MestoPodpisi {
   c: T2;
   vynoska: readonly [T2, T2] | null;
+  /** Чистого места не нашлось ни рядом, ни с выноской: буква касается чего-то. */
+  tesno?: boolean;
 }
 
 /**
@@ -245,7 +324,7 @@ export function razmestitSVynoskami(
         const ug = zhel + (k * 2 * Math.PI) / NAPRAVLENIY;
         const { c, pr, vne } = kandidat(ug, ots);
         const shtraf =
-          1e4 * kasaniya(pr, prepI, zanyato, p) +
+          1e4 * kasaniya(pr, prepI, zanyato, p, ZAZOR_RASKLADKI) +
           3e3 * vne +
           ots * 1.6 +
           raznostUglov(ug, zhel) * 9;
@@ -262,10 +341,10 @@ export function razmestitSVynoskami(
     if (luchshiyShtraf >= 1e3) {
       let shtrafV = Infinity;
       for (const ots of OTSTUPY_VYNOSKI) {
-        for (let k = 0; k < NAPRAVLENIY; k += 1) {
-          const ug = zhel + (k * 2 * Math.PI) / NAPRAVLENIY;
+        for (let k = 0; k < NAPRAVLENIY_VYNOSKI; k += 1) {
+          const ug = zhel + (k * 2 * Math.PI) / NAPRAVLENIY_VYNOSKI;
           const { c, pr, vne } = kandidat(ug, ots);
-          if (vne === 1 || kasaniya(pr, prepI, zanyato, p) > 0) continue;
+          if (vne === 1 || kasaniya(pr, prepI, zanyato, p, ZAZOR_RASKLADKI) > 0) continue;
           const nachalo: T2 = [p[0] + Math.cos(ug) * OT_TOCHKI, p[1] + Math.sin(ug) * OT_TOCHKI];
           const konec = konecVynoski(p, pr);
           /* Выноска не задевает чужие подписи и точки. */
@@ -275,7 +354,12 @@ export function razmestitSVynoskami(
             Math.max(nachalo[0], konec[0]),
             Math.max(nachalo[1], konec[1]),
           ];
-          if (zanyato.some((q) => otrezokVPryamougolnike(nachalo, konec, q))) continue;
+          if (
+            zanyato.some((q) =>
+              otrezokVPryamougolnike(nachalo, konec, [q[0] - 2, q[1] - 2, q[2] + 2, q[3] + 2]),
+            )
+          )
+            continue;
           const chuzhie = prep.tochki.some(
             (q) =>
               (q[0] !== p[0] || q[1] !== p[1]) &&
@@ -300,7 +384,11 @@ export function razmestitSVynoskami(
         if (luchshayaVynoska !== null) break;
       }
     }
-    mesta[i] = { c: luchshee, vynoska: luchshayaVynoska };
+    mesta[i] = {
+      c: luchshee,
+      vynoska: luchshayaVynoska,
+      tesno: luchshiyShtraf >= 1e3 && luchshayaVynoska === null,
+    };
     if (luchshiyPr !== null) zanyato.push(luchshiyPr);
     if (luchshayaVynoska !== null) vynoski.push(luchshayaVynoska);
   }

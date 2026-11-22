@@ -8,8 +8,13 @@
  * код читают с бумаги. Вставили код — получили ту же партию. Шапка
  * работы (тип, дата, учитель) в код не входит: на задачи она не влияет.
  *
- * Состав (25 бит, 5 знаков): задания 1–13 маской, источник, звёзды
- * маской, число вариантов − 1, параллельность.
+ * Состав (25 бит, 5 знаков), от младших битов: разделы 1–13 маской
+ * (биты 0–12), источник (13–14), звёзды маской (15–17), число
+ * вариантов − 1 (18–21), параллельность (22), раздел 21 «Наибольшее и
+ * наименьшее» (23). Бит 23 добавлен в ноябре 2026: в кодах, выданных
+ * раньше, он всегда 0, поэтому они читаются как прежде и собирают те
+ * же задачи (pnpm test:variant-kody). Бит 24 свободен.
+ * Номера разделов в коде — номера хранения (content/struktura.js).
  * Подтипы: для каждого задания с выбранными подтипами — знак номера
  * задания и маска подтипов фиксированной длины (по числу подтипов
  * раздела в lib/variant/sections.ts).
@@ -22,6 +27,27 @@
 import { EGE_NUMBERS, MAX_VARIANTS, type EgeNo, type Stars, type VariantConfig } from './types';
 
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+
+/** Бит раздела в маске состава: 1–13 — биты 0–12, 21 — бит 23. */
+const BIT: Readonly<Record<EgeNo, number>> = {
+  1: 0,
+  2: 1,
+  3: 2,
+  4: 3,
+  5: 4,
+  6: 5,
+  7: 6,
+  8: 7,
+  9: 8,
+  10: 9,
+  11: 10,
+  12: 11,
+  13: 12,
+  21: 23,
+};
+
+const isEgeNo = (n: number): n is EgeNo => (EGE_NUMBERS as readonly number[]).includes(n);
+
 const SOURCES = ['mix', 'fipi', 'own'] as const;
 
 function enc(value: number, len: number): string {
@@ -85,7 +111,7 @@ export function encodeCode(
 ): string {
   const c = d.config;
   let mask = 0;
-  for (const n of c.tasks) mask |= 1 << (n - 1);
+  for (const n of new Set(c.tasks)) mask += 2 ** BIT[n];
   const stars = c.stars.reduce((m, s) => m | (1 << (s - 1)), 0);
   const src = Math.max(0, SOURCES.indexOf(c.source));
   /* Порядок полей — от младших битов. */
@@ -110,7 +136,7 @@ export function encodeCode(
       const [v = 0, n = 0] = key.split('.').map(Number);
       return { v, n, k };
     })
-    .filter((z) => z.v >= 1 && z.v <= MAX_VARIANTS && z.n >= 1 && z.n <= 13 && z.k > 0)
+    .filter((z) => z.v >= 1 && z.v <= MAX_VARIANTS && isEgeNo(z.n) && z.k > 0)
     .sort((a, b) => a.v - b.v || a.n - b.n)
     .map((z) => enc(z.v - 1, 1) + enc(z.n, 1) + enc(Math.min(31, z.k), 1))
     .join('');
@@ -140,12 +166,11 @@ export function decodeCode(
   const [, seed = '', cfg = '', version = ''] = m;
   const packed = dec(cfg);
   if (packed === null) return null;
-  const mask = packed % 2 ** 13;
   const src = Math.floor(packed / 2 ** 13) % 4;
   const starsMask = Math.floor(packed / 2 ** 15) % 8;
   const count = (Math.floor(packed / 2 ** 18) % 16) + 1;
   const parallel = Math.floor(packed / 2 ** 22) % 2 === 1;
-  const tasks = EGE_NUMBERS.filter((n) => (mask & (1 << (n - 1))) !== 0);
+  const tasks = EGE_NUMBERS.filter((n) => Math.floor(packed / 2 ** BIT[n]) % 2 === 1);
   if (tasks.length === 0 || count > MAX_VARIANTS || src > 2) return null;
   const stars = ([1, 2, 3] as Stars[]).filter((s) => (starsMask & (1 << (s - 1))) !== 0);
   const subtypes: VariantConfig['subtypes'] = {};
@@ -158,12 +183,12 @@ export function decodeCode(
       let rest = tail.slice(1);
       while (rest.length > 0) {
         const n = dec(rest.slice(0, 1));
-        if (n === null || n < 1 || n > 13) return null;
-        const ids = subtypeIds[n as EgeNo];
+        if (n === null || !isEgeNo(n)) return null;
+        const ids = subtypeIds[n];
         const len = Math.ceil(ids.length / 5);
         const bits = dec(rest.slice(1, 1 + len));
         if (bits === null || len === 0) return null;
-        subtypes[n as EgeNo] = ids.filter((_, i) => Math.floor(bits / 2 ** i) % 2 === 1);
+        subtypes[n] = ids.filter((_, i) => Math.floor(bits / 2 ** i) % 2 === 1);
         rest = rest.slice(1 + len);
       }
     } else if (tail.startsWith('Z')) {

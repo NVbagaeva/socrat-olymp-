@@ -2,14 +2,14 @@ import type { Metadata } from 'next';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { Opornye9Spisok } from '@/components/tasks/proizvodnaya/Opornye9';
 import { OPORNYE } from '@/content/opornye';
-import { proizvodnayaTitle } from '@/content/proizvodnaya';
 import { NAVYKI9, OPORNYE9 } from '@/content/proizvodnaya9';
 import { blokHref9 } from '@/lib/proizvodnaya/links';
 import { PREP_BLOCKS } from '@/lib/proizvodnaya/prep/blocks';
 import { typeset } from '@/lib/tex';
+import { proizvodnayaZagolovok } from '@/lib/seo-razdely';
 
 export const metadata: Metadata = {
-  title: proizvodnayaTitle(OPORNYE.title),
+  title: proizvodnayaZagolovok(OPORNYE.title),
 };
 
 /**

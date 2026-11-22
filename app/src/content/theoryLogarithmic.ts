@@ -16,6 +16,7 @@
 
 import type { TheoryBlock } from '@/data/functionTypes';
 import { richTheoryBlocks, type RichSection } from './theoryRich';
+import { nomerRazdela } from '@/content/struktura';
 
 const CHECK = 'Проверка по графику';
 
@@ -381,7 +382,7 @@ const TITLES: Record<string, string> = {
   'log-graphs': 'Графики: $a > 1$ и $0 < a < 1$',
   'log-shifts': 'Сдвиги графика',
   'log-params': 'Как найти параметры по двум точкам',
-  'log-props': 'Свойства логарифма для задания №12',
+  'log-props': `Свойства логарифма для задания №${nomerRazdela('grafiki-funkciy')}`,
   'log-traps': 'Ловушки',
 };
 

@@ -36,6 +36,7 @@ import { solutionLength, spaceFor, type SheetSpace } from '@/lib/sheet/space.js'
 import typo from '@/lib/sheet/typography.js';
 import { codeWithSpace } from './code';
 import type { Figure, FigureSize, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
+import { BEZ_NOMERA, metkaVida, nomerChasti1, podpis2 } from './struktura';
 
 export type SheetKind = 'uchenik' | 'uchitel' | 'razbor';
 export type SheetChoice = SheetKind | 'vse';
@@ -72,9 +73,13 @@ export function sheetFigure(
 
 /* ── Номера и подписи ───────────────────────────────────────────── */
 
-/** Номер задачи на листе: как в ЕГЭ или сквозной. */
-export function sheetNo(task: VariantTask, index: number, numbering: Numbering): number {
-  return numbering === 'ege' ? task.egeNumber : index + 1;
+/**
+ * Номер задачи на листе: как в ЕГЭ или сквозной. Номер ЕГЭ — по
+ * действующей структуре экзамена (struktura.ts); у задачи, раздела
+ * которой в первой части больше нет, вместо номера — «—».
+ */
+export function sheetNo(task: VariantTask, index: number, numbering: Numbering): number | string {
+  return numbering === 'ege' ? (nomerChasti1(task.egeNumber) ?? BEZ_NOMERA) : index + 1;
 }
 
 /**
@@ -230,7 +235,7 @@ function figureItem(f: Figure | null, cls: string, figures: FigureSize): string 
  */
 function card(
   task: VariantTask,
-  no: number,
+  no: number | string,
   figures: FigureSize,
   answerLine = false,
   plashka = false,
@@ -289,7 +294,7 @@ function keyItem(
   );
 }
 
-function solutionHead(task: VariantTask, no: number, withMeta: boolean): string {
+function solutionHead(task: VariantTask, no: number | string, withMeta: boolean): string {
   const meta = withMeta
     ? `<span class="var-sol__meta">${typo.escape(task.source.label)}</span>`
     : '';
@@ -435,15 +440,20 @@ function blocksRazbor(
 /** Часть 2 на листе ученика: по странице на задание или без места для решения. */
 export type Mesto2 = 'stranica' | 'net';
 
-function card2(z: Chast2Zadacha) {
+/** Карточка задания части 2; sRisunkom: false — условие без чертежа (лист ученика). */
+function card2(z: Chast2Zadacha, sRisunkom = true) {
+  const risunok = sRisunkom ? z.risunok : null;
   return {
-    no: z.no,
+    no: podpis2(z.no),
     id: `c2-${z.no}`,
     badge: ballText(MAX_BALL[z.no]),
-    questionHtml: uslovieHtml(z.uslovie),
+    /* Пометка вида у задачи прежнего №17 в ЕГЭ-2027 (№16: экономическая или на оптимизацию). */
+    questionHtml:
+      (metkaVida(z) === null ? '' : `<p class="sheet-vid"><i>${metkaVida(z)}</i></p>`) +
+      uslovieHtml(z.uslovie),
     options: null,
-    figureSvg: z.risunok,
-    figureWidth: z.risunok === null ? undefined : 60,
+    figureSvg: risunok,
+    figureWidth: risunok === null ? undefined : 60,
     figureBelow: false,
     solutionHtml: null,
     answerLine: false,
@@ -469,7 +479,11 @@ function part2Head(): string {
  * стоит на одной странице с заголовком части. «Без места» — задания
  * подряд.
  */
-function blocksUchenik2(zadachi: readonly Chast2Zadacha[], mesto: Mesto2): unknown[] {
+function blocksUchenik2(
+  zadachi: readonly Chast2Zadacha[],
+  mesto: Mesto2,
+  risunki: boolean,
+): unknown[] {
   return [
     {
       head: false,
@@ -477,7 +491,9 @@ function blocksUchenik2(zadachi: readonly Chast2Zadacha[], mesto: Mesto2): unkno
       note: '',
       leadItems: [part2Head()],
       tasks: zadachi.map((z, i) =>
-        mesto === 'stranica' ? { ...card2(z), page: true, pageBreak: i > 0 } : card2(z),
+        mesto === 'stranica'
+          ? { ...card2(z, risunki), page: true, pageBreak: i > 0 }
+          : card2(z, risunki),
       ),
     },
   ];
@@ -487,7 +503,7 @@ function key2Item(zadachi: readonly Chast2Zadacha[]): string {
   const rows = zadachi
     .map(
       (z) =>
-        `<tr><th scope="row">${z.no}</th><td class="var-key__answer">${strokaHtml(z.otvet, 'list')}</td>` +
+        `<tr><th scope="row">${podpis2(z.no)}</th><td class="var-key__answer">${strokaHtml(z.otvet, 'list')}</td>` +
         `<td>${MAX_BALL[z.no]}</td></tr>`,
     )
     .join('');
@@ -509,7 +525,7 @@ function blocksUchitel2(zadachi: readonly Chast2Zadacha[]): unknown[] {
         ...(i === 0 ? [part2Head()] : []),
         item(
           'var-sol var-sol--first',
-          `<p class="var-sol__head"><b>${typo.escape(T.task(z.no))}</b></p>`,
+          `<p class="var-sol__head"><b>${typo.escape(T.task(podpis2(z.no)))}</b></p>`,
           ' data-keep-with-next="1"',
         ),
       ],
@@ -565,7 +581,7 @@ function blocksRazbor2(zadachi: readonly Chast2Zadacha[]): unknown[] {
         ...(i === 0 ? [part2Head()] : []),
         item(
           'var-sol var-sol--first',
-          `<p class="var-sol__head"><b>${typo.escape(T.task(z.no))}</b></p>`,
+          `<p class="var-sol__head"><b>${typo.escape(T.task(podpis2(z.no)))}</b></p>`,
           ' data-keep-with-next="1"',
         ),
       ],
@@ -613,6 +629,12 @@ export interface VariantSheetOptions {
   chast2?: (index: number) => readonly Chast2Zadacha[] | null;
   /** Часть 2 на листе ученика: по странице на задание (по умолчанию) или без места. */
   mesto2?: Mesto2;
+  /**
+   * «Чертёж к условию» части 2 (задания 15 и 18) на листе ученика. Нет —
+   * условия без чертежа: чертёж ученик делает сам, это часть решения.
+   * У учителя и в разборе чертёж есть всегда.
+   */
+  risunki2?: boolean;
 }
 
 /** Описание документа для `buildDocument` (lib/sheet/sheet.js). */
@@ -643,7 +665,9 @@ export function variantSheetSpec(
         kind === 'uchenik'
           ? [
               ...blocksUchenik(v.tasks, meta, opts.space, pl),
-              ...(c2 === null ? [] : blocksUchenik2(c2, opts.mesto2 ?? 'stranica')),
+              ...(c2 === null
+                ? []
+                : blocksUchenik2(c2, opts.mesto2 ?? 'stranica', opts.risunki2 === true)),
             ]
           : kind === 'uchitel'
             ? [

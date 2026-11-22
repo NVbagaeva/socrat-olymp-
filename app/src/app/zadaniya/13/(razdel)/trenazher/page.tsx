@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { Trenazher13Tab } from '@/components/tasks/zadanie13/Trenazher13Tab';
 import { TRENAZHER13 } from '@/content/ekonomicheskie13';
-import { zadanie13Title } from '@/content/zadanie13';
 import { TRENAZHER13_HREF } from '@/lib/zadanie13/links';
+import { zadanie13Zagolovok } from '@/lib/seo-razdely';
 
 export const metadata: Metadata = {
-  title: zadanie13Title(TRENAZHER13.title),
+  title: zadanie13Zagolovok(TRENAZHER13.title),
 };
 
 /**

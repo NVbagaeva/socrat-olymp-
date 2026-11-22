@@ -1,17 +1,18 @@
 import type { Metadata } from 'next';
 import { Generator1 } from '@/components/tasks/planimetriya/Generator1';
-import { ZADANIE1, zadanie1Title } from '@/content/zadanie1';
+import { ZADANIE1 } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
 import { dannyeTrenazhera1 } from '@/lib/planimetriya/trenazher/dannye';
 import '../../../11/zadanie11.css';
 import '../../../komplekt.css';
 import '../../trenazher1.css';
 import { VariantFromSection } from '@/components/variant/VariantEntry';
+import { zadanie1Zagolovok } from '@/lib/seo-razdely';
 
 const VKLADKA = ZADANIE1.tabs.find((tab) => tab.id === 'generator')?.label ?? 'Генератор';
 
 export const metadata: Metadata = {
-  title: zadanie1Title(VKLADKA),
+  title: zadanie1Zagolovok(VKLADKA),
 };
 
 /**

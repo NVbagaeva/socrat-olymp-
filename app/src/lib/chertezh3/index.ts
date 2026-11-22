@@ -21,7 +21,15 @@ export * from './scenariy';
 export { postroit, type Scena3 } from './postroit';
 export { kadr, ocenkaRazmera, type Kadr, type OpciiKadra, type PodpisKadra } from './kadr';
 export { ED_PT_EKRAN, OFORMLENIE, kadrSvg, stilLinii, texSvg } from './svg';
-export { KAMERY, PRAVILA, metrikiVida, sVidom, vybratVid, type Metriki } from './vid';
+export {
+  KAMERY,
+  PRAVILA,
+  metrikiVida,
+  sVidom,
+  vybratObshchiyVid,
+  vybratVid,
+  type Metriki,
+} from './vid';
 
 export type Rezhim = 'uchenik' | 'uchitel';
 

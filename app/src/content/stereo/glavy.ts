@@ -11,6 +11,8 @@
  * (каждый прототип — ровно в одной главе).
  */
 
+import { nomerRazdela } from '@/content/struktura';
+
 export interface GlavaStereo {
   id: string;
   /** Номер на экране и в содержании. */
@@ -30,7 +32,7 @@ export const GLAVY_3: readonly GlavaStereo[] = [
   {
     id: 'umet',
     nomer: 0,
-    title: 'Что такое №3 и что нужно уметь',
+    title: `Что такое №${nomerRazdela('stereometriya')} и что нужно уметь`,
     podglavy: [
       'Три умения: читать, рисовать, считать',
       'Типы задач — с разобранным примером к каждому',
@@ -130,7 +132,7 @@ export const GLAVY_3: readonly GlavaStereo[] = [
   {
     id: 'formuly',
     nomer: 10,
-    title: 'Шпаргалка №3',
+    title: `Шпаргалка №${nomerRazdela('stereometriya')}`,
     podglavy: ['Формулы, главные факты и тройки — одной страницей'],
   },
 ];

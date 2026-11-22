@@ -40,15 +40,15 @@ function proveritOtrezki(sch, { A, B, C, K }, imya) {
 }
 const OTREZKI = {
   id: 'ks-otrezki',
-  b() {
-    const { A, B, C } = poStoronam(8, 9, 7);
+  b(_sch, _rnd, d) {
+    const { A, B, C } = poStoronam(d.BC, d.CA, d.AB);
     return dist(A, osnovanie(incentr(A, B, C), A, B));
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiOtrezkov(t);
     sch.fakt(
-      'данные: AB = 7, BC = 8, CA = 9',
-      blizko(dist(p.A, p.B), 7) && blizko(dist(p.B, p.C), 8) && blizko(dist(p.C, p.A), 9),
+      `данные: AB = ${d.AB}, BC = ${d.BC}, CA = ${d.CA}`,
+      blizko(dist(p.A, p.B), d.AB) && blizko(dist(p.B, p.C), d.BC) && blizko(dist(p.C, p.A), d.CA),
     );
     return dist(p.A, p.K);
   },
@@ -74,14 +74,14 @@ function proveritKasatelnye(sch, { O, A, r, B, C }, imya) {
 }
 const DVE_KASATELNYE = {
   id: 'ks-dve-kasatelnye',
-  b() {
-    const okr = { c: [0, 0], r: 6 };
-    const [B, C] = kasaniya([10, 0], okr);
+  b(_sch, _rnd, d) {
+    const okr = { c: [0, 0], r: d.r };
+    const [B, C] = kasaniya([d.AO, 0], okr);
     return dist(B, C);
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiKasatelnyh(t);
-    sch.fakt('данные: r = 6, AO = 10', blizko(p.r, 6) && blizko(dist(p.A, p.O), 10));
+    sch.fakt(`данные: r = ${d.r}, AO = ${d.AO}`, blizko(p.r, d.r) && blizko(dist(p.A, p.O), d.AO));
     proveritKasatelnye(sch, p, 'чертёж (начало)');
     return dist(p.B, p.C);
   },
@@ -122,12 +122,12 @@ function malaya(K, A, B, C) {
 }
 const VNUTR = {
   id: 'ks-vnutr-kasanie',
-  b(sch) {
-    /* Подбираем AB = x: окружность через K, касающаяся AB в точке C (AC = 4),
+  b(sch, _rnd, d) {
+    /* Подбираем AB = x: окружность через K, касающаяся AB в точке C (AC — из данных),
        должна касаться описанной окружности KAB в точке K. Биссектриса здесь не используется. */
     const postroit = (x) => {
-      const { A: K, B: A, C: B } = poStoronam(x, 9, 6);
-      const C = add(A, mul(ed(sub(B, A)), 4));
+      const { A: K, B: A, C: B } = poStoronam(x, d.KB, d.KA);
+      const C = add(A, mul(ed(sub(B, A)), d.AC));
       return { K, A, B, C, ...malaya(K, A, B, C) };
     };
     /* Касание в K ⇔ центры O, Q и точка K на одной прямой: знак векторного произведения меняется. */
@@ -137,16 +137,16 @@ const VNUTR = {
       const q = sub(p.Q, p.K);
       return (o[0] * q[1] - o[1] * q[0]) / (Math.hypot(...o) * Math.hypot(...q));
     };
-    const x = korenNaSetke(f, 4.2, 14.8);
+    const x = korenNaSetke(f, Math.max(Math.abs(d.KA - d.KB), d.AC) + 0.2, d.KA + d.KB - 0.2);
     const p = postroit(x);
     proveritVnutr(sch, p, 'б) найденная фигура');
     return x;
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiVnutrKasaniya(t);
     sch.fakt(
-      'данные: KA = 6, KB = 9, AC = 4',
-      blizko(dist(p.K, p.A), 6) && blizko(dist(p.K, p.B), 9) && blizko(dist(p.A, p.C), 4),
+      `данные: KA = ${d.KA}, KB = ${d.KB}, AC = ${d.AC}`,
+      blizko(dist(p.K, p.A), d.KA) && blizko(dist(p.K, p.B), d.KB) && blizko(dist(p.A, p.C), d.AC),
     );
     return dist(p.A, p.B);
   },
@@ -193,18 +193,28 @@ function proveritPryamTrap(sch, { A, B, C, D, O }, imya) {
 }
 const PRYAM_TRAP = {
   id: 'ks-pryam-trap',
-  b(sch) {
-    /* OD = 20: d = r + √(400 − r²) (O = (r; r)); r подбираем по OC = 15. */
-    const postroit = (r) => pryamTrap(2 * r, r + Math.sqrt(400 - r * r));
-    const r = korenNaSetke((x) => dist(postroit(x).O, postroit(x).C) - 15, 1, 19.9);
+  b(sch, _rnd, d) {
+    /* AD = r + √(OD² − r²) (O = (r; r)); r подбираем по OC. */
+    const postroit = (r) => pryamTrap(2 * r, r + Math.sqrt(d.OD ** 2 - r * r));
+    const r = korenNaSetke(
+      (x) => dist(postroit(x).O, postroit(x).C) - d.OC,
+      d.OD * 0.05,
+      d.OD * 0.995,
+    );
     const t = postroit(r);
-    sch.fakt('б) OC = 15, OD = 20', blizko(dist(t.O, t.C), 15) && blizko(dist(t.O, t.D), 20));
+    sch.fakt(
+      `б) OC = ${d.OC}, OD = ${d.OD}`,
+      blizko(dist(t.O, t.C), d.OC) && blizko(dist(t.O, t.D), d.OD),
+    );
     proveritPryamTrap(sch, t, 'б) найденная трапеция');
     return ploshchad([t.A, t.B, t.C, t.D]);
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiPryamTrap(t);
-    sch.fakt('данные: OC = 15, OD = 20', blizko(dist(p.O, p.C), 15) && blizko(dist(p.O, p.D), 20));
+    sch.fakt(
+      `данные: OC = ${d.OC}, OD = ${d.OD}`,
+      blizko(dist(p.O, p.C), d.OC) && blizko(dist(p.O, p.D), d.OD),
+    );
     return ploshchad([p.A, p.B, p.C, p.D]);
   },
   a(rnd, sch) {

@@ -5,6 +5,7 @@ import { OPORNYE_18, OPORNYE_18_UI } from '@/content/zadanie18/opornye';
 import { GRUPPY_18 } from '@/content/zadanie18/tipy';
 import { ZADANIYA } from '@/lib/paths';
 import { OpornayaMini18 } from './OpornayaMini18';
+import { SchetchikOpornyh18, StatusOpornoy18 } from './ProgressOpornyh18';
 
 const BASE = `${ZADANIYA}/${ZADANIE18.slug}`;
 
@@ -20,6 +21,7 @@ export function Opornye18({ vkladka }: { vkladka: string }) {
         {vkladka}
       </h2>
       <p className="z18-op-spisok__lead">{OPORNYE_18_UI.lead}</p>
+      <SchetchikOpornyh18 ids={OPORNYE_18.map((o) => o.id)} />
       <div className="z18-op-spisok__kak">
         <p className="z18-op-spisok__kak-title">{OPORNYE_18_UI.kakRabotat}</p>
         <ol className="z18-vv__shagi">
@@ -54,7 +56,7 @@ export function Opornye18({ vkladka }: { vkladka: string }) {
                       <span className="z18-op-plitka__punkt">а)</span> <Tex text={o.a} />
                     </span>
                     <span className="z18-plitka__status">
-                      <span className="z18-op-plitka__metka">{OPORNYE_18_UI.sostavleno}</span>
+                      <StatusOpornoy18 id={o.id} />
                       <span className="z18-plitka__otkryt">{OPORNYE_18_UI.otkryt} ›</span>
                     </span>
                   </Link>

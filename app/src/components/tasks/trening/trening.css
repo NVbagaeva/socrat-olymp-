@@ -368,14 +368,21 @@
 .trn-polosa > span {
   display: block;
   height: 100%;
-  border-radius: inherit;
   background: var(--gloss);
-  transition: width var(--dur-switch, 200ms) var(--ease, ease);
+  /* Ширина — масштабом от левого края (docs/motion-system.md, «Учёба»):
+     без пересчёта вёрстки на каждом кадре. */
+  transform-origin: left center;
+  transition: transform var(--motion-slow) var(--ease-in-out);
 }
 .trn-zadacha {
   display: grid;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-4) var(--space-5);
+  /* Новая задача входит справа, как перелистнутая страница. Блок
+     ставится заново по key (EkranZadachi), поэтому анимация
+     проигрывается на каждой задаче. Сдвиг — 12 px; на слабом
+     устройстве и при «меньше движения» — только проявление. */
+  animation: trn-vhod var(--motion-base) var(--ease-out) both;
 }
 .trn-zadacha__verh {
   display: flex;
@@ -412,6 +419,65 @@
 .trn-pole {
   display: grid;
   gap: var(--space-2);
+}
+/* Ответ выбором варианта (№12): крупные кнопки-варианты в одну колонку. */
+.trn-varianty {
+  display: grid;
+  gap: var(--space-2);
+}
+.trn-variant {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--color-border-strong);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.trn-variant:disabled {
+  cursor: default;
+}
+.trn-variant:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.trn-variant__no {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--blue-50);
+  color: var(--blue-700);
+  font-weight: 700;
+}
+.trn-variant__text {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.trn-variant.is-on {
+  box-shadow: inset 0 0 0 2px var(--blue-600);
+}
+.trn-variant.is-on .trn-variant__no {
+  background: var(--blue-600);
+  color: var(--white);
+}
+.trn-variant.is-da {
+  box-shadow: inset 0 0 0 2px var(--green-600);
+}
+.trn-variant.is-net {
+  box-shadow: inset 0 0 0 2px var(--terracotta);
+}
+.trn-varianty__proverit {
+  justify-self: start;
 }
 .trn-pole__ryad {
   display: grid;
@@ -545,7 +611,7 @@
   border-radius: 14px;
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
-  animation: trn-poyavlenie var(--dur-switch, 260ms) var(--ease, ease) both;
+  animation: trn-poyavlenie var(--motion-base) var(--ease-out) both;
 }
 .trn-verdikt--da {
   background: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(214 242 230 / 0.8));
@@ -566,6 +632,7 @@
     var(--glass-hi);
 }
 .trn-verdikt__ico {
+  position: relative;
   flex: none;
   display: grid;
   place-items: center;
@@ -576,6 +643,19 @@
 }
 .trn-verdikt--da .trn-verdikt__ico {
   background: var(--emerald-600);
+  /* «Верно»: галочка в круге — с перелётом, и одно кольцо расходится.
+     Маленькая награда без конфетти (docs/motion-system.md). */
+  animation: trn-galochka var(--motion-slow) var(--ease-spring) both;
+}
+.trn-verdikt--da .trn-verdikt__ico::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--emerald-600);
+  opacity: 0;
+  pointer-events: none;
+  animation: trn-kolco var(--motion-scene) var(--ease-out);
 }
 .trn-verdikt--net .trn-verdikt__ico {
   background: var(--gloss-warm);
@@ -594,6 +674,11 @@
   min-width: 0;
   font-size: 0.9375rem;
   line-height: 1.45;
+}
+.trn-verdikt__poyasnenie {
+  color: var(--color-text-secondary);
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 .trn-verdikt__text > b {
   font-size: var(--fs-lg);
@@ -621,8 +706,46 @@
 @keyframes trn-poyavlenie {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(var(--motion-rise-sm, 6px));
   }
+}
+@keyframes trn-vhod {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--motion-rise-sm, 6px) * 2));
+  }
+}
+@keyframes trn-galochka {
+  from {
+    transform: scale(0.5);
+  }
+}
+@keyframes trn-kolco {
+  from {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+/* «Пока не так»: поле один раз качается — «не туда», без наказания.
+   Экран не трясётся, красного нет: рамка — терракота. */
+@keyframes trn-kachanie {
+  25% {
+    transform: translateX(-4px);
+  }
+  55% {
+    transform: translateX(4px);
+  }
+  80% {
+    transform: translateX(-2px);
+  }
+}
+.trn-ekran--neverno .trn-input .otvet-input__field,
+.trn-variant.is-net {
+  animation: trn-kachanie 280ms var(--ease-in-out);
 }
 
 /* Панель оболочки сессии (components/tasks/session) внутри сцены —
@@ -670,6 +793,27 @@
   z-index: -1;
   border-radius: 50%;
   background: var(--white);
+}
+/* Итог тренировки — точка в конце работы: счёт появляется с перелётом
+   и одним кольцом, строки разбивки — каскадом (единственный каскад в
+   учёбе, docs/motion-system.md). */
+.trn-itogi__schet {
+  animation: trn-galochka var(--motion-slow) var(--ease-spring) both;
+}
+.trn-itogi__schet::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--blue-600);
+  opacity: 0;
+  pointer-events: none;
+  animation: trn-kolco var(--motion-scene) var(--ease-out) var(--motion-fast);
+}
+.trn-razbivka li {
+  animation: trn-poyavlenie var(--motion-slow) var(--ease-out) both;
+  animation-delay: calc(var(--motion-slow) / 2 + var(--i, 0) * var(--motion-stagger));
 }
 .trn-itogi__schet b {
   font-size: 2rem;
@@ -926,9 +1070,33 @@
   }
   .trn-verdikt,
   .trn-podskazka,
-  .trn-reshenie {
+  .trn-reshenie,
+  .trn-zadacha,
+  .trn-verdikt--da .trn-verdikt__ico,
+  .trn-verdikt--da .trn-verdikt__ico::after,
+  .trn-ekran--neverno .trn-input .otvet-input__field,
+  .trn-variant.is-net,
+  .trn-itogi__schet,
+  .trn-itogi__schet::after,
+  .trn-razbivka li {
     animation: none;
   }
+}
+/* То же по атрибуту уровня (lib/motion.ts): он учитывает и смену
+   настройки на ходу. Слабому устройству отклик тренажёра оставляем —
+   токены там лишь убирают сдвиги. */
+:root[data-motion-level='reduce']
+  :is(
+    .trn-zadacha,
+    .trn-verdikt--da .trn-verdikt__ico,
+    .trn-verdikt--da .trn-verdikt__ico::after,
+    .trn-ekran--neverno .trn-input .otvet-input__field,
+    .trn-variant.is-net,
+    .trn-itogi__schet,
+    .trn-itogi__schet::after,
+    .trn-razbivka li
+  ) {
+  animation: none;
 }
 
 /* Чертёж задачи над условием (стереометрия). */

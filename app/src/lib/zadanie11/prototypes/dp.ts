@@ -24,7 +24,7 @@ import { add, d, div, fq, frac, mul, q, round9, sub, txt, val } from '../num';
 import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
 import { minutyVChasy, MS_V_KMCH_POYASNENIE, msVKmch } from '../../teoriya/perevod';
 import type { Subtype } from '../types';
-import { GEROI, klyuch } from './syuzhety';
+import { GEROI, geroyEsli, geroyIz, glagol, glagolPary, klyuch, poRodu } from './syuzhety';
 import { otvet } from './common';
 
 /** Часы дробью в TeX: 1 ч 20 мин = 4/3. */
@@ -416,6 +416,10 @@ const DP06: Subtype = {
     /* Аналог: мотоциклисты, автобусы, велосипедисты (мужской род). */
     const kto = slovo(p, 'kto', 'автомобиль');
     const ktoRod = slovo(p, 'ktoRod', 'автомобиля');
+    /* Автомобиль «проехал», поезд «прошёл» — глагол у героя. */
+    const g = geroyIz(p, 'geroy', 'avtomobil');
+    const proehal = glagol(g, 'proshel');
+    const ehal = glagol(g, 'shel');
     return {
       uslovie: `Расстояние между городами А и В равно ${txt(D)} км. Из города А в город В выехал первый автомобиль, а через ${sk(h, SLOVA.chas)} после этого навстречу ему из города В выехал со скоростью ${txt(v2)} км/ч второй автомобиль. Найдите скорость первого автомобиля, если автомобили встретились на расстоянии ${txt(s)} км от города А. Ответ дайте в км/ч.`,
       answer: x,
@@ -424,13 +428,13 @@ const DP06: Subtype = {
         [
           `Второй ${kto}`,
           [
-            `До встречи он проехал $${d(D)}-${d(s)}=${d(D - s)}$ км за $${frac(D - s, v2)}=${fq(tau)}$ ч.`,
+            `До встречи он ${proehal} $${d(D)}-${d(s)}=${d(D - s)}$ км за $${frac(D - s, v2)}=${fq(tau)}$ ч.`,
           ],
         ],
         [
           `Первый ${kto}`,
           [
-            `Он в пути на $${d(h)}$ ч дольше: $${fq(tau)}+${d(h)}=${fq(T)}$ ч и проехал $${d(s)}$ км.`,
+            `Он в пути на $${d(h)}$ ч дольше: $${fq(tau)}+${d(h)}=${fq(T)}$ ч и ${proehal} $${d(s)}$ км.`,
           ],
         ],
         ['Уравнение и решение', [`$${fq(T)}x=${d(s)}$, $x=${d(x)}$.`]],
@@ -443,15 +447,15 @@ const DP06: Subtype = {
         ]),
       ],
       hints: [
-        vopros(`Сколько километров до встречи проехал второй ${kto}?`, `$${d(D - s)}$`, [
+        vopros(`Сколько километров до встречи ${proehal} второй ${kto}?`, `$${d(D - s)}$`, [
           `$${d(s)}$`,
           `$${d(D)}$`,
         ]),
-        vopros('Сколько часов до встречи ехал второй?', `$${fq(tau)}$`, [
+        vopros(`Сколько часов до встречи ${ehal} второй?`, `$${fq(tau)}$`, [
           `$${fq(add(tau, q(h)))}$`,
           `$${fq(q(s, v2))}$`,
         ]),
-        vopros('Сколько часов до встречи ехал первый?', `$${fq(T)}$`, [
+        vopros(`Сколько часов до встречи ${ehal} первый?`, `$${fq(T)}$`, [
           `$${fq(tau)}$`,
           `$${fq(sub(tau, q(h)).n > 0 ? sub(tau, q(h)) : q(h))}$`,
         ]),
@@ -596,6 +600,14 @@ const DP08: Subtype = {
     const res = xxd(S, dd);
     const x = res.root;
     const ans = ask === 'first' ? x + dd : x;
+    /* Глаголы — у героя: велосипедист «приехал», турист «пришёл». У задачи
+       банка героя в параметрах нет — условие ФИПИ дословно; генератор и
+       аналоги задают героя. */
+    const zadan = geroyEsli(p);
+    const g = zadan ?? geroyIz(p, 'geroy', 'velo');
+    const prishel = glagol(g, 'prishel');
+    const prich = g.gl.prishedshego;
+    const vtor = poRodu(g, 'Второй', 'Вторая');
     const t = drobnoe({
       nuli: [0, -dd],
       lo: 0,
@@ -608,7 +620,9 @@ const DP08: Subtype = {
       roots: res.roots,
     });
     return {
-      uslovie: `Два велосипедиста одновременно отправились в ${txt(S)}-километровый пробег. Первый ехал со скоростью на ${txt(dd)} км/ч большей, чем скорость второго, и прибыл к финишу на ${sk(dd, SLOVA.chas)} раньше второго. Найдите скорость велосипедиста, пришедшего к финишу ${ask === 'first' ? 'первым' : 'вторым'}. Ответ дайте в км/ч.`,
+      uslovie: zadan
+        ? `${poRodu(g, 'Два', 'Две')} ${g.rod} одновременно отправились в ${txt(S)}-километровый ${g.gl.sposob === 'edet' ? 'пробег' : 'маршрут'}. ${poRodu(g, 'Первый', 'Первая')} ${glagol(g, 'shel')} со скоростью на ${txt(dd)} км/ч большей, чем скорость ${poRodu(g, 'второго', 'второй')}, и ${prishel} к финишу на ${sk(dd, SLOVA.chas)} раньше ${poRodu(g, 'второго', 'второй')}. Найдите скорость ${g.rod}, ${poRodu(g, prich.m, prich.f)} к финишу ${ask === 'first' ? poRodu(g, 'первым', 'первой') : poRodu(g, 'вторым', 'второй')}. Ответ дайте в км/ч.`
+        : `Два велосипедиста одновременно отправились в ${txt(S)}-километровый пробег. Первый ехал со скоростью на ${txt(dd)} км/ч большей, чем скорость второго, и прибыл к финишу на ${sk(dd, SLOVA.chas)} раньше второго. Найдите скорость велосипедиста, пришедшего к финишу ${ask === 'first' ? 'первым' : 'вторым'}. Ответ дайте в км/ч.`,
       answer: ans,
       etapy: etapy(
         ['Обозначаем', [`Скорость второго — $x$ км/ч, первого — $x+${d(dd)}$ км/ч.`]],
@@ -619,7 +633,7 @@ const DP08: Subtype = {
         [
           'Уравнение',
           [
-            `Второй ехал дольше на $${d(dd)}$ ч: $\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(dd)}}=${d(dd)}$.`,
+            `${vtor} ${glagol(g, 'shel')} дольше на $${d(dd)}$ ч: $\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(dd)}}=${d(dd)}$.`,
           ],
         ],
         t.odz,
@@ -629,8 +643,8 @@ const DP08: Subtype = {
           [
             ...t.otbor,
             ask === 'first'
-              ? `Первым пришёл более быстрый: $x+${d(dd)}=${d(ans)}$ км/ч.`
-              : `Вторым пришёл более медленный: $x=${d(ans)}$ км/ч.`,
+              ? `${poRodu(g, 'Первым', 'Первой')} ${prishel} ${poRodu(g, 'более быстрый', 'более быстрая')}: $x+${d(dd)}=${d(ans)}$ км/ч.`
+              : `${poRodu(g, 'Вторым', 'Второй')} ${prishel} ${poRodu(g, 'более медленный', 'более медленная')}: $x=${d(ans)}$ км/ч.`,
             otvet(ans),
           ],
         ],
@@ -642,7 +656,7 @@ const DP08: Subtype = {
         ]),
       ],
       hints: [
-        vopros('Кто пришёл к финишу первым?', 'тот, у кого скорость больше', [
+        vopros(`Кто ${g.gl.prishel.m} к финишу первым?`, 'тот, у кого скорость больше', [
           'тот, у кого скорость меньше',
           'нельзя сказать',
         ]),
@@ -660,12 +674,10 @@ const DP08: Subtype = {
           'перевести минуты в часы',
         ]),
         t.hintKoren,
-        chtoSprashivayut(
-          ask === 'first' ? 'скорость пришедшего первым' : 'скорость пришедшего вторым',
-          ask === 'first'
-            ? ['скорость пришедшего вторым', 'время в пути']
-            : ['скорость пришедшего первым', 'время в пути'],
-        ),
+        chtoSprashivayut(`скорость ${prich.m} ${ask === 'first' ? 'первым' : 'вторым'}`, [
+          `скорость ${prich.m} ${ask === 'first' ? 'вторым' : 'первым'}`,
+          'время в пути',
+        ]),
       ],
       lifehacks: ['x-x-plus-d', 'root-guess', 'divide-equation'],
     };
@@ -696,6 +708,9 @@ const DP09: Subtype = {
     const kogo = slovo(p, 'bysRod', kogo0);
     const medl = slovo(p, 'medl', 'велосипедист');
     const medlRod = slovo(p, 'medlRod', 'велосипедиста');
+    /* Глаголы — у героев: пешеход «проходит», велосипедист «проезжает». */
+    const gm = geroyIz(p, 'geroy', 'velo');
+    const gb = geroyIz(p, 'geroy2', p.kto === 'moto' ? 'motociklist' : 'avtomobil');
     const T = q(dt, 60);
     const P = val(div(q(S * dv), T)); // x(x + dv) = P
     const res = xxd(P, dv);
@@ -718,7 +733,7 @@ const DP09: Subtype = {
     });
     return {
       uslovie: bys
-        ? `Из пункта А в пункт В, расстояние между которыми ${txt(S)} км, одновременно выехали ${medl} и ${kto}. За час ${medl} проезжает на ${txt(dv)} км меньше, чем ${kto}. Определите скорость ${kogo}, если известно, что он прибыл в пункт В на ${vremya(dt, true)} раньше ${medlRod}. Ответ дайте в км/ч.`
+        ? `Из пункта А в пункт В, расстояние между которыми ${txt(S)} км, одновременно ${glagolPary(gm, gb, 'vyshel')} ${medl} и ${kto}. За час ${medl} ${gm.gl.prohodit} на ${txt(dv)} км меньше, чем ${kto}. Определите скорость ${kogo}, если известно, что он прибыл в пункт В на ${vremya(dt, true)} раньше ${medlRod}. Ответ дайте в км/ч.`
         : `Из пункта А в пункт В, расстояние между которыми ${txt(S)} км, одновременно выехали ${kto} и велосипедист. За час ${kto} проезжает на ${txt(dv)} км больше, чем велосипедист. Определите скорость велосипедиста, если известно, что он прибыл в пункт В на ${vremya(dt, true)} позже ${kogo}. Ответ дайте в км/ч.`,
       answer: ans,
       etapy: etapy(
@@ -805,6 +820,9 @@ const DP10: Subtype = {
     const dog = slovo(p, 'dog', 'мотоциклист');
     const dogRod = slovo(p, 'dogRod', 'мотоциклиста');
     const dogKr = slovo(p, 'dogKr', 'Мотоцикл');
+    /* Глаголы — у героев: geroy уехал первым, geroy2 догонял. */
+    const ga = geroyIz(p, 'geroy', 'avtomobil');
+    const gd = geroyIz(p, 'geroy2', 'motociklist');
     const t = drobnoe({
       nuli: [-u],
       lo: 0,
@@ -821,7 +839,7 @@ const DP10: Subtype = {
         [
           'Таблица',
           [
-            `${zaglavnaya(dog)} до С ехал $\\dfrac{x}{${d(u)}}$ ч, ${avto} — на час дольше: $\\dfrac{x}{${d(u)}}+1$ ч.`,
+            `${zaglavnaya(dog)} до С ${glagol(gd, 'shel')} $\\dfrac{x}{${d(u)}}$ ч, ${avto} — на час дольше: $\\dfrac{x}{${d(u)}}+1$ ч.`,
             `Скорость ${avtoRod} $x:\\left(\\dfrac{x}{${d(u)}}+1\\right)=\\dfrac{${d(u)}x}{x+${d(u)}}$.`,
             `Весь путь ${avtoRod} длился $1+\\dfrac{2x}{${d(u)}}=\\dfrac{${d(u)}+2x}{${d(u)}}$ ч (час форы плюс путь ${dogRod} туда и обратно).`,
           ],
@@ -851,14 +869,15 @@ const DP10: Subtype = {
           `скорость ${avtoRod}`,
           'время до встречи',
         ]),
-        vopros(`Сколько ехал ${avto} до С?`, `$\\dfrac{x}{${d(u)}}+1$`, [
+        vopros(`Сколько ${glagol(ga, 'shel')} ${avto} до С?`, `$\\dfrac{x}{${d(u)}}+1$`, [
           `$\\dfrac{x}{${d(u)}}$`,
           `$\\dfrac{x}{${d(u)}}-1$`,
         ]),
-        vopros(`Сколько всего ехал ${avto} из А в В?`, `$1+\\dfrac{2x}{${d(u)}}$`, [
-          `$\\dfrac{2x}{${d(u)}}$`,
-          `$1+\\dfrac{x}{${d(u)}}$`,
-        ]),
+        vopros(
+          `Сколько всего ${glagol(ga, 'shel')} ${avto} из А в В?`,
+          `$1+\\dfrac{2x}{${d(u)}}$`,
+          [`$\\dfrac{2x}{${d(u)}}$`, `$1+\\dfrac{x}{${d(u)}}$`],
+        ),
         t.hintOdz,
         t.hintKoren,
         chtoSprashivayut('расстояние от А до С', [`скорость ${avtoRod}`, 'время в пути']),
@@ -897,7 +916,10 @@ const DP11: Subtype = {
     const bysRod = slovo(p, 'bysRod', 'мотоциклиста');
     const medl = slovo(p, 'medl', 'велосипедист');
     const medlRod = slovo(p, 'medlRod', 'велосипедиста');
-    const ehal = slovo(p, 'ehal', 'ехал');
+    /* Глаголы — у героев: geroy — медленный, geroy2 — быстрый. */
+    const gm = geroyIz(p, 'geroy', 'velo');
+    const gb = geroyIz(p, 'geroy2', 'motociklist');
+    const ehal = glagol(gb, 'shel');
     const dr = drobnoe({
       nuli: [0, Dl],
       lo: Dl,
@@ -930,7 +952,7 @@ const DP11: Subtype = {
         [
           'Уравнение',
           [
-            `За $${tTex}$ ч вместе проехали весь путь: $${tTex}\\left(\\dfrac{1}{x}+\\dfrac{1}{x-${d(Dl)}}\\right)=1$.`,
+            `За $${tTex}$ ч вместе ${glagolPary(gm, gb, 'proshel')} весь путь: $${tTex}\\left(\\dfrac{1}{x}+\\dfrac{1}{x-${d(Dl)}}\\right)=1$.`,
           ],
         ],
         dr.odz,
@@ -1035,10 +1057,11 @@ const DP12: Subtype = {
           'взять $100$ км',
           'задачу не решить',
         ]),
-        vopros(`Сколько времени ехал первый ${kto}?`, '$\\dfrac{2}{x}$', [
-          '$\\dfrac{1}{x}$',
-          '$2x$',
-        ]),
+        vopros(
+          `Сколько времени ${glagol(geroyIz(p, 'geroy', 'avtomobil'), 'shel')} первый ${kto}?`,
+          '$\\dfrac{2}{x}$',
+          ['$\\dfrac{1}{x}$', '$2x$'],
+        ),
         vopros('Какое уравнение?', `$\\dfrac{2}{x}=\\dfrac{1}{x-${d(dd)}}+\\dfrac{1}{${d(u)}}$`, [
           `$\\dfrac{1}{x}=\\dfrac{1}{x-${d(dd)}}+\\dfrac{1}{${d(u)}}$`,
           `$\\dfrac{2}{x}=\\dfrac{2}{x-${d(dd)}}+\\dfrac{2}{${d(u)}}$`,
@@ -1066,6 +1089,8 @@ const DP13: Subtype = {
     const x = res.root;
     /* Аналог: катера, автобусы, велосипедисты. */
     const ktoRod = slovo(p, 'ktoRod', 'теплохода');
+    /* Теплоход «вышел», велосипедист «выехал» — глагол у героя. */
+    const g = geroyIz(p, 'geroy', 'teplohod');
     const t = drobnoe({
       nuli: [0, -h],
       lo: 0,
@@ -1103,7 +1128,11 @@ const DP13: Subtype = {
         ]),
       ],
       hints: [
-        vopros('Кто был в пути дольше?', 'первый — он вышел раньше', ['второй', 'одинаково']),
+        vopros(
+          'Кто был в пути дольше?',
+          `${poRodu(g, 'первый — он', 'первая — она')} ${glagol(g, 'vyshel')} раньше`,
+          [poRodu(g, 'второй', 'вторая'), 'одинаково'],
+        ),
         vopros('Какое уравнение?', `$\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(h)}}=${d(h)}$`, [
           `$\\dfrac{${d(S)}}{x+${d(h)}}-\\dfrac{${d(S)}}{x}=${d(h)}$`,
           `$\\dfrac{${d(S)}}{x}=\\dfrac{${d(S)}}{x+${d(h)}}$`,

@@ -1,3 +1,4 @@
+import { DIAGONAL_PARALLELOGRAMMA, UGLY_PARALLELOGRAMMA } from './novye-temy';
 import type { Razdel1 } from './tipy';
 
 /* ── 8. Четырёхугольники ──────────────────────────────────────── */
@@ -129,6 +130,8 @@ export const R08_CHETYREHUGOLNIKI: Razdel1 = {
       prototipy: [12, 14, 15, 53],
       zamenyaet: ['parallelogramm', 'bissektrisa-parallelogramma'],
     },
+    UGLY_PARALLELOGRAMMA,
+    DIAGONAL_PARALLELOGRAMMA,
     {
       id: 'pryamougolnik',
       title: 'Прямоугольник',

@@ -19,12 +19,19 @@ export interface Dannye01 {
   bank: [number, number, Nabor][];
 }
 
+const BEZ_VARIANTA: ReadonlySet<string> = new Set(['p76']);
+
 export function dannye(): Dannye01 {
   const d = dannyeTrenazhera1();
   const urovni: Record<string, number> = {};
   for (const r of d.razdely) for (const p of r.podtipy) urovni[p.id] = p.level;
   return {
     urovni,
-    bank: d.bank.map((b) => [b.no, Number(b.id.slice(1)), b.params]),
+    /* Прототипы, которых нет в открытом банке ФИПИ (76 — своя задача
+       «три части стороны»), в вариант не входят: варианты повторяют
+       экзамен, а коды, выданные раньше, собирают те же задачи. */
+    bank: d.bank
+      .filter((b) => !BEZ_VARIANTA.has(b.id))
+      .map((b) => [b.no, Number(b.id.slice(1)), b.params]),
   };
 }

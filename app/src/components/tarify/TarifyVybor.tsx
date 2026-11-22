@@ -10,8 +10,10 @@ import { Plashka } from './Plashka';
 const KLYUCH_ROLI = 'tarify:rol';
 
 /**
- * Плашки в порядке разметки: платная первой. На телефоне она первой и
- * видна, на широком экране CSS ставит её справа (tarify.css).
+ * Плашки в порядке разметки: платная, бесплатная, пробная. На телефоне
+ * первой видна платная — первое число на экране не «0 ₽»
+ * (docs/audit-prodazhi.md, D1). На широком экране CSS ставит платную
+ * справа, на планшете — сверху во всю ширину (tarify.css).
  */
 function poryadok(rol: Rol) {
   const [besplatno, probnyy, platnyy] = plashki(rol);
@@ -74,7 +76,9 @@ export function TarifyVybor() {
   const sohranyonnaya = useSyncExternalStore(podpiskaRoli, chitatRol, () => null);
   const [vybrannaya, setVybrannaya] = useState<Rol | null>(null);
   const rol: Rol = vybrannaya ?? sohranyonnaya ?? 'uchenik';
-  const [srok, setSrok] = useState<Srok>('d30');
+  /* По умолчанию — «До ЕГЭ»: выгоднее для покупателя, рядом якорь.
+     Когда срок не продаётся, ниже он сам сменится на 30 дней. */
+  const [srok, setSrok] = useState<Srok>('ege');
   /* Дата — только в браузере; при сборке её нет, и цена «До ЕГЭ»
      считается на сегодня уже после загрузки. */
   const data = useSyncExternalStore(bezPodpiski, segodnya, () => undefined);
@@ -146,8 +150,8 @@ export function TarifyVybor() {
             value={tekushchiySrok}
             onChange={setSrok}
             options={[
-              { value: 'd30', label: vybor.srok.d30 },
               { value: 'ege', label: vybor.srok.ege },
+              { value: 'd30', label: vybor.srok.d30 },
             ]}
           />
         ) : null}

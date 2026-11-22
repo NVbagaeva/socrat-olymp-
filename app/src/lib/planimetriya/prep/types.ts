@@ -10,6 +10,7 @@
  */
 
 import type { Rng } from '../../veroyatnost/generator';
+import type { Scenariy } from '../scenariy';
 import type { Scena } from '../types';
 
 export interface MikroGenerated {
@@ -20,6 +21,19 @@ export interface MikroGenerated {
   otvet: number;
   /** Разбор: строки с формулами в $…$. */
   razbor: string[];
+  /**
+   * Подсказка-сценарий: вопросы с кнопками по чертежу задачи. Нет —
+   * подсказка из формулы навыка.
+   */
+  scenariy?: Scenariy;
+}
+
+/** Факт памятки блока: словами, мелкой формулой и маленьким чертежом. */
+export interface FaktPamyatki {
+  tekst: string;
+  /** Формула (TeX без $) — мелко под словами. */
+  formula?: string;
+  risunok?: Scena;
 }
 
 export interface Mikro {
@@ -28,6 +42,15 @@ export interface Mikro {
   nazvanie: string;
   /** Формула-подсказка, TeX без долларов. Ответа в ней нет. */
   formula: string;
+  /**
+   * Подсказка словами вместо формулы: когда формула записана общими
+   * буквами, которых нет на чертеже задачи (prep/fakty.ts).
+   */
+  podskazka?: string;
+  /** Факт реестра справочника: кнопка «Показать свойство». null — без факта. */
+  fakt?: string | null;
+  /** «В нашей задаче»: факт на буквах этой задачи, без ответа. */
+  vNashey?: string;
   generate(r: Rng): MikroGenerated | null;
 }
 
@@ -41,5 +64,7 @@ export interface Blok {
   lead: string;
   /** Плашка «Запомни»: формулы блока, TeX. */
   formuly: string[];
+  /** Плашка «Запомни» словами, с чертежами (вместо формул). */
+  pamyatka?: FaktPamyatki[];
   zadachi: Mikro[];
 }

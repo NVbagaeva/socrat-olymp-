@@ -108,7 +108,7 @@
   .z6-tablica th,
   .z6-tablica td {
     padding: var(--space-1) var(--space-2);
-    font-size: 15px;
+    font-size: 16px;
   }
   .z6-tablica th {
     min-width: 7em;
@@ -176,7 +176,7 @@
 
 .z6-razbor__title {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-text);
 }

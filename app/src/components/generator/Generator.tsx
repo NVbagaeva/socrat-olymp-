@@ -11,12 +11,14 @@ import {
   type AktivnyyFiltr,
 } from '@/components/filtry/chasti';
 import { GEN_UI } from '@/content/generatorUi';
+import { GENERATOR_BAZY } from '@/content/baza/generator';
 import { typesetText } from '@/lib/tex';
 import {
   changeLevelAt,
   countsByTopic,
   defaultState,
   extrasOn,
+  flagVklyuchen,
   filterBySource,
   indexOfPos,
   levelsText,
@@ -29,6 +31,7 @@ import {
   setSubtypeCount,
   setTopicCount,
   sPodskazkami,
+  sFlagom,
   stateFromPreset,
   subtypeById,
   summary,
@@ -67,11 +70,28 @@ import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { withSpace } from '@/lib/sheet/space.js';
 import { SpaceOption } from '@/components/tasks/space/SpaceOption';
 import { useSheetSpace } from '@/components/tasks/space/useSheetSpace';
+import {
+  generatorBezLimita,
+  generatorOtkryt,
+  potratitProbnuyu,
+  usePolnyyDostup,
+  useProbnyhOstalos,
+} from '@/lib/tarify/dostup';
+import { nomerDlyaPodpisi } from '@/lib/tarify/config';
 import { GenIcon } from './GenIcons';
 import { GenKits } from './GenKits';
 import { GenToast, GenSheet as GenWindow } from './GenOverlay';
 import { GenSheetView, type TaskAction } from './GenSheetView';
+import { GenZakryt, ProbnayaPotrachena } from './GenZamok';
 import './generator.css';
+
+/** Номер генератора в окнах доступа: «12», у базы — «12 базы» (область «baza-12»). */
+/** Номер для подписи: у базы — свой, у профиля — номер ЕГЭ, не хранения. */
+function nomerGeneratora(scope: string): string {
+  return scope.startsWith('baza-')
+    ? GENERATOR_BAZY.nomer(Number(scope.slice(5)))
+    : nomerDlyaPodpisi(scope);
+}
 
 type Overlay =
   | null
@@ -80,7 +100,9 @@ type Overlay =
   | { kind: 'level'; pos: string }
   | { kind: 'actions' }
   | { kind: 'kits' }
-  | { kind: 'link'; href: string };
+  | { kind: 'link'; href: string }
+  /** Пробная генерация потрачена — окно тарифов. */
+  | { kind: 'tarif' };
 
 export interface GeneratorProps {
   config: GenConfig;
@@ -200,6 +222,19 @@ function Podpis({ text, html }: { text: string; html?: string }) {
 }
 
 /**
+ * Генератор с доступом без тарифа (lib/tarify/dostup.ts): закрытое
+ * задание — карточка тарифов вместо экрана; открытое — экран с одной
+ * пробной генерацией; аккаунт с полным доступом — всё без ограничений.
+ */
+export function Generator(props: GeneratorProps) {
+  const polnyy = usePolnyyDostup() || generatorBezLimita(props.config.scope);
+  if (!polnyy && !generatorOtkryt(props.config.scope)) {
+    return <GenZakryt nomer={nomerGeneratora(props.config.scope)} />;
+  }
+  return <GeneratorEkran {...props} polnyy={polnyy} />;
+}
+
+/**
  * Общий генератор листов (docs/generator/02-design.md, макет А).
  *
  * Сверху липкая полоса фильтров со сводкой и кнопкой «Сгенерировать»,
@@ -213,7 +248,12 @@ function Podpis({ text, html }: { text: string; html?: string }) {
  * комплекте раздела (lib/komplekt.ts): после перезагрузки или
  * возвращения на вкладку открывается тот же лист.
  */
-export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
+function GeneratorEkran({
+  config: ishodnyy,
+  engine,
+  icons,
+  polnyy,
+}: GeneratorProps & { polnyy: boolean }) {
   const config = useMemo(() => sFormulami(ishodnyy), [ishodnyy]);
   /* Памятка и пример — по виду работы, пока учитель их не переключил сам. */
   const ege = (s: GenState) => engine.formatEge?.(s) ?? false;
@@ -247,6 +287,24 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
 
   const say = useCallback((text: string) => setToast(text), []);
   const closeOverlay = useCallback(() => setOverlay(null), []);
+
+  /* Пробная генерация (lib/tarify/dostup.ts). null — ещё не прочитано
+     из браузера: ничего не закрыто. */
+  const ostalos = useProbnyhOstalos(config.scope);
+  const probnayaPotrachena = !polnyy && ostalos !== null && ostalos <= 0;
+  /**
+   * Новые задачи без тарифа: пробная генерация потрачена — окно тарифов
+   * вместо действия. До «Сгенерировать» состав меняется свободно: это
+   * предпросмотр; собранный лист остаётся — его можно печатать,
+   * переставлять задачи, менять оформление.
+   */
+  function nuzhenTarif(): boolean {
+    if (!probnayaPotrachena) return false;
+    setOverlay({ kind: 'tarif' });
+    return true;
+  }
+  /** То же для правок собранного листа. */
+  const pravkaZakryta = () => generated && nuzhenTarif();
 
   useEffect(() => {
     if (toast === null) return undefined;
@@ -414,6 +472,7 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
   }
 
   function changePlan(plan: GenSlot[], patch: Partial<GenState> = {}) {
+    if (pravkaZakryta()) return;
     const next = { ...st, ...patch, plan };
     /* Вид «по составу»: лист стал вариантом ЕГЭ или перестал — другой вид. */
     commit(st.extras.kind === null && ege(next) !== ege(st) ? poTipu(next, rucnye) : next);
@@ -422,7 +481,7 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
 
   function applyPreset(id: string) {
     const p = config.presets.find((x) => x.id === id);
-    if (p === undefined) return;
+    if (p === undefined || pravkaZakryta()) return;
     setSt(poTipu({ ...stateFromPreset(config, p, st.source, st.extras), seed: st.seed }, rucnye));
     setPick(p.pickTopic !== undefined);
     setVariant(0);
@@ -465,17 +524,21 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
   }
 
   function setFiltr(filtr: string) {
+    if (pravkaZakryta()) return;
     commit({ ...st, filtr });
     if (generated) say(GEN_UI.toast.obnovlen);
   }
 
   function setVariants(n: number) {
     const variants = Math.max(1, Math.min(config.limits.variantsMax, n));
+    if (variants > st.variants && pravkaZakryta()) return;
     commit({ ...st, variants });
     if (variant >= variants) setVariant(0);
   }
 
   function setExtras(patch: Partial<GenExtras>, quiet = false) {
+    /* «Урок серии» — следующие задачи банка. */
+    if ('urok' in patch && pravkaZakryta()) return;
     commit({ ...st, extras: { ...st.extras, ...patch } });
     if (generated && !quiet) say(GEN_UI.toast.obnovlen);
   }
@@ -500,6 +563,8 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
       say(GEN_UI.pustoy);
       return;
     }
+    if (nuzhenTarif()) return;
+    if (!polnyy) potratitProbnuyu(config.scope);
     const again = generated;
     setBusy(true);
     setVariant(0);
@@ -534,6 +599,7 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
       return;
     }
     if (action === 'swap') {
+      if (pravkaZakryta()) return;
       if (st.legacy !== undefined && engine.legacyZameny !== true) {
         /* Прежний лист этого раздела замен не умеет: набор переходит на
            ключи позиций, задача заменяется уже в новой схеме. */
@@ -558,6 +624,7 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
   }
 
   function chooseLevel(pos: string, level: Level) {
+    if (pravkaZakryta()) return;
     commit({ ...st, plan: changeLevelAt(config, st.plan, indexOf(pos), level) });
     say(GEN_UI.toast.uroven(stars(level)));
     setOverlay(null);
@@ -612,9 +679,10 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
       type="button"
       className={clsx('btn btn--primary btn--lg gen-go', busy && 'is-busy')}
       aria-busy={busy || undefined}
+      title={probnayaPotrachena ? GEN_UI.dostup.netProbnoy : undefined}
       onClick={generate}
     >
-      <GenIcon name={generated ? 'refresh' : 'play'} />
+      <GenIcon name={probnayaPotrachena ? 'lock' : generated ? 'refresh' : 'play'} />
       {goLabel}
     </button>
   );
@@ -785,6 +853,26 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
             />
           </div>
         )}
+        {(extras.flagi ?? []).map((f) => (
+          <div className="gen-opt" key={f.id}>
+            <span>
+              {f.title}
+              <small>{f.note}</small>
+            </span>
+            <button
+              type="button"
+              role="switch"
+              className="gen-switch"
+              aria-checked={flagVklyuchen(st.extras, f.id)}
+              aria-label={f.title}
+              onClick={() =>
+                setExtras({
+                  flagi: sFlagom(st.extras, f.id, !flagVklyuchen(st.extras, f.id)).flagi,
+                })
+              }
+            />
+          </div>
+        ))}
         {extras.vybor === undefined ? null : (
           <label className="gen-opt">
             <span>{extras.vybor.title}</span>
@@ -920,6 +1008,11 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
           <span className="gen-sum" title={sum.full}>
             <b>{sum.main}</b>
             <small>{sum.rest}</small>
+            {polnyy || ostalos === null ? null : (
+              <small className="gen-sum__probnaya">
+                {ostalos > 0 ? GEN_UI.dostup.ostalos : GEN_UI.dostup.netProbnoy}
+              </small>
+            )}
           </span>
           {go}
         </div>
@@ -1445,6 +1538,13 @@ export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
             }}
           />
         </GenWindow>
+      ) : null}
+
+      {overlay?.kind === 'tarif' ? (
+        <ProbnayaPotrachena
+          tekst={GEN_UI.dostup.potrachena.generator(nomerGeneratora(config.scope))}
+          onClose={closeOverlay}
+        />
       ) : null}
 
       {overlay?.kind === 'link' ? (

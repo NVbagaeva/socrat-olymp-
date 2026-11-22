@@ -115,6 +115,25 @@
   background: rgb(224 122 47 / 0.14);
   box-shadow: inset 0 0 0 1px rgb(224 122 47 / 0.28);
 }
+.tf-plashka__yakor {
+  margin: var(--space-2) 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+.tf-plashka__yakor s {
+  text-decoration-thickness: 1px;
+}
+.tf-plashka__yakor b {
+  font-weight: 650;
+  color: var(--color-accent-text);
+}
+.tf--b .tf-plashka--platnyy .tf-plashka__yakor {
+  color: rgb(232 240 252 / 0.75);
+}
+.tf--b .tf-plashka--platnyy .tf-plashka__yakor b {
+  color: #ffc28a;
+}
 .tf-plashka__nazvanie {
   margin: 0;
   max-width: calc(100% - 96px);
@@ -138,13 +157,13 @@
   font-variant-numeric: tabular-nums;
 }
 .tf-plashka__srok {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 20px;
   color: var(--color-text-secondary);
 }
 .tf-plashka__dlya {
   margin: var(--space-3) 0 0;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.45;
   color: var(--color-text-secondary);
 }
@@ -161,7 +180,7 @@
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr);
   gap: 10px;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 22px;
 }
 .tf-punkt__znak {
@@ -190,7 +209,7 @@
 }
 .tf-plashka__snoska {
   margin: var(--space-3) 0 0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 18px;
   text-align: center;
   color: var(--color-text-secondary);
@@ -245,12 +264,20 @@
 .tf-knopka:active {
   transform: scale(0.98);
 }
-/* Неактивная: читается, но не зовёт нажать. Текст 4,5:1 на своём фоне. */
+/* Неактивная («Оплата скоро откроется») — не кнопка, а тихая плашка-
+   статус: ниже, мельче, пунктирная рамка. Выключенная главная кнопка на
+   самом заметном месте читалась как сломанная (docs/design-audit.md,
+   п. 4.3). Текст 4,5:1 на своём фоне. */
 .tf-knopka[disabled] {
+  min-height: 44px;
   cursor: default;
   color: var(--color-text-secondary);
-  background: rgb(255 255 255 / 0.5);
-  box-shadow: inset 0 0 0 1px rgb(16 23 40 / 0.14);
+  background: transparent;
+  box-shadow: none;
+  outline: 1px dashed rgb(16 23 40 / 0.22);
+  outline-offset: -1px;
+  font-size: 14px;
+  font-weight: 500;
   filter: none;
   transform: none;
 }
@@ -328,8 +355,9 @@
 }
 .tf--b .tf-plashka--platnyy .tf-knopka[disabled] {
   color: #dbe4f5;
-  background: rgb(255 255 255 / 0.1);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.28);
+  background: transparent;
+  box-shadow: none;
+  outline-color: rgb(255 255 255 / 0.36);
 }
 /* Соседние плашки в варианте Б — чистое светлое стекло без оттенка. */
 .tf--b .tf-plashka:not(.tf-plashka--platnyy) {
@@ -387,8 +415,8 @@
   }
 }
 
-/* Платная в разметке первая (так её первой видит телефон и читалка
-   экрана); на широком экране она встаёт справа. */
+/* Платная в разметке первая (телефон первой показывает её);
+   на широком экране она встаёт справа. */
 @media (min-width: 1024px) {
   .tf-plashka--platnyy {
     order: 1;
@@ -406,10 +434,11 @@
   }
   .tf-plashka--platnyy {
     grid-column: 1 / -1;
+    order: -1;
   }
 }
 
-/* ── Телефон: свайп с прилипанием, платная первой ────────────── */
+/* ── Телефон: свайп с прилипанием, платная первой ─────────────── */
 
 @media (max-width: 599.98px) {
   .tf-ryad {
@@ -462,8 +491,8 @@
 }
 .tf-shapka__nad {
   margin: 0 0 var(--space-4);
-  font-size: 13px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 19px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -481,7 +510,7 @@
 .tf-shapka__lid {
   margin: var(--space-5) auto 0;
   max-width: 54ch;
-  font-size: 19px;
+  font-size: 18px;
   line-height: 1.5;
   color: var(--color-text-secondary);
   text-wrap: pretty;
@@ -535,7 +564,7 @@
   min-height: 44px;
   padding: 0 var(--space-5);
   border-radius: var(--radius-pill);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-text-secondary);
   transition:
@@ -615,7 +644,7 @@
 .tf-sekciya__lid {
   max-width: 60ch;
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.55;
   color: var(--color-text-secondary);
 }
@@ -700,7 +729,7 @@
 .tf-podskazki__punkt p,
 .tf-kak__shag p {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--color-text-secondary);
 }
@@ -726,8 +755,14 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 15px;
+  /* Колонки значений — равной ширины, первая (возможность) — шире:
+     иначе «Бесплатно» и «Ученик» делили место по длине текста. */
+  table-layout: fixed;
+  font-size: 16px;
   line-height: 1.4;
+}
+.tf-sr__tablica thead th:first-child {
+  width: 34%;
 }
 .tf-sr__tablica th,
 .tf-sr__tablica td {
@@ -740,7 +775,7 @@
   border-bottom: 0;
 }
 .tf-sr__tablica thead th {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -759,6 +794,11 @@
   font-weight: 650;
 }
 .tf-sr__znak {
+  /* SVG по умолчанию блочный (сброс стилей), и text-align ячейки его
+     не центрировал: галочки стояли у левого края, а текст соседних
+     ячеек — по центру (docs/design-audit.md, п. 4.2). */
+  display: block;
+  margin: 0 auto;
   width: 24px;
   height: 24px;
   padding: 4px;
@@ -824,7 +864,7 @@
   gap: var(--space-4);
   min-height: 56px;
   padding: var(--space-3) var(--space-6);
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.35;
   font-weight: 600;
   cursor: pointer;
@@ -864,7 +904,7 @@
   margin: 0 auto;
   padding: var(--space-4) var(--space-8) var(--space-16);
   max-width: 1120px;
-  font-size: 17px;
+  font-size: 18px;
   color: var(--color-text-secondary);
 }
 .tf-shkoly a {
@@ -896,7 +936,7 @@
 .tf-stena__zagolovok {
   margin: 0;
   max-width: calc(100% - 80px);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.25;
   font-weight: 620;
 }
@@ -981,7 +1021,7 @@
     border: 1px solid var(--glass-edge);
     border-radius: var(--radius-pill);
     font: inherit;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--color-primary);
     background: var(--glass-bg-strong);
@@ -1036,5 +1076,67 @@
   .tf-vopros summary svg,
   .tf-sr__knopka svg {
     transition: none;
+  }
+}
+
+/* ── Автор и гарантии под плашками ─────────────────────────────── */
+
+.tf-garantii {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-6);
+  max-width: 1120px;
+  margin: calc(-1 * var(--space-6)) auto 0;
+  padding: 0 var(--space-8) var(--space-6);
+}
+.tf-garantii__spisok {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tf-garantii__punkt {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+.tf-garantii__punkt b {
+  font-weight: 620;
+  color: var(--color-text);
+}
+.tf-garantii__punkt svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  padding: 3px;
+  border-radius: 50%;
+  background: rgb(31 95 208 / 0.1);
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 1023.98px) {
+  .tf-garantii {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    padding-inline: var(--space-6);
+  }
+}
+@media (max-width: 599.98px) {
+  .tf-garantii {
+    margin-top: 0;
+    padding-inline: var(--space-4);
+  }
+  .tf-garantii__spisok {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
   }
 }

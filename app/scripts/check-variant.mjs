@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* scripts/check-variant.mjs — генератор «Собрать вариант» (задания 1–13).
+/* scripts/check-variant.mjs — генератор «Собрать вариант» (разделы 1–13 и 21).
 
    Запуск: pnpm test:variant [номера заданий] [--sets N] [--report]
            pnpm test:variant 13 --sets 50
@@ -57,8 +57,9 @@ function fail(where, message) {
 
 /* ── Разделы ────────────────────────────────────────────────────── */
 
+const { EGE_NUMBERS } = requireSrc('lib/variant/types');
 const adapters = new Map();
-for (let n = 1; n <= 13; n += 1) {
+for (const n of EGE_NUMBERS) {
   if (only.length > 0 && !only.includes(n)) continue;
   const dir = `lib/variant/adapters/z${String(n).padStart(2, '0')}`;
   if (!fs.existsSync(path.join(SRC, dir, 'index.ts'))) continue;
@@ -73,13 +74,22 @@ for (let n = 1; n <= 13; n += 1) {
   adapters.set(n, adapter);
   console.log(`№${n} ${adapter.info.title}: загружен за ${Date.now() - t0} мс`);
 }
+/* Подтипы раздела 21 — группы видов функций (lib/zadanie21/gruppy.ts):
+   описание раздела пишет их списком, чтобы экран фильтров не тянул
+   прототипы. */
+if (adapters.has(21)) {
+  const { GRUPPY21 } = requireSrc('lib/zadanie21/gruppy');
+  const est = JSON.stringify(adapters.get(21).info.subtypes);
+  const nado = JSON.stringify(GRUPPY21.map((g) => ({ id: `G${g.id}`, label: g.title })));
+  if (est !== nado) fail('№21', `подтипы ${est} ≠ группы ${nado}`);
+}
 if (adapters.size === 0) {
   console.error('Нет ни одного адаптера.');
   process.exit(1);
 }
 
 const subtypeIds = {};
-for (let n = 1; n <= 13; n += 1) {
+for (const n of EGE_NUMBERS) {
   subtypeIds[n] = adapters.get(n)?.info.subtypes.map((s) => s.id) ?? [];
 }
 
@@ -104,6 +114,13 @@ function rawTex(html) {
 
 function checkTask(where, t, n) {
   if (t.egeNumber !== n) fail(where, `egeNumber ${t.egeNumber}`);
+  /* «Наибольшее и наименьшее»: ответ для бланка — целое или конечная
+     десятичная дробь, разбор с подсказками. */
+  if (n === 21) {
+    if (!/^−?\d+(?:,\d+)?$/.test(t.answer)) fail(where, `ответ «${t.answer}» не для бланка`);
+    if ((t.hints ?? []).length === 0) fail(where, 'нет подсказок');
+    if (!/sheet-step/.test(t.solutionTeacher ?? '')) fail(where, 'нет решения по шагам');
+  }
   if (typeof t.taskId !== 'string' || t.taskId === '') fail(where, 'нет taskId');
   if (t.prototypeId === 'missing') fail(where, 'задача не подобрана');
   if (typeof t.statement !== 'string' || t.statement.replace(/<[^>]+>/g, '').trim().length < 10)

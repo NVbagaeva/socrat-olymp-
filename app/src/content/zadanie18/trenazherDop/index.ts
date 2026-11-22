@@ -1,7 +1,7 @@
 /**
  * Перенесённые задачи тренажёра №18: 18 задач, составленных для сайта в
- * формате задания 18, с одним набором чисел каждая. Здесь они
- * становятся типами банка (TipZadachi18) с одним вариантом; чертёж —
+ * формате задания 18, по три набора чисел. Здесь они становятся типами
+ * банка (TipZadachi18); чертёж —
  * lib/zadanie18/trenazher/dop, проверка — scripts/verify_schemes/trenazherDop
  * (pnpm test:trenazher-18): ответ б) пересчитан по данным в координатах
  * без кода сайта, утверждение а) — на 1000 случайных фигурах.
@@ -23,7 +23,7 @@ import {
 import { OK18_BRAHMAGUPTA, OK18_ORTOCENTR, OK18_SEKUSHCHIE } from './okruzhnost';
 import { OT18_CHEVA, OT18_MEDIANY, OT18_MENELAY, OT18_PARALLELOGRAMM } from './otnosheniya';
 import { PL18_BISSEKTRISA, PL18_OBSHCHAYA_VYSOTA } from './ploshchadi';
-import type { ZadachaDop18 } from './tipy';
+import { poNaboru, type ZadachaDop18 } from './tipy';
 import { TP18_BABOCHKA, TP18_RAVNOBOKAYA, TP18_UGOL_90 } from './trapeciya';
 import { TR18_INCENTR, TR18_SREDLIN } from './treugolnik';
 
@@ -96,10 +96,14 @@ export const TIPY_DOP_18: readonly TipZadachi18[] = ZADACHI_DOP_18.map((z) => ({
   nazvanie: z.nazvanie,
   skhema: z.skhemy[0]!.id,
   uroven: z.uroven,
-  varianty: [{}],
-  tekst: () => ({ uslovie: z.uslovie, a: z.a, b: z.b }),
-  otvet: () => z.otvet,
+  varianty: z.varianty,
+  tekst: (p) => ({
+    uslovie: poNaboru(z.uslovie, p),
+    a: poNaboru(z.a, p),
+    b: poNaboru(z.b, p),
+  }),
+  otvet: (p) => poNaboru(z.otvet, p),
   podskazka: () => podskazka(z),
-  reshenieA: () => [...z.dokazatelstvo],
-  reshenieB: () => [...z.reshenieB],
+  reshenieA: (p) => [...poNaboru(z.dokazatelstvo, p)],
+  reshenieB: (p) => [...poNaboru(z.reshenieB, p)],
 }));

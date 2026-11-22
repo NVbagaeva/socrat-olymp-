@@ -103,7 +103,7 @@
 /* Запасной значок — римская цифра раздела. */
 .ikonka-tela--nomer {
   color: var(--color-primary);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.02em;
 }

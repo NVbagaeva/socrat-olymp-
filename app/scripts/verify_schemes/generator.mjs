@@ -6,7 +6,9 @@
    выбранных типов, без повторов, пока вариантов чисел хватает; замена
    меняет задачу только на своей позиции; ответ на листе учителя — тот
    же, что считает тренажёр; описание листа ученика без ответов;
-   чертёж несёт оформление в себе (не зависит от skhemy.css). */
+   чертёж несёт оформление в себе (не зависит от skhemy.css);
+   «Чертёж к условию»: без галочки у ученика чертежа нет, с галочкой —
+   есть, у учителя — всегда; задачи те же, галочка — в адресе. */
 
 import { requireSrc } from '../lib/load-ts.mjs';
 import { schetchik, zerno } from './obshchee.mjs';
@@ -58,7 +60,7 @@ export function proverit(N = 200) {
       a.poVariantam.flat().every((z) => vybor.includes(z.klyuch.split('#')[0])),
     );
     /* Чисел хватает: каждому типу нужно не больше наборов, чем у него есть
-       (у перенесённых задач — один набор, у остальных — три). */
+       (у всех типов сейчас по три). */
     const naborov = new Map(TIPY_18.map((t) => [t.id, t.varianty.length]));
     const hvataet = p.sostav.every((x) => x.n * p.variants <= naborov.get(x.id));
     const kluchi = a.poVariantam.flat().map((z) => z.klyuch);
@@ -99,6 +101,40 @@ export function proverit(N = 200) {
       'лист учителя с решениями и ответами',
       uchit.includes('sheet-task-answer') && uchit.includes('sheet-steps'),
     );
+
+    /* «Чертёж к условию» (ch=1): по умолчанию лист ученика — только
+       текст; с галочкой — чертёж под каждым условием; у учителя чертёж
+       есть всегда. Задачи от галочки не зависят. */
+    const sp = (spec) =>
+      (spec.variants ?? [{ blocks: spec.blocks }]).flatMap((v) =>
+        v.blocks.flatMap((bl) => bl.tasks),
+      );
+    const sCh = { ...p, dop: { ...DOP, chertezh: true } };
+    const qCh = g.sheetQuery18(sCh);
+    sch.fakt('галочка «Чертёж к условию» — в адресе ch=1', /(^|&)ch=1(&|$)/.test(qCh));
+    sch.fakt(
+      'адрес с галочкой разбирается обратно',
+      g.parseSheetQuery18(new URLSearchParams(qCh)).dop.chertezh === true &&
+        g.parseSheetQuery18(new URLSearchParams(g.sheetQuery18(p))).dop.chertezh === undefined,
+    );
+    const aCh = g.sobratList18(sCh, bank);
+    sch.fakt('с галочкой и без — те же задачи', kl(aCh) === kl(a));
+    sch.fakt(
+      'по умолчанию у ученика чертежей нет',
+      sp(g.sheetSpec18(p, a, 'uchenik')).every((t) => t.figureSvg === ''),
+    );
+    sch.fakt(
+      'с галочкой у ученика чертёж под каждым условием',
+      sp(g.sheetSpec18(sCh, aCh, 'uchenik')).every((t) => t.figureSvg.includes('<svg')),
+    );
+    for (const [imya, pp, l] of [
+      ['без галочки', p, a],
+      ['с галочкой', sCh, aCh],
+    ])
+      sch.fakt(
+        `у учителя чертёж есть всегда (${imya})`,
+        sp(g.sheetSpec18(pp, l, 'uchitel')).every((t) => t.figureSvg.includes('<svg')),
+      );
   }
   return { plokho: sch.itog() };
 }

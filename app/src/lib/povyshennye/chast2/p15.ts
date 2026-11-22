@@ -8,6 +8,7 @@
  *    ρ(C) = CD·CM/DM, ρ(C₁) = CD·C₁M/DM, CD² = 3a²/4, DM² = CD² + CM².
  */
 
+import { vPredelah } from '@/lib/skhemy/vidimye';
 import { chertezhSvg, postroit, sVidom, vybratVid, type Scenariy } from '@/lib/chertezh3';
 import { add, div, mul, rat, ratTex, toNumber } from '@/lib/zadanie15/core/rational';
 import { sqrtRat, surdTex, surdToNumber } from '@/lib/zadanie15/core/surd';
@@ -36,7 +37,10 @@ export function chislaP15(p: PP15) {
 }
 
 function scenariy(p: PP15, punkt: 'a' | 'b'): Scenariy {
-  const t = p.m / (p.m + p.n);
+  /* Видимое положение M (lib/skhemy/vidimye.ts): при CM : MC₁ = 8 : 1
+     точки M, H и C₁ слипаются. M — не ближе 0,3 ребра к его концам; M
+     между C и C₁, как в задаче. Чисел на чертеже нет. */
+  const t = vPredelah(p.m / (p.m + p.n), 0.3, 0.7);
   const ot = p.ot === 'C' ? 'C' : 'C1';
   const sc: Scenariy = {
     id: `PV-P15-${punkt}`,

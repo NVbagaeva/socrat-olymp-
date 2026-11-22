@@ -26,3 +26,23 @@ export function tipTrenazherHref13(prototip: string): string {
 export function blokHref13(slug: string): string {
   return `${OPORNYE13_HREF}${slug}/`;
 }
+
+/** Хвост вкладки «На оптимизацию» — второй вид задач задания (ЕГЭ-2027). */
+export const OPTIMIZACIYA13_TAIL = 'optimizaciya/';
+export const OPTIMIZACIYA13_HREF = `${RAZDEL13}${OPTIMIZACIYA13_TAIL}`;
+
+/**
+ * Блок «Задачи на оптимизацию» на «О задании». Сюда ведут прежние ссылки
+ * на раздел оптимизации: в ЕГЭ-2027 своего номера у него нет.
+ */
+export const OPTIMIZACIYA13_BLOK_HREF = `${RAZDEL13}#optimizaciya`;
+
+/** Сюжет на вкладке «На оптимизацию»: группа раскрывается по якорю. */
+export function syuzhetHref13(syuzhet: string): string {
+  return `${OPTIMIZACIYA13_HREF}#gruppa-${syuzhet}`;
+}
+
+/** Глава теории раздела: …/teoriya/#teoriya-{glava}. */
+export function glavaHref13(glava: string): string {
+  return `${TEORIYA13_HREF}#teoriya-${glava}`;
+}

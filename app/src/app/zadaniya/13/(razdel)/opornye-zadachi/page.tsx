@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { Opornye13Spisok } from '@/components/tasks/zadanie13/Opornye13';
 import { NAVYKI13, OPORNYE13 } from '@/content/ekonomicheskie13';
-import { OPORNYE_13, zadanie13Title } from '@/content/zadanie13';
+import { OPORNYE_13 } from '@/content/zadanie13';
 import { blokHref13 } from '@/lib/zadanie13/links';
 import { BLOKI_13, zadachiBloka } from '@/lib/zadanie13/opornye/bloki';
+import { zadanie13Zagolovok } from '@/lib/seo-razdely';
 
 export const metadata: Metadata = {
-  title: zadanie13Title(OPORNYE13.title),
+  title: zadanie13Zagolovok(OPORNYE13.title),
 };
 
 function esc(text: string): string {

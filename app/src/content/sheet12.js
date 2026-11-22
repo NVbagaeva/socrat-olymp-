@@ -12,6 +12,8 @@
 */
 
 /** Шапка листа. */
+import { nomerRazdela } from './struktura.js';
+
 export const head = {
   course: 'Профильная математика',
   author: 'Багаева Н.В.',
@@ -20,13 +22,13 @@ export const head = {
 
 /** Блок названия. Даты на листе нет намеренно. */
 export const title = {
-  chip: 'Задание 12',
+  chip: `Задание ${nomerRazdela('grafiki-funkciy')}`,
   text: 'Линейная функция',
   subtitle: 'Задания для отработки',
 };
 
 /** Строка компактной шапки следующих страниц. */
-export const runner = 'Задание 12 · Линейная функция';
+export const runner = `Задание ${nomerRazdela('grafiki-funkciy')} · Линейная функция`;
 
 /**
  * Рамка «Повторяем:». Пункты взяты из теории задания №12

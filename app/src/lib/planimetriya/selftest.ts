@@ -102,7 +102,9 @@ function proveritRisunok(
       out.push('на листе ученика элементы подсказки или решения');
     if (svg.includes(`stroke-dasharray="${PL.dash.punktir}"`))
       out.push('на листе ученика пунктир построения');
-    if (o.ramki.some((r) => r.kind === 'znachenie')) out.push('на листе ученика числа на чертеже');
+    /* «?» у искомого — не число: это знак вопроса задачи. */
+    if (o.ramki.some((r) => r.kind === 'znachenie' && r.id !== '?'))
+      out.push('на листе ученика числа на чертеже');
   }
   if (variant) {
     const bukvy = o.ramki

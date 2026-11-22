@@ -465,3 +465,18 @@
 /* Что сделано в тренажёре (.tstats) — в стилях компонента:
    components/tasks/trainer/tstats.css. Блок показывают и страницы, которые
    этот файл не подключают (кабинет ученика). */
+
+/* Отклик на ответ: плашка проявляется, значок «пружинит»
+   (ключевые кадры — styles/components.css). */
+.tverdict {
+  animation: otklik-vhod var(--motion-base) var(--ease-out) both;
+}
+.tverdict__ico {
+  animation: otklik-znachok var(--motion-slow) var(--ease-spring) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tverdict,
+  .tverdict__ico {
+    animation: none;
+  }
+}
