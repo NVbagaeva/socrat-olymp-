@@ -91,6 +91,19 @@ const nextConfig: NextConfig = {
     // флага вход работает (страница /voyti/ открывается по прямой
     // ссылке), но в шапке его не видно — так живёт пробный режим.
     // Кружок с инициалами после входа показывается при любом значении.
+    // Кабинет, версия 2 (docs/plans/cabinet-v2.md, src/lib/flags.ts): журнал
+    // решения задач и список разделов, где он включён («5,8» или «all»).
+    // Без включённого входа флаг не действует.
+    KAB2_ZHURNAL:
+      process.env.NEXT_PUBLIC_KAB2_ZHURNAL === '1' &&
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' &&
+      (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '') !== '' &&
+      (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '') !== ''
+        ? '1'
+        : '0',
+    KAB2_RAZDELY: /^(all|\d+(,\d+)*)$/.test(process.env.NEXT_PUBLIC_KAB2_RAZDELY ?? '')
+      ? (process.env.NEXT_PUBLIC_KAB2_RAZDELY ?? '')
+      : '',
     AUTH_HEADER:
       process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' &&
       (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '') !== '' &&

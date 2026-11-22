@@ -20,6 +20,7 @@ import { zadachaBanka, type SessiyaPayload, type SessiyaZadacha } from '../sessi
 import type { TekstyTrenazhera45 } from '@/content/veroyatnost45';
 import { DerevoPodskazki, risunok45, shagi45, voprosy45 } from './shagi45';
 import type { Ui45 } from './ui45';
+import { useZhurnal } from '@/lib/zhurnal/useZhurnal';
 
 /**
  * Замены «Похожая задача»: экран подменяет задачу тренировки другим
@@ -189,6 +190,27 @@ export function Ekran45({
     [gotovaya, hintOpen],
   );
 
+  /* Журнал для кабинета (lib/zhurnal): попытки, шаги подсказки, решение,
+     время. Запись начинается, когда задача загружена и показана. */
+  const zhurnal = useZhurnal(
+    gotovaya === undefined
+      ? null
+      : {
+          klyuch: `t45:${roundKey}:${index}:${gotovaya.id}`,
+          source: 'trainer',
+          taskNo: zadanie,
+          kind: gotovaya.metod === '' ? gotovaya.kind : gotovaya.metod,
+          ref: gotovaya.id,
+          gen: versiya,
+          statement: gotovaya.uslovie,
+          ...((gotovaya.illustration ?? gotovaya.model?.illustration) === undefined
+            ? {}
+            : { figure: (gotovaya.illustration ?? gotovaya.model?.illustration)?.path ?? '' }),
+          session: roundKey,
+          position: index + 1,
+        },
+  );
+
   function taskSeconds(): number {
     return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
   }
@@ -211,6 +233,7 @@ export function Ekran45({
   useBeforeFinish(setBeforeFinish, () => {
     if (task !== undefined && checked === 'wrong' && marks[index] === undefined) {
       remember(task, 'wrong');
+      zhurnal().zakryt('wrong');
     }
   });
 
@@ -255,13 +278,16 @@ export function Ekran45({
     }
     setFormat(null);
     const right = reading.right;
+    zhurnal().popytka(value, right);
     setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       if (!zakryta) {
         const chisto = !failed && !hintOpen;
         setMarks({ ...marks, [index]: chisto ? 'right' : 'hinted' });
-        remember(tekushchaya, failed ? 'wrong' : hintOpen ? 'hinted' : 'right');
+        const outcome = failed ? 'wrong' : hintOpen ? 'hinted' : 'right';
+        remember(tekushchaya, outcome);
+        zhurnal().zakryt(outcome);
       }
     } else {
       setFailed(true);
@@ -273,10 +299,14 @@ export function Ekran45({
   function reveal() {
     const wasOpen = solutionOpen;
     setSolutionOpen(!wasOpen);
+    if (!wasOpen) {
+      zhurnal().reshenie();
+    }
     if (!wasOpen && checked !== 'right' && !zakryta) {
       /* Решение открыто до верного ответа: задача закрыта «с разбором». */
       setMarks({ ...marks, [index]: 'hinted' });
       remember(tekushchaya, 'revealed');
+      zhurnal().zakryt('revealed');
     }
   }
 
@@ -296,6 +326,11 @@ export function Ekran45({
   function next() {
     if (checked === 'wrong' && !zakryta) {
       remember(tekushchaya, 'wrong');
+      zhurnal().zakryt('wrong');
+    } else if (!zakryta) {
+      /* «Дальше» без ответа — пропуск. */
+      zhurnal().propusk();
+      zhurnal().zakryt('skipped');
     }
     if (last) {
       onFinish();
@@ -317,6 +352,8 @@ export function Ekran45({
     if (v === undefined) {
       return;
     }
+    zhurnal().pohozhaya();
+    zhurnal().zakryt(checked === 'wrong' ? 'wrong' : 'skipped');
     const nextMarks = { ...marks };
     delete nextMarks[index];
     const nextTried = { ...tried };
@@ -373,7 +410,10 @@ export function Ekran45({
           : {
               html: '',
               open: hintOpen,
-              onOpen: () => setHintOpen(true),
+              onOpen: () => {
+                setHintOpen(true);
+                zhurnal().podskazka();
+              },
               telo:
                 voprosy.length === 0 ? (
                   <p>{T.ekran.zagruzka}</p>
@@ -384,10 +424,14 @@ export function Ekran45({
                       otkryto={shag}
                       mimo={mimo}
                       onVerno={() => {
+                        zhurnal().shagPodskazki(shag);
                         setShag(shag + 1);
                         setMimo([]);
                       }}
-                      onMimo={(j) => setMimo([...mimo, j])}
+                      onMimo={(j) => {
+                        zhurnal().oshibkaPodskazki(shag);
+                        setMimo([...mimo, j]);
+                      }}
                       labels={T.ekran.voprosy}
                     />
                     <DerevoPodskazki

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode, useRef } from 'react';
 import { OpornayaZadacha, type OpornyyIshod } from '../../opornye';
 import { tekstyKarty45, tekstyOpornyh45 } from '@/content/veroyatnost45';
 import { PodskazkaVoprosy } from '../../trening/PodskazkaVoprosy';
@@ -17,6 +17,7 @@ import { readSealed45 } from '@/lib/veroyatnost/trening/otvet45';
 import { DerevoPodskazki, risunok45, shagi45, voprosy45 } from '../trening/shagi45';
 import '../../trening/trening.css';
 import '../trening/trening45.css';
+import { useZhurnal } from '@/lib/zhurnal/useZhurnal';
 
 /**
  * Экран блока опорных задач №4 и №5 на общем экране блока
@@ -57,6 +58,25 @@ export function Opornye45Blok({
   const index = vybrana ?? (pervaya === -1 ? 0 : pervaya);
   const z = zadachi[index];
 
+  /* Журнал для кабинета (lib/zhurnal): новый показ задачи — новая запись. */
+  const [vhod] = useState(() => Date.now().toString(36));
+  const [pokaz, setPokaz] = useState(0);
+  const oshibalsya = useRef(false);
+  const zhurnal = useZhurnal(
+    z === undefined
+      ? null
+      : {
+          klyuch: `o45:${zadanie}:${z.id}:${vhod}.${pokaz}`,
+          source: 'opornye',
+          taskNo: zadanie,
+          kind: z.id.split(':')[0] ?? z.id,
+          ref: z.id,
+          statement: z.uslovie,
+          ...(z.risunok === undefined ? {} : { figure: z.risunok }),
+          position: index + 1,
+        },
+  );
+
   const razbor = useMemo(
     /* Разбор нужен и подсказке: из него дерево, которое растёт по шагам. */
     () =>
@@ -86,6 +106,13 @@ export function Opornye45Blok({
 
   function open(next: number) {
     if (next < 0 || next >= zadachi.length) return;
+    /* Уход с незакрытой задачи: с ошибкой — «неверно», иначе пропуск. */
+    if (checked !== 'right') {
+      if (!oshibalsya.current) zhurnal().propusk();
+      zhurnal().zakryt(oshibalsya.current ? 'wrong' : 'skipped');
+    }
+    oshibalsya.current = false;
+    setPokaz((n) => n + 1);
     setVybrana(next);
     setValue('');
     setChecked(null);
@@ -111,6 +138,12 @@ export function Opornye45Blok({
     setFormat(null);
     setVybrana(index);
     const ok = reading.right;
+    zhurnal().popytka(value, ok);
+    if (ok) {
+      zhurnal().zakryt(oshibalsya.current ? 'wrong' : hintOpen || solutionOpen ? 'hinted' : 'right');
+    } else {
+      oshibalsya.current = true;
+    }
     setChecked(ok ? 'right' : 'wrong');
     /* Начисто — если до верного ответа задачу не открывали и не ошибались. */
     zapisat(ok, ok && prepItog(progress, zadacha.id) === null && !hintOpen, ok ? 'right' : 'wrong');
@@ -168,6 +201,7 @@ export function Opornye45Blok({
               open: hintOpen,
               onOpen: () => {
                 setHintOpen(true);
+                zhurnal().podskazka();
                 /* Подсказка учитывается так же, как открытое решение. */
                 razborOtkryt();
               },
@@ -178,10 +212,14 @@ export function Opornye45Blok({
                     otkryto={shag}
                     mimo={mimo}
                     onVerno={() => {
+                      zhurnal().shagPodskazki(shag);
                       setShag(shag + 1);
                       setMimo([]);
                     }}
-                    onMimo={(j) => setMimo([...mimo, j])}
+                    onMimo={(j) => {
+                      zhurnal().oshibkaPodskazki(shag);
+                      setMimo([...mimo, j]);
+                    }}
                     labels={T.voprosy}
                   />
                   <DerevoPodskazki
@@ -212,6 +250,7 @@ export function Opornye45Blok({
               ),
               open: solutionOpen,
               onToggle: () => {
+                if (!solutionOpen) zhurnal().reshenie();
                 if (!solutionOpen && checked !== 'right') razborOtkryt();
                 setSolutionOpen(!solutionOpen);
               },

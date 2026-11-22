@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui';
 import { BookmarkButton } from '@/components/zakladki/BookmarkButton';
@@ -19,6 +19,7 @@ import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { AnswerInput, FormatHint } from '../otvet/AnswerInput';
 import { Razbor8 } from './Razbor8';
 import type { RazborHtml } from '@/lib/vychisleniya/razbor';
+import { useZhurnal } from '@/lib/zhurnal/useZhurnal';
 
 type Attempt = 'wrong' | 'skipped';
 
@@ -89,6 +90,35 @@ export function Podgotovka8Screen({
   );
   const index = picked ?? firstOpen(status);
   const found = tasks[index];
+
+  /* Журнал для кабинета (lib/zhurnal): новый показ задачи или «Ещё
+     вариант» — новая запись; ссылка «блок|задача|seed» воспроизводит числа. */
+  const [vhod] = useState(() => Date.now().toString(36));
+  const [pokaz, setPokaz] = useState(0);
+  const oshibalsya = useRef(false);
+  const pokazana = found === undefined ? undefined : (fresh[found.no] ?? found);
+  const zhurnal = useZhurnal(
+    found === undefined || pokazana === undefined
+      ? null
+      : {
+          klyuch: `o8:${blockId}:${found.no}:${pokazana.seed}:${vhod}.${pokaz}`,
+          source: 'opornye',
+          taskNo: 8,
+          kind: pokazana.id,
+          ref: `${blockId}|${pokazana.id}|${pokazana.seed}`,
+          statement: pokazana.uslovieHtml,
+          position: found.no,
+        },
+  );
+  /* Уход с незакрытой задачи: с ошибкой — «неверно», иначе пропуск. */
+  function ostavitZadachu() {
+    if (checked !== 'right') {
+      zhurnal().zakryt(oshibalsya.current ? 'wrong' : 'skipped');
+    }
+    oshibalsya.current = false;
+    setPokaz((n) => n + 1);
+  }
+
   if (found === undefined) {
     return null;
   }
@@ -108,6 +138,7 @@ export function Podgotovka8Screen({
   }
 
   function open(next: number) {
+    ostavitZadachu();
     setPicked(next);
     reset();
     scrollTabTo('.ptask__card');
@@ -135,6 +166,12 @@ export function Podgotovka8Screen({
     setHint(null);
     setPicked(index);
     setChecked(correct ? 'right' : 'wrong');
+    zhurnal().popytka(value, correct);
+    if (correct) {
+      zhurnal().zakryt(oshibalsya.current ? 'wrong' : memo || solution !== null ? 'hinted' : 'right');
+    } else {
+      oshibalsya.current = true;
+    }
     if (correct) {
       prep8MarkSolved(blockId, base.no);
     } else {
@@ -143,6 +180,7 @@ export function Podgotovka8Screen({
   }
 
   function skip() {
+    zhurnal().propusk();
     setAttempts((prev) => ({ ...prev, [base.no]: 'skipped' }));
     if (nextOpen !== null) {
       open(nextOpen);
@@ -154,12 +192,18 @@ export function Podgotovka8Screen({
     if (micro === undefined) {
       return;
     }
+    zhurnal().pohozhaya();
+    ostavitZadachu();
     setPicked(index);
     setFresh((prev) => ({ ...prev, [base.no]: sealPrep(micro, randomSeed()) }));
     reset();
   }
 
   function showSolution() {
+    zhurnal().reshenie();
+    if (checked !== 'right') {
+      zhurnal().zakryt('revealed');
+    }
     try {
       setSolution(JSON.parse(openText(task.razbor, task.seal)) as RazborHtml);
     } catch {
@@ -316,7 +360,11 @@ export function Podgotovka8Screen({
               <Button onClick={check} disabled={!ready}>
                 Проверить
               </Button>
-              <Button variant="ghost" onClick={() => setMemo(!memo)}>
+              <Button variant="ghost" onClick={() => {
+                  /* «Формула» — свойство, на которое опирается задача. */
+                  if (!memo) zhurnal().svoystvo();
+                  setMemo(!memo);
+                }}>
                 {memo ? 'Скрыть формулу' : 'Формула'}
               </Button>
               {checked === 'wrong' ? (

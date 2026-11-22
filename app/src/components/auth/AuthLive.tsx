@@ -39,6 +39,14 @@ export function LiveWidget({ variant, className }: AuthWidgetProps) {
     };
   }, [userId]);
 
+  /* Ученик вошёл — остаток журнала решения с прошлого визита уходит на
+     сервер (lib/zhurnal). Без флага сборки кода журнала здесь нет. */
+  const uchenik = user !== null && user.role === 'student';
+  useEffect(() => {
+    if (process.env.KAB2_ZHURNAL !== '1' || !uchenik) return;
+    void import('@/lib/zhurnal').then(({ dootpravit }) => dootpravit());
+  }, [uchenik]);
+
   /* Репетитор вошёл — его комплекты уходят и в аккаунт. */
   useEffect(() => {
     if (user === null || user.role !== 'tutor') return undefined;

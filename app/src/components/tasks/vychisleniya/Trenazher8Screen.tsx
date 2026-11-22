@@ -17,6 +17,7 @@ import type { PriznakHtml, RazborHtml, ShagHtml } from '@/lib/vychisleniya/razbo
 import { openText, readSealed } from '@/lib/vychisleniya/secret';
 import { analogOf, parseTaskId, makeTask, type Task8 } from '@/lib/vychisleniya/session';
 import { typeset } from '@/lib/tex';
+import { useZhurnal } from '@/lib/zhurnal/useZhurnal';
 import { ZAMENY8, type Trenazher8Payload } from './trenazher8Payload';
 import type { Trenazher8Ui } from './trenazher8Ui';
 
@@ -165,6 +166,24 @@ export function Trenazher8Screen({
     return text === null ? null : typeset(text);
   }, [task]);
 
+  /* Журнал для кабинета (lib/zhurnal): каждая попытка, подсказка,
+     решение и время. Новый показ — новая запись; после перезагрузки
+     страницы запись той же задачи продолжается. */
+  const zhurnal = useZhurnal(
+    task === undefined
+      ? null
+      : {
+          klyuch: `t8:${roundKey}:${index}:${task.id}`,
+          source: 'trainer',
+          taskNo: 8,
+          kind: task.prototype,
+          ref: task.id,
+          statement: task.questionHtml,
+          session: roundKey,
+          position: index + 1,
+        },
+  );
+
   function taskSeconds(): number {
     return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
   }
@@ -187,6 +206,7 @@ export function Trenazher8Screen({
   useBeforeFinish(setBeforeFinish, () => {
     if (task !== undefined && checked === 'wrong' && marks[index] === undefined) {
       remember(task, 'wrong');
+      zhurnal().zakryt('wrong');
     }
   });
 
@@ -215,12 +235,15 @@ export function Trenazher8Screen({
     }
     setFormat(null);
     const right = reading.right;
+    zhurnal().popytka(value, right);
     setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       setMarks({ ...marks, [index]: 'right' });
       /* Верно с первой попытки, но с открытой подсказкой — «с подсказкой». */
-      remember(zadacha, failed ? 'wrong' : hintOpen ? 'hinted' : 'right');
+      const outcome = failed ? 'wrong' : hintOpen ? 'hinted' : 'right';
+      remember(zadacha, outcome);
+      zhurnal().zakryt(outcome);
     } else {
       setFailed(true);
       setMisses(misses + 1);
@@ -231,10 +254,14 @@ export function Trenazher8Screen({
   function reveal() {
     const wasOpen = solutionOpen;
     setSolutionOpen(!wasOpen);
+    if (!wasOpen) {
+      zhurnal().reshenie();
+    }
     if (!wasOpen && checked !== 'right' && !zakryta) {
       /* Решение открыто до ответа: задача закрыта «с разбором». */
       setMarks({ ...marks, [index]: 'hinted' });
       remember(zadacha, 'revealed');
+      zhurnal().zakryt('revealed');
     }
   }
 
@@ -252,6 +279,11 @@ export function Trenazher8Screen({
   function next() {
     if (checked === 'wrong' && !zakryta) {
       remember(zadacha, 'wrong');
+      zhurnal().zakryt('wrong');
+    } else if (!zakryta) {
+      /* «Дальше» без ответа — пропуск. */
+      zhurnal().propusk();
+      zhurnal().zakryt('skipped');
     }
     if (last) {
       onFinish();
@@ -268,6 +300,8 @@ export function Trenazher8Screen({
     if (fresh === null || parsed === null) {
       return;
     }
+    zhurnal().pohozhaya();
+    zhurnal().zakryt(checked === 'wrong' ? 'wrong' : 'skipped');
     /* Закрытая задача уходит из отметок: решается новая. */
     const nextMarks = { ...marks };
     delete nextMarks[index];
@@ -300,7 +334,14 @@ export function Trenazher8Screen({
       podskazka={
         control || podskazkaHtml === null
           ? null
-          : { html: podskazkaHtml, open: hintOpen, onOpen: () => setHintOpen(true) }
+          : {
+              html: podskazkaHtml,
+              open: hintOpen,
+              onOpen: () => {
+                setHintOpen(true);
+                zhurnal().podskazka();
+              },
+            }
       }
       reshenie={
         control

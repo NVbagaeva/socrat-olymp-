@@ -28,6 +28,7 @@ import { taskId } from '@/lib/vychisleniya/ids';
 import type { RazborHtml } from '@/lib/vychisleniya/razbor';
 import { skillOfPrototype } from '@/lib/vychisleniya/skills';
 import { Confirm, dzApi, errorCode } from './common';
+import { useZhurnal } from '@/lib/zhurnal/useZhurnal';
 
 const t = DZ.solve;
 
@@ -94,6 +95,24 @@ export function HomeworkSolve({
   const readOnly = submittedAt !== null || hw.closedAt !== null;
   const late = !readOnly && hw.dueAt !== null && Date.parse(hw.dueAt) < full.loadedAt;
 
+  /* Журнал для кабинета (lib/zhurnal): время и действия по задаче ДЗ.
+     Ответ проверяет база; здесь — как ученик шёл к нему. Запись одна на
+     задачу и переживает уход со страницы. Закрытая задача не пишется. */
+  const zhurnal = useZhurnal(
+    task === undefined || readOnly || stateOf(task.id) !== 'open'
+      ? null
+      : {
+          klyuch: `dz:${hw.id}:${task.id}`,
+          source: 'homework',
+          taskNo: hw.taskNo,
+          kind: task.kind,
+          ref: task.id,
+          statement: task.questionHtml,
+          homeworkId: hw.id,
+          position: task.position,
+        },
+  );
+
   /* Первое открытие — «начато» в базе. */
   useEffect(() => {
     if (mine !== undefined && mine.startedAt === null && !readOnly) {
@@ -150,6 +169,10 @@ export function HomeworkSolve({
         return { hint: null, wrong: false };
       }
       const ok = result.kind === 'right';
+      zhurnal().popytka(value, ok);
+      if (result.state !== 'open') {
+        zhurnal().zakryt(ok && result.attempts <= 1 ? 'right' : 'wrong');
+      }
       setAnswers((m) =>
         new Map(m).set(current.id, {
           taskId: current.id,
@@ -180,6 +203,8 @@ export function HomeworkSolve({
     setAsk(null);
     try {
       const razbor = await (await dzApi()).revealSolution(current.id);
+      zhurnal().reshenie();
+      zhurnal().zakryt('revealed');
       setAnswers((m) =>
         new Map(m).set(current.id, {
           taskId: current.id,

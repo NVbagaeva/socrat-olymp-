@@ -27,6 +27,7 @@ import {
 } from '@/lib/kartochki/progress';
 import { persistent, type PersistentStore } from '@/lib/storage';
 import { KartochkaFlip } from './KartochkaFlip';
+import { useZhurnal } from '@/lib/zhurnal/useZhurnal';
 
 /** Начатая сессия: переживает переход в теорию и перезагрузку. */
 interface Nachataya {
@@ -145,6 +146,26 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
       nachatRef.current('vse', undefined, p);
   }, [task]);
 
+  /* Журнал для кабинета (lib/zhurnal): показ карточки и оценка. Колоды
+     базы (свой ключ прогресса) в журнал не идут. */
+  const naEkrane =
+    ekran.vid === 'sessiya' && nachataya !== null && koloda.klyuch === undefined
+      ? tekushchaya(nachataya.s)
+      : null;
+  const zhurnal = useZhurnal(
+    naEkrane === null || nachataya === null
+      ? null
+      : {
+          klyuch: `k:${koloda.task}:${nachataya.seed}:${nachataya.s.poz}:${naEkrane}`,
+          source: 'cards',
+          taskNo: koloda.task,
+          kind: poId.get(naEkrane)?.topic ?? '',
+          ref: naEkrane,
+          session: `k:${koloda.task}:${nachataya.seed}`,
+          position: nachataya.s.poz + 1,
+        },
+  );
+
   function zavershit(s: Sessiya) {
     store.write(null);
     pokazat(s.poz === 0 ? { vid: 'start' } : { vid: 'itog', s });
@@ -154,6 +175,8 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
     if (nachataya === null) return;
     const id = tekushchaya(nachataya.s);
     if (id === null) return;
+    zhurnal().popytka(znayu ? 'знаю' : 'не знаю', znayu);
+    zhurnal().zakryt(znayu ? 'right' : 'wrong');
     if (menyaetKorobki(nachataya.s))
       zapisatProgress(task, otsenit(progress, id, znayu, Date.now()));
     const dalshe = otmetit(nachataya.s, znayu);

@@ -46,6 +46,7 @@ import type { VariantTask } from '@/lib/variant/types';
 import { WorkResult } from './WorkResult';
 import { WorkScreen } from './WorkScreen';
 import { podpis1, podpis2 } from '@/lib/variant/struktura';
+import { zapisatVariant } from '@/lib/zhurnal/variant';
 
 export interface WorkRunProps {
   link: WorkLink;
@@ -375,6 +376,11 @@ function Finished({
   );
   const code = useMemo(() => encodeResult(result), [result]);
   const saved = useRef(false);
+  /* Состояние экрана для журнала: читается один раз, при сохранении. */
+  const uiRef = useRef(ui);
+  useEffect(() => {
+    uiRef.current = ui;
+  });
   /* Завершение отправляется один раз, даже если эффект перезапустится:
      сервер второй раз ответил бы «работа уже завершена». */
   const finishing = useRef<Promise<WorkCheck> | null>(null);
@@ -420,6 +426,44 @@ function Finished({
           })),
         };
         zapis.current = rec;
+        /* Журнал кабинета (lib/zhurnal): работа и её задачи. «Работа над
+           ошибками» — не вариант, в журнал вариантов не идёт. */
+        if (payload.oshibki === null) {
+          const ui = uiRef.current;
+          const nabor = naborRazdela(link.code);
+          const second = Object.fromEntries(
+            Object.entries(ui.v2).map(([i, v]) => [i, v === 'right']),
+          );
+          zapisatVariant({
+            kind:
+              payload.kabinet !== undefined
+                ? 'kabinet'
+                : nabor?.razdel === 'pv'
+                  ? 'povyshennye'
+                  : nabor?.razdel === 'ev'
+                    ? 'ezhemesyachnye'
+                    : series
+                      ? 'seriya'
+                      : 'sobrat',
+            code: payload.code,
+            variant: payload.variant,
+            mode: payload.mode === 'trening' ? 'trening' : 'kontrol',
+            title,
+            startedAt: ui.startedAt,
+            finishedAt,
+            activeMs: seconds * 1000,
+            primary: score.primary,
+            max: score.max,
+            test: score.test,
+            tasks: payload.tasks,
+            answers,
+            second: ui.second,
+            right: payload.tasks.map((_, i) => c.right[i] === true),
+            secondRight: second,
+            hinted: ui.hinted,
+            times: ui.times,
+          });
+        }
         void saveWork(rec).then(() => {
           if (alive) setVolatile(archiveVolatile());
         });
@@ -431,7 +475,7 @@ function Finished({
     return () => {
       alive = false;
     };
-  }, [proverka, answers, payload, title, code, seconds, result, ui.hinted]);
+  }, [proverka, answers, payload, title, code, seconds, result, ui.hinted, link.code, series]);
 
   /* Оценки части 2 — в ту же запись архива: карточка версии покажет
      «Часть 2: 14/20» или «на проверке». */
