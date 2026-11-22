@@ -6,6 +6,8 @@
      node scripts/check-auth.mjs --no-header               вход есть, кнопки в шапке нет
      node scripts/check-auth.mjs --disabled                сборка без входа
      node scripts/check-auth.mjs --gallery <папка>         только снимки ключевых экранов
+     NEXT_PUBLIC_ZHURNAL=1 node scripts/check-auth.mjs --zhurnal [папка]
+                                                           только журнал решения задач
 
    Служба входа (Supabase: GoTrue и PostgREST) здесь не настоящая, а
    мок внутри Playwright: все запросы к адресу проекта перехватываются
@@ -115,6 +117,7 @@ const SHOTS =
   GALLERY !== null || GALLERY_Z8 !== null || GALLERY_DZ !== null
     ? null
     : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null);
+if (SHOTS !== null) fs.mkdirSync(SHOTS, { recursive: true });
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
   console.error('Нет out/index.html — сначала pnpm build.');
@@ -182,6 +185,10 @@ const ALLOWED = new Set([
   'dz-repetitor@yandex.ru',
   'dz-uchenik1@yandex.ru',
   'dz-uchenik2@yandex.ru',
+  /* Журнал решения задач: ученик и учитель. */
+  'zhurnal@yandex.ru',
+  'zhurnal2@yandex.ru',
+  'zhurnal-uchitel@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -2310,103 +2317,7 @@ async function runEnabled() {
     await context.close();
   }
 
-  /* ── Журнал решения задач (docs/kabinet-zhurnal.md) ──
-     Ученик решает №8 в тренажёре: неверно, потом верно; вторую задачу —
-     с подсказкой. В «базу» уходят ответы как есть, номера попыток,
-     подсказка, время и исход. Учитель журнал не пишет. Снимки экрана
-     тренажёра с записью — на телефоне и компьютере. */
-  if (ZHURNAL_ON) {
-    const mock = makeMock();
-    registerInMock(mock, 'zhurnal@yandex.ru', 'zhurnal-parol-1', 'Журнал Ученик', 'student', {
-      birth_year: 2000,
-    });
-    const errors = [];
-    const answerOfTask = (id) => {
-      const parsed = parseTaskId(id);
-      return generate(parsed.prototype, parsed.seed, parsed.level).otvet;
-    };
-    for (const width of [375, 1280]) {
-      const { context, page } = await newPage(mock, width, errors);
-      await welcomeSeen(context);
-      await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
-      await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
-      await page.waitForSelector('.trn-start');
-      await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
-      await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
-      await page.locator('.trn-vybor__start').click();
-      const CARD = '.trn-zadacha[data-task]';
-      await page.waitForSelector(CARD);
-      const first = await page.locator(CARD).getAttribute('data-task');
-      const right = answerOfTask(first);
-      const wrongTyped = ` ${ru(right + 1)} `;
-      await page.fill('.trn-ekran .otvet-input__field', wrongTyped);
-      await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
-      await page.waitForSelector('.trn-verdikt--net');
-      await page.fill('.trn-ekran .otvet-input__field', ru(right));
-      await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
-      await page.locator('.trn-knopki button:has-text("Дальше")').click();
-      await page.waitForFunction(
-        ([sel, id]) => document.querySelector(sel)?.getAttribute('data-task') !== id,
-        [CARD, first],
-      );
-      const second = await page.locator(CARD).getAttribute('data-task');
-      const hint = page.locator('.trn-ekran button:has-text("Подсказка")');
-      const hinted = (await hint.count()) > 0;
-      if (hinted) await hint.first().click();
-      await page.fill('.trn-ekran .otvet-input__field', ru(answerOfTask(second)));
-      await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
-      await page.waitForSelector('.trn-verdikt--da');
-      if (SHOTS !== null) {
-        await page.evaluate(() => document.fonts.ready);
-        await page.screenshot({ path: path.join(SHOTS, `zhurnal-trenazher-8-${width}.png`) });
-      }
-      /* Очередь уходит через 3 с после изменения. */
-      const until = Date.now() + 15000;
-      const rowOf = (id) =>
-        mock.zhurnal.find((r) => r.task_ref === id && r.outcome !== null && r.outcome !== undefined);
-      while (Date.now() < until && (rowOf(first) === undefined || rowOf(second) === undefined)) {
-        await new Promise((done) => setTimeout(done, 250));
-      }
-      const a = rowOf(first);
-      const b = rowOf(second);
-      check(a !== undefined && b !== undefined, `журнал ${width}: обе задачи ушли в базу`);
-      if (a !== undefined) {
-        check(a.task_no === 8 && a.kind === parseTaskId(first).prototype && a.place === 'trenazher',
-          `журнал ${width}: раздел, тип и место задачи`);
-        check(a.popytki.length === 2 && a.popytki[0].answer === wrongTyped && !a.popytki[0].ok
-          && a.popytki[1].ok && a.popytki[1].n === 2,
-          `журнал ${width}: обе попытки с ответом как есть: ${JSON.stringify(a.popytki)}`);
-        check(a.outcome === 'wrong', `журнал ${width}: верно со второй попытки — ошибка (${a.outcome})`);
-        check(typeof a.gen_hash === 'string' && a.gen_hash.length === 16 && a.uslovie_tex.length > 0,
-          `журнал ${width}: отпечаток и условие для учителя`);
-        check(a.total_ms > 0 && a.active_ms > 0 && a.active_ms <= a.total_ms,
-          `журнал ${width}: активное и общее время (${a.active_ms} из ${a.total_ms})`);
-      }
-      if (b !== undefined) {
-        check(b.outcome === (hinted ? 'hinted' : 'right') && b.hint_steps === (hinted ? 1 : 0),
-          `журнал ${width}: подсказка и исход второй задачи (${b.outcome}, ${b.hint_steps})`);
-      }
-      await context.close();
-      mock.zhurnal.length = 0;
-    }
-    /* Учитель журнал не пишет: очереди у него нет. */
-    registerInMock(mock, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2', 'Журнал Учитель', 'tutor');
-    const { context, page } = await newPage(mock, 1280, errors);
-    await welcomeSeen(context);
-    await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
-    await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
-    await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
-    await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
-    await page.locator('.trn-vybor__start').click();
-    await page.waitForSelector('.trn-zadacha[data-task]');
-    const id = await page.locator('.trn-zadacha[data-task]').getAttribute('data-task');
-    await page.fill('.trn-ekran .otvet-input__field', ru(answerOfTask(id)));
-    await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
-    await new Promise((done) => setTimeout(done, 5000));
-    check(mock.zhurnal.length === 0, 'журнал: учитель в журнал не пишет');
-    await context.close();
-    check(errors.length === 0, `журнал: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
-  }
+  if (ZHURNAL_ON) await runZhurnal();
 
   sdkOutsideFirstLoad();
 }
@@ -2423,6 +2334,107 @@ function sdkOutsideFirstLoad() {
     }
     check(!sdk, `/${p}: SDK входа не в первой загрузке`);
   }
+}
+
+/* ── Журнал решения задач (docs/kabinet-zhurnal.md) ──
+   Ученик решает №8 в тренажёре: неверно, потом верно; вторую задачу —
+   с подсказкой. В «базу» уходят ответы как есть, номера попыток,
+   подсказка, время и исход. Учитель журнал не пишет. Снимки экрана
+   тренажёра с записью — на телефоне и компьютере. */
+async function runZhurnal() {
+  const mock = makeMock();
+  /* У каждой ширины свой ученик: тренировка синхронизируется с аккаунтом,
+     и второй вход продолжил бы начатую. */
+  const uchenik = { 375: 'zhurnal@yandex.ru', 1280: 'zhurnal2@yandex.ru' };
+  for (const email of Object.values(uchenik)) {
+    registerInMock(mock, email, 'zhurnal-parol-1', 'Журнал Ученик', 'student', { birth_year: 2000 });
+  }
+  const errors = [];
+  const answerOfTask = (id) => {
+    const parsed = parseTaskId(id);
+    return generate(parsed.prototype, parsed.seed, parsed.level).otvet;
+  };
+  for (const width of [375, 1280]) {
+    const { context, page } = await newPage(mock, width, errors);
+    await welcomeSeen(context);
+    await login(page, uchenik[width], 'zhurnal-parol-1');
+    await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.trn-start');
+    await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+    await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
+    await page.locator('.trn-vybor__start').click();
+    const CARD = '.trn-zadacha[data-task]';
+    await page.waitForSelector(CARD);
+    const first = await page.locator(CARD).getAttribute('data-task');
+    const right = answerOfTask(first);
+    const wrongTyped = ` ${ru(right + 1)} `;
+    await page.fill('.trn-ekran .otvet-input__field', wrongTyped);
+    await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
+    await page.waitForSelector('.trn-verdikt--net');
+    await page.fill('.trn-ekran .otvet-input__field', ru(right));
+    await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
+    await page.locator('.trn-knopki button:has-text("Дальше")').click();
+    await page.waitForFunction(
+      ([sel, id]) => document.querySelector(sel)?.getAttribute('data-task') !== id,
+      [CARD, first],
+    );
+    const second = await page.locator(CARD).getAttribute('data-task');
+    const hint = page.locator('.trn-ekran button:has-text("Подсказка")');
+    const hinted = (await hint.count()) > 0;
+    if (hinted) await hint.first().click();
+    await page.fill('.trn-ekran .otvet-input__field', ru(answerOfTask(second)));
+    await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
+    await page.waitForSelector('.trn-verdikt--da');
+    if (SHOTS !== null) {
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({ path: path.join(SHOTS, `zhurnal-trenazher-8-${width}.png`) });
+    }
+    /* Очередь уходит через 3 с после изменения. */
+    const until = Date.now() + 15000;
+    const rowOf = (id) =>
+      mock.zhurnal.find((r) => r.task_ref === id && r.outcome !== null && r.outcome !== undefined);
+    while (Date.now() < until && (rowOf(first) === undefined || rowOf(second) === undefined)) {
+      await new Promise((done) => setTimeout(done, 250));
+    }
+    const a = rowOf(first);
+    const b = rowOf(second);
+    check(a !== undefined && b !== undefined, `журнал ${width}: обе задачи ушли в базу`);
+    if (a !== undefined) {
+      check(a.task_no === 8 && a.kind === parseTaskId(first).prototype && a.place === 'trenazher',
+        `журнал ${width}: раздел, тип и место задачи`);
+      check(a.popytki.length === 2 && a.popytki[0].answer === wrongTyped && !a.popytki[0].ok
+        && a.popytki[1].ok && a.popytki[1].n === 2,
+        `журнал ${width}: обе попытки с ответом как есть: ${JSON.stringify(a.popytki)}`);
+      check(a.outcome === 'wrong', `журнал ${width}: верно со второй попытки — ошибка (${a.outcome})`);
+      check(typeof a.gen_hash === 'string' && a.gen_hash.length === 16 && a.uslovie_tex.length > 0,
+        `журнал ${width}: отпечаток и условие для учителя`);
+      check(a.total_ms > 0 && a.active_ms > 0 && a.active_ms <= a.total_ms,
+        `журнал ${width}: активное и общее время (${a.active_ms} из ${a.total_ms})`);
+    }
+    if (b !== undefined) {
+      check(b.outcome === (hinted ? 'hinted' : 'right') && b.hint_steps === (hinted ? 1 : 0),
+        `журнал ${width}: подсказка и исход второй задачи (${b.outcome}, ${b.hint_steps})`);
+    }
+    await context.close();
+    mock.zhurnal.length = 0;
+  }
+  /* Учитель журнал не пишет: очереди у него нет. */
+  registerInMock(mock, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2', 'Журнал Учитель', 'tutor');
+  const { context, page } = await newPage(mock, 1280, errors);
+  await welcomeSeen(context);
+  await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+  await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+  await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+  await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
+  await page.locator('.trn-vybor__start').click();
+  await page.waitForSelector('.trn-zadacha[data-task]');
+  const id = await page.locator('.trn-zadacha[data-task]').getAttribute('data-task');
+  await page.fill('.trn-ekran .otvet-input__field', ru(answerOfTask(id)));
+  await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
+  await new Promise((done) => setTimeout(done, 5000));
+  check(mock.zhurnal.length === 0, 'журнал: учитель в журнал не пишет');
+  await context.close();
+  check(errors.length === 0, `журнал: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
 }
 
 /* ── Вход включён, кнопки в шапке нет (пробный режим) ──────────── */
@@ -2803,6 +2815,7 @@ try {
   else if (GALLERY_Z8 !== null) await runGalleryZ8(GALLERY_Z8);
   else if (GALLERY_DZ !== null) await runGalleryDz(GALLERY_DZ);
   else if (NO_HEADER) await runNoHeader();
+  else if (process.argv.includes('--zhurnal')) await runZhurnal();
   else await runEnabled();
 } finally {
   await browser.close();
