@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 const PRIMERY: { rol: Rol; srok: Srok; podpis: string }[] = [
   { rol: 'uchenik', srok: 'd30', podpis: 'Ученик, 30 дней' },
-  { rol: 'repetitor', srok: 'ege', podpis: 'Репетитор, до ЕГЭ' },
+  { rol: 'repetitor', srok: 'ege', podpis: 'Учитель, до ЕГЭ' },
 ];
 
 /** Порядок разметки, как на странице: платная первой. */

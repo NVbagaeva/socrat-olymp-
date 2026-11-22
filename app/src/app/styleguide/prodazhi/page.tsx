@@ -87,7 +87,7 @@ function TarifyA() {
         </p>
         <div className="pz-pereklyuchatel">
           <span className="is-on">Я ученик</span>
-          <span>Я репетитор</span>
+          <span>Я учитель</span>
           <span>Я родитель</span>
         </div>
       </header>
