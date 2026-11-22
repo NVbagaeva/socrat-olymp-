@@ -340,7 +340,7 @@ export function createLocalApi(): KabinetApi {
         const me = requireRole(db, 'admin', 'tutor');
         let tutorId: string | null = null;
         if (me.role === 'tutor') {
-          if (role !== 'student') fail('forbidden', 'Репетитор приглашает только учеников');
+          if (role !== 'student') fail('forbidden', 'Учитель приглашает только учеников');
           tutorId = me.id;
         }
         if (classId !== null) {
@@ -350,7 +350,7 @@ export function createLocalApi(): KabinetApi {
           tutorId = cls.tutorId;
         }
         if (role === 'tutor' && (tutorId !== null || classId !== null)) {
-          fail('bad_role', 'Репетитора приглашают без класса');
+          fail('bad_role', 'Учителя приглашают без класса');
         }
         const code = newCode();
         const at = new Date();

@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import { KartaNazadMesto } from './KartaNazadMesto';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
@@ -110,6 +111,7 @@ export function TabsRow({ className, children }: TabsRowProps) {
         inert={shown}
         aria-hidden={shown || undefined}
       >
+        <KartaNazadMesto slushat />
         {children('tiles', !shown)}
       </div>
       <div
@@ -121,6 +123,7 @@ export function TabsRow({ className, children }: TabsRowProps) {
         aria-hidden={!shown || undefined}
         onClickCapture={onPanelClick}
       >
+        <KartaNazadMesto slushat={false} />
         {children('panel', shown)}
       </div>
     </>

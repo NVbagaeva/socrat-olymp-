@@ -37,11 +37,11 @@ done
 tutor=$(printf '%s' "$SEED_TUTOR_EMAIL" | tr -d ' \n' | tr '[:upper:]' '[:lower:]')
 mapfile -t students < <(printf '%s' "$SEED_STUDENT_EMAILS" | tr ',' '\n' | tr -d ' ' | tr '[:upper:]' '[:lower:]' | grep '@' | sort -u)
 
-[ -n "$tutor" ] || { log "Нет секрета SEED_TUTOR_EMAIL — почты вашего аккаунта репетитора"; exit 1; }
+[ -n "$tutor" ] || { log "Нет секрета SEED_TUTOR_EMAIL — почты вашего аккаунта учителя"; exit 1; }
 [ "${#students[@]}" -ge 1 ] && [ "${#students[@]}" -le 10 ] \
   || { log "В SEED_STUDENT_EMAILS должно быть от одного до десяти адресов через запятую"; exit 1; }
 for email in "${students[@]}"; do
-  [ "$email" != "$tutor" ] || { log "Адрес репетитора не может быть и адресом ученика"; exit 1; }
+  [ "$email" != "$tutor" ] || { log "Адрес учителя не может быть и адресом ученика"; exit 1; }
 done
 
 sql() { psql_db -tA "$@"; }
@@ -54,7 +54,7 @@ select u.id from auth.users u join public.profiles p on p.user_id = u.id
 where lower(u.email) = :'email' and p.role = 'tutor';
 SQL
 )
-[ -n "$tutor_id" ] || { log "Аккаунта репетитора с почтой из SEED_TUTOR_EMAIL нет. Сначала зарегистрируйтесь на сайте как репетитор и подтвердите почту."; exit 1; }
+[ -n "$tutor_id" ] || { log "Аккаунта учителя с почтой из SEED_TUTOR_EMAIL нет. Сначала зарегистрируйтесь на сайте как учитель и подтвердите почту."; exit 1; }
 
 if [ "$mode" = "--remove" ]; then
   removed=0
