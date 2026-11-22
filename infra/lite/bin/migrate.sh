@@ -24,7 +24,12 @@
 #                        российских сервисов (необязательно);
 #   ADMIN_EMAIL        — почта аккаунта администратора (необязательно);
 #   DB_ADMIN_PASSWORD  — пароль роли budetege_admin для доступа к базе
-#                        через SSH-туннель (необязательно).
+#                        через SSH-туннель (необязательно);
+#   ZHURNAL            — «1» — журнал решения задач принимает записи
+#                        (флаг базы kabinet_flags.zhurnal, Variable
+#                        NEXT_PUBLIC_ZHURNAL — та же, что у сайта);
+#   ZHURNAL_RAZDELY    — номера хранения разделов журнала через запятую
+#                        (Variable NEXT_PUBLIC_ZHURNAL_RAZDELY); пусто — 5,8.
 set -eu
 . "$(dirname "$0")/lib.sh"
 load_env
@@ -35,6 +40,8 @@ SIGNUP_EXTRA=
 DOCUMENTS_VERSION=
 ADMIN_EMAIL=
 DB_ADMIN_PASSWORD=
+ZHURNAL=
+ZHURNAL_RAZDELY=
 while IFS= read -r line; do
   case "$line" in
     ALLOWED_EMAILS=*) ALLOWED_EMAILS=${line#ALLOWED_EMAILS=} ;;
@@ -42,6 +49,8 @@ while IFS= read -r line; do
     DOCUMENTS_VERSION=*) DOCUMENTS_VERSION=${line#DOCUMENTS_VERSION=} ;;
     ADMIN_EMAIL=*) ADMIN_EMAIL=${line#ADMIN_EMAIL=} ;;
     DB_ADMIN_PASSWORD=*) DB_ADMIN_PASSWORD=${line#DB_ADMIN_PASSWORD=} ;;
+    ZHURNAL=*) ZHURNAL=${line#ZHURNAL=} ;;
+    ZHURNAL_RAZDELY=*) ZHURNAL_RAZDELY=${line#ZHURNAL_RAZDELY=} ;;
   esac
 done
 
@@ -152,5 +161,17 @@ grant pg_read_all_data, pg_write_all_data to budetege_admin;
 SQL
   log "Роль budetege_admin для туннеля обновлена"
 fi
+
+# Флаги кабинета v2 (миграция 20261122120000_zhurnal.sql). №6 база не
+# примет в журнал и с флагом: раздел вне ЕГЭ-2027.
+case "$ZHURNAL_RAZDELY" in
+  '') ZHURNAL_RAZDELY=5,8 ;;
+  *[!0-9,]*) log "ZHURNAL_RAZDELY: нужны номера через запятую, например 5,8"; exit 1 ;;
+esac
+psql_db -v on="$([ "$ZHURNAL" = 1 ] && echo true || echo false)" -v razdely="[$ZHURNAL_RAZDELY]" <<'SQL'
+insert into public.kabinet_flags (key, value) values ('zhurnal', :'on'::jsonb), ('zhurnal_razdely', :'razdely'::jsonb)
+on conflict (key) do update set value = excluded.value, updated_at = now();
+SQL
+log "Журнал: $([ "$ZHURNAL" = 1 ] && echo включён || echo выключен), разделы $ZHURNAL_RAZDELY"
 
 psql_db -c "notify pgrst, 'reload schema'"

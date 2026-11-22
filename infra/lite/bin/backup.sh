@@ -81,6 +81,14 @@ step="удаление старых копий"
 rclone delete --min-age 14d "$S3_ROOT/daily/"
 rclone delete --min-age 56d "$S3_ROOT/weekly/"
 
+# Срок хранения журнала (docs/kabinet-zhurnal.md): подробные записи
+# старше конца прошлого учебного года удаляются, свёртка по дням остаётся.
+# Только после удачной копии; до миграции журнала функции нет — пропуск.
+step="срок хранения журнала"
+if [ "$(psql_db -tAc "select to_regprocedure('public.zhurnal_svernut()') is not null")" = "t" ]; then
+  log "Журнал: удалено старых записей $(psql_db -tAc 'select public.zhurnal_svernut()')"
+fi
+
 rm -f "$dump" "$meta"
 printf '%s %s\n' "$(date -u +%s)" "$name" > "$STATE_DIR/last-backup"
 trap - ERR

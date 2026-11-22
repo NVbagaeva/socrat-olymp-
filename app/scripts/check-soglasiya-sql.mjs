@@ -231,6 +231,23 @@ const SUITES = [
     ],
   },
   {
+    /* Журнал решения задач (docs/kabinet-zhurnal.md): запись только
+       учеником и только функцией, повтор без дублей, №6 и разделы вне
+       флага не пишутся; учитель не видит чужих учеников, свой виден с дня
+       связи и пока связь действует; ученику — без пометок учителя;
+       выгрузка, срок хранения, удаление. На фоне прав своего сервера. */
+    name: 'Журнал и права доступа',
+    db: 'zhurnal',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['zhurnal-prava.test.sql', path.join(SUPA, 'tests', 'zhurnal-prava.test.sql')],
+    ],
+  },
+  {
     /* Регистрация только с почтой российских почтовых сервисов: хук,
        триггер, смена почты, ручной список, старые пользователи
        (supabase/tests/domeny.test.sql). Без добавленного x.ru. */
@@ -292,5 +309,5 @@ for (const suite of SUITES) {
 stop();
 if (failed) process.exit(1);
 console.log(
-  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8, почтовые домены и устный счёт в базе: все проверки прошли.',
+  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8, журнал, почтовые домены и устный счёт в базе: все проверки прошли.',
 );
