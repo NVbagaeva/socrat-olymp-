@@ -49,6 +49,17 @@ import {
   sootvetstvennyySmezhnyy,
   sosedniyUgolParallelogramma,
 } from './scenarii';
+import {
+  scenariyChetvertyyUgol,
+  scenariyDiagonaliPryamougolnika,
+  scenariyDiagonalRomba,
+  scenariyPryamougolnayaTrapeciya,
+  scenariyRavnobedrennayaTrapeciya,
+  scenariySummaDvuhUglov,
+  scenariyTupoyUgolRomba,
+  scenariyUgolMezhduBissektrisami,
+  scenariyUgolMezhduVysotami,
+} from './scenarii-p1-4';
 import type { Mikro } from './types';
 
 /* ── Помощники ───────────────────────────────────────────────────── */
@@ -838,15 +849,25 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
       uslovie: `Сумма двух углов параллелограмма равна $${g(2 * a)}$. Найдите больший угол параллелограмма.`,
       risunok: forma(a, 30, 88, (v) => ({
         tochki: parallelogramm(v),
-        elementy: [mn(['A', 'B', 'C', 'D']), ug('A', 'B', 'C', { vydelit: 'iskomoe' })],
+        elementy: [
+          mn(['A', 'B', 'C', 'D']),
+          ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
+          /* Подсказка: равные противолежащие углы A и C, затем их x. */
+          ug('D', 'A', 'B', { sloy: 1, cvet: 1 }),
+          ug('B', 'C', 'D', { sloy: 1, cvet: 1 }),
+          ug('D', 'A', 'B', { sloy: 2, cvet: 1, znachenie: 'x' }),
+          ug('B', 'C', 'D', { sloy: 2, cvet: 1, znachenie: 'x' }),
+        ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'D'],
         proverki: [ist('A', 'B', 'C', 180 - a)],
       })),
       otvet: 180 - a,
       razbor: [
-        `Сумма меньше $180^\\circ$ — это противолежащие углы, каждый $${g(a)}$.`,
-        `Больший угол: $180^\\circ - ${g(a)} = ${g(180 - a)}$.`,
+        `Соседние углы вместе дают $180^\\circ$, а сумма $${g(2 * a)}$ меньше — это противолежащие углы $A$ и $C$. Они равны: $x + x = ${g(2 * a)}$, $x = ${g(a)}$.`,
+        `$x$ — острый угол, а больший угол $B$ — соседний с ним: $180^\\circ - ${g(a)} = ${g(180 - a)}$.`,
       ],
+      scenariy: scenariySummaDvuhUglov(a),
     };
   }),
   mikro('P1-4-03', 'Диагональ ромба и сторона', '\\angle CAB = \\dfrac{\\angle A}{2}', (r) => {
@@ -861,10 +882,19 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
           ug('D', 'A', 'C'),
           ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
           ug('D', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
+          /* Подсказка: равные половинки угла A, затем их x. */
+          ug('D', 'A', 'C', { sloy: 1, cvet: 1, radiusPx: 64 }),
+          ug('C', 'A', 'B', { sloy: 1, cvet: 1, radiusPx: 64 }),
+          ug('D', 'A', 'C', { sloy: 2, cvet: 1, znachenie: 'x', radiusPx: 64 }),
+          ug('C', 'A', 'B', { sloy: 2, cvet: 1, znachenie: 'x', radiusPx: 64 }),
         ],
       })),
       otvet: a / 2,
-      razbor: ['Диагональ ромба — биссектриса его угла.', `$${g(a)} : 2 = ${g(a / 2)}$.`],
+      razbor: [
+        'Диагональ ромба — биссектриса его угла: $\\angle DAC = \\angle CAB = x$.',
+        `$x + x = ${g(a)}$, $x = ${g(a)} : 2 = ${g(a / 2)}$ — это и есть угол $CAB$.`,
+      ],
+      scenariy: scenariyDiagonalRomba(a),
     };
   }),
   mikro('P1-4-04', 'Тупой угол ромба', '\\angle B = 180^\\circ - 2\\angle CAB', (r) => {
@@ -878,14 +908,19 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
           otr('A', 'C'),
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(x) }),
           ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
+          /* Подсказка: AB = BC (стороны ромба), угол BCA равен данному. */
+          { tip: 'otrezok', a: 'A', b: 'B', tolkoShtrihi: true, shtrihi: 1, sloy: 1 } as Element,
+          { tip: 'otrezok', a: 'B', b: 'C', tolkoShtrihi: true, shtrihi: 1, sloy: 1 } as Element,
+          ug('A', 'C', 'B', { sloy: 2, cvet: 1, znachenie: gr(x) }),
         ],
         proverki: [ist('A', 'B', 'C', 180 - 2 * x)],
       })),
       otvet: 180 - 2 * x,
       razbor: [
-        `$\\angle A = 2\\cdot ${g(x)} = ${g(2 * x)}$.`,
-        `$\\angle B = 180^\\circ - ${g(2 * x)} = ${g(180 - 2 * x)}$.`,
+        `$AB = BC$ — стороны ромба: треугольник $ABC$ равнобедренный, $\\angle BCA = \\angle CAB = ${g(x)}$.`,
+        `Сумма углов треугольника: $\\angle B = 180^\\circ - 2\\cdot ${g(x)} = ${g(180 - 2 * x)}$.`,
       ],
+      scenariy: scenariyTupoyUgolRomba(x),
     };
   }),
   mikro(
@@ -911,14 +946,29 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
             otr('B', 'D'),
             ug('D', 'A', 'C', { vydelit: 'dano', znachenie: gr(x) }),
             ug('A', 'O', 'D', { vydelit: 'iskomoe' }),
+            /* Подсказка: половины равных диагоналей, угол ODA равен данному. */
+            ...(['A', 'B', 'C', 'D'] as const).map(
+              (v) =>
+                ({
+                  tip: 'otrezok',
+                  a: v,
+                  b: 'O',
+                  tolkoShtrihi: true,
+                  shtrihi: 1,
+                  sloy: 1,
+                }) as Element,
+            ),
+            ug('A', 'D', 'O', { sloy: 2, cvet: 1, znachenie: gr(x) }),
           ],
           proverki: [ist('A', 'O', 'D', 180 - 2 * x)],
         })),
         otvet: 180 - 2 * x,
         razbor: [
-          '$OA = OD$ — половины равных диагоналей, треугольник $AOD$ равнобедренный.',
+          '$OA = OD$ — половины равных диагоналей, треугольник $AOD$ равнобедренный с основанием $AD$.',
+          `Углы при основании равны: $\\angle ODA = \\angle OAD = ${g(x)}$.`,
           `$\\angle AOD = 180^\\circ - 2\\cdot ${g(x)} = ${g(180 - 2 * x)}$.`,
         ],
+        scenariy: scenariyDiagonaliPryamougolnika(x),
       };
     },
   ),
@@ -939,15 +989,22 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
             shtrih('C', 'D', 1),
             ug('D', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
             ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
+            /* Подсказка: BC ∥ AD, секущая AB, второй тупой угол C. */
+            { tip: 'otrezok', a: 'B', b: 'C', tolkoShtrihi: true, strelki: 1, sloy: 1 } as Element,
+            { tip: 'otrezok', a: 'A', b: 'D', tolkoShtrihi: true, strelki: 1, sloy: 1 } as Element,
+            otr('A', 'B', { sloy: 2 }),
+            ug('B', 'C', 'D', { sloy: 3 }),
           ],
           podpisi: false,
+          podpisiPodskazki: ['A', 'B', 'C', 'D'],
         };
       }),
       otvet: 180 - a,
       razbor: [
-        'Углы, прилежащие к боковой стороне, — односторонние при параллельных основаниях.',
-        `$180^\\circ - ${g(a)} = ${g(180 - a)}$.`,
+        '$BC \\parallel AD$, $AB$ — секущая: углы $A$ и $B$ односторонние, их сумма $180^\\circ$.',
+        `Тупой угол $B$ (он равен углу $C$): $180^\\circ - ${g(a)} = ${g(180 - a)}$.`,
       ],
+      scenariy: scenariyRavnobedrennayaTrapeciya(a),
     };
   }),
   mikro(
@@ -965,9 +1022,10 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
         risunok: null,
         otvet: d,
         razbor: [
-          'Сумма углов выпуклого четырёхугольника $360^\\circ$.',
-          `$360^\\circ - ${g(a)} - ${g(b)} - ${g(c)} = ${g(d)}$.`,
+          `Сумма углов выпуклого четырёхугольника $360^\\circ$. Четвёртый угол обозначим $x$: $${g(a)} + ${g(b)} + ${g(c)} + x = 360^\\circ$.`,
+          `$x = 360^\\circ - ${g(a + b + c)} = ${g(d)}$.`,
         ],
+        scenariy: scenariyChetvertyyUgol(a, b, c),
       };
     },
   ),
@@ -1004,6 +1062,8 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
               pryam('A', 'E', 'C'),
               ug('B', 'A', 'C', { vydelit: 'dano', znachenie: gr(a) }),
               ug('D', 'O', 'E', { vydelit: 'iskomoe' }),
+              /* Подсказка: четырёхугольник ADOE. */
+              { tip: 'oblast', tochki: ['A', 'D', 'O', 'E'], cvet: 1, sloy: 1 } as Element,
             ],
             proverki: [ist('D', 'O', 'E', 180 - a)],
           } as Scena;
@@ -1012,9 +1072,10 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
       ),
       otvet: 180 - a,
       razbor: [
-        'В четырёхугольнике $ADOE$ два прямых угла.',
-        `$\\angle DOE = 360^\\circ - 180^\\circ - ${g(a)} = ${g(180 - a)}$.`,
+        'В четырёхугольнике $ADOE$ углы $D$ и $E$ прямые: $BD$ и $CE$ — высоты.',
+        `Сумма углов четырёхугольника $360^\\circ$: $\\angle DOE = 360^\\circ - 90^\\circ - 90^\\circ - ${g(a)} = ${g(180 - a)}$.`,
       ],
+      scenariy: scenariyUgolMezhduVysotami(a),
     };
   }),
   mikro(
@@ -1043,15 +1104,25 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
             otr('B', 'O'),
             ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(c) }),
             ug('A', 'O', 'B', { vydelit: 'iskomoe' }),
+            /* Подсказка: половинки угла A — одна дуга, угла B — две; затем α и β. */
+            ug('C', 'A', 'O', { sloy: 1, cvet: 1, radiusPx: 40 }),
+            ug('O', 'A', 'B', { sloy: 1, cvet: 1, radiusPx: 40 }),
+            ug('O', 'B', 'C', { sloy: 1, cvet: 3, dugi: 2, radiusPx: 40 }),
+            ug('A', 'B', 'O', { sloy: 1, cvet: 3, dugi: 2, radiusPx: 40 }),
+            ug('C', 'A', 'O', { sloy: 2, cvet: 1, znachenie: 'α', radiusPx: 40 }),
+            ug('O', 'A', 'B', { sloy: 2, cvet: 1, znachenie: 'α', radiusPx: 40 }),
+            ug('O', 'B', 'C', { sloy: 2, cvet: 3, dugi: 2, znachenie: 'β', radiusPx: 40 }),
+            ug('A', 'B', 'O', { sloy: 2, cvet: 3, dugi: 2, znachenie: 'β', radiusPx: 40 }),
           ],
           bezPodpisi: ['D', 'E'],
           proverki: [ist('A', 'O', 'B', 90 + c / 2)],
         })),
         otvet: 90 + c / 2,
         razbor: [
-          `$\\angle OAB + \\angle OBA = \\dfrac{180^\\circ - ${g(c)}}{2} = ${g((180 - c) / 2)}$.`,
-          `$\\angle AOB = 180^\\circ - ${g((180 - c) / 2)} = ${g(90 + c / 2)}$.`,
+          `Половинки угла $A$ обозначим $\\alpha$, угла $B$ — $\\beta$: $2\\alpha + 2\\beta + ${g(c)} = 180^\\circ$, $\\alpha + \\beta = ${g((180 - c) / 2)}$.`,
+          `В треугольнике $AOB$: $\\angle AOB = 180^\\circ - (\\alpha + \\beta) = 180^\\circ - ${g((180 - c) / 2)} = ${g(90 + c / 2)}$.`,
         ],
+        scenariy: scenariyUgolMezhduBissektrisami(c),
       };
     },
   ),
@@ -1068,14 +1139,20 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
           pryam('A', 'B', 'C'),
           ug('A', 'D', 'C', { vydelit: 'dano', znachenie: gr(a) }),
           ug('B', 'C', 'D', { vydelit: 'iskomoe' }),
+          /* Подсказка: BC ∥ AD, секущая CD. */
+          { tip: 'otrezok', a: 'B', b: 'C', tolkoShtrihi: true, strelki: 1, sloy: 1 } as Element,
+          { tip: 'otrezok', a: 'A', b: 'D', tolkoShtrihi: true, strelki: 1, sloy: 1 } as Element,
+          otr('C', 'D', { sloy: 2 }),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'D'],
       },
       otvet: 180 - a,
       razbor: [
-        'Два угла прямые, острый и тупой при боковой стороне дают $180^\\circ$.',
-        `Больший: $180^\\circ - ${g(a)} = ${g(180 - a)}$.`,
+        '$BC \\parallel AD$, $CD$ — секущая: углы $C$ и $D$ односторонние, их сумма $180^\\circ$.',
+        `Угол $D$ острый, значит, больший — тупой угол $C$: $180^\\circ - ${g(a)} = ${g(180 - a)}$.`,
       ],
+      scenariy: scenariyPryamougolnayaTrapeciya(a),
     };
   }),
 ];
