@@ -14,8 +14,10 @@
      • пролив — карточка «Переход ко второй части», «Посмотреть часть 2»;
      • табличка «Часть 1» — сводка «Освоено 4 из 13»;
      • вода и Esc закрывают; Tab + Enter открывают область, Esc закрывает;
-     • телефон: короткое касание выбирает, движение пальцем двигает карту
-       и не выбирает, щипок меняет масштаб; кнопка «?» не перекрыта;
+     • телефон (390): карта — список сверху вниз, раздел раскрывается на
+       месте, тема ведёт в тренажёр;
+     • планшет (820): короткое касание выбирает, движение пальцем двигает
+       карту и не выбирает, щипок меняет масштаб; кнопка «?» не перекрыта;
      • решённая задача в тренажёре №8 → на карте №8 «в процессе». */
 
 import fs from 'node:fs';
@@ -542,16 +544,59 @@ if (VIDEO && !TOLKO_TELEFON) {
   console.log(`Запись: ${VIDEO}`);
 }
 
-/* ── WebKit, телефон ─────────────────────────────────────────────── */
+/* ── WebKit: телефон (список) и планшет (острова) ─────────────────── */
 {
-  const browser = await webkit.launch();
+  /* WebKit ставит CI (playwright install); на машине без него — Chromium. */
+  const browser = await webkit.launch().catch(async () => {
+    console.log('  (WebKit не установлен — телефон и планшет в Chromium)');
+    return chromium.launch();
+  });
+
+  /* Телефон стоя: карта — список сверху вниз (KartaSpisok), не острова. */
+  {
+    const { page, ctx, errors } = await otkryt(browser, {
+      width: 390,
+      height: 844,
+      uchenik: 'seredina',
+      mobile: true,
+      bezKarty: true,
+    });
+    await page.waitForSelector('.karta-ps');
+    check(errors.length === 0, `телефон: без ошибок сценариев ${errors.join(' | ')}`);
+    check(
+      (await page.locator('.karta-holst').count()) === 0,
+      'телефон: островов нет — карта списком',
+    );
+    check(
+      (await page.locator('.karta-ps__knopka').count()) === VSEGO,
+      `телефон: в списке ${VSEGO} разделов`,
+    );
+    check(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      'телефон: горизонтальной прокрутки нет',
+    );
+    await page.locator('.karta-ps__knopka[data-cel="oblast:8"]').tap();
+    await page.waitForSelector('.karta-ps__uzel.is-otkryt[data-no="8"]');
+    check(
+      (await page
+        .locator('.karta-ps__uzel[data-no="8"] .karta-gorod--tekushchaya a')
+        .getAttribute('href')) === '/zadaniya/8/trenazher/?tip=8.H',
+      'телефон: раздел раскрывается на месте, тема → тренажёр',
+    );
+    await page.locator('.karta-ps__knopka[data-cel="oblast:8"]').tap();
+    await page.waitForSelector('.karta-ps__uzel.is-otkryt', { state: 'detached' });
+    check(true, 'телефон: второе касание сворачивает раздел');
+    await ctx.close();
+  }
+
+  /* Планшет (820): острова, жесты и шторка снизу. */
   const { page, ctx, errors, dozhdatsya } = await otkryt(browser, {
-    width: 390,
-    height: 844,
+    width: 820,
+    height: 1180,
     uchenik: 'seredina',
     mobile: true,
   });
-  check(errors.length === 0, `телефон: без ошибок сценариев ${errors.join(' | ')}`);
+  check(errors.length === 0, `планшет: без ошибок сценариев ${errors.join(' | ')}`);
   const holst = await page.locator('.karta-holst').boundingBox();
   const vid = () =>
     page.locator('.karta-holst').evaluate((e) => ({
@@ -560,11 +605,11 @@ if (VIDEO && !TOLKO_TELEFON) {
       y: parseFloat(e.style.getPropertyValue('--y')),
     }));
   const v0 = await vid();
-  check(v0.k > 0 && v0.k < 1, `телефон: вид «Весь мир» (k = ${v0.k.toFixed(3)})`);
+  check(v0.k > 0 && v0.k < 1, `планшет: вид «Весь мир» (k = ${v0.k.toFixed(3)})`);
   const bezProkrutki = await page.evaluate(
     () => document.documentElement.scrollWidth <= window.innerWidth,
   );
-  check(bezProkrutki, 'телефон: горизонтальной прокрутки нет');
+  check(bezProkrutki, 'планшет: горизонтальной прокрутки нет');
 
   /* Движение пальцем: карта двигается, область не выбирается. */
   const cdp = page;
@@ -603,10 +648,12 @@ if (VIDEO && !TOLKO_TELEFON) {
   );
   check(
     dragged.before !== dragged.after,
-    `телефон: движение пальцем двигает карту (${dragged.before} → ${dragged.after})`,
+    `планшет: движение пальцем двигает карту (${dragged.before} → ${dragged.after})`,
   );
-  check(dragged.vybor === false, 'телефон: движение пальцем не выбирает область');
-  /* Щипок: масштаб растёт. */
+  check(dragged.vybor === false, 'планшет: движение пальцем не выбирает область');
+  /* Щипок: масштаб растёт (от вида «Весь мир», чтобы было куда расти). */
+  await page.locator('.karta-ves-mir').click();
+  await dozhdatsya();
   const pinched = await page.evaluate(
     ([x, y]) => {
       const el = document.querySelector('.karta-holst');
@@ -641,9 +688,9 @@ if (VIDEO && !TOLKO_TELEFON) {
   );
   check(
     pinched.k1 > pinched.k0 * 1.5,
-    `телефон: щипок приближает (${pinched.k0.toFixed(3)} → ${pinched.k1.toFixed(3)})`,
+    `планшет: щипок приближает (${pinched.k0.toFixed(3)} → ${pinched.k1.toFixed(3)})`,
   );
-  check(pinched.vybor === false, 'телефон: щипок не выбирает область');
+  check(pinched.vybor === false, 'планшет: щипок не выбирает область');
   await page.locator('.karta-ves-mir').click();
   await dozhdatsya();
 
@@ -653,11 +700,11 @@ if (VIDEO && !TOLKO_TELEFON) {
   await page.waitForSelector('.karta-okoshko');
   await dozhdatsya();
   const panel = page.locator('.karta-panel.is-otkryta');
-  check((await panel.count()) === 1, 'телефон: касание открывает шторку');
+  check((await panel.count()) === 1, 'планшет: касание открывает шторку');
   const pb = await panel.boundingBox();
   check(
     pb.y + pb.height >= holst.y + holst.height - 2 && pb.height < holst.height * 0.5,
-    'телефон: шторка снизу, не выше половины карты',
+    'планшет: шторка снизу, не выше половины карты',
   );
   const fab = await page
     .locator('.help-fab')
@@ -671,21 +718,21 @@ if (VIDEO && !TOLKO_TELEFON) {
     .catch(() => true);
   check(
     fab === null || fabHidden || fab.y + fab.height <= pb.y || fab.x >= pb.x + pb.width,
-    'телефон: кнопка «?» не перекрыта шторкой',
+    'планшет: кнопка «?» не перекрыта шторкой',
   );
-  if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'seredina-390-8.png') });
+  if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'seredina-820-8.png') });
   /* Касание по теме ведёт в тренажёр. */
   check(
     (await page.locator('.karta-gorod--tekushchaya a').getAttribute('href')) ===
       '/zadaniya/8/trenazher/?tip=8.H',
-    'телефон: тема → тренажёр',
+    'планшет: тема → тренажёр',
   );
   /* Вода над материками: карта на телефоне стоит посередине холста. */
   await page.touchscreen.tap(holst.x + holst.width / 2, holst.y + 40);
   await page.waitForSelector('.karta-okoshko', { state: 'detached' });
   check(
     (await page.locator('.karta-panel.is-otkryta').count()) === 0,
-    'телефон: касание по воде закрывает',
+    'планшет: касание по воде закрывает',
   );
 
   if (SHOTS) {
@@ -696,7 +743,14 @@ if (VIDEO && !TOLKO_TELEFON) {
         [390, 844],
         [768, 1024],
       ]) {
-        const { page, ctx } = await otkryt(browser, { width, height, uchenik, mobile: true });
+        const { page, ctx } = await otkryt(browser, {
+          width,
+          height,
+          uchenik,
+          mobile: true,
+          bezKarty: width < 768,
+        });
+        await page.waitForTimeout(400);
         await page.screenshot({ path: path.join(SHOTS, `${uchenik}-${width}.png`) });
         await ctx.close();
       }

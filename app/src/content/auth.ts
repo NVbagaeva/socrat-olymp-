@@ -39,14 +39,14 @@ export const REGISTER_FORM = {
   roleTitle: 'Кто вы?',
   roles: {
     student: { title: 'Я ученик', text: 'Готовлюсь к ЕГЭ и решаю задания сам.' },
-    tutor: { title: 'Я репетитор', text: 'Занимаюсь с учениками и собираю варианты.' },
+    tutor: { title: 'Я учитель', text: 'Занимаюсь с учениками и собираю варианты.' },
   },
   submit: 'Создать аккаунт',
   haveAccount: 'Уже есть аккаунт?',
   toLogin: 'Войти',
   nameRequired: 'Напишите, как к вам обращаться.',
   emailInvalid: 'Проверьте адрес почты: в нём должна быть «@» и точка.',
-  roleRequired: 'Выберите, кто вы: ученик или репетитор.',
+  roleRequired: 'Выберите, кто вы: ученик или учитель.',
   /* Ученик: год рождения и, если ему меньше 18, почта родителя. */
   birthYear: 'Год рождения',
   birthYearPlaceholder: '2009',
@@ -154,7 +154,7 @@ export const KABINET = {
   tabsLabel: 'Разделы кабинета',
   roleLine: {
     student: 'Кабинет ученика',
-    tutor: 'Кабинет репетитора',
+    tutor: 'Кабинет учителя',
     admin: 'Кабинет администратора',
   } satisfies Record<Role, string>,
   trial: `Кабинет работает в пробном режиме: разделы ниже появляются по одному, первым — задание №${nomerRazdela('vychisleniya')} «Вычисления».`,
@@ -180,12 +180,12 @@ export const KABINET = {
     homework: {
       title: 'Домашние задания',
       empty: 'Заданий пока нет',
-      text: 'Здесь появятся домашние задания от репетитора: срок сдачи, сколько решено и кнопка «Сдать». Пока репетитор ничего не выдал — можно тренироваться самому.',
+      text: 'Здесь появятся домашние задания от учителя: срок сдачи, сколько решено и кнопка «Сдать». Пока учитель ничего не выдал — можно тренироваться самому.',
     },
     classes: {
       title: 'Мой класс',
-      none: 'Ты пока не в классе. Когда репетитор добавит тебя в класс, он появится здесь.',
-      tutor: (name: string) => `Репетитор: ${name}`,
+      none: 'Ты пока не в классе. Когда учитель добавит тебя в класс, он появится здесь.',
+      tutor: (name: string) => `Учитель: ${name}`,
     },
   },
 
@@ -250,7 +250,7 @@ export const KABINET = {
   },
   roleName: {
     student: 'Ученик',
-    tutor: 'Репетитор',
+    tutor: 'Учитель',
     admin: 'Администратор',
   } satisfies Record<Role, string>,
   saved: {
@@ -269,7 +269,7 @@ export const KABINET = {
     tourDone: (name: string) => `${name} — пройден`,
     tourStarted: (name: string) => `${name} — начат`,
     tourNone: 'не начинали',
-    tourNames: { repetitor: 'Тур для репетитора' } as Record<string, string>,
+    tourNames: { repetitor: 'Тур для учителя' } as Record<string, string>,
     imported: 'Прогресс с устройства',
     importedNone: 'не переносился',
     importedItem: (title: string, date: string) => `${title} — перенесён ${date}`,
