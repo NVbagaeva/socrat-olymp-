@@ -8,6 +8,7 @@ import { OPORNYE7_HREF, blokHref7, tipTrenazherHref7 } from '@/lib/zadanie7/link
 import { BLOKI_OPORNYH } from '@/lib/zadanie7/opornye';
 import { GROUPS, prototype, prototypesOfGroup, PROTOTYPES } from '@/lib/zadanie7/prototypes';
 import { FormulyRamka, KartaGruppa, KartaPrimer, KartaShapka, KartaTip } from '../karta';
+import { nabratOpasno } from '../karta/opasno';
 import { YakorTipa } from '../karta/YakorTipa';
 import { GruppaProgress7 } from './GruppaProgress7';
 import { SkhemaIrr7 } from './Irracionalnye7';
@@ -62,7 +63,7 @@ export function OZadanii7({ base }: { base: string }) {
         lead={SHAPKA7.lead}
         fakty={SHAPKA7.fakty(PROTOTYPES.length)}
         opasnoTitle={SHAPKA7.opasnoTitle}
-        opasno={SHAPKA7.opasno.map((line) => typeset(line))}
+        opasno={SHAPKA7.opasno.map((p) => nabratOpasno(p))}
         oblozhka={
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
              пережатия, прозрачный фон на стекле шапки. */

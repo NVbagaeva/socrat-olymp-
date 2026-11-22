@@ -5,6 +5,7 @@ import { katex } from '@/lib/graph/katex';
 import { renderFigura, type RezhimRisunka } from '@/lib/proizvodnaya/render';
 import type { Generated, Shag } from '@/lib/proizvodnaya/types';
 import { FiguraSvg9 } from './FiguraSvg9';
+import { PlashkaOtveta } from '@/components/ui/PlashkaOtveta';
 
 /** Выносная формула: KaTeX на сборке. */
 export function Display9({ tex, className }: { tex: string; className?: string }) {
@@ -127,9 +128,9 @@ export function Primer9({ title, uslovie, svg, alt, shagi, answer, className }: 
           ))}
         </ol>
       </div>
-      <p className="rich-example__answer">
-        Ответ: <Tex text={answer} />
-      </p>
+      <PlashkaOtveta className="rich-example__answer">
+        <Tex text={answer} />
+      </PlashkaOtveta>
     </article>
   );
 }

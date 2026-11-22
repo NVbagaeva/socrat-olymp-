@@ -9,6 +9,7 @@ import { reshenie } from '@/lib/planimetriya/reshenie';
 import { prototip } from '@/lib/planimetriya/stseny';
 import type { Params } from '@/lib/planimetriya/stseny/dsl';
 import { chislo } from '@/lib/planimetriya/stseny/dsl';
+import { PlashkaOtveta } from '@/components/ui/PlashkaOtveta';
 
 export interface Razbor1Props {
   proto: number;
@@ -87,9 +88,9 @@ export function Razbor1({ proto, params, title, wide = false, id }: Razbor1Props
           </li>
         </ol>
       </div>
-      <p className="rich-example__answer">
-        Ответ: <Tex text={`$${chislo(r.otvet).replace(',', '{,}')}$`} />
-      </p>
+      <PlashkaOtveta className="rich-example__answer">
+        <Tex text={`$${chislo(r.otvet).replace(',', '{,}')}$`} />
+      </PlashkaOtveta>
     </article>
   );
 }

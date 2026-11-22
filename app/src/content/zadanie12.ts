@@ -13,6 +13,7 @@
 import type { Ton } from '@/components/tasks/steklo';
 import { tekstyTrenazheraBanka, tipov } from './treningBanka';
 import { nomerRazdela, slovoChasti } from './struktura';
+import { DROB_KATETOV } from '@/lib/drobSlov';
 
 export const SHAPKA12 = {
   nadzagolovok: `Задание №${nomerRazdela('grafiki-funkciy')} · ${slovoChasti('grafiki-funkciy')}`,
@@ -176,7 +177,7 @@ export const FORMULY12: FormulyVida12[] = [
     vid: 'linear',
     formuly: [
       {
-        tex: 'k=\\pm\\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}}',
+        tex: `k=\\pm${DROB_KATETOV}`,
         primer: '\\text{катеты }3\\text{ и }2,\\ \\text{прямая растёт}:\\ k=1{,}5',
       },
       { tex: 'b=f(0)', primer: '\\text{прямая пересекает }Oy\\text{ в }(0;-1):\\ b=-1' },

@@ -187,6 +187,9 @@
 }
 .spr1-card__bloki {
   display: grid;
+  /* Колонка не шире карточки: выносная формула не раздвигает сетку,
+     а уменьшается или прокручивается в своей рамке (FormulyPoShirine). */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   min-width: 0;
 }
@@ -346,6 +349,9 @@
 }
 .spr1-blok__list {
   display: grid;
+  /* Колонка не шире карточки: выносная формула не раздвигает сетку,
+     а уменьшается или прокручивается в своей рамке (FormulyPoShirine). */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
   margin: 0;
   padding: 0;

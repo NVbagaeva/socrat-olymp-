@@ -7,6 +7,39 @@ import { useEffect } from 'react';
    он же меряет формулы в невидимых пробах. */
 const SVOI_PRAVILA = '#sheet-pages, .sheet-page, .spr1-pdf, .vykladka';
 
+/* Выделенная (выносная) формула: своей строкой, в рамке. Такая формула
+   не переносится никогда — ни по «=», ни по «+». */
+const VYNOS = '.rich-formula, .formula-vynos';
+
+/** Наименьший масштаб выделенной формулы, дальше — прокрутка. */
+const MIN_MASSHTAB = 0.8;
+
+/** Рамка выделенной формулы или null, если формула строчная, в тексте. */
+function ramkaVynosa(el: HTMLElement): HTMLElement | null {
+  const disp = el.parentElement;
+  if (disp?.classList.contains('katex-display') === true) {
+    return disp;
+  }
+  return el.closest<HTMLElement>(VYNOS);
+}
+
+/** Ширина содержимого рамки: без внутренних полей. */
+function shirinaSoderzhimogo(b: HTMLElement): number {
+  const cs = getComputedStyle(b);
+  return b.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+}
+
+/** Сколько места формула занимает в одну строку. */
+function nuzhno(el: HTMLElement): number {
+  const html = el.querySelector<HTMLElement>(':scope > .katex-html');
+  if (el.parentElement?.classList.contains('katex-display') === true && html !== null) {
+    /* В выключке .katex-html — блок по ширине рамки: длина строки —
+       его прокручиваемая ширина. */
+    return html.scrollWidth;
+  }
+  return el.getBoundingClientRect().width;
+}
+
 /** Ближайший предок-блок: внутри него формула должна поместиться. */
 function blok(el: HTMLElement): HTMLElement | null {
   for (let a = el.parentElement; a !== null; a = a.parentElement) {
@@ -40,6 +73,7 @@ function vylezaet(el: HTMLElement, b: HTMLElement): boolean {
 function sbros(el: HTMLElement): void {
   const html = el.querySelector<HTMLElement>('.katex-html');
   el.removeAttribute('data-shirina');
+  el.style.removeProperty('font-size');
   el.style.removeProperty('white-space');
   el.style.removeProperty('display');
   el.style.removeProperty('max-width');
@@ -47,10 +81,10 @@ function sbros(el: HTMLElement): void {
   el.style.removeProperty('overflow-y');
   el.style.removeProperty('vertical-align');
   html?.style.removeProperty('white-space');
-  const disp = el.parentElement;
-  if (disp?.classList.contains('katex-display') === true) {
-    disp.style.removeProperty('overflow-x');
-    disp.style.removeProperty('overflow-y');
+  const ramka = ramkaVynosa(el);
+  if (ramka !== null) {
+    ramka.style.removeProperty('overflow-x');
+    ramka.style.removeProperty('overflow-y');
   }
 }
 
@@ -62,11 +96,13 @@ function sbros(el: HTMLElement): void {
  * шире самого блока на телефоне так вылезала за экран, и страница
  * ехала вбок. Здесь — только для таких формул, после вёрстки:
  *
- * 1. Строчной формуле разрешается перенос — KaTeX ставит его места
- *    после знаков отношения и действия (=, +, −, ·).
- * 2. Если и после переноса кусок шире блока (длинная дробь, формула
- *    в выключке), формула прокручивается вбок внутри себя, а не
- *    вместе со страницей.
+ * 1. Строчной формуле в тексте разрешается перенос — KaTeX ставит его
+ *    места после знаков отношения и действия (=, +, −, ·).
+ * 2. Выделенная формула (выключка KaTeX, рамка .rich-formula или
+ *    .formula-vynos) не рвётся никогда: она плавно уменьшается, но не
+ *    меньше чем до 80 % своего размера.
+ * 3. Если и так кусок шире блока, формула прокручивается вбок внутри
+ *    своей рамки, а не вместе со страницей.
  *
  * Пересчёт — при смене ширины окна, раскрытии <details> и появлении
  * новых формул (тренажёр, подсказки). Ничего не рисует.
@@ -109,9 +145,38 @@ export function FormulyPoShirine() {
         }
       }
       const dlinnye: typeof shirokie = [];
+      /* Выделенные формулы: масштаб по ширине рамки. Сначала все замеры,
+         потом запись. */
+      const vynosy: { el: HTMLElement; ramka: HTMLElement; k: number }[] = [];
       for (const s of shirokie) {
-        if (s.el.parentElement?.classList.contains('katex-display') === true) {
-          dlinnye.push(s);
+        const ramka = ramkaVynosa(s.el);
+        if (ramka === null) {
+          continue;
+        }
+        const mesto = shirinaSoderzhimogo(ramka);
+        const dlina = nuzhno(s.el);
+        vynosy.push({ el: s.el, ramka, k: dlina > 0 && mesto > 0 ? mesto / dlina : 1 });
+      }
+      for (const v of vynosy) {
+        if (v.k >= 1) {
+          continue;
+        }
+        const razmer = parseFloat(getComputedStyle(v.el).fontSize);
+        /* Запас в полпроцента — от дробных пикселей и полосы прокрутки. */
+        const m = Math.max(MIN_MASSHTAB, v.k - 0.005);
+        v.el.style.setProperty('font-size', `${(razmer * m).toFixed(2)}px`);
+        v.el.setAttribute('data-shirina', m > MIN_MASSHTAB ? 'umensheno' : 'prokrutka');
+      }
+      for (const v of vynosy) {
+        if (nuzhno(v.el) > shirinaSoderzhimogo(v.ramka) + 0.5) {
+          v.el.setAttribute('data-shirina', 'prokrutka');
+          v.ramka.style.setProperty('overflow-x', 'auto');
+          v.ramka.style.setProperty('overflow-y', 'hidden');
+        }
+      }
+      const vynosEl = new Set(vynosy.map((v) => v.el));
+      for (const s of shirokie) {
+        if (vynosEl.has(s.el)) {
           continue;
         }
         s.el.setAttribute('data-shirina', 'perenos');
@@ -119,23 +184,17 @@ export function FormulyPoShirine() {
         s.el.querySelector<HTMLElement>('.katex-html')?.style.setProperty('white-space', 'normal');
       }
       for (const s of shirokie) {
-        if (!dlinnye.includes(s) && vylezaet(s.el, s.b)) {
+        if (!vynosEl.has(s.el) && !dlinnye.includes(s) && vylezaet(s.el, s.b)) {
           dlinnye.push(s);
         }
       }
       for (const { el } of dlinnye) {
         el.setAttribute('data-shirina', 'prokrutka');
-        const disp = el.parentElement;
-        if (disp?.classList.contains('katex-display') === true) {
-          disp.style.setProperty('overflow-x', 'auto');
-          disp.style.setProperty('overflow-y', 'hidden');
-        } else {
-          el.style.setProperty('display', 'inline-block');
-          el.style.setProperty('max-width', '100%');
-          el.style.setProperty('overflow-x', 'auto');
-          el.style.setProperty('overflow-y', 'hidden');
-          el.style.setProperty('vertical-align', 'middle');
-        }
+        el.style.setProperty('display', 'inline-block');
+        el.style.setProperty('max-width', '100%');
+        el.style.setProperty('overflow-x', 'auto');
+        el.style.setProperty('overflow-y', 'hidden');
+        el.style.setProperty('vertical-align', 'middle');
       }
     }
 
