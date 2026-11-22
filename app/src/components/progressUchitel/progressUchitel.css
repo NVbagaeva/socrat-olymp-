@@ -119,7 +119,7 @@ i.pu-cell {
   color: var(--color-text-inverse);
 }
 .pu-cell--2 {
-  background: var(--color-accent-soft);
+  background: color-mix(in srgb, var(--color-accent) 35%, var(--color-surface));
   color: var(--color-text);
 }
 .pu-cell--3 {
