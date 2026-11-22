@@ -22,3 +22,4 @@ supabase/migrations/20261113120000_pochtovye_domeny.sql
 supabase/migrations/20261114120000_struktura_2027.sql
 supabase/migrations/20261115120000_ustnyy_schet.sql
 supabase/migrations/20261119120000_otkrytaya_registraciya.sql
+supabase/migrations/20261122120000_zhurnal.sql

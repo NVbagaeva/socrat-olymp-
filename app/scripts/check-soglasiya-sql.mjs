@@ -146,6 +146,12 @@ function normalizeCasesSql() {
 
 /* Таблица сверки рейтинговых форматов устного счёта — та же, по которой
    проверяются генераторы сайта (check-ustnyy-schet.mjs). */
+/* Общее начало тестов журнала: люди и помощники (pg_temp живёт одно
+   подключение, поэтому начало идёт в том же файле, что и тест). */
+function zhurnalSetupSql() {
+  return fs.readFileSync(path.join(SUPA, 'tests', 'zhurnal-setup.sql'), 'utf8') + '\n';
+}
+
 function formatyCasesSql() {
   const cases = JSON.parse(
     fs.readFileSync(path.join(ROOT, 'app/src/lib/ustnyySchet/formatyCases.json'), 'utf8'),
@@ -256,6 +262,36 @@ const SUITES = [
       ...migrations.map(migration),
       ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
       ['ustnyy-schet.test.sql', path.join(SUPA, 'tests', 'ustnyy-schet.test.sql'), formatyCasesSql],
+    ],
+  },
+  {
+    /* Журнал решения задач (docs/plans/cabinet-v2.md, этап 1): приём
+       пачки из браузера без дублей, итоги из событий, границы времени,
+       итог за день, выгрузка и удаление. */
+    name: 'Журнал решения',
+    db: 'zhurnal',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['zhurnal.test.sql', path.join(SUPA, 'tests', 'zhurnal.test.sql'), zhurnalSetupSql],
+    ],
+  },
+  {
+    /* Отдельный тест прав: учитель не видит журнал чужих учеников и
+       теряет доступ, когда ученик уходит; ученик видит только своё;
+       анониму закрыто всё. */
+    name: 'Доступ учителя к журналу',
+    db: 'dostup',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['dostup-uchitelya.test.sql', path.join(SUPA, 'tests', 'dostup-uchitelya.test.sql'), zhurnalSetupSql],
     ],
   },
 ];
