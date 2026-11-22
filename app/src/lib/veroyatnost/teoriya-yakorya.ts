@@ -34,6 +34,38 @@ export const BLOKI_PRYAMOY = [
   'syuzhety',
 ] as const;
 
+/** Блоки раздела «Совместные и несовместные события» (№5). */
+export const BLOKI_SOVMESTNYH = [
+  'opredeleniya',
+  'nesovmestnye',
+  'sovmestnye',
+  'kofe',
+  'vyvod',
+] as const;
+
+/** Блоки раздела «Независимые события» (№5). */
+export const BLOKI_NEZAVISIMYH = [
+  'opredelenie',
+  'umnozhenie',
+  'neputay',
+  'hotya-by',
+  'biatlon',
+  'prodavtsy',
+  'popytki',
+  'vyvod',
+] as const;
+
+/** Блоки раздела «Условная вероятность» (№5). */
+export const BLOKI_USLOVNOY = [
+  'smysl',
+  'formula',
+  'derevo',
+  'stekla',
+  'test',
+  'layfhak',
+  'vyvod',
+] as const;
+
 export const YAKOR_4 = {
   /** Карточка вида события: «t4-vid-nevozmozhnoe». */
   vid: (id: string) => `t4-vid-${id}`,
@@ -55,6 +87,9 @@ export const YAKOR_4 = {
 
 export const YAKOR_5 = {
   pryamaya: (id: (typeof BLOKI_PRYAMOY)[number]) => `t5-pryamaya-${id}`,
+  sovm: (id: (typeof BLOKI_SOVMESTNYH)[number]) => `t5-sovm-${id}`,
+  nezav: (id: (typeof BLOKI_NEZAVISIMYH)[number]) => `t5-nezav-${id}`,
+  uslov: (id: (typeof BLOKI_USLOVNOY)[number]) => `t5-uslov-${id}`,
 } as const;
 
 /** Все якоря блоков теории №4 (без якорей разделов). */
@@ -74,5 +109,10 @@ export function yakoryaBlokov4(): string[] {
 
 /** Все якоря блоков теории №5 (без якорей разделов). */
 export function yakoryaBlokov5(): string[] {
-  return BLOKI_PRYAMOY.map(YAKOR_5.pryamaya);
+  return [
+    ...BLOKI_PRYAMOY.map(YAKOR_5.pryamaya),
+    ...BLOKI_SOVMESTNYH.map(YAKOR_5.sovm),
+    ...BLOKI_NEZAVISIMYH.map(YAKOR_5.nezav),
+    ...BLOKI_USLOVNOY.map(YAKOR_5.uslov),
+  ];
 }

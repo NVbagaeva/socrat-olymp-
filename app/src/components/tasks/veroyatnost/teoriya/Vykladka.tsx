@@ -8,6 +8,8 @@ export interface VykladkaProps {
    * тексте дважды: в конце куска и в начале следующего.
    */
   stroki: readonly string[];
+  /** Крупные дроби, а не строчные (теория №5: дроби в выкладках). */
+  krupnyeDrobi?: boolean;
 }
 
 /**
@@ -16,11 +18,11 @@ export interface VykladkaProps {
  * строки по ширине колонки их собирает VykladkaKlient — помещается
  * формула целиком, она стоит одной строкой без повторных знаков.
  */
-export function Vykladka({ stroki }: VykladkaProps) {
+export function Vykladka({ stroki, krupnyeDrobi = false }: VykladkaProps) {
   return (
     <VykladkaKlient
       className="vteor-vykladka"
-      vykladka={nabratVykladku(odnoyStrokoy(stroki), true)}
+      vykladka={nabratVykladku(odnoyStrokoy(stroki), true, krupnyeDrobi)}
     />
   );
 }

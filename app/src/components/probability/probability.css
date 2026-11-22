@@ -437,3 +437,54 @@
     text-decoration: underline;
   }
 }
+
+/* ── Два пересекающихся круга (DvaKruga) ────────────────────────── */
+
+/* Рисунок узкий (300 единиц): на телефоне он идёт почти один к
+   одному, на широком экране не раздувается. */
+.pr-krugi {
+  width: 100%;
+  max-width: 340px;
+}
+.pr-krugi__pole {
+  fill: var(--color-surface);
+  stroke: var(--color-border-strong);
+  stroke-width: 1.5;
+}
+/* Первое событие — цвета оси, второе — оранжевое, общая часть —
+   терракотовая: она и есть то, что сумма считает дважды. */
+.pr-krugi__krug--a {
+  fill: var(--blue-600);
+  fill-opacity: 0.16;
+}
+.pr-krugi__krug--b {
+  fill: var(--amber-600);
+  fill-opacity: 0.18;
+}
+.pr-krugi__obshchee {
+  fill: var(--terracotta-600);
+  fill-opacity: 0.85;
+}
+.pr-krugi__kontur {
+  fill: none;
+  stroke-width: 2.5;
+}
+.pr-krugi__kontur--a {
+  stroke: var(--blue-600);
+}
+.pr-krugi__kontur--b {
+  stroke: var(--amber-600);
+}
+.pr-krugi__imya {
+  fill: var(--color-text);
+  font-family: KaTeX_Main, var(--font-math);
+  font-size: 22px;
+}
+.pr-krugi__imya .pr-var {
+  font-family: KaTeX_Math, var(--font-math);
+  font-style: italic;
+}
+.pr-krugi__imya--ab {
+  fill: var(--color-surface);
+  font-weight: 700;
+}

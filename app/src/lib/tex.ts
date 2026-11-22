@@ -284,10 +284,15 @@ function atomy(utverzhdenie: string): Atom[] {
  * вёрсткой. Как из атомов собрать строки по ширине колонки, решает
  * браузер (VykladkaKlient); знаки между атомами он рисует сам.
  */
-export function nabratVykladku(formula: string, strogo = false): AtomVykladki[][] {
+export function nabratVykladku(
+  formula: string,
+  strogo = false,
+  /** Крупные дроби (dfrac не превращается в строчную), как в typesetKrupno. */
+  krupnyeDrobi = false,
+): AtomVykladki[][] {
   return utverzhdeniya(formula).map((u) =>
     atomy(u).map(({ tex, znak, uroven }) => ({
-      html: typeset(`$${tex}$`, strogo),
+      html: kuskiHtml(`$${tex}$`, strogo, false, krupnyeDrobi),
       ...(znak === undefined ? {} : { znak }),
       ...(uroven === undefined ? {} : { uroven }),
     })),

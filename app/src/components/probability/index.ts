@@ -24,6 +24,7 @@ export {
   type Tochka,
 } from './CoordinateLine';
 export { CircularRatio, type CircularRatioProps } from './CircularRatio';
+export { DvaKruga, type DvaKrugaProps } from './DvaKruga';
 export { ProbabilityTree, type ProbabilityTreeProps, type TreeBranch } from './ProbabilityTree';
 export {
   HundredGrid,
