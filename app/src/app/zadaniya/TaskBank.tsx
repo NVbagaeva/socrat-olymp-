@@ -99,41 +99,42 @@ export function TaskBank({ level = 'profile' }: { level?: Level }) {
 
   return (
     <main className="app-main">
+      {/* Шапка: тёплое и синее свечение за текстом — как у «Собрать
+          вариант». Поиск стоит в одной строке с лидом. */}
       <header className="bank-head">
-        <div className="bank-head__text">
-          <p className="bank-head__eyebrow">{tasksPage.eyebrow}</p>
-          <h1 className="t-h1 bank-head__title">{tasksPage.title}</h1>
+        <span className="bank-aura" aria-hidden="true">
+          <span className="bank-aura__siniy" />
+          <span className="bank-aura__oranzh" />
+        </span>
+        <p className="bank-head__eyebrow">{tasksPage.eyebrow}</p>
+        <h1 className="t-h1 bank-head__title">{tasksPage.title}</h1>
+        <div className="bank-head__row">
           <p className="bank-head__lead">{tasksPage.lead}</p>
+          <div className="bank-search">
+            <label className="sr-only" htmlFor={searchId}>
+              Поиск по заданиям
+            </label>
+            <svg
+              className="bank-search__icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M16.5 16.5 L 21 21" />
+            </svg>
+            <input
+              id={searchId}
+              className="input bank-search__input"
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Поиск по заданиям…"
+              autoComplete="off"
+            />
+          </div>
         </div>
       </header>
-
-      {/* Строка фильтров. Рядом с поиском встанет выбор темы, когда
-          в конфиге появится признак, по которому фильтровать. */}
-      <div className="bank-filters">
-        <div className="bank-search">
-          <label className="sr-only" htmlFor={searchId}>
-            Поиск по заданиям
-          </label>
-          <svg
-            className="bank-search__icon"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="M16.5 16.5 L 21 21" />
-          </svg>
-          <input
-            id={searchId}
-            className="input bank-search__input"
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Поиск по заданиям…"
-            autoComplete="off"
-          />
-        </div>
-      </div>
 
       {/* Вход в «Собрать вариант» — рядом с выбором заданий. */}
       <VariantEntry className="bank-variant" level={level} />
