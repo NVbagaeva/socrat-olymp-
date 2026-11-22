@@ -17,6 +17,12 @@
 .kristall__oblast:active {
   cursor: grabbing;
 }
+/* <picture> по умолчанию строчный, а img в нём блочный: Safari тогда не
+   применяет к картинке opacity родителя, и рендер не гаснет под живой
+   моделью — видны обе фигуры. Блочный picture гасится целиком. */
+.kristall__poster {
+  display: block;
+}
 .kristall__poster img {
   display: block;
   width: 100%;
