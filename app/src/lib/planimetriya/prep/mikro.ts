@@ -49,6 +49,18 @@ import {
   sootvetstvennyySmezhnyy,
   sosedniyUgolParallelogramma,
 } from './scenarii';
+import {
+  scenariyCentralnyyPoVpisannomu,
+  scenariyDolyaOkruzhnosti,
+  scenariyDugaPoVpisannomu,
+  scenariyHordaDelitOkruzhnost,
+  scenariyNaOdnuDugu,
+  scenariyTreugolnikAOB,
+  scenariyUgolNaDiametr,
+  scenariyVpisannyyPoCentralnomu,
+  scenariyVpisannyyPoDuge,
+  scenariyVpisannyyPoDvumDugam,
+} from './scenarii-p1-8';
 import type { Mikro } from './types';
 
 /* ── Помощники ───────────────────────────────────────────────────── */
@@ -1760,12 +1772,16 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
         otr('C', 'B'),
         ug('A', 'O', 'B', { vydelit: 'dano', znachenie: gr(u), dugi: 2 }),
         ug('A', 'C', 'B', { vydelit: 'iskomoe' }),
+        /* Подсказка, шаг «На какую дугу опираются углы?»: дуга AB. */
+        duga('w', 'A', 'B', { sloy: 1 }),
       ]),
       otvet: u / 2,
       razbor: [
+        '$\\angle AOB$ — центральный, $\\angle ACB$ — вписанный; оба опираются на дугу $AB$, не содержащую $C$.',
         'Вписанный угол вдвое меньше центрального на ту же дугу.',
-        `$${g(u)} : 2 = ${g(u / 2)}$.`,
+        `$\\angle ACB = ${g(u)} : 2 = ${g(u / 2)}$.`,
       ],
+      scenariy: scenariyVpisannyyPoCentralnomu(u),
     };
   }),
   mikro('P1-8-02', 'Центральный по вписанному', '\\angle AOB = 2\\angle ACB', (r) => {
@@ -1779,9 +1795,15 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
         otr('C', 'B'),
         ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(u) }),
         ug('A', 'O', 'B', { vydelit: 'iskomoe', dugi: 2 }),
+        /* Подсказка, шаг «На какую дугу опираются углы?»: дуга AB. */
+        duga('w', 'A', 'B', { sloy: 1 }),
       ]),
       otvet: 2 * u,
-      razbor: [`$\\angle AOB = 2\\cdot ${g(u)} = ${g(2 * u)}$.`],
+      razbor: [
+        '$\\angle ACB$ — вписанный, $\\angle AOB$ — центральный; оба опираются на дугу $AB$, не содержащую $C$.',
+        `Центральный угол вдвое больше вписанного: $\\angle AOB = 2\\cdot ${g(u)} = ${g(2 * u)}$.`,
+      ],
+      scenariy: scenariyCentralnyyPoVpisannomu(u),
     };
   }),
   mikro('P1-8-03', 'Вписанный угол по дуге', '\\angle ACB = \\dfrac{\\arc{AB}}{2}', (r) => {
@@ -1799,7 +1821,11 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
         d > 200 ? { C: naDuge(90) } : {},
       ),
       otvet: d / 2,
-      razbor: [`$${g(d)} : 2 = ${g(d / 2)}$.`],
+      razbor: [
+        'Угол $ACB$ вписанный, он равен половине дуги $AB$, на которую опирается.',
+        `$\\angle ACB = ${g(d)} : 2 = ${g(d / 2)}$.`,
+      ],
+      scenariy: scenariyVpisannyyPoDuge(d),
     };
   }),
   mikro('P1-8-04', 'Дуга по вписанному углу', '\\arc{AB} = 2\\angle ACB', (r) => {
@@ -1813,7 +1839,11 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
         duga('w', 'A', 'B', { vydelit: 'iskomoe' }),
       ]),
       otvet: 2 * u,
-      razbor: [`$2\\cdot ${g(u)} = ${g(2 * u)}$.`],
+      razbor: [
+        'Угол $ACB$ вписанный и опирается на дугу $AB$: он равен её половине.',
+        `Значит, дуга вдвое больше угла: $\\arc{AB} = 2\\cdot ${g(u)} = ${g(2 * u)}$.`,
+      ],
+      scenariy: scenariyDugaPoVpisannomu(u),
     };
   }),
   mikro('P1-8-05', 'Угол на диаметр', '\\angle ACB = 90^\\circ', (r) => {
@@ -1830,14 +1860,19 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
           tochka('O'),
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
           ug('C', 'B', 'A', { vydelit: 'iskomoe' }),
+          /* Подсказка: полуокружность, на которую опирается угол ACB, затем прямой угол. */
+          duga('w', 'A', 'B', { sloy: 1 }),
+          pryam('A', 'C', 'B', { sloy: 2 }),
         ],
         proverki: [ist('C', 'B', 'A', 90 - a)],
       })),
       otvet: 90 - a,
       razbor: [
-        'Угол $ACB$ опирается на диаметр — он прямой.',
+        'Угол $ACB$ вписанный и опирается на диаметр $AB$ — он прямой.',
+        'Сумма углов треугольника $ABC$ — $180^\\circ$, на острые углы остаётся $90^\\circ$.',
         `$\\angle CBA = 90^\\circ - ${g(a)} = ${g(90 - a)}$.`,
       ],
+      scenariy: scenariyUgolNaDiametr(),
     };
   }),
   mikro(
@@ -1858,14 +1893,21 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
             otr('C', 'A'),
             otr('C', 'B'),
             ug('A', 'C', 'B', { vydelit: 'iskomoe' }),
+            /* Подсказка: дуга AB, на которую опирается угол, затем данные дуги и её величина. */
+            duga('w', 'A', 'B', { sloy: 1 }),
+            duga('w', 'C', 'A', { sloy: 2, znachenie: gr(ac) }),
+            duga('w', 'B', 'C', { sloy: 2, znachenie: gr(bc) }),
+            duga('w', 'A', 'B', { sloy: 2, znachenie: gr(360 - ac - bc) }),
           ],
           bezPodpisi: ['O'],
         },
         otvet: (360 - ac - bc) / 2,
         razbor: [
-          `Дуга $AB$: $360^\\circ - ${g(ac)} - ${g(bc)} = ${g(360 - ac - bc)}$.`,
-          `$\\angle ACB = ${g((360 - ac - bc) / 2)}$.`,
+          'Угол $ACB$ вписанный и опирается на дугу $AB$, не содержащую $C$.',
+          `Дуга $AB$ — остаток окружности: $360^\\circ - ${g(ac)} - ${g(bc)} = ${g(360 - ac - bc)}$.`,
+          `Вписанный угол — половина дуги: $\\angle ACB = ${g(360 - ac - bc)} : 2 = ${g((360 - ac - bc) / 2)}$.`,
         ],
+        scenariy: scenariyVpisannyyPoDvumDugam(ac, bc),
       };
     },
   ),
@@ -1882,11 +1924,18 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
           otr('D', 'B'),
           ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(u) }),
           ug('A', 'D', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка, шаг «На какие дуги опираются углы?»: общая дуга AB. */
+          duga('w', 'A', 'B', { sloy: 1 }),
         ],
         { C: naDuge(60), D: naDuge(130) },
       ),
       otvet: u,
-      razbor: ['Вписанные углы на одну дугу равны.', `$\\angle ADB = ${g(u)}$.`],
+      razbor: [
+        'Углы $ACB$ и $ADB$ вписанные; $C$ и $D$ по одну сторону от $AB$ — оба опираются на одну дугу $AB$.',
+        'Вписанные углы на одну дугу равны.',
+        `$\\angle ADB = \\angle ACB = ${g(u)}$.`,
+      ],
+      scenariy: scenariyNaOdnuDugu(),
     };
   }),
   mikro('P1-8-08', 'Дуга как доля окружности', '\\arc{} = \\dfrac{k}{n}\\cdot 360^\\circ', (r) => {
@@ -1899,9 +1948,10 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
       risunok: null,
       otvet: ans,
       razbor: [
-        `Дуга: $\\frac{${n}}{${d}}\\cdot 360^\\circ = ${g((360 * n) / d)}$.`,
-        `Вписанный угол: $${g(ans)}$.`,
+        `Вся окружность — $360^\\circ$. Дуга: $\\frac{${n}}{${d}}\\cdot 360^\\circ = ${g((360 * n) / d)}$.`,
+        `Вписанный угол — половина дуги: $${g((360 * n) / d)} : 2 = ${g(ans)}$.`,
       ],
+      scenariy: scenariyDolyaOkruzhnosti(n, d),
     };
   }),
   mikro('P1-8-09', 'Хорда делит окружность', '\\angle = \\dfrac{\\arc{}}{2}', (r) => {
@@ -1913,9 +1963,15 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
         otr('C', 'A'),
         otr('C', 'B'),
         ug('A', 'C', 'B', { vydelit: 'iskomoe' }),
+        /* Подсказка, шаг «На какую дугу опирается угол?»: меньшая дуга AB. */
+        duga('w', 'A', 'B', { sloy: 1, znachenie: gr(a) }),
       ]),
       otvet: a / 2,
-      razbor: [`Угол $ACB$ опирается на меньшую дугу: $${g(a)} : 2 = ${g(a / 2)}$.`],
+      razbor: [
+        'Угол $ACB$ вписанный; точка $C$ на большей дуге, поэтому угол опирается на меньшую дугу $AB$.',
+        `Вписанный угол — половина дуги: $${g(a)} : 2 = ${g(a / 2)}$.`,
+      ],
+      scenariy: scenariyHordaDelitOkruzhnost(a),
     };
   }),
   mikro('P1-8-10', 'Треугольник $AOB$', '\\angle AOB = 180^\\circ - 2\\angle OAB', (r) => {
@@ -1930,14 +1986,20 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
           tri('O', 'A', 'B'),
           ug('O', 'A', 'B', { vydelit: 'dano', znachenie: gr(x) }),
           ug('A', 'O', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка: радиусы OA = OB, затем равный угол при основании AB. */
+          shtrih('O', 'A', 1, { sloy: 1 }),
+          shtrih('O', 'B', 1, { sloy: 1 }),
+          ug('O', 'B', 'A', { sloy: 2, znachenie: gr(x) }),
         ],
         proverki: [ist('A', 'O', 'B', 180 - 2 * x)],
       })),
       otvet: 180 - 2 * x,
       razbor: [
-        '$OA = OB$ — радиусы, углы при $AB$ равны.',
-        `$\\angle AOB = 180^\\circ - 2\\cdot ${g(x)} = ${g(180 - 2 * x)}$.`,
+        '$OA = OB$ — радиусы: треугольник $AOB$ равнобедренный с основанием $AB$.',
+        `Углы при основании равны: $\\angle OBA = \\angle OAB = ${g(x)}$.`,
+        `Сумма углов треугольника: $\\angle AOB = 180^\\circ - 2\\cdot ${g(x)} = ${g(180 - 2 * x)}$.`,
       ],
+      scenariy: scenariyTreugolnikAOB(x),
     };
   }),
 ];
