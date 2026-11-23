@@ -102,7 +102,8 @@ export function RegisterWizard({
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
   const [attempted, setAttempted] = useState<Partial<Record<FieldKey, boolean>>>({});
   const [consentAttempted, setConsentAttempted] = useState(false);
-  const [focused, setFocused] = useState<FieldKey | null>(null);
+  // Keep the last field hint visible when focus moves to an action so the button stays under the pointer.
+  const [activeField, setActiveField] = useState<FieldKey | null>(null);
   const [shakeKey, setShakeKey] = useState<FieldKey | null>(null);
   const [emailAlreadyRegistered, setEmailAlreadyRegistered] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -210,7 +211,7 @@ export function RegisterWizard({
       if (element === null || element === undefined) return;
       element.scrollIntoView({
         block: 'center',
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        behavior: 'instant',
       });
       element.focus({ preventScroll: true });
     });
@@ -603,9 +604,8 @@ export function RegisterWizard({
               enterKeyHint="next"
               placeholder={REGISTER_FORM.namePlaceholder}
               value={name}
-              onFocus={() => setFocused('name')}
+              onFocus={() => setActiveField('name')}
               onBlur={() => {
-                setFocused(null);
                 setTouched((current) => ({ ...current, name: true }));
               }}
               onChange={(event) => setName(event.target.value)}
@@ -616,7 +616,7 @@ export function RegisterWizard({
               aria-describedby={
                 nameError !== null
                   ? `${id}-name-error`
-                  : focused === 'name'
+                  : activeField === 'name'
                     ? `${id}-name-hint`
                     : undefined
               }
@@ -625,7 +625,7 @@ export function RegisterWizard({
               <FieldMessage id={`${id}-name-error`} tone="error">
                 {nameError}
               </FieldMessage>
-            ) : focused === 'name' ? (
+            ) : activeField === 'name' ? (
               <FieldMessage id={`${id}-name-hint`}>{nameHint}</FieldMessage>
             ) : null}
           </div>
@@ -653,9 +653,8 @@ export function RegisterWizard({
               placeholder={LOGIN_FORM.emailPlaceholder}
               spellCheck={false}
               value={email}
-              onFocus={() => setFocused('email')}
+              onFocus={() => setActiveField('email')}
               onBlur={() => {
-                setFocused(null);
                 setTouched((current) => ({ ...current, email: true }));
               }}
               onChange={(event) => {
@@ -671,14 +670,14 @@ export function RegisterWizard({
               aria-describedby={
                 [
                   emailError !== null ? emailErrorId : null,
-                  focused === 'email' ? emailHelpId : null,
+                  activeField === 'email' ? emailHelpId : null,
                   domainBlocked ? emailDomainId : null,
                 ]
                   .filter(Boolean)
                   .join(' ') || undefined
               }
             />
-            {focused === 'email' && emailError === null ? (
+            {activeField === 'email' && emailError === null ? (
               <FieldMessage id={emailHelpId}>{REGISTER_FORM.emailHint}</FieldMessage>
             ) : null}
             {emailError !== null ? (
@@ -802,13 +801,12 @@ export function RegisterWizard({
             autoComplete="new-password"
             disabled={busy}
             error={passwordError}
-            onFocus={() => setFocused('password')}
+            onFocus={() => setActiveField('password')}
             onBlur={() => {
-              setFocused(null);
               setTouched((current) => ({ ...current, password: true }));
             }}
           />
-          {focused === 'password' ? (
+          {activeField === 'password' ? (
             <FieldMessage>{REGISTER_FORM.help.password}</FieldMessage>
           ) : null}
         </section>
@@ -842,9 +840,8 @@ export function RegisterWizard({
               maxLength={4}
               placeholder={REGISTER_FORM.birthYearPlaceholder}
               value={birthYear}
-              onFocus={() => setFocused('birthYear')}
+              onFocus={() => setActiveField('birthYear')}
               onBlur={() => {
-                setFocused(null);
                 setTouched((current) => ({ ...current, birthYear: true }));
               }}
               onChange={(event) => setBirthYear(event.target.value.replace(/\D/g, ''))}
@@ -853,7 +850,7 @@ export function RegisterWizard({
               aria-describedby={
                 birthYearError !== null
                   ? `${id}-year-error`
-                  : focused === 'birthYear'
+                  : activeField === 'birthYear'
                     ? `${id}-year-hint`
                     : undefined
               }
@@ -862,7 +859,7 @@ export function RegisterWizard({
               <FieldMessage id={`${id}-year-error`} tone="error">
                 {birthYearError}
               </FieldMessage>
-            ) : focused === 'birthYear' ? (
+            ) : activeField === 'birthYear' ? (
               <FieldMessage id={`${id}-year-hint`}>{REGISTER_FORM.birthYearHint}</FieldMessage>
             ) : null}
             <p className="register-years__caption">{REGISTER_FORM.yearsQuickPick}</p>
@@ -910,9 +907,8 @@ export function RegisterWizard({
                   enterKeyHint="next"
                   placeholder={LOGIN_FORM.emailPlaceholder}
                   value={parentEmail}
-                  onFocus={() => setFocused('parentEmail')}
+                  onFocus={() => setActiveField('parentEmail')}
                   onBlur={() => {
-                    setFocused(null);
                     setTouched((current) => ({ ...current, parentEmail: true }));
                   }}
                   onChange={(event) => setParentEmail(event.target.value)}
@@ -921,7 +917,7 @@ export function RegisterWizard({
                   aria-describedby={
                     parentEmailError !== null
                       ? `${id}-parent-error`
-                      : focused === 'parentEmail'
+                      : activeField === 'parentEmail'
                         ? `${id}-parent-hint`
                         : undefined
                   }
@@ -930,7 +926,7 @@ export function RegisterWizard({
                   <FieldMessage id={`${id}-parent-error`} tone="error">
                     {parentEmailError}
                   </FieldMessage>
-                ) : focused === 'parentEmail' ? (
+                ) : activeField === 'parentEmail' ? (
                   <FieldMessage id={`${id}-parent-hint`}>
                     {REGISTER_FORM.parentSameHint}
                   </FieldMessage>
