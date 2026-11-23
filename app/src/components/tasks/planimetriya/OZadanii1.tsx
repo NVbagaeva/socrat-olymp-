@@ -78,7 +78,7 @@ export function OZadanii1() {
                 tipov={tipy.length}
                 progress={<GruppaProgress1 prototypes={tipy.map((p) => klyuchProto(p.id))} />}
                 labels={SHAPKA1}
-                open={gi === 0}
+                open={false}
               >
                 {tipy.map((p, i) => {
                   const k = klyuchProto(p.id);
@@ -90,7 +90,7 @@ export function OZadanii1() {
                      приезжают файлом по раскрытию карточки. */
                   const ex = open ? primer1(k) : null;
                   return (
-                    <KartaTip key={k} id={k} nazvanieHtml={typeset(p.nazvanie)} open={open}>
+                    <KartaTip key={k} id={k} nazvanieHtml={typeset(p.nazvanie)} open={false}>
                       {ex !== null ? (
                         <Primer1View
                           primer={ex}

@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { AnswerInput, FormatHint } from '../otvet/AnswerInput';
 import { Ikonka, Metka, ShagiResheniya, type PriznakDelimosti, type Shag } from '../steklo';
 
@@ -135,14 +135,6 @@ export function EkranZadachi({
   const otvechen = sostoyanie === 'verno' || sostoyanie === 'razbor';
   const ready = gotovo ?? value.trim() !== '';
   const input = () => pole.current?.querySelector('input') ?? null;
-
-  /* Новая задача — курсор в поле (на телефоне клавиатура сама не
-     открывается без касания, и это правильно). */
-  useEffect(() => {
-    if (sostoyanie === 'vvod' && window.matchMedia('(pointer: fine)').matches) {
-      input()?.focus();
-    }
-  }, [nomer, sostoyanie]);
 
   function onKey(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key !== 'Enter') {

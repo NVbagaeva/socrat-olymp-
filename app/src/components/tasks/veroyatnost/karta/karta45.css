@@ -3,7 +3,7 @@
 
 /* Картинка к примеру — целиком, по центру, не шире колонки. */
 .z45-karta .kz-primer__risunok {
-  max-width: 560px;
+  max-width: 390px;
   margin-inline: auto;
 }
 

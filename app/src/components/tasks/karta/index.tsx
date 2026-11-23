@@ -294,6 +294,8 @@ export interface FormulaSPrimerom {
   html: string;
   /** Пример применения, HTML KaTeX. */
   primerHtml: string;
+  /** Пошаговое пояснение правила, HTML с набранными формулами. */
+  detailsHtml?: string[];
   /** Маленький чертёж к формуле: что в ней a, h, r. */
   risunok?: ReactNode;
 }
@@ -303,7 +305,7 @@ export function FormulyRamka({
   nazvanie,
   ton,
   formuly,
-  primerLabel = 'например',
+  primerLabel = 'например,',
 }: {
   nazvanie: string;
   ton: Ton;
@@ -323,6 +325,16 @@ export function FormulyRamka({
             <span className="kz-ramka__primer">
               <i>{primerLabel}</i> <span dangerouslySetInnerHTML={{ __html: f.primerHtml }} />
             </span>
+            {f.detailsHtml === undefined || f.detailsHtml.length === 0 ? null : (
+              <details className="kz-ramka__details">
+                <summary>Показать подробнее</summary>
+                <div className="kz-ramka__details-body">
+                  {f.detailsHtml.map((line, j) => (
+                    <p key={j} dangerouslySetInnerHTML={{ __html: line }} />
+                  ))}
+                </div>
+              </details>
+            )}
           </li>
         ))}
       </ul>

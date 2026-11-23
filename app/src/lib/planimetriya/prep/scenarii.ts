@@ -10,7 +10,7 @@ import { parallelogramm } from '../figury';
 import { polar } from '../geom';
 import type { Scenariy } from '../scenariy';
 import { podobrat } from '../skhema';
-import { gr, mn, otr, ug } from '../stseny/dsl';
+import { gr, mn, otr, shtrih, tri, ug } from '../stseny/dsl';
 import type { Element, Scena } from '../types';
 import type { FaktPamyatki, MikroGenerated } from './types';
 
@@ -759,5 +759,60 @@ export const PAMYATKA_SMEZHNYE: FaktPamyatki[] = [
       ug('B', m, n, { cvet: 1, radiusPx: 13 }),
       ug('D', n, m, { cvet: 2, dugi: 2, radiusPx: 13 }),
     ]),
+  },
+];
+
+/* ── Памятка блока «Сумма углов и равнобедренный треугольник» ───── */
+
+const summaUglovTreugRis = (): Scena => ({
+  tochki: { A: [-4, 0], B: [4, 0], C: [0, 4.8] },
+  elementy: [
+    tri('A', 'B', 'C'),
+    ug('B', 'A', 'C', { cvet: 1, radiusPx: 13 }),
+    ug('C', 'B', 'A', { cvet: 2, radiusPx: 13 }),
+    ug('A', 'C', 'B', { cvet: 3, radiusPx: 13 }),
+  ],
+  podpisi: ['A', 'B', 'C'],
+});
+
+const vneshniyUgolTreugRis = (): Scena => ({
+  tochki: { A: [-4, 0], B: [4, 0], C: [0, 4], D: [-4, 8] },
+  elementy: [
+    tri('A', 'B', 'C'),
+    otr('C', 'D'),
+    ug('B', 'A', 'C', { cvet: 1, radiusPx: 12 }),
+    ug('C', 'B', 'A', { cvet: 2, radiusPx: 12 }),
+    ug('D', 'C', 'A', { cvet: 3, radiusPx: 17 }),
+  ],
+  podpisi: ['A', 'B', 'C', 'D'],
+});
+
+const ravnobedrennyyTreugRis = (): Scena => ({
+  tochki: { A: [-4, 0], B: [4, 0], C: [0, 4.8] },
+  elementy: [
+    tri('A', 'B', 'C'),
+    shtrih('A', 'C', 1),
+    shtrih('B', 'C', 1),
+    ug('B', 'A', 'C', { cvet: 1, dugi: 2, radiusPx: 13 }),
+    ug('C', 'B', 'A', { cvet: 1, dugi: 2, radiusPx: 13 }),
+  ],
+  podpisi: ['A', 'B', 'C'],
+});
+
+export const PAMYATKA_SUMMA: FaktPamyatki[] = [
+  {
+    tekst: 'Сумма трёх внутренних углов любого треугольника равна $180^\\circ$.',
+    formula: '\\angle A + \\angle B + \\angle C = 180^\\circ',
+    risunok: summaUglovTreugRis(),
+  },
+  {
+    tekst: 'Внешний угол треугольника равен сумме двух внутренних углов, не смежных с ним.',
+    formula: '\\angle DCA = \\angle A + \\angle B',
+    risunok: vneshniyUgolTreugRis(),
+  },
+  {
+    tekst: 'Если две стороны треугольника равны, он равнобедренный. Углы при основании такого треугольника равны.',
+    formula: 'AC = BC \\Rightarrow \\angle A = \\angle B',
+    risunok: ravnobedrennyyTreugRis(),
   },
 ];

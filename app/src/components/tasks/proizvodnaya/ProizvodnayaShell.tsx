@@ -20,6 +20,7 @@ export function ProizvodnayaShell({ children }: { children: React.ReactNode }) {
     <AppShell active="tasks">
       <main className="app-main">
         <StsenaShapka
+          className="z9-shell"
           crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },

@@ -1,0 +1,32 @@
+/* Шапка, вкладки и содержимое длинного раздела №9 держим в одном
+   читаемом столбце, как у раздела «Уравнения». */
+.z10-shell {
+  width: min(100%, 82vw);
+  max-width: 1480px;
+  margin-inline: auto;
+}
+
+/* У рисунка физического смысла достаточно места в колонке, но он не
+   растягивает карточку по высоте. */
+.stsena--fizika .stsena__media .rsz {
+  width: auto;
+  height: 260px;
+  aspect-ratio: 120 / 130;
+  justify-self: end;
+}
+
+@media (max-width: 1023.98px) {
+  .z10-shell {
+    width: 100%;
+  }
+
+  .stsena--fizika .stsena__media .rsz {
+    height: 180px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .stsena--fizika .stsena__media .rsz {
+    height: 108px;
+  }
+}

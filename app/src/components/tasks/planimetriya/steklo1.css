@@ -201,13 +201,13 @@
 }
 .z1-pamyatka__fakt {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: 136px minmax(0, 1fr);
   gap: var(--space-3);
   align-items: center;
 }
 .z1-pamyatka__ris {
   display: block;
-  width: 96px;
+  width: 136px;
 }
 .z1-pamyatka__tekst {
   display: grid;
@@ -221,6 +221,14 @@
   color: var(--color-text-secondary);
   overflow-x: auto;
   overflow-y: hidden;
+}
+@media (max-width: 520px) {
+  .z1-pamyatka__fakt {
+    grid-template-columns: 104px minmax(0, 1fr);
+  }
+  .z1-pamyatka__ris {
+    width: 104px;
+  }
 }
 .z1-op__chertezh {
   max-width: 320px;
@@ -288,7 +296,15 @@
   /* Вращение пальцем не должно прокручивать страницу. */
   touch-action: none;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
   filter: drop-shadow(0 18px 28px rgb(31 95 208 / 0.16));
+}
+.z1-trezubets,
+.z1-trezubets__svg,
+.z1-trezubets__svg * {
+  -webkit-user-select: none;
+  user-select: none;
 }
 .z1-trezubets__svg:active {
   cursor: grabbing;

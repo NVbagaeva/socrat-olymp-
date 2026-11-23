@@ -4,7 +4,7 @@
  * четырёхугольники, площади, Пифагор, тригонометрия, окружность.
  */
 
-import { PAMYATKA_SMEZHNYE } from './scenarii';
+import { PAMYATKA_SMEZHNYE, PAMYATKA_SUMMA } from './scenarii';
 import {
   BLOK_CHETYREHUGOLNIKI,
   BLOK_KASATELNYE,
@@ -31,6 +31,7 @@ const BLOKI_BEZ_FAKTOV: Blok[] = [
       '\\angle_{\\text{внеш}} = \\angle A + \\angle B',
       'AC = BC \\Rightarrow \\angle A = \\angle B',
     ],
+    pamyatka: PAMYATKA_SUMMA,
     zadachi: BLOK_SUMMA,
   },
   {

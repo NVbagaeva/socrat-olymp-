@@ -898,7 +898,61 @@
   padding: var(--space-4);
 }
 .z7-skhemy__karta .z7-sx {
-  font-size: var(--fs-lg);
+  /* В трёхколоночной сетке широкая горизонтальная схема сжималась в
+     Safari до узкой полосы: роли и формулы накладывались. Здесь схема
+     становится вертикальной и сохраняет читаемую ширину каждой строки. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  overflow: visible;
+  font-size: var(--fs-body);
+}
+.z7-skhemy__karta .z7-sx__iskh,
+.z7-skhemy__karta .z7-sx__vetki,
+.z7-skhemy__karta .z7-sx__vetka,
+.z7-skhemy__karta .z7-sx__itog,
+.z7-skhemy__karta .z7-sx__stroki,
+.z7-skhemy__karta .z7-sx__stroka {
+  min-width: 0;
+  max-width: 100%;
+}
+.z7-skhemy__karta .z7-sx__iskh {
+  justify-self: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.z7-skhemy__karta .z7-sx__vetki {
+  width: 100%;
+}
+.z7-skhemy__karta .z7-sx__vetka,
+.z7-skhemy__karta .z7-sx__vetka:not(:has(.z7-sx__esli)) {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+.z7-skhemy__karta .z7-sx__strelka {
+  justify-self: start;
+  margin: 0 0 0 var(--space-3);
+  line-height: 1;
+  transform: rotate(90deg);
+}
+.z7-skhemy__karta .z7-sx__sistema {
+  min-width: 0;
+  max-width: 100%;
+}
+.z7-skhemy__karta .z7-sx__stroka {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-1);
+  overflow-wrap: anywhere;
+}
+.z7-skhemy__karta .z7-sx__formula {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.z7-skhemy__karta .z7-sx__prichina {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .z7-skhemy__knopka {
   justify-self: start;
@@ -990,6 +1044,20 @@
   display: grid;
   gap: var(--space-4);
 }
+/* Опорные задачи №7 теперь полностью совпадают по палитре с картой
+   задания №10: единые синие карточки и спокойные стеклянные поверхности. */
+.z7-opornye .op-navyk {
+  --ton: var(--blue-600);
+  --ton-soft: var(--blue-100);
+  --ton-border: var(--blue-200);
+  --ton-text: var(--blue-700);
+}
+.z7-opornye .op-blok {
+  color: var(--color-text);
+}
+.z7-opornye .op-blok__text b {
+  color: var(--navy-800);
+}
 .z7-opornye__nazad {
   justify-self: start;
   display: inline-flex;
@@ -1009,6 +1077,26 @@
   margin: var(--space-3) 0 0;
   padding: 0;
   list-style: none;
+}
+
+/* Теория №7 использует ту же сетку воздуха и визуальную иерархию,
+   что и соседние разделы: синий вводный блок, стеклянные карточки,
+   а оранжевый остаётся только у разобранных примеров. */
+@media screen {
+  .teor-steklo .z7-teoriya__lead {
+    max-width: 76ch;
+    margin: 0 0 var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    border-left: 4px solid var(--blue-600);
+    border-radius: 0 14px 14px 0;
+    background: linear-gradient(100deg, var(--blue-50), transparent 85%);
+    color: var(--color-text-secondary);
+    line-height: 1.65;
+  }
+  .teor-steklo .z7-kartochki {
+    align-items: start;
+    gap: var(--space-4);
+  }
 }
 .z7-gde__chip--steklo {
   display: inline-flex;

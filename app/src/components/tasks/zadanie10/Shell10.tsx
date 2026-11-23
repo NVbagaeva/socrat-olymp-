@@ -5,6 +5,7 @@ import { tasksPage } from '@/content/tasks';
 import { ZADANIE10 } from '@/content/zadanie10';
 import { ZADANIYA } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
+import './shell10.css';
 
 /**
  * Оболочка задания №10: крошки, заголовок и липкая лента вкладок
@@ -17,21 +18,27 @@ export function Shell10({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <StsenaShapka
-          crumbs={[
-            { label: 'Главная', href: '/' },
-            { label: 'Банк заданий', href: tasksPage.href },
-            { label: `№${no}` },
-          ]}
-          title={ZADANIE10.title}
-          lead={ZADANIE10.lead}
-          tabletki={tabletkiRazdela({ chast: ZADANIE10.badge })}
-          media={
-            <RisunokRazdela no={ZADANIE10.slug} label={`${STSENA.oblozhka}: ${ZADANIE10.title}`} />
-          }
-        />
-        <RazdelTabs base={base} tabs={ZADANIE10.tabs} className="topic-tabs-row--stsena" />
-        <div className="section-panel">{children}</div>
+        <div className="z10-shell">
+          <StsenaShapka
+            className="stsena--fizika"
+            crumbs={[
+              { label: 'Главная', href: '/' },
+              { label: 'Банк заданий', href: tasksPage.href },
+              { label: `№${no}` },
+            ]}
+            title={ZADANIE10.title}
+            lead={ZADANIE10.lead}
+            tabletki={tabletkiRazdela({ chast: ZADANIE10.badge })}
+            media={
+              <RisunokRazdela
+                no={ZADANIE10.slug}
+                label={`${STSENA.oblozhka}: ${ZADANIE10.title}`}
+              />
+            }
+          />
+          <RazdelTabs base={base} tabs={ZADANIE10.tabs} className="topic-tabs-row--stsena" />
+          <div className="section-panel">{children}</div>
+        </div>
       </main>
     </AppShell>
   );

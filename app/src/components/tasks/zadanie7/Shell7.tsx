@@ -8,6 +8,7 @@ import { ZADANIYA } from '@/lib/paths';
 import { PROTOTYPES } from '@/lib/zadanie7/prototypes';
 import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
 import { RazdelTabs } from '../RazdelTabs';
+import './shell7.css';
 
 /**
  * Оболочка задания №7: шапка «Стеклянная сцена» и липкая лента вкладок
@@ -24,28 +25,31 @@ export function Shell7({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <StsenaShapka
-          crumbs={[
-            { label: 'Главная', href: '/' },
-            { label: 'Банк заданий', href: tasksPage.href },
-            { label: `№${no}` },
-          ]}
-          title={ZADANIE7.title}
-          lead={ZADANIE7.lead}
-          tabletki={tabletkiRazdela({
-            chast: ZADANIE7.badge,
-            fakty: SHAPKA7.fakty(PROTOTYPES.length),
-          })}
-          media={
-            ZADANIE7.art ? (
-              <IllyustratsiyaShapki art={ZADANIE7.art} />
-            ) : (
-              <RisunokRazdela no={ZADANIE7.slug} label={`${STSENA.oblozhka}: ${ZADANIE7.title}`} />
-            )
-          }
-        />
-        <RazdelTabs base={base} tabs={ZADANIE7.tabs} className="topic-tabs-row--stsena" />
-        <div className="section-panel">{children}</div>
+        <div className="z7-shell">
+          <StsenaShapka
+            className="stsena--uravneniya"
+            crumbs={[
+              { label: 'Главная', href: '/' },
+              { label: 'Банк заданий', href: tasksPage.href },
+              { label: `№${no}` },
+            ]}
+            title={ZADANIE7.title}
+            lead={ZADANIE7.lead}
+            tabletki={tabletkiRazdela({
+              chast: ZADANIE7.badge,
+              fakty: SHAPKA7.fakty(PROTOTYPES.length),
+            })}
+            media={
+              ZADANIE7.art ? (
+                <IllyustratsiyaShapki art={ZADANIE7.art} />
+              ) : (
+                <RisunokRazdela no={ZADANIE7.slug} label={`${STSENA.oblozhka}: ${ZADANIE7.title}`} />
+              )
+            }
+          />
+          <RazdelTabs base={base} tabs={ZADANIE7.tabs} className="topic-tabs-row--stsena" />
+          <div className="section-panel">{children}</div>
+        </div>
       </main>
     </AppShell>
   );

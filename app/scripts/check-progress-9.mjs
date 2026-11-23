@@ -425,7 +425,7 @@ const vse = PROTOTYPES.map((p) => p.id);
   );
   check(ZNAT9.length === 5, 'в «Что нужно знать» не пять рамок');
 
-  const { primer9 } = requireSrc('components/tasks/proizvodnaya/primer9.ts');
+  const { primer9 } = requireSrc('components/tasks/proizvodnaya/PrimerDannye9.ts');
   for (const p of PROTOTYPES) {
     let pr = null;
     try {

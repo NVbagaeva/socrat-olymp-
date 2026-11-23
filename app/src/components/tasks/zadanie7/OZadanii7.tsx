@@ -97,7 +97,7 @@ export function OZadanii7({ base }: { base: string }) {
                 tipov={tipy.length}
                 progress={<GruppaProgress7 prototypes={tipy.map((p) => p.id)} />}
                 labels={SHAPKA7}
-                open={gi === 0}
+                open={false}
               >
                 {tipy.map((p, i) => {
                   const open = gi === 0 && i === 0;
@@ -111,7 +111,7 @@ export function OZadanii7({ base }: { base: string }) {
                       id={p.id}
                       nazvanieHtml={typeset(p.title)}
                       lead={tex(p.formula)}
-                      open={open}
+                      open={false}
                     >
                       {ex === null ? (
                         <PrimerLazy7
@@ -153,7 +153,11 @@ export function OZadanii7({ base }: { base: string }) {
               key={blok.id}
               nazvanie={blok.nazvanie}
               ton={blok.ton}
-              formuly={blok.formuly.map((f) => ({ html: tex(f.tex), primerHtml: tex(f.primer) }))}
+              formuly={blok.formuly.map((f) => ({
+                html: tex(f.tex),
+                primerHtml: tex(f.primer),
+                ...(f.details === undefined ? {} : { detailsHtml: f.details.map((line) => typeset(line)) }),
+              }))}
             />
           ))}
         </div>

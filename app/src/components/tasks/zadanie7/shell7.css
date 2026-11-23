@@ -1,0 +1,32 @@
+/* Для длинного раздела «Уравнения» держим один читаемый столбец:
+   шапка, лента вкладок и содержимое имеют общие края. */
+.z7-shell {
+  width: min(100%, 82vw);
+  max-width: 1480px;
+  margin-inline: auto;
+}
+
+/* Уменьшаем лишнюю высоту карточки: обложке не нужна прежняя колонка
+   300 px, а пропорции нового рисунка рассчитаны на 120 × 130. */
+.stsena--uravneniya .stsena__media .rsz {
+  width: auto;
+  height: 260px;
+  aspect-ratio: 120 / 130;
+  justify-self: end;
+}
+
+@media (max-width: 1023.98px) {
+  .z7-shell {
+    width: 100%;
+  }
+
+  .stsena--uravneniya .stsena__media .rsz {
+    height: 180px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .stsena--uravneniya .stsena__media .rsz {
+    height: 108px;
+  }
+}

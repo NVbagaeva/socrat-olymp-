@@ -332,6 +332,52 @@
   color: var(--ton-text);
   font-weight: 600;
 }
+.kz-ramka__details {
+  min-width: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-lg);
+  white-space: normal;
+}
+.kz-ramka__details summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  color: var(--ton-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+.kz-ramka__details summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 160ms ease;
+}
+.kz-ramka__details[open] summary::after {
+  transform: rotate(225deg) translate(-1px, -1px);
+}
+.kz-ramka__details summary:focus-visible {
+  outline: 2px solid var(--ton-text);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.kz-ramka__details-body {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2) 0 var(--space-1);
+  border-top: 1px solid var(--ton-border);
+}
+.kz-ramka__details-body p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.kz-ramka__details-body .katex-display {
+  overflow-x: auto;
+}
 
 /* ── Сворачиваемая панель ─────────────────────────────────────── */
 .kz-svernut__summary {

@@ -89,6 +89,9 @@ export function Trezubets({ label, hintHtml }: { label: string; hintHtml: string
   }
 
   function onDown(event: PointerEvent<SVGSVGElement>) {
+    // Safari can start selecting the SVG's rectangular box during a drag unless
+    // the pointer default is cancelled, even when CSS user-select is disabled.
+    event.preventDefault();
     tronuli.current = true;
     tashchim.current = { ot: ugolUkazatelya(event), bylo: ugol };
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -119,6 +122,7 @@ export function Trezubets({ label, hintHtml }: { label: string; hintHtml: string
         aria-label={label}
         tabIndex={0}
         onPointerDown={onDown}
+        onDragStart={(event) => event.preventDefault()}
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={onUp}

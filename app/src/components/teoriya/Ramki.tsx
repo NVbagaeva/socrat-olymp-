@@ -124,6 +124,8 @@ export interface ShagPrimera {
   paras?: readonly string[];
   /** Выносные формулы этапа: идут сразу под подписью. */
   formuly?: readonly string[];
+  /** Дополнительный блок после объяснения шага (схема, таблица и т. п.). */
+  posle?: ReactNode;
 }
 
 export function RamkaPrimer({
@@ -168,6 +170,7 @@ export function RamkaPrimer({
                 <Tex text={para} />
               </p>
             ))}
+            {shag.posle}
           </li>
         ))}
       </ol>

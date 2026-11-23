@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
 import { KakIzobrazhatSobytiya } from './KakIzobrazhatSobytiya';
+import { ProtivopolozhnoeSobytiye4 } from './ProtivopolozhnoeSobytiye4';
 import { KlassicheskayaVeroyatnost } from './KlassicheskayaVeroyatnost';
 import { KoordinatnayaPryamaya } from './KoordinatnayaPryamaya';
 import { VidySobytiy } from './VidySobytiy';
+import { NezavisimyeSobytiya5, SovmestnyeSobytiya5 } from './Sobytiya5';
 
 /**
  * Свёрстанные разделы теории по идентификатору из конфига.
@@ -16,11 +18,14 @@ export const telaRazdelov4: Record<string, ReactNode> = {
   'vidy-sobytiy': <VidySobytiy />,
   klassicheskaya: <KlassicheskayaVeroyatnost />,
   'kak-izobrazhat': <KakIzobrazhatSobytiya />,
+  protivopolozhnoe: <ProtivopolozhnoeSobytiye4 />,
 };
 
-/** Разделы теории задания №5: пока один — координатная прямая. */
+/** Разделы теории задания №5. */
 export const telaRazdelov5: Record<string, ReactNode> = {
   'koordinatnaya-pryamaya': <KoordinatnayaPryamaya />,
+  nezavisimye: <NezavisimyeSobytiya5 />,
+  sovmestnye: <SovmestnyeSobytiya5 />,
 };
 
 export { TeoriyaShell, type TeoriyaShellProps } from '@/components/tasks/teoriya/TeoriyaShell';

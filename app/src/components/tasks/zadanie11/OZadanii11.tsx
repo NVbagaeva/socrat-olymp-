@@ -108,7 +108,7 @@ export function OZadanii11() {
                 tipov={tipy.length}
                 progress={<GruppaProgress11 podtipy={tipy.map((st) => st.id)} />}
                 labels={SHAPKA11}
-                open={gi === 0}
+                open={false}
               >
                 {tipy.map((st, i) => {
                   const open = gi === 0 && i === 0;
@@ -122,7 +122,7 @@ export function OZadanii11() {
                   /* Картинка к задаче — только если она есть (сейчас нет ни одной). */
                   const kartinka = estKartinka11(st.id) ? <Kartinka11 podtip={st.id} /> : undefined;
                   return (
-                    <KartaTip key={st.id} id={st.id} nazvanieHtml={typeset(st.title)} open={open}>
+                    <KartaTip key={st.id} id={st.id} nazvanieHtml={typeset(st.title)} open={false}>
                       {ex !== null ? (
                         <KartaPrimer
                           uslovieHtml={ex.uslovieHtml}

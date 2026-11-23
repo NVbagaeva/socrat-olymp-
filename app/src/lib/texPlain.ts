@@ -61,9 +61,9 @@ function plainFormula(tex: string): string {
         /(\w?)\\(arcsin|arccos|arctg|arcctg|sin|cos|tg|ctg|tan|cot|log|ln|lg|exp)(?![a-zA-Z])\s*/g,
         (_m, before: string, name: string) => `${before === '' ? '' : `${before} `}${name} `,
       )
-      .replace(/ _(?:\{(\w)\}|(\w))\s*/g, (_m, a: string | undefined, b: string | undefined) => {
+      .replace(/\s*_(?:\{(\w)\}|(\w))/g, (_m, a: string | undefined, b: string | undefined) => {
         const ch = a ?? b ?? '';
-        return `${SUB[ch] ?? `_${ch}`} `;
+        return SUB[ch] ?? `_${ch}`;
       })
       .replace(/\\[a-zA-Z]+/g, '')
       .replace(/[{}]/g, '')
