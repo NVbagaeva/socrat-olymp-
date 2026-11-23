@@ -262,6 +262,41 @@ for (const n of [8, 5]) {
   check(U.srokProshel({ due_at: '2026-11-24T15:00:00Z' }, now) && !U.srokProshel({}, now), 'срок прошёл / без срока');
 }
 
+/* ── Итоги учителя (PR 2г) ──────────────────────────────────────── */
+{
+  const I = requireSrc('lib/dz2/itogi.ts');
+  check(I.yacheyka(undefined) === 'net' && I.yacheyka({ done: 0, need: 3, completed: false }) === 'net',
+    'клетка: не начато');
+  check(I.yacheyka({ done: 1, need: 3, completed: false }) === 'nachato', 'клетка: начато');
+  check(I.yacheyka({ done: 0, need: 3, completed: false, closed: 2, total: 10 }) === 'nachato',
+    'клетка «подряд»: серия сорвалась, но задачи решались — начато');
+  check(I.yacheyka({ done: 3, need: 3, completed: true }) === 'gotovo', 'клетка: выполнено');
+  const tr = { kind: 'trenazher' };
+  const te = { kind: 'teoriya' };
+  check(I.podpisYacheyki(tr, { done: 5, need: 3, completed: true }) === '3/3', 'подпись: не больше цели');
+  check(I.podpisYacheyki(te, { done: 1, need: 1, completed: true }) === '✓' &&
+    I.podpisYacheyki(te, { done: 0, need: 1, completed: false }) === '—', 'подпись теории');
+  check(I.podpisYacheyki(tr, undefined) === '—', 'подпись без прогресса');
+  const u = (id, name, status, progress = {}) => ({ id, name, status, seconds: 0, progress });
+  const list = [
+    u('a', 'Яна', 'not_started'), u('b', 'Борис', 'late', { e1: { done: 1, need: 1, completed: true } }),
+    u('c', 'Аня', 'submitted', { e1: { done: 1, need: 1, completed: true } }), u('d', 'Вера', 'returned'),
+    u('e', 'Гоша', 'missed'), u('f', 'Дина', 'in_progress', { e1: { done: 0, need: 1, completed: false } }),
+  ];
+  check(I.poryadokUchenikov(list).map((x) => x.id).join() === 'c,b,d,f,a,e',
+    `порядок учеников: сдавшие, на доработке, в работе, не начавшие, не сдавшие (${I.poryadokUchenikov(list).map((x) => x.id).join()})`);
+  check(I.sdali(list) === 2 && I.vypolnili(list, 'e1') === 2, 'сдали 2, элемент выполнили 2');
+  check(JSON.stringify(I.poStatusam(list)) === '{"not_started":1,"late":1,"submitted":1,"returned":1,"missed":1,"in_progress":1}',
+    'счёт по статусам');
+  check(I.mozhnoVernut(list[1]) && I.mozhnoVernut(list[2]) && !I.mozhnoVernut(list[3]) && !I.mozhnoVernut(list[0]),
+    'вернуть можно только сданное');
+  const items = [{ id: 'e2', position: 2 }, { id: 'e1', position: 1 }];
+  const ot = [{ id: 't2', item_id: 'e1', position: 2 }, { id: 't1', item_id: 'e1', position: 1 }, { id: 't3', item_id: 'e2', position: 1 }];
+  const pe = I.poElementam(items, ot);
+  check(pe[0].e.id === 'e2' && pe[0].zadachi.length === 1 && pe[1].zadachi.map((x) => x.id).join() === 't1,t2',
+    'ответы по элементам и по порядку задач');
+}
+
 /* Ссылки ученика из ДЗ — на настоящие адреса разделов. */
 {
   const L = requireSrc('lib/dz2/links.ts');

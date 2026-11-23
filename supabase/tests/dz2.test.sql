@@ -257,8 +257,13 @@ select public.dz2_comment(:'hw', :'s1', 'Молодец с тренажёром'
 select pg_temp.as_user(:'t2');
 select pg_temp.fails(format($q$select public.dz2_vernut(%L, %L, 'x')$q$, :'hw', :'s1'), 'forbidden');
 select pg_temp.fails(format($q$select public.dz2_comment(%L, %L, 'x')$q$, :'hw', :'s1'), 'forbidden');
+-- 2г: итоги и ответы чужого ДЗ учителю не отдаются, ученику — тоже.
+select pg_temp.fails(format('select public.dz2_otvety(%L, %L)', :'hw', :'s1'), 'forbidden');
+select pg_temp.fails(format('select public.dz2_itogi(%L)', :'hw'), 'forbidden');
 
 select pg_temp.as_user(:'s1');
+select pg_temp.fails(format('select public.dz2_itogi(%L)', :'hw'), 'forbidden');
+select pg_temp.fails(format('select public.dz2_otvety(%L, %L)', :'hw', :'s1'), 'forbidden');
 select pg_temp.ok((public.dz2_open(:'hw') ->> 'status') = 'returned'
                   and (public.dz2_open(:'hw') ->> 'return_comment') = 'Перерешай №3', 'возврат на доработку');
 select pg_temp.ok((public.dz2_check(:'op3', '12') ->> 'kind') = 'right', 'после возврата нельзя решать');

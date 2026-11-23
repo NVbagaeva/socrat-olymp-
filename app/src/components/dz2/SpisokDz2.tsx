@@ -17,7 +17,7 @@ import { useSessionUser } from '@/lib/auth/session';
 import type { Dz2Kratko } from '@/lib/dz2/api';
 import type * as Dz2ApiModule from '@/lib/dz2/api';
 import { useKorzina } from '@/lib/dz2/korzina';
-import { DZ2_HREF, dz2VydatHref } from '@/lib/dz2/links';
+import { DZ2_HREF, dz2ItogiHref, dz2VydatHref } from '@/lib/dz2/links';
 import { dataRu } from '@/lib/zhurnal/vid';
 import './dz2.css';
 
@@ -136,6 +136,11 @@ export function SpisokDz2() {
                   <Button size="sm" variant="secondary" onClick={() => void kopiya(d.id, 'draft')}>
                     {t.izShablona}
                   </Button>
+                ) : null}
+                {d.status === 'published' || d.status === 'closed' ? (
+                  <Link className="btn btn--primary btn--sm" href={dz2ItogiHref(d.id)}>
+                    {t.itogi}
+                  </Link>
                 ) : null}
                 {d.status === 'published' || d.status === 'closed' ? (
                   <Button size="sm" variant="secondary" onClick={() => void kopiya(d.id, 'draft')} title={t.povtoritPodskazka}>
