@@ -61,7 +61,13 @@ export function razdel10(kartinki: Record<string, IllInfo>): RazdelBanka<Zadacha
       const ill: IllInfo | undefined = kartinki[klyuchKartinki10(z)];
       return ill === undefined
         ? undefined
-        : { src: ill.webp, src280: src280(ill.webp), alt: ill.alt, width: ill.width, height: ill.height };
+        : {
+            src: ill.webp,
+            src280: src280(ill.webp),
+            alt: ill.alt,
+            width: ill.width,
+            height: ill.height,
+          };
     },
     shagi: shagiIzResheniya10,
     posle: schitaemSUmom10,

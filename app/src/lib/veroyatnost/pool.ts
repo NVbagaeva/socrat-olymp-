@@ -140,7 +140,10 @@ export function illyustratsiyaVarianta(
         ? vseh
         : undefined;
   if (imya !== undefined) {
-    return { path: `/images/veroyatnost/zadanie-${zadanie}/${imya}.webp`, alt: altIllyustratsii(imya) };
+    return {
+      path: `/images/veroyatnost/zadanie-${zadanie}/${imya}.webp`,
+      alt: altIllyustratsii(imya),
+    };
   }
   /* Своего файла нет — картинка сюжета (lib/kartinkiZadach.ts): общая
      для всех вариантов с тем же сюжетом. */

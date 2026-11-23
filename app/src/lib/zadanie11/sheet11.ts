@@ -656,8 +656,7 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
         kod: kodNaSayte(poz.id),
         title: st.title,
         questionHtml:
-          kartinkaZadachiLista(p, poz.id, izBanka) +
-          typeset(izBanka?.analog?.tekst ?? s.uslovie),
+          kartinkaZadachiLista(p, poz.id, izBanka) + typeset(izBanka?.analog?.tekst ?? s.uslovie),
         answer: otvetVybor === null ? chislo(s.answer) : otvetVybor.replace(/\$/g, ''),
         answerHtml: otvetVybor === null ? typeset(`$${d(s.answer)}$`) : typeset(otvetVybor),
         solutionHtml: reshenieHtml(s.etapy, s.tables ?? [], k),

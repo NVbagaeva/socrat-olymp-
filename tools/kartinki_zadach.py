@@ -134,6 +134,10 @@ def proverka(im: Image.Image) -> list[str]:
         bad.append(f'по краям {nepr} непрозрачных пикселей')
     if a.getextrema()[0] > 40:
         bad.append('фон непрозрачный')
+    # полупрозрачная дымка-подложка: слабая непрозрачность по всей рамке кадра
+    dymka = sum(sum(1 for v in a.crop(b).tobytes() if v > 10) for b in polosy)
+    if dymka > 0.4 * sum((b[2] - b[0]) * (b[3] - b[1]) for b in polosy):
+        bad.append(f'дымка по краям: {dymka} полупрозрачных пикселей')
     return bad
 
 

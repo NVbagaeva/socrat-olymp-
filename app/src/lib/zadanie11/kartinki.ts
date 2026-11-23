@@ -18,7 +18,9 @@ import KARTINKI_ANALOGOV from '@/data/zadanie11/kartinki-analogov.json';
 import type { Params } from './types';
 
 /** Подтип → ключ сюжета; у подтипов с шаблонами — по `form`/`kto` ('' — остальные). */
-export const SYUZHET_PODTIPA_11: Readonly<Record<string, string | Readonly<Record<string, string>>>> = {
+export const SYUZHET_PODTIPA_11: Readonly<
+  Record<string, string | Readonly<Record<string, string>>>
+> = {
   'PR-01': 'pr-01-tax-citizen',
   'PR-03': 'pr-03-shares',
   'PR-04': 'pr-04-shirts-jacket',
@@ -55,7 +57,12 @@ export const SYUZHET_PODTIPA_11: Readonly<Record<string, string | Readonly<Recor
   'VD-02': 'vd-02-motor-ship',
   'VD-03': 'vd-03-motor-ship',
   'VD-04': 'vd-04-motorboat',
-  'VD-05': { kater: 'vd-05-cutter', barzha: 'vd-05-barge', lodka: 'vd-05-motorboat', baidarka: 'vd-05-kayak' },
+  'VD-05': {
+    kater: 'vd-05-cutter',
+    barzha: 'vd-05-barge',
+    lodka: 'vd-05-motorboat',
+    baidarka: 'vd-05-kayak',
+  },
   'VD-06': 'vd-06-raft-yacht',
   'VD-07': 'vd-07-cutter',
   'OK-01': 'ok-01-cars',
@@ -89,6 +96,10 @@ export function klyuchPodtipa11(podtip: string, params?: Params): string | undef
 }
 
 /** Картинка сюжета: по ключу задачи (у аналога) или по подтипу. */
-export function kartinka11(podtip: string, params?: Params, klyuch?: string): KartinkaZadachi | undefined {
+export function kartinka11(
+  podtip: string,
+  params?: Params,
+  klyuch?: string,
+): KartinkaZadachi | undefined {
   return kartinkaSyuzheta(10, klyuch ?? klyuchPodtipa11(podtip, params));
 }

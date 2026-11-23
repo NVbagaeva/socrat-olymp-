@@ -531,10 +531,7 @@ function otvetyVariantov(variants: Sheet4Block[][], list: ListSlova): string[] {
  * тех же задач, в конце — ответы и краткие решения. У задач ученика
  * строка ответа своя (answerLine), у листа учителя строки полей нет.
  */
-export function sheet4Vse(
-  uchenik: ReturnType<typeof specIz>,
-  uchitel: ReturnType<typeof specIz>,
-) {
+export function sheet4Vse(uchenik: ReturnType<typeof specIz>, uchitel: ReturnType<typeof specIz>) {
   const kakVarianty = (s: ReturnType<typeof specIz>) =>
     'variants' in s ? s.variants : [{ title: s.title, blocks: s.blocks }];
   const sLiniey = (blocks: Sheet4Block[], liniya: boolean) =>
@@ -543,7 +540,11 @@ export function sheet4Vse(
     ...uchenik,
     variants: [
       ...kakVarianty(uchenik).map((v) => ({ ...v, blocks: sLiniey(v.blocks, true) })),
-      ...kakVarianty(uchitel).map((v) => ({ ...v, fields: null, blocks: sLiniey(v.blocks, false) })),
+      ...kakVarianty(uchitel).map((v) => ({
+        ...v,
+        fields: null,
+        blocks: sLiniey(v.blocks, false),
+      })),
     ],
     blocks: [],
     withAnswerLine: false,
