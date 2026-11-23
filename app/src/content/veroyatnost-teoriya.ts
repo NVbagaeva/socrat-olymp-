@@ -1,4 +1,7 @@
 import { assetUrl } from '@/lib/assetUrl';
+import { glavaMetoda, teoriyaYakor } from '@/lib/paths';
+import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
+import { PODPUNKTY_GLAVY } from './veroyatnost4-metody-teoriya';
 
 /**
  * Тексты вкладки «Теория» задания №4.
@@ -43,6 +46,16 @@ export const RAZDELY_4: readonly TeoriyaRazdel[] = [
   { id: 'kak-izobrazhat', title: 'Как изображать события' },
   { id: 'klassicheskaya', title: 'Классическая вероятность' },
   { id: 'protivopolozhnoe', title: 'Противоположное событие' },
+  /* Главы пяти ключевых методов: к ним ведут карточки вкладки
+     «Ключевые методы решения». Тексты — content/veroyatnost4-metody-teoriya.ts. */
+  ...KLYUCHEVYE_4.map((m) => ({
+    id: glavaMetoda(m.id),
+    title: `Метод «${m.nazvanie}»`,
+    podpunkty: PODPUNKTY_GLAVY.map((p) => ({
+      id: `${teoriyaYakor(glavaMetoda(m.id))}-${p.tail}`,
+      title: p.title,
+    })),
+  })),
 ];
 
 /**
@@ -506,7 +519,8 @@ export const PRYAMAYA = {
   ideya: {
     title: 'Главная идея',
     text: 'Представим возможные значения случайной величины на числовом луче. Условие события задаёт луч или промежуток на нём. Сравниваем области событий: входят ли они друг в друга и есть ли у них общая часть.',
-    plashka: 'Луч показывает возможные значения; границы события отмечаем точками и промежутками. Сам рисунок не задаёт вероятность.',
+    plashka:
+      'Луч показывает возможные значения; границы события отмечаем точками и промежутками. Сам рисунок не задаёт вероятность.',
   },
 
   /* ── Карточка 1: отрезок внутри отрезка ───────────────────────── */

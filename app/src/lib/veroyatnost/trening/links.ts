@@ -6,7 +6,7 @@
 
 import { OPORNYE } from '@/content/opornye';
 import { veroyatnostBySlug } from '@/content/veroyatnost';
-import { ZADANIYA, href } from '@/lib/paths';
+import { TEORIYA_TAIL, ZADANIYA, glavaMetoda, href, teoriyaYakor } from '@/lib/paths';
 
 export type Zadanie45 = 4 | 5;
 
@@ -46,4 +46,9 @@ export function tipHref45(z: Zadanie45, prototip: string): string {
 export function metodyHref45(z: Zadanie45): string {
   const tail = veroyatnostBySlug(String(z))?.tabs.find((t) => t.id === 'metody')?.tail ?? '';
   return `${razdelHref45(z)}${tail}`;
+}
+
+/** Глава метода во вкладке «Теория»: /zadaniya/4/teoriya/#teoriya-metod-kubiki. */
+export function teoriyaMetodaHref45(z: Zadanie45, metod: string): string {
+  return href(ZADANIYA, z, TEORIYA_TAIL, `#${teoriyaYakor(glavaMetoda(metod))}`);
 }

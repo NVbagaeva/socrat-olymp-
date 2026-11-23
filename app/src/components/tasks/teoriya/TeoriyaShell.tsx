@@ -6,6 +6,7 @@ import { EmptyState, HandNote, Modal } from '@/components/ui';
 import { TopicContents, ZamokIkonka } from '@/components/tasks/TopicContents';
 import { scrollToSection, useActiveSection } from '@/components/tasks/useActiveSection';
 import { markSectionRead } from '@/lib/theoryRead';
+import { teoriyaYakor } from '@/lib/paths';
 import { SODERZHANIE, TEORIYA_DEKOR, type TeoriyaRazdel } from '@/content/veroyatnost-teoriya';
 
 export interface TeoriyaDekor {
@@ -55,9 +56,9 @@ export interface TeoriyaShellProps {
   soderzhanieRaskryvashka?: boolean;
 }
 
-/** Якорь раздела на странице. */
+/** Якорь раздела на странице — из общих констант (lib/paths.ts). */
 function razdelId(id: string): string {
-  return `teoriya-${id}`;
+  return teoriyaYakor(id);
 }
 
 /**

@@ -6,6 +6,7 @@ import { METODY_5 } from '@/lib/veroyatnost/metody5';
 import { bank4Pool, bank5Pool, prep4Pool, prep5Pool } from '@/lib/veroyatnost/pool';
 import type { Metod } from '@/lib/veroyatnost/tipologiya';
 import { MetodyKartochki, type KartochkaMetoda } from './MetodyKartochki';
+import { MetodyKartochki4 } from './MetodyKartochki4';
 import { navykiMetodov, yarlyki } from './navyki';
 import { Tex } from './Tex';
 import { ZADANIYA } from '@/lib/paths';
@@ -83,7 +84,9 @@ export function KlyuchevyeMetody({ zadanie }: KlyuchevyeMetodyProps) {
       <header className="vmetody__head">
         <h2 className="t-h2 vmetody__title">{METODY_KARTOCHKI.title}</h2>
       </header>
-      <MetodyKartochki items={kartochki(zadanie)} />
+      {/* У №4 карточка ведёт в главу метода во вкладке «Теория»;
+          у №5 — прежняя модалка метода. */}
+      {zadanie === 4 ? <MetodyKartochki4 /> : <MetodyKartochki items={kartochki(zadanie)} />}
     </div>
   );
 }
