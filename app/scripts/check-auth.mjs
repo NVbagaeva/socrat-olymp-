@@ -1225,12 +1225,34 @@ async function runEnabled() {
     await page.fill('input[name="name"]', 'Чужой Человек');
     await page.fill('input[name="email"]', 'chuzhoy@yandex.ru');
     await page.evaluate(() => {
-      const button = document.querySelector('.register-actions button[type="submit"]');
-      const form = button?.form;
-      const audit = { click: false, submit: false };
+      const audit = { click: false, submit: false, target: null };
       window.__registrationSubmitAudit = audit;
-      button?.addEventListener('click', () => { audit.click = true; }, { once: true });
-      form?.addEventListener('submit', () => { audit.submit = true; }, { once: true });
+      document.addEventListener(
+        'click',
+        (event) => {
+          const target =
+            event.target instanceof Element
+              ? event.target.closest('.register-actions button[type="submit"]')
+              : null;
+          if (target !== null) {
+            audit.click = true;
+            audit.target = target.outerHTML;
+          }
+        },
+        true,
+      );
+      document.addEventListener(
+        'submit',
+        (event) => {
+          if (event.target instanceof HTMLFormElement && event.target.matches('.register-wizard')) {
+            audit.submit = true;
+            setTimeout(() => {
+              audit.submitDefaultPrevented = event.defaultPrevented;
+            }, 0);
+          }
+        },
+        true,
+      );
     });
     await wizardNext(page);
     const submitAudit = await page.evaluate(() => {
