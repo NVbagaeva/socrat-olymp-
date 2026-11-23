@@ -1488,6 +1488,17 @@ async function runEnabled() {
 
     await email.fill('ivan@яндекс.ру');
     await email.press('Tab');
+    const russianEmailState = await email.evaluate((input) => ({
+      value: input.value,
+      valid: input.validity.valid,
+      invalid: input.getAttribute('aria-invalid'),
+      describedBy: input.getAttribute('aria-describedby'),
+      stillFocused: document.activeElement === input,
+      errors: Array.from(document.querySelectorAll('.field__msg--error')).map((node) =>
+        node.textContent?.trim(),
+      ),
+    }));
+    console.log(`Состояние поля почты с кириллицей: ${JSON.stringify(russianEmailState)}`);
     await page.waitForSelector('[id$="-email-error"]');
     check(
       (await page.locator('[id$="-email-error"]').innerText()).includes(
