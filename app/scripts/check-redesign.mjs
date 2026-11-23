@@ -331,9 +331,9 @@ const ODOBRENO = {
   'app/src/components/tasks/veroyatnost/teoriya/KakIzobrazhatSobytiya.tsx':
     '9b85c72ca8dd7eade200454766cccc15a5b31a83ef2160a8e0ba20025501f409',
   'app/src/components/tasks/veroyatnost/teoriya/ProtivopolozhnoeSobytiye4.tsx':
-    '41baf2dbc0a51465e9a957f09ab961bb385a9f03ffd6590da4a78a66ce6974e7',
+    'f19f54b03e2eeb5fac4cfea5517681d1134bddce0dc6e21b55aa643d16b634d0',
   'app/src/components/tasks/veroyatnost/teoriya/Sobytiya5.tsx':
-    '40aecc95d6460dcd51fa3067f68c997764e5332582c8906bd8cc56aa6acac491',
+    '9c6a30cad1d2967620c601730688e0d7fe94411d7006fde08846e9e1db35f90f',
   'app/src/components/tasks/veroyatnost/teoriya/index.tsx':
     'bc9a702586381afad4fb9aa3d994c8b7dd95e011057cce7efb9f84af5c92c2c8',
   'app/src/content/veroyatnost-teoriya.ts':
