@@ -1225,10 +1225,35 @@ async function runEnabled() {
     await page.fill('input[name="name"]', 'Чужой Человек');
     await page.fill('input[name="email"]', 'chuzhoy@yandex.ru');
     await wizardNext(page);
+    const passwordStepState = await page.evaluate(() => {
+      const readField = (name) => {
+        const input = document.querySelector(`input[name="${name}"]`);
+        const describedBy = input?.getAttribute('aria-describedby') ?? '';
+        return {
+          value: input?.value ?? null,
+          invalid: input?.getAttribute('aria-invalid') ?? null,
+          messages: describedBy
+            .split(/\\s+/)
+            .map((id) => document.getElementById(id)?.innerText.trim())
+            .filter(Boolean),
+        };
+      };
+      return {
+        progress: document.querySelector('.register-progress__count')?.textContent.trim() ?? null,
+        role: document.querySelector('.register-progress')?.getAttribute('data-role') ?? null,
+        name: readField('name'),
+        email: readField('email'),
+        domainMessage: document.querySelector('.auth-form__domain')?.innerText.trim() ?? null,
+      };
+    });
+    console.log(`Состояние регистрации после «Дальше»: ${JSON.stringify(passwordStepState)}`);
+    await shot(page, 'registraciya-posle-dalshe');
     check(
-      (await page.locator('.register-progress__count').innerText()) === 'Шаг 3 из 5',
-      'кнопка «Дальше» переводит к паролю',
+      passwordStepState.progress === 'Шаг 3 из 5',
+      `кнопка «Дальше» переводит к паролю; состояние: ${JSON.stringify(passwordStepState)}`,
     );
+    if (passwordStepState.progress !== 'Шаг 3 из 5')
+      throw new Error(`Регистрация не открыла пароль: ${JSON.stringify(passwordStepState)}`);
     await page.fill('input[name="password"]', 'parol-dlinnyy-1');
     await wizardNext(page);
     check(
