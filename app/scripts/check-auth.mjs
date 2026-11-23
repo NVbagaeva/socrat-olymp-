@@ -1224,7 +1224,38 @@ async function runEnabled() {
     );
     await page.fill('input[name="name"]', 'Чужой Человек');
     await page.fill('input[name="email"]', 'chuzhoy@yandex.ru');
+    await page.evaluate(() => {
+      const button = document.querySelector('.register-actions button[type="submit"]');
+      const form = button?.form;
+      const audit = { click: false, submit: false };
+      window.__registrationSubmitAudit = audit;
+      button?.addEventListener('click', () => { audit.click = true; }, { once: true });
+      form?.addEventListener('submit', () => { audit.submit = true; }, { once: true });
+    });
     await wizardNext(page);
+    const submitAudit = await page.evaluate(() => {
+      const button = document.querySelector('.register-actions button[type="submit"]');
+      const form = button?.form;
+      return {
+        click: window.__registrationSubmitAudit?.click ?? null,
+        submit: window.__registrationSubmitAudit?.submit ?? null,
+        buttonType: button?.type ?? null,
+        disabled: button?.disabled ?? null,
+        hasForm: form !== null,
+        noValidate: form?.noValidate ?? null,
+        checkValidity: form?.checkValidity() ?? null,
+        invalidControls: form
+          ? Array.from(form.elements)
+              .filter((element) => !element.validity.valid)
+              .map((element) => ({
+                name: element.name,
+                type: element.type,
+                value: element.value,
+                message: element.validationMessage,
+              }))
+          : [],
+      };
+    });
     const passwordStepState = await page.evaluate(() => {
       const readField = (name) => {
         const input = document.querySelector(`input[name="${name}"]`);
@@ -1246,6 +1277,7 @@ async function runEnabled() {
         domainMessage: document.querySelector('.auth-form__domain')?.innerText.trim() ?? null,
       };
     });
+    passwordStepState.submitAudit = submitAudit;
     console.log(`Состояние регистрации после «Дальше»: ${JSON.stringify(passwordStepState)}`);
     await shot(page, 'registraciya-posle-dalshe');
     check(
