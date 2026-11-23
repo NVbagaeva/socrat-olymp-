@@ -325,12 +325,6 @@ const SODERZHANIE = {
  * образец уже содержит эту версию.
  */
 const ODOBRENO = {
-  /* №1: одобрено владельцем 23.11.2026 — русские формулировки фактов о
-     сумме углов и равнобедренном треугольнике с соответствующими схемами. */
-  'app/src/lib/planimetriya/prep/bloki.ts':
-    '9ef2ef119e08c71900f1883b7ac8a339bcd93d0e059b9289cc5cb91cc96783c3',
-  'app/src/lib/planimetriya/prep/scenarii.ts':
-    '63f79ff2c5062651c27b3a86bb73c2c2dd74ed55be369393038102a9bf96ee67',
   /* №4–5: одобрено владельцем 23.11.2026 — подробные материалы по
      изображению событий и противоположному событию. Зафиксированы только
      версии пяти затронутых файлов; последующие изменения снова проверяются. */
@@ -352,6 +346,8 @@ const ODOBRENO = {
      сценарии вопросами, новые карточки справочника и приёмы, новый тип 76
      «три части стороны» с аналогами, опорные P1-2-03/09/10 и P1-4-01,
      генераторы углов без 80°–100°, прототип 68 (A и D не слипаются). */
+  /* В дополнение 23.11.2026 одобрены русские формулировки свойств
+     треугольника и схемы к ним в блоках и сценариях подготовки. */
   'app/src/content/spravochnik1/fakty.ts':
     'ec1568aae84b2e633c7dac22bf9f95f00f1e57a5b30e4c78df6fc111784343a1',
   'app/src/lib/planimetriya/bank/analogi.ts':
@@ -359,7 +355,7 @@ const ODOBRENO = {
   'app/src/lib/planimetriya/figury.ts':
     '4e79a42395825e6e0c68d758100b59940ee15c05d2f47dc2fc625208acde200e',
   'app/src/lib/planimetriya/prep/bloki.ts':
-    'f24d545595075d5f6a0dcd96bdee501f07a15871c91c2c28dad0941fdba6c30a',
+    '9ef2ef119e08c71900f1883b7ac8a339bcd93d0e059b9289cc5cb91cc96783c3',
   'app/src/lib/planimetriya/prep/fakty.ts':
     'a85ca2cbffe9ca0a00b46099aa6c3deb2bd6459cd23d01d4fbbb08631baa0af1',
   'app/src/lib/planimetriya/prep/generate.ts':
@@ -489,7 +485,7 @@ const ODOBRENO = {
   'app/src/lib/planimetriya/prep/pool.ts':
     '3c519358fd3e2f040978f63c14355f5cabe8a6867977fd690c58ea32b7df145c',
   'app/src/lib/planimetriya/prep/scenarii.ts':
-    'cfee723e1896316f6132204764cbcd6e24022a8604ca790c2597515fd689d281',
+    '63f79ff2c5062651c27b3a86bb73c2c2dd74ed55be369393038102a9bf96ee67',
   /* Подсказки опорных задач №1 вопросами — все 90 задач (одобрено владельцем
      22.11.2026: «Разрешаю, переделай остальные тоже»). Условия и ответы те
      же, кроме P1-1-07: там исправлен угол C (ответ не сходился с суммой). */
