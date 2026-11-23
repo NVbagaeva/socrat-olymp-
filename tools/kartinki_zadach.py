@@ -61,7 +61,7 @@ STIL = (
 # Добавка автора после пробы (слишком много стекла): главные предметы — настоящие.
 STIL_PREDMETY = (
     'IMPORTANT material balance: the main subject objects of the scene (vehicles, food, drinks, goods, '
-    'devices, animals, plants, buildings, sports equipment) are REALISTIC, in their natural colors and '
+    'devices, animals, plants, buildings, sports equipment such as balls, goals, nets, rackets and boards) are REALISTIC, in their natural colors and '
     'materials (painted metal, wood, fabric, plastic, fruit skin, water), not glass. Only the base '
     'platform, roads and paths, arrows, sound waves, motion lines and the human figurines are clear '
     'pale blue glass. '

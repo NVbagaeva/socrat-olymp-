@@ -37,7 +37,6 @@ dp-07-motorcyclist
 dp-07-skier
 dp-08-runners
 dp-09-bus-cyclist
-dp-09-car-cyclist
 dp-09-cyclist-pedestrian
 dp-09-cyclist-runner
 dp-09-moto-cyclist
@@ -65,7 +64,6 @@ girlyanda-tri-sektsii
 girlyandy-dve-fabriki
 golosovoy-pomoshchnik
 gorizont-s-orbity
-gruzovik-iz-posyolka
 kamen-pod-uglom
 kameshek-vverh
 khleb-moloko
@@ -118,7 +116,6 @@ pr-06-fridge
 pr-06-laptop
 pr-06-smartphone
 pr-06-tv
-pr-06-washing-machine
 pr-07-bus-rain
 pr-07-car-faster
 pr-07-fast-vs-suburban-train
