@@ -5,6 +5,7 @@
  */
 
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
+import { FLAG_KARTINOK } from '@/lib/kartinkiZadach';
 import { nomerRazdela } from '@/content/struktura';
 
 export const GENERATOR10_TEXTS = {
@@ -19,8 +20,8 @@ export const GENERATOR10_TEXTS = {
   podzagolovok: 'Задания для отработки',
   /** Прежняя настройка генератора — переключатель в «Дополнительно». */
   flag: {
-    title: 'Картинки сюжетов',
-    note: 'Тратят тонер; чертёж моста печатается всегда.',
+    title: FLAG_KARTINOK.title,
+    note: 'Тратят тонер; чертёж моста печатается всегда. На чёрно-белом листе и в варианте ЕГЭ картинок нет.',
   },
 };
 

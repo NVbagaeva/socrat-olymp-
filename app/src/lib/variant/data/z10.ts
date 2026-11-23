@@ -10,6 +10,8 @@
 import { ANALOGI, FIPI } from '@/lib/zadanie10/bank';
 import { lite } from '@/lib/zadanie10/dannye-server';
 import type { Params } from '@/lib/zadanie10/types';
+import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
+import { klyuchKartinki10 } from '@/lib/zadanie10/kartinkiSyuzhetov';
 
 export interface Zadacha10Variant {
   id: string;
@@ -19,11 +21,15 @@ export interface Zadacha10Variant {
   no?: number;
   text: string;
   params: Params;
+  /** Картинка сюжета: аналога (kartinkiSyuzhetov.ts) или прототипа. */
+  kartinka?: { src: string; alt: string };
 }
 
 export function dannye(): Zadacha10Variant[] {
+  const kartinki = kartinkiPrototipov();
   return [...FIPI, ...ANALOGI].map((b) => {
     const z = lite(b);
+    const ill = kartinki[klyuchKartinki10(z)];
     const out: Zadacha10Variant = {
       id: z.id,
       prototypeId: z.prototypeId,
@@ -32,6 +38,7 @@ export function dannye(): Zadacha10Variant[] {
       params: z.params,
     };
     if (z.no !== undefined) out.no = z.no;
+    if (ill !== undefined) out.kartinka = { src: ill.webp, alt: ill.alt };
     return out;
   });
 }

@@ -16,6 +16,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { assetUrl } from '../assetUrl';
 import { PROTOTYPES } from './prototypes';
+import { kartinkaSyuzheta } from '../kartinkiZadach';
+import { SYUZHET_KARTINKI_9 } from './kartinkiSyuzhetov';
 
 export const PAPKA_ILLYUSTRACIY = '/illustrations/zadanie-10';
 
@@ -139,6 +141,14 @@ export function kartinkiPrototipov(): Record<
     const i = illyustraciya(p.id);
     if (i) {
       ill[p.id] = { webp: i.webp, png: i.png, alt: i.alt, width: i.width, height: i.height };
+    }
+  }
+  /* Картинки сюжетов аналогов: ключ `<прототип>:<сюжет>` (kartinkiSyuzhetov.ts). */
+  for (const [k, syuzhet] of Object.entries(SYUZHET_KARTINKI_9)) {
+    const s = kartinkaSyuzheta(9, syuzhet);
+    if (s) {
+      const src = assetUrl(s.src);
+      ill[k] = { webp: src, png: src, alt: s.alt, width: s.razmer, height: s.razmer };
     }
   }
   return ill;

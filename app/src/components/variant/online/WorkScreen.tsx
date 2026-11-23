@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import { KartinkaZadachi, src280 } from '@/components/ui/KartinkaZadachi';
 import { FiguraZhivaya } from '@/components/stereo/FiguraZhivaya';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -492,10 +493,18 @@ export function WorkScreen({
             </h2>
             <span className={clsx('vo-status', `is-${status}`)}>{T.run.status[status]}</span>
           </header>
+          {task.kartinka === undefined ? null : (
+            <KartinkaZadachi
+              src={task.kartinka.src}
+              src280={src280(task.kartinka.src)}
+              alt={task.kartinka.alt}
+            />
+          )}
           <div
             className="vo-card__statement"
             dangerouslySetInnerHTML={{ __html: task.statement }}
           />
+          {task.kartinka === undefined ? null : <div className="kz-clear" />}
           {task.figure === null ? null : task.figure.zhivoy !== undefined ? (
             /* Стереометрия: чертёж вращается руками, масштаб — его же кнопками. */
             <div className="vo-card__figure is-3d">

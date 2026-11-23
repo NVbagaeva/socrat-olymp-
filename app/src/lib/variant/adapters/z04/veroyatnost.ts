@@ -41,6 +41,8 @@ export interface Variant45 {
   seal: string;
   /** `Razbor45` в JSON, закрытый отпечатком (sealText). */
   razbor: string;
+  /** Картинка сюжета варианта (pool.ts, illyustratsiyaVarianta). */
+  kartinka?: { src: string; alt: string };
 }
 
 export interface Kind45 {
@@ -142,6 +144,7 @@ function build(egeNumber: 4 | 5, c: C45): VariantTask {
     },
     difficulty: null,
     statement: `<p>${typesetText(variant.uslovie)}</p>`,
+    ...(variant.kartinka === undefined ? {} : { kartinka: variant.kartinka }),
     figure: null,
     figureTeacher: null,
     answer: r.otvet.replace('.', ',').replace('-', '−'),

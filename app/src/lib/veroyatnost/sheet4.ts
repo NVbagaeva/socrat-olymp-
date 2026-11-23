@@ -19,6 +19,7 @@
  */
 
 import content from '@/content/sheet12.js';
+import { kartinkaListaHtml } from '../kartinkiZadach';
 import { LIST_4, type ListSlova } from '@/content/veroyatnost';
 import answers from '@/lib/sheet/answers.js';
 import typo from '@/lib/sheet/typography.js';
@@ -326,13 +327,17 @@ export function idsLista45(
  * Блок листа из выбора: один, без полосы-заголовка — ни метод, ни
  * прототип на листе ученика не подписаны. Нумерация с 1.
  */
-function blokiIz(vybor: Vybor[], withAnswers: boolean): Sheet4Block[] {
+function blokiIz(vybor: Vybor[], withAnswers: boolean, kartinki = false): Sheet4Block[] {
   const tasks = vybor.map(({ kind, variant }, i): Sheet4Task => {
     const razbor = withAnswers ? otkrytRazbor(variant.steps, variant.seal) : null;
+    /* Картинка сюжета — только по переключателю «Картинки к задачам». */
+    const ill = kartinki ? variant.model?.illustration : undefined;
     return {
       no: i + 1,
       id: `${kind.id}-${variant.n}`,
-      questionHtml: typo.mathText(variant.uslovie),
+      questionHtml:
+        (ill === undefined ? '' : kartinkaListaHtml(ill.path, ill.alt)) +
+        typo.mathText(variant.uslovie),
       options: null,
       figureSvg: null,
       answer: razbor === null ? '' : razbor.otvet,
@@ -400,7 +405,9 @@ export function sheet4SpecKlyuchi(
   list: ListSlova = LIST_4,
   shapka: Shapka45 = {},
 ) {
-  const variants = poKlyucham45(pool.kinds, z).vybor.map((v) => blokiIz(v, withAnswers));
+  /* Картинки — только на цветном листе (params45: тема 'color'). */
+  const kartinki = z.flag === true && params45(z).theme === 'color';
+  const variants = poKlyucham45(pool.kinds, z).vybor.map((v) => blokiIz(v, withAnswers, kartinki));
   return specIz(variants, params45(z), withAnswers, list, shapka);
 }
 

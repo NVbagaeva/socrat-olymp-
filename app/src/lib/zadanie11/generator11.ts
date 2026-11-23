@@ -10,6 +10,7 @@
  * схеме, до первой правки состава.
  */
 
+import { FLAG_KARTINOK } from '../kartinkiZadach';
 import {
   GENERATOR11_LEVELS,
   GENERATOR11_PRESETS,
@@ -69,6 +70,7 @@ export function config11(razdely: readonly RazdelInfo[], slot: string): GenConfi
     limits: { variantsMax: 8 },
     extras: {
       kinds: Object.entries(SHEET_11.vidy).map(([id, title]) => ({ id, title })),
+      flag: FLAG_KARTINOK,
     },
   };
 }
@@ -85,6 +87,7 @@ function dopIzExtras(e: GenExtras, config: GenConfig): Dop11 | undefined {
     ...(e.kind === SVOY_VID && e.svoy !== undefined ? { svoy: e.svoy } : {}),
     data: e.date,
     uchitel: e.teacher,
+    ...(e.flag === true ? { kartinki: true } : {}),
   };
 }
 
@@ -98,6 +101,7 @@ function extrasIzDop(dop: Dop11 | undefined, config: GenConfig): GenExtras {
     date: dop.data,
     teacher: dop.uchitel,
     urok: 0,
+    ...(dop.kartinki === true ? { flag: true } : {}),
     ...(dop.vid === null && dop.svoy !== undefined && dop.svoy !== '' ? { svoy: dop.svoy } : {}),
   };
 }

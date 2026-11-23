@@ -1,0 +1,31 @@
+/* Картинка-иллюстрация сюжета задачи (KartinkaZadachi.tsx). */
+.kz {
+  float: right;
+  width: 170px;
+  margin: 0 0 var(--space-2, 8px) var(--space-4, 16px);
+  shape-outside: margin-box;
+}
+.kz img {
+  display: block;
+  width: 100%;
+  height: auto;
+
+  object-fit: contain;
+}
+/* Телефон: над условием, по центру, поменьше — текст на всю ширину. */
+@media (max-width: 480px) {
+  .kz {
+    float: none;
+    width: 120px;
+    margin: 0 auto var(--space-2, 8px);
+  }
+}
+/* Условие и поле ответа под картинкой не заезжают. */
+.kz-clear {
+  clear: both;
+}
+@media print and (monochrome) {
+  .kz {
+    display: none;
+  }
+}

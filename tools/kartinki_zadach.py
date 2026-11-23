@@ -178,6 +178,96 @@ def lenta(html: Path, keys: list[str]) -> None:
                     f'<div class=tma><h2>Тёмный фон</h2><section>{obr}{kart}</section></div>')
 
 
+STATUS = REF_OUT / 'status.json'
+
+
+def status() -> dict:
+    return json.loads(STATUS.read_text()) if STATUS.exists() else {}
+
+
+def batch(keys: list[str], potokov: int = 8, maks: int = 3) -> None:
+    """Сгенерировать и выгрузить сюжеты; неудачный фон — перегенерировать, не больше maks попыток."""
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    sp = spec()
+    lock = threading.Lock()
+    st = status()
+
+    def one(k: str) -> None:
+        s = sp[k]
+        bad: list[str] = []
+        for _ in range(maks):
+            try:
+                gen(s)
+            except SystemExit as e:
+                bad = [str(e)]
+                time.sleep(20)
+                continue
+            bad = export(s)
+            if not bad:
+                break
+        with lock:
+            st[k] = {'ok': not bad, 'problemy': bad, 'popytok': len(popytki(s))}
+            STATUS.write_text(json.dumps(st, ensure_ascii=False, indent=1))
+
+    with ThreadPoolExecutor(potokov) as ex:
+        list(ex.map(one, keys))
+
+
+PLAN = KOREN / 'docs' / 'plans' / 'kartinki-k-zadacham.md'
+CENA = {'text': 5e-6, 'image_in': 8e-6, 'out': 30e-6}  # $ за токен (по сторонним источникам, см. план)
+
+
+def stoimost(u: dict) -> float:
+    d = u.get('input_tokens_details', {})
+    return (d.get('text_tokens', 0) * CENA['text'] + d.get('image_tokens', 0) * CENA['image_in']
+            + u.get('output_tokens', 0) * CENA['out'])
+
+
+def zhurnal_v_plan() -> None:
+    """Журнал «сюжет → промпт → файл → попытки» и отметки в таблицах плана."""
+    sp = spec()
+    st = status()
+    zapisi = [json.loads(s) for s in ZHURNAL.read_text().splitlines() if s.strip()]
+    popyt: dict[str, int] = {}
+    for z in zapisi:
+        popyt[z['key']] = popyt.get(z['key'], 0) + 1
+    itogo = sum(stoimost(z['usage']) for z in zapisi if z.get('usage'))
+    stroki = ['## Журнал генерации', '',
+              f'Модель `{MODEL}`, `/v1/images/edits`, quality high, 1024×1024, фон прозрачный. '
+              f'Образцы стиля: {", ".join("`" + o + "`" for o in OBRAZCY)}. '
+              'Текст промпта — константа `STIL` в `tools/kartinki_zadach.py` + сюжет из таблицы ниже '
+              '(источник — `tools/kartinki-zadach.json`). Перегенерировать сюжет: '
+              '`python3 tools/kartinki_zadach.py gen <ключ> && python3 tools/kartinki_zadach.py export <ключ>`.', '',
+              f'Попыток всего: {len(zapisi)}, сюжетов: {len(popyt)}. '
+              f'Стоимость по полю `usage`: **${itogo:.2f}** (≈ ${itogo / max(1, len(zapisi)):.3f} за попытку).', '',
+              '| № | Ключ сюжета | Сюжет (часть промпта) | Файл | Попыток | Итог |', '|---|---|---|---|---:|---|']
+    for k, s in sp.items():
+        r = st.get(k, {})
+        itog = 'сделано' if r.get('ok') else ('решение автора: ' + '; '.join(r.get('problemy', [])) if r else 'не генерировалось')
+        if r.get('primechanie'):
+            itog += f' ({r["primechanie"]})'
+        fayl = f'`images/zadachi/{s["nomer"]}/{k}-560.webp`' if r.get('ok') else '—'
+        stroki.append(f'| {s["nomer"]} | `{k}` | {s["scene"].replace("|", "/")} | {fayl} | {popyt.get(k, 0)} | {itog} |')
+    tekst = PLAN.read_text()
+    nachalo = tekst.index('## Журнал генерации')
+    konec = tekst.index('\n---\n', nachalo)
+    tekst = tekst[:nachalo] + '\n'.join(stroki) + '\n' + tekst[konec:]
+    # отметки в таблицах инвентаризации: в колонке «нужна?» строки с ключом
+    out = []
+    for line in tekst.split('\n'):
+        c = line.split('|')
+        if line.startswith('| ') and len(c) > 8 and c[1].strip().isdigit():
+            key = c[6].strip().strip('`')
+            r = st.get(key)
+            if r is not None and '✅' not in c[5] and '⚠' not in c[5]:
+                c[5] = c[5].rstrip() + (' ✅ сделано ' if r.get('ok') else ' ⚠ решение автора ')
+                line = '|'.join(c)
+        out.append(line)
+    PLAN.write_text('\n'.join(out))
+    print(f'журнал: {len(popyt)} сюжетов, {len(zapisi)} попыток, ${itogo:.2f}')
+
+
 def main() -> None:
     cmd, *rest = sys.argv[1:]
     sp = spec()
@@ -187,6 +277,22 @@ def main() -> None:
     elif cmd == 'export':
         for k in rest:
             export(sp[k])
+    elif cmd == 'batch':
+        st = status()
+        keys = rest or [k for k in sp if not st.get(k, {}).get('ok')]
+        batch(keys)
+    elif cmd == 'data':
+        # alt и размеры готовых картинок для сайта: app/src/data/kartinkiZadach.json
+        st = status()
+        out: dict[str, dict[str, str]] = {}
+        for k, s in sp.items():
+            if st.get(k, {}).get('ok') and (PUBLIC / str(s['nomer']) / f'{k}-560.webp').exists():
+                out.setdefault(str(s['nomer']), {})[k] = s['alt']
+        f = KOREN / 'app' / 'src' / 'data' / 'kartinkiZadach.json'
+        f.write_text(json.dumps(out, ensure_ascii=False, indent=1, sort_keys=True) + '\n')
+        print(f, {n: len(v) for n, v in out.items()})
+    elif cmd == 'zhurnal':
+        zhurnal_v_plan()
     elif cmd == 'lenta':
         lenta(Path(rest[0]), rest[1:])
     else:

@@ -101,6 +101,7 @@ export function build(c: C10, svoy?: Prototype): VariantTask {
     source: { kind: c.source, label },
     difficulty: null,
     statement: `<p>${typeset(z.text)}</p>`,
+    ...(z.kartinka === undefined ? {} : { kartinka: z.kartinka }),
     figure: most ? { svg: mostSvg(z, 'uchenik'), width: SHIRINA_MOSTA_MM } : null,
     figureTeacher: most ? { svg: mostSvg(z, 'uchitel'), width: SHIRINA_MOSTA_MM } : null,
     answer: answerText(s.answer),

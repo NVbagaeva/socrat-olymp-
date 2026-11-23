@@ -28,7 +28,11 @@ import {
   altIllyustratsii,
   KARTINKA_NE_PO_USLOVIYU,
   KARTINKA_OSNOVY_PODHODIT,
+  KARTINKA_PROTOTIPA_OPORNOY,
+  KARTINKA_VSEH_VARIANTOV,
+  SYUZHET_KARTINKI_45,
 } from './illyustratsii';
+import { kartinkaSyuzheta } from '../kartinkiZadach';
 import { imyaIllyustratsii, texPlain, zadanieIllyustratsii, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import { podskazkaOpornoy } from './podgotovka5-podskazki';
@@ -127,10 +131,21 @@ export function illyustratsiyaVarianta(
   const zadanie = zadanieIllyustratsii(id);
   const imena = manifestIllyustratsiy(zadanie);
   const svoy = imyaIllyustratsii(id, n);
-  const imya = imena.has(`${id}-${n}`) ? `${id}-${n}` : imena.has(svoy) ? svoy : undefined;
-  return imya === undefined
-    ? undefined
-    : { path: `/images/veroyatnost/zadanie-${zadanie}/${imya}.webp`, alt: altIllyustratsii(imya) };
+  const vseh = KARTINKA_VSEH_VARIANTOV[id];
+  const imya = imena.has(`${id}-${n}`)
+    ? `${id}-${n}`
+    : imena.has(svoy)
+      ? svoy
+      : vseh !== undefined && imena.has(vseh)
+        ? vseh
+        : undefined;
+  if (imya !== undefined) {
+    return { path: `/images/veroyatnost/zadanie-${zadanie}/${imya}.webp`, alt: altIllyustratsii(imya) };
+  }
+  /* Своего файла нет — картинка сюжета (lib/kartinkiZadach.ts): общая
+     для всех вариантов с тем же сюжетом. */
+  const k = kartinkaSyuzheta(zadanie, SYUZHET_KARTINKI_45[`${id}#${n}`] ?? SYUZHET_KARTINKI_45[id]);
+  return k === undefined ? undefined : { path: k.src, alt: k.alt };
 }
 
 export interface PoolVariant {
@@ -472,6 +487,10 @@ export interface PrepPoolBlok {
  * показывается вовсе.
  */
 function kartinkaOpornoy(zadacha: PrepZadacha): { path: string; alt: string } | undefined {
+  const prototipa = KARTINKA_PROTOTIPA_OPORNOY[zadacha.id];
+  if (prototipa !== undefined) {
+    return illyustratsiyaVarianta(prototipa, 1);
+  }
   if (zadacha.id in KARTINKA_NE_PO_USLOVIYU) {
     return undefined;
   }

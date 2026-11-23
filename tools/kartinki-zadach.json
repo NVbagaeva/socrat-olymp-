@@ -1,14 +1,212 @@
 [
  {
+  "nomer": 4,
+  "key": "zhrebiy-nachat-igru",
+  "ids": [
+   "p4-04, p4-24"
+  ],
+  "size": "1024x1024",
+  "scene": "Several faceless glass child figurines (boys and girls) standing in a circle around a small glass bowl of folded paper lots, a glass game board on a low table beside them, soft studio light, no one yet holding a lot",
+  "alt": "Дети бросают жребий, кому начинать игру (мальчик / «не Ксюша»)",
+  "stroka": 115
+ },
+ {
+  "nomer": 5,
+  "key": "skaner-srok-sluzhby",
+  "ids": [
+   "p5-03 v5"
+  ],
+  "size": "1024x1024",
+  "scene": "A new glass document scanner on an office desk with a glass calendar and an hourglass beside it, no text",
+  "alt": "Новый сканер прослужит больше 1 года, но меньше 2 лет",
+  "stroka": 159
+ },
+ {
   "nomer": 5,
   "key": "toster-srok-sluzhby",
   "ids": [
-   "p5-03 v6",
-   "p5-03 v16"
+   "p5-03 v6, v16"
   ],
   "size": "1024x1024",
   "scene": "one new two-slot toaster made of blue glass with polished metal accents, two slices of realistic golden toast popping up from it; beside it a small glass desk calendar with blank pages and a glass hourglass with amber sand. Nothing else.",
-  "alt": "Новый тостер, календарь и песочные часы"
+  "alt": "Новый тостер, календарь и песочные часы",
+  "stroka": 160
+ },
+ {
+  "nomer": 5,
+  "key": "printer-srok-sluzhby",
+  "ids": [
+   "p5-03 v9"
+  ],
+  "size": "1024x1024",
+  "scene": "A new glass desktop printer with a blank sheet coming out, a glass calendar and an hourglass beside it",
+  "alt": "Новый принтер прослужит больше 1 года, но меньше 2 лет",
+  "stroka": 161
+ },
+ {
+  "nomer": 5,
+  "key": "fen-srok-sluzhby",
+  "ids": [
+   "p5-03 v10, v15"
+  ],
+  "size": "1024x1024",
+  "scene": "A new glass hair dryer lying on a bathroom shelf, a glass calendar and an hourglass beside it",
+  "alt": "Новый фен прослужит больше 1 года, но меньше 2 лет",
+  "stroka": 162
+ },
+ {
+  "nomer": 5,
+  "key": "telefon-srok-sluzhby",
+  "ids": [
+   "k5-22"
+  ],
+  "size": "1024x1024",
+  "scene": "A new glass smartphone with a blank screen standing on a stand, a glass calendar and an hourglass beside it",
+  "alt": "Новый мобильный телефон прослужит больше 1 года, но меньше 2 лет",
+  "stroka": 163
+ },
+ {
+  "nomer": 5,
+  "key": "basketbolist-dva-shtrafnyh",
+  "ids": [
+   "p5-27"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass basketball player figurine at the free-throw line holding a glass ball, a glass hoop ahead, a second ball resting at his feet",
+  "alt": "Баскетболист бросает два штрафных",
+  "stroka": 174
+ },
+ {
+  "nomer": 5,
+  "key": "test-ugadyvanie-tri-voprosa",
+  "ids": [
+   "p5-28"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass student figurine at a desk with a blank glass answer sheet showing three question rows of empty tick boxes, a glass pencil hovering, a small glass die beside the sheet",
+  "alt": "Школьник наугад отвечает на три вопроса теста",
+  "stroka": 175
+ },
+ {
+  "nomer": 5,
+  "key": "sluzhba-podderzhki-zvonki",
+  "ids": [
+   "p5-29"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine holding a glass phone to the ear, three small glass phone-handset icons floating in a row beside him, a headset on a support desk in the background",
+  "alt": "Клиент три раза звонит в службу поддержки",
+  "stroka": 176
+ },
+ {
+  "nomer": 5,
+  "key": "dozhd-tri-dnya",
+  "ids": [
+   "p5-30"
+  ],
+  "size": "1024x1024",
+  "scene": "Three glass calendar tiles without numbers in a row above a small village, each tile topped by a glass cloud, some clouds with rain drops undecided (semi-transparent)",
+  "alt": "Дождь в каждый из трёх выходных дней",
+  "stroka": 177
+ },
+ {
+  "nomer": 5,
+  "key": "futbolist-tri-penalti",
+  "ids": [
+   "p5-31"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass footballer figurine at the penalty spot with three glass balls lined up, a glass goal and goalkeeper figurine ahead",
+  "alt": "Футболист бьёт три пенальти",
+  "stroka": 178
+ },
+ {
+  "nomer": 5,
+  "key": "dozhd-subbota-voskresene",
+  "ids": [
+   "p5-32"
+  ],
+  "size": "1024x1024",
+  "scene": "Two glass calendar tiles without numbers side by side, each under its own small glass cloud with faint rain drops, a folded umbrella between them",
+  "alt": "Дождь в субботу и в воскресенье",
+  "stroka": 179
+ },
+ {
+  "nomer": 5,
+  "key": "lotereya-tri-bileta",
+  "ids": [
+   "p5-33"
+  ],
+  "size": "1024x1024",
+  "scene": "Three blank glass lottery tickets fanned in a faceless glass hand, a glass lottery drum in the background",
+  "alt": "Купили три лотерейных билета",
+  "stroka": 180
+ },
+ {
+  "nomer": 5,
+  "key": "semena-tykvy-vskhozhest",
+  "ids": [
+   "p5-41"
+  ],
+  "size": "1024x1024",
+  "scene": "A garden bed with three small glass mounds of soil in a row, a faceless glass gardener figurine with a watering can, a ripe glass pumpkin at the edge of the bed",
+  "alt": "Дачник посадил три семени тыквы",
+  "stroka": 181
+ },
+ {
+  "nomer": 5,
+  "key": "dva-svetofora",
+  "ids": [
+   "p5-42"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass schoolgirl figurine with a backpack walking along a street with two glass traffic lights ahead, both lights shown unlit/neutral",
+  "alt": "Маша проходит два светофора",
+  "stroka": 182
+ },
+ {
+  "nomer": 5,
+  "key": "shakhmatist-tri-partii",
+  "ids": [
+   "p5-43"
+  ],
+  "size": "1024x1024",
+  "scene": "Three glass chessboards side by side with pieces mid-game, one faceless glass chess player figurine walking between the boards",
+  "alt": "Шахматист играет на турнире три партии",
+  "stroka": 183
+ },
+ {
+  "nomer": 5,
+  "key": "kvest-tri-zamka",
+  "ids": [
+   "p5-51"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass door in a quest room with three glass padlocks on it, a faceless glass team of a few figurines holding keys in front of the door",
+  "alt": "Квест-комната: три замка",
+  "stroka": 184
+ },
+ {
+  "nomer": 5,
+  "key": "darts-dva-broska",
+  "ids": [
+   "p5-52"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass dartboard on a wall with a faceless glass player figurine holding two glass darts, no darts on the board yet",
+  "alt": "Дартс: два броска в «яблочко",
+  "stroka": 185
+ },
+ {
+  "nomer": 5,
+  "key": "sobesedovaniya-tri-kompanii",
+  "ids": [
+   "p5-53"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass graduate figurine with a folder standing before three glass office buildings, each with an open door",
+  "alt": "Собеседования в трёх компаниях",
+  "stroka": 186
  },
  {
   "nomer": 5,
@@ -16,9 +214,989 @@
   "ids": [
    "p5-14"
   ],
-  "size": "1536x1024",
+  "size": "1024x1024",
   "scene": "two small glass warehouse buildings side by side, each with a short glass conveyor belt carrying several small cardboard-colored parcels; both belts lead to one compact delivery van in front, made of blue glass. All parcels look alike. No people.",
-  "alt": "Два склада интернет-магазина отправляют посылки в один фургон"
+  "alt": "Два склада интернет-магазина отправляют посылки в один фургон",
+  "stroka": 187
+ },
+ {
+  "nomer": 5,
+  "key": "test-na-virus",
+  "ids": [
+   "p5-15"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass test tube rack with several glass sample tubes, a magnified glass virus particle floating beside healthy round glass cells, a blank result indicator",
+  "alt": "Тест на вирус у больных и здоровых: положительный результат",
+  "stroka": 188
+ },
+ {
+  "nomer": 5,
+  "key": "ekzamen-vyuchennyy-bilet",
+  "ids": [
+   "p5-16"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass student figurine in front of an examiner's desk with a spread of face-down glass exam tickets, some tickets tinted to show they were studied, none chosen",
+  "alt": "Студент выучил часть билетов: сдаст экзамен",
+  "stroka": 189
+ },
+ {
+  "nomer": 5,
+  "key": "rybak-dva-ozera",
+  "ids": [
+   "p5-17"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass fisherman figurine with a rod at a fork in a path leading to two lakes, one with darker water and one with lighter water",
+  "alt": "Рыбак выбирает одно из двух озёр, поклёвка",
+  "stroka": 190
+ },
+ {
+  "nomer": 5,
+  "key": "pochta-spam",
+  "ids": [
+   "p5-18"
+  ],
+  "size": "1024x1024",
+  "scene": "Glass envelopes of two kinds (stacked promo envelopes and single personal envelopes) flowing through a glass sieve-shaped filter toward two glass trays",
+  "alt": "Почтовый фильтр: рассылка или личное письмо попадёт в спам",
+  "stroka": 191
+ },
+ {
+  "nomer": 5,
+  "key": "taksi-tsentr-prigorod",
+  "ids": [
+   "p5-19"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass taxi car on a road between a cluster of tall glass city buildings and small suburban houses, a glass clock without numerals floating above",
+  "alt": "Такси из центра или пригорода приедет вовремя",
+  "stroka": 192
+ },
+ {
+  "nomer": 5,
+  "key": "samolet-zaderzhka-pogoda",
+  "ids": [
+   "p5-20"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass airplane at a gate, the sky split into a stormy cloud half and a clear sunny half, a glass departure clock without numerals",
+  "alt": "Задержка рейса в ненастную и ясную погоду",
+  "stroka": 193
+ },
+ {
+  "nomer": 5,
+  "key": "bagazh-peresadka",
+  "ids": [
+   "p5-21"
+  ],
+  "size": "1024x1024",
+  "scene": "Two glass airplanes linked by a dotted route through a transfer airport, a glass suitcase on a baggage carousel between them",
+  "alt": "Багаж теряется при пересадке или прямом рейсе",
+  "stroka": 194
+ },
+ {
+  "nomer": 5,
+  "key": "olimpiada-dve-shkoly",
+  "ids": [
+   "p5-22"
+  ],
+  "size": "1024x1024",
+  "scene": "Two glass school buildings with groups of faceless glass student figurines walking from each toward a stage with glass diploma scrolls",
+  "alt": "Олимпиада: дипломы учеников двух школ",
+  "stroka": 195
+ },
+ {
+  "nomer": 5,
+  "key": "yaytsa-dve-fermy",
+  "ids": [
+   "p5-23"
+  ],
+  "size": "1024x1024",
+  "scene": "Two glass farm barns, each sending a glass egg tray to one shop counter; trays hold eggs of mixed large and small sizes",
+  "alt": "Яйца с двух ферм: доля крупных",
+  "stroka": 196
+ },
+ {
+  "nomer": 5,
+  "key": "konfety-tri-linii",
+  "ids": [
+   "p5-24"
+  ],
+  "size": "1024x1024",
+  "scene": "Three parallel glass conveyor lines of wrapped glass candies merging into one box, a magnifying glass hovering over the box",
+  "alt": "Конфетная фабрика: три линии, бракованная конфета",
+  "stroka": 197
+ },
+ {
+  "nomer": 5,
+  "key": "dacha-tri-marshruta",
+  "ids": [
+   "p5-25"
+  ],
+  "size": "1024x1024",
+  "scene": "Three glass buses on three different roads converging at a country bus stop near small dacha houses, a glass clock without numerals at the stop",
+  "alt": "Дачный посёлок: три автобусных маршрута, опоздание",
+  "stroka": 198
+ },
+ {
+  "nomer": 5,
+  "key": "marshrut-les-ozero-gory",
+  "ids": [
+   "p5-26"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass hiker figurine at a signpost with three blank arrows pointing to a forest, a lake and mountains, a distant glass thundercloud",
+  "alt": "Выходной Ивана: лес, озеро или горы, гроза",
+  "stroka": 199
+ },
+ {
+  "nomer": 5,
+  "key": "smartfon-zaryad",
+  "ids": [
+   "p5-34"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass smartphone with a battery icon without numbers, a leaf-shaped power-saving toggle beside it, a setting sun in the background",
+  "alt": "Смартфон в энергосбережении или обычном режиме: доживёт до вечера",
+  "stroka": 200
+ },
+ {
+  "nomer": 5,
+  "key": "posylka-kurer-pochta",
+  "ids": [
+   "p5-35"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass parcel between a faceless glass courier figurine on one side and a glass post office mailbox on the other",
+  "alt": "Посылка курьером или почтой: повреждение",
+  "stroka": 201
+ },
+ {
+  "nomer": 5,
+  "key": "onlayn-igra-server",
+  "ids": [
+   "p5-36"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass game controller connected by glowing lines to two glass server towers standing on a stylized globe, one over Europe and one over Asia",
+  "alt": "Онлайн-игра: европейский или азиатский сервер, задержка",
+  "stroka": 202
+ },
+ {
+  "nomer": 5,
+  "key": "futbol-dozhd",
+  "ids": [
+   "p5-37"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass football pitch with a few faceless glass player figurines, half of the sky over it rainy and half dry and sunny",
+  "alt": "Футбольный матч под дождём или в сухую погоду: победа",
+  "stroka": 203
+ },
+ {
+  "nomer": 5,
+  "key": "fotograf-shtativ",
+  "ids": [
+   "p5-38"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass photographer figurine with a camera, a glass tripod standing next to him, a blank glass photo frame floating ahead",
+  "alt": "Фотограф со штатива или с рук: резкий снимок",
+  "stroka": 204
+ },
+ {
+  "nomer": 5,
+  "key": "kartofel-tri-fermera",
+  "ids": [
+   "p5-39"
+  ],
+  "size": "1024x1024",
+  "scene": "Three glass crates of potatoes arriving on three small carts at a vegetable warehouse, the potatoes mixed in one big glass bin",
+  "alt": "Овощебаза: картофель трёх фермеров, гнилой клубень",
+  "stroka": 205
+ },
+ {
+  "nomer": 5,
+  "key": "olimpiada-tri-temy",
+  "ids": [
+   "p5-40"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass student figurine at a desk facing three face-down glass cards decorated with symbols: a parabola curve, a triangle, a tree diagram",
+  "alt": "Олимпиада: задача по алгебре, геометрии или комбинаторике",
+  "stroka": 206
+ },
+ {
+  "nomer": 5,
+  "key": "budilnik-prospit",
+  "ids": [
+   "p5-44"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass alarm clock without numerals on a bedside table, a faceless glass boy figurine asleep in bed under a glass blanket",
+  "alt": "Будильник Пети: проспит ли",
+  "stroka": 207
+ },
+ {
+  "nomer": 5,
+  "key": "pitstsa-dostavka",
+  "ids": [
+   "p5-45"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass pizza box with soft steam, a glass kick-scooter on one side and a glass delivery car on the other",
+  "alt": "Пицца на самокате или на машине: приедет горячей",
+  "stroka": 208
+ },
+ {
+  "nomer": 5,
+  "key": "golosovoy-pomoshchnik",
+  "ids": [
+   "p5-46"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass smart speaker on a table, sound wave rings around it, one half of the room quiet and the other half with noisy glass objects (a pot lid, a radio)",
+  "alt": "Голосовой помощник в тишине или в шуме",
+  "stroka": 209
+ },
+ {
+  "nomer": 5,
+  "key": "penalti-levyy-pravyy",
+  "ids": [
+   "p5-47"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass goal seen from the penalty spot, a faceless glass goalkeeper figurine in the center, two glowing target zones in the left and right corners, a ball on the spot",
+  "alt": "Пенальти в левый или правый угол, вратарь отражает",
+  "stroka": 210
+ },
+ {
+  "nomer": 5,
+  "key": "girlyandy-dve-fabriki",
+  "ids": [
+   "p5-48"
+  ],
+  "size": "1024x1024",
+  "scene": "Two coiled glass Christmas light strings in two different box styles from two small glass factories, a few bulbs unlit",
+  "alt": "Новогодние гирлянды двух фабрик: неисправная",
+  "stroka": 211
+ },
+ {
+  "nomer": 5,
+  "key": "kofeynya-tri-barista",
+  "ids": [
+   "p5-49"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass barista figurines behind a coffee bar, each with a glass cappuccino cup with milk foam",
+  "alt": "Кофейня: три бариста, идеальная пенка",
+  "stroka": 212
+ },
+ {
+  "nomer": 5,
+  "key": "turfirma-transport",
+  "ids": [
+   "p5-50"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass train, a glass bus and a glass airplane heading toward one destination pin, a glass clock without numerals above",
+  "alt": "Турфирма: поезд, автобус или самолёт, прибытие по расписанию",
+  "stroka": 213
+ },
+ {
+  "nomer": 5,
+  "key": "opechatka-telefon",
+  "ids": [
+   "k5-sp-1"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass boy figurine typing on a glass smartphone, small glass letter-shaped keys floating above the screen (no readable letters)",
+  "alt": "Ваня набирает слово на телефоне: опечатки не будет",
+  "stroka": 214
+ },
+ {
+  "nomer": 5,
+  "key": "strelok-ochki",
+  "ids": [
+   "k5-sp-2"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass shooter figurine aiming at one round glass target with concentric rings (no numbers on the rings)",
+  "alt": "Стрелок выбивает 10, 9 или 8 очков",
+  "stroka": 216
+ },
+ {
+  "nomer": 5,
+  "key": "pryzhok-v-dlinu",
+  "ids": [
+   "k5-sp-3"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass athlete figurine mid-jump over a glass sand pit with two blank marker flags along the edge",
+  "alt": "Прыжок в длину дальше 5 м, но не дальше 6 м",
+  "stroka": 218
+ },
+ {
+  "nomer": 5,
+  "key": "ozhidanie-taksi",
+  "ids": [
+   "k5-sp-4"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine waiting at the curb with a raised hand, a glass taxi far down the street, a glass clock without numerals",
+  "alt": "Ожидание такси от 3 до 10 минут",
+  "stroka": 220
+ },
+ {
+  "nomer": 5,
+  "key": "kruzhki-shakhmaty-tantsy",
+  "ids": [
+   "k5-sv-1"
+  ],
+  "size": "1024x1024",
+  "scene": "Two overlapping glass circles on a floor: one with a chessboard and faceless glass figurines playing, one with dancing glass figurines; a few figurines stand in the overlap",
+  "alt": "Шахматный и танцевальный кружки",
+  "stroka": 221
+ },
+ {
+  "nomer": 5,
+  "key": "avtobusy-dva-marshruta",
+  "ids": [
+   "k5-sv-2"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass bus stop with two glass buses of different colors approaching from opposite ends, no route numbers",
+  "alt": "Автобусы двух маршрутов на остановке",
+  "stroka": 222
+ },
+ {
+  "nomer": 5,
+  "key": "khleb-moloko",
+  "ids": [
+   "k5-sv-3"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass shopping basket on a counter between a loaf of glass bread and a glass milk bottle",
+  "alt": "Покупатель купит хлеб и/или молоко",
+  "stroka": 223
+ },
+ {
+  "nomer": 5,
+  "key": "dozhd-veter",
+  "ids": [
+   "k5-sv-4"
+  ],
+  "size": "1024x1024",
+  "scene": "An autumn glass street scene with rain drops and wind-bent glass trees with flying leaves",
+  "alt": "Осенний день: дождь и сильный ветер",
+  "stroka": 224
+ },
+ {
+  "nomer": 5,
+  "key": "popkorn-avtomaty",
+  "ids": [
+   "k5-sv-5"
+  ],
+  "size": "1024x1024",
+  "scene": "Two identical glass popcorn machines in a cinema lobby, both partially filled with popcorn",
+  "alt": "Два автомата с попкорном в фойе кинотеатра",
+  "stroka": 225
+ },
+ {
+  "nomer": 5,
+  "key": "printery-bumaga",
+  "ids": [
+   "k5-sv-6"
+  ],
+  "size": "1024x1024",
+  "scene": "Two identical glass office printers side by side, each with a paper tray partially filled with blank sheets",
+  "alt": "Два офисных принтера: бумага останется в обоих",
+  "stroka": 226
+ },
+ {
+  "nomer": 5,
+  "key": "kholodilnik-datchik",
+  "ids": [
+   "k5-sv-7"
+  ],
+  "size": "1024x1024",
+  "scene": "An open glass refrigerator with a small glass thermometer sensor on a shelf, frosty air, no scale numbers",
+  "alt": "Датчик температуры в холодильнике",
+  "stroka": 228
+ },
+ {
+  "nomer": 5,
+  "key": "datchiki-dyma",
+  "ids": [
+   "k5-hb-1"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass warehouse ceiling with three round glass smoke detectors, a faint wisp of glass smoke rising from below",
+  "alt": "Три датчика дыма на складе",
+  "stroka": 239
+ },
+ {
+  "nomer": 5,
+  "key": "kassy-samoobsluzhivaniya",
+  "ids": [
+   "k5-hb-2"
+  ],
+  "size": "1024x1024",
+  "scene": "Three glass self-checkout kiosks in a row in a supermarket, screens blank",
+  "alt": "Три кассы самообслуживания",
+  "stroka": 240
+ },
+ {
+  "nomer": 5,
+  "key": "signalizatsiya-dva-kanala",
+  "ids": [
+   "k5-hb-3"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass house with an alarm siren, two glowing signal paths (a cell tower and a Wi-Fi router) leading to a glass phone in a faceless glass owner's hand",
+  "alt": "Сигнализация по двум каналам: сотовая связь и интернет",
+  "stroka": 242
+ },
+ {
+  "nomer": 5,
+  "key": "tri-strelka-mishen",
+  "ids": [
+   "k5-hb-4"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass shooter figurines side by side aiming at one round glass target, target intact",
+  "alt": "Три стрелка по одной мишени",
+  "stroka": 243
+ },
+ {
+  "nomer": 5,
+  "key": "girlyanda-tri-sektsii",
+  "ids": [
+   "k5-hb-5"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass Christmas light string divided into three clearly separated sections joined by connectors, all bulbs softly glowing",
+  "alt": "Новогодняя гирлянда из трёх секций",
+  "stroka": 244
+ },
+ {
+  "nomer": 5,
+  "key": "pribor-tri-bloka",
+  "ids": [
+   "k5-hb-6"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass electronic device box with its cover open showing three identical glass power units connected to one circuit",
+  "alt": "Прибор с тремя блоками питания, нужны хотя бы два",
+  "stroka": 245
+ },
+ {
+  "nomer": 5,
+  "key": "vaza-yabloki-grushi",
+  "ids": [
+   "k5-bv-1"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass fruit bowl with two glass apples and three glass pears, a glass hand reaching in without having taken anything",
+  "alt": "Ваза: 2 яблока и 3 груши, берут два фрукта",
+  "stroka": 246
+ },
+ {
+  "nomer": 5,
+  "key": "dezhurnye-klass",
+  "ids": [
+   "k5-bv-2"
+  ],
+  "size": "1024x1024",
+  "scene": "A classroom with several faceless glass student figurines, boys and girls, sitting at glass desks; a faceless glass teacher figurine at a blank board holding two blank duty armbands",
+  "alt": "Класс: 6 мальчиков и 10 девочек, выбирают двух дежурных",
+  "stroka": 247
+ },
+ {
+  "nomer": 5,
+  "key": "meshochek-shariki",
+  "ids": [
+   "k5-bv-3"
+  ],
+  "size": "1024x1024",
+  "scene": "An open soft glass pouch with several glass marbles spilling out: white, red and blue marbles mixed",
+  "alt": "Мешочек: 3 белых, 1 красный, 2 синих шарика",
+  "stroka": 249
+ },
+ {
+  "nomer": 5,
+  "key": "akvarium-rybki",
+  "ids": [
+   "k5-bv-4"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass aquarium with several fish of three kinds swimming: goldfish, striped fish and grey fish; a small glass net above the water",
+  "alt": "Аквариум: 6 золотых, 5 полосатых, 5 серых рыбок",
+  "stroka": 251
+ },
+ {
+  "nomer": 5,
+  "key": "korzina-myachi",
+  "ids": [
+   "k5-bv-5"
+  ],
+  "size": "1024x1024",
+  "scene": "A large glass sports basket full of balls of three kinds mixed together: basketballs, volleyballs and footballs; a faceless glass coach figurine beside it",
+  "alt": "Корзина: 7 баскетбольных, 3 волейбольных, 11 футбольных мячей",
+  "stroka": 252
+ },
+ {
+  "nomer": 5,
+  "key": "loterejnye-bilety-pyat",
+  "ids": [
+   "k5-bv-6"
+  ],
+  "size": "1024x1024",
+  "scene": "Five identical blank glass lottery tickets lying face-down in a row on a table",
+  "alt": "5 лотерейных билетов, 2 выигрышных",
+  "stroka": 253
+ },
+ {
+  "nomer": 5,
+  "key": "vaza-tyulpany",
+  "ids": [
+   "k5-bv-7"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass vase with five tulips: two red and three yellow",
+  "alt": "Ваза: 2 красных и 3 жёлтых тюльпана",
+  "stroka": 254
+ },
+ {
+  "nomer": 5,
+  "key": "avtobus-tramvay-shkola",
+  "ids": [
+   "k5-dr-1"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass schoolboy figurine with a backpack at a fork between a glass bus and a glass tram, a school building in the distance",
+  "alt": "Петя едет в школу на автобусе или трамвае, опоздание",
+  "stroka": 255
+ },
+ {
+  "nomer": 5,
+  "key": "robot-pylesos",
+  "ids": [
+   "k5-dr-2"
+  ],
+  "size": "1024x1024",
+  "scene": "A round glass robot vacuum cleaner on a floor heading toward a low glass sofa",
+  "alt": "Робот-пылесос: обычный режим или турбо, застрянет под диваном",
+  "stroka": 257
+ },
+ {
+  "nomer": 5,
+  "key": "tri-rabochikh-detali",
+  "ids": [
+   "k5-dr-3"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass worker figurines at three workbenches assembling small glass parts that slide into one shared bin",
+  "alt": "Три рабочих собирают детали, брак",
+  "stroka": 260
+ },
+ {
+  "nomer": 5,
+  "key": "turisty-yazyki",
+  "ids": [
+   "k5-sl-1"
+  ],
+  "size": "1024x1024",
+  "scene": "A group of faceless glass tourist figurines with a glass guide figurine holding a flag, two speech-bubble shapes above the group in two different colors (no text), a few figurines under both bubbles",
+  "alt": "Туристы говорят по-английски и по-французски",
+  "stroka": 264
+ },
+ {
+  "nomer": 5,
+  "key": "basketbolist-do-popadaniya",
+  "ids": [
+   "k5-sl-3"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass basketball player figurine at the free-throw line with a glass ball, a glass hoop ahead, a small rack of spare balls beside him",
+  "alt": "Баскетболист бросает до первого попадания",
+  "stroka": 268
+ },
+ {
+  "nomer": 9,
+  "key": "most-verevochnyy-park",
+  "ids": [
+   "P01 аналоги «мост в верёвочном парке»"
+  ],
+  "size": "1024x1024",
+  "scene": "A light pedestrian suspension footbridge in a forest rope-adventure park: two wooden pylons on platforms between tall pine trees, one sagging chain between their tops, evenly spaced vertical hanger ropes holding a narrow plank deck, rope nets along both sides; nobody on the bridge.",
+  "alt": "Подвесной пешеходный мост в верёвочном парке",
+  "stroka": 344
+ },
+ {
+  "nomer": 9,
+  "key": "most-velodorozhka",
+  "ids": [
+   "P01 аналоги «велодорожка»"
+  ],
+  "size": "1024x1024",
+  "scene": "A slim modern suspension bridge over a river carrying a bike lane: two pylons, one sagging main chain, evenly spaced vertical hangers to a narrow deck; one bicycle and one electric scooter on the deck, no riders.",
+  "alt": "Висячий мост для велодорожки и электросамокатов",
+  "stroka": 345
+ },
+ {
+  "nomer": 9,
+  "key": "reyting-mobilnyh-igr",
+  "ids": [
+   "P02 аналоги «мобильные игры»"
+  ],
+  "size": "1024x1024",
+  "scene": "A smartphone lying at an angle showing a colorful abstract game landscape, and three floating glossy badges beside it: a paint palette, an open storybook, a gamepad; a row of blank star shapes below.",
+  "alt": "Рейтинг мобильных игр (графика, сюжет, управление)",
+  "stroka": 347
+ },
+ {
+  "nomer": 9,
+  "key": "reyting-muzeev",
+  "ids": [
+   "P02 аналоги «музеи»"
+  ],
+  "size": "1024x1024",
+  "scene": "A small classical museum building with columns and steps, a framed painting and a marble bust on pedestals in front of it, one faceless glass figurine guide pointing at the painting; a row of blank star shapes.",
+  "alt": "Рейтинг городских музеев",
+  "stroka": 348
+ },
+ {
+  "nomer": 9,
+  "key": "reyting-videoblogov",
+  "ids": [
+   "P02 аналоги «научные видеоблоги»"
+  ],
+  "size": "1024x1024",
+  "scene": "A video camera on a tripod and a ring light aimed at a desk with a glowing atom model and a flask; a laptop screen showing a large play-button triangle; a row of blank star shapes.",
+  "alt": "Рейтинг научных видеоблогов",
+  "stroka": 349
+ },
+ {
+  "nomer": 9,
+  "key": "reyting-dostavki-edy",
+  "ids": [
+   "P03 аналоги «приложение доставки»"
+  ],
+  "size": "1024x1024",
+  "scene": "A smartphone showing an abstract food-delivery app screen with food pictograms, a paper delivery bag and a pizza box beside it, a row of blank star shapes and a magnifying-glass badge for the expert score.",
+  "alt": "Рейтинг приложения доставки еды",
+  "stroka": 351
+ },
+ {
+  "nomer": 9,
+  "key": "zaryadka-samokatov",
+  "ids": [
+   "P04 аналоги «зарядная станция самокатов»"
+  ],
+  "size": "1024x1024",
+  "scene": "A street charging post with two electric scooters plugged into it by cables, a small protective breaker box on the post with one glowing indicator lamp.",
+  "alt": "Защита зарядной станции электросамокатов",
+  "stroka": 353
+ },
+ {
+  "nomer": 9,
+  "key": "usb-zashchita",
+  "ids": [
+   "P04 аналоги «USB-порт»"
+  ],
+  "size": "1024x1024",
+  "scene": "A laptop seen from the side with one USB cable plugged into its port and leading to a smartphone; a small glowing shield shape next to the port.",
+  "alt": "Защита USB-порта ноутбука",
+  "stroka": 354
+ },
+ {
+  "nomer": 9,
+  "key": "akkumulyator-samokata",
+  "ids": [
+   "P05 аналоги «аккумулятор электросамоката»"
+  ],
+  "size": "1024x1024",
+  "scene": "An electric scooter with its battery pack lifted out and shown beside it, two cables running from the battery to the hub motor in the front wheel.",
+  "alt": "Аккумулятор самоката и мотор",
+  "stroka": 356
+ },
+ {
+  "nomer": 9,
+  "key": "generator-obogrevatel",
+  "ids": [
+   "P05 аналоги «генератор»"
+  ],
+  "size": "1024x1024",
+  "scene": "A portable petrol generator on the ground connected by one cable to an electric fan heater with a glowing grille.",
+  "alt": "Генератор и обогреватель",
+  "stroka": 357
+ },
+ {
+  "nomer": 9,
+  "key": "powerbank-smartfon",
+  "ids": [
+   "P05 аналоги «павербанк»"
+  ],
+  "size": "1024x1024",
+  "scene": "A power bank connected by a short cable to a smartphone lying next to it, a glowing lightning-bolt shape on the phone screen.",
+  "alt": "Павербанк заряжает смартфон",
+  "stroka": 358
+ },
+ {
+  "nomer": 9,
+  "key": "obogrevatel-toster",
+  "ids": [
+   "P06 аналоги «плита и обогреватель» (в тексте: обогреватель + тостер)"
+  ],
+  "size": "1024x1024",
+  "scene": "One double wall socket with two plugs: an oil-filled radiator heater and a two-slot toaster, their glowing cables joining at the socket.",
+  "alt": "Обогреватель и тостер в одной розетке",
+  "stroka": 360
+ },
+ {
+  "nomer": 9,
+  "key": "chaynik-utyug",
+  "ids": [
+   "P06 аналоги «чайник и утюг»"
+  ],
+  "size": "1024x1024",
+  "scene": "One double wall socket with two plugs: an electric kettle and a steam iron standing on an ironing board, glowing cables joining at the socket.",
+  "alt": "Чайник и утюг в одной розетке",
+  "stroka": 361
+ },
+ {
+  "nomer": 9,
+  "key": "pk-zaryadka-samokata",
+  "ids": [
+   "P06 аналоги «игровой компьютер»"
+  ],
+  "size": "1024x1024",
+  "scene": "One double wall socket with two plugs: a gaming PC tower with glowing fans and an electric scooter charger connected to a scooter, glowing cables joining at the socket.",
+  "alt": "Игровой ПК и зарядка самоката",
+  "stroka": 362
+ },
+ {
+  "nomer": 9,
+  "key": "uvlazhnitel-pristavka",
+  "ids": [
+   "P06 аналоги «игровая приставка»"
+  ],
+  "size": "1024x1024",
+  "scene": "One double wall socket with two plugs: an air humidifier releasing a mist plume and a game console with one gamepad, glowing cables joining at the socket.",
+  "alt": "Увлажнитель воздуха и приставка",
+  "stroka": 363
+ },
+ {
+  "nomer": 9,
+  "key": "proektor-iz-korobki",
+  "ids": [
+   "P07 аналоги «проектор для смартфона»"
+  ],
+  "size": "1024x1024",
+  "scene": "A cardboard-box DIY projector: a smartphone inside at the back, a round magnifying lens fitted in a hole in the front, a cone of light falling on a white wall screen with an enlarged bright rectangle.",
+  "alt": "Самодельный проектор из коробки",
+  "stroka": 365
+ },
+ {
+  "nomer": 9,
+  "key": "filmoskop",
+  "ids": [
+   "P07 аналоги «кадр плёнки»"
+  ],
+  "size": "1024x1024",
+  "scene": "A school filmstrip projector on a desk projecting one film frame through its lens onto a white screen as an enlarged image, a coiled filmstrip beside it.",
+  "alt": "Школьный фильмоскоп",
+  "stroka": 366
+ },
+ {
+  "nomer": 9,
+  "key": "nasekomoe-linza",
+  "ids": [
+   "P07 аналоги «насекомое под линзой»"
+  ],
+  "size": "1024x1024",
+  "scene": "On one optical bench rail: a ladybug on a small stand, a converging lens in a holder and a white screen showing an enlarged image of the ladybug.",
+  "alt": "Увеличенное изображение насекомого",
+  "stroka": 367
+ },
+ {
+  "nomer": 9,
+  "key": "dron-dostavshchik-signal",
+  "ids": [
+   "P08 аналоги «дрон-доставщик»"
+  ],
+  "size": "1024x1024",
+  "scene": "a glass delivery quadcopter carrying one realistic cardboard parcel flies from right to left toward a round glass landing pad on the left; thin crisp glowing sound-wave arcs around the drone: closely spaced in front of it (left side) and widely spaced behind it (right side). The arcs are thin solid lines, no haze, no mist, no glow cloud around the scene; everything outside the objects is fully transparent.",
+  "alt": "Дрон-доставщик с посылкой летит к площадке, впереди сгущаются звуковые волны",
+  "stroka": 369
+ },
+ {
+  "nomer": 9,
+  "key": "skoraya-signal",
+  "ids": [
+   "P08 аналоги «скорая помощь»"
+  ],
+  "size": "1024x1024",
+  "scene": "An ambulance with flashing roof lights driving toward a road intersection, sound-wave arcs bunched in front and spread behind.",
+  "alt": "Сирена скорой у перекрёстка",
+  "stroka": 370
+ },
+ {
+  "nomer": 9,
+  "key": "elektrokar-signal",
+  "ids": [
+   "P08 аналоги «электрокар»"
+  ],
+  "size": "1024x1024",
+  "scene": "A compact electric car approaching a zebra crossing, sound-wave arcs bunched in front; one faceless glass figurine waits at the crossing.",
+  "alt": "Сигнал электрокара у перехода",
+  "stroka": 371
+ },
+ {
+  "nomer": 9,
+  "key": "dva-drona-zvuk",
+  "ids": [
+   "P09 аналоги «два дрона»"
+  ],
+  "size": "1024x1024",
+  "scene": "Two quadcopters flying toward each other along one straight line: the left one carries a small buzzer, the right one a microphone; sound-wave arcs between them.",
+  "alt": "Дрон с пищалкой и дрон с микрофоном",
+  "stroka": 373
+ },
+ {
+  "nomer": 9,
+  "key": "kater-i-buy",
+  "ids": [
+   "P09 аналоги «катера»"
+  ],
+  "size": "1024x1024",
+  "scene": "A motorboat with a siren on its mast moving toward a floating buoy topped with a microphone, along one straight line on calm water; sound-wave arcs between them.",
+  "alt": "Катер с сиреной и буй с микрофоном",
+  "stroka": 374
+ },
+ {
+  "nomer": 9,
+  "key": "robot-pylesos-i-sobaka",
+  "ids": [
+   "P09 аналоги «роботы»"
+  ],
+  "size": "1024x1024",
+  "scene": "A round robot vacuum with a glowing beacon and a robot dog with a sound sensor on its head moving toward each other across a floor; sound-wave arcs between them.",
+  "alt": "Робот-пылесос и робот-собака",
+  "stroka": 375
+ },
+ {
+  "nomer": 9,
+  "key": "tormozhenie-samokata",
+  "ids": [
+   "P11 аналоги «электросамокат»"
+  ],
+  "size": "1024x1024",
+  "scene": "An electric scooter braking on a bike path, ridden by one faceless glass figurine, a short skid mark behind the rear wheel.",
+  "alt": "Торможение электросамоката",
+  "stroka": 378
+ },
+ {
+  "nomer": 9,
+  "key": "tormozhenie-avtobusa",
+  "ids": [
+   "P11 аналоги «автобус»"
+  ],
+  "size": "1024x1024",
+  "scene": "A city bus braking on a road before a bus stop shelter, skid marks behind its wheels.",
+  "alt": "Торможение автобуса",
+  "stroka": 379
+ },
+ {
+  "nomer": 9,
+  "key": "tormozhenie-karta",
+  "ids": [
+   "P11 аналоги «карт»"
+  ],
+  "size": "1024x1024",
+  "scene": "A go-kart braking on a karting track with red-and-white curbs, tyre marks behind it, one faceless glass figurine driver in a helmet.",
+  "alt": "Торможение карта на картодроме",
+  "stroka": 380
+ },
+ {
+  "nomer": 9,
+  "key": "gruzovik-iz-posyolka",
+  "ids": [
+   "P12 аналоги «грузовик»"
+  ],
+  "size": "1024x1024",
+  "scene": "A truck leaving a small village of low houses onto an open straight highway, motion streaks behind it.",
+  "alt": "Грузовик выезжает из посёлка и разгоняется",
+  "stroka": 382
+ },
+ {
+  "nomer": 9,
+  "key": "bespilotnoe-taksi",
+  "ids": [
+   "P12 аналоги «беспилотное такси»"
+  ],
+  "size": "1024x1024",
+  "scene": "A driverless taxi car with a sensor dome on its roof leaving a city skyline onto a straight highway, empty driver seat visible.",
+  "alt": "Беспилотное такси выезжает из города",
+  "stroka": 383
+ },
+ {
+  "nomer": 9,
+  "key": "namotka-filamenta",
+  "ids": [
+   "P13 аналоги «3D-принтер»"
+  ],
+  "size": "1024x1024",
+  "scene": "A winding machine spooling bright plastic 3D-printer filament onto one reel, a curved glowing arrow around the reel showing rotation.",
+  "alt": "Намотка филамента для 3D-принтера",
+  "stroka": 385
+ },
+ {
+  "nomer": 9,
+  "key": "karkasnyy-basseyn",
+  "ids": [
+   "P15 аналоги «каркасный бассейн»"
+  ],
+  "size": "1024x1024",
+  "scene": "A round above-ground frame swimming pool in a garden, a tap at the very bottom of its side wall with a stream of water flowing out.",
+  "alt": "Вода вытекает из каркасного бассейна",
+  "stroka": 388
+ },
+ {
+  "nomer": 9,
+  "key": "nagrev-sopla-3d",
+  "ids": [
+   "P16 аналоги «3D-принтер»"
+  ],
+  "size": "1024x1024",
+  "scene": "Close-up of a metal 3D-printer print head with a red-hot glowing nozzle heater block, and a thermometer dial without numbers beside it.",
+  "alt": "Нагреватель сопла 3D-принтера по металлу",
+  "stroka": 390
+ },
+ {
+  "nomer": 9,
+  "key": "mufelnaya-pech",
+  "ids": [
+   "P16 аналоги «муфельная печь»"
+  ],
+  "size": "1024x1024",
+  "scene": "A laboratory muffle furnace with its door open showing a glowing orange coil inside and one crucible on the shelf, a thermometer dial without numbers.",
+  "alt": "Спираль лабораторной муфельной печи",
+  "stroka": 391
+ },
+ {
+  "nomer": 9,
+  "key": "payalnaya-stanciya",
+  "ids": [
+   "P16 аналоги «паяльная станция»"
+  ],
+  "size": "1024x1024",
+  "scene": "A soldering station base with a soldering iron in its holder, red-hot tip, a small circuit board with robot parts on the desk.",
+  "alt": "Паяльная станция в кружке робототехники",
+  "stroka": 392
  },
  {
   "nomer": 9,
@@ -28,36 +1206,3604 @@
   ],
   "size": "1024x1024",
   "scene": "one small realistic grey pebble in mid-air, tossed straight up; a thin dashed glowing vertical line below it shows its path up from a small glass hand-shaped launch point; to one side a thin translucent horizontal glass plate floats at mid-height as a height level, and a glass stopwatch with a blank dial stands beside. Minimal, airy.",
-  "alt": "Камешек подброшен вверх, рядом отметка высоты и секундомер"
+  "alt": "Камешек подброшен вверх, рядом отметка высоты и секундомер",
+  "stroka": 394
  },
  {
   "nomer": 9,
-  "key": "dron-dostavshchik-signal",
+  "key": "basketbolnyy-myach-vverh",
   "ids": [
-   "P08 аналоги «дрон-доставщик»"
+   "P17 аналоги «баскетбольный мяч»"
   ],
-  "size": "1536x1024",
-  "scene": "a glass delivery quadcopter carrying one realistic cardboard parcel flies from right to left toward a round glass landing pad on the left; thin crisp glowing sound-wave arcs around the drone: closely spaced in front of it (left side) and widely spaced behind it (right side). The arcs are thin solid lines, no haze, no mist, no glow cloud around the scene; everything outside the objects is fully transparent.",
-  "alt": "Дрон-доставщик с посылкой летит к площадке, впереди сгущаются звуковые волны"
+  "size": "1024x1024",
+  "scene": "An orange basketball thrown straight up on an outdoor streetball court with one hoop in the background, a dashed vertical path, one translucent glass level plane, a stopwatch.",
+  "alt": "Баскетбольный мяч в стритболе",
+  "stroka": 395
+ },
+ {
+  "nomer": 9,
+  "key": "nablyudatel-na-gore",
+  "ids": [
+   "P19 аналоги «наблюдатель на горе»"
+  ],
+  "size": "1024x1024",
+  "scene": "One faceless glass figurine standing on a mountain summit, a glowing sight line from it touching the curved Earth's horizon over plains.",
+  "alt": "Наблюдатель на вершине горы",
+  "stroka": 398
+ },
+ {
+  "nomer": 9,
+  "key": "gorizont-s-orbity",
+  "ids": [
+   "P19 аналоги «космонавт на орбите»"
+  ],
+  "size": "1024x1024",
+  "scene": "An orbital space station above the curved Earth, a glowing sight line from the station touching the Earth's limb.",
+  "alt": "Горизонт с орбитальной станции",
+  "stroka": 399
+ },
+ {
+  "nomer": 9,
+  "key": "gorizont-s-drona",
+  "ids": [
+   "P19 аналоги «дрон с камерой»"
+  ],
+  "size": "1024x1024",
+  "scene": "A quadcopter with a camera hovering above a seashore, a glowing sight line from the camera touching the curved sea horizon.",
+  "alt": "Горизонт с дрона",
+  "stroka": 400
+ },
+ {
+  "nomer": 9,
+  "key": "ballon-dlya-dayvinga",
+  "ids": [
+   "P21 аналоги «баллон для дайвинга»"
+  ],
+  "size": "1024x1024",
+  "scene": "A scuba-diving cylinder being filled through a hose from a compressor, a pressure gauge with a needle and no numbers on the valve.",
+  "alt": "Накачка баллона для дайвинга",
+  "stroka": 403
+ },
+ {
+  "nomer": 9,
+  "key": "vodyanaya-raketa",
+  "ids": [
+   "P32 аналоги «модель ракеты»"
+  ],
+  "size": "1024x1024",
+  "scene": "A plastic-bottle water rocket standing on a launch pad, a hand pump connected to it by a tube, air bubbles rising in the water inside.",
+  "alt": "Водяная модель ракеты",
+  "stroka": 404
+ },
+ {
+  "nomer": 9,
+  "key": "ballon-peyntbol",
+  "ids": [
+   "P32 аналоги «баллон для пейнтбола»"
+  ],
+  "size": "1024x1024",
+  "scene": "A paintball marker with a compressed-air tank attached, the tank connected by a hose to a filling station, a gauge without numbers.",
+  "alt": "Баллон пейнтбольного маркера",
+  "stroka": 405
+ },
+ {
+  "nomer": 9,
+  "key": "podvodnaya-laboratoriya",
+  "ids": [
+   "P23 аналоги «подводная лаборатория»"
+  ],
+  "size": "1024x1024",
+  "scene": "A cylindrical underwater-laboratory module with portholes being lowered on cables from a ship's crane toward the seabed.",
+  "alt": "Модуль подводной лаборатории опускают на дно",
+  "stroka": 408
+ },
+ {
+  "nomer": 9,
+  "key": "kupol-dlya-dayverov",
+  "ids": [
+   "P23 аналоги «купол для дайверов»"
+  ],
+  "size": "1024x1024",
+  "scene": "A transparent hemispherical dome, open at the bottom, being lowered on chains into water toward the seabed, a pocket of trapped air inside it.",
+  "alt": "Прозрачный купол для дайверов",
+  "stroka": 409
+ },
+ {
+  "nomer": 9,
+  "key": "defibrillyator",
+  "ids": [
+   "P24 аналоги «дефибриллятор»"
+  ],
+  "size": "1024x1024",
+  "scene": "An open training defibrillator case with two paddles, a large cylindrical capacitor and a resistor visible on its board, a smoothly falling glowing curve beside it without axes or labels.",
+  "alt": "Конденсатор учебного дефибриллятора",
+  "stroka": 411
+ },
+ {
+  "nomer": 9,
+  "key": "rentgen-apparat",
+  "ids": [
+   "P24 аналоги «рентгеновский аппарат»"
+  ],
+  "size": "1024x1024",
+  "scene": "A medical X-ray machine with its emitter arm over an empty table, a side panel open to show a large high-voltage capacitor and a resistor.",
+  "alt": "Конденсатор рентгеновского аппарата",
+  "stroka": 412
+ },
+ {
+  "nomer": 9,
+  "key": "lazernoe-shou",
+  "ids": [
+   "P24 аналоги «лазерная установка»"
+  ],
+  "size": "1024x1024",
+  "scene": "A pulsed laser projector for a light show emitting several coloured beams into haze, its housing open to show a large capacitor and a resistor.",
+  "alt": "Конденсатор установки для лазерного шоу",
+  "stroka": 413
+ },
+ {
+  "nomer": 9,
+  "key": "teplyy-pol",
+  "ids": [
+   "P25 аналоги «тёплый пол»"
+  ],
+  "size": "1024x1024",
+  "scene": "A cutaway of a room floor showing one water pipe laid in loops under the floor, hot red at the inlet fading to cooler blue at the outlet.",
+  "alt": "Труба водяного тёплого пола",
+  "stroka": 415
+ },
+ {
+  "nomer": 9,
+  "key": "teplica-otoplenie",
+  "ids": [
+   "P25 аналоги «теплица»"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass greenhouse with seedlings on benches, one heating pipe running along the wall, hot red at the inlet fading to blue at the outlet.",
+  "alt": "Отопление теплицы",
+  "stroka": 416
+ },
+ {
+  "nomer": 9,
+  "key": "vodyanoe-ohlazhdenie-pk",
+  "ids": [
+   "P25 аналоги «водяное охлаждение ПК»"
+  ],
+  "size": "1024x1024",
+  "scene": "A gaming PC case with a transparent side showing a water-cooling loop: a copper radiator tube with fans, water hot red at the inlet fading to blue at the outlet.",
+  "alt": "Водяное охлаждение игрового ПК",
+  "stroka": 417
+ },
+ {
+  "nomer": 9,
+  "key": "kamen-pod-uglom",
+  "ids": [
+   "P26 аналоги «камень»"
+  ],
+  "size": "1024x1024",
+  "scene": "One stone flying along a dashed parabolic arc from the ground, a small arc marking the launch angle at the ground.",
+  "alt": "Камень, брошенный под углом",
+  "stroka": 419
+ },
+ {
+  "nomer": 9,
+  "key": "myach-regbi-pod-uglom",
+  "ids": [
+   "P26 аналоги «мяч для регби»"
+  ],
+  "size": "1024x1024",
+  "scene": "An oval rugby ball flying along a dashed parabolic arc over a grass field, a small arc marking the launch angle at the ground.",
+  "alt": "Мяч для регби под углом",
+  "stroka": 420
+ },
+ {
+  "nomer": 9,
+  "key": "padel-myach",
+  "ids": [
+   "P26 аналоги «мяч в паделе»"
+  ],
+  "size": "1024x1024",
+  "scene": "A padel ball flying along a dashed parabolic arc on a padel court with glass walls, one padel racket at the start, a small arc marking the launch angle.",
+  "alt": "Мяч для падел-тенниса под углом",
+  "stroka": 421
+ },
+ {
+  "nomer": 9,
+  "key": "smartfon-v-derzhatele",
+  "ids": [
+   "P27 аналоги «смартфон на пружинном держателе»"
+  ],
+  "size": "1024x1024",
+  "scene": "A smartphone clamped in a spring-loaded holder on a bicycle handlebar, bouncing up and down, a vertical double-headed glowing arrow beside it.",
+  "alt": "Смартфон в пружинном держателе велосипеда",
+  "stroka": 423
+ },
+ {
+  "nomer": 9,
+  "key": "brelok-poprygunchik",
+  "ids": [
+   "P27 аналоги «игрушка-попрыгунчик», P34 аналоги «фигурка на пружине»"
+  ],
+  "size": "1024x1024",
+  "scene": "A small toy keychain figure hanging on a coiled spring from a ring, bouncing up and down, a vertical double-headed glowing arrow beside it.",
+  "alt": "Брелок-попрыгунчик на пружинке",
+  "stroka": 424
+ },
+ {
+  "nomer": 9,
+  "key": "vibromotor-model",
+  "ids": [
+   "P34 аналоги «датчик в смартфоне»"
+  ],
+  "size": "1024x1024",
+  "scene": "An enlarged transparent teaching model of a smartphone showing inside a small weight on a spring that oscillates, a double-headed glowing arrow beside the weight.",
+  "alt": "Грузик вибромотора в учебной модели смартфона",
+  "stroka": 425
+ },
+ {
+  "nomer": 9,
+  "key": "roboty-sumoisty",
+  "ids": [
+   "P28 аналоги «роботы-сумоисты»"
+  ],
+  "size": "1024x1024",
+  "scene": "Two identical small sumo robots on a round arena ring driving toward each other along paths at an angle, glowing arrows showing their directions, an arc marking the angle between them.",
+  "alt": "Столкновение роботов-сумоистов",
+  "stroka": 427
+ },
+ {
+  "nomer": 9,
+  "key": "shayby-aerohokkeya",
+  "ids": [
+   "P28 аналоги «шайбы аэрохоккея»"
+  ],
+  "size": "1024x1024",
+  "scene": "An air-hockey table with two identical pucks gliding toward each other along paths at an angle, glowing arrows for directions, an arc marking the angle between them.",
+  "alt": "Липкие шайбы аэрохоккея",
+  "stroka": 428
+ },
+ {
+  "nomer": 9,
+  "key": "myach-nad-skalodromom",
+  "ids": [
+   "P29 аналоги «мяч над скалодромом»"
+  ],
+  "size": "1024x1024",
+  "scene": "A ball launched from a small training cannon flies along a dashed arc over a climbing wall covered with colourful holds.",
+  "alt": "Мяч из тренировочной пушки над стеной скалодрома",
+  "stroka": 430
+ },
+ {
+  "nomer": 9,
+  "key": "myach-nad-dronom",
+  "ids": [
+   "P29 аналоги «мяч над дроном» (в тексте: мяч для фрисби-гольфа)"
+  ],
+  "size": "1024x1024",
+  "scene": "A ball flies along a dashed arc over a quadcopter hovering above a grass field, a frisbee-golf basket target on the ground.",
+  "alt": "Мяч пролетает над зависшим дроном",
+  "stroka": 431
+ },
+ {
+  "nomer": 9,
+  "key": "cd-difrakciya",
+  "ids": [
+   "P33 аналоги «CD-диск и лазерная указка»"
+  ],
+  "size": "1024x1024",
+  "scene": "A laser pointer shining a beam perpendicular onto a compact disc; a few bright reflected spots on a curved screen, one angle arc measured from the perpendicular.",
+  "alt": "Компакт-диск как решётка",
+  "stroka": 433
+ },
+ {
+  "nomer": 9,
+  "key": "velogenerator-svetodiod",
+  "ids": [
+   "EV10-SIGNAL (e10.signal)"
+  ],
+  "size": "1024x1024",
+  "scene": "A bicycle on a stand with a small dynamo generator pressed against its rear wheel, one cable to a glowing LED lamp.",
+  "alt": "Велосипедный генератор: напряжение по синусу",
+  "stroka": 440
+ },
+ {
+  "nomer": 9,
+  "key": "inkubator-nagrevateli",
+  "ids": [
+   "EV10-NAGREVATELI (e10.nagrevateli)"
+  ],
+  "size": "1024x1024",
+  "scene": "An egg incubator with a transparent lid holding several eggs, a chain of identical heating elements connected one after another along the bottom and to a battery source.",
+  "alt": "Цепочка нагревательных элементов инкубатора",
+  "stroka": 441
+ },
+ {
+  "nomer": 9,
+  "key": "sila-ampera-sterzhen",
+  "ids": [
+   "EV10-AMPER (e10.amper)"
+  ],
+  "size": "1024x1024",
+  "scene": "A metal rod lying across two parallel rails between the poles of a large horseshoe magnet, a battery connected to the rails, glowing current arrows along the rod.",
+  "alt": "Сила Ампера: стержень на рельсах",
+  "stroka": 442
+ },
+ {
+  "nomer": 9,
+  "key": "poplavok-na-volnah",
+  "ids": [
+   "PV10-DOLYA (z10.dolya-vremeni: поплавок, груз, маятник часов, буй, камертон, качели)"
+  ],
+  "size": "1024x1024",
+  "scene": "A fishing float bobbing up and down on small waves, a vertical double-headed glowing arrow beside it.",
+  "alt": "Колебания: доля времени, когда скорость мала",
+  "stroka": 447
+ },
+ {
+  "nomer": 9,
+  "key": "teplovoy-dvigatel",
+  "ids": [
+   "PV10-KPD (z10.kpd)"
+  ],
+  "size": "1024x1024",
+  "scene": "A schematic heat engine: a glowing red hot block (heater) at the top, a blue cold block (cooler) at the bottom, a piston cylinder with a flywheel between them, glowing arrows of heat flow.",
+  "alt": "КПД теплового двигателя: температура нагревателя",
+  "stroka": 451
+ },
+ {
+  "nomer": 9,
+  "key": "pryzhok-na-platformu",
+  "ids": [
+   "PV10-PLATFORMA (z10.platforma: скейтбордист, сноубордист, турист, мальчик с санками, спортсмен, каскадёр)"
+  ],
+  "size": "1024x1024",
+  "scene": "One faceless glass figurine jumping onto a flat railway platform cart standing on straight rails, a glowing arrow for the jump direction at an angle to the rails and an arc marking that angle.",
+  "alt": "Прыжок на платформу на рельсах под углом",
+  "stroka": 456
+ },
+ {
+  "nomer": 9,
+  "key": "kameshek-v-kolodec",
+  "ids": [
+   "PV10-KOLODEC (z10.kolodec)"
+  ],
+  "size": "1024x1024",
+  "scene": "A cut-away stone well: one pebble falling down the shaft toward the water surface, a dashed vertical path, a stopwatch beside the well.",
+  "alt": "Камешек падает в колодец, вода поднялась",
+  "stroka": 457
+ },
+ {
+  "nomer": 9,
+  "key": "arhimed-podvodnyy-apparat",
+  "ids": [
+   "PV10-ARHIMED (z10.arhimed: куб, шар)"
+  ],
+  "size": "1024x1024",
+  "scene": "Two underwater vehicles under water side by side, one cube-shaped and one sphere-shaped, glowing upward arrows of buoyant force on each.",
+  "alt": "Архимедова сила на подводный аппарат",
+  "stroka": 458
+ },
+ {
+  "nomer": 10,
+  "key": "pr-01-tax-citizen",
+  "ids": [
+   "PR-01 · банк+ген; аналоги: 10 «граждан» — только фамилии"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine citizen holding a pay envelope; a larger coin stack with a small separate portion moved to a tax-office tray.",
+  "alt": "Зарплата по сумме после налога 13%",
+  "stroka": 672
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-aquapark",
+  "ids": [
+   "PR-02 · аналоги: билеты в аквапарк"
+  ],
+  "size": "1024x1024",
+  "scene": "A water park with slides and a ticket booth; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Билеты в аквапарк",
+  "stroka": 674
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-bicycle",
+  "ids": [
+   "PR-02 · аналоги: велосипед"
+  ],
+  "size": "1024x1024",
+  "scene": "A bicycle in a shop window; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Велосипед",
+  "stroka": 675
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-strawberries",
+  "ids": [
+   "PR-02 · аналоги: клубника"
+  ],
+  "size": "1024x1024",
+  "scene": "A crate of strawberries at a market; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Клубника",
+  "stroka": 676
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-holiday-flowers",
+  "ids": [
+   "PR-02 · аналоги: цветы к празднику"
+  ],
+  "size": "1024x1024",
+  "scene": "Buckets of flowers at a florist's; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Цветы к празднику",
+  "stroka": 677
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-smartphone",
+  "ids": [
+   "PR-02 · аналоги: смартфон"
+  ],
+  "size": "1024x1024",
+  "scene": "A smartphone on a shop stand; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Смартфон",
+  "stroka": 678
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-fridge",
+  "ids": [
+   "PR-02 · аналоги: холодильник"
+  ],
+  "size": "1024x1024",
+  "scene": "A refrigerator in an appliance store; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Холодильник",
+  "stroka": 679
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-pool-pass",
+  "ids": [
+   "PR-02 · аналоги: абонемент в бассейн"
+  ],
+  "size": "1024x1024",
+  "scene": "An indoor swimming pool entrance with a blank pass card; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Абонемент в бассейн",
+  "stroka": 680
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-sea-trip",
+  "ids": [
+   "PR-02 · аналоги: путёвка на море"
+  ],
+  "size": "1024x1024",
+  "scene": "A beach resort with sun loungers; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Путёвка на море",
+  "stroka": 681
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-shares",
+  "ids": [
+   "PR-02 · аналоги: акции компании"
+  ],
+  "size": "1024x1024",
+  "scene": "A line chart on a monitor rising then falling, no axes labels; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Акции компании",
+  "stroka": 682
+ },
+ {
+  "nomer": 10,
+  "key": "pr-02-cucumbers",
+  "ids": [
+   "PR-02 · аналоги: огурцы зимой и весной"
+  ],
+  "size": "1024x1024",
+  "scene": "A crate of cucumbers at a winter market; beside it an up arrow followed by a down arrow (no numbers).",
+  "alt": "Огурцы зимой и весной",
+  "stroka": 683
+ },
+ {
+  "nomer": 10,
+  "key": "pr-03-shares",
+  "ids": [
+   "PR-03 · банк+ген; аналоги: акции, среда и четверг; акции молодой компании"
+  ],
+  "size": "1024x1024",
+  "scene": "A stock-exchange monitor with a blank chart; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
+  "alt": "Акции: подорожали и подешевели на тот же %",
+  "stroka": 684
+ },
+ {
+  "nomer": 10,
+  "key": "pr-03-petrol",
+  "ids": [
+   "PR-03 · аналоги: бензин"
+  ],
+  "size": "1024x1024",
+  "scene": "A petrol station pump with a blank display; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
+  "alt": "Бензин",
+  "stroka": 685
+ },
+ {
+  "nomer": 10,
+  "key": "pr-03-apartment",
+  "ids": [
+   "PR-03 · аналоги: квартира"
+  ],
+  "size": "1024x1024",
+  "scene": "A multi-storey residential building; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
+  "alt": "Квартира",
+  "stroka": 686
+ },
+ {
+  "nomer": 10,
+  "key": "pr-03-gold",
+  "ids": [
+   "PR-03 · аналоги: золото"
+  ],
+  "size": "1024x1024",
+  "scene": "Gold bars stacked in a vault; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
+  "alt": "Золото",
+  "stroka": 687
+ },
+ {
+  "nomer": 10,
+  "key": "pr-03-train-tickets",
+  "ids": [
+   "PR-03 · аналоги: билеты на поезд"
+  ],
+  "size": "1024x1024",
+  "scene": "A railway station ticket hall with a train behind; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
+  "alt": "Билеты на поезд",
+  "stroka": 688
+ },
+ {
+  "nomer": 10,
+  "key": "pr-03-auction-coin",
+  "ids": [
+   "PR-03 · аналоги: монета на аукционе"
+  ],
+  "size": "1024x1024",
+  "scene": "A rare coin on a velvet stand with a faceless glass figurine auctioneer and gavel; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
+  "alt": "Монета на аукционе",
+  "stroka": 689
+ },
+ {
+  "nomer": 10,
+  "key": "pr-03-strawberries",
+  "ids": [
+   "PR-03 · аналоги: клубника"
+  ],
+  "size": "1024x1024",
+  "scene": "A basket of strawberries; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
+  "alt": "Клубника",
+  "stroka": 690
+ },
+ {
+  "nomer": 10,
+  "key": "pr-03-mountain-trip",
+  "ids": [
+   "PR-03 · аналоги: путёвка в горы"
+  ],
+  "size": "1024x1024",
+  "scene": "Snowy mountains with a chalet; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
+  "alt": "Путёвка в горы",
+  "stroka": 691
+ },
+ {
+  "nomer": 10,
+  "key": "pr-03-tomatoes",
+  "ids": [
+   "PR-03 · аналоги: помидоры"
+  ],
+  "size": "1024x1024",
+  "scene": "A crate of tomatoes at a market; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
+  "alt": "Помидоры",
+  "stroka": 692
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-shirts-jacket",
+  "ids": [
+   "PR-04 · банк+ген"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical folded shirts lined up on one side of a balance scale and one jacket on the other side, the scale tipping slightly toward one jacket.",
+  "alt": "Рубашки и куртка",
+  "stroka": 693
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-caps-sneakers",
+  "ids": [
+   "PR-04 · аналоги: кепки и кроссовки"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical caps lined up on one side of a balance scale and a pair of sneakers on the other side, the scale tipping slightly toward a pair of sneakers.",
+  "alt": "Кепки и кроссовки",
+  "stroka": 694
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-books-ereader",
+  "ids": [
+   "PR-04 · аналоги: книги"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical paper books lined up on one side of a balance scale and an e-reader on the other side, the scale tipping slightly toward an e-reader.",
+  "alt": "Бумажные книги и электронная книга",
+  "stroka": 695
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-pastries-cake",
+  "ids": [
+   "PR-04 · аналоги: пирожные и торт"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical pastries lined up on one side of a balance scale and a whole cake on the other side, the scale tipping slightly toward a whole cake.",
+  "alt": "Пирожные и торт",
+  "stroka": 696
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-cinema-theatre",
+  "ids": [
+   "PR-04 · аналоги: кино и театр"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical small blank cinema tickets lined up on one side of a balance scale and one ornate blank theatre ticket on the other side, the scale tipping slightly toward one ornate blank theatre ticket.",
+  "alt": "Билеты в кино и в театр",
+  "stroka": 697
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-balls-racket",
+  "ids": [
+   "PR-04 · аналоги: мячи и ракетка"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical tennis balls lined up on one side of a balance scale and a tennis racket on the other side, the scale tipping slightly toward a tennis racket.",
+  "alt": "Теннисные мячи и ракетка",
+  "stroka": 698
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-scarves-coat",
+  "ids": [
+   "PR-04 · аналоги: шарфы и пальто"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical scarves lined up on one side of a balance scale and a coat on the other side, the scale tipping slightly toward a coat.",
+  "alt": "Шарфы и пальто",
+  "stroka": 699
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-chocolates-giftset",
+  "ids": [
+   "PR-04 · аналоги: шоколадки и набор"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical chocolate bars lined up on one side of a balance scale and a gift box on the other side, the scale tipping slightly toward a gift box.",
+  "alt": "Шоколадки и подарочный набор",
+  "stroka": 700
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-tshirts-jeans",
+  "ids": [
+   "PR-04 · аналоги: футболки и джинсы"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical T-shirts lined up on one side of a balance scale and a pair of jeans on the other side, the scale tipping slightly toward a pair of jeans.",
+  "alt": "Футболки и джинсы",
+  "stroka": 701
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-postcards-boardgame",
+  "ids": [
+   "PR-04 · аналоги: открытки и игра"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical postcards (blank) lined up on one side of a balance scale and a board game box (no writing) on the other side, the scale tipping slightly toward a board game box (no writing).",
+  "alt": "Открытки и настольная игра",
+  "stroka": 702
+ },
+ {
+  "nomer": 10,
+  "key": "pr-04-pencils-case",
+  "ids": [
+   "PR-04 · аналоги: карандаши и пенал"
+  ],
+  "size": "1024x1024",
+  "scene": "Several identical colored pencils lined up on one side of a balance scale and a pencil case on the other side, the scale tipping slightly toward a pencil case.",
+  "alt": "Карандаши и пенал",
+  "stroka": 703
+ },
+ {
+  "nomer": 10,
+  "key": "pr-05-student-daughter",
+  "ids": [
+   "PR-05 · банк+ген; аналоги: муж, жена, дочь; жена зарабатывает больше; мама, папа, дочь"
+  ],
+  "size": "1024x1024",
+  "scene": "A family of three faceless glass figurines at a kitchen table: husband, wife and a student daughter with a textbook; three coin stacks of different heights in front of them.",
+  "alt": "Муж, жена, дочь-студентка",
+  "stroka": 704
+ },
+ {
+  "nomer": 10,
+  "key": "pr-05-student-son",
+  "ids": [
+   "PR-05 · аналоги: муж, жена, сын; муж, жена, сын-студент"
+  ],
+  "size": "1024x1024",
+  "scene": "A family of three faceless glass figurines at a kitchen table: husband, wife and a student son with a textbook; three coin stacks of different heights in front of them.",
+  "alt": "Муж, жена, сын-студент",
+  "stroka": 705
+ },
+ {
+  "nomer": 10,
+  "key": "pr-05-grandparent-pension",
+  "ids": [
+   "PR-05 · аналоги: папа, мама, бабушка; отец, мать, дедушка; муж, жена, бабушка; муж, жена, дедушка"
+  ],
+  "size": "1024x1024",
+  "scene": "A family of three faceless glass figurines at a kitchen table: father, mother and an elderly grandparent; three coin stacks of different heights in front of them.",
+  "alt": "Родители и бабушка/дедушка-пенсионер",
+  "stroka": 706
+ },
+ {
+  "nomer": 10,
+  "key": "pr-05-mother-son-daughter",
+  "ids": [
+   "PR-05 · аналоги: мама, сын, дочь"
+  ],
+  "size": "1024x1024",
+  "scene": "A family of three faceless glass figurines at a kitchen table: a mother, an adult son and a student daughter; three coin stacks of different heights in front of them.",
+  "alt": "Мама, сын и дочь",
+  "stroka": 707
+ },
+ {
+  "nomer": 10,
+  "key": "pr-06-fridge",
+  "ids": [
+   "PR-06 · банк+ген (form=holodilnik)"
+  ],
+  "size": "1024x1024",
+  "scene": "A refrigerator in a shop over successive years: the same item shown three times left to right with a blank price tag that shrinks each time.",
+  "alt": "Цена холодильника снижается ежегодно",
+  "stroka": 708
+ },
+ {
+  "nomer": 10,
+  "key": "pr-06-tv",
+  "ids": [
+   "PR-06 · аналоги: телевизор"
+  ],
+  "size": "1024x1024",
+  "scene": "A flat TV in a shop over successive years: the same item shown three times left to right with a blank price tag that shrinks each time.",
+  "alt": "Телевизор",
+  "stroka": 709
+ },
+ {
+  "nomer": 10,
+  "key": "pr-06-smartphone",
+  "ids": [
+   "PR-06 · аналоги: смартфон"
+  ],
+  "size": "1024x1024",
+  "scene": "A smartphone in a shop over successive years: the same item shown three times left to right with a blank price tag that shrinks each time.",
+  "alt": "Смартфон",
+  "stroka": 710
+ },
+ {
+  "nomer": 10,
+  "key": "pr-06-laptop",
+  "ids": [
+   "PR-06 · аналоги: ноутбук"
+  ],
+  "size": "1024x1024",
+  "scene": "A laptop in a shop over successive years: the same item shown three times left to right with a blank price tag that shrinks each time.",
+  "alt": "Ноутбук",
+  "stroka": 711
+ },
+ {
+  "nomer": 10,
+  "key": "pr-06-washing-machine",
+  "ids": [
+   "PR-06 · аналоги: стиральная машина"
+  ],
+  "size": "1024x1024",
+  "scene": "A washing machine in a shop over successive years: the same item shown three times left to right with a blank price tag that shrinks each time.",
+  "alt": "Стиральная машина",
+  "stroka": 712
+ },
+ {
+  "nomer": 10,
+  "key": "pr-06-bicycle",
+  "ids": [
+   "PR-06 · аналоги: велосипед"
+  ],
+  "size": "1024x1024",
+  "scene": "A bicycle in a shop over successive years: the same item shown three times left to right with a blank price tag that shrinks each time.",
+  "alt": "Велосипед",
+  "stroka": 713
+ },
+ {
+  "nomer": 10,
+  "key": "pr-06-bank-deposits",
+  "ids": [
+   "PR-06 · банк+ген (form=vklad); аналоги: вклады А. и Б.; вклады по 6000/8000/12 000/20 000"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine clients at a bank counter, each with a piggy bank; coin stacks beside each growing over a row of three years (calendar pages without numbers).",
+  "alt": "Два вклада, проценты раз в год",
+  "stroka": 714
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-car-faster",
+  "ids": [
+   "PR-07 · банк+ген"
+  ],
+  "size": "1024x1024",
+  "scene": "A car on an open highway; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Автомобиль увеличил скорость",
+  "stroka": 715
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-cyclist-faster",
+  "ids": [
+   "PR-07 · аналоги: велосипедист быстрее"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist on a road; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Велосипедист ускорился",
+  "stroka": 716
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-bus-rain",
+  "ids": [
+   "PR-07 · аналоги: автобус под дождём"
+  ],
+  "size": "1024x1024",
+  "scene": "A bus driving through rain; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Автобус в дождь",
+  "stroka": 717
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-truck-new-road",
+  "ids": [
+   "PR-07 · аналоги: грузовик"
+  ],
+  "size": "1024x1024",
+  "scene": "A truck on a freshly repaved road; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Грузовик после ремонта дороги",
+  "stroka": 718
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-car-traffic-jam",
+  "ids": [
+   "PR-07 · аналоги: автомобиль в пробке"
+  ],
+  "size": "1024x1024",
+  "scene": "A car stuck in a traffic jam; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Автомобиль в пробке",
+  "stroka": 719
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-fast-vs-suburban-train",
+  "ids": [
+   "PR-07 · аналоги: скорый и пригородный поезд"
+  ],
+  "size": "1024x1024",
+  "scene": "An express train and a suburban train on parallel tracks; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Скорый и пригородный поезд",
+  "stroka": 720
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-skier-uphill",
+  "ids": [
+   "PR-07 · аналоги: лыжник на подъёме"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine skier climbing a slope; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Лыжник на подъёме",
+  "stroka": 721
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-walker-to-bike",
+  "ids": [
+   "PR-07 · аналоги: пешеход и велосипед"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine walking, then the same figurine riding a bicycle; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Пешеход сел на велосипед",
+  "stroka": 722
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-ship-fog",
+  "ids": [
+   "PR-07 · аналоги: теплоход в тумане"
+  ],
+  "size": "1024x1024",
+  "scene": "A motor ship on a river in thick fog; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Теплоход в тумане",
+  "stroka": 723
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-bike-to-motorcycle",
+  "ids": [
+   "PR-07 · аналоги: мотоцикл"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine tourist switching from a bicycle to a motorcycle; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Турист пересел на мотоцикл",
+  "stroka": 724
+ },
+ {
+  "nomer": 10,
+  "key": "pr-07-flat-tire",
+  "ids": [
+   "PR-07 · аналоги: велосипед с проколом"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist walking beside a bicycle with a flat tire; two copies of the same road segment, the second showing the hero faster/slower with motion lines; an hourglass without marks.",
+  "alt": "Проколол шину, ведёт велосипед",
+  "stroka": 725
+ },
+ {
+  "nomer": 10,
+  "key": "sm-01-vessel",
+  "ids": [
+   "SM-01 · банк+ген; аналоги: раствор соли, кг; кислота, кг"
+  ],
+  "size": "1024x1024",
+  "scene": "A glass vessel with a tinted solution; a jug of clear water being poured in; the liquid visibly paler where the water mixes.",
+  "alt": "Сосуд с раствором + вода",
+  "stroka": 731
  },
  {
   "nomer": 10,
   "key": "sm-01-brine",
   "ids": [
-   "SM-01 аналоги: рассол в бочке; засолка огурцов"
+   "SM-01 · аналоги: рассол в бочке; засолка огурцов"
   ],
   "size": "1024x1024",
   "scene": "a realistic small wooden barrel filled with pale blue glassy brine and several realistic green cucumbers; a blue glass jug above it pours a stream of clear water into the barrel; the liquid is visibly paler where the water mixes in.",
-  "alt": "Бочка с рассолом и огурцами, в неё доливают воду из кувшина"
+  "alt": "Бочка с рассолом и огурцами, в неё доливают воду из кувшина",
+  "stroka": 732
+ },
+ {
+  "nomer": 10,
+  "key": "sm-01-sugar-syrup",
+  "ids": [
+   "SM-01 · аналоги: сироп; кондитерская фабрика"
+  ],
+  "size": "1024x1024",
+  "scene": "A large pot of golden sugar syrup; a jug of clear water being poured in; the liquid visibly paler where the water mixes.",
+  "alt": "Сахарный сироп (в т.ч. фабрика)",
+  "stroka": 733
+ },
+ {
+  "nomer": 10,
+  "key": "sm-01-alcohol-canister",
+  "ids": [
+   "SM-01 · аналоги: раствор спирта"
+  ],
+  "size": "1024x1024",
+  "scene": "A plastic canister of clear solution; a jug of clear water being poured in; the liquid visibly paler where the water mixes.",
+  "alt": "Раствор спирта в канистре",
+  "stroka": 734
+ },
+ {
+  "nomer": 10,
+  "key": "sm-01-lab-acid",
+  "ids": [
+   "SM-01 · аналоги: кислота в лаборатории"
+  ],
+  "size": "1024x1024",
+  "scene": "A lab beaker of acid solution with a faceless glass figurine lab assistant in goggles; a jug of clear water being poured in; the liquid visibly paler where the water mixes.",
+  "alt": "Кислота в лаборатории",
+  "stroka": 735
+ },
+ {
+  "nomer": 10,
+  "key": "sm-01-compote",
+  "ids": [
+   "SM-01 · аналоги: компот"
+  ],
+  "size": "1024x1024",
+  "scene": "A large pot of fruit compote; a jug of clear water being poured in; the liquid visibly paler where the water mixes.",
+  "alt": "Компот в котле",
+  "stroka": 736
+ },
+ {
+  "nomer": 10,
+  "key": "sm-01-pharmacy-glycerin",
+  "ids": [
+   "SM-01 · аналоги: глицерин в аптеке"
+  ],
+  "size": "1024x1024",
+  "scene": "A pharmacy counter with a bottle of glycerin and a faceless glass figurine pharmacist; a jug of clear water being poured in; the liquid visibly paler where the water mixes.",
+  "alt": "Глицерин в аптеке",
+  "stroka": 737
+ },
+ {
+  "nomer": 10,
+  "key": "sm-02-equal-solutions",
+  "ids": [
+   "SM-02 · банк+ген; аналоги: соль; спирт; солевые растворы; спирт 60 и 40"
+  ],
+  "size": "1024x1024",
+  "scene": "Two identical beakers: two equal amounts of liquids of different tint poured together into one container.",
+  "alt": "Смешали равные количества растворов",
+  "stroka": 738
+ },
+ {
+  "nomer": 10,
+  "key": "sm-02-cook-syrup",
+  "ids": [
+   "SM-02 · аналоги: сироп"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cook with two identical jugs of syrup: two equal amounts of liquids of different tint poured together into one container.",
+  "alt": "Повар смешивает сиропы",
+  "stroka": 739
+ },
+ {
+  "nomer": 10,
+  "key": "sm-02-lab-acid",
+  "ids": [
+   "SM-02 · аналоги: лаборант; колба"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine lab assistant with two identical flasks: two equal amounts of liquids of different tint poured together into one container.",
+  "alt": "Лаборант, колба",
+  "stroka": 740
+ },
+ {
+  "nomer": 10,
+  "key": "sm-02-aquarium",
+  "ids": [
+   "SM-02 · аналоги: аквариум"
+  ],
+  "size": "1024x1024",
+  "scene": "Two identical buckets of salt water beside a marine aquarium with fish: two equal amounts of liquids of different tint poured together into one container.",
+  "alt": "Морская вода для аквариума",
+  "stroka": 741
+ },
+ {
+  "nomer": 10,
+  "key": "sm-02-jam",
+  "ids": [
+   "SM-02 · аналоги: варенье"
+  ],
+  "size": "1024x1024",
+  "scene": "Two identical jars of jam: two equal amounts of liquids of different tint poured together into one container.",
+  "alt": "Варенье разной сладости",
+  "stroka": 742
+ },
+ {
+  "nomer": 10,
+  "key": "sm-02-juice-mors",
+  "ids": [
+   "SM-02 · аналоги: сок и морс"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine mother with a jug of juice and an identical jug of berry drink: two equal amounts of liquids of different tint poured together into one container.",
+  "alt": "Сок и морс",
+  "stroka": 743
+ },
+ {
+  "nomer": 10,
+  "key": "sm-03-juices",
+  "ids": [
+   "SM-03 · банк+ген; аналоги: соки"
+  ],
+  "size": "1024x1024",
+  "scene": "Two jugs of different juices (apple and tomato colors); liquid from both poured into one large jug; the first container visibly smaller or larger than the second as the volumes vary.",
+  "alt": "Соки с разным содержанием сахара",
+  "stroka": 744
+ },
+ {
+  "nomer": 10,
+  "key": "sm-03-milk",
+  "ids": [
+   "SM-03 · аналоги: молоко; молоко разной жирности"
+  ],
+  "size": "1024x1024",
+  "scene": "Two bottles of milk, one creamier; liquid from both poured into one large jug; the first container visibly smaller or larger than the second as the volumes vary.",
+  "alt": "Молоко разной жирности",
+  "stroka": 745
+ },
+ {
+  "nomer": 10,
+  "key": "sm-03-syrups",
+  "ids": [
+   "SM-03 · аналоги: сиропы; вишнёвый и малиновый сироп"
+  ],
+  "size": "1024x1024",
+  "scene": "Two bottles of red syrups; liquid from both poured into one large jug; the first container visibly smaller or larger than the second as the volumes vary.",
+  "alt": "Сиропы (вишнёвый и малиновый)",
+  "stroka": 746
+ },
+ {
+  "nomer": 10,
+  "key": "sm-03-brine",
+  "ids": [
+   "SM-03 · аналоги: рассол"
+  ],
+  "size": "1024x1024",
+  "scene": "Two jars of brine with dill; liquid from both poured into one large jug; the first container visibly smaller or larger than the second as the volumes vary.",
+  "alt": "Рассол",
+  "stroka": 747
+ },
+ {
+  "nomer": 10,
+  "key": "sm-03-berry-drinks",
+  "ids": [
+   "SM-03 · аналоги: морс и компот; морсы"
+  ],
+  "size": "1024x1024",
+  "scene": "Two jugs of berry drinks (cranberry and lingonberry colors); liquid from both poured into one large jug; the first container visibly smaller or larger than the second as the volumes vary.",
+  "alt": "Морс и компот / морсы",
+  "stroka": 748
+ },
+ {
+  "nomer": 10,
+  "key": "sm-03-lab-acid",
+  "ids": [
+   "SM-03 · аналоги: кислота"
+  ],
+  "size": "1024x1024",
+  "scene": "Two lab bottles of acid solution; liquid from both poured into one large jug; the first container visibly smaller or larger than the second as the volumes vary.",
+  "alt": "Растворы кислоты",
+  "stroka": 749
+ },
+ {
+  "nomer": 10,
+  "key": "sm-03-vinegar",
+  "ids": [
+   "SM-03 · аналоги: уксус"
+  ],
+  "size": "1024x1024",
+  "scene": "Two bottles of vinegar, clear and amber; liquid from both poured into one large jug; the first container visibly smaller or larger than the second as the volumes vary.",
+  "alt": "Столовый и яблочный уксус",
+  "stroka": 750
+ },
+ {
+  "nomer": 10,
+  "key": "sm-04-two-alloys-ingots",
+  "ids": [
+   "SM-04 · банк+ген (медь/серебро); аналоги: олово; медь; серебро; никель; цинк — металл = имя"
+  ],
+  "size": "1024x1024",
+  "scene": "A foundry: two metal ingots of different size and slightly different shade being poured into one crucible; a third, larger ingot cooling in a mould.",
+  "alt": "Два сплава, масса второго больше на …, найти массу третьего",
+  "stroka": 751
+ },
+ {
+  "nomer": 10,
+  "key": "sm-05-two-alloys-melt",
+  "ids": [
+   "SM-05 · банк+ген (никель); аналоги: цинк; медь; серебро; олово — металл = имя"
+  ],
+  "size": "1024x1024",
+  "scene": "A furnace with one crucible of molten metal receiving metal from two ladles; a finished large ingot on a scale with a blank dial.",
+  "alt": "Два сплава дали третий заданной массы, найти разность масс",
+  "stroka": 752
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-grapes-raisins",
+  "ids": [
+   "SM-06 · банк+ген (form=izyum); аналоги: изюм"
+  ],
+  "size": "1024x1024",
+  "scene": "A large basket of fresh grapes on the left; a small heap of raisins on the right; an arrow of warm air or sun between them.",
+  "alt": "Виноград → изюм",
+  "stroka": 753
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-apricots",
+  "ids": [
+   "SM-06 · аналоги: курага"
+  ],
+  "size": "1024x1024",
+  "scene": "A large basket of fresh apricots on the left; a small heap of dried apricots on the right; an arrow of warm air or sun between them.",
+  "alt": "Абрикосы → курага",
+  "stroka": 754
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-plums-prunes",
+  "ids": [
+   "SM-06 · аналоги: чернослив"
+  ],
+  "size": "1024x1024",
+  "scene": "A large basket of plums on the left; a small heap of prunes on the right; an arrow of warm air or sun between them.",
+  "alt": "Сливы → чернослив",
+  "stroka": 755
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-mushrooms",
+  "ids": [
+   "SM-06 · аналоги: сушёные грибы"
+  ],
+  "size": "1024x1024",
+  "scene": "A large basket of fresh mushrooms on the left; a small heap of dried mushrooms on a string on the right; an arrow of warm air or sun between them.",
+  "alt": "Свежие → сушёные грибы",
+  "stroka": 756
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-dried-apples",
+  "ids": [
+   "SM-06 · аналоги: сушёные яблоки"
+  ],
+  "size": "1024x1024",
+  "scene": "A large basket of apples on the left; a small heap of dried apple rings on the right; an arrow of warm air or sun between them.",
+  "alt": "Свежие → сушёные яблоки",
+  "stroka": 757
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-potato-flakes",
+  "ids": [
+   "SM-06 · банк+ген (form=pyure); аналоги: картофельное пюре"
+  ],
+  "size": "1024x1024",
+  "scene": "A bowl of dry potato flakes; a kettle pouring water into it; next to it a bowl of the ready mashed potato.",
+  "alt": "Сухое картофельное пюре + вода",
+  "stroka": 758
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-milk-powder",
+  "ids": [
+   "SM-06 · аналоги: сухое молоко"
+  ],
+  "size": "1024x1024",
+  "scene": "A bowl of milk powder; a kettle pouring water into it; next to it a bowl of the ready glass of milk.",
+  "alt": "Сухое молоко",
+  "stroka": 759
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-porridge-mix",
+  "ids": [
+   "SM-06 · аналоги: смесь для каши"
+  ],
+  "size": "1024x1024",
+  "scene": "A bowl of dry porridge mix; a kettle pouring water into it; next to it a bowl of the ready porridge.",
+  "alt": "Смесь для каши",
+  "stroka": 760
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-baby-formula",
+  "ids": [
+   "SM-06 · аналоги: детская смесь"
+  ],
+  "size": "1024x1024",
+  "scene": "A bowl of infant formula powder; a kettle pouring water into it; next to it a bowl of the ready baby bottle of formula.",
+  "alt": "Детская смесь",
+  "stroka": 761
+ },
+ {
+  "nomer": 10,
+  "key": "sm-06-soup-concentrate",
+  "ids": [
+   "SM-06 · аналоги: суп из концентрата"
+  ],
+  "size": "1024x1024",
+  "scene": "A bowl of dry soup concentrate; a kettle pouring water into it; next to it a bowl of the ready soup.",
+  "alt": "Суп из концентрата",
+  "stroka": 762
+ },
+ {
+  "nomer": 10,
+  "key": "sm-07-acid-vessels",
+  "ids": [
+   "SM-07 · банк+ген; аналоги: глицерин"
+  ],
+  "size": "1024x1024",
+  "scene": "Two glass vessels: two containers of clearly different size holding the same kind of substance in different concentration (different tint), plus a smaller cup scooped equally from each.",
+  "alt": "Два сосуда с раствором кислоты/глицерина",
+  "stroka": 763
+ },
+ {
+  "nomer": 10,
+  "key": "sm-07-brine-barrels",
+  "ids": [
+   "SM-07 · аналоги: соль, бочки"
+  ],
+  "size": "1024x1024",
+  "scene": "Two wooden barrels of brine: two containers of clearly different size holding the same kind of substance in different concentration (different tint), plus a smaller cup scooped equally from each.",
+  "alt": "Рассол в двух бочках",
+  "stroka": 764
+ },
+ {
+  "nomer": 10,
+  "key": "sm-07-syrup-vats",
+  "ids": [
+   "SM-07 · аналоги: сахарный сироп"
+  ],
+  "size": "1024x1024",
+  "scene": "Two steel vats of syrup at a confectionery: two containers of clearly different size holding the same kind of substance in different concentration (different tint), plus a smaller cup scooped equally from each.",
+  "alt": "Сахарный сироп в двух чанах",
+  "stroka": 765
+ },
+ {
+  "nomer": 10,
+  "key": "sm-07-alcohol-canisters",
+  "ids": [
+   "SM-07 · аналоги: спирт, канистры"
+  ],
+  "size": "1024x1024",
+  "scene": "Two plastic canisters in a lab: two containers of clearly different size holding the same kind of substance in different concentration (different tint), plus a smaller cup scooped equally from each.",
+  "alt": "Спирт в двух канистрах",
+  "stroka": 766
+ },
+ {
+  "nomer": 10,
+  "key": "sm-07-dye-tanks",
+  "ids": [
+   "SM-07 · аналоги: краситель"
+  ],
+  "size": "1024x1024",
+  "scene": "Two tanks of dye at a dye works: two containers of clearly different size holding the same kind of substance in different concentration (different tint), plus a smaller cup scooped equally from each.",
+  "alt": "Краситель в двух баках",
+  "stroka": 767
+ },
+ {
+  "nomer": 10,
+  "key": "sm-07-alloy-ingots",
+  "ids": [
+   "SM-07 · аналоги: серебро, слитки; олово; цинк, слитки; никель, слитки; медь"
+  ],
+  "size": "1024x1024",
+  "scene": "Two metal ingots of different size on a faceless glass figurine jeweller's bench: two containers of clearly different size holding the same kind of substance in different concentration (different tint), plus a smaller cup scooped equally from each.",
+  "alt": "Два слитка сплава (серебро, олово, цинк, никель, медь)",
+  "stroka": 768
+ },
+ {
+  "nomer": 10,
+  "key": "sm-08-lab-two-solutions-water",
+  "ids": [
+   "SM-08 · банк+ген; аналоги: кислота; спирт; сахар; глицерин — вещество = имя"
+  ],
+  "size": "1024x1024",
+  "scene": "A lab bench: two flasks of solution of different tint being poured into one beaker; beside it a large bottle of clear water and an alternative bottle of a mid-tint solution; a faceless glass figurine lab assistant.",
+  "alt": "Два раствора + 10 кг воды или 50%-го раствора (система)",
+  "stroka": 769
+ },
+ {
+  "nomer": 10,
+  "key": "sm-09-lab-water-or-solution",
+  "ids": [
+   "SM-09 · ген (свой подтип); аналоги: кислота, лаборатория; спирт, лаборант"
+  ],
+  "size": "1024x1024",
+  "scene": "A lab bench with two flasks being mixed, a bottle of clear water and a different-size bottle of tinted solution as alternatives; a faceless glass figurine lab assistant.",
+  "alt": "Два раствора + вода / вместо воды раствор (разные массы)",
+  "stroka": 770
+ },
+ {
+  "nomer": 10,
+  "key": "sm-09-bubble-tea",
+  "ids": [
+   "SM-09 · аналоги: сироп для бабл-ти"
+  ],
+  "size": "1024x1024",
+  "scene": "A café counter with two jugs of sugar syrup and cups of bubble tea",
+  "alt": "Сироп для бабл-ти",
+  "stroka": 771
+ },
+ {
+  "nomer": 10,
+  "key": "sm-09-pharmacy-glycerin",
+  "ids": [
+   "SM-09 · аналоги: глицерин, аптека"
+  ],
+  "size": "1024x1024",
+  "scene": "A pharmacy back room with two bottles of glycerin and a faceless glass figurine pharmacist",
+  "alt": "Глицерин, аптека",
+  "stroka": 772
+ },
+ {
+  "nomer": 10,
+  "key": "sm-09-pickling-brine",
+  "ids": [
+   "SM-09 · аналоги: рассол для засолки"
+  ],
+  "size": "1024x1024",
+  "scene": "Two pots of brine and jars of cucumbers",
+  "alt": "Рассол для засолки",
+  "stroka": 773
+ },
+ {
+  "nomer": 10,
+  "key": "sm-09-antiseptic",
+  "ids": [
+   "SM-09 · аналоги: антисептик"
+  ],
+  "size": "1024x1024",
+  "scene": "Two bottles of alcohol solution and small spray bottles",
+  "alt": "Антисептик",
+  "stroka": 774
+ },
+ {
+  "nomer": 10,
+  "key": "sm-09-soap-bubbles",
+  "ids": [
+   "SM-09 · аналоги: раствор для гигантских пузырей"
+  ],
+  "size": "1024x1024",
+  "scene": "A school fair: a tub of soap solution and faceless glass figurine children making giant bubbles",
+  "alt": "Раствор для гигантских пузырей",
+  "stroka": 775
+ },
+ {
+  "nomer": 10,
+  "key": "sm-09-descaling",
+  "ids": [
+   "SM-09 · аналоги: лимонная кислота от накипи"
+  ],
+  "size": "1024x1024",
+  "scene": "Two jugs of citric acid solution beside a kettle with limescale",
+  "alt": "Лимонная кислота от накипи",
+  "stroka": 776
+ },
+ {
+  "nomer": 10,
+  "key": "sm-09-jam",
+  "ids": [
+   "SM-09 · аналоги: сахарный раствор для варенья"
+  ],
+  "size": "1024x1024",
+  "scene": "Two pots of sugar syrup and a basin of berries",
+  "alt": "Сахарный раствор для варенья",
+  "stroka": 777
+ },
+ {
+  "nomer": 10,
+  "key": "sm-09-floating-pool",
+  "ids": [
+   "SM-09 · аналоги: флоатинг-бассейн"
+  ],
+  "size": "1024x1024",
+  "scene": "A small floating pool with salt water and sacks of salt",
+  "alt": "Флоатинг-бассейн",
+  "stroka": 778
+ },
+ {
+  "nomer": 10,
+  "key": "dp-01-runner",
+  "ids": [
+   "DP-01 · банк+ген; аналоги: бегун"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine runner on a stadium track covering a short marked stretch (start and finish posts), motion lines; a stopwatch with blank face.",
+  "alt": "Бегун на дистанции",
+  "stroka": 784
+ },
+ {
+  "nomer": 10,
+  "key": "dp-01-swimmer",
+  "ids": [
+   "DP-01 · аналоги: пловец"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine swimmer in a pool lane covering a short marked stretch (start and finish posts), motion lines; a stopwatch with blank face.",
+  "alt": "Пловец",
+  "stroka": 785
+ },
+ {
+  "nomer": 10,
+  "key": "dp-01-skier",
+  "ids": [
+   "DP-01 · аналоги: лыжник на спуске; лыжница"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine skier on a ski slope covering a short marked stretch (start and finish posts), motion lines; a stopwatch with blank face.",
+  "alt": "Лыжник/лыжница",
+  "stroka": 786
  },
  {
   "nomer": 10,
   "key": "dp-01-cyclist",
   "ids": [
-   "DP-01 аналоги: велосипедист; велосипедистка"
+   "DP-01 · аналоги: велосипедист; велосипедистка"
   ],
-  "size": "1536x1024",
+  "size": "1024x1024",
   "scene": "a faceless smooth blue glass figurine riding a glass road bicycle along a short straight glass road segment between two slim glowing posts (start and finish); faint motion streaks behind the bicycle; a glass stopwatch with a blank dial floats beside the road.",
-  "alt": "Велосипедист едет по дороге от старта к финишу, рядом секундомер"
+  "alt": "Велосипедист едет по дороге от старта к финишу, рядом секундомер",
+  "stroka": 787
+ },
+ {
+  "nomer": 10,
+  "key": "dp-01-race-car",
+  "ids": [
+   "DP-01 · аналоги: гоночный автомобиль"
+  ],
+  "size": "1024x1024",
+  "scene": "A race car on a track covering a short marked stretch (start and finish posts), motion lines; a stopwatch with blank face.",
+  "alt": "Гоночный автомобиль",
+  "stroka": 788
+ },
+ {
+  "nomer": 10,
+  "key": "dp-01-train",
+  "ids": [
+   "DP-01 · аналоги: скорый поезд"
+  ],
+  "size": "1024x1024",
+  "scene": "An express train covering a short marked stretch (start and finish posts), motion lines; a stopwatch with blank face.",
+  "alt": "Скорый поезд",
+  "stroka": 789
+ },
+ {
+  "nomer": 10,
+  "key": "dp-01-motorcyclist",
+  "ids": [
+   "DP-01 · аналоги: мотоциклист"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine motorcyclist covering a short marked stretch (start and finish posts), motion lines; a stopwatch with blank face.",
+  "alt": "Мотоциклист",
+  "stroka": 790
+ },
+ {
+  "nomer": 10,
+  "key": "dp-01-pedestrian",
+  "ids": [
+   "DP-01 · аналоги: пешеход"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine pedestrian on a pavement covering a short marked stretch (start and finish posts), motion lines; a stopwatch with blank face.",
+  "alt": "Пешеход",
+  "stroka": 791
+ },
+ {
+  "nomer": 10,
+  "key": "dp-02-car",
+  "ids": [
+   "DP-02 · банк+ген; аналоги: автомобиль; автомобиль, город и трасса"
+  ],
+  "size": "1024x1024",
+  "scene": "A car on a long route divided into three visibly different stretches (e.g. town, highway, country), each stretch tinted differently.",
+  "alt": "Автомобиль: 3 участка по времени",
+  "stroka": 792
+ },
+ {
+  "nomer": 10,
+  "key": "dp-02-bus",
+  "ids": [
+   "DP-02 · аналоги: автобус"
+  ],
+  "size": "1024x1024",
+  "scene": "A bus on a long route divided into three visibly different stretches (e.g. town, highway, country), each stretch tinted differently.",
+  "alt": "Автобус",
+  "stroka": 793
+ },
+ {
+  "nomer": 10,
+  "key": "dp-02-cyclist",
+  "ids": [
+   "DP-02 · аналоги: велосипедист; велосипедистка"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist on a long route divided into three visibly different stretches (e.g. town, highway, country), each stretch tinted differently.",
+  "alt": "Велосипедист(ка), в конце с горы",
+  "stroka": 794
+ },
+ {
+  "nomer": 10,
+  "key": "dp-02-train",
+  "ids": [
+   "DP-02 · аналоги: поезд"
+  ],
+  "size": "1024x1024",
+  "scene": "A passenger train on rails on a long route divided into three visibly different stretches (e.g. town, highway, country), each stretch tinted differently.",
+  "alt": "Поезд",
+  "stroka": 795
+ },
+ {
+  "nomer": 10,
+  "key": "dp-02-motor-ship-lake",
+  "ids": [
+   "DP-02 · аналоги: теплоход"
+  ],
+  "size": "1024x1024",
+  "scene": "A motor ship crossing a lake on a long route divided into three visibly different stretches (e.g. town, highway, country), each stretch tinted differently.",
+  "alt": "Теплоход по озеру",
+  "stroka": 796
+ },
+ {
+  "nomer": 10,
+  "key": "dp-02-motorcyclist",
+  "ids": [
+   "DP-02 · аналоги: мотоциклист"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine motorcyclist on a long route divided into three visibly different stretches (e.g. town, highway, country), each stretch tinted differently.",
+  "alt": "Мотоциклист",
+  "stroka": 797
+ },
+ {
+  "nomer": 10,
+  "key": "dp-02-truck",
+  "ids": [
+   "DP-02 · аналоги: грузовик"
+  ],
+  "size": "1024x1024",
+  "scene": "A truck on a long route divided into three visibly different stretches (e.g. town, highway, country), each stretch tinted differently.",
+  "alt": "Грузовик: трасса и просёлок",
+  "stroka": 798
+ },
+ {
+  "nomer": 10,
+  "key": "dp-02-motorboat-lake",
+  "ids": [
+   "DP-02 · аналоги: моторная лодка"
+  ],
+  "size": "1024x1024",
+  "scene": "A motorboat on a lake on a long route divided into three visibly different stretches (e.g. town, highway, country), each stretch tinted differently.",
+  "alt": "Моторная лодка по озеру",
+  "stroka": 799
+ },
+ {
+  "nomer": 10,
+  "key": "dp-03-car",
+  "ids": [
+   "DP-03 · банк+ген; аналоги: автомобиль; треть трассы; 600 км"
+  ],
+  "size": "1024x1024",
+  "scene": "A car on a highway on a route split into three segments of different length/terrain marked by roadside posts.",
+  "alt": "Автомобиль: участки в км / трети трассы",
+  "stroka": 800
+ },
+ {
+  "nomer": 10,
+  "key": "dp-03-cyclist",
+  "ids": [
+   "DP-03 · аналоги: треть маршрута; велосипедист; песок и асфальт"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist on a route going uphill, flat, then over sand and asphalt on a route split into three segments of different length/terrain marked by roadside posts.",
+  "alt": "Велосипедист: в гору, по ровной, песок–асфальт",
+  "stroka": 801
+ },
+ {
+  "nomer": 10,
+  "key": "dp-03-motorcyclist",
+  "ids": [
+   "DP-03 · аналоги: мотоциклист; 340 км"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine motorcyclist on a highway on a route split into three segments of different length/terrain marked by roadside posts.",
+  "alt": "Мотоциклист",
+  "stroka": 802
+ },
+ {
+  "nomer": 10,
+  "key": "dp-03-bus",
+  "ids": [
+   "DP-03 · аналоги: треть маршрута, автобус"
+  ],
+  "size": "1024x1024",
+  "scene": "A bus on an intercity road on a route split into three segments of different length/terrain marked by roadside posts.",
+  "alt": "Автобус по трети маршрута",
+  "stroka": 803
+ },
+ {
+  "nomer": 10,
+  "key": "dp-03-skier",
+  "ids": [
+   "DP-03 · аналоги: треть дистанции, лыжник"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine skier on a ski trail on a route split into three segments of different length/terrain marked by roadside posts.",
+  "alt": "Лыжник по трети дистанции",
+  "stroka": 804
+ },
+ {
+  "nomer": 10,
+  "key": "dp-04-car",
+  "ids": [
+   "DP-04 · банк+ген; аналоги: автомобиль, половина времени; автомобиль, половина пути"
+  ],
+  "size": "1024x1024",
+  "scene": "A car on a route visibly divided into two halves (two tints), e.g. town then highway.",
+  "alt": "Автомобиль: половина времени / пути",
+  "stroka": 805
+ },
+ {
+  "nomer": 10,
+  "key": "dp-04-cyclist",
+  "ids": [
+   "DP-04 · аналоги: велосипедист, половина времени; велосипедист, в гору и с горы"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist on a road over a hill on a route visibly divided into two halves (two tints), e.g. town then highway.",
+  "alt": "Велосипедист, в т.ч. в гору и с горы",
+  "stroka": 806
+ },
+ {
+  "nomer": 10,
+  "key": "dp-04-train",
+  "ids": [
+   "DP-04 · аналоги: поезд, половина времени; поезд, половина пути"
+  ],
+  "size": "1024x1024",
+  "scene": "A passenger train on a route visibly divided into two halves (two tints), e.g. town then highway.",
+  "alt": "Поезд",
+  "stroka": 807
+ },
+ {
+  "nomer": 10,
+  "key": "dp-04-bus",
+  "ids": [
+   "DP-04 · аналоги: автобус, половина пути"
+  ],
+  "size": "1024x1024",
+  "scene": "A bus leaving town onto a highway on a route visibly divided into two halves (two tints), e.g. town then highway.",
+  "alt": "Автобус: город и трасса",
+  "stroka": 808
+ },
+ {
+  "nomer": 10,
+  "key": "dp-04-motor-ship",
+  "ids": [
+   "DP-04 · аналоги: теплоход, половина времени"
+  ],
+  "size": "1024x1024",
+  "scene": "A motor ship on a lake on a route visibly divided into two halves (two tints), e.g. town then highway.",
+  "alt": "Теплоход по озеру",
+  "stroka": 809
+ },
+ {
+  "nomer": 10,
+  "key": "dp-04-skier",
+  "ids": [
+   "DP-04 · аналоги: лыжник, половина дистанции"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine skier on a route visibly divided into two halves (two tints), e.g. town then highway.",
+  "alt": "Лыжник",
+  "stroka": 810
+ },
+ {
+  "nomer": 10,
+  "key": "dp-04-motorcyclist",
+  "ids": [
+   "DP-04 · аналоги: мотоциклист, половина времени"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine motorcyclist on a route visibly divided into two halves (two tints), e.g. town then highway.",
+  "alt": "Мотоциклист",
+  "stroka": 811
+ },
+ {
+  "nomer": 10,
+  "key": "dp-05-hiker",
+  "ids": [
+   "DP-05 · банк+ген; аналоги: турист; турист в горах; турист, 22 км"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine hiker with a backpack on a mountain trail on a route from point A over a single hill to point B: an uphill part then a downhill part, small markers at both ends.",
+  "alt": "Турист: подъём и спуск",
+  "stroka": 812
+ },
+ {
+  "nomer": 10,
+  "key": "dp-05-skier",
+  "ids": [
+   "DP-05 · аналоги: лыжник; лыжня"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine skier on a ski track on a route from point A over a single hill to point B: an uphill part then a downhill part, small markers at both ends.",
+  "alt": "Лыжник / лыжня",
+  "stroka": 813
+ },
+ {
+  "nomer": 10,
+  "key": "dp-05-cyclist",
+  "ids": [
+   "DP-05 · аналоги: велосипедист; велосипедист, 34 км; велосипедный маршрут"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist on a country road on a route from point A over a single hill to point B: an uphill part then a downhill part, small markers at both ends.",
+  "alt": "Велосипедист",
+  "stroka": 814
+ },
+ {
+  "nomer": 10,
+  "key": "dp-05-motorcyclist",
+  "ids": [
+   "DP-05 · аналоги: мотоциклист в горах"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine motorcyclist on a mountain road on a route from point A over a single hill to point B: an uphill part then a downhill part, small markers at both ends.",
+  "alt": "Мотоциклист в горах",
+  "stroka": 815
+ },
+ {
+  "nomer": 10,
+  "key": "dp-05-car",
+  "ids": [
+   "DP-05 · аналоги: автомобиль в горах"
+  ],
+  "size": "1024x1024",
+  "scene": "A car on a winding mountain road on a route from point A over a single hill to point B: an uphill part then a downhill part, small markers at both ends.",
+  "alt": "Автомобиль в горах",
+  "stroka": 816
+ },
+ {
+  "nomer": 10,
+  "key": "dp-06-cars",
+  "ids": [
+   "DP-06 · банк+ген; аналоги: автомобили"
+  ],
+  "size": "1024x1024",
+  "scene": "A straight road between two towns at the left and right edges; two cars — one already partway along the road from the left town, the second just leaving the right town toward it.",
+  "alt": "Два автомобиля навстречу, второй позже",
+  "stroka": 817
+ },
+ {
+  "nomer": 10,
+  "key": "dp-06-motorcyclists",
+  "ids": [
+   "DP-06 · аналоги: мотоциклисты"
+  ],
+  "size": "1024x1024",
+  "scene": "A straight road between two towns at the left and right edges; two faceless glass figurine motorcyclists — one already partway along the road from the left town, the second just leaving the right town toward it.",
+  "alt": "Мотоциклисты",
+  "stroka": 818
+ },
+ {
+  "nomer": 10,
+  "key": "dp-06-cyclists",
+  "ids": [
+   "DP-06 · аналоги: велосипедисты"
+  ],
+  "size": "1024x1024",
+  "scene": "A straight road between two towns at the left and right edges; two faceless glass figurine cyclists — one already partway along the road from the left town, the second just leaving the right town toward it.",
+  "alt": "Велосипедисты",
+  "stroka": 819
+ },
+ {
+  "nomer": 10,
+  "key": "dp-06-buses",
+  "ids": [
+   "DP-06 · аналоги: автобусы"
+  ],
+  "size": "1024x1024",
+  "scene": "A straight road between two towns at the left and right edges; two buses — one already partway along the road from the left town, the second just leaving the right town toward it.",
+  "alt": "Автобусы",
+  "stroka": 820
+ },
+ {
+  "nomer": 10,
+  "key": "dp-06-trucks",
+  "ids": [
+   "DP-06 · аналоги: грузовики"
+  ],
+  "size": "1024x1024",
+  "scene": "A straight road between two towns at the left and right edges; two trucks, warehouses at the ends — one already partway along the road from the left town, the second just leaving the right town toward it.",
+  "alt": "Грузовики (в т.ч. между складами)",
+  "stroka": 821
+ },
+ {
+  "nomer": 10,
+  "key": "dp-06-trains",
+  "ids": [
+   "DP-06 · аналоги: поезда"
+  ],
+  "size": "1024x1024",
+  "scene": "A straight road between two towns at the left and right edges; two trains on a single line between stations — one already partway along the road from the left town, the second just leaving the right town toward it.",
+  "alt": "Поезда между станциями",
+  "stroka": 822
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-cyclist",
+  "ids": [
+   "DP-07 · банк+ген (form=velo); аналоги: велосипедистка"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist on a road between two towns — the outbound trip shown along the top, the return trip along the bottom with a stop marked by the bicycle leaning on a bench.",
+  "alt": "Велосипедист: обратно быстрее, но с остановкой",
+  "stroka": 823
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-barge-lake",
+  "ids": [
+   "DP-07 · банк+ген (form=barzha)"
+  ],
+  "size": "1024x1024",
+  "scene": "A barge crossing a lake between two piers — the outbound trip shown along the top, the return trip along the bottom with a stop marked by the barge moored at a small island.",
+  "alt": "Баржа по озеру между пристанями",
+  "stroka": 824
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-skier",
+  "ids": [
+   "DP-07 · аналоги: лыжник; лыжница"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine skier on a ski trail between two villages — the outbound trip shown along the top, the return trip along the bottom with a stop marked by skis stuck in the snow by a campfire.",
+  "alt": "Лыжник(ца) между посёлками/базами",
+  "stroka": 825
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-motorcyclist",
+  "ids": [
+   "DP-07 · аналоги: мотоциклист"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine motorcyclist on a road between two towns — the outbound trip shown along the top, the return trip along the bottom with a stop marked by the motorcycle parked at a roadside café.",
+  "alt": "Мотоциклист",
+  "stroka": 826
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-truck",
+  "ids": [
+   "DP-07 · аналоги: грузовик"
+  ],
+  "size": "1024x1024",
+  "scene": "A truck on a road from a warehouse to a village — the outbound trip shown along the top, the return trip along the bottom with a stop marked by the truck parked at a roadside stop.",
+  "alt": "Грузовик склад–посёлок",
+  "stroka": 827
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-bus",
+  "ids": [
+   "DP-07 · аналоги: автобус"
+  ],
+  "size": "1024x1024",
+  "scene": "A tour bus on a road between two cities — the outbound trip shown along the top, the return trip along the bottom with a stop marked by the bus parked at a rest area.",
+  "alt": "Туристический автобус",
+  "stroka": 828
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-cutter-lake",
+  "ids": [
+   "DP-07 · аналоги: катер"
+  ],
+  "size": "1024x1024",
+  "scene": "A motor cutter on a lake between two piers — the outbound trip shown along the top, the return trip along the bottom with a stop marked by the cutter moored at a small pier.",
+  "alt": "Катер по озеру",
+  "stroka": 829
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-yacht-lake",
+  "ids": [
+   "DP-07 · аналоги: яхта"
+  ],
+  "size": "1024x1024",
+  "scene": "A sailing yacht on a lake between two jetties — the outbound trip shown along the top, the return trip along the bottom with a stop marked by the yacht anchored by an island.",
+  "alt": "Яхта по озеру",
+  "stroka": 830
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-motorboat-lake",
+  "ids": [
+   "DP-07 · аналоги: моторная лодка"
+  ],
+  "size": "1024x1024",
+  "scene": "A motorboat on a lake between two boat stations — the outbound trip shown along the top, the return trip along the bottom with a stop marked by the boat pulled onto a beach.",
+  "alt": "Моторная лодка",
+  "stroka": 831
+ },
+ {
+  "nomer": 10,
+  "key": "dp-07-motor-ship-lake",
+  "ids": [
+   "DP-07 · аналоги: теплоход"
+  ],
+  "size": "1024x1024",
+  "scene": "A pleasure motor ship on a lake between two piers — the outbound trip shown along the top, the return trip along the bottom with a stop marked by the ship docked at a pier.",
+  "alt": "Прогулочный теплоход",
+  "stroka": 832
+ },
+ {
+  "nomer": 10,
+  "key": "dp-08-cyclists",
+  "ids": [
+   "DP-08 · банк+ген; аналоги: велопробег 150/180/300 км; велосипедистки"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine cyclists starting together on a long route; finish line far ahead; one slightly ahead of the other.",
+  "alt": "Два велосипедиста (велосипедистки) в пробеге",
+  "stroka": 833
+ },
+ {
+  "nomer": 10,
+  "key": "dp-08-hikers",
+  "ids": [
+   "DP-08 · аналоги: туристы; пеший поход; пешеходы"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine hikers with backpacks starting together on a long route; finish line far ahead; one slightly ahead of the other.",
+  "alt": "Туристы / пешеходы на маршруте",
+  "stroka": 834
+ },
+ {
+  "nomer": 10,
+  "key": "dp-08-skiers",
+  "ids": [
+   "DP-08 · аналоги: лыжный марафон; лыжная гонка"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine skiers on a ski trail starting together on a long route; finish line far ahead; one slightly ahead of the other.",
+  "alt": "Лыжный марафон / гонка",
+  "stroka": 835
+ },
+ {
+  "nomer": 10,
+  "key": "dp-08-runners",
+  "ids": [
+   "DP-08 · аналоги: сверхмарафон"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine ultramarathon runners starting together on a long route; finish line far ahead; one slightly ahead of the other.",
+  "alt": "Бегуны в сверхмарафоне",
+  "stroka": 836
+ },
+ {
+  "nomer": 10,
+  "key": "dp-09-car-cyclist",
+  "ids": [
+   "DP-09 · банк+ген (kto=avto); аналоги: автомобилист и велосипедист"
+  ],
+  "size": "1024x1024",
+  "scene": "A car and a faceless glass figurine cyclist leaving point A together on the same road toward point B; the faster one well ahead.",
+  "alt": "Автомобилист и велосипедист",
+  "stroka": 837
+ },
+ {
+  "nomer": 10,
+  "key": "dp-09-moto-cyclist",
+  "ids": [
+   "DP-09 · банк+ген (kto=moto); аналоги: мотоциклист и велосипедист"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine motorcyclist and a faceless glass figurine cyclist leaving point A together on the same road toward point B; the faster one well ahead.",
+  "alt": "Мотоциклист и велосипедист",
+  "stroka": 838
+ },
+ {
+  "nomer": 10,
+  "key": "dp-09-cyclist-pedestrian",
+  "ids": [
+   "DP-09 · аналоги: велосипедист и пешеход; пешеход и велосипедист"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist and a faceless glass figurine pedestrian between villages leaving point A together on the same road toward point B; the faster one well ahead.",
+  "alt": "Велосипедист и пешеход",
+  "stroka": 839
+ },
+ {
+  "nomer": 10,
+  "key": "dp-09-bus-cyclist",
+  "ids": [
+   "DP-09 · аналоги: автобус и велосипедист"
+  ],
+  "size": "1024x1024",
+  "scene": "A bus and a faceless glass figurine cyclist leaving point A together on the same road toward point B; the faster one well ahead.",
+  "alt": "Автобус и велосипедист",
+  "stroka": 840
+ },
+ {
+  "nomer": 10,
+  "key": "dp-09-snowmobile-skier",
+  "ids": [
+   "DP-09 · аналоги: снегоход и лыжник"
+  ],
+  "size": "1024x1024",
+  "scene": "A snowmobile and a faceless glass figurine skier from a base to a hut in snowy forest leaving point A together on the same road toward point B; the faster one well ahead.",
+  "alt": "Снегоход и лыжник",
+  "stroka": 841
+ },
+ {
+  "nomer": 10,
+  "key": "dp-09-cyclist-runner",
+  "ids": [
+   "DP-09 · аналоги: велосипедист и бегун"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist and a faceless glass figurine runner leaving point A together on the same road toward point B; the faster one well ahead.",
+  "alt": "Велосипедист и бегун",
+  "stroka": 842
+ },
+ {
+  "nomer": 10,
+  "key": "dp-10-car-moto",
+  "ids": [
+   "DP-10 · банк+ген; аналоги: автомобиль и мотоциклист"
+  ],
+  "size": "1024x1024",
+  "scene": "A road from town A (left) to town B (right) with village C in between; a car on the road ahead, a faceless glass figurine motorcyclist behind it heading the same way; a curved return arrow from C back to A.",
+  "alt": "Автомобиль, мотоциклист догнал в C и вернулся",
+  "stroka": 843
+ },
+ {
+  "nomer": 10,
+  "key": "dp-10-bus-car",
+  "ids": [
+   "DP-10 · аналоги: автобус и легковой автомобиль; автобус и автомобиль; междугородний автобус"
+  ],
+  "size": "1024x1024",
+  "scene": "A road from town A (left) to town B (right) with village C in between; a bus on the road ahead, a passenger car behind it heading the same way; a curved return arrow from C back to A.",
+  "alt": "Автобус и легковой автомобиль",
+  "stroka": 844
+ },
+ {
+  "nomer": 10,
+  "key": "dp-10-cyclist-moto",
+  "ids": [
+   "DP-10 · аналоги: велосипедист и мотоциклист"
+  ],
+  "size": "1024x1024",
+  "scene": "A road from town A (left) to town B (right) with village C in between; a faceless glass figurine cyclist on the road ahead, a faceless glass figurine motorcyclist behind it heading the same way; a curved return arrow from C back to A.",
+  "alt": "Велосипедист и мотоциклист",
+  "stroka": 845
+ },
+ {
+  "nomer": 10,
+  "key": "dp-10-truck-car",
+  "ids": [
+   "DP-10 · аналоги: грузовик и автомобиль; грузовик и легковой автомобиль"
+  ],
+  "size": "1024x1024",
+  "scene": "A road from town A (left) to town B (right) with village C in between; a truck on the road ahead, a passenger car behind it heading the same way; a curved return arrow from C back to A.",
+  "alt": "Грузовик и автомобиль",
+  "stroka": 846
+ },
+ {
+  "nomer": 10,
+  "key": "dp-11-moto-cyclist",
+  "ids": [
+   "DP-11 · банк+ген; аналоги: мотоциклист и велосипедист"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine motorcyclist and a faceless glass figurine cyclist from two towns setting out at the same moment from opposite ends of one route and moving toward each other; the meeting point not marked.",
+  "alt": "Мотоциклист и велосипедист навстречу",
+  "stroka": 847
+ },
+ {
+  "nomer": 10,
+  "key": "dp-11-cyclist-pedestrian",
+  "ids": [
+   "DP-11 · аналоги: велосипедист и пешеход"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine cyclist and a faceless glass figurine pedestrian from two villages setting out at the same moment from opposite ends of one route and moving toward each other; the meeting point not marked.",
+  "alt": "Велосипедист и пешеход",
+  "stroka": 848
+ },
+ {
+  "nomer": 10,
+  "key": "dp-11-car-bus",
+  "ids": [
+   "DP-11 · аналоги: автомобиль и автобус"
+  ],
+  "size": "1024x1024",
+  "scene": "A car and a bus from two cities setting out at the same moment from opposite ends of one route and moving toward each other; the meeting point not marked.",
+  "alt": "Автомобиль и автобус",
+  "stroka": 849
+ },
+ {
+  "nomer": 10,
+  "key": "dp-11-trains",
+  "ids": [
+   "DP-11 · аналоги: скорый и товарный поезд"
+  ],
+  "size": "1024x1024",
+  "scene": "An express train and a freight train from two stations setting out at the same moment from opposite ends of one route and moving toward each other; the meeting point not marked.",
+  "alt": "Скорый и товарный поезд",
+  "stroka": 850
+ },
+ {
+  "nomer": 10,
+  "key": "dp-11-car-cyclist",
+  "ids": [
+   "DP-11 · аналоги: автомобиль и велосипедист"
+  ],
+  "size": "1024x1024",
+  "scene": "A car and a faceless glass figurine cyclist setting out at the same moment from opposite ends of one route and moving toward each other; the meeting point not marked.",
+  "alt": "Автомобиль и велосипедист",
+  "stroka": 851
+ },
+ {
+  "nomer": 10,
+  "key": "dp-11-car-truck",
+  "ids": [
+   "DP-11 · аналоги: автомобиль и грузовик"
+  ],
+  "size": "1024x1024",
+  "scene": "A car and a truck setting out at the same moment from opposite ends of one route and moving toward each other; the meeting point not marked.",
+  "alt": "Легковой автомобиль и грузовик",
+  "stroka": 852
+ },
+ {
+  "nomer": 10,
+  "key": "dp-11-bus-cyclist",
+  "ids": [
+   "DP-11 · аналоги: автобус и велосипедист"
+  ],
+  "size": "1024x1024",
+  "scene": "A bus and a faceless glass figurine cyclist setting out at the same moment from opposite ends of one route and moving toward each other; the meeting point not marked.",
+  "alt": "Автобус и велосипедист",
+  "stroka": 853
+ },
+ {
+  "nomer": 10,
+  "key": "dp-11-cutter-barge",
+  "ids": [
+   "DP-11 · аналоги: катер и баржа"
+  ],
+  "size": "1024x1024",
+  "scene": "A cutter and a barge from two piers on a lake setting out at the same moment from opposite ends of one route and moving toward each other; the meeting point not marked.",
+  "alt": "Катер и баржа на озере",
+  "stroka": 854
+ },
+ {
+  "nomer": 10,
+  "key": "dp-11-skier-pedestrian",
+  "ids": [
+   "DP-11 · аналоги: лыжник и пешеход"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine skier and a faceless glass figurine pedestrian on a snowy path setting out at the same moment from opposite ends of one route and moving toward each other; the meeting point not marked.",
+  "alt": "Лыжник и пешеход",
+  "stroka": 855
+ },
+ {
+  "nomer": 10,
+  "key": "dp-12-cars",
+  "ids": [
+   "DP-12 · банк+ген; аналоги: автомобили"
+  ],
+  "size": "1024x1024",
+  "scene": "Two cars leaving point A together; one steady the whole way, the other slower on the first half of the road and faster on the second half (road halves tinted differently).",
+  "alt": "Два автомобиля: половина пути медленнее",
+  "stroka": 856
+ },
+ {
+  "nomer": 10,
+  "key": "dp-12-cyclists",
+  "ids": [
+   "DP-12 · аналоги: велосипедисты"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine cyclists leaving point A together; one steady the whole way, the other slower on the first half of the road and faster on the second half (road halves tinted differently).",
+  "alt": "Велосипедисты",
+  "stroka": 857
+ },
+ {
+  "nomer": 10,
+  "key": "dp-12-motorcyclists",
+  "ids": [
+   "DP-12 · аналоги: мотоциклисты"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine motorcyclists leaving point A together; one steady the whole way, the other slower on the first half of the road and faster on the second half (road halves tinted differently).",
+  "alt": "Мотоциклисты",
+  "stroka": 858
+ },
+ {
+  "nomer": 10,
+  "key": "dp-12-buses",
+  "ids": [
+   "DP-12 · аналоги: автобусы"
+  ],
+  "size": "1024x1024",
+  "scene": "Two buses leaving point A together; one steady the whole way, the other slower on the first half of the road and faster on the second half (road halves tinted differently).",
+  "alt": "Автобусы",
+  "stroka": 859
+ },
+ {
+  "nomer": 10,
+  "key": "dp-12-trucks",
+  "ids": [
+   "DP-12 · аналоги: грузовики"
+  ],
+  "size": "1024x1024",
+  "scene": "Two trucks leaving point A together; one steady the whole way, the other slower on the first half of the road and faster on the second half (road halves tinted differently).",
+  "alt": "Грузовики",
+  "stroka": 860
+ },
+ {
+  "nomer": 10,
+  "key": "dp-13-motor-ships",
+  "ids": [
+   "DP-13 · банк+ген; аналоги: теплоходы"
+  ],
+  "size": "1024x1024",
+  "scene": "Two motor ships on a lake between two piers: the first already partway along the route from A to B, the second just starting from A; both heading to B.",
+  "alt": "Теплоходы: второй позже и быстрее, прибыли вместе",
+  "stroka": 861
+ },
+ {
+  "nomer": 10,
+  "key": "dp-13-hikers",
+  "ids": [
+   "DP-13 · аналоги: туристы; пешеходы"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine hikers on a trail from a camp to a lake: the first already partway along the route from A to B, the second just starting from A; both heading to B.",
+  "alt": "Туристы / пешеходы",
+  "stroka": 862
+ },
+ {
+  "nomer": 10,
+  "key": "dp-13-skiers",
+  "ids": [
+   "DP-13 · аналоги: лыжники"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine skiers on a ski trail: the first already partway along the route from A to B, the second just starting from A; both heading to B.",
+  "alt": "Лыжники",
+  "stroka": 863
+ },
+ {
+  "nomer": 10,
+  "key": "dp-13-cyclists",
+  "ids": [
+   "DP-13 · аналоги: велосипедисты"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine cyclists on a road between towns: the first already partway along the route from A to B, the second just starting from A; both heading to B.",
+  "alt": "Велосипедисты",
+  "stroka": 864
+ },
+ {
+  "nomer": 10,
+  "key": "dp-13-rowboats",
+  "ids": [
+   "DP-13 · аналоги: лодки на озере"
+  ],
+  "size": "1024x1024",
+  "scene": "Two boats on a lake between piers: the first already partway along the route from A to B, the second just starting from A; both heading to B.",
+  "alt": "Лодки на озере",
+  "stroka": 865
+ },
+ {
+  "nomer": 10,
+  "key": "dp-13-barges",
+  "ids": [
+   "DP-13 · аналоги: баржи"
+  ],
+  "size": "1024x1024",
+  "scene": "Two barges on a lake between piers: the first already partway along the route from A to B, the second just starting from A; both heading to B.",
+  "alt": "Баржи",
+  "stroka": 866
+ },
+ {
+  "nomer": 10,
+  "key": "dp-13-cutters",
+  "ids": [
+   "DP-13 · аналоги: катера"
+  ],
+  "size": "1024x1024",
+  "scene": "Two cutters on a lake between piers: the first already partway along the route from A to B, the second just starting from A; both heading to B.",
+  "alt": "Катера",
+  "stroka": 867
+ },
+ {
+  "nomer": 10,
+  "key": "pt-01-tunnel",
+  "ids": [
+   "PT-01 · банк+ген (form=tonnel); аналоги: тоннель; горный тоннель; длинный тоннель"
+  ],
+  "size": "1024x1024",
+  "scene": "A long train half inside a mountain tunnel, its tail still outside; train length comparable to the object.",
+  "alt": "Поезд через тоннель",
+  "stroka": 873
+ },
+ {
+  "nomer": 10,
+  "key": "pt-01-forest-belt",
+  "ids": [
+   "PT-01 · ген (form=lesopolosa); аналоги: лесополоса; товарный поезд и лесополоса"
+  ],
+  "size": "1024x1024",
+  "scene": "A long train passing alongside a narrow strip of forest, the locomotive past the strip, the tail before it; train length comparable to the object.",
+  "alt": "Поезд мимо лесополосы",
+  "stroka": 874
+ },
+ {
+  "nomer": 10,
+  "key": "pt-01-bridge",
+  "ids": [
+   "PT-01 · аналоги: мост; мост через реку"
+  ],
+  "size": "1024x1024",
+  "scene": "A long train on a railway bridge over a river, head and tail beyond the bridge ends; train length comparable to the object.",
+  "alt": "Поезд по мосту",
+  "stroka": 875
+ },
+ {
+  "nomer": 10,
+  "key": "pt-01-platform",
+  "ids": [
+   "PT-01 · аналоги: платформа; электричка и платформа"
+  ],
+  "size": "1024x1024",
+  "scene": "A commuter train passing a station platform without stopping; train length comparable to the object.",
+  "alt": "Поезд/электричка мимо платформы",
+  "stroka": 876
+ },
+ {
+  "nomer": 10,
+  "key": "pt-01-sunflower-field",
+  "ids": [
+   "PT-01 · аналоги: поле подсолнухов"
+  ],
+  "size": "1024x1024",
+  "scene": "A train running alongside a sunflower field; train length comparable to the object.",
+  "alt": "Поезд вдоль поля подсолнухов",
+  "stroka": 877
+ },
+ {
+  "nomer": 10,
+  "key": "pt-02-trains-opposite",
+  "ids": [
+   "PT-02 · банк+ген; аналоги: скорый/скоростной/пассажирский/пригородный/товарный — тип поезда = имя"
+  ],
+  "size": "1024x1024",
+  "scene": "Two trains on parallel tracks moving toward each other, locomotives just level; a faceless glass figurine passenger at a window.",
+  "alt": "Два поезда навстречу по параллельным путям",
+  "stroka": 878
+ },
+ {
+  "nomer": 10,
+  "key": "pt-03-trains-overtaking",
+  "ids": [
+   "PT-03 · банк+ген; аналоги: пассажирский/скорый/скоростной/пригородный/товарный — тип = имя"
+  ],
+  "size": "1024x1024",
+  "scene": "A passenger train overtaking a long freight train on a parallel track, both heading the same way.",
+  "alt": "Обгон поезда в одном направлении",
+  "stroka": 879
+ },
+ {
+  "nomer": 10,
+  "key": "pt-04-two-ships-swap",
+  "ids": [
+   "PT-04 · банк+ген; аналоги: танкеры; контейнеровозы; лайнеры; паромы; теплоходы на озере/реке — тип судна = имя"
+  ],
+  "size": "1024x1024",
+  "scene": "Two long cargo ships of different length on parallel courses at sea, the shorter one behind the longer, its bow approaching the other's stern.",
+  "alt": "Два судна поменялись местами (корма–нос)",
+  "stroka": 880
+ },
+ {
+  "nomer": 10,
+  "key": "vd-01-motor-ship",
+  "ids": [
+   "VD-01 · банк+ген; аналоги: пассажирский/грузовой/туристический/речной/круизный теплоход"
+  ],
+  "size": "1024x1024",
+  "scene": "A river motor ship on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Теплоход туда и обратно со стоянкой (весь путь)",
+  "stroka": 886
+ },
+ {
+  "nomer": 10,
+  "key": "vd-01-cutter",
+  "ids": [
+   "VD-01 · аналоги: катера разных типов"
+  ],
+  "size": "1024x1024",
+  "scene": "A small river cutter on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Катер (прогулочный, патрульный, скоростной, рыболовный, спасательный)",
+  "stroka": 887
+ },
+ {
+  "nomer": 10,
+  "key": "vd-01-tug",
+  "ids": [
+   "VD-01 · аналоги: буксир; портовый буксир"
+  ],
+  "size": "1024x1024",
+  "scene": "A river tug on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Буксир",
+  "stroka": 888
+ },
+ {
+  "nomer": 10,
+  "key": "vd-01-ferry",
+  "ids": [
+   "VD-01 · аналоги: паром"
+  ],
+  "size": "1024x1024",
+  "scene": "A river ferry on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Паром",
+  "stroka": 889
+ },
+ {
+  "nomer": 10,
+  "key": "vd-02-motor-ship",
+  "ids": [
+   "VD-02 · банк+ген; аналоги: пассажирский/грузовой/туристический/речной/круизный теплоход"
+  ],
+  "size": "1024x1024",
+  "scene": "A river motor ship on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Теплоход туда и обратно со стоянкой (собственная скорость)",
+  "stroka": 890
+ },
+ {
+  "nomer": 10,
+  "key": "vd-02-cutter",
+  "ids": [
+   "VD-02 · аналоги: катера разных типов"
+  ],
+  "size": "1024x1024",
+  "scene": "A small river cutter on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Катер (прогулочный, патрульный, скоростной, рыболовный, спасательный)",
+  "stroka": 891
+ },
+ {
+  "nomer": 10,
+  "key": "vd-02-tug",
+  "ids": [
+   "VD-02 · аналоги: буксир; портовый буксир"
+  ],
+  "size": "1024x1024",
+  "scene": "A river tug on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Буксир",
+  "stroka": 892
+ },
+ {
+  "nomer": 10,
+  "key": "vd-02-ferry",
+  "ids": [
+   "VD-02 · аналоги: паром"
+  ],
+  "size": "1024x1024",
+  "scene": "A river ferry on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Паром",
+  "stroka": 893
+ },
+ {
+  "nomer": 10,
+  "key": "vd-03-motor-ship",
+  "ids": [
+   "VD-03 · банк+ген; аналоги: пассажирский/грузовой/туристический/речной/круизный теплоход"
+  ],
+  "size": "1024x1024",
+  "scene": "A river motor ship on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Теплоход туда и обратно со стоянкой (скорость течения)",
+  "stroka": 894
+ },
+ {
+  "nomer": 10,
+  "key": "vd-03-cutter",
+  "ids": [
+   "VD-03 · аналоги: катера разных типов"
+  ],
+  "size": "1024x1024",
+  "scene": "A small river cutter on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Катер (прогулочный, патрульный, скоростной, рыболовный, спасательный)",
+  "stroka": 895
+ },
+ {
+  "nomer": 10,
+  "key": "vd-03-tug",
+  "ids": [
+   "VD-03 · аналоги: буксир; портовый буксир"
+  ],
+  "size": "1024x1024",
+  "scene": "A river tug on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Буксир",
+  "stroka": 896
+ },
+ {
+  "nomer": 10,
+  "key": "vd-03-ferry",
+  "ids": [
+   "VD-03 · аналоги: паром"
+  ],
+  "size": "1024x1024",
+  "scene": "A river ferry on a river with a clear current (flow arrows/ripples): going downstream from pier A to pier B, moored at B, then heading back upstream.",
+  "alt": "Паром",
+  "stroka": 897
+ },
+ {
+  "nomer": 10,
+  "key": "vd-04-motorboat",
+  "ids": [
+   "VD-04 · банк+ген; аналоги: моторная лодка"
+  ],
+  "size": "1024x1024",
+  "scene": "A motorboat on a river with visible current, travelling upstream from a pier and then returning downstream to the same pier.",
+  "alt": "Моторная лодка: против течения и обратно",
+  "stroka": 898
+ },
+ {
+  "nomer": 10,
+  "key": "vd-04-cutter",
+  "ids": [
+   "VD-04 · аналоги: катер"
+  ],
+  "size": "1024x1024",
+  "scene": "A cutter on a river with visible current, travelling upstream from a pier and then returning downstream to the same pier.",
+  "alt": "Катер",
+  "stroka": 899
+ },
+ {
+  "nomer": 10,
+  "key": "vd-04-motor-ship",
+  "ids": [
+   "VD-04 · аналоги: теплоход"
+  ],
+  "size": "1024x1024",
+  "scene": "A motor ship on a river with visible current, travelling upstream from a pier and then returning downstream to the same pier.",
+  "alt": "Теплоход",
+  "stroka": 900
+ },
+ {
+  "nomer": 10,
+  "key": "vd-04-kayak",
+  "ids": [
+   "VD-04 · аналоги: байдарка"
+  ],
+  "size": "1024x1024",
+  "scene": "A kayak with a faceless glass figurine paddler on a river with visible current, travelling upstream from a pier and then returning downstream to the same pier.",
+  "alt": "Байдарка",
+  "stroka": 901
+ },
+ {
+  "nomer": 10,
+  "key": "vd-05-cutter",
+  "ids": [
+   "VD-05 · банк+ген (form=kater); аналоги: катер"
+  ],
+  "size": "1024x1024",
+  "scene": "A cutter leaving pier A in the morning light downstream, moored at point B, and returning in evening light; a wall clock without numerals at the pier.",
+  "alt": "Катер: вышел и вернулся по часам",
+  "stroka": 902
+ },
+ {
+  "nomer": 10,
+  "key": "vd-05-barge",
+  "ids": [
+   "VD-05 · банк+ген (form=barzha); аналоги: баржа"
+  ],
+  "size": "1024x1024",
+  "scene": "A barge leaving pier A in the morning light downstream, moored at point B, and returning in evening light; a wall clock without numerals at the pier.",
+  "alt": "Баржа",
+  "stroka": 903
+ },
+ {
+  "nomer": 10,
+  "key": "vd-05-motorboat",
+  "ids": [
+   "VD-05 · банк+ген (form=lodka); аналоги: моторная лодка"
+  ],
+  "size": "1024x1024",
+  "scene": "A motorboat leaving pier A in the morning light downstream, moored at point B, and returning in evening light; a wall clock without numerals at the pier.",
+  "alt": "Моторная лодка",
+  "stroka": 904
+ },
+ {
+  "nomer": 10,
+  "key": "vd-05-kayak",
+  "ids": [
+   "VD-05 · банк+ген (form=baidarka); аналоги: байдарка"
+  ],
+  "size": "1024x1024",
+  "scene": "A kayak with a faceless glass figurine paddler leaving pier A in the morning light downstream, moored at point B, and returning in evening light; a wall clock without numerals at the pier.",
+  "alt": "Байдарка",
+  "stroka": 905
+ },
+ {
+  "nomer": 10,
+  "key": "vd-06-raft-yacht",
+  "ids": [
+   "VD-06 · банк+ген; аналоги: яхта"
+  ],
+  "size": "1024x1024",
+  "scene": "A river between piers A and B with current arrows; a log raft drifting downstream from A, and a sailing yacht that left A later, reached B and is heading back upstream toward the raft.",
+  "alt": "Плот и яхта",
+  "stroka": 906
+ },
+ {
+  "nomer": 10,
+  "key": "vd-06-raft-kayak",
+  "ids": [
+   "VD-06 · аналоги: байдарка"
+  ],
+  "size": "1024x1024",
+  "scene": "A river between piers A and B with current arrows; a log raft drifting downstream from A, and a kayak with a faceless glass figurine paddler that left A later, reached B and is heading back upstream toward the raft.",
+  "alt": "Плот и байдарка",
+  "stroka": 907
+ },
+ {
+  "nomer": 10,
+  "key": "vd-06-raft-motorboat",
+  "ids": [
+   "VD-06 · аналоги: моторная лодка"
+  ],
+  "size": "1024x1024",
+  "scene": "A river between piers A and B with current arrows; a log raft drifting downstream from A, and a motorboat that left A later, reached B and is heading back upstream toward the raft.",
+  "alt": "Плот и моторная лодка",
+  "stroka": 908
+ },
+ {
+  "nomer": 10,
+  "key": "vd-07-cutter",
+  "ids": [
+   "VD-07 · банк+ген; аналоги: катер; скоростной катер"
+  ],
+  "size": "1024x1024",
+  "scene": "A cutter on a river with visible current, going downstream from a pier and then returning upstream to it.",
+  "alt": "Катер: по течению и обратно, обратно дольше",
+  "stroka": 909
+ },
+ {
+  "nomer": 10,
+  "key": "vd-07-motor-ship",
+  "ids": [
+   "VD-07 · аналоги: теплоход"
+  ],
+  "size": "1024x1024",
+  "scene": "A motor ship on a river with visible current, going downstream from a pier and then returning upstream to it.",
+  "alt": "Теплоход",
+  "stroka": 910
+ },
+ {
+  "nomer": 10,
+  "key": "vd-07-motorboat",
+  "ids": [
+   "VD-07 · аналоги: моторная лодка"
+  ],
+  "size": "1024x1024",
+  "scene": "A motorboat on a river with visible current, going downstream from a pier and then returning upstream to it.",
+  "alt": "Моторная лодка",
+  "stroka": 911
+ },
+ {
+  "nomer": 10,
+  "key": "vd-07-tug",
+  "ids": [
+   "VD-07 · аналоги: буксир"
+  ],
+  "size": "1024x1024",
+  "scene": "A tug on a river with visible current, going downstream from a pier and then returning upstream to it.",
+  "alt": "Буксир",
+  "stroka": 912
+ },
+ {
+  "nomer": 10,
+  "key": "ok-01-cars",
+  "ids": [
+   "OK-01 · банк+ген; аналоги: автомобили"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a ring road around a town; two cars that started together from one point, one now ahead along the loop.",
+  "alt": "Автомобили на кольцевой дороге",
+  "stroka": 918
+ },
+ {
+  "nomer": 10,
+  "key": "ok-01-cyclists",
+  "ids": [
+   "OK-01 · аналоги: велосипедисты"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a circular bike path in a park; two faceless glass figurine cyclists that started together from one point, one now ahead along the loop.",
+  "alt": "Велосипедисты на круговой велодорожке",
+  "stroka": 919
+ },
+ {
+  "nomer": 10,
+  "key": "ok-01-motorcyclists",
+  "ids": [
+   "OK-01 · аналоги: мотоциклисты"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a ring highway; two faceless glass figurine motorcyclists that started together from one point, one now ahead along the loop.",
+  "alt": "Мотоциклисты",
+  "stroka": 920
+ },
+ {
+  "nomer": 10,
+  "key": "ok-01-skiers",
+  "ids": [
+   "OK-01 · аналоги: лыжники"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a looped ski track in a snowy field; two faceless glass figurine skiers that started together from one point, one now ahead along the loop.",
+  "alt": "Лыжники на кольцевой лыжне",
+  "stroka": 921
+ },
+ {
+  "nomer": 10,
+  "key": "ok-01-runners",
+  "ids": [
+   "OK-01 · аналоги: бегуны"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a circular running track; two faceless glass figurine runners that started together from one point, one now ahead along the loop.",
+  "alt": "Бегуны на круговой дорожке",
+  "stroka": 922
+ },
+ {
+  "nomer": 10,
+  "key": "ok-02-race-cars",
+  "ids": [
+   "OK-02 · банк+ген; аналоги: гонщики (6 вариантов)"
+  ],
+  "size": "1024x1024",
+  "scene": "Two race cars on a closed circuit racetrack, one about to lap the other; chequered flag at the start/finish line.",
+  "alt": "Гонщики: обгон на круг",
+  "stroka": 923
+ },
+ {
+  "nomer": 10,
+  "key": "ok-02-bike-racers",
+  "ids": [
+   "OK-02 · аналоги: велогонщики"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine racing cyclists on a velodrome-like circuit, one about to lap the other.",
+  "alt": "Велогонщики",
+  "stroka": 924
+ },
+ {
+  "nomer": 10,
+  "key": "ok-02-karting",
+  "ids": [
+   "OK-02 · аналоги: картинг"
+  ],
+  "size": "1024x1024",
+  "scene": "Two go-karts with faceless glass figurine drivers on a kart circuit, one about to lap the other.",
+  "alt": "Картинг",
+  "stroka": 925
+ },
+ {
+  "nomer": 10,
+  "key": "ok-03-moto-cyclist",
+  "ids": [
+   "OK-03 · банк+ген; аналоги: мотоциклист и велосипедист/велогонщик"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a circular track; a faceless glass figurine cyclist on the loop well ahead of point A, a faceless glass figurine motorcyclist just leaving point A after it.",
+  "alt": "Велосипедист, затем мотоциклист по кругу",
+  "stroka": 926
+ },
+ {
+  "nomer": 10,
+  "key": "ok-03-car-bus",
+  "ids": [
+   "OK-03 · аналоги: автомобиль и автобус"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a ring road with a bus stop A; a bus on the loop well ahead of point A, a car just leaving point A after it.",
+  "alt": "Автобус по кольцевому маршруту и автомобиль",
+  "stroka": 927
+ },
+ {
+  "nomer": 10,
+  "key": "ok-03-cyclist-pedestrian",
+  "ids": [
+   "OK-03 · аналоги: велосипедист и пешеход"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a circular park path; a faceless glass figurine pedestrian on the loop well ahead of point A, a faceless glass figurine cyclist just leaving point A after it.",
+  "alt": "Пешеход и велосипедист в парке",
+  "stroka": 928
+ },
+ {
+  "nomer": 10,
+  "key": "ok-03-car-cyclist",
+  "ids": [
+   "OK-03 · аналоги: автомобиль и велосипедист"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a circular road; a faceless glass figurine cyclist on the loop well ahead of point A, a car just leaving point A after it.",
+  "alt": "Велосипедист и автомобиль",
+  "stroka": 929
+ },
+ {
+  "nomer": 10,
+  "key": "ok-03-car-truck",
+  "ids": [
+   "OK-03 · аналоги: автомобиль и грузовик"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a ring road; a truck on the loop well ahead of point A, a car just leaving point A after it.",
+  "alt": "Грузовик и автомобиль",
+  "stroka": 930
+ },
+ {
+  "nomer": 10,
+  "key": "ok-03-cyclist-runner",
+  "ids": [
+   "OK-03 · аналоги: велосипедист и бегун"
+  ],
+  "size": "1024x1024",
+  "scene": "Bird's-eye view of a circular track; a faceless glass figurine runner on the loop well ahead of point A, a faceless glass figurine cyclist just leaving point A after it.",
+  "alt": "Бегун и велосипедист",
+  "stroka": 931
+ },
+ {
+  "nomer": 10,
+  "key": "rb-01-workshop-parts",
+  "ids": [
+   "RB-01 · банк+ген; аналоги: рабочие; токари; мастера и заготовки"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine workers at two lathes, each with a bin of finished metal parts of different fullness.",
+  "alt": "Рабочие/токари/мастера и детали (одинаковый заказ)",
+  "stroka": 937
+ },
+ {
+  "nomer": 10,
+  "key": "rb-01-typesetters",
+  "ids": [
+   "RB-01 · аналоги: наборщики"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine typesetters at keyboards with stacks of blank printed pages.",
+  "alt": "Наборщики и страницы",
+  "stroka": 938
+ },
+ {
+  "nomer": 10,
+  "key": "rb-01-bakers-pies",
+  "ids": [
+   "RB-01 · аналоги: пекари"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine bakers with trays of pies.",
+  "alt": "Пекари и пирожки",
+  "stroka": 939
+ },
+ {
+  "nomer": 10,
+  "key": "rb-01-confectioners",
+  "ids": [
+   "RB-01 · аналоги: кондитеры"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine confectioners decorating trays of pastries.",
+  "alt": "Кондитеры и пирожные",
+  "stroka": 940
+ },
+ {
+  "nomer": 10,
+  "key": "rb-02-workshop-parts",
+  "ids": [
+   "RB-02 · банк+ген; аналоги: рабочие; токари; мастера и заготовки"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine workers at two lathes, each with a bin of finished metal parts of different fullness.",
+  "alt": "Рабочие/токари/мастера и детали (разные заказы)",
+  "stroka": 941
+ },
+ {
+  "nomer": 10,
+  "key": "rb-02-typesetters",
+  "ids": [
+   "RB-02 · аналоги: наборщики"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine typesetters at keyboards with stacks of blank printed pages.",
+  "alt": "Наборщики и страницы",
+  "stroka": 942
+ },
+ {
+  "nomer": 10,
+  "key": "rb-02-bakers-pies",
+  "ids": [
+   "RB-02 · аналоги: пекари"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine bakers with trays of pies.",
+  "alt": "Пекари и пирожки",
+  "stroka": 943
+ },
+ {
+  "nomer": 10,
+  "key": "rb-02-confectioners",
+  "ids": [
+   "RB-02 · аналоги: кондитеры"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine confectioners decorating trays of pastries.",
+  "alt": "Кондитеры и пирожные",
+  "stroka": 944
+ },
+ {
+  "nomer": 10,
+  "key": "rb-03-tank",
+  "ids": [
+   "RB-03 · банк+ген; аналоги: бак; резервуар; чан"
+  ],
+  "size": "1024x1024",
+  "scene": "A large tank being filled by two pipes of different thickness; water streams of different thickness.",
+  "alt": "Трубы: на столько л меньше, на сколько мин дольше (бак/резервуар/чан)",
+  "stroka": 945
+ },
+ {
+  "nomer": 10,
+  "key": "rb-03-pool",
+  "ids": [
+   "RB-03 · аналоги: бассейн; большой бассейн"
+  ],
+  "size": "1024x1024",
+  "scene": "An outdoor swimming pool being filled by two pipes of different thickness.",
+  "alt": "То же, бассейн",
+  "stroka": 946
+ },
+ {
+  "nomer": 10,
+  "key": "rb-06-tank",
+  "ids": [
+   "RB-06 · банк+ген; аналоги: бак; резервуар; чан"
+  ],
+  "size": "1024x1024",
+  "scene": "A large tank being filled by two pipes pouring together; water streams of different thickness.",
+  "alt": "Одна труба дольше, вместе за известное время (бак/резервуар/чан)",
+  "stroka": 947
+ },
+ {
+  "nomer": 10,
+  "key": "rb-06-pool",
+  "ids": [
+   "RB-06 · аналоги: бассейн; большой бассейн"
+  ],
+  "size": "1024x1024",
+  "scene": "An outdoor swimming pool being filled by two pipes pouring together.",
+  "alt": "То же, бассейн",
+  "stroka": 948
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-masters-order",
+  "ids": [
+   "RB-04 · банк+ген (form=mastera); аналоги: мастера и шкаф"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine craftsmen assembling a wardrobe together.",
+  "alt": "Два мастера выполняют заказ / собирают шкаф",
+  "stroka": 949
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-pumps-tank",
+  "ids": [
+   "RB-04 · банк+ген (form=nasosy); аналоги: три насоса, бак"
+  ],
+  "size": "1024x1024",
+  "scene": "Three pumps of different size filling one tank.",
+  "alt": "Три насоса наполняют бак",
+  "stroka": 950
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-pumps-pool",
+  "ids": [
+   "RB-04 · аналоги: три насоса, бассейн"
+  ],
+  "size": "1024x1024",
+  "scene": "Three pumps filling a swimming pool.",
+  "alt": "Три насоса, бассейн",
+  "stroka": 951
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-road-brigades",
+  "ids": [
+   "RB-04 · аналоги: бригады"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine road crews repairing a road section from both ends.",
+  "alt": "Бригады ремонтируют дорогу",
+  "stroka": 952
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-printers",
+  "ids": [
+   "RB-04 · аналоги: принтеры"
+  ],
+  "size": "1024x1024",
+  "scene": "Two office printers printing stacks of brochures (blank).",
+  "alt": "Принтеры печатают тираж",
+  "stroka": 953
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-pipes-cistern",
+  "ids": [
+   "RB-04 · аналоги: три трубы"
+  ],
+  "size": "1024x1024",
+  "scene": "Three pipes filling a cistern.",
+  "alt": "Три трубы и цистерна",
+  "stroka": 954
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-harvesters",
+  "ids": [
+   "RB-04 · аналоги: комбайны"
+  ],
+  "size": "1024x1024",
+  "scene": "Two combine harvesters working one wheat field.",
+  "alt": "Комбайны убирают поле",
+  "stroka": 955
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-taps-bathtub",
+  "ids": [
+   "RB-04 · аналоги: три крана"
+  ],
+  "size": "1024x1024",
+  "scene": "A bathtub with three taps running.",
+  "alt": "Три крана наполняют ванну",
+  "stroka": 956
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-pit-pumps",
+  "ids": [
+   "RB-04 · аналоги: котлован"
+  ],
+  "size": "1024x1024",
+  "scene": "Three pumps draining water from a construction pit.",
+  "alt": "Насосы откачивают котлован",
+  "stroka": 957
+ },
+ {
+  "nomer": 10,
+  "key": "rb-04-facade-painters",
+  "ids": [
+   "RB-04 · аналоги: маляры"
+  ],
+  "size": "1024x1024",
+  "scene": "Two crews of faceless glass figurine painters on scaffolding painting a building facade.",
+  "alt": "Бригады маляров красят фасад",
+  "stroka": 958
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-weeding",
+  "ids": [
+   "RB-05 · банк+ген; аналоги: грядка"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) weeding a garden bed together; one of them shown alone in a smaller inset.",
+  "alt": "Пропалывают грядку",
+  "stroka": 959
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-class-cleaning",
+  "ids": [
+   "RB-05 · аналоги: уборка класса"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) tidying a classroom together; one of them shown alone in a smaller inset.",
+  "alt": "Убирают класс",
+  "stroka": 960
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-puzzle",
+  "ids": [
+   "RB-05 · аналоги: пазл"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) assembling a jigsaw puzzle on a table (abstract picture) together; one of them shown alone in a smaller inset.",
+  "alt": "Собирают пазл",
+  "stroka": 961
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-watering",
+  "ids": [
+   "RB-05 · аналоги: огород"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) watering a vegetable garden with cans together; one of them shown alone in a smaller inset.",
+  "alt": "Поливают огород",
+  "stroka": 962
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-dishes",
+  "ids": [
+   "RB-05 · аналоги: посуда"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) washing dishes at a sink together; one of them shown alone in a smaller inset.",
+  "alt": "Моют посуду",
+  "stroka": 963
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-christmas-tree",
+  "ids": [
+   "RB-05 · аналоги: ёлка"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) decorating a Christmas tree together; one of them shown alone in a smaller inset.",
+  "alt": "Наряжают ёлку",
+  "stroka": 964
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-raspberries",
+  "ids": [
+   "RB-05 · аналоги: малина"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) picking raspberries into baskets together; one of them shown alone in a smaller inset.",
+  "alt": "Собирают малину",
+  "stroka": 965
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-dumplings",
+  "ids": [
+   "RB-05 · аналоги: пельмени"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) (mother and grandmother) making dumplings together; one of them shown alone in a smaller inset.",
+  "alt": "Мама и бабушка лепят пельмени",
+  "stroka": 966
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-sweeping-yard",
+  "ids": [
+   "RB-05 · аналоги: двор"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) sweeping a courtyard together; one of them shown alone in a smaller inset.",
+  "alt": "Подметают двор",
+  "stroka": 967
+ },
+ {
+  "nomer": 10,
+  "key": "rb-05-ironing",
+  "ids": [
+   "RB-05 · аналоги: бельё"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine girls (or women) ironing laundry together; one of them shown alone in a smaller inset.",
+  "alt": "Гладят бельё",
+  "stroka": 968
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-fence",
+  "ids": [
+   "RB-07 · банк+ген; аналоги: забор"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines painting a long wooden fence, shown as three pairs (each pair working together).",
+  "alt": "Красят забор попарно",
+  "stroka": 969
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-apple-harvest",
+  "ids": [
+   "RB-07 · аналоги: урожай яблок"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines picking apples in an orchard, shown as three pairs (each pair working together).",
+  "alt": "Собирают урожай яблок",
+  "stroka": 970
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-birdhouses",
+  "ids": [
+   "RB-07 · аналоги: скворечники"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines building birdhouses, shown as three pairs (each pair working together).",
+  "alt": "Сколачивают скворечники",
+  "stroka": 971
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-snow",
+  "ids": [
+   "RB-07 · аналоги: снег"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines shovelling snow in a yard, shown as three pairs (each pair working together).",
+  "alt": "Убирают снег во дворе",
+  "stroka": 972
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-boat",
+  "ids": [
+   "RB-07 · аналоги: лодка"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines painting an upturned boat, shown as three pairs (each pair working together).",
+  "alt": "Красят лодку",
+  "stroka": 973
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-embroidery",
+  "ids": [
+   "RB-07 · аналоги: панно"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines embroidering a large panel (floral pattern), shown as three pairs (each pair working together).",
+  "alt": "Вышивают панно",
+  "stroka": 974
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-paving",
+  "ids": [
+   "RB-07 · аналоги: дорожка"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines laying paving tiles on a path, shown as three pairs (each pair working together).",
+  "alt": "Выкладывают дорожку плиткой",
+  "stroka": 975
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-digging",
+  "ids": [
+   "RB-07 · аналоги: огород"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines digging a vegetable garden, shown as three pairs (each pair working together).",
+  "alt": "Вскапывают огород",
+  "stroka": 976
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-ship-model",
+  "ids": [
+   "RB-07 · аналоги: модель корабля"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines assembling a sailing-ship model, shown as three pairs (each pair working together).",
+  "alt": "Собирают модель корабля",
+  "stroka": 977
+ },
+ {
+  "nomer": 10,
+  "key": "rb-07-firewood",
+  "ids": [
+   "RB-07 · аналоги: дрова"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurines carrying firewood into a shed, shown as three pairs (each pair working together).",
+  "alt": "Переносят дрова в сарай",
+  "stroka": 978
+ },
+ {
+  "nomer": 10,
+  "key": "pg-01-snail",
+  "ids": [
+   "PG-01 · банк+ген (form=ulitka); аналоги: улитка"
+  ],
+  "size": "1024x1024",
+  "scene": "A snail crawling along the ground from one tree toward another; a dotted trail with segments getting longer each day (sun/moon icons, no numbers).",
+  "alt": "Улитка ползёт между деревьями",
+  "stroka": 984
+ },
+ {
+  "nomer": 10,
+  "key": "pg-01-problems",
+  "ids": [
+   "PG-01 · банк+ген (form=vasya); аналоги: задачи"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine schoolboy at a desk with daily stacks of solved notebooks, each stack taller than the previous.",
+  "alt": "Вася решает задачи по дням",
+  "stroka": 985
+ },
+ {
+  "nomer": 10,
+  "key": "pg-01-reading",
+  "ids": [
+   "PG-01 · аналоги: книга; чтение книги"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine girl reading a thick book; bookmarks showing ever-larger portions read each day.",
+  "alt": "Чтение книги по дням",
+  "stroka": 986
+ },
+ {
+  "nomer": 10,
+  "key": "pg-01-caterpillar",
+  "ids": [
+   "PG-01 · аналоги: гусеница"
+  ],
+  "size": "1024x1024",
+  "scene": "A caterpillar climbing a tall plant stem; marks of daily progress getting longer.",
+  "alt": "Гусеница ползёт по стеблю",
+  "stroka": 987
+ },
+ {
+  "nomer": 10,
+  "key": "pg-01-pushups",
+  "ids": [
+   "PG-01 · аналоги: отжимания"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine boy doing push-ups; a row of growing bars behind him.",
+  "alt": "Отжимания по дням",
+  "stroka": 988
+ },
+ {
+  "nomer": 10,
+  "key": "pg-01-english-words",
+  "ids": [
+   "PG-01 · аналоги: английские слова"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine pupil with flashcards (blank), daily piles growing.",
+  "alt": "Английские слова по дням",
+  "stroka": 989
+ },
+ {
+  "nomer": 10,
+  "key": "pg-01-hikers",
+  "ids": [
+   "PG-01 · аналоги: туристы"
+  ],
+  "size": "1024x1024",
+  "scene": "A group of faceless glass figurine hikers on a long trail with daily camps further apart each day.",
+  "alt": "Туристы проходят маршрут",
+  "stroka": 990
+ },
+ {
+  "nomer": 10,
+  "key": "pg-01-bricklayer",
+  "ids": [
+   "PG-01 · аналоги: каменщик"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine bricklayer building a wall; daily courses getting longer.",
+  "alt": "Каменщик укладывает кирпичи",
+  "stroka": 991
+ },
+ {
+  "nomer": 10,
+  "key": "pg-01-runner",
+  "ids": [
+   "PG-01 · аналоги: бегун"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine runner on a park loop; daily runs drawn as lengthening paths.",
+  "alt": "Бегун готовится к марафону",
+  "stroka": 992
+ },
+ {
+  "nomer": 10,
+  "key": "z11-bystryy",
+  "ids": [
+   "`z11.bystryy` → DP-09"
+  ],
+  "size": "1024x1024",
+  "scene": "A highway from a village to an airport (planes visible); a coach bus and a taxi leaving together, the taxi ahead.",
+  "alt": "Автобус и такси до аэропорта (и др.: курорт, порт, марафонец)",
+  "stroka": 998
+ },
+ {
+  "nomer": 10,
+  "key": "z11-ocheredno",
+  "ids": [
+   "`z11.ocheredno` → PV11-OCHEREDNO"
+  ],
+  "size": "1024x1024",
+  "scene": "Three faceless glass figurine tilers laying tiles in a hall: one working, a second arriving, a third waiting at the door (crews vary: painters, furniture assemblers, volunteers, cable fitters, gardeners).",
+  "alt": "Три одинаковых работника подключаются по очереди",
+  "stroka": 1000
+ },
+ {
+  "nomer": 10,
+  "key": "z11-dve-truby",
+  "ids": [
+   "`z11.dve-truby` → PV11-DVE-TRUBY"
+  ],
+  "size": "1024x1024",
+  "scene": "Two identical pipes over a reservoir: one already pouring, the second just being opened (variants: pumps/cistern, taps/tank, hoses/pond).",
+  "alt": "Две одинаковые трубы/насосы: сначала одна, потом обе",
+  "stroka": 1004
+ },
+ {
+  "nomer": 10,
+  "key": "z11-brigady",
+  "ids": [
+   "`z11.brigady` → PV11-BRIGADY"
+  ],
+  "size": "1024x1024",
+  "scene": "Two identical construction sites side by side, a larger crew of faceless glass figurine workers at one and a smaller crew at the other; a few workers walking from the larger crew to the smaller.",
+  "alt": "Две бригады, рабочие переходят из одной в другую",
+  "stroka": 1007
+ },
+ {
+  "nomer": 10,
+  "key": "z11-dvoe-rabochih",
+  "ids": [
+   "`z11.dvoe-rabochih` → PV11-DVOE-RABOCHIH"
+  ],
+  "size": "1024x1024",
+  "scene": "Two faceless glass figurine workers building a brick wall together; a calendar of blank day squares behind them.",
+  "alt": "Двое рабочих: вместе за … дней, доли работы",
+  "stroka": 1014
+ },
+ {
+  "nomer": 10,
+  "key": "e11-plot-kater",
+  "ids": [
+   "`e11.plot-kater` → EV11-PLOT-KATER"
+  ],
+  "size": "1024x1024",
+  "scene": "A river with a downstream pier and an upstream boat station; a small raft carrying a sensor buoy drifting downstream, a cutter heading upstream; faceless glass figurine hydrobiologists on the bank.",
+  "alt": "Плот с датчиком и катер туда-обратно",
+  "stroka": 1017
+ },
+ {
+  "nomer": 10,
+  "key": "e11-progressiya",
+  "ids": [
+   "`e11.progressiya` → EV11-PROGRESSIYA"
+  ],
+  "size": "1024x1024",
+  "scene": "faceless glass figurine volunteers sorting donated books into boxes; a row of book piles, each taller than the previous.",
+  "alt": "Волонтёры собирают книги, каждый день больше",
+  "stroka": 1018
+ },
+ {
+  "nomer": 10,
+  "key": "e11-medlennyy",
+  "ids": [
+   "`e11.medlennyy` → DP-09"
+  ],
+  "size": "1024x1024",
+  "scene": "Two delivery drones with parcels flying from a warehouse toward a village, one slightly ahead.",
+  "alt": "Два дрона-доставщика",
+  "stroka": 1019
  }
 ]

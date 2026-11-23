@@ -7,10 +7,14 @@
  */
 
 import { subtype } from '../prototypes';
+import KARTINKI_ANALOGOV_JSON from '@/data/zadanie11/kartinki-analogov.json';
 import { sealAnswer, sealChoice } from '../secret';
 import { dannyeTrenazhera } from '../trenazher/dannye';
 import { klyuchZadachi, type UslovieBanka, type ZadachaPlan } from '../trenazher/sessiya';
 import type { ZadachaLite11 } from './dannye';
+
+/** Номер аналога («ДП-07-a01») → ключ сюжета картинки. */
+const KARTINKI_ANALOGOV = KARTINKI_ANALOGOV_JSON as Readonly<Record<string, string>>;
 
 function plan(b: UslovieBanka): ZadachaPlan {
   return {
@@ -35,6 +39,10 @@ export function lite11(b: UslovieBanka): ZadachaLite11 {
   }
   if (s.lifehacks.length > 0) {
     z.lh = s.lifehacks;
+  }
+  const ks = b.analog === undefined ? undefined : KARTINKI_ANALOGOV[b.analog.kod];
+  if (ks !== undefined) {
+    z.ks = ks;
   }
   return z;
 }

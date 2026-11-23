@@ -8,8 +8,16 @@
  */
 
 import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
+import KARTINKI_ANALOGOV_JSON from '@/data/zadanie11/kartinki-analogov.json';
 import type { UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
 
+const KARTINKI_ANALOGOV = KARTINKI_ANALOGOV_JSON as Readonly<Record<string, string>>;
+
 export function dannye(): UslovieBanka[] {
-  return dannyeTrenazhera().bank.filter((b) => !b.razminka && !b.id.startsWith('RZ-'));
+  return dannyeTrenazhera()
+    .bank.filter((b) => !b.razminka && !b.id.startsWith('RZ-'))
+    .map((b) => {
+      const ks = b.analog === undefined ? undefined : KARTINKI_ANALOGOV[b.analog.kod];
+      return b.analog === undefined || ks === undefined ? b : { ...b, analog: { ...b.analog, ks } };
+    });
 }

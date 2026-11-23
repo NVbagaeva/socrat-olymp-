@@ -374,6 +374,9 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       tipHtml={nazvaniya[tekushchaya.p] ?? ''}
       uslovieHtml={zagruzka.nabrat(dannye.text)}
       tekst
+      {...(razdel.kartinka?.(dannye) === undefined
+        ? {}
+        : { kartinka: razdel.kartinka(dannye) })}
       pod={razdel.pod(dannye, rezhim, {
         podskazka: hintOpen && !control,
         shag,
