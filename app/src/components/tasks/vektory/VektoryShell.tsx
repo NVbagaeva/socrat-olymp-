@@ -8,6 +8,7 @@ import { BLOKI } from '@/lib/vektory/prep/bloki';
 import { PROTOTYPES } from '@/lib/vektory/prototypes';
 import { RazdelTabs } from '../RazdelTabs';
 import { Progress2 } from './Progress2';
+import { VektorShapka } from './VektorShapka';
 import { ZADANIYA } from '@/lib/paths';
 
 /**
@@ -29,6 +30,7 @@ export function VektoryShell({ children }: { children: React.ReactNode }) {
     <AppShell active="tasks">
       <main className="app-main">
         <StsenaShapka
+          className="z2-stsena"
           crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
@@ -41,11 +43,16 @@ export function VektoryShell({ children }: { children: React.ReactNode }) {
             fakty: SHAPKA2.fakty(PROTOTYPES.length),
           })}
           media={
-            <Progress2
-              razdely={RAZDELY_TEORII.map((r) => r.id)}
-              bloki={BLOKI.map((b) => ({ id: b.id, total: b.zadachi.length }))}
-              prototypes={PROTOTYPES.map((p) => p.id)}
-            />
+            <div className="z2-head-media">
+              <VektorShapka />
+              <div className="z2-head-progress">
+                <Progress2
+                  razdely={RAZDELY_TEORII.map((r) => r.id)}
+                  bloki={BLOKI.map((b) => ({ id: b.id, total: b.zadachi.length }))}
+                  prototypes={PROTOTYPES.map((p) => p.id)}
+                />
+              </div>
+            </div>
           }
         />
 
