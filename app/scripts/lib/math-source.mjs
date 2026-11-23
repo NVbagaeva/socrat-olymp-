@@ -30,6 +30,9 @@ const NOT_TEXT_KEYS = new Set([
      обычный текст, KaTeX не набрать. piPodskazka — подсказка о записи ответа
      под полем (FormatHint, components/tasks/otvet): тоже только текст. */
   'pravka', 'sostavleno', 'polePodskazka', 'piPodskazka',
+  /* Подписи внутри SVG живых сцен №9 (content/teoriya10.ts → MYACH10, RASPAD10):
+     текст <text> в SVG, KaTeX туда не набрать — как labelX и axisLabels. */
+  'podpisH', 'podpisPromezhutok', 'podpisCel', 'podpisOtvet',
 ]);
 
 /* Словари, значения которых — подписи для экранного диктора (aria-label):
@@ -52,8 +55,20 @@ function inAriaMap(node) {
 const TEX_CALLS = /^(?:scena|prismModel|shape\w*|cube\w*|katex\.renderToString|renderToString|formula|math|tex|texNum|texFactor|m|keyMath|field|katexHtml|formulaHtml|require|import|t\.?|querySelector(?:All)?|getElementById|addEventListener|setAttribute|getAttribute|classList\.\w+|console\.\w+|Error|RegExp|Intl\.\w+|new\s+\w+)$/;
 
 function keyOf(node) {
-  const parent = node.parent;
+  let parent = node.parent;
   if (!parent) { return null; }
+  /* Подпись-функция «podpisH: (H) => `H = ${H} м`» (и с тернарным выбором):
+     ключ — у свойства, которому присвоена стрелочная функция. */
+  let up = node;
+  while (parent && (ts.isConditionalExpression(parent) || ts.isParenthesizedExpression(parent))) {
+    up = parent;
+    parent = parent.parent;
+  }
+  if (parent && ts.isArrowFunction(parent) && parent.body === up && parent.parent &&
+      ts.isPropertyAssignment(parent.parent)) {
+    return parent.parent.name.getText().replace(/['"]/g, '');
+  }
+  parent = node.parent;
   if (ts.isPropertyAssignment(parent) && parent.initializer === node) {
     return parent.name.getText().replace(/['"]/g, '');
   }
