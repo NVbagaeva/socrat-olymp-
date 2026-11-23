@@ -1,0 +1,14 @@
+/* Живые чертежи №1, №13, №15, №17, №18: свои мелочи поверх shapka.css. */
+
+/* №15: ручка конца промежутка — прозрачная, точку рисует сам чертёж. */
+.zhv-pryamaya__ruchka .zhv__ruchka-tochka {
+  fill: transparent;
+  stroke: none;
+  filter: none;
+}
+
+/* №17: малая окружность целиком — ручка. */
+.zhv-okr__malaya {
+  cursor: grab;
+  touch-action: none;
+}

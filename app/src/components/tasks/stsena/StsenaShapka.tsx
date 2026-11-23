@@ -30,7 +30,7 @@ export interface StsenaShapkaProps {
   progress?: ReactNode;
   /** Под прогрессом: кнопка «Продолжить подготовку» у №12. */
   actions?: ReactNode;
-  /** Обложка справа: картинка, оживающая в 3D (ObjomnayaOblozhka). */
+  /** Обложка справа: картинка или мотив раздела (RisunokRazdela). */
   media?: ReactNode;
   className?: string;
 }
