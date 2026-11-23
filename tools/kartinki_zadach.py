@@ -58,6 +58,14 @@ STIL = (
     'no logos. Single composition centered, filling about 80% of the square, three-quarter view from '
     'slightly above. Scene: '
 )
+# Добавка автора после пробы (слишком много стекла): главные предметы — настоящие.
+STIL_PREDMETY = (
+    'IMPORTANT material balance: the main subject objects of the scene (vehicles, food, drinks, goods, '
+    'devices, animals, plants, buildings, sports equipment) are REALISTIC, in their natural colors and '
+    'materials (painted metal, wood, fabric, plastic, fruit skin, water), not glass. Only the base '
+    'platform, roads and paths, arrows, sound waves, motion lines and the human figurines are clear '
+    'pale blue glass. '
+)
 DOLYA = 0.84  # какую долю квадрата занимает объект по большей стороне
 KRAY = 6  # ширина полосы по краю, где не должно быть непрозрачных пикселей
 
@@ -90,7 +98,7 @@ def gen(s: dict) -> Path:
     n = len(popytki(s)) + 1
     raw_dir(s).mkdir(parents=True, exist_ok=True)
     out = raw_dir(s) / f"{s['key']}-{n}.png"
-    prompt = STIL + s['scene']
+    prompt = STIL + (STIL_PREDMETY if s.get('predmety', True) else '') + s['scene']
     with tempfile.TemporaryDirectory() as t:
         tmp = Path(t)
         cmd = ['curl', '-sS', '--max-time', '600', 'https://api.openai.com/v1/images/edits']
@@ -283,6 +291,9 @@ def main() -> None:
             export(sp[k])
     elif cmd == 'batch':
         st = status()
+        # batch @файл — ключи из файла (по строке), например очередь на перерисовку
+        if rest and rest[0].startswith('@'):
+            rest = [x.strip() for x in Path(rest[0][1:]).read_text().splitlines() if x.strip()]
         keys = rest or [k for k in sp if not st.get(k, {}).get('ok')]
         batch(keys)
     elif cmd == 'data':
