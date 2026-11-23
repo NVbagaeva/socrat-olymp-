@@ -1,0 +1,661 @@
+/* «Мяч выше отметки» — стили сцены (грузятся вместе с ней, лениво).
+   Оболочка карточки — app/zadaniya/10/zadanie10.css. Мяч и график —
+   синий #1f5fd0, всё, что выше отметки, — тёплый #f08a24 / #c2502e.
+   Подписи не мельче 13 px, кнопки — от 44 px. */
+
+.z10-my__osnova {
+  --my-sin: #1f5fd0;
+  --my-sin-text: #1a4fb0;
+  --my-zhar: #f08a24;
+  --my-zhar-text: #b4501c;
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* ── Секундомер-таймлайн ── */
+.z10-my__chasy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-1) var(--space-3);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(234, 241, 255, 0.7));
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.z10-my__sekundomer {
+  flex: none;
+  width: 44px;
+  height: 48px;
+}
+.z10-my__sekundomer line {
+  stroke: rgba(26, 79, 176, 0.45);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+.z10-my__sekundomer-krug {
+  fill: rgba(255, 255, 255, 0.92);
+  stroke: rgba(31, 95, 208, 0.35);
+  stroke-width: 1.2;
+}
+.z10-my__sekundomer-knopka {
+  fill: #12306e;
+}
+.z10-my__sekundomer .z10-my__sekundomer-strelka {
+  stroke: var(--my-zhar);
+  stroke-width: 1.8;
+}
+.z10-my__sekundomer-os {
+  fill: #12306e;
+}
+.z10-my__lenta {
+  --thumb: 24px;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-top: 32px;
+}
+.z10-my__puzyr {
+  position: absolute;
+  top: 0;
+  left: calc(var(--p) * (100% - var(--thumb)) + var(--thumb) / 2);
+  transform: translateX(-50%);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #12306e;
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.z10-my__puzyr .katex {
+  color: #fff;
+}
+.z10-my__polzunok {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: pan-y;
+}
+.z10-my__polzunok::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--my-sin), var(--my-zhar)) 0 0 / calc(var(--p) * 100%) 100% no-repeat,
+    rgba(31, 95, 208, 0.12);
+  box-shadow: inset 0 1px 2px rgba(18, 48, 110, 0.12);
+}
+.z10-my__polzunok::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--my-sin), var(--my-zhar)) 0 0 / calc(var(--p) * 100%) 100% no-repeat,
+    rgba(31, 95, 208, 0.12);
+}
+.z10-my__polzunok::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+  margin-top: -8px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.35),
+    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.z10-my__polzunok::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.35),
+    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+}
+.z10-my__polzunok:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.z10-my__metki {
+  position: relative;
+  height: 18px;
+  margin: -8px calc(var(--thumb) / 2) 0;
+}
+.z10-my__metki span {
+  position: absolute;
+  left: calc(var(--k) * 100%);
+  transform: translateX(-50%);
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.z10-my__metki span:first-child {
+  transform: none;
+  left: calc(var(--thumb) / -2);
+}
+.z10-my__metki span.is-proydena {
+  color: var(--my-sin-text);
+}
+/* t₁ и t₂ — тёплые точки на дорожке. */
+.z10-my__metka-korna {
+  position: absolute;
+  top: -27px;
+  left: calc(var(--k) * 100%);
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--my-zhar);
+  pointer-events: none;
+}
+.z10-my__metka-korna.is-proydena {
+  background: var(--my-zhar);
+}
+
+/* ── Сцена ── */
+.z10-my__scena {
+  position: relative;
+  min-height: 330px;
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 90% at 6% 8%, rgba(31, 95, 208, 0.14), transparent 70%),
+    radial-gradient(60% 90% at 96% 8%, rgba(240, 138, 36, 0.14), transparent 70%),
+    linear-gradient(180deg, #f6f9ff 0%, #eef3fc 70%, #e4ecf9 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    inset 0 -24px 40px -30px rgba(31, 95, 208, 0.35),
+    0 18px 36px -28px rgba(18, 48, 110, 0.45);
+}
+@container z10-my (min-width: 560px) {
+  .z10-my__scena {
+    min-height: 380px;
+  }
+}
+.z10-my__scena:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 3px;
+}
+.z10-my__svg {
+  display: block;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.z10-my__svg text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Стойка: стеклянная панель, земля, линейка. */
+.z10-my__stoyka {
+  fill: rgba(255, 255, 255, 0.45);
+  stroke: rgba(255, 255, 255, 0.9);
+}
+.z10-my__zemlya {
+  fill: rgba(31, 95, 208, 0.18);
+  stroke: rgba(255, 255, 255, 0.9);
+}
+.z10-my__lineyka {
+  stroke: rgba(255, 255, 255, 1);
+  filter: drop-shadow(0 3px 5px rgba(18, 48, 110, 0.18));
+}
+.z10-my__shtrih {
+  stroke: rgba(18, 48, 110, 0.4);
+  stroke-width: 1;
+}
+.z10-my__shtrih.is-krupnyy {
+  stroke: rgba(18, 48, 110, 0.65);
+  stroke-width: 1.4;
+}
+.z10-my__chislo {
+  fill: #5a6b8c;
+}
+
+/* График. */
+.z10-my__setka {
+  stroke: rgba(31, 95, 208, 0.1);
+  stroke-width: 1;
+}
+.z10-my__os {
+  fill: none;
+  stroke: #33405a;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z10-my__os-podpis {
+  fill: #33405a;
+  font-style: italic;
+}
+.z10-my__parabola-ten {
+  fill: none;
+  stroke: rgba(31, 95, 208, 0.22);
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+}
+.z10-my__parabola {
+  fill: none;
+  stroke: var(--my-sin);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(31, 95, 208, 0.35));
+}
+.z10-my__duga {
+  fill: none;
+  stroke: var(--my-zhar);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(240, 138, 36, 0.5));
+}
+.z10-my__otmetka-liniya {
+  stroke: var(--my-zhar);
+  stroke-width: 1.6;
+  stroke-dasharray: 7 5;
+}
+.z10-my__legenda rect {
+  fill: rgba(255, 255, 255, 0.88);
+  stroke: rgba(240, 138, 36, 0.35);
+}
+.z10-my__legenda line {
+  stroke: var(--my-zhar);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+.z10-my__legenda text {
+  fill: var(--my-zhar-text);
+}
+.z10-my__vershina circle {
+  fill: var(--my-sin);
+}
+.z10-my__vershina text {
+  fill: var(--my-sin-text);
+}
+.z10-my__koren line {
+  stroke: var(--my-zhar);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+.z10-my__koren circle {
+  fill: #fff;
+  stroke: var(--my-zhar);
+  stroke-width: 2.5;
+}
+.z10-my__podpis rect {
+  fill: rgba(255, 255, 255, 0.9);
+  stroke: #fff;
+  filter: drop-shadow(0 2px 4px rgba(18, 48, 110, 0.12));
+}
+.z10-my__podpis text {
+  fill: var(--my-zhar-text);
+}
+.z10-my__promezhutok line {
+  stroke: var(--my-zhar);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.z10-my__promezhutok.is-gotovo .z10-my__podpis rect {
+  fill: #fff4e6;
+  stroke: rgba(240, 138, 36, 0.5);
+}
+.z10-my__svyaz {
+  stroke: rgba(31, 95, 208, 0.45);
+  stroke-width: 1.2;
+  stroke-dasharray: 2 4;
+}
+.z10-my__tochka {
+  fill: var(--my-sin);
+  stroke: #fff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px rgba(31, 95, 208, 0.55));
+}
+.z10-my__tochka.is-vyshe {
+  fill: var(--my-zhar);
+  filter: drop-shadow(0 0 7px rgba(240, 138, 36, 0.7));
+}
+
+/* Бросающий. */
+.z10-my__chel-ten {
+  fill: rgba(18, 48, 110, 0.2);
+}
+.z10-my__chel-ruka,
+.z10-my__chel-noga {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z10-my__chel-ruka {
+  stroke: #1f5fd0;
+  stroke-width: 5;
+}
+.z10-my__chel-ruka.is-dal {
+  stroke: #17489f;
+}
+.z10-my__chel-noga {
+  stroke: #1d2f57;
+  stroke-width: 6.5;
+}
+.z10-my__chel-noga.is-dal {
+  stroke: #14213f;
+}
+.z10-my__chel-kurtka {
+  fill: #1f5fd0;
+}
+.z10-my__chel-botinok {
+  fill: #20242e;
+}
+.z10-my__chel-kozha {
+  fill: #f2c4a2;
+}
+.z10-my__chel-volosy {
+  fill: #2a2f3b;
+}
+
+/* Мяч. */
+.z10-my__myach-ten {
+  fill: rgba(18, 48, 110, 0.5);
+}
+.z10-my__myach-telo {
+  filter: drop-shadow(0 3px 5px rgba(18, 48, 110, 0.3));
+}
+.z10-my__myach-zhar,
+.z10-my__myach-svet {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.z10-my__myach.is-vyshe .z10-my__myach-zhar,
+.z10-my__myach.is-vyshe .z10-my__myach-svet {
+  opacity: 1;
+}
+.z10-my__myach-polosy path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.75);
+  stroke-width: 1.4;
+}
+.z10-my__myach-blik {
+  fill: rgba(255, 255, 255, 0.85);
+}
+/* Приземление: мяч слегка сплющивается, по земле идёт волна. */
+.z10-my__myach[data-upal] {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: z10-my-plyuh 0.45s ease-out;
+}
+@keyframes z10-my-plyuh {
+  30% {
+    transform: scale(1.25, 0.72);
+  }
+  65% {
+    transform: scale(0.94, 1.06);
+  }
+}
+.z10-my__volna {
+  fill: none;
+  stroke: rgba(31, 95, 208, 0.45);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: z10-my-volna 0.9s ease-out both;
+}
+@keyframes z10-my-volna {
+  from {
+    transform: scale(0.3);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* ── Строка состояния и управление ── */
+.z10-my__status {
+  min-height: 3em;
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.z10-my__upr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.z10-my__pusk {
+  min-width: 156px;
+}
+.z10-my__ikonka {
+  width: 12px;
+  height: 14px;
+}
+.z10-my__ikonka.is-pusk {
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  background: currentColor;
+}
+.z10-my__ikonka.is-pauza {
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 4px 100% no-repeat,
+    linear-gradient(currentColor, currentColor) 100% 0 / 4px 100% no-repeat;
+}
+.z10-my__seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(31, 95, 208, 0.08);
+  box-shadow: var(--glass-ring);
+}
+.z10-my__seg button {
+  min-width: 48px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--blue-700);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.z10-my__seg button.is-on {
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.2),
+    0 4px 10px -4px rgba(18, 48, 110, 0.35);
+}
+.z10-my__seg--H button.is-on {
+  color: var(--my-zhar-text);
+  box-shadow:
+    0 0 0 1px rgba(240, 138, 36, 0.45),
+    0 4px 10px -4px rgba(180, 80, 28, 0.35);
+}
+.z10-my__seg button:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z10-my__podskazka {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+@media (hover: none) {
+  .z10-my__podskazka {
+    display: none;
+  }
+}
+.z10-my__otmetka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.z10-my__otmetka-zag {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--color-text-secondary);
+}
+.z10-my__otmetka-lead {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+/* ── Таблица моментов и решение ── */
+.z10-my__niz {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@container z10-my (min-width: 680px) {
+  .z10-my__niz {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+}
+.z10-my__tablica {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  font-variant-numeric: tabular-nums;
+}
+.z10-my__tablica caption {
+  padding: 0 0 var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+.z10-my__tablica th,
+.z10-my__tablica td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(31, 95, 208, 0.1);
+  font-size: 15px;
+  text-align: right;
+  white-space: nowrap;
+}
+.z10-my__tablica th:first-child {
+  text-align: left;
+}
+.z10-my__tablica thead th {
+  background: rgba(234, 241, 255, 0.7);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 650;
+}
+.z10-my__tablica tbody th {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+.z10-my__tablica tbody tr.is-est th {
+  color: var(--color-text);
+}
+.z10-my__tablica tbody tr.is-est td {
+  animation: z10-my-poyavlenie 0.4s ease-out both;
+}
+.z10-my__tablica tr.is-koren.is-est th,
+.z10-my__tablica tr.is-koren.is-est td {
+  background: rgba(240, 138, 36, 0.08);
+  color: var(--my-zhar-text);
+}
+.z10-my__seychas th,
+.z10-my__seychas td {
+  background: rgba(31, 95, 208, 0.06);
+  color: var(--my-sin-text) !important;
+  font-weight: 700;
+}
+.z10-my__tablica tfoot td {
+  border-bottom: 0;
+  text-align: left;
+  font-weight: 650;
+  color: var(--my-zhar-text);
+}
+.z10-my__tablica tfoot tr.is-est td {
+  background: #fff4e6;
+}
+@keyframes z10-my-poyavlenie {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+.z10-my__reshenie {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(253, 241, 234, 0.75));
+  box-shadow: var(--glass-ring-warm, var(--glass-ring)), var(--glass-hi);
+}
+.z10-my__reshenie:not(.is-vidno) {
+  display: none;
+}
+.z10-my__reshenie ol {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 1.4em;
+}
+.z10-my__reshenie li {
+  font-size: 16px;
+  line-height: 1.55;
+  animation: z10-my-poyavlenie 0.5s ease-out both;
+  animation-delay: calc(var(--i) * 0.4s + 0.2s);
+}
+
+/* Печать: один кадр без управления. */
+@media print {
+  .z10-my__chasy,
+  .z10-my__upr,
+  .z10-my__otmetka {
+    display: none;
+  }
+}
+
+/* «Уменьшить движение»: без сплющивания, волны и каскадов. */
+@media (prefers-reduced-motion: reduce) {
+  .z10-my__myach[data-upal],
+  .z10-my__volna,
+  .z10-my__reshenie li,
+  .z10-my__tablica tbody tr.is-est td {
+    animation: none;
+  }
+  .z10-my__myach-zhar,
+  .z10-my__myach-svet,
+  .z10-my__seg button {
+    transition: none;
+  }
+}
+:root[data-motion-level='reduce'] .z10-my__myach[data-upal],
+:root[data-motion-level='reduce'] .z10-my__volna,
+:root[data-motion-level='reduce'] .z10-my__reshenie li {
+  animation: none;
+}

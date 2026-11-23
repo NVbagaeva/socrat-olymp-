@@ -4,11 +4,9 @@ import { useId, useState } from 'react';
 import { Tex } from '@/components/ui/Tex';
 
 /**
- * Живые графики теории №10.
+ * Живые графики теории №10 (мяч выше отметки — отдельная сцена,
+ * myach/Myach10.tsx).
  *
- *   ZhivoyMyach  — высота мяча $h(t)=1{,}2+10t-5t^2$ (задача ФИПИ №37),
- *                  ползунок задаёт отметку $H$; подсвечен промежуток,
- *                  где $h(t)\ge H$, и его длина $t_2-t_1$;
  *   ZhivoyRaspad — масса изотопа $m(t)=16\cdot2^{-\frac{t}{7}}$ (№109),
  *                  ползунок — время; видно, сколько раз масса
  *                  уменьшилась вдвое.
@@ -25,10 +23,6 @@ const P = { l: 46, r: 18, t: 18, b: 40 };
 function chislo(x: number, znakov = 2): string {
   const r = Math.round(x * 10 ** znakov) / 10 ** znakov;
   return String(r).replace('.', ',').replace('-', '−');
-}
-
-function tochnoe(x: number): boolean {
-  return Math.abs(x * 100 - Math.round(x * 100)) < 1e-9;
 }
 
 interface Osi {
@@ -129,108 +123,6 @@ function Setka({ o }: { o: Osi }) {
         {o.podpisY}
       </text>
     </g>
-  );
-}
-
-export function ZhivoyMyach() {
-  const id = useId();
-  const h0 = 1.2;
-  const v = 10;
-  const hMax = h0 + (v * v) / 20;
-  const [Hm, setHm] = useState(6);
-  const o: Osi = { tMax: 2.4, yMax: 7, podpisY: 'h', shagT: 0.4, shagY: 1 };
-  const X = (t: number) => P.l + (t / o.tMax) * (W - P.l - P.r);
-  const Y = (y: number) => H - P.b - (y / o.yMax) * (H - P.t - P.b);
-  const h = (t: number) => h0 + v * t - 5 * t * t;
-  const tKon = (v + Math.sqrt(v * v + 20 * h0)) / 10;
-  const kriv: string[] = [];
-  for (let i = 0; i <= 80; i += 1) {
-    const t = (tKon * i) / 80;
-    kriv.push(`${X(t).toFixed(1)},${Y(h(t)).toFixed(1)}`);
-  }
-  const D = (hMax - Hm) / 5;
-  const t1 = 1 - Math.sqrt(D);
-  const t2 = 1 + Math.sqrt(D);
-  const dt = t2 - t1;
-  const tochno = tochnoe(t1) && tochnoe(t2);
-  const dug: string[] = [];
-  for (let i = 0; i <= 40; i += 1) {
-    const t = t1 + (dt * i) / 40;
-    dug.push(`${X(t).toFixed(1)},${Y(h(t)).toFixed(1)}`);
-  }
-  return (
-    <figure className="z10-zhivoy">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="График высоты мяча и отметки H">
-        <Setka o={o} />
-        <rect
-          x={X(t1)}
-          y={Y(o.yMax)}
-          width={X(t2) - X(t1)}
-          height={Y(0) - Y(o.yMax)}
-          fill="var(--graph-accent, #E07A2F)"
-          opacity="0.12"
-        />
-        <polyline
-          points={kriv.join(' ')}
-          fill="none"
-          stroke="var(--color-primary, #1F5FD0)"
-          strokeWidth="3"
-        />
-        <polyline
-          points={dug.join(' ')}
-          fill="none"
-          stroke="var(--graph-accent, #E07A2F)"
-          strokeWidth="5"
-          strokeLinecap="round"
-        />
-        <line
-          x1={X(0)}
-          y1={Y(Hm)}
-          x2={X(o.tMax)}
-          y2={Y(Hm)}
-          stroke="var(--graph-accent, #E07A2F)"
-          strokeWidth="1.6"
-          strokeDasharray="6 5"
-        />
-        <text
-          x={X(o.tMax) - 4}
-          y={Y(Hm) - 6}
-          textAnchor="end"
-          fontSize="14"
-          fontWeight="600"
-          fill="var(--graph-accent, #E07A2F)"
-        >
-          {`H = ${chislo(Hm, 1)}`}
-        </text>
-        <line
-          x1={X(t1)}
-          y1={Y(0)}
-          x2={X(t2)}
-          y2={Y(0)}
-          stroke="var(--graph-accent, #E07A2F)"
-          strokeWidth="5"
-        />
-      </svg>
-      <label className="z10-zhivoy__polzunok" htmlFor={id}>
-        <span>
-          Отметка <Tex text="$H$" />, м
-        </span>
-        <input
-          id={id}
-          type="range"
-          min={1.4}
-          max={6}
-          step={0.2}
-          value={Hm}
-          onChange={(e) => setHm(Number(e.target.value))}
-        />
-      </label>
-      <figcaption>
-        <Tex
-          text={`$h(t)=1{,}2+10t-5t^2\\ge${chislo(Hm, 1).replace(',', '{,}')}$ при $t$ от $${chislo(t1).replace(',', '{,}')}$ до $${chislo(t2).replace(',', '{,}')}$: мяч выше отметки $${tochno ? '' : '\\approx'}${chislo(dt).replace(',', '{,}')}$ с.`}
-        />
-      </figcaption>
-    </figure>
   );
 }
 
