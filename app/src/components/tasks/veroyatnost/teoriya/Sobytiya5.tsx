@@ -91,7 +91,7 @@ export function SovmestnyeSobytiya5() {
             <text x="432" y="154" textAnchor="middle" fill="#18243a" fontSize="25" fontWeight="650">5</text>
             <text x="58" y="275" fill="#18243a" fontSize="23" fontWeight="650">1</text>
             <text x="545" y="275" fill="#18243a" fontSize="23" fontWeight="650">3</text>
-            <text x="310" y="294" textAnchor="middle" fill="#506783" fontSize="15">Пересечение A ∩ B — два общих исхода: 4 и 6</text>
+            <text x="310" y="294" textAnchor="middle" fill="#506783" fontSize="15">Два общих исхода: 4 и 6</text>
           </svg>
           <figcaption><Tex text="$A=\\{2;4;6\\}$, $B=\\{4;5;6\\}$, $A\\cap B=\\{4;6\\}$, $A\\cup B=\\{2;4;5;6\\}$." /></figcaption>
         </figure>
