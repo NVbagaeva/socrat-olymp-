@@ -3,6 +3,8 @@ import { OPORNYE } from '@/content/opornye';
 import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
+import { SHIRINY_KARTINOK_5, kartinkaMetoda5 } from '@/lib/veroyatnost/metody5-kartinki';
+import { assetUrl } from '@/lib/assetUrl';
 import { bank4Pool, bank5Pool, prep4Pool, prep5Pool } from '@/lib/veroyatnost/pool';
 import type { Metod } from '@/lib/veroyatnost/tipologiya';
 import { MetodyKartochki, type KartochkaMetoda } from './MetodyKartochki';
@@ -44,6 +46,33 @@ export interface KlyuchevyeMetodyProps {
   zadanie: Zadanie;
 }
 
+/**
+ * Иллюстрация метода №5: WebP двух ширин и запасной PNG. Картинка
+ * декоративная (alt пустой): название метода рядом, текстом.
+ */
+function Kartinka5({ id }: { id: string }) {
+  const k = kartinkaMetoda5(id);
+  if (k === undefined) return null;
+  const put = (w: number, ext: string) => assetUrl(`/images/zadanie-05/${k.imya}-${w}.${ext}`);
+  return (
+    <picture>
+      <source
+        type="image/webp"
+        srcSet={SHIRINY_KARTINOK_5.map((w) => `${put(w, 'webp')} ${w}w`).join(', ')}
+        sizes="220px"
+      />
+      <img
+        src={put(SHIRINY_KARTINOK_5[1], 'png')}
+        width={k.width}
+        height={k.height}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    </picture>
+  );
+}
+
 function kartochki(zadanie: Zadanie): KartochkaMetoda[] {
   const metody: readonly Metod[] = zadanie === 4 ? KLYUCHEVYE_4 : METODY_5;
   const pool = zadanie === 4 ? bank4Pool() : bank5Pool();
@@ -60,6 +89,9 @@ function kartochki(zadanie: Zadanie): KartochkaMetoda[] {
       nazvanie: m.nazvanie,
       opisanie: m.opisanie,
       formula: m.formula === undefined ? null : <Tex text={`$${m.formula}$`} />,
+      ...(zadanie === 5 && kartinkaMetoda5(m.id) !== undefined
+        ? { kartinka: <Kartinka5 id={m.id} /> }
+        : {}),
       /* Тренировка у метода вероятности одна: тренажёр с выбранным
        методом. Подвал окна с одной тренировкой выглядит как раньше. */
       trenirovki: [
