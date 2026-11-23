@@ -939,8 +939,6 @@ async function newPage(mock, width, errors) {
     viewport: { width, height: width < 500 ? 844 : 900 },
     deviceScaleFactor: 1,
     hasTouch: width < 500,
-    /* Keep focus-driven smooth scrolling from racing automated button clicks. */
-    reducedMotion: 'reduce',
   });
   await installMock(context, mock);
   const page = await context.newPage();
@@ -1235,6 +1233,11 @@ async function runEnabled() {
           audit.anyClick = true;
           audit.lastClickTarget =
             event.target instanceof Element ? event.target.outerHTML.slice(0, 240) : String(event.target);
+          audit.clickPoint = {
+            x: event.clientX,
+            y: event.clientY,
+            hit: document.elementFromPoint(event.clientX, event.clientY)?.outerHTML.slice(0, 240) ?? null,
+          };
           const target =
             event.target instanceof Element
               ? event.target.closest('.register-actions button[type="submit"]')
