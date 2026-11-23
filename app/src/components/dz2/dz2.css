@@ -1,0 +1,182 @@
+/* Новая выдача ДЗ: кнопка «В домашку», корзина и мастер. Только токены. */
+
+.dz2-knopka {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.dz2-knopka__glavnaya {
+  min-height: 44px;
+}
+.dz2-knopka__korzina {
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.dz2-knopka__oshibka {
+  flex-basis: 100%;
+  color: var(--color-error);
+  font-size: 0.875rem;
+}
+
+.dz2-ryad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-block: var(--space-4);
+}
+
+/* Мастер и список */
+.dz2-uspeh {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-success-soft);
+}
+.dz2-oshibka,
+.dz2-oshibki {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-error-soft);
+}
+.dz2-oshibki {
+  padding-left: var(--space-8);
+}
+.dz2-elementy {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+  counter-reset: dz2;
+}
+.dz2-element {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface);
+  counter-increment: dz2;
+}
+.dz2-element__verh {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: baseline;
+}
+.dz2-element__verh::before {
+  content: counter(dz2) '.';
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.dz2-element__vid {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+}
+.dz2-element__nazvanie {
+  font-weight: 600;
+}
+.dz2-element__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.dz2-polya {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--space-3) var(--space-4);
+  margin-block: var(--space-3);
+}
+.dz2-vvod,
+.dz2-textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+.dz2-vvod--chislo {
+  max-width: 120px;
+}
+.dz2-textarea {
+  resize: vertical;
+}
+.dz2-galki {
+  display: grid;
+  gap: var(--space-2);
+}
+.dz2-galka__poyasnenie {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+.dz2-podzag {
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+}
+.dz2-details {
+  margin-top: var(--space-4);
+}
+.dz2-details summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-primary);
+}
+.dz2-fieldset {
+  border: 0;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.dz2-fieldset legend {
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+.dz2-radio {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 44px;
+}
+.dz2-deystviya {
+  position: sticky;
+  bottom: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg, 16px);
+  background: var(--color-bg-translucent-strong, var(--color-surface));
+  backdrop-filter: blur(8px);
+}
+.dz2-spisok {
+  display: grid;
+  gap: var(--space-3);
+}
+.dz2-kartochka__verh {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+}
+.dz2-kartochka__nazvanie {
+  margin: 0;
+  font-size: 1.0625rem;
+}
+.dz2-nazad {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  color: var(--color-primary);
+  font-size: 0.875rem;
+}

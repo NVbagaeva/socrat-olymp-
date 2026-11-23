@@ -24,6 +24,9 @@ import type { KlassView } from '@/lib/auth/klassy';
 import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
 import { currentUser, useSessionUser } from '@/lib/auth/session';
 import { KartaUchenika } from '@/components/karta/KartaUchenika';
+import { DZ2 } from '@/content/dz2';
+import { DZ2_ON } from '@/lib/dz2/config';
+import { DZ2_HREF } from '@/lib/dz2/links';
 import { PROGRESS } from '@/content/progressUchitel';
 import { PROGRESS_UCHENIK_ON } from '@/lib/zhurnal/config';
 import { PROGRESS_HREF } from '@/lib/zhurnal/links';
@@ -379,6 +382,15 @@ function TutorHome({ kits }: { kits: SavedKit[] | null }) {
   const t = KABINET.tutor;
   return (
     <>
+      {/* Новая выдача ДЗ (кабинет v2, docs/kabinet-dz2.md) — за флагом. */}
+      {DZ2_ON ? (
+        <Card className="kabinet__card" title={DZ2.spisok.zagolovok} data-section="dz2">
+          <p className="auth-form__text">{DZ2.spisok.pustoLead}</p>
+          <Link className="btn btn--primary" href={DZ2_HREF.spisok}>
+            {DZ2.spisok.zagolovok}
+          </Link>
+        </Card>
+      ) : null}
       <div className="kabinet__grid">
         <TutorClassesCard />
         <TutorHomeworkCard />

@@ -81,6 +81,9 @@ jobs:
           NEXT_PUBLIC_ZHURNAL_RAZDELY: ${{ vars.NEXT_PUBLIC_ZHURNAL_RAZDELY }}
           NEXT_PUBLIC_PROGRESS_UCHITEL: ${{ vars.NEXT_PUBLIC_PROGRESS_UCHITEL }}
           NEXT_PUBLIC_PROGRESS_UCHENIK: ${{ vars.NEXT_PUBLIC_PROGRESS_UCHENIK }}
+          # Новая выдача ДЗ (docs/kabinet-dz2.md); флаг базы — «Сервер: миграции».
+          NEXT_PUBLIC_DZ2: ${{ vars.NEXT_PUBLIC_DZ2 }}
+          NEXT_PUBLIC_DZ2_RAZDELY: ${{ vars.NEXT_PUBLIC_DZ2_RAZDELY }}
         run: pnpm build
 
       - name: Проверить, что экспорт не пустой

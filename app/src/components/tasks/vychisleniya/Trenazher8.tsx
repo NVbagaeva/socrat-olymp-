@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui';
+import { VDomashkuTrenazher } from '@/components/dz2/knopki';
 import { BookmarksList, HistoryList, MistakesList } from '@/components/progress/Lists';
 import { TrainerSessionHost, type ConfiguratorApi, type SummaryActions } from '../session';
 import type { SummaryData } from '../session/TrainerSummary';
@@ -348,6 +349,9 @@ function Konfigurator8({
             start(buildByPrototypes(tipy, vybor.count ?? BEZ_KONCA, closedTasks(log)));
           }}
           labels={TRENAZHER8.vybor}
+          ryadomSoStartom={
+            <VDomashkuTrenazher taskNo={8} tipy={PROTOTYPES8_ORDER.filter((id) => selected.has(id))} />
+          }
         />
       </div>
     );
