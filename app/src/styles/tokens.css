@@ -795,7 +795,7 @@
 }
 @media (min-width: 1920px) {
   :root {
-    --w-container: 1860px;
+    --w-container: 1680px;
     --card-pad: var(--space-8);
     --card-no: 36px;
     --card-no-lh: 42px;
