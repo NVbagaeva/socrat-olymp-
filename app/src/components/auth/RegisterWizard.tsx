@@ -637,17 +637,21 @@ export function RegisterWizard({
               <FieldLabel htmlFor={emailId}>{REGISTER_FORM.email}</FieldLabel>
               <FieldHelp label={REGISTER_FORM.help.button}>{REGISTER_FORM.emailHelp}</FieldHelp>
             </div>
+            {/* Preserve raw Unicode so the layout hint can run before browser IDN conversion. */}
             <Input
               ref={(node) => {
                 refs.current.email = node;
               }}
               id={emailId}
               name="email"
-              type="email"
+              type="text"
               inputMode="email"
+              autoCapitalize="none"
               autoComplete="email"
+              autoCorrect="off"
               enterKeyHint="next"
               placeholder={LOGIN_FORM.emailPlaceholder}
+              spellCheck={false}
               value={email}
               onFocus={() => setFocused('email')}
               onBlur={() => {
