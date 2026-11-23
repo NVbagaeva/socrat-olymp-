@@ -1264,7 +1264,11 @@ async function runEnabled() {
       const form = button?.form;
       return {
         click: window.__registrationSubmitAudit?.click ?? null,
+        anyClick: window.__registrationSubmitAudit?.anyClick ?? null,
+        lastClickTarget: window.__registrationSubmitAudit?.lastClickTarget ?? null,
+        trusted: window.__registrationSubmitAudit?.trusted ?? null,
         submit: window.__registrationSubmitAudit?.submit ?? null,
+        submitDefaultPrevented: window.__registrationSubmitAudit?.submitDefaultPrevented ?? null,
         buttonType: button?.type ?? null,
         disabled: button?.disabled ?? null,
         hasForm: form !== null,
