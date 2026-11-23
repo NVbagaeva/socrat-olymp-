@@ -1031,18 +1031,9 @@ async function chooseRegistrationRole(page, role) {
 
 async function wizardNext(page) {
   const button = page.locator('.register-actions button[type="submit"]');
-  /* Confirm the visible center is the button, then activate the native control. */
-  await button.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(120);
-  const hitsButton = await button.evaluate((element) => {
-    const rect = element.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-    const hit = document.elementFromPoint(x, y);
-    return hit === element || (hit !== null && element.contains(hit));
-  });
-  if (!hitsButton) throw new Error('Кнопка «Дальше» закрыта другим элементом');
-  await button.evaluate((element) => element.click());
+  // На узком экране закреплённая шапка может перекрывать край области просмотра.
+  await button.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
+  await button.click();
 }
 
 async function prepareRegistration(page, { role, name, email, password, birthYear, parentEmail }) {
