@@ -29,7 +29,11 @@
 #                        (флаг базы kabinet_flags.zhurnal, Variable
 #                        NEXT_PUBLIC_ZHURNAL — та же, что у сайта);
 #   ZHURNAL_RAZDELY    — номера хранения разделов журнала через запятую
-#                        (Variable NEXT_PUBLIC_ZHURNAL_RAZDELY); пусто — 5,8.
+#                        (Variable NEXT_PUBLIC_ZHURNAL_RAZDELY); пусто — 5,8;
+#   DZ_NOVYE           — «1» — новая выдача ДЗ (флаг базы kabinet_flags.dz_novye,
+#                        Variable NEXT_PUBLIC_DZ2);
+#   DZ_NOVYE_RAZDELY   — разделы новой выдачи ДЗ (Variable NEXT_PUBLIC_DZ2_RAZDELY);
+#                        пусто — 5,8.
 set -eu
 . "$(dirname "$0")/lib.sh"
 load_env
@@ -41,6 +45,8 @@ DOCUMENTS_VERSION=
 ADMIN_EMAIL=
 ZHURNAL=
 ZHURNAL_RAZDELY=
+DZ_NOVYE=
+DZ_NOVYE_RAZDELY=
 DB_ADMIN_PASSWORD=
 while IFS= read -r line; do
   case "$line" in
@@ -51,6 +57,8 @@ while IFS= read -r line; do
     DB_ADMIN_PASSWORD=*) DB_ADMIN_PASSWORD=${line#DB_ADMIN_PASSWORD=} ;;
     ZHURNAL=*) ZHURNAL=${line#ZHURNAL=} ;;
     ZHURNAL_RAZDELY=*) ZHURNAL_RAZDELY=${line#ZHURNAL_RAZDELY=} ;;
+    DZ_NOVYE=*) DZ_NOVYE=${line#DZ_NOVYE=} ;;
+    DZ_NOVYE_RAZDELY=*) DZ_NOVYE_RAZDELY=${line#DZ_NOVYE_RAZDELY=} ;;
   esac
 done
 
@@ -173,5 +181,16 @@ insert into public.kabinet_flags (key, value) values ('zhurnal', :'on'::jsonb), 
 on conflict (key) do update set value = excluded.value, updated_at = now();
 SQL
 log "Журнал: $([ "$ZHURNAL" = 1 ] && echo включён || echo выключен), разделы $ZHURNAL_RAZDELY"
+
+# Новая выдача ДЗ (миграция 20261123120000_dz2.sql). №6 база не примет.
+case "$DZ_NOVYE_RAZDELY" in
+  '') DZ_NOVYE_RAZDELY=5,8 ;;
+  *[!0-9,]*) log "DZ_NOVYE_RAZDELY: нужны номера через запятую, например 5,8"; exit 1 ;;
+esac
+psql_db -v on="$([ "$DZ_NOVYE" = 1 ] && echo true || echo false)" -v razdely="[$DZ_NOVYE_RAZDELY]" <<'SQL'
+insert into public.kabinet_flags (key, value) values ('dz_novye', :'on'::jsonb), ('dz_novye_razdely', :'razdely'::jsonb)
+on conflict (key) do update set value = excluded.value, updated_at = now();
+SQL
+log "Новая выдача ДЗ: $([ "$DZ_NOVYE" = 1 ] && echo включена || echo выключена), разделы $DZ_NOVYE_RAZDELY"
 
 psql_db -c "notify pgrst, 'reload schema'"

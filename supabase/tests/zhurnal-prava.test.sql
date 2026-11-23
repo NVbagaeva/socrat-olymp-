@@ -144,6 +144,17 @@ select pg_temp.push(pg_temp.z(:'za1', 8, '8.B', 'right', 1000));
 select pg_temp.ok((select kind = '8.A' and outcome = 'wrong' from public.zhurnal_zadachi where id = :'za1'),
   'чужая задача под тем же id переписала строку');
 
+-- Незаконченная задача (исход пустой) принимается и в «решено» не идёт,
+-- а закрытая позже — идёт (миграция 20261123110000_zhurnal_otkrytye.sql).
+select pg_temp.as_user(:'s4');
+select pg_temp.ok((pg_temp.push(pg_temp.z('d5000000-0000-0000-0000-00000000000e', 5, '5:P09', null, 4000))
+                   ->> 'saved')::int = 1, 'незаконченная задача не записалась');
+select pg_temp.ok((select coalesce(sum(solved), 0) = 0 from public.zhurnal_dni), 'незаконченная задача — в «решено»');
+select pg_temp.push(pg_temp.z('d5000000-0000-0000-0000-00000000000e', 5, '5:P09', 'right', 9000));
+select pg_temp.ok((select sum(solved) = 1 and sum("right") = 1 from public.zhurnal_dni),
+  'закрытая позже задача не попала в свёртку');
+select pg_temp.as_user(:'s1');
+
 -- Свёртка по дням: 3 задачи, 2 верно (8.A — ошибка).
 select pg_temp.ok((select sum(solved) = 3 and sum("right") = 2 from public.zhurnal_dni), 'свёртка неверна');
 
