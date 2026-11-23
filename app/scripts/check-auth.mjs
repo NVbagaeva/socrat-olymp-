@@ -1030,18 +1030,18 @@ async function chooseRegistrationRole(page, role) {
 
 async function wizardNext(page) {
   const button = page.locator('.register-actions button[type="submit"]');
-  /* Scroll first, then use a fresh hit-tested point instead of locator auto-scroll. */
+  /* Confirm the visible center is the button, then activate the native control. */
   await button.scrollIntoViewIfNeeded();
   await page.waitForTimeout(120);
-  const point = await button.evaluate((element) => {
+  const hitsButton = await button.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
     const hit = document.elementFromPoint(x, y);
-    return { x, y, hitsButton: hit === element || (hit !== null && element.contains(hit)) };
+    return hit === element || (hit !== null && element.contains(hit));
   });
-  if (!point.hitsButton) throw new Error('Кнопка «Дальше» закрыта другим элементом');
-  await page.mouse.click(point.x, point.y);
+  if (!hitsButton) throw new Error('Кнопка «Дальше» закрыта другим элементом');
+  await button.evaluate((element) => element.click());
 }
 
 async function prepareRegistration(page, { role, name, email, password, birthYear, parentEmail }) {
