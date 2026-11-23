@@ -325,6 +325,19 @@ const SODERZHANIE = {
  * образец уже содержит эту версию.
  */
 const ODOBRENO = {
+  /* №4–5: одобрено владельцем 23.11.2026 — подробные материалы по
+     изображению событий и противоположному событию. Зафиксированы только
+     версии пяти затронутых файлов; последующие изменения снова проверяются. */
+  'app/src/components/tasks/veroyatnost/teoriya/KakIzobrazhatSobytiya.tsx':
+    '9b85c72ca8dd7eade200454766cccc15a5b31a83ef2160a8e0ba20025501f409',
+  'app/src/components/tasks/veroyatnost/teoriya/ProtivopolozhnoeSobytiye4.tsx':
+    '41baf2dbc0a51465e9a957f09ab961bb385a9f03ffd6590da4a78a66ce6974e7',
+  'app/src/components/tasks/veroyatnost/teoriya/Sobytiya5.tsx':
+    '40aecc95d6460dcd51fa3067f68c997764e5332582c8906bd8cc56aa6acac491',
+  'app/src/components/tasks/veroyatnost/teoriya/index.tsx':
+    'bc9a702586381afad4fb9aa3d994c8b7dd95e011057cce7efb9f84af5c92c2c8',
+  'app/src/content/veroyatnost-teoriya.ts':
+    '7421149ede2c6dbaad982983bbf9da08344b08ecbfeaeb6b5ae1dec51b4452ad',
   /* №1, одобрено владельцем 19.11.2026: подсказки (PR #451 — чертёж в
      шаге, буквы, реестр фактов «Показать свойство», тексты вопросов и
      решений) и «чертёж — схема, а не масштабный рисунок» (PR #452 —
