@@ -29,7 +29,7 @@ const INTERAKTIV = {
   stolAlisa: 'Алиса',
   stolStul: (i: number) => `Стул ${i}`,
   stolPodpis: (n: number) => `Для Шляпника ${n} равновозможных стульев, рядом с Алисой — 2:`,
-  diskPolzunok: 'Вероятность события A',
+  diskPolzunok: 'Вероятность оранжевого сектора',
 } as const;
 
 function Html({ html, className }: { html: string; className?: string }) {
@@ -395,7 +395,17 @@ function tochka(p: number, r: number, c: number): [number, number] {
   return [c + r * Math.cos(ugol), c + r * Math.sin(ugol)];
 }
 
-export function Disk4({ nachalo }: { nachalo: number }) {
+/** Обозначения подписи диска, набранные KaTeX на сервере: числа между ними меняются. */
+export interface DiskTex {
+  /** P(A)= */
+  pa: string;
+  /** P(\overline A)=1- */
+  pna: string;
+  /** = */
+  ravno: string;
+}
+
+export function Disk4({ nachalo, tex }: { nachalo: number; tex: DiskTex }) {
   const [p, setP] = useState(nachalo);
   const svg = useRef<SVGSVGElement | null>(null);
   const tyanem = useRef(false);
@@ -476,10 +486,11 @@ export function Disk4({ nachalo }: { nachalo: number }) {
       </label>
       <div className="m4i-itog m4i-mat" aria-live="polite">
         <span className="m4i-disk__a">
-          <i>P</i>(<i>A</i>) = {pa}
+          <Html html={tex.pa} /> <span className="m4i-chislo">{pa}</span>
         </span>
         <span className="m4i-disk__na">
-          <i>P</i>(<i className="m4i-nadcherk">A</i>) = 1 − {pa} = {pna}
+          <Html html={tex.pna} /> <span className="m4i-chislo">{pa}</span> <Html html={tex.ravno} />{' '}
+          <span className="m4i-chislo">{pna}</span>
         </span>
       </div>
     </div>

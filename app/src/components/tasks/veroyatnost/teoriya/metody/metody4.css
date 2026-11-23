@@ -366,8 +366,11 @@
   font-family: KaTeX_Main, 'Times New Roman', serif;
   font-size: 1.2rem;
 }
-.m4i-nadcherk {
-  text-decoration: overline;
+.m4i-chislo {
+  /* Размер и шрифт — как у KaTeX рядом (.katex: 1.21em, KaTeX_Main). */
+  font-family: KaTeX_Main, 'Times New Roman', serif;
+  font-size: 1.21em;
+  font-variant-numeric: tabular-nums;
 }
 .m4i-vybor {
   display: flex;

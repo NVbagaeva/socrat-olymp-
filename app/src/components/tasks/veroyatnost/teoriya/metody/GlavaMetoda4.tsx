@@ -216,7 +216,9 @@ function Interaktiv({ metod }: { metod: string }) {
     case 'kruglyy-stol':
       return <Stol4 mest={9} formula={t(`P=${drobTex(2, 8)}`)} />;
     case 'protivopolozhnye':
-      return <Disk4 nachalo={19} />;
+      return (
+        <Disk4 nachalo={19} tex={{ pa: t('P(A)='), pna: t('P(\\overline A)=1-'), ravno: t('=') }} />
+      );
     default:
       return null;
   }
