@@ -72,7 +72,7 @@ for file in migrations/*.sql; do
 -- Сверяем хеш до пропуска, как и для канонического имени.
 select distinct sha256 from lite.migrations
 where name = :'name'
-   or (:'name' = '013-20261122130000_avatar_profiles.sql'
+   or (substring(:'name' from 5) = '20261122130000_avatar_profiles.sql'
        and name = '011-20261122130000_avatar_profiles.sql');
 SQL
 )

@@ -1315,13 +1315,16 @@
   display: grid;
   gap: var(--space-3);
 }
-.trn-vybor {
+/* Только ответ выбором (role="radiogroup"): то же имя класса носит экран
+   выбора тем (VyborTem), и без уточнения он тоже делился на две колонки —
+   на компьютере настройки и «Начать» налезали друг на друга. */
+.trn-vybor[role='radiogroup'] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
 }
 @media (min-width: 640px) {
-  .trn-vybor {
+  .trn-vybor[role='radiogroup'] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1361,4 +1364,11 @@
 /* Строка ответа под шагами решения (№13). */
 .trn-otvet-stroka {
   margin: var(--space-3) 0 0;
+}
+
+/* Под «Начать»: «В домашку» учителя (docs/kabinet-dz2.md) — отдельной строкой справа. */
+.trn-vybor__ryadom {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-3);
 }

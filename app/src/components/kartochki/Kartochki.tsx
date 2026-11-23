@@ -28,6 +28,7 @@ import {
 import { persistent, type PersistentStore } from '@/lib/storage';
 import { idIz } from '@/lib/zhurnal/model';
 import { useZapisZadachi } from '@/lib/zhurnal/zapis';
+import { VDomashkuKartochki } from '@/components/dz2/knopki';
 import { KartochkaFlip } from './KartochkaFlip';
 
 /** Начатая сессия: переживает переход в теорию и перезагрузку. */
@@ -373,6 +374,10 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
           <Button size="lg" disabled={nechego !== null} onClick={() => nachat(rezhim)}>
             {T.nachat}
           </Button>
+          {/* Учителю: набор карточек — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). */}
+          {koloda.klyuch === undefined ? (
+            <VDomashkuKartochki taskNo={koloda.task} kartochek={vsego} />
+          ) : null}
           <p className="kart-klavishi t-caption">{T.klavishi}</p>
         </div>
 
