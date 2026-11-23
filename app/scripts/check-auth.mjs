@@ -1451,6 +1451,7 @@ async function runEnabled() {
     const { context, page } = await newPage(mock, 1440, errors);
     await page.goto(`${SITE}/voyti/?vkladka=registraciya`, { waitUntil: 'networkidle' });
     await chooseRegistrationRole(page, 'tutor');
+    await page.fill('input[name="name"]', 'Чужой Человек');
     const note = page.locator('.auth-form__domain');
     const email = page.locator('input[name="email"]');
     let asked = 0;
@@ -1481,12 +1482,13 @@ async function runEnabled() {
       'школьная или рабочая почта: есть ссылка автору сайта',
     );
     check(
-      (await page.locator('.field__msg--error').count()) === 0,
+      (await email.getAttribute('aria-invalid')) !== 'true',
       'подсказка про иностранную почту спокойная и не красная',
     );
 
     await email.fill('ivan@яндекс.ру');
-    await email.evaluate((input) => input.blur());
+    await email.press('Tab');
+    await page.waitForSelector('[id$="-email-error"]');
     check(
       (await page.locator('[id$="-email-error"]').innerText()).includes(
         'Переключите клавиатуру на английский',
