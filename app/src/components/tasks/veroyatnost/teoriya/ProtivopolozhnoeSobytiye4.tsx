@@ -25,7 +25,7 @@ export function ProtivopolozhnoeSobytiye4() {
                 <g key={n}>
                   <rect x={x} y="30" width="84" height="90" rx="18" fill={opposite ? '#edf4ff' : '#fff3e8'} stroke={opposite ? '#2b67d8' : '#e98a32'} strokeWidth="2" />
                   <text x={x + 42} y="87" textAnchor="middle" fill={opposite ? '#1f56bb' : '#a85f06'} fontSize="32" fontWeight="700">{n}</text>
-                  <text x={x + 42} y="153" textAnchor="middle" fill={opposite ? '#1f56bb' : '#a85f06'} fontSize="14" fontWeight="600">{opposite ? 'не A' : 'A'}</text>
+                  <text x={x + 42} y="153" textAnchor="middle" fill={opposite ? '#1f56bb' : '#a85f06'} fontSize="14" fontWeight="600">{opposite ? 'остальные' : 'событие'}</text>
                 </g>
               );
             })}
