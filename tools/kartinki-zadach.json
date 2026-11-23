@@ -18,7 +18,7 @@
   ],
   "size": "1024x1024",
   "scene": "A new glass document scanner on an office desk with a glass calendar and an hourglass beside it, no text",
-  "alt": "Новый сканер прослужит больше 1 года, но меньше 2 лет",
+  "alt": "Новый сканер, календарь и песочные часы",
   "stroka": 159
  },
  {
@@ -40,7 +40,7 @@
   ],
   "size": "1024x1024",
   "scene": "A new glass desktop printer with a blank sheet coming out, a glass calendar and an hourglass beside it",
-  "alt": "Новый принтер прослужит больше 1 года, но меньше 2 лет",
+  "alt": "Новый принтер, календарь и песочные часы",
   "stroka": 161
  },
  {
@@ -51,7 +51,7 @@
   ],
   "size": "1024x1024",
   "scene": "A new glass hair dryer lying on a bathroom shelf, a glass calendar and an hourglass beside it",
-  "alt": "Новый фен прослужит больше 1 года, но меньше 2 лет",
+  "alt": "Новый фен, календарь и песочные часы",
   "stroka": 162
  },
  {
@@ -62,7 +62,7 @@
   ],
   "size": "1024x1024",
   "scene": "A new glass smartphone with a blank screen standing on a stand, a glass calendar and an hourglass beside it",
-  "alt": "Новый мобильный телефон прослужит больше 1 года, но меньше 2 лет",
+  "alt": "Новый смартфон, календарь и песочные часы",
   "stroka": 163
  },
  {
@@ -524,7 +524,7 @@
   ],
   "size": "1024x1024",
   "scene": "A faceless glass shooter figurine aiming at one round glass target with concentric rings (no numbers on the rings)",
-  "alt": "Стрелок выбивает 10, 9 или 8 очков",
+  "alt": "Стрелок целится в мишень с кольцами",
   "stroka": 216
  },
  {
@@ -535,7 +535,7 @@
   ],
   "size": "1024x1024",
   "scene": "A faceless glass athlete figurine mid-jump over a glass sand pit with two blank marker flags along the edge",
-  "alt": "Прыжок в длину дальше 5 м, но не дальше 6 м",
+  "alt": "Спортсмен в прыжке над ямой с песком",
   "stroka": 218
  },
  {
@@ -546,7 +546,7 @@
   ],
   "size": "1024x1024",
   "scene": "A faceless glass figurine waiting at the curb with a raised hand, a glass taxi far down the street, a glass clock without numerals",
-  "alt": "Ожидание такси от 3 до 10 минут",
+  "alt": "Человек ждёт такси у обочины, рядом часы",
   "stroka": 220
  },
  {
@@ -700,7 +700,7 @@
   ],
   "size": "1024x1024",
   "scene": "A glass fruit bowl with two glass apples and three glass pears, a glass hand reaching in without having taken anything",
-  "alt": "Ваза: 2 яблока и 3 груши, берут два фрукта",
+  "alt": "Ваза с яблоками и грушами, рука тянется к фруктам",
   "stroka": 246
  },
  {
@@ -711,7 +711,7 @@
   ],
   "size": "1024x1024",
   "scene": "A classroom with several faceless glass student figurines, boys and girls, sitting at glass desks; a faceless glass teacher figurine at a blank board holding two blank duty armbands",
-  "alt": "Класс: 6 мальчиков и 10 девочек, выбирают двух дежурных",
+  "alt": "Класс за партами, учитель с повязками дежурных",
   "stroka": 247
  },
  {
@@ -722,7 +722,7 @@
   ],
   "size": "1024x1024",
   "scene": "An open soft glass pouch with several glass marbles spilling out: white, red and blue marbles mixed",
-  "alt": "Мешочек: 3 белых, 1 красный, 2 синих шарика",
+  "alt": "Мешочек с белыми, красными и синими шариками",
   "stroka": 249
  },
  {
@@ -733,7 +733,7 @@
   ],
   "size": "1024x1024",
   "scene": "A glass aquarium with several fish of three kinds swimming: goldfish, striped fish and grey fish; a small glass net above the water",
-  "alt": "Аквариум: 6 золотых, 5 полосатых, 5 серых рыбок",
+  "alt": "Аквариум с рыбками трёх видов и сачок",
   "stroka": 251
  },
  {
@@ -744,7 +744,7 @@
   ],
   "size": "1024x1024",
   "scene": "A large glass sports basket full of balls of three kinds mixed together: basketballs, volleyballs and footballs; a faceless glass coach figurine beside it",
-  "alt": "Корзина: 7 баскетбольных, 3 волейбольных, 11 футбольных мячей",
+  "alt": "Корзина с баскетбольными, волейбольными и футбольными мячами",
   "stroka": 252
  },
  {
@@ -755,7 +755,7 @@
   ],
   "size": "1024x1024",
   "scene": "Five identical blank glass lottery tickets lying face-down in a row on a table",
-  "alt": "5 лотерейных билетов, 2 выигрышных",
+  "alt": "Лотерейные билеты лежат в ряд рубашкой вверх",
   "stroka": 253
  },
  {
@@ -766,7 +766,7 @@
   ],
   "size": "1024x1024",
   "scene": "A glass vase with five tulips: two red and three yellow",
-  "alt": "Ваза: 2 красных и 3 жёлтых тюльпана",
+  "alt": "Ваза с красными и жёлтыми тюльпанами",
   "stroka": 254
  },
  {
@@ -1151,7 +1151,7 @@
   ],
   "size": "1024x1024",
   "scene": "A winding machine spooling bright plastic 3D-printer filament onto one reel, a curved glowing arrow around the reel showing rotation.",
-  "alt": "Намотка филамента для 3D-принтера",
+  "alt": "Катушка с нитью для трёхмерного принтера",
   "stroka": 385
  },
  {
@@ -1173,7 +1173,7 @@
   ],
   "size": "1024x1024",
   "scene": "Close-up of a metal 3D-printer print head with a red-hot glowing nozzle heater block, and a thermometer dial without numbers beside it.",
-  "alt": "Нагреватель сопла 3D-принтера по металлу",
+  "alt": "Раскалённое сопло трёхмерного принтера и термометр",
   "stroka": 390
  },
  {
@@ -1591,7 +1591,7 @@
   ],
   "size": "1024x1024",
   "scene": "A faceless glass figurine citizen holding a pay envelope; a larger coin stack with a small separate portion moved to a tax-office tray.",
-  "alt": "Зарплата по сумме после налога 13%",
+  "alt": "Человек с конвертом зарплаты, часть монет уходит в налоговую",
   "stroka": 672
  },
  {
@@ -1712,7 +1712,7 @@
   ],
   "size": "1024x1024",
   "scene": "A stock-exchange monitor with a blank chart; a curved arrow going up and then down by the same-looking step, ending lower than it started.",
-  "alt": "Акции: подорожали и подешевели на тот же %",
+  "alt": "Монитор с графиком цены акций",
   "stroka": 684
  },
  {
@@ -2592,7 +2592,7 @@
   ],
   "size": "1024x1024",
   "scene": "A lab bench: two flasks of solution of different tint being poured into one beaker; beside it a large bottle of clear water and an alternative bottle of a mid-tint solution; a faceless glass figurine lab assistant.",
-  "alt": "Два раствора + 10 кг воды или 50%-го раствора (система)",
+  "alt": "Лаборант смешивает два раствора и добавляет воду",
   "stroka": 769
  },
  {
@@ -2790,7 +2790,7 @@
   ],
   "size": "1024x1024",
   "scene": "A car on a long route divided into three visibly different stretches (e.g. town, highway, country), each stretch tinted differently.",
-  "alt": "Автомобиль: 3 участка по времени",
+  "alt": "Автомобиль едет по дороге через город и трассу",
   "stroka": 792
  },
  {
@@ -3351,7 +3351,7 @@
   ],
   "size": "1024x1024",
   "scene": "A road from town A (left) to town B (right) with village C in between; a car on the road ahead, a faceless glass figurine motorcyclist behind it heading the same way; a curved return arrow from C back to A.",
-  "alt": "Автомобиль, мотоциклист догнал в C и вернулся",
+  "alt": "Автомобиль и мотоциклист на одной дороге: мотоциклист догоняет и возвращается",
   "stroka": 843
  },
  {
