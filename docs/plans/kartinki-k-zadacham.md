@@ -1,6 +1,19 @@
 # Картинки-иллюстрации к задачам первой части
 
-Состояние: **инвентаризация, генерация не начата — ждёт согласования.**
+Состояние (23.11.2026): **сделано 387 из 437 сюжетов, на сайте подключены.**
+Объём согласован: всё из таблицы, кроме разминки №10 и отрезков №4.
+Генерация остановлена — на счёте OpenAI кончились средства. Осталось
+(очередь `design-reference/zadachi/pererisovat.txt`, 221 сюжет):
+48 не нарисованных сюжетов №10, `pr-05-student-daughter` (дымка — снята
+с сайта) и 173 «слишком стеклянные» картинки — автор попросила
+разбавить стекло настоящими предметами (добавка `STIL_PREDMETY` к
+промпту). Запуск: `python3 tools/kartinki_zadach.py batch @design-reference/zadachi/pererisovat.txt`.
+
+Решения автора: `k4-09`, `k5-31`, `k5-40` — показаны готовые картинки
+прототипов `p4-07`, `p5-07`, `p5-09`; `p4-25` — общая картинка билетов
+`p4-08`. Остальные 7 задач «не по условию» (`k4-01`, `k4-04`, `k4-06`,
+`k4-11`, `k5-38`, `k5-55`, `k5-60`), `p4-15`, `p5-13` и отрезки `p4-22`/`p4-23`
+— без новых картинок, ждут решения.
 Номера — ЕГЭ-2027 (19 заданий). Разделы хранения: №4 → 4, №5 → 5,
 №9 → 10 (`lib/zadanie10`), №10 → 11 (`lib/zadanie11`).
 Существующие картинки и фото не заменяются и не перерисовываются.
@@ -238,7 +251,7 @@
 | 10 | `pr-04-tshirts-jeans` | Several identical T-shirts lined up on one side of a balance scale and a pair of jeans on the other side, the scale tipping slightly toward a pair of jeans. | `images/zadachi/10/pr-04-tshirts-jeans-560.webp` | 2 | сделано |
 | 10 | `pr-04-postcards-boardgame` | Several identical postcards (blank) lined up on one side of a balance scale and a board game box (no writing) on the other side, the scale tipping slightly toward a board game box (no writing). | `images/zadachi/10/pr-04-postcards-boardgame-560.webp` | 1 | сделано |
 | 10 | `pr-04-pencils-case` | Several identical colored pencils lined up on one side of a balance scale and a pencil case on the other side, the scale tipping slightly toward a pencil case. | `images/zadachi/10/pr-04-pencils-case-560.webp` | 1 | сделано |
-| 10 | `pr-05-student-daughter` | A family of three faceless glass figurines at a kitchen table: husband, wife and a student daughter with a textbook; one shared small pile of glass coins in the middle of the table. Nothing behind the table: no wall, no backdrop, no haze, everything outside the objects fully transparent. | `images/zadachi/10/pr-05-student-daughter-560.webp` | 1 | сделано |
+| 10 | `pr-05-student-daughter` | A family of three faceless glass figurines at a kitchen table: husband, wife and a student daughter with a textbook; one shared small pile of glass coins in the middle of the table. Nothing behind the table: no wall, no backdrop, no haze, everything outside the objects fully transparent. | — | 1 | решение автора: дымка-подложка по краям (видна на тёмном фоне) — ждёт перерисовки |
 | 10 | `pr-05-student-son` | A family of three faceless glass figurines at a kitchen table: husband, wife and a student son with a textbook; three coin stacks of different heights in front of them. | `images/zadachi/10/pr-05-student-son-560.webp` | 1 | сделано |
 | 10 | `pr-05-grandparent-pension` | A family of three faceless glass figurines at a kitchen table: father, mother and an elderly grandparent; three coin stacks of different heights in front of them. | `images/zadachi/10/pr-05-grandparent-pension-560.webp` | 1 | сделано |
 | 10 | `pr-05-mother-son-daughter` | A family of three faceless glass figurines at a kitchen table: a mother, an adult son and a student daughter; three coin stacks of different heights in front of them. | `images/zadachi/10/pr-05-mother-son-daughter-560.webp` | 1 | сделано |

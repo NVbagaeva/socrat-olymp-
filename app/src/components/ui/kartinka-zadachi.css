@@ -20,10 +20,12 @@
     margin: 0 auto var(--space-2, 8px);
   }
 }
-/* Условие и поле ответа под картинкой не заезжают. */
-.kz-clear {
-  clear: both;
+/* Картинка и условие: обычный блок, условие обтекает картинку, всё
+   ниже (поле ответа, чертёж) начинается под обоими. */
+.kz-ryad {
+  display: flow-root;
 }
+
 @media print and (monochrome) {
   .kz {
     display: none;

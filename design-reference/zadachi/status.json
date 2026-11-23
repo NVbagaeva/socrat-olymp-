@@ -884,8 +884,10 @@
   "popytok": 1
  },
  "pr-05-student-daughter": {
-  "ok": true,
-  "problemy": [],
+  "ok": false,
+  "problemy": [
+   "дымка-подложка по краям (видна на тёмном фоне) — ждёт перерисовки"
+  ],
   "popytok": 1
  },
  "pr-05-grandparent-pension": {

@@ -179,12 +179,22 @@ export function EkranZadachi({
           {zakladka}
         </div>
         {risunok === undefined ? null : <div className="trn-risunok">{risunok}</div>}
-        {kartinka === undefined ? null : <KartinkaZadachi {...kartinka} />}
-        <div
-          className={clsx('trn-uslovie', tekst && 'trn-uslovie--tekst')}
-          dangerouslySetInnerHTML={{ __html: uslovieHtml }}
-        />
-        {kartinka === undefined ? null : <div className="kz-clear" />}
+        {kartinka === undefined ? (
+          <div
+            className={clsx('trn-uslovie', tekst && 'trn-uslovie--tekst')}
+            dangerouslySetInnerHTML={{ __html: uslovieHtml }}
+          />
+        ) : (
+          /* Картинка справа, условие её обтекает: обёртка — обычный блок,
+             в колонке карточки float не работал бы. */
+          <div className="kz-ryad">
+            <KartinkaZadachi {...kartinka} />
+            <div
+              className={clsx('trn-uslovie', tekst && 'trn-uslovie--tekst')}
+              dangerouslySetInnerHTML={{ __html: uslovieHtml }}
+            />
+          </div>
+        )}
         {pod}
       </article>
 
