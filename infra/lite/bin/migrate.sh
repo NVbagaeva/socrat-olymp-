@@ -68,7 +68,12 @@ for file in migrations/*.sql; do
   name=$(basename "$file")
   sum=$(sha256sum "$file" | cut -d' ' -f1)
   known=$(psql_db -tA -v name="$name" <<'SQL'
-select sha256 from lite.migrations where name = :'name';
+-- Первая выкладка аватаров записала тот же SQL под номером 011.
+-- Сверяем хеш до пропуска, как и для канонического имени.
+select distinct sha256 from lite.migrations
+where name = :'name'
+   or (substring(:'name' from 5) = '20261122130000_avatar_profiles.sql'
+       and name = '011-20261122130000_avatar_profiles.sql');
 SQL
 )
   if [ "$known" = "$sum" ]; then

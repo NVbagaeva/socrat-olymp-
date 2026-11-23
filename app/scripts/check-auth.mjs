@@ -533,7 +533,10 @@ function makeMock() {
         for (const v of pachka.varianty ?? []) zhurnalVarianty.push({ ...v, user_id: me.id });
         return {
           status: 200,
-          body: { saved: (pachka.zadachi ?? []).length + (pachka.varianty ?? []).length, skipped: 0 },
+          body: {
+            saved: (pachka.zadachi ?? []).length + (pachka.varianty ?? []).length,
+            skipped: 0,
+          },
         };
       }
       /* Чтение журнала (функции uchitel_*, moya_*): как в базе — учитель
@@ -1104,6 +1107,35 @@ async function tickConsents(page) {
   await page.check('input[name="accept-soglasie"]');
 }
 
+async function chooseRegistrationRole(page, role) {
+  if ((await page.locator('.role-card').count()) === 0) {
+    await page.getByRole('button', { name: 'Назад · Кто вы?' }).evaluate((button) => button.click());
+    await page.waitForSelector('.role-card');
+  }
+  await page.locator(`.role-card[data-role="${role}"]`).evaluate((button) => button.click());
+}
+
+async function wizardNext(page) {
+  const button = page.locator('.register-actions button[type="submit"]');
+  // На узком экране закреплённая шапка может перекрывать край области просмотра.
+  await button.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
+  await button.click();
+}
+
+async function prepareRegistration(page, { role, name, email, password, birthYear, parentEmail }) {
+  await chooseRegistrationRole(page, role);
+  await page.fill('input[name="name"]', name);
+  await page.fill('input[name="email"]', email);
+  await wizardNext(page);
+  await page.fill('input[name="password"]', password);
+  await wizardNext(page);
+  if (role === 'student') {
+    await page.fill('input[name="birth-year"]', String(birthYear));
+    if (parentEmail !== undefined) await page.fill('input[name="parent-email"]', parentEmail);
+    await wizardNext(page);
+  }
+}
+
 /** Вкладка кабинета «Профиль». */
 async function openProfile(page) {
   await page.click('.kabinet__tabs [role="tab"]:has-text("Профиль")');
@@ -1245,19 +1277,21 @@ async function runEnabled() {
     await context.close();
   }
 
-  /* 2. Страница входа; галочки согласий; регистрация чужой почтой. */
+  /* 2. Вход, мастер регистрации, согласия и возраст ученика. */
   {
     const { context, page } = await newPage(mock, 1440, errors);
     await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
     check((await page.locator('h1').innerText()) === 'Вход', '/voyti/: заголовок «Вход»');
     await shot(page, 'vhod-1440');
     await page.click('[role="tab"]:has-text("Зарегистрироваться")');
-    await page.fill('input[name="name"]', 'Чужой Человек');
-    await page.fill('input[name="email"]', 'chuzhoy@yandex.ru');
-    await page.fill('input[name="password"]', 'parol-dlinnyy-1');
     check(
-      (await page.locator('input[name="birth-year"]').count()) === 0,
-      'пока роль не выбрана, года рождения в форме нет',
+      (await page.locator('.register-progress__count').innerText()) === 'Шаг 1 из 4',
+      'новая регистрация начинается с первого шага',
+    );
+    check(
+      (await page.locator('.role-card').count()) === 2 &&
+        (await page.locator('input[name="name"]').count()) === 0,
+      'сначала выбор роли, поля имени ещё нет',
     );
     {
       const roleCards = await page.locator('.role-card').allInnerTexts();
@@ -1265,70 +1299,219 @@ async function runEnabled() {
         roleCards.some((t) => t.includes('Я учитель')) &&
           roleCards.some((t) => t.includes('Я ученик')) &&
           !roleCards.some((t) => /репетитор/i.test(t)),
-        'выбор роли «Кто вы?»: «Я ученик» и «Я учитель», без «репетитора»',
+        'выбор роли: карточки ученика и учителя',
       );
     }
+    await shot(page, 'registraciya-rol-1440');
     await page.click('.role-card[data-role="student"]');
     check(
-      (await page.locator('input[name="birth-year"]').count()) === 1,
-      'ученику — поле «Год рождения»',
+      (await page.locator('.register-progress__count').innerText()) === 'Шаг 2 из 5',
+      'роль ученика меняет общий счёт шагов на пять',
     );
     check(
-      (await page.locator('input[name="parent-email"]').count()) === 0,
-      'без года рождения почты родителя в форме нет',
+      (await page.locator('input[name="birth-year"]').count()) === 0,
+      'год рождения показывается только на отдельном шаге ученика',
     );
-    await page.fill('input[name="birth-year"]', String(new Date().getFullYear() - 16));
+    await page.fill('input[name="name"]', 'Чужой Человек');
+    await page.fill('input[name="email"]', 'chuzhoy@yandex.ru');
+    await page.evaluate(() => {
+      const audit = { click: false, submit: false, target: null };
+      window.__registrationSubmitAudit = audit;
+      document.addEventListener(
+        'click',
+        (event) => {
+          audit.anyClick = true;
+          audit.lastClickTarget =
+            event.target instanceof Element ? event.target.outerHTML.slice(0, 240) : String(event.target);
+          const button = document.querySelector('.register-actions button[type="submit"]');
+          const rect = button?.getBoundingClientRect();
+          audit.clickPoint = {
+            x: event.clientX,
+            y: event.clientY,
+            hit: document.elementFromPoint(event.clientX, event.clientY)?.outerHTML.slice(0, 240) ?? null,
+            button: rect === undefined ? null : { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
+            pointerEvents: button === null ? null : getComputedStyle(button).pointerEvents,
+          };
+          const target =
+            event.target instanceof Element
+              ? event.target.closest('.register-actions button[type="submit"]')
+              : null;
+          if (target !== null) {
+            audit.click = true;
+            audit.target = target.outerHTML;
+            audit.trusted = event.isTrusted;
+          }
+        },
+        true,
+      );
+      document.addEventListener(
+        'submit',
+        (event) => {
+          if (event.target instanceof HTMLFormElement && event.target.matches('.register-wizard')) {
+            audit.submit = true;
+            setTimeout(() => {
+              audit.submitDefaultPrevented = event.defaultPrevented;
+            }, 0);
+          }
+        },
+        true,
+      );
+    });
+    await wizardNext(page);
+    const submitAudit = await page.evaluate(() => {
+      const button = document.querySelector('.register-actions button[type="submit"]');
+      const form = button?.form;
+      return {
+        click: window.__registrationSubmitAudit?.click ?? null,
+        anyClick: window.__registrationSubmitAudit?.anyClick ?? null,
+        lastClickTarget: window.__registrationSubmitAudit?.lastClickTarget ?? null,
+        clickPoint: window.__registrationSubmitAudit?.clickPoint ?? null,
+        trusted: window.__registrationSubmitAudit?.trusted ?? null,
+        submit: window.__registrationSubmitAudit?.submit ?? null,
+        submitDefaultPrevented: window.__registrationSubmitAudit?.submitDefaultPrevented ?? null,
+        buttonType: button?.type ?? null,
+        disabled: button?.disabled ?? null,
+        hasForm: form !== null,
+        noValidate: form?.noValidate ?? null,
+        checkValidity: form?.checkValidity() ?? null,
+        invalidControls: form
+          ? Array.from(form.elements)
+              .filter((element) => !element.validity.valid)
+              .map((element) => ({
+                name: element.name,
+                type: element.type,
+                value: element.value,
+                message: element.validationMessage,
+              }))
+          : [],
+        buttonRect: button
+          ? (() => {
+              const rect = button.getBoundingClientRect();
+              const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+              return {
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height,
+                hitIsButton: hit === button,
+                hit: hit instanceof Element ? hit.outerHTML.slice(0, 240) : null,
+              };
+            })()
+          : null,
+      };
+    });
+    const passwordStepState = await page.evaluate(() => {
+      const readField = (name) => {
+        const input = document.querySelector(`input[name="${name}"]`);
+        const describedBy = input?.getAttribute('aria-describedby') ?? '';
+        return {
+          value: input?.value ?? null,
+          invalid: input?.getAttribute('aria-invalid') ?? null,
+          messages: describedBy
+            .split(/\\s+/)
+            .map((id) => document.getElementById(id)?.innerText.trim())
+            .filter(Boolean),
+        };
+      };
+      return {
+        progress: document.querySelector('.register-progress__count')?.textContent.trim() ?? null,
+        role: document.querySelector('.register-progress')?.getAttribute('data-role') ?? null,
+        name: readField('name'),
+        email: readField('email'),
+        domainMessage: document.querySelector('.auth-form__domain')?.innerText.trim() ?? null,
+      };
+    });
+    passwordStepState.submitAudit = submitAudit;
+    console.log(`Состояние регистрации после «Дальше»: ${JSON.stringify(passwordStepState)}`);
+    await shot(page, 'registraciya-posle-dalshe');
+    check(
+      passwordStepState.progress === 'Шаг 3 из 5',
+      `кнопка «Дальше» переводит к паролю; состояние: ${JSON.stringify(passwordStepState)}`,
+    );
+    if (passwordStepState.progress !== 'Шаг 3 из 5')
+      throw new Error(`Регистрация не открыла пароль: ${JSON.stringify(passwordStepState)}`);
+    await page.fill('input[name="password"]', 'parol-dlinnyy-1');
+    await wizardNext(page);
+    check(
+      (await page.locator('.register-progress__count').innerText()) === 'Шаг 4 из 5',
+      'после пароля открывается шаг ученика',
+    );
+    check(
+      (await page.locator('input[name="birth-year"]').count()) === 1 &&
+        (await page.locator('input[name="parent-email"]').count()) === 0,
+      'на шаге ученика есть год рождения, почта родителя ждёт возраста',
+    );
+    await page.fill('input[name="birth-year"]', String(new Date().getFullYear() - 14));
     check(
       (await page.locator('input[name="parent-email"]').count()) === 1,
-      'ученику младше 18 — поле «Почта родителя»',
+      'ученику 14 лет — появляется поле почты родителя',
     );
+    check(
+      (await page.locator('.register-parent-note').innerText()).includes('Вам меньше 18 лет'),
+      'появилось понятное объяснение согласия родителя',
+    );
+    await page.fill('input[name="parent-email"]', 'roditel@yandex.ru');
     await shot(page, 'registraciya-uchenik-1440');
     await page.fill('input[name="birth-year"]', '2000');
     check(
       (await page.locator('input[name="parent-email"]').count()) === 0,
       'взрослому ученику почта родителя не нужна',
     );
-    await page.click('.role-card[data-role="tutor"]');
+    await chooseRegistrationRole(page, 'tutor');
     check(
       (await page.locator('input[name="birth-year"]').count()) === 0,
-      'учителю год рождения не нужен',
+      'у учителя год рождения не нужен',
     );
-    const docLinks = await page
-      .locator('.consent-checks a')
-      .evaluateAll((list) => list.map((a) => a.getAttribute('href')));
+    await page.fill('input[name="name"]', 'Чужой Человек');
+    await page.fill('input[name="email"]', 'chuzhoy@yandex.ru');
+    await wizardNext(page);
+    await page.fill('input[name="password"]', 'parol-dlinnyy-1');
+    await wizardNext(page);
+
     check(
-      docLinks.includes('/soglashenie/') && docLinks.includes('/soglasie/'),
-      'галочки согласий со ссылками на соглашение и согласие',
+      (await page.locator('.consent-checks__read').count()) === 2,
+      'у каждого согласия есть отдельная ссылка «Прочитать полностью»',
+    );
+    await page.locator('.consent-checks__read').first().click();
+    check(
+      (await page.locator('.consent-drawer iframe').getAttribute('src')) === '/soglashenie/',
+      'текст согласия открылся в шторке поверх формы',
+    );
+    await page.getByRole('button', { name: 'Понятно, отметить' }).click();
+    check(
+      await page.locator('input[name="accept-soglashenie"]').isChecked(),
+      'кнопка в шторке отметила соответствующее согласие',
     );
     check(
-      (await page.locator('.auth-form a[href="/politika/"]').count()) >= 1,
+      (await page.locator('.auth-form a[href="/politika/"]').count()) === 1,
       'в форме есть ссылка на политику обработки данных',
     );
-    await shot(page, 'registraciya-repetitor-1440');
+    await shot(page, 'registraciya-soglasiya-1440');
 
-    /* Без галочек запрос не уходит. */
+    /* Без второй галочки запрос не уходит. */
     const before = mock.users.size;
     let asked = false;
     page.on('request', (r) => {
       if (r.url().includes('/auth/v1/signup')) asked = true;
     });
-    await page.click('button[type="submit"]');
-    await page.waitForSelector('.field__msg--error');
+    await page.click('.register-wizard button[type="submit"]');
+    await page.waitForSelector('.consent-checks__error');
     check(
-      (await page.locator('.field__msg--error').innerText()).startsWith('Отметьте обе галочки'),
-      'без галочек: «Отметьте обе галочки…»',
+      (await page.locator('.consent-checks__error').innerText()).startsWith('Отметьте обе галочки'),
+      'без галочек: текст ошибки рядом с группой согласий',
     );
     check(!asked && mock.users.size === before, 'без галочек запрос на сервер не уходит');
 
     await tickConsents(page);
-    await page.click('button[type="submit"]');
+    await page.click('.register-wizard button[type="submit"]');
     await page.waitForFunction(
       () =>
-        document.querySelector('.field__msg--error')?.textContent ===
+        document.querySelector('.register-submit-error .field__msg--error')?.textContent ===
         'Регистрация пока по приглашению.',
     );
     check(
-      (await page.locator('.field__msg--error').innerText()) === 'Регистрация пока по приглашению.',
+      (await page.locator('.register-submit-error .field__msg--error').innerText()) ===
+        'Регистрация пока по приглашению.',
       'чужая почта: «Регистрация пока по приглашению.»',
     );
     const html = await page.content();
@@ -1340,14 +1523,14 @@ async function runEnabled() {
     await context.close();
   }
 
-  /* 2а. Почта не российского сервиса: спокойная подсказка со ссылкой на
-        почту, запрос не уходит; «Мой адрес уже добавили» — решает сервер. */
+  /* 2а. Иностранные домены, опечатки и русская раскладка. */
   {
     const { context, page } = await newPage(mock, 1440, errors);
     await page.goto(`${SITE}/voyti/?vkladka=registraciya`, { waitUntil: 'networkidle' });
+    await chooseRegistrationRole(page, 'tutor');
+    await page.fill('input[name="name"]', 'Чужой Человек');
     const note = page.locator('.auth-form__domain');
     const email = page.locator('input[name="email"]');
-    const blur = () => page.locator('input[name="name"]').click();
     let asked = 0;
     page.on('request', (r) => {
       if (r.url().includes('/auth/v1/signup')) asked += 1;
@@ -1361,48 +1544,67 @@ async function runEnabled() {
       'ivan@mail.ru.example.com',
     ]) {
       await email.fill(value);
-      await blur();
-      check((await note.count()) === 1, `«${value}»: подсказка о российских почтовых сервисах`);
+      check(
+        (await note.count()) === 1,
+        `«${value}»: подсказка о российских почтовых сервисах сразу`,
+      );
     }
     const text = await note.innerText();
     check(
-      text.startsWith(
-        'Регистрация доступна с адресами российских почтовых сервисов: Яндекс, Mail.ru, Рамблер. Если у вас школьная или рабочая почта — напишите нам, добавим вручную.',
+      text.startsWith('Gmail и другие иностранные сервисы'),
+      `текст подсказки про российские сервисы: ${text.slice(0, 80)}`,
+    );
+    check(
+      (await note.locator('a[href^="mailto:"]').count()) === 1,
+      'школьная или рабочая почта: есть ссылка автору сайта',
+    );
+    check(
+      (await email.getAttribute('aria-invalid')) !== 'true',
+      'подсказка про иностранную почту спокойная и не красная',
+    );
+
+    await email.fill('ivan@яндекс.ру');
+    await email.press('Tab');
+    await page.waitForSelector('[id$="-email-error"]');
+    check(
+      (await page.locator('[id$="-email-error"]').innerText()).includes(
+        'Переключите клавиатуру на английский',
       ),
-      `текст подсказки: ${text.slice(0, 120)}`,
+      'русская раскладка объяснена прямо под полем',
     );
+    await email.fill('ivan@yadex.ru');
     check(
-      ((await note.locator('a').getAttribute('href')) ?? '').startsWith('mailto:'),
-      '«напишите нам» — ссылка на почту',
+      (await page.locator('.register-email-suggestion').innerText()).includes('ivan@yandex.ru'),
+      'опечатка yadex.ru предлагает исправленный адрес',
     );
-    check(
-      (await page.locator('.field__msg--error').count()) === 0,
-      'подсказка спокойная: не красная ошибка',
-    );
+    await page.locator('.register-email-suggestion button').click();
+    check((await email.inputValue()) === 'ivan@yandex.ru', 'кнопка исправила домен');
 
-    /* Российская почта — заглавными и с пробелами — подсказку убирает. */
+    /* Разрешённая почта — заглавными; пробелы нужно убрать. */
     await email.fill('  Novyy@Yandex.RU ');
-    check((await note.count()) === 0, 'Novyy@Yandex.RU с пробелами: подсказки нет');
+    check((await note.count()) === 0, 'разрешённый сервис не показывает предупреждение о домене');
+    await email.fill('Novyy@Yandex.RU');
 
-    /* Отправка с иностранной почтой: запрос не уходит. */
+    /* Иностранная почта не проходит дальше, пока пользователь не подтвердит,
+       что адрес уже добавлен вручную. */
     await email.fill('zarubezh@gmail.com');
     await page.fill('input[name="name"]', 'Иван Зарубежный');
-    await page.fill('input[name="password"]', 'parol-dlinnyy-1');
-    await page.click('.role-card[data-role="tutor"]');
-    await tickConsents(page);
-    await page.click('button[type="submit"]');
+    await wizardNext(page);
     check(
       (await note.count()) === 1 && asked === 0,
-      'иностранная почта: запрос на сервер не уходит',
+      'иностранная почта: «Дальше» показывает подсказку и не отправляет запрос',
     );
-
-    /* «Уже добавили», а на деле нет: сервер отказывает, снова подсказка. */
-    await page.click('.auth-form__domain button');
-    await page.waitForFunction(() => document.querySelector('.auth-form__domain') !== null);
-    check(asked === 1, '«Мой адрес уже добавили»: запрос уходит на сервер');
+    await note.getByRole('button', { name: 'Мой адрес уже добавили' }).click();
+    await wizardNext(page);
+    await page.fill('input[name="password"]', 'parol-dlinnyy-1');
+    await wizardNext(page);
+    await tickConsents(page);
+    await page.click('.register-wizard button[type="submit"]');
+    await page.waitForSelector('.register-email-status, .auth-form__domain');
+    check(asked === 1, 'адрес вручную добавили: сервер проверяет его при создании аккаунта');
     check(
       (await note.count()) === 1 && (await page.locator('.field__msg--error').count()) === 0,
-      'сервер отказал по домену: та же спокойная подсказка, не ошибка',
+      'сервер отказал по домену: спокойная подсказка возвращается',
     );
     check(
       !(await page.content()).includes('domain_not_allowed'),
@@ -1410,12 +1612,14 @@ async function runEnabled() {
     );
     check(!mock.users.has('zarubezh@gmail.com'), 'иностранная почта: аккаунт не создан');
 
-    /* Школьная почта, добавленная вручную: аккаунт создаётся. */
+    /* Школьная почта из серверного списка проходит тот же путь. */
     await email.fill('shkola@school.example');
-    await page.click('button[type="submit"]');
-    await page.waitForSelector('.auth-form__domain');
-    await page.click('.auth-form__domain button');
-    await page.waitForSelector('.state');
+    await note.getByRole('button', { name: 'Мой адрес уже добавили' }).click();
+    await wizardNext(page);
+    await wizardNext(page);
+    await tickConsents(page);
+    await page.click('.register-wizard button[type="submit"]');
+    await page.waitForSelector('.auth-confirm');
     check(
       mock.users.has('shkola@school.example'),
       'школьная почта из ручного списка: аккаунт создан',
@@ -1423,8 +1627,6 @@ async function runEnabled() {
     check(errors.length === 0, `почтовые домены: ошибок в консоли нет (${errors.join(' | ')})`);
     await shot(page, 'registraciya-domen-1440');
     await context.close();
-    /* Дальше сценарий ждёт пустой почтовый ящик и одного нового
-       пользователя — убираем школьный аккаунт и его письмо. */
     const shkola = mock.users.get('shkola@school.example');
     mock.users.delete(shkola.email);
     mock.profiles.delete(shkola.id);
@@ -1436,8 +1638,10 @@ async function runEnabled() {
   {
     const { context, page } = await newPage(mock, 390, errors);
     await page.goto(`${SITE}/voyti/?vkladka=registraciya`, { waitUntil: 'networkidle' });
+    await chooseRegistrationRole(page, 'tutor');
     await page.fill('input[name="email"]', 'zarubezh@gmail.com');
-    await page.locator('input[name="name"]').click();
+    await page.fill('input[name="name"]', 'Тест');
+    await page.locator('input[name="name"]').evaluate((input) => input.blur());
     await page.waitForSelector('.auth-form__domain');
     check(await noHorizontalScroll(page), 'подсказка о почте 390: горизонтальной прокрутки нет');
     const button = await page.locator('.auth-form__domain button').boundingBox();
@@ -1451,11 +1655,99 @@ async function runEnabled() {
     check(await noHorizontalScroll(page), '/voyti/ 390: горизонтальной прокрутки нет');
     await shot(page, 'vhod-390');
     await page.click('[role="tab"]:has-text("Зарегистрироваться")');
+    await shot(page, 'registraciya-rol-390');
     await page.click('.role-card[data-role="student"]');
-    await page.fill('input[name="birth-year"]', String(new Date().getFullYear() - 16));
+    await page.fill('input[name="name"]', 'Ученик');
+    await page.fill('input[name="email"]', 'mobile@yandex.ru');
+    await wizardNext(page);
+    await page.fill('input[name="password"]', 'parol-dlinnyy-1');
+    await wizardNext(page);
+    await page.fill('input[name="birth-year"]', String(new Date().getFullYear() - 14));
+    await page.fill('input[name="parent-email"]', 'parent@yandex.ru');
     check(await noHorizontalScroll(page), 'регистрация 390: горизонтальной прокрутки нет');
-    await shot(page, 'registraciya-390');
+    await shot(page, 'registraciya-uchenik-390');
     await context.close();
+  }
+
+  /* 2б. Обновление посреди мастера, пароль не попадает в sessionStorage,
+        короткий пароль и возврат назад. */
+  {
+    const { context, page } = await newPage(mock, 375, errors);
+    await page.goto(`${SITE}/voyti/?vkladka=registraciya`, { waitUntil: 'networkidle' });
+    await page.click('.role-card[data-role="tutor"]');
+    await page.fill('input[name="name"]', 'Проверка черновика');
+    await page.fill('input[name="email"]', 'draft@yandex.ru');
+    await page.waitForFunction(
+      () =>
+        JSON.parse(sessionStorage.getItem('budetege:register-draft:v1') ?? '{}').email ===
+        'draft@yandex.ru',
+    );
+    await page.reload({ waitUntil: 'networkidle' });
+    check(
+      (await page.locator('input[name="name"]').inputValue()) === 'Проверка черновика' &&
+        (await page.locator('input[name="email"]').inputValue()) === 'draft@yandex.ru',
+      'обновление: имя и почта восстановились из sessionStorage',
+    );
+    await wizardNext(page);
+    await page.fill('input[name="password"]', 'kor');
+    await wizardNext(page);
+    check(
+      (await page.locator('[id$="-error"]').filter({ hasText: 'не меньше 8' }).count()) === 1,
+      'короткий пароль: ошибка показана прямо под полем',
+    );
+    await page.reload({ waitUntil: 'networkidle' });
+    check(
+      (await page.locator('input[name="password"]').inputValue()) === '',
+      'обновление: пароль не сохранён в sessionStorage',
+    );
+    await page.locator('.register-actions button[type="button"]').click();
+    check(
+      (await page.locator('input[name="name"]').inputValue()) === 'Проверка черновика' &&
+        (await page.locator('input[name="email"]').inputValue()) === 'draft@yandex.ru',
+      'кнопка «Назад»: имя и почта остались заполнены',
+    );
+    check(await noHorizontalScroll(page), 'мастер на 375 px: нет горизонтальной прокрутки');
+    await shot(page, 'registraciya-nazad-375');
+    check(!mock.users.has('draft@yandex.ru'), 'черновик не отправлялся на сервер');
+    await context.close();
+  }
+
+  /* 2в. Ученик 14 лет: год и почта родителя остаются в существующем payload. */
+  {
+    const { context, page } = await newPage(mock, 1280, errors);
+    const email = 'uchenik-14@yandex.ru';
+    const parentEmail = 'mama-uchenika@yandex.ru';
+    await page.goto(`${SITE}/voyti/?vkladka=registraciya`, { waitUntil: 'networkidle' });
+    await prepareRegistration(page, {
+      role: 'student',
+      name: 'Ученик 14 лет',
+      email,
+      password: 'ucheniu-parol-123',
+      birthYear: new Date().getFullYear() - 14,
+      parentEmail,
+    });
+    await tickConsents(page);
+    await page.click('.register-wizard button[type="submit"]');
+    await page.waitForSelector('.auth-confirm');
+    const saved = mock.users.get(email);
+    check(
+      saved.meta.birth_year === new Date().getFullYear() - 14 &&
+        saved.meta.parent_email === parentEmail,
+      'ученик 14 лет: год рождения и почта родителя ушли в прежний signup payload',
+    );
+    check(
+      mock.parents.get(saved.id)?.parent_email === parentEmail,
+      'триггер создал запись о согласии родителя для указанного адреса',
+    );
+    await shot(page, 'registraciya-uchenik-1280');
+    await context.close();
+    mock.users.delete(email);
+    mock.profiles.delete(saved.id);
+    mock.parents.delete(saved.id);
+    for (let i = mock.consents.length - 1; i >= 0; i -= 1) {
+      if (mock.consents[i].user_id === saved.id) mock.consents.splice(i, 1);
+    }
+    mock.mailbox.splice(0);
   }
 
   /* 3. Регистрация разрешённой почтой → письмо → подтверждение → кабинет
@@ -1488,21 +1780,28 @@ async function runEnabled() {
       ),
       '?vkladka=registraciya открывает вкладку регистрации',
     );
+    await page.click('.role-card[data-role="tutor"]');
     await page.fill('input[name="name"]', 'Наталия Багаева');
     await page.fill('input[name="email"]', 'svoy@yandex.ru');
+    await wizardNext(page);
     await page.fill('input[name="password"]', 'kor');
     check(
-      (await page.locator('.password + .field__msg').innerText()).startsWith('Ещё 5'),
+      (await page.locator('.field__msg').filter({ hasText: 'Ещё 5' }).count()) === 1,
       'подсказка о длине пароля по мере ввода',
     );
+    await shot(page, 'registraciya-parol-1440');
     await page.fill('input[name="password"]', 'moy-dlinnyy-parol');
-    await page.click('.role-card[data-role="tutor"]');
+    await wizardNext(page);
     await tickConsents(page);
-    await page.click('button[type="submit"]');
-    await page.waitForSelector('.state');
+    await page.click('.register-wizard button[type="submit"]');
+    await page.waitForSelector('.auth-confirm');
     check(
-      (await page.locator('.state').innerText()).includes('svoy@yandex.ru'),
+      (await page.locator('.auth-confirm__email').innerText()).includes('svoy@yandex.ru'),
       'разрешённая почта: экран «Подтвердите почту» с адресом',
+    );
+    check(
+      (await page.locator('.auth-confirm__steps li').count()) === 3,
+      'экран подтверждения даёт три коротких шага',
     );
     check(
       mock.mailbox.length === 1 && mock.mailbox[0].type === 'signup',
@@ -1522,6 +1821,36 @@ async function runEnabled() {
     }
     await shot(page, 'pismo-otpravleno-1440');
 
+    /* Попытка зарегистрировать уже существующий адрес даёт действия входа
+       и восстановления пароля вместо общей ошибки. */
+    {
+      const duplicate = await newPage(mock, 1280, errors);
+      await duplicate.page.goto(`${SITE}/voyti/?vkladka=registraciya`, {
+        waitUntil: 'networkidle',
+      });
+      await prepareRegistration(duplicate.page, {
+        role: 'tutor',
+        name: 'Наталия Багаева',
+        email: 'svoy@yandex.ru',
+        password: 'moy-dlinnyy-parol',
+      });
+      await tickConsents(duplicate.page);
+      await duplicate.page.click('.register-wizard button[type="submit"]');
+      await duplicate.page.waitForSelector('.register-email-status');
+      check(
+        (await duplicate.page.locator('.register-email-status').innerText()).includes(
+          'Этот адрес уже зарегистрирован',
+        ),
+        'повторный адрес — спокойная подсказка под почтой',
+      );
+      check(
+        (await duplicate.page.locator('.register-email-status button').count()) === 2,
+        'повторный адрес — кнопки «Войти» и «Забыли пароль?»',
+      );
+      await shot(duplicate.page, 'registraciya-adres-uzhe-est-1280');
+      await duplicate.context.close();
+    }
+
     await page.goto(mock.mailbox[0].link, { waitUntil: 'networkidle' });
     await page.waitForSelector('.state');
     check(
@@ -1529,8 +1858,8 @@ async function runEnabled() {
       'ссылка из письма вернула на сайт',
     );
     check(
-      (await page.locator('.state h4').innerText()) === 'Почта подтверждена',
-      'подтверждение: «Почта подтверждена»',
+      (await page.locator('.state h4').innerText()) === 'Готово!',
+      'подтверждение: экран «Готово!»',
     );
     check(!page.url().includes('access_token'), 'токены убраны из адреса после входа');
     await page.waitForSelector(AVATAR);
@@ -2614,7 +2943,9 @@ async function runZhurnal() {
      и второй вход продолжил бы начатую. */
   const uchenik = { 375: 'zhurnal@yandex.ru', 1280: 'zhurnal2@yandex.ru' };
   for (const email of Object.values(uchenik)) {
-    registerInMock(mock, email, 'zhurnal-parol-1', 'Журнал Ученик', 'student', { birth_year: 2000 });
+    registerInMock(mock, email, 'zhurnal-parol-1', 'Журнал Ученик', 'student', {
+      birth_year: 2000,
+    });
   }
   const errors = [];
   const answerOfTask = (id) => {
@@ -2667,20 +2998,36 @@ async function runZhurnal() {
     const b = rowOf(second);
     check(a !== undefined && b !== undefined, `журнал ${width}: обе задачи ушли в базу`);
     if (a !== undefined) {
-      check(a.task_no === 8 && a.kind === parseTaskId(first).prototype && a.place === 'trenazher',
-        `журнал ${width}: раздел, тип и место задачи`);
-      check(a.popytki.length === 2 && a.popytki[0].answer === wrongTyped && !a.popytki[0].ok
-        && a.popytki[1].ok && a.popytki[1].n === 2,
-        `журнал ${width}: обе попытки с ответом как есть: ${JSON.stringify(a.popytki)}`);
-      check(a.outcome === 'wrong', `журнал ${width}: верно со второй попытки — ошибка (${a.outcome})`);
-      check(typeof a.gen_hash === 'string' && a.gen_hash.length === 16 && a.uslovie_tex.length > 0,
-        `журнал ${width}: отпечаток и условие для учителя`);
-      check(a.total_ms > 0 && a.active_ms > 0 && a.active_ms <= a.total_ms,
-        `журнал ${width}: активное и общее время (${a.active_ms} из ${a.total_ms})`);
+      check(
+        a.task_no === 8 && a.kind === parseTaskId(first).prototype && a.place === 'trenazher',
+        `журнал ${width}: раздел, тип и место задачи`,
+      );
+      check(
+        a.popytki.length === 2 &&
+          a.popytki[0].answer === wrongTyped &&
+          !a.popytki[0].ok &&
+          a.popytki[1].ok &&
+          a.popytki[1].n === 2,
+        `журнал ${width}: обе попытки с ответом как есть: ${JSON.stringify(a.popytki)}`,
+      );
+      check(
+        a.outcome === 'wrong',
+        `журнал ${width}: верно со второй попытки — ошибка (${a.outcome})`,
+      );
+      check(
+        typeof a.gen_hash === 'string' && a.gen_hash.length === 16 && a.uslovie_tex.length > 0,
+        `журнал ${width}: отпечаток и условие для учителя`,
+      );
+      check(
+        a.total_ms > 0 && a.active_ms > 0 && a.active_ms <= a.total_ms,
+        `журнал ${width}: активное и общее время (${a.active_ms} из ${a.total_ms})`,
+      );
     }
     if (b !== undefined) {
-      check(b.outcome === (hinted ? 'hinted' : 'right') && b.hint_steps === (hinted ? 1 : 0),
-        `журнал ${width}: подсказка и исход второй задачи (${b.outcome}, ${b.hint_steps})`);
+      check(
+        b.outcome === (hinted ? 'hinted' : 'right') && b.hint_steps === (hinted ? 1 : 0),
+        `журнал ${width}: подсказка и исход второй задачи (${b.outcome}, ${b.hint_steps})`,
+      );
     }
     await context.close();
     mock.zhurnal.length = 0;
@@ -2701,7 +3048,10 @@ async function runZhurnal() {
   await new Promise((done) => setTimeout(done, 5000));
   check(mock.zhurnal.length === 0, 'журнал: учитель в журнал не пишет');
   await context.close();
-  check(errors.length === 0, `журнал: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
+  check(
+    errors.length === 0,
+    `журнал: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`,
+  );
 }
 
 /* ── Экраны прогресса (кабинет v2, этап 1б; docs/kabinet-zhurnal.md) ──

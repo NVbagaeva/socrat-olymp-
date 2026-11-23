@@ -151,8 +151,10 @@ export const kabinetText = {
   register: {
     title: 'Регистрация по приглашению',
     as: (role: string) => `Вы регистрируетесь как ${role}.`,
-    tutor: (name: string) => `Учитель: ${name}.`,
-    klass: (name: string) => `Класс: ${name}.`,
+    invited: (teacher: string | null, className: string | null) =>
+      teacher === null
+        ? `Вас пригласили${className === null ? '' : ` в класс ${className}`}.`
+        : `Вас пригласил(а) учитель ${teacher}${className === null ? '' : `, класс ${className}`}.`,
     bad: 'Приглашение не действует',
     badBody:
       'Ссылка устарела, отозвана или уже использована. Попросите новую у того, кто приглашал.',

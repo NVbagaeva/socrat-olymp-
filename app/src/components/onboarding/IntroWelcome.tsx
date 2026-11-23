@@ -10,8 +10,8 @@ const IntroSplash = dynamic(() => loadSplash().then((m) => m.IntroSplash), {
   ssr: false,
 });
 
-/** Через сколько после открытия страницы показать заставку. */
-const DELAY_MS = 1200;
+/** Пауза после загрузки страницы до заставки: дать первому экрану отрисоваться. */
+const DELAY_MS = 2500;
 /** Если на странице уже открыто другое окно — подождать и проверить снова. */
 const RETRY_MS = 1000;
 
@@ -22,9 +22,7 @@ function somethingOpen(): boolean {
 
 /**
  * Вызвать, когда страница под заставкой догрузилась (событие load) и
- * браузер свободен. Код и слои заставки не делят сеть и главный поток
- * с картинками и скриптами самой страницы. На быстром соединении load
- * наступает раньше DELAY_MS, и заставка выходит в прежний момент.
+ * браузер свободен. Тяжёлый чанк заставки будет запрошен позже, после паузы.
  */
 function afterPageLoad(run: () => void): () => void {
   let idle = 0;
@@ -58,14 +56,14 @@ export function IntroWelcome({ first, replay }: { first: boolean; replay: number
   const [open, setOpen] = useState(false);
   const [shownReplay, setShownReplay] = useState(0);
 
-  /* Первый визит: с задержкой, не поверх другого окна и не раньше,
-     чем догрузится сама страница. Код заставки забирается заранее,
-     в свободное время после load: к показу он уже на месте. */
+  /* Первый визит: после load и idle выдержать паузу, чтобы главный экран
+     завершил отрисовку до запроса кода и картинок заставки. */
   useEffect(() => {
     if (!first) return;
-    let loaded = false;
-    let due = false;
+    let cancelled = false;
+    let timer = 0;
     const show = () => {
+      if (cancelled) return;
       if (somethingOpen()) {
         timer = window.setTimeout(show, RETRY_MS);
         return;
@@ -73,16 +71,13 @@ export function IntroWelcome({ first, replay }: { first: boolean; replay: number
       markWelcomeSeen();
       setOpen(true);
     };
-    let timer = window.setTimeout(() => {
-      due = true;
-      if (loaded) show();
-    }, DELAY_MS);
     const cancelLoad = afterPageLoad(() => {
-      loaded = true;
-      void loadSplash();
-      if (due) show();
+      timer = window.setTimeout(() => {
+        void loadSplash().then(show);
+      }, DELAY_MS);
     });
     return () => {
+      cancelled = true;
       window.clearTimeout(timer);
       cancelLoad();
     };

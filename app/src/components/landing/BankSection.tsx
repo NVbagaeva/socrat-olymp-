@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { TaskGrid } from '@/components/tasks';
+import { TaskGrid } from '@/components/tasks/TaskGrid';
 import { PovEntry } from '@/components/povyshennye/PovEntry';
 import { VariantEntry } from '@/components/variant/VariantEntry';
 import { LevelTabs } from '@/components/level/LevelTabs';
