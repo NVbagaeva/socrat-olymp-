@@ -333,6 +333,16 @@ select pg_temp.ok((select count(*) = 7 from public.homework2_keys k join public.
                     where t.homework_id = :'kop'), 'ключи копии');
 set role authenticated;
 select pg_temp.as_user(:'t1');
+-- Рабочая копия мастера: сохраняется в черновик и копируется с ним.
+select public.dz2_chernovik(:'kop', '{"korzina": {"v": 1, "elementy": []}}');
+select pg_temp.ok((select chernovik ->> 'korzina' is not null from public.homework2 where id = :'kop'),
+  'рабочая копия не сохранилась');
+select pg_temp.fails(format($q$select public.dz2_chernovik(%L, '{}')$q$, :'hw'), 'forbidden');
+select (public.dz2_copy(:'kop')) as kop3 \gset
+select pg_temp.ok((select chernovik is not null from public.homework2 where id = :'kop3'), 'рабочая копия не скопировалась');
+select pg_temp.as_user(:'t2');
+select pg_temp.fails(format($q$select public.dz2_chernovik(%L, '{}')$q$, :'kop'), 'forbidden');
+select pg_temp.as_user(:'t1');
 select public.dz2_copy(:'hw', 'template') as tpl \gset
 select pg_temp.fails(format('select public.dz2_publish(%L)', :'tpl'), 'not_draft');
 select public.dz2_delete(:'tpl');

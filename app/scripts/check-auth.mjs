@@ -104,6 +104,8 @@ const SUPABASE = 'http://127.0.0.1:54321';
 /* Сборка с журналом решения задач (NEXT_PUBLIC_ZHURNAL=1): сценарий журнала. */
 const ZHURNAL_ON = process.env.NEXT_PUBLIC_ZHURNAL === '1';
 /* Сборка с экранами прогресса (NEXT_PUBLIC_PROGRESS_UCHITEL=1 и _UCHENIK=1). */
+/* Сборка с новой выдачей ДЗ (NEXT_PUBLIC_DZ2=1). */
+const DZ2_ON = process.env.NEXT_PUBLIC_DZ2 === '1';
 const PROGRESS_ON =
   process.env.NEXT_PUBLIC_PROGRESS_UCHITEL === '1' && process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1';
 const DISABLED = process.argv.includes('--disabled');
@@ -241,6 +243,7 @@ function makeMock() {
   const members = []; // { class_id, user_id }
   const zhurnal = []; // строки журнала решения задач: { user_id, id, task_no, popytki, … }
   const zhurnalVarianty = [];
+  const dz2 = []; // ДЗ новой выдачи: { id, tutor_id, status, p, chernovik, recipients }
   /* Текущая редакция документов в «базе». */
   const edition = { version: DOCUMENTS_VERSION };
   const mailbox = []; // { to, type, link }
@@ -543,6 +546,88 @@ function makeMock() {
       if (ZHURNAL_RPC.includes(rpcName) && method === 'POST') {
         return zhurnalRead(rpcName, body, me);
       }
+      /* Новая выдача ДЗ (docs/kabinet-dz2.md): учительские функции. */
+      if (table.startsWith('rpc/dz2_') && method === 'POST') {
+        const fn = table.slice(4);
+        const role = profiles.get(me.id)?.role;
+        const pg = (code, message) => ({ status: 400, body: { code, message, details: null, hint: null } });
+        if (role !== 'tutor') return pg('42501', 'forbidden');
+        const mine = (id) => dz2.find((d) => d.id === id && d.tutor_id === me.id);
+        if (fn === 'dz2_save') {
+          const p = body.p ?? {};
+          const old = p.id ? mine(p.id) : undefined;
+          if (p.id && (old === undefined || !['draft', 'template'].includes(old.status))) return pg('P0001', 'not_draft');
+          const row = old ?? { id: `dz2-${dz2.length + 1}`, tutor_id: me.id, chernovik: null };
+          Object.assign(row, { status: p.status ?? 'draft', p, created_at: new Date().toISOString() });
+          if (old === undefined) dz2.push(row);
+          return { status: 200, body: row.id };
+        }
+        if (fn === 'dz2_chernovik') {
+          const d = mine(body.p_id);
+          if (d === undefined) return pg('42501', 'forbidden');
+          d.chernovik = body.p;
+          return { status: 200, body: null };
+        }
+        if (fn === 'dz2_publish') {
+          const d = mine(body.p_id);
+          if (d === undefined || d.status !== 'draft') return pg('P0001', 'not_draft');
+          const ids = new Set();
+          for (const t of d.p.targets ?? []) {
+            if (t.class_id) for (const m of members) if (m.class_id === t.class_id) ids.add(m.user_id);
+            if (t.student_id) ids.add(t.student_id);
+          }
+          if (ids.size === 0) return pg('P0001', 'no_recipients');
+          d.status = 'published';
+          d.recipients = [...ids];
+          return { status: 200, body: { id: d.id, recipients: ids.size } };
+        }
+        if (fn === 'dz2_spisok') {
+          return {
+            status: 200,
+            body: dz2
+              .filter((d) => d.tutor_id === me.id)
+              .map((d) => ({
+                id: d.id, title: d.p.title, status: d.status, created_at: d.created_at,
+                ...(d.p.due_at ? { due_at: d.p.due_at } : {}), ...(d.p.publish_at ? { publish_at: d.p.publish_at } : {}),
+                items: (d.p.items ?? []).length, recipients: (d.recipients ?? []).length, submitted: 0,
+              })),
+          };
+        }
+        if (fn === 'dz2_copy') {
+          const d = mine(body.p_id);
+          if (d === undefined) return pg('42501', 'forbidden');
+          const row = { id: `dz2-${dz2.length + 1}`, tutor_id: me.id, status: body.p_status ?? 'draft',
+            p: { ...d.p, targets: [] }, chernovik: d.chernovik, created_at: new Date().toISOString() };
+          dz2.push(row);
+          return { status: 200, body: row.id };
+        }
+        if (fn === 'dz2_delete') {
+          const i = dz2.findIndex((d) => d.id === body.p_id && d.tutor_id === me.id && ['draft', 'template'].includes(d.status));
+          if (i < 0) return pg('42501', 'forbidden');
+          dz2.splice(i, 1);
+          return { status: 200, body: null };
+        }
+        if (fn === 'dz2_edit') {
+          const d = mine(body.p_id);
+          if (d === undefined) return pg('42501', 'forbidden');
+          if (body.p?.closed === true) d.status = 'closed';
+          if (body.p?.closed === false) d.status = 'published';
+          return { status: 200, body: null };
+        }
+        return pg('P0001', 'unknown');
+      }
+      /* Черновик: учитель читает свою строку ДЗ с рабочей копией. */
+      if (table === 'homework2' && method === 'GET') {
+        const id = (u.searchParams.get('id') ?? '').replace(/^eq\./, '');
+        const d = dz2.find((x) => x.id === id && x.tutor_id === me.id);
+        if (d === undefined) return err(406, 'PGRST116', 'JSON object requested, multiple (or no) rows returned');
+        const row = { id: d.id, title: d.p.title, note: d.p.note ?? null, status: d.status,
+          publish_at: d.p.publish_at ?? null, due_at: d.p.due_at ?? null, after_due: d.p.after_due ?? 'late_ok',
+          hints_allowed: d.p.hints_allowed ?? true, attempts_limit: d.p.attempts_limit ?? null,
+          solutions_when: d.p.solutions_when ?? 'instant', individual: d.p.individual ?? false,
+          kontrol: d.p.kontrol ?? false, chernovik: d.chernovik };
+        return { status: 200, body: prefersObject ? row : [row] };
+      }
       if (table === 'rpc/delete_my_account' && method === 'POST') {
         wipe();
         return { status: 204, body: null };
@@ -804,6 +889,7 @@ function makeMock() {
     dz,
     zhurnal,
     zhurnalVarianty,
+    dz2,
     users,
     mailbox,
     kits,
@@ -2498,6 +2584,7 @@ async function runEnabled() {
 
   if (ZHURNAL_ON) await runZhurnal();
   if (PROGRESS_ON) await runProgress();
+  if (DZ2_ON) await runDz2();
 
   sdkOutsideFirstLoad();
 }
@@ -2784,6 +2871,109 @@ async function runProgress() {
     await context.close();
   }
   check(errors.length === 0, `прогресс: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
+}
+
+/* ── Новая выдача ДЗ (кабинет v2, этап 2б; docs/kabinet-dz2.md) ──
+   Учитель кладёт «В домашку» тренажёр №8 (выбранные типы) и блок опорных
+   №8, открывает мастер, ставит цель «Верных подряд», выбирает класс и
+   выдаёт: в «базу» уходят задачи с ответами в нормальной записи, рабочая
+   копия черновика и публикация. Ученик кнопки «В домашку» не видит.
+   Снимки — 375 и 1280. */
+async function runDz2() {
+  const NORM = /^-?[0-9]+(\.[0-9]+)?$/;
+  const { prepPool } = requireSrc('lib/vychisleniya/prep/pool.ts');
+  const blok = prepPool()[0];
+  const mock = makeMock();
+  registerInMock(mock, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2', 'Журнал Учитель', 'tutor');
+  for (const e of ['zhurnal@yandex.ru', 'zhurnal2@yandex.ru']) {
+    registerInMock(mock, e, 'zhurnal-parol-1', e.startsWith('zhurnal2') ? 'Борис Ким' : 'Аня Смирнова', 'student',
+      { birth_year: 2000 });
+  }
+  mock.seedClass('zhurnal-uchitel@yandex.ru', ['zhurnal@yandex.ru', 'zhurnal2@yandex.ru'], '11 «А»');
+  const errors = [];
+  const snap = async (page, name, width) => {
+    check(await noHorizontalScroll(page), `ДЗ ${width} ${name}: без горизонтальной прокрутки`);
+    if (SHOTS === null) return;
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({ path: path.join(SHOTS, `dz2-${name}-${width}.png`), fullPage: true,
+      style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+  };
+
+  for (const width of [375, 1280]) {
+    const { context, page } = await newPage(mock, width, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+
+    await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.trn-start');
+    await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+    const knopka = page.locator('.trn-vybor__ryadom .dz2-knopka__glavnaya');
+    await knopka.waitFor();
+    await knopka.click();
+    await page.waitForSelector('.trn-vybor__ryadom .dz2-knopka__glavnaya[aria-pressed="true"]');
+    check((await page.locator('.trn-vybor__ryadom .dz2-knopka__korzina').textContent()).includes('(1)'),
+      `ДЗ ${width}: в корзине один элемент`);
+    /* Ряд «Начать» на телефоне прилипает к низу экрана: проверяется, что
+       кнопка, прокрученная в видимую часть, не закрыта им и нажимается. */
+    await knopka.scrollIntoViewIfNeeded();
+    check(await knopka.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return top !== null && el.contains(top);
+    }), `ДЗ ${width}: «В домашку» видна и не закрыта рядом «Начать»`);
+    await snap(page, 'trenazher', width);
+
+    await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/${blok.slug}/`, { waitUntil: 'networkidle' });
+    await page.locator('.dz2-ryad .dz2-knopka__glavnaya').click();
+    await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
+
+    await page.goto(`${SITE}/kabinet/dz2/vydat/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.dz2-element');
+    check((await page.locator('.dz2-element').count()) === 2, `ДЗ ${width}: в мастере два элемента`);
+    const tr = page.locator('.dz2-element').first();
+    await tr.locator('select').nth(1).selectOption('streak');
+    await tr.locator('input[type="number"]').fill('3');
+    await page.locator('input[placeholder="ДЗ к пятнице"]').fill(`ДЗ на ${width}`);
+    await page.locator('label:has-text("11 «А» (2)")').click();
+    await page.locator('input[type="datetime-local"]').nth(1).fill('2027-05-20T18:00');
+    await snap(page, 'master', width);
+    await page.locator('.dz2-deystviya button:has-text("Выдать")').click();
+    await page.waitForSelector('.dz2-uspeh');
+    check((await page.locator('.dz2-uspeh').textContent()).includes('учеников — 2'), `ДЗ ${width}: выдано двоим`);
+
+    const d = mock.dz2.find((x) => x.p.title === `ДЗ на ${width}`);
+    check(d !== undefined && d.status === 'published', `ДЗ ${width}: опубликовано`);
+    if (d !== undefined) {
+      const [t1, t2] = d.p.items;
+      check(t1.kind === 'trenazher' && t1.goal_kind === 'streak' && t1.goal_n === 3 && t1.tasks.length === 10,
+        `ДЗ ${width}: тренажёр — цель «3 подряд», запас 10 (${t1.tasks.length})`);
+      check(t1.tasks.every((t) => NORM.test(t.answer) && t.question_html.length > 0 && t.task_ref.length > 0),
+        `ДЗ ${width}: задачи тренажёра с ответами`);
+      check(t2.kind === 'opornye' && t2.tasks.length > 0 && t2.tasks.every((t) => NORM.test(t.answer)),
+        `ДЗ ${width}: опорные с ответами (${t2.tasks.length})`);
+      check(d.p.due_at === '2027-05-20T15:00:00.000Z', `ДЗ ${width}: дедлайн по Москве в UTC (${d.p.due_at})`);
+      check(JSON.stringify(d.p.targets) === JSON.stringify([{ class_id: mock.classes[0].id }]), `ДЗ ${width}: класс`);
+      check(d.chernovik?.korzina?.elementy?.length === 2, `ДЗ ${width}: рабочая копия сохранена`);
+    }
+    check((await page.locator('.dz2-element').count()) === 0, `ДЗ ${width}: корзина очищена после выдачи`);
+
+    await page.goto(`${SITE}/kabinet/dz2/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.dz2-kartochka');
+    check((await page.locator('.dz2-kartochka:has-text("Выдано")').count()) >= 1, `ДЗ ${width}: в списке «Выдано»`);
+    await snap(page, 'spisok', width);
+    await context.close();
+  }
+
+  /* Ученик кнопки «В домашку» не видит. */
+  const { context, page } = await newPage(mock, 1280, errors);
+  await welcomeSeen(context);
+  await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
+  await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+  await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+  await page.waitForSelector('.trn-vybor__start');
+  check((await page.locator('.dz2-knopka').count()) === 0, 'ДЗ: ученик не видит «В домашку»');
+  await context.close();
+  check(errors.length === 0, `ДЗ: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
 }
 
 /* ── Вход включён, кнопки в шапке нет (пробный режим) ──────────── */
@@ -3166,6 +3356,7 @@ try {
   else if (NO_HEADER) await runNoHeader();
   else if (process.argv.includes('--zhurnal')) await runZhurnal();
   else if (process.argv.includes('--progress')) await runProgress();
+  else if (process.argv.includes('--dz2')) await runDz2();
   else if (SHOTS_KARTA !== null || KARTA_NAZAD) {
     const K = await import('./lib/karta-nazad.mjs');
     const deps = { browser, SITE, mock: makeMock(), installMock, registerInMock, login, check };
