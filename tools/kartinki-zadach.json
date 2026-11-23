@@ -1,0 +1,63 @@
+[
+ {
+  "nomer": 5,
+  "key": "toster-srok-sluzhby",
+  "ids": [
+   "p5-03 v6",
+   "p5-03 v16"
+  ],
+  "size": "1024x1024",
+  "scene": "one new two-slot toaster made of blue glass with polished metal accents, two slices of realistic golden toast popping up from it; beside it a small glass desk calendar with blank pages and a glass hourglass with amber sand. Nothing else.",
+  "alt": "Новый тостер, календарь и песочные часы"
+ },
+ {
+  "nomer": 5,
+  "key": "sklady-oshibka-sborki",
+  "ids": [
+   "p5-14"
+  ],
+  "size": "1536x1024",
+  "scene": "two small glass warehouse buildings side by side, each with a short glass conveyor belt carrying several small cardboard-colored parcels; both belts lead to one compact delivery van in front, made of blue glass. All parcels look alike. No people.",
+  "alt": "Два склада интернет-магазина отправляют посылки в один фургон"
+ },
+ {
+  "nomer": 9,
+  "key": "kameshek-vverh",
+  "ids": [
+   "P17 аналоги «камешек»"
+  ],
+  "size": "1024x1024",
+  "scene": "one small realistic grey pebble in mid-air, tossed straight up; a thin dashed glowing vertical line below it shows its path up from a small glass hand-shaped launch point; to one side a thin translucent horizontal glass plate floats at mid-height as a height level, and a glass stopwatch with a blank dial stands beside. Minimal, airy.",
+  "alt": "Камешек подброшен вверх, рядом отметка высоты и секундомер"
+ },
+ {
+  "nomer": 9,
+  "key": "dron-dostavshchik-signal",
+  "ids": [
+   "P08 аналоги «дрон-доставщик»"
+  ],
+  "size": "1536x1024",
+  "scene": "a glass delivery quadcopter carrying one realistic cardboard parcel flies from right to left toward a round glass landing pad on the left; thin crisp glowing sound-wave arcs around the drone: closely spaced in front of it (left side) and widely spaced behind it (right side). The arcs are thin solid lines, no haze, no mist, no glow cloud around the scene; everything outside the objects is fully transparent.",
+  "alt": "Дрон-доставщик с посылкой летит к площадке, впереди сгущаются звуковые волны"
+ },
+ {
+  "nomer": 10,
+  "key": "sm-01-brine",
+  "ids": [
+   "SM-01 аналоги: рассол в бочке; засолка огурцов"
+  ],
+  "size": "1024x1024",
+  "scene": "a realistic small wooden barrel filled with pale blue glassy brine and several realistic green cucumbers; a blue glass jug above it pours a stream of clear water into the barrel; the liquid is visibly paler where the water mixes in.",
+  "alt": "Бочка с рассолом и огурцами, в неё доливают воду из кувшина"
+ },
+ {
+  "nomer": 10,
+  "key": "dp-01-cyclist",
+  "ids": [
+   "DP-01 аналоги: велосипедист; велосипедистка"
+  ],
+  "size": "1536x1024",
+  "scene": "a faceless smooth blue glass figurine riding a glass road bicycle along a short straight glass road segment between two slim glowing posts (start and finish); faint motion streaks behind the bicycle; a glass stopwatch with a blank dial floats beside the road.",
+  "alt": "Велосипедист едет по дороге от старта к финишу, рядом секундомер"
+ }
+]
