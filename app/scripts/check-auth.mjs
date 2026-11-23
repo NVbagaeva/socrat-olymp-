@@ -939,6 +939,8 @@ async function newPage(mock, width, errors) {
     viewport: { width, height: width < 500 ? 844 : 900 },
     deviceScaleFactor: 1,
     hasTouch: width < 500,
+    /* Keep focus-driven smooth scrolling from racing automated button clicks. */
+    reducedMotion: 'reduce',
   });
   await installMock(context, mock);
   const page = await context.newPage();
