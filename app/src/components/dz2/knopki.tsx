@@ -105,11 +105,15 @@ export function VDomashkuOpornye5({
       taskNo={5}
       klyuch={`opornye:5:${blok}`}
       element={async () => {
-        const { otkrytRazbor } = await import('@/lib/veroyatnost/razbor');
+        const [{ otkrytRazbor }, { typeset, typesetText }] = await Promise.all([
+          import('@/lib/veroyatnost/razbor'),
+          import('@/lib/tex'),
+        ]);
+        const nabor = { tekst: typesetText, formula: (tex: string) => typeset(`$${tex}$`) };
         const tasks = zadachi
           .map((z) => {
             try {
-              return zadachaOpornaya5(z, otkrytRazbor(z.steps, z.seal));
+              return zadachaOpornaya5(z, otkrytRazbor(z.steps, z.seal), nabor);
             } catch {
               return null;
             }
