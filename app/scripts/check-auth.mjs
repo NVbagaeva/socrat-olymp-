@@ -2913,11 +2913,14 @@ async function runDz2() {
     await page.waitForSelector('.trn-vybor__ryadom .dz2-knopka__glavnaya[aria-pressed="true"]');
     check((await page.locator('.trn-vybor__ryadom .dz2-knopka__korzina').textContent()).includes('(1)'),
       `ДЗ ${width}: в корзине один элемент`);
-    check(await page.evaluate(() => {
-      const a = document.querySelector('.trn-vybor__niz')?.getBoundingClientRect();
-      const b = document.querySelector('.trn-vybor__ryadom')?.getBoundingClientRect();
-      return a !== undefined && b !== undefined && b.top >= a.bottom - 1;
-    }), `ДЗ ${width}: «В домашку» под рядом «Начать», не налезает на него`);
+    /* Ряд «Начать» на телефоне прилипает к низу экрана: проверяется, что
+       кнопка, прокрученная в видимую часть, не закрыта им и нажимается. */
+    await knopka.scrollIntoViewIfNeeded();
+    check(await knopka.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return top !== null && el.contains(top);
+    }), `ДЗ ${width}: «В домашку» видна и не закрыта рядом «Начать»`);
     await snap(page, 'trenazher', width);
 
     await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/${blok.slug}/`, { waitUntil: 'networkidle' });
