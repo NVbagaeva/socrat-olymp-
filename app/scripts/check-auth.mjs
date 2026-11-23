@@ -1023,9 +1023,10 @@ async function tickConsents(page) {
 
 async function chooseRegistrationRole(page, role) {
   if ((await page.locator('.role-card').count()) === 0) {
-    await page.getByRole('button', { name: 'Назад · Кто вы?' }).click();
+    await page.getByRole('button', { name: 'Назад · Кто вы?' }).evaluate((button) => button.click());
+    await page.waitForSelector('.role-card');
   }
-  await page.click(`.role-card[data-role="${role}"]`);
+  await page.locator(`.role-card[data-role="${role}"]`).evaluate((button) => button.click());
 }
 
 async function wizardNext(page) {
