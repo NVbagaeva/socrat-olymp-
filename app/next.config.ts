@@ -113,12 +113,22 @@ const nextConfig: NextConfig = {
     // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,
     // а он грузится отдельно (components/onboarding/intro/IntroSplash.tsx).
     // Так же — файлы данных тренажёров 6, 7, 10 (public/data/, 82 файла):
-    // DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts.
+    // DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts. И картинки
+    // шапок разделов (public/images/shapki/): SHAPKI_ASSET_VERSIONS, адреса
+    // считает серверная шапка (SectionHeader), в браузер таблица не идёт.
     ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(
-          ([file]) => !file.startsWith('/intro/') && !file.startsWith('/data/'),
+          ([file]) =>
+            !file.startsWith('/intro/') &&
+            !file.startsWith('/data/') &&
+            !file.startsWith('/images/shapki/'),
         ),
+      ),
+    ),
+    SHAPKI_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/shapki/')),
       ),
     ),
     INTRO_ASSET_VERSIONS: JSON.stringify(

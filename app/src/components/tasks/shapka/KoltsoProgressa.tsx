@@ -1,13 +1,12 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useState, type ComponentType, type ReactNode } from 'react';
 import { SHAPKA_TEKSTY as T } from '@/content/shapki';
 import { AUTH_HREF } from '@/lib/auth/config';
 import { useSessionUser } from '@/lib/auth/session';
 import { createLogStore, type LogStore } from '@/lib/progressLog';
 import { skolkoOsvoeno } from '@/lib/shapka/osvoenie';
-import { useOpornyeResheno } from '@/lib/shapka/useOpornyeResheno';
 
 export interface KoltsoProgressaProps {
   /** Номер хранения раздела: ключи прогресса. */
@@ -61,7 +60,23 @@ export function KoltsoProgressa({
   const id = useId().replace(/:/g, '');
   const user = useSessionUser();
   const log = (logKey === null ? PUSTOY : zhurnal(logKey)).use();
-  const opResheno = useOpornyeResheno(hranenie, opornye ?? []);
+  /* Счёт опорных задач — после первой отрисовки, отдельным куском. */
+  const [opResheno, setOpResheno] = useState(0);
+  const [Schyot, setSchyot] = useState<ComponentType<{
+    hranenie: number;
+    ids: readonly string[];
+    soobshchit: (n: number) => void;
+  }> | null>(null);
+  useEffect(() => {
+    if (opornye === null || opornye.length === 0) return;
+    let zhiv = true;
+    void import('./OpornyeSchyot').then((m) => {
+      if (zhiv) setSchyot(() => m.default);
+    });
+    return () => {
+      zhiv = false;
+    };
+  }, [opornye]);
 
   const tr = useMemo<[number, number] | null>(
     () => (tipy.length === 0 ? null : [skolkoOsvoeno(log, tipy), tipy.length]),
@@ -109,6 +124,9 @@ export function KoltsoProgressa({
       )}
       style={{ '--koltso-p': dolya } as React.CSSProperties}
     >
+      {Schyot === null || opornye === null ? null : (
+        <Schyot hranenie={hranenie} ids={opornye} soobshchit={setOpResheno} />
+      )}
       <div className="koltso__krug">
         <div className="koltso__media">{children}</div>
         <svg className="koltso__svg" viewBox="0 0 200 200" aria-hidden="true" focusable="false">

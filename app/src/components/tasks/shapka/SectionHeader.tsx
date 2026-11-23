@@ -5,7 +5,7 @@ import KATALOG from '@/content/karta/katalog.json';
 import { SHAPKA_TEKSTY as T, kartinkaShapki, shapkaRazdela } from '@/content/shapki';
 import { chastRazdela, maxBall, nomerRazdela, razdel, type RazdelKod } from '@/content/struktura';
 import { tasksPage, vseRazdely } from '@/content/tasks';
-import { assetUrl } from '@/lib/assetUrl';
+import { assetUrl, withVersion } from '@/lib/assetUrl';
 import { KARTA_ZHURNALY } from '@/lib/karta/katalog';
 import { opornyeRazdela } from '@/lib/shapka/opornyeRazdela';
 import { ChasyIkonka, ZvezdaIkonka } from '@/components/tasks/stsena';
@@ -20,6 +20,18 @@ export interface SectionHeaderProps {
   pereklyuchatel?: ReactNode;
   /** Под чипами: кнопка «Продолжить подготовку» у хаба «Графики функций». */
   actions?: ReactNode;
+}
+
+/**
+ * Адрес картинки шапки с версией. Картинки серии (images/shapki/) — в
+ * своей таблице версий: шапка серверная, и общая таблица первой
+ * загрузки (assetUrl) от них не растёт.
+ */
+let shapkiVersii: Record<string, string> | null = null;
+function kartinkaUrl(src: string): string {
+  if (!src.startsWith('/images/shapki/')) return assetUrl(src);
+  shapkiVersii ??= JSON.parse(process.env.SHAPKI_ASSET_VERSIONS ?? '{}') as Record<string, string>;
+  return withVersion(src, shapkiVersii);
 }
 
 /** Типы тренажёра раздела по каталогу «Карты ЕГЭ». */
@@ -114,8 +126,8 @@ export function SectionHeader({ kod, pereklyuchatel, actions }: SectionHeaderPro
           >
             <ZhivayaKartinka
               kod={kod}
-              src560={assetUrl(src560)}
-              src280={assetUrl(src280)}
+              src560={kartinkaUrl(src560)}
+              src280={kartinkaUrl(src280)}
               alt={`${title}: стеклянная иллюстрация`}
               label={s.opisanie}
               podskazka={s.podskazka}
