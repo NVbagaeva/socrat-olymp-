@@ -169,7 +169,7 @@ export interface VariantTask {
    * разделов): только для карточки онлайн-варианта. На лист в формате
    * ЕГЭ и на печать не идёт. Путь от корня public, без версии.
    */
-  kartinka?: { src: string; alt: string };
+  kartinka?: { src: string; alt: string; src280?: string };
   /** Поля, взятые из запасного варианта. Пусто — всё своё. */
   fallbacks: Fallback[];
   /** Как восстановить задачу без сохранения разметки (кабинет). */

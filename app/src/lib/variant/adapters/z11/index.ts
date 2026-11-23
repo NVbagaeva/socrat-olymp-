@@ -80,7 +80,7 @@ function fromBank(b: UslovieBanka): C11 | null {
 }
 
 /** Картинка сюжета для онлайн-варианта: аналогу — по его ключу, остальным — по подтипу. */
-function kartinkaVarianta11(c: C11): { kartinka?: { src: string; alt: string } } {
+function kartinkaVarianta11(c: C11): { kartinka?: { src: string; alt: string; src280: string } } {
   const k =
     c.iz.vid === 'new'
       ? kartinka11(c.prototypeId, c.iz.params)
@@ -89,7 +89,7 @@ function kartinkaVarianta11(c: C11): { kartinka?: { src: string; alt: string } }
           ? undefined
           : kartinka11(c.prototypeId, undefined, c.iz.b.analog.ks)
         : kartinka11(c.prototypeId, c.iz.b.params);
-  return k === undefined ? {} : { kartinka: { src: k.src, alt: k.alt } };
+  return k === undefined ? {} : { kartinka: { src: k.src, alt: k.alt, src280: k.src280 } };
 }
 
 export function build(c: C11, solved: Solved): VariantTask {

@@ -131,11 +131,11 @@ export function slotyIllyustraciy(): { id: string; title: string; alt: string; e
 /** Картинки всех прототипов для клиентских компонентов (только найденные). */
 export function kartinkiPrototipov(): Record<
   string,
-  { webp: string; png: string; alt: string; width: number; height: number }
+  { webp: string; png: string; alt: string; width: number; height: number; webp280?: string }
 > {
   const ill: Record<
     string,
-    { webp: string; png: string; alt: string; width: number; height: number }
+    { webp: string; png: string; alt: string; width: number; height: number; webp280?: string }
   > = {};
   for (const p of PROTOTYPES) {
     const i = illyustraciya(p.id);
@@ -147,8 +147,14 @@ export function kartinkiPrototipov(): Record<
   for (const [k, syuzhet] of Object.entries(SYUZHET_KARTINKI_9)) {
     const s = kartinkaSyuzheta(9, syuzhet);
     if (s) {
-      const src = assetUrl(s.src);
-      ill[k] = { webp: src, png: src, alt: s.alt, width: s.razmer, height: s.razmer };
+      ill[k] = {
+        webp: s.src,
+        png: s.src,
+        webp280: s.src280,
+        alt: s.alt,
+        width: s.razmer,
+        height: s.razmer,
+      };
     }
   }
   return ill;

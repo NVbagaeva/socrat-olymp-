@@ -42,7 +42,7 @@ export interface Variant45 {
   /** `Razbor45` в JSON, закрытый отпечатком (sealText). */
   razbor: string;
   /** Картинка сюжета варианта (pool.ts, illyustratsiyaVarianta). */
-  kartinka?: { src: string; alt: string };
+  kartinka?: { src: string; alt: string; src280?: string };
 }
 
 export interface Kind45 {

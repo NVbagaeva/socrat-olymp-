@@ -21,7 +21,6 @@ import { zadachaBanka, type SessiyaPayload, type SessiyaZadacha } from '../sessi
 import type { TekstyTrenazhera45 } from '@/content/veroyatnost45';
 import { DerevoPodskazki, risunok45, shagi45, voprosy45 } from './shagi45';
 import type { Ui45 } from './ui45';
-import { src280 } from '@/components/ui/KartinkaZadachi';
 
 /**
  * Замены «Похожая задача»: экран подменяет задачу тренировки другим
@@ -365,7 +364,11 @@ export function Ekran45({
         ? {}
         : {
             /* Картинка сюжета — справа от условия (KartinkaZadachi). */
-            kartinka: { src: kartinka.path, src280: src280(kartinka.path), alt: kartinka.alt },
+            kartinka: {
+              src: kartinka.path,
+              ...(kartinka.path280 === undefined ? {} : { src280: kartinka.path280 }),
+              alt: kartinka.alt,
+            },
           })}
       value={value}
       onValue={(nextValue) => {

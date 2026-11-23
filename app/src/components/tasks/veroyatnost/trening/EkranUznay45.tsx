@@ -13,7 +13,7 @@ import { MetodKartinka } from '../MetodKartinka';
 import { navykiZadaniya } from '../metody';
 import type { SessiyaPayload } from '../sessiyaPayload';
 import type { Ui45 } from './ui45';
-import { KartinkaZadachi, src280 } from '@/components/ui/KartinkaZadachi';
+import { KartinkaZadachi } from '@/components/ui/KartinkaZadachi';
 
 export interface EkranUznay45Props {
   zadanie: Zadanie45;
@@ -144,7 +144,7 @@ export function EkranUznay45({
           <div className="kz-ryad">
             <KartinkaZadachi
               src={kartinka.path}
-              src280={src280(kartinka.path)}
+              {...(kartinka.path280 === undefined ? {} : { src280: kartinka.path280 })}
               alt={kartinka.alt}
             />
             <div

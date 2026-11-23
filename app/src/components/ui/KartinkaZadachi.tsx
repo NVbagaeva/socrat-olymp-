@@ -47,8 +47,3 @@ export function KartinkaZadachi({
     </figure>
   );
 }
-
-/** 280-я копия по пути 560-й: '/images/zadachi/9/x-560.webp' → '…-280.webp'. */
-export function src280(src: string): string | undefined {
-  return /-560\.webp(\?|$)/.test(src) ? src.replace('-560.webp', '-280.webp') : undefined;
-}

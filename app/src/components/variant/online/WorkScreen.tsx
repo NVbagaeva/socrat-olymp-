@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { KartinkaZadachi, src280 } from '@/components/ui/KartinkaZadachi';
+import { KartinkaZadachi } from '@/components/ui/KartinkaZadachi';
 import { FiguraZhivaya } from '@/components/stereo/FiguraZhivaya';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -502,7 +502,7 @@ export function WorkScreen({
             <div className="kz-ryad">
               <KartinkaZadachi
                 src={task.kartinka.src}
-                src280={src280(task.kartinka.src)}
+                {...(task.kartinka.src280 === undefined ? {} : { src280: task.kartinka.src280 })}
                 alt={task.kartinka.alt}
               />
               <div

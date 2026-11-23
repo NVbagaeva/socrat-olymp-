@@ -18,7 +18,6 @@ import { readSealed45 } from '@/lib/veroyatnost/trening/otvet45';
 import { DerevoPodskazki, risunok45, shagi45, voprosy45 } from '../trening/shagi45';
 import '../../trening/trening.css';
 import '../trening/trening45.css';
-import { src280 } from '@/components/ui/KartinkaZadachi';
 
 /**
  * Экран блока опорных задач №4 и №5 на общем экране блока
@@ -158,7 +157,13 @@ export function Opornye45Blok({
       {...(risunok === undefined ? {} : { risunok })}
       {...(kartinka === undefined
         ? {}
-        : { kartinka: { src: kartinka.path, src280: src280(kartinka.path), alt: kartinka.alt } })}
+        : {
+            kartinka: {
+              src: kartinka.path,
+              ...(kartinka.path280 === undefined ? {} : { src280: kartinka.path280 }),
+              alt: kartinka.alt,
+            },
+          })}
       value={value}
       onValue={(next) => {
         setValue(next);

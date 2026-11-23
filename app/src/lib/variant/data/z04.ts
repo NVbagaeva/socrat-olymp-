@@ -42,7 +42,15 @@ function variant45(prototype: Prototype, variant: Variant): Variant45 {
     uslovie: prototype.uslovie(p),
     seal,
     razbor: sealText(JSON.stringify(razbor), seal),
-    ...(ill === undefined ? {} : { kartinka: { src: ill.path, alt: ill.alt } }),
+    ...(ill === undefined
+      ? {}
+      : {
+          kartinka: {
+            src: ill.path,
+            alt: ill.alt,
+            ...(ill.path280 === undefined ? {} : { src280: ill.path280 }),
+          },
+        }),
   };
 }
 

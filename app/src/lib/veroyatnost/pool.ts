@@ -59,6 +59,16 @@ import { nabratVykladku, typeset, typesetText } from '../tex';
  * лежат в закрытом разборе вместе с подсветкой и открываются с ним.
  * У метода «Формула» рисунка нет — только имя метода.
  */
+/**
+ * Картинка задачи: путь от корня public и alt; у картинок сюжетов
+ * (lib/kartinkiZadach.ts) путь уже с версией и есть копия 280 px.
+ */
+export interface IllyustratsiyaPool {
+  path: string;
+  alt: string;
+  path280?: string;
+}
+
 export interface PoolModel {
   method: Method;
   /**
@@ -66,7 +76,7 @@ export interface PoolModel {
    * лежит в манифесте картинок; нет файла — нет поля, и карточка
    * не показывает ни картинки, ни места под неё.
    */
-  illustration?: { path: string; alt: string };
+  illustration?: IllyustratsiyaPool;
 }
 
 /* ── Манифест иллюстраций ────────────────────────────────────────── */
@@ -124,10 +134,7 @@ function manifestIllyustratsiy(zadanie: 4 | 5): Set<string> {
  * Подпись alt — по имени файла (illyustratsii.ts): сюжет у вариантов
  * разный, поэтому и подпись своя.
  */
-export function illyustratsiyaVarianta(
-  id: string,
-  n: number,
-): { path: string; alt: string } | undefined {
+export function illyustratsiyaVarianta(id: string, n: number): IllyustratsiyaPool | undefined {
   const zadanie = zadanieIllyustratsii(id);
   const imena = manifestIllyustratsiy(zadanie);
   const svoy = imyaIllyustratsii(id, n);
@@ -148,7 +155,7 @@ export function illyustratsiyaVarianta(
   /* Своего файла нет — картинка сюжета (lib/kartinkiZadach.ts): общая
      для всех вариантов с тем же сюжетом. */
   const k = kartinkaSyuzheta(zadanie, SYUZHET_KARTINKI_45[`${id}#${n}`] ?? SYUZHET_KARTINKI_45[id]);
-  return k === undefined ? undefined : { path: k.src, alt: k.alt };
+  return k === undefined ? undefined : { path: k.src, alt: k.alt, path280: k.src280 };
 }
 
 export interface PoolVariant {
@@ -465,7 +472,7 @@ export interface PrepPoolZadacha {
    * Картинка к условию у задачи без модели (подготовка №5): у задач
    * с моделью она идёт через модель. Только если файл есть.
    */
-  illustration?: { path: string; alt: string };
+  illustration?: IllyustratsiyaPool;
   /** Чертёж задачи готовой разметкой SVG, если он ей нужен. */
   risunok?: string;
   model?: PoolModel;
@@ -489,7 +496,7 @@ export interface PrepPoolBlok {
  * которая расходится с условием (KARTINKA_NE_PO_USLOVIYU), не
  * показывается вовсе.
  */
-function kartinkaOpornoy(zadacha: PrepZadacha): { path: string; alt: string } | undefined {
+function kartinkaOpornoy(zadacha: PrepZadacha): IllyustratsiyaPool | undefined {
   const prototipa = KARTINKA_PROTOTIPA_OPORNOY[zadacha.id];
   if (prototipa !== undefined) {
     return illyustratsiyaVarianta(prototipa, 1);
@@ -583,7 +590,7 @@ export interface UznayVariant {
    * Иллюстрация — только если файл есть: путь по модели метод не
    * выдаёт, но в карточке без картинки и рамки под неё быть не должно.
    */
-  illustration?: { path: string; alt: string };
+  illustration?: IllyustratsiyaPool;
   /** Отпечаток идентификатора метода. */
   metodSeal: string;
   /** Признаки в условии — JSON-список строк, закрытый отпечатком. */
@@ -606,7 +613,7 @@ function uznayVariant(
   n: number,
   uslovie: string,
   metodika: Metodika,
-  illustration: { path: string; alt: string } | undefined,
+  illustration: IllyustratsiyaPool | undefined,
   klyuch: string,
 ): UznayVariant {
   const metodSeal = sealMetod(klyuch);

@@ -117,12 +117,22 @@ const nextConfig: NextConfig = {
     ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(
-          ([file]) => !file.startsWith('/intro/') && !file.startsWith('/data/'),
+          ([file]) =>
+            !file.startsWith('/intro/') &&
+            !file.startsWith('/data/') &&
+            !file.startsWith('/images/zadachi/'),
         ),
       ),
     ),
     INTRO_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(Object.entries(ASSETS).filter(([file]) => file.startsWith('/intro/'))),
+    ),
+    // Картинки сюжетов задач (public/images/zadachi/, ~800 файлов):
+    // KARTINKI_ASSET_VERSIONS, её подставляет только lib/kartinkiZadach.ts.
+    KARTINKI_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/zadachi/')),
+      ),
     ),
     DATA_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(Object.entries(ASSETS).filter(([file]) => file.startsWith('/data/'))),

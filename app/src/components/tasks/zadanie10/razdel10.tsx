@@ -11,7 +11,6 @@ import { ZAGRUZKA10 } from '@/lib/zadanie10/trening/zagruzka';
 import type { Solved } from '@/lib/zadanie10/types';
 import type { RazdelBanka } from '../trening/bank/types';
 import type { IllInfo } from './Kartinka10';
-import { src280 } from '@/components/ui/KartinkaZadachi';
 import { Most10 } from './Most10';
 import { schitaemSUmom10, shagiIzResheniya10, voprosyIzResheniya10 } from './shagi10';
 
@@ -63,7 +62,7 @@ export function razdel10(kartinki: Record<string, IllInfo>): RazdelBanka<Zadacha
         ? undefined
         : {
             src: ill.webp,
-            src280: src280(ill.webp),
+            ...(ill.webp280 === undefined ? {} : { src280: ill.webp280 }),
             alt: ill.alt,
             width: ill.width,
             height: ill.height,

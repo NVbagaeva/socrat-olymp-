@@ -20,7 +20,7 @@ import { assetUrl } from './assetUrl';
 export type NomerKartinki = 4 | 5 | 9 | 10;
 
 export interface KartinkaZadachi {
-  /** Путь от корня public: 560 px — основной, для экранов 2x. */
+  /** Путь от корня public с версией: 560 px — основной, для экранов 2x. */
   src: string;
   /** 280 px — для обычных экранов и печати. */
   src280: string;
@@ -30,6 +30,23 @@ export interface KartinkaZadachi {
 }
 
 const ALT = DANNYE as Readonly<Record<string, Readonly<Record<string, string>>>>;
+
+/* Версии файлов картинок — своя таблица (next.config.ts): в общей
+   ASSET_VERSIONS 800 строк попали бы в первую загрузку каждой страницы. */
+let versii: Record<string, string> | null = null;
+
+/** Путь с версией: '/images/zadachi/9/x-560.webp' → '…?v=1a2b3c4d'. */
+function sVersiey(put: string): string {
+  if (versii === null) {
+    try {
+      versii = JSON.parse(process.env.KARTINKI_ASSET_VERSIONS ?? '{}') as Record<string, string>;
+    } catch {
+      versii = {};
+    }
+  }
+  const v = versii[put];
+  return v === undefined ? put : `${put}?v=${v}`;
+}
 
 export const PAPKA_KARTINOK_ZADACH = '/images/zadachi';
 
@@ -46,7 +63,12 @@ export function kartinkaSyuzheta(
     return undefined;
   }
   const baza = `${PAPKA_KARTINOK_ZADACH}/${nomer}/${klyuch}`;
-  return { src: `${baza}-560.webp`, src280: `${baza}-280.webp`, alt, razmer: 560 };
+  return {
+    src: sVersiey(`${baza}-560.webp`),
+    src280: sVersiey(`${baza}-280.webp`),
+    alt,
+    razmer: 560,
+  };
 }
 
 /** Все ключи сюжетов задания, у которых картинка готова. */

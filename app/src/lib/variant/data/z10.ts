@@ -22,7 +22,7 @@ export interface Zadacha10Variant {
   text: string;
   params: Params;
   /** Картинка сюжета: аналога (kartinkiSyuzhetov.ts) или прототипа. */
-  kartinka?: { src: string; alt: string };
+  kartinka?: { src: string; alt: string; src280?: string };
 }
 
 export function dannye(): Zadacha10Variant[] {
@@ -38,7 +38,13 @@ export function dannye(): Zadacha10Variant[] {
       params: z.params,
     };
     if (z.no !== undefined) out.no = z.no;
-    if (ill !== undefined) out.kartinka = { src: ill.webp, alt: ill.alt };
+    if (ill !== undefined) {
+      out.kartinka = {
+        src: ill.webp,
+        alt: ill.alt,
+        ...(ill.webp280 === undefined ? {} : { src280: ill.webp280 }),
+      };
+    }
     return out;
   });
 }
