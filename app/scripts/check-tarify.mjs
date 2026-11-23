@@ -81,8 +81,18 @@ if (
 ) {
   fail('лимиты бесплатного доступа не совпадают с утверждёнными (10 / 1 / 1)');
 }
+/* Утверждено: генераторы заданий ЕГЭ №1, 2, 9, 10 — планиметрия,
+   векторы, прикладные и текстовые задачи. Сверяем коды разделов,
+   номера хранения (1, 2, 10, 11) и номера ЕГЭ в подписи. */
+const GENERATORY = ['planimetriya', 'vektory', 'prikladnye-zadachi', 'tekstovye-zadachi'];
+if (JSON.stringify(BESPLATNO.generatorRazdely) !== JSON.stringify(GENERATORY)) {
+  fail(`генераторы без тарифа: ${BESPLATNO.generatorRazdely.join(', ')}, утверждено ${GENERATORY.join(', ')}`);
+}
 if (JSON.stringify(BESPLATNO.generatorNomera) !== JSON.stringify(['1', '2', '10', '11'])) {
-  fail(`генераторы без тарифа: ${BESPLATNO.generatorNomera.join(', ')}, утверждено №1, 2, 10, 11`);
+  fail(`номера хранения открытых генераторов: ${BESPLATNO.generatorNomera.join(', ')}, ждали 1, 2, 10, 11`);
+}
+if (process.env.STRUKTURA_EGE !== '2027-20' && config.nomeraGeneratorov() !== '№1, 2, 9, 10') {
+  fail(`подпись открытых генераторов: «${config.nomeraGeneratorov()}», по номерам ЕГЭ — «№1, 2, 9, 10»`);
 }
 if (PROBNYY.dney !== 7 || PROBNYY.raz !== 1) fail('пробный доступ — 7 дней, один раз');
 if (KLASS_MAKS !== 30) fail('класс репетитора — до 30 учеников');

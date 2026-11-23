@@ -7,7 +7,7 @@
  * и ничего не включает сам.
  */
 
-import { nomerRazdela } from '@/content/struktura';
+import { nomerRazdela, razdel } from '@/content/struktura';
 
 /** Флаг оплаты: «1» — кнопки ведут на регистрацию и оплату. */
 export const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === '1';
@@ -24,6 +24,18 @@ export const DO_EGE = { data: '2027-06-30', podpis: 'до 30 июня 2027' } as
 /** Срок обычной оплаты, дней. */
 export const PERIOD_DNEY = 30;
 
+/**
+ * Разделы, чей генератор открыт без тарифа. Записаны кодами разделов,
+ * а не номерами: номер хранения (10, 11) легко принять за номер ЕГЭ
+ * (9, 10). Сейчас это задания ЕГЭ №1, 2, 9, 10.
+ */
+const GENERATOR_RAZDELY = [
+  'planimetriya',
+  'vektory',
+  'prikladnye-zadachi',
+  'tekstovye-zadachi',
+] as const;
+
 /** Лимиты бесплатного доступа. */
 export const BESPLATNO = {
   /** Задач тренажёра в день. */
@@ -36,11 +48,15 @@ export const BESPLATNO = {
    * lib/tarify/dostup.ts.
    */
   generatorProbnyh: 1,
+  /** Разделы, чей генератор открыт без тарифа: см. GENERATOR_RAZDELY. */
+  generatorRazdely: GENERATOR_RAZDELY,
   /**
-   * Задания (номера сайта), чей генератор открыт без тарифа. Генераторы
-   * остальных — в пробном доступе и на платных тарифах.
+   * Те же генераторы номерами хранения — так генератор называет свою
+   * область (адрес /zadaniya/10/generator/, проверка доступа). Не для
+   * подписей: человеку номер показывает nomerDlyaPodpisi. Генераторы
+   * остальных заданий — в пробном доступе и на платных тарифах.
    */
-  generatorNomera: ['1', '2', '10', '11'],
+  generatorNomera: GENERATOR_RAZDELY.map((kod) => String(razdel(kod).hranenie)),
   /**
    * Генераторы базовой математики (области «baza-N») открыты целиком:
    * без тарифа и без счётчика пробных генераций. Решение владельца.

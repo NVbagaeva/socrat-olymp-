@@ -85,8 +85,7 @@ import { GenSheetView, type TaskAction } from './GenSheetView';
 import { GenZakryt, ProbnayaPotrachena } from './GenZamok';
 import './generator.css';
 
-/** Номер генератора в окнах доступа: «12», у базы — «12 базы» (область «baza-12»). */
-/** Номер для подписи: у базы — свой, у профиля — номер ЕГЭ, не хранения. */
+/** Номер генератора в окнах доступа: у профиля — номер ЕГЭ, не хранения; у базы — «12 базы» (область «baza-12»). */
 function nomerGeneratora(scope: string): string {
   return scope.startsWith('baza-')
     ? GENERATOR_BAZY.nomer(Number(scope.slice(5)))
