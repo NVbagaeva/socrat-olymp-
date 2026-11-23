@@ -10,7 +10,7 @@
 import { ANALOGI, FIPI } from '@/lib/zadanie10/bank';
 import { lite } from '@/lib/zadanie10/dannye-server';
 import type { Params } from '@/lib/zadanie10/types';
-import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
+import { kartinkiZadach10 } from '@/lib/zadanie10/kartinkiZadach10';
 import { klyuchKartinki10 } from '@/lib/zadanie10/kartinkiSyuzhetov';
 
 export interface Zadacha10Variant {
@@ -26,7 +26,7 @@ export interface Zadacha10Variant {
 }
 
 export function dannye(): Zadacha10Variant[] {
-  const kartinki = kartinkiPrototipov();
+  const kartinki = kartinkiZadach10();
   return [...FIPI, ...ANALOGI].map((b) => {
     const z = lite(b);
     const ill = kartinki[klyuchKartinki10(z)];

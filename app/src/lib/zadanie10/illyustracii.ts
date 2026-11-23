@@ -16,8 +16,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { assetUrl } from '../assetUrl';
 import { PROTOTYPES } from './prototypes';
-import { kartinkaSyuzheta } from '../kartinkiZadach';
-import { SYUZHET_KARTINKI_9 } from './kartinkiSyuzhetov';
 
 export const PAPKA_ILLYUSTRACIY = '/illustrations/zadanie-10';
 
@@ -131,30 +129,16 @@ export function slotyIllyustraciy(): { id: string; title: string; alt: string; e
 /** Картинки всех прототипов для клиентских компонентов (только найденные). */
 export function kartinkiPrototipov(): Record<
   string,
-  { webp: string; png: string; alt: string; width: number; height: number; webp280?: string }
+  { webp: string; png: string; alt: string; width: number; height: number }
 > {
   const ill: Record<
     string,
-    { webp: string; png: string; alt: string; width: number; height: number; webp280?: string }
+    { webp: string; png: string; alt: string; width: number; height: number }
   > = {};
   for (const p of PROTOTYPES) {
     const i = illyustraciya(p.id);
     if (i) {
       ill[p.id] = { webp: i.webp, png: i.png, alt: i.alt, width: i.width, height: i.height };
-    }
-  }
-  /* Картинки сюжетов аналогов: ключ `<прототип>:<сюжет>` (kartinkiSyuzhetov.ts). */
-  for (const [k, syuzhet] of Object.entries(SYUZHET_KARTINKI_9)) {
-    const s = kartinkaSyuzheta(9, syuzhet);
-    if (s) {
-      ill[k] = {
-        webp: s.src,
-        png: s.src,
-        webp280: s.src280,
-        alt: s.alt,
-        width: s.razmer,
-        height: s.razmer,
-      };
     }
   }
   return ill;

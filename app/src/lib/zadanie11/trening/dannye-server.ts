@@ -7,7 +7,7 @@
  */
 
 import { subtype } from '../prototypes';
-import KARTINKI_ANALOGOV_JSON from '@/data/zadanie11/kartinki-analogov.json';
+import KARTINKI_ANALOGOV_JSON from '@/data/kartinki-analogov-11.json';
 import { sealAnswer, sealChoice } from '../secret';
 import { dannyeTrenazhera } from '../trenazher/dannye';
 import { klyuchZadachi, type UslovieBanka, type ZadachaPlan } from '../trenazher/sessiya';

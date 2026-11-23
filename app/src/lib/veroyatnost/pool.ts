@@ -28,10 +28,12 @@ import {
   altIllyustratsii,
   KARTINKA_NE_PO_USLOVIYU,
   KARTINKA_OSNOVY_PODHODIT,
+} from './illyustratsii';
+import {
   KARTINKA_PROTOTIPA_OPORNOY,
   KARTINKA_VSEH_VARIANTOV,
   SYUZHET_KARTINKI_45,
-} from './illyustratsii';
+} from './kartinkiSyuzhetov45';
 import { kartinkaSyuzheta } from '../kartinkiZadach';
 import { imyaIllyustratsii, texPlain, zadanieIllyustratsii, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';

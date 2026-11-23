@@ -23,8 +23,6 @@
  */
 
 import { MARSHRUTY_11, SHEET_11 } from '@/content/repetitory11';
-import { kartinkaListaHtml } from '../kartinkiZadach';
-import { kartinka11, klyuchAnaloga11 } from './kartinki';
 import { RAZDELY_TEORII_11 } from '@/content/teoriya11';
 import answers from '@/lib/sheet/answers.js';
 import { exampleItem } from '@/lib/sheet/sheet.js';
@@ -94,8 +92,6 @@ export interface Dop11 {
   /** Дата на листе: «2026-10-24»; пусто — пустая линия. */
   data: string;
   uchitel: string;
-  /** «Картинки к задачам»: иллюстрации сюжетов на цветном листе отработки. */
-  kartinki?: boolean;
 }
 
 export const DOP_11: Dop11 = {
@@ -140,7 +136,6 @@ export function sheetQuery11(p: SheetParams11): string {
     else if (dop.svoy !== undefined && dop.svoy !== '') q.set('vt', dop.svoy);
     if (dop.data !== '') q.set('d', dop.data);
     if (dop.uchitel !== DOP_11.uchitel) q.set('uch', dop.uchitel);
-    if (dop.kartinki === true) q.set('ki', '1');
   }
   return q.toString();
 }
@@ -155,7 +150,7 @@ function chistyy(text: string, max: number): string {
 
 /** «Дополнительно» из адреса; нет ни одного ключа — undefined. */
 function dopIzZaprosa(q: URLSearchParams): Dop11 | undefined {
-  if (!['tr', 'pr', 'qr', 'vr', 'vt', 'd', 'uch', 'ki'].some((k) => q.has(k))) return undefined;
+  if (!['tr', 'pr', 'qr', 'vr', 'vt', 'd', 'uch'].some((k) => q.has(k))) return undefined;
   const pr = Number(q.get('pr'));
   const vr = q.get('vr') ?? '';
   const data = q.get('d') ?? '';
@@ -172,7 +167,6 @@ function dopIzZaprosa(q: URLSearchParams): Dop11 | undefined {
           .trim()
           .slice(0, 40)
       : DOP_11.uchitel,
-    ...(q.get('ki') === '1' ? { kartinki: true } : {}),
   };
 }
 
@@ -564,26 +558,6 @@ function primeryLista(
   return { '*': iz.flatMap((id) => nabrat(id, ids.length >= k ? 1 : k)) };
 }
 
-/**
- * Картинка сюжета на листе: только по «Картинкам к задачам», только на
- * цветном листе отработки — в формате варианта ЕГЭ картинок нет.
- */
-function kartinkaZadachiLista(
-  p: SheetParams11,
-  podtip: string,
-  b: UslovieBanka | undefined,
-): string {
-  if (p.dop?.kartinki !== true || p.rezhim !== 'otrabotka' || p.theme !== 'color') return '';
-  const k =
-    b?.analog !== undefined
-      ? (() => {
-          const ks = klyuchAnaloga11(b.analog.kod);
-          return ks === undefined ? undefined : kartinka11(podtip, undefined, ks);
-        })()
-      : kartinka11(podtip, b?.params);
-  return k === undefined ? '' : kartinkaListaHtml(k.src280, k.alt);
-}
-
 /** Задачи листа по вариантам: условия, ответы, решения. */
 export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): SobrannyyList {
   const plan = planLista(p, bank);
@@ -645,7 +619,6 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
       }
       const s = zadachaIzBanka(poz, bank, pohozha);
       const st = subtype(poz.id);
-      const izBanka = poz.vid === 'new' ? undefined : bank.find((b) => b.no === poz.no);
       const vybor = s.vybor;
       const otvetVybor = vybor === undefined ? null : (vybor.options[vybor.correct] ?? '');
       return {
@@ -655,8 +628,10 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
         blok,
         kod: kodNaSayte(poz.id),
         title: st.title,
-        questionHtml:
-          kartinkaZadachiLista(p, poz.id, izBanka) + typeset(izBanka?.analog?.tekst ?? s.uslovie),
+        questionHtml: typeset(
+          (poz.vid === 'new' ? undefined : bank.find((b) => b.no === poz.no)?.analog?.tekst) ??
+            s.uslovie,
+        ),
         answer: otvetVybor === null ? chislo(s.answer) : otvetVybor.replace(/\$/g, ''),
         answerHtml: otvetVybor === null ? typeset(`$${d(s.answer)}$`) : typeset(otvetVybor),
         solutionHtml: reshenieHtml(s.etapy, s.tables ?? [], k),

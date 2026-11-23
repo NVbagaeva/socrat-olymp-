@@ -8,7 +8,7 @@
  */
 
 import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
-import KARTINKI_ANALOGOV_JSON from '@/data/zadanie11/kartinki-analogov.json';
+import KARTINKI_ANALOGOV_JSON from '@/data/kartinki-analogov-11.json';
 import type { UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
 
 const KARTINKI_ANALOGOV = KARTINKI_ANALOGOV_JSON as Readonly<Record<string, string>>;

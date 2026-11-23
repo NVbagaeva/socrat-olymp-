@@ -6,7 +6,7 @@
  *
  * Ключ сюжета задачи:
  *   — аналог из пула — по его номеру («ДП-07-a01»):
- *     data/zadanie11/kartinki-analogov.json (klyuchAnaloga11);
+ *     data/kartinki-analogov-11.json (klyuchAnaloga11);
  *   — задача банка и генератора — по подтипу и, где у подтипа несколько
  *     шаблонов текста, по параметру `form` (`kto` у ДП-09): SYUZHET_PODTIPA_11.
  * Разминка (РЗ) картинок не получает. План и журнал —
@@ -14,7 +14,7 @@
  */
 
 import { kartinkaSyuzheta, type KartinkaZadachi } from '../kartinkiZadach';
-import KARTINKI_ANALOGOV from '@/data/zadanie11/kartinki-analogov.json';
+import KARTINKI_ANALOGOV from '@/data/kartinki-analogov-11.json';
 import type { Params } from './types';
 
 /** Подтип → ключ сюжета; у подтипов с шаблонами — по `form`/`kto` ('' — остальные). */
