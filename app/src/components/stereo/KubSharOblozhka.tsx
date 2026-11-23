@@ -22,7 +22,7 @@ export function KubSharOblozhka() {
         src: assetUrl(`${KADR}-560.png`),
         srcSet: `${assetUrl(`${KADR}-560.png`)} 560w, ${assetUrl(`${KADR}-1120.png`)} 1120w`,
         webpSrcSet: `${assetUrl(`${KADR}-560.webp`)} 560w, ${assetUrl(`${KADR}-1120.webp`)} 1120w`,
-        sizes: '(max-width: 1023.98px) 150px, 300px',
+        sizes: '(max-width: 1023.98px) 112px, 240px',
         width: 961,
         height: 1048,
       }}

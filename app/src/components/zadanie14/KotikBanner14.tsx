@@ -17,11 +17,7 @@ function Sloy({
   const webp = (s: number) => `${assetUrl(`${PAPKA}/kotik-${imya}-${s}.webp`)} ${s}w`;
   return (
     <picture className={className}>
-      <source
-        type="image/webp"
-        srcSet={`${webp(480)}, ${webp(754)}`}
-        sizes="(max-width: 759px) 70vw, 340px"
-      />
+      <source type="image/webp" srcSet={`${webp(480)}, ${webp(754)}`} sizes="280px" />
       <img
         src={assetUrl(`${PAPKA}/kotik-${imya}-480.png`)}
         width={w}
@@ -78,7 +74,7 @@ export function KotikBanner14({
           {knopka}
         </a>
       </div>
-      <div className="z14-kotik__kartinka" aria-hidden="true">
+      <div className="z14-kotik__kartinka" data-ill="section" aria-hidden="true">
         {kartinka ?? <KotikKartinka14 />}
       </div>
     </aside>

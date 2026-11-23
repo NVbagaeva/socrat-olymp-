@@ -13,6 +13,7 @@ import { YAKOR_11, type ChastRazdela11 } from '@/lib/zadanie11/teoriya-yakorya';
 import type { LifehackId } from '@/lib/zadanie11/types';
 import { IkonkaRazdela, MiniKartinka, Piktogramma, tsvetRazdela, Zvezdy } from './Piktogrammy';
 import { Tablitsa11 } from './Tablitsa11';
+import { illustrationRamka } from '@/components/ui/Illustration';
 import '../teoriya/teoriya-steklo.css';
 
 /** Формула крупно (display), набранная на сервере. */
@@ -241,7 +242,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
           </p>
           <ul className="z11-vved__list">
             {r.vvedenie.kartinki.map((k) => (
-              <li className="z11-vved__item" key={k.title}>
+              <li {...illustrationRamka('inline', 'z11-vved__item')} key={k.title}>
                 <Image className="z11-vved__pic" src={k.src} alt={k.alt} width={480} height={480} />
                 <span className="z11-vved__title">{k.title}</span>
                 <span className="z11-vved__text">

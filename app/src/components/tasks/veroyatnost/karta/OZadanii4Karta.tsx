@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import Image from 'next/image';
 import { Svernut } from '../../karta';
 import { navykiZadaniya } from '../metody';
 import { OZadanii45Karta } from './OZadanii45Karta';
 import { FORMULY4, SHAPKA4, TIPY4_OPASNO } from '@/content/veroyatnost4';
 import { FOTO_4, O_ZADANII_4, STATISTIKA_4, V_ZADANII_5 } from '@/content/veroyatnost-o-zadanii';
+import { Illustration } from '@/components/ui/Illustration';
 import { bezVersii } from '@/lib/assetUrl';
 import { typesetText } from '@/lib/tex';
 import { BANK_4 } from '@/lib/veroyatnost/index';
@@ -82,13 +82,13 @@ export function OZadanii4Karta() {
                 <p>{istoriya.text}</p>
                 {fotoEst() ? (
                   <figure className="z45-ob__foto">
-                    {/* Фотография — как есть, целиком. */}
-                    <Image
+                    {/* Фотография — как есть, целиком; норма section. */}
+                    <Illustration
+                      variant="section"
                       src={FOTO_4.src}
                       alt={FOTO_4.alt}
                       width={FOTO_4.width}
                       height={FOTO_4.height}
-                      sizes="(max-width: 720px) 100vw, 640px"
                     />
                     <figcaption>{istoriya.podpis}</figcaption>
                   </figure>

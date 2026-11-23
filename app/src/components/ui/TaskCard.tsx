@@ -2,6 +2,7 @@ import { clsx } from 'clsx';
 import { LinkPoNamereniyu } from './LinkPoNamereniyu';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { Badge, type BadgeTone } from './Badge';
+import { illustrationRamka } from './Illustration';
 
 export type TaskStatusTone = 'neutral' | 'solved' | 'failed';
 
@@ -88,7 +89,7 @@ export function TaskCard({
         </span>
       </span>
       {illustration !== undefined ? (
-        <span className="task-card__ill" aria-hidden="true">
+        <span {...illustrationRamka('inline', 'task-card__ill')} aria-hidden="true">
           {illustration}
         </span>
       ) : null}

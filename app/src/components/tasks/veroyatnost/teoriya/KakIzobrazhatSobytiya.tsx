@@ -10,6 +10,7 @@ import { plain } from '@/lib/tex';
 import { YAKOR_4 } from '@/lib/veroyatnost/teoriya-yakorya';
 import { HintIcon } from '../../prep/PrepIcons';
 import { Tex } from '../Tex';
+import { illustrationRamka } from '@/components/ui/Illustration';
 
 /**
  * Раздел теории «Как изображать события» задания №4 — по макету
@@ -390,7 +391,7 @@ export function KakIzobrazhatSobytiya() {
           слева, плашка с фактом справа. */}
       <section className="vizo-eylerblok">
         <div className="vizo-eylerblok__levo">
-          <figure className="vizo-eylerblok__figura">
+          <figure {...illustrationRamka('section', 'vizo-eylerblok__figura')}>
             <HandNote className="vizo-eylerblok__ruka">
               {eyler.tsitata}
               <span className="vizo-eylerblok__avtor">{eyler.avtor}</span>

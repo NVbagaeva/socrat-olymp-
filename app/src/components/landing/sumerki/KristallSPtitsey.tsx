@@ -46,7 +46,7 @@ export function KristallSPtitsey({
         vozvrat
         onKrutyat={onKrutyat}
         hint={podskazka}
-        sizes="(max-width: 767.98px) 300px, (max-width: 1023.98px) 440px, 600px"
+        sizes="(max-width: 639.98px) 220px, 356px"
       />
       <div
         className="sm-ptica"

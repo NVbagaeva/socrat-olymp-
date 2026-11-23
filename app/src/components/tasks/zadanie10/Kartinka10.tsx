@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { Illustration, type IllustrationVariant } from '@/components/ui/Illustration';
 
 /** Картинка сюжета, найденная при сборке (lib/zadanie10/illyustracii.ts). */
 export interface IllInfo {
@@ -11,34 +12,33 @@ export interface IllInfo {
 
 /**
  * Картинка сюжета №10 в «Стеклянной сцене»: готовый рисунок как есть —
- * webp с запасным png, прозрачный фон, без обрезки и пережатия. Ширина
- * по месту, высота — по пропорциям файла; вертикальные рисунки (бак,
- * мяч) — уже, чтобы не занимали весь экран. Подпись — для чтения с
- * экрана в alt, на экране не дублируется.
+ * webp с запасным png, прозрачный фон, без обрезки и пережатия. Размер —
+ * норма Illustration: у условия и примера — task (до 180, телефон 120),
+ * миниатюра в строке типа — inline. Подпись — для чтения с экрана в alt,
+ * на экране не дублируется.
  */
 export function Kartinka10({
   ill,
   alt,
+  variant = 'task',
   className,
 }: {
   ill: IllInfo;
   /** Пустая строка — картинка-украшение (рядом уже есть название). */
   alt?: string;
+  variant?: Extract<IllustrationVariant, 'task' | 'inline' | 'section'>;
   className?: string;
 }) {
   return (
-    <picture
-      className={clsx('z10-kartinka', ill.height > ill.width && 'z10-kartinka--vert', className)}
-    >
-      <source type="image/webp" srcSet={ill.webp} />
-      <img
-        src={ill.png}
-        alt={alt ?? ill.alt}
-        width={ill.width}
-        height={ill.height}
-        loading="lazy"
-        decoding="async"
-      />
-    </picture>
+    <Illustration
+      variant={variant}
+      className={clsx('z10-kartinka', className)}
+      src={ill.png}
+      sources={[{ type: 'image/webp', srcSet: `${ill.webp} ${ill.width}w` }]}
+      srcSet={`${ill.png} ${ill.width}w`}
+      alt={alt ?? ill.alt}
+      width={ill.width}
+      height={ill.height}
+    />
   );
 }

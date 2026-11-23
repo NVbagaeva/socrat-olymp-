@@ -37,28 +37,14 @@
 .section-head--text {
   grid-template-columns: minmax(0, 1fr);
 }
-/* Шапка с иллюстрацией раздела (№4, №1): картинка занимает правую
-   треть, текст лежит в соседней колонке сетки и под неё не заходит —
-   колонки не перекрываются, поэтому наехать текст не может даже при
-   самом длинном заголовке. Выравнивание по центру — как на макете №4.
-
-   Доли, а не пиксели: картинка ужимается вместе с шапкой, и отдельная
-   ступень на 1280 не нужна. 1.8 к 1 — наименьшая доля, при которой
-   заголовок №4 на 1440 ещё укладывается в строку, как на макете:
-   ему нужно 689px, а колонка даёт 710px. Ниже 1024px картинки нет
-   (см. раскладку по ширинам). */
+/* Шапка с иллюстрацией раздела: картинка — Illustration variant="header"
+   (260 px, на телефоне 112 px), колонка по её размеру; текст лежит в
+   соседней колонке сетки и под картинку не заходит — колонки не
+   перекрываются. Обе по центру по вертикали. */
 .section-head--art:not(.section-head--text) {
-  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-8);
   align-items: center;
-}
-/* Картинка тянется по ширине колонки, высоту держит сама: пропорции
-   исходника сохраняются, по одной оси она не сжимается. */
-.shapka-art,
-.shapka-art img {
-  display: block;
-  width: 100%;
-  height: auto;
 }
 .section-head__title {
   display: flex;
@@ -271,7 +257,9 @@ a.subtopic:focus-visible {
   outline: none;
   border-color: var(--color-primary);
   background: var(--color-surface-info);
-  box-shadow: var(--shadow-md), 0 0 0 3px var(--color-focus-ring);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 3px var(--color-focus-ring);
   transform: translateY(-2px);
 }
 a.subtopic:focus-visible .subtopic__go {
@@ -451,14 +439,19 @@ a.subtopic--ikonka:focus-visible .subtopic__ico {
   .section-head__media {
     max-width: 320px;
   }
-  /* Иллюстрации шапки на планшете и телефоне нет: под неё нужна треть
-     ширины, а на этом ярусе её забирает текст. Картинка декоративная,
-     ничего с ней не теряется. */
+  /* Планшет и телефон: картинка шапки — маленькая (112 px) над
+     заголовком, у начала строки; текст во всю ширину. */
   .section-head--art:not(.section-head--text) {
     grid-template-columns: minmax(0, 1fr);
   }
   .section-head--art .section-head__media {
-    display: none;
+    order: -1;
+    max-width: none;
+  }
+  .section-head--art .section-head__media .illu--header {
+    --illu-w: 112px;
+    --illu-h: 112px;
+    margin-inline: 0;
   }
   /* Планшет: обложка — узкий столбик справа от текста, как у
      нарисованных обложек (.rsz в risunok.css). Картинка держит в нём

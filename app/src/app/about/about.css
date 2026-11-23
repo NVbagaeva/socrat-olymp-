@@ -150,7 +150,7 @@
   box-shadow: inset 0 -1px 0 var(--oa-line);
 }
 .oa-hero__text {
-  grid-column: 1 / 7;
+  grid-column: 1 / 8;
   align-self: center;
   padding-bottom: var(--space-12);
 }
@@ -214,10 +214,14 @@
   --px: 0;
   --py: 0;
   --sy: 0;
-  grid-column: 7 / 13;
-  justify-self: end;
+  grid-column: 8 / 13;
+  justify-self: center;
+  align-self: center;
   position: relative;
-  width: min(100%, 82svh, 660px);
+  /* Сцена с портретом — вводная иллюстрация страницы (норма hero
+     Illustration: не шире 360 и не выше 300; телефон — до 220):
+     336 × 300 при пропорциях 1.12. */
+  width: min(100%, 336px);
   /* Пропорции заданы заранее: картинки при загрузке ничего не сдвигают. */
   aspect-ratio: 1.12;
   margin-top: var(--space-4);
@@ -446,16 +450,12 @@
   transform: rotate(-3deg);
 }
 
-/* Иллюстрация в пустом левом поле: стоит вровень с текстом справа. */
+/* Иллюстрация в пустом левом поле: стоит вровень с текстом справа.
+   Размер — норма Illustration section (до 280), по центру поля. */
 .oa-ill {
   grid-column: 1 / 6;
   align-self: center;
   margin: var(--space-12) 0 0;
-}
-.oa-ill img {
-  display: block;
-  width: 100%;
-  height: auto;
 }
 
 /* ── Принципы ────────────────────────────────────────────────── */
@@ -796,10 +796,8 @@
   .oa-sec__side {
     margin-top: var(--space-8);
   }
-  /* Иллюстрация встаёт над текстом; шире 300 px её края, собранные из
-     исходника с впечатанным фоном, выглядят грубовато. */
+  /* Иллюстрация встаёт над текстом. */
   .oa-ill {
-    max-width: 300px;
     margin-top: var(--space-10);
   }
 
@@ -833,7 +831,7 @@
     display: none;
   }
   .oa-sm {
-    width: min(100%, 50svh, 560px);
+    width: min(100%, 336px);
     margin: var(--space-6) auto 0;
   }
   .oa-sm__formula {
@@ -853,6 +851,16 @@
 @media (max-width: 639.98px) {
   .oa-wrap {
     padding: 0 var(--space-5);
+  }
+  /* Телефон: сцена с портретом — до 220 px, по центру над текстом. */
+  .oa-hero__grid {
+    display: flex;
+    flex-direction: column;
+  }
+  .oa-sm {
+    order: -1;
+    width: min(100%, 220px);
+    margin: 0 auto var(--space-4);
   }
   .oa-printsipy,
   .oa-polza {

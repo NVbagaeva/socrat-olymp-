@@ -338,7 +338,13 @@ export function ObjomnayaOblozhka({
         aria-label={label}
         tabIndex={0}
         onKeyDown={onKeyDown}
-        style={{ aspectRatio: `${poster.width} / ${poster.height}` }}
+        /* Норма header Illustration: большая сторона не больше 260 px —
+           у высокой картинки ширину ограничивает её высота. */
+        style={{
+          aspectRatio: `${poster.width} / ${poster.height}`,
+          maxWidth: `min(100%, calc(260px * ${poster.width} / ${poster.height}))`,
+          marginInline: 'auto',
+        }}
       >
         <picture className="oblozhka__poster">
           <source type="image/webp" srcSet={poster.webpSrcSet} sizes={poster.sizes} />

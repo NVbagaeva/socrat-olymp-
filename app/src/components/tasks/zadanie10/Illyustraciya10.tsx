@@ -1,8 +1,10 @@
 import { clsx } from 'clsx';
+import { Illustration } from '@/components/ui/Illustration';
 import { illyustraciya } from '@/lib/zadanie10/illyustracii';
 
 /**
- * Иллюстрация сюжета прототипа: webp с запасным png, alt по-русски.
+ * Иллюстрация сюжета прототипа в теории: webp с запасным png, alt
+ * по-русски; размер — норма Illustration section (до 280).
  * Картинки нет — компонент ничего не выводит (никаких заглушек).
  *
  * svernuto — в тренажёре над условием: картинка спрятана в
@@ -22,17 +24,16 @@ export function Illyustraciya10({
     return null;
   }
   const picture = (
-    <picture className={clsx('z10-ill', className)}>
-      <source type="image/webp" srcSet={il.webp} />
-      <img
-        src={il.png}
-        alt={il.alt}
-        width={il.width}
-        height={il.height}
-        loading="lazy"
-        decoding="async"
-      />
-    </picture>
+    <Illustration
+      variant="section"
+      className={clsx('z10-ill', className)}
+      src={il.png}
+      sources={[{ type: 'image/webp', srcSet: `${il.webp} ${il.width}w` }]}
+      srcSet={`${il.png} ${il.width}w`}
+      alt={il.alt}
+      width={il.width}
+      height={il.height}
+    />
   );
   if (!svernuto) {
     return picture;

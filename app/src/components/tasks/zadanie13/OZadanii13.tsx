@@ -13,6 +13,7 @@ import {
 } from '@/content/ekonomicheskie13';
 import { KRITERII13 } from '@/content/teoriya13-chast2';
 import { MESTO13, O_ZADANII_13 } from '@/content/zadanie13';
+import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { typeset } from '@/lib/tex';
 import { tipograf } from '@/lib/tipograf';
@@ -82,13 +83,14 @@ export function OZadanii13() {
         opasno={SHAPKA13.opasno.map((line) => typeset(line))}
         oblozhka={
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
-             пережатия, прозрачный фон на стекле шапки. */
-          <img
+             пережатия, прозрачный фон на стекле шапки; размер — норма hero. */
+          <Illustration
+            variant="hero"
             src={assetUrl('/images/task-13.svg')}
             alt={SHAPKA13.oblozhkaAlt}
             width={512}
             height={512}
-            decoding="async"
+            priority
           />
         }
       />

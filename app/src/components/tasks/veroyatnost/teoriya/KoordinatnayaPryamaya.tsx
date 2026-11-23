@@ -6,6 +6,7 @@ import { HintIcon } from '../../prep/PrepIcons';
 import { Tex } from '../Tex';
 import { YAKOR_5 } from '@/lib/veroyatnost/teoriya-yakorya';
 import { Vykladka } from './Vykladka';
+import { illustrationRamka } from '@/components/ui/Illustration';
 
 /**
  * Раздел теории «Координатная прямая» задания №5 — по утверждённому
@@ -60,7 +61,7 @@ function Shapka({
   return (
     <header className="vteor-sluchay__head">
       {kartinka !== undefined ? (
-        <div className="vteor-sluchay__figura">
+        <div {...illustrationRamka('inline', 'vteor-sluchay__figura')}>
           <Image
             className="vteor-sluchay__kartinka"
             src={kartinka.src}
