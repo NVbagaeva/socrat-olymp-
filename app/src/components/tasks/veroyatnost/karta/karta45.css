@@ -55,7 +55,11 @@
    Размер — норма Illustration section (до 280); на компьютере — справа
    от текста блока, на телефоне — под ним. */
 .z45-ob__foto {
-  margin: var(--space-2) 0 0;
+  /* Ширина фигуры — ширина фото (норма section, 280): подпись
+     переносится по ней, а не растягивает колонку в одну длинную строку. */
+  width: 280px;
+  max-width: 100%;
+  margin: var(--space-2) auto 0;
 }
 .z45-ob__foto img {
   border-radius: 14px;
@@ -74,8 +78,8 @@
   .z45-ob__istoriya {
     grid-column: 1 / -1;
     grid-template-columns: minmax(420px, 1fr) auto;
-    column-gap: var(--space-6);
-    align-items: center;
+    column-gap: var(--space-8);
+    align-items: start;
   }
   .z45-ob__istoriya > :not(.z45-ob__foto) {
     grid-column: 1;
