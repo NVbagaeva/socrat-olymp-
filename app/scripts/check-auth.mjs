@@ -1233,10 +1233,14 @@ async function runEnabled() {
           audit.anyClick = true;
           audit.lastClickTarget =
             event.target instanceof Element ? event.target.outerHTML.slice(0, 240) : String(event.target);
+          const button = document.querySelector('.register-actions button[type="submit"]');
+          const rect = button?.getBoundingClientRect();
           audit.clickPoint = {
             x: event.clientX,
             y: event.clientY,
             hit: document.elementFromPoint(event.clientX, event.clientY)?.outerHTML.slice(0, 240) ?? null,
+            button: rect === undefined ? null : { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
+            pointerEvents: button === null ? null : getComputedStyle(button).pointerEvents,
           };
           const target =
             event.target instanceof Element
@@ -1271,6 +1275,7 @@ async function runEnabled() {
         click: window.__registrationSubmitAudit?.click ?? null,
         anyClick: window.__registrationSubmitAudit?.anyClick ?? null,
         lastClickTarget: window.__registrationSubmitAudit?.lastClickTarget ?? null,
+        clickPoint: window.__registrationSubmitAudit?.clickPoint ?? null,
         trusted: window.__registrationSubmitAudit?.trusted ?? null,
         submit: window.__registrationSubmitAudit?.submit ?? null,
         submitDefaultPrevented: window.__registrationSubmitAudit?.submitDefaultPrevented ?? null,
