@@ -107,6 +107,23 @@ export function rabota(
   };
 }
 
+/**
+ * Таблица со стрелкой разницы: от строки, где меньше, к строке, где
+ * больше, подпись — «на 4 ч больше» (TeX в $…$ можно).
+ */
+export function sRaznicey(t: Tablitsa, bolshe: number, menshe: number, podpis: string): Tablitsa {
+  return { ...t, raznica: { bolshe, menshe, podpis } };
+}
+
+/**
+ * Строка-пояснение к уравнению-разности: большее − меньшее = разница.
+ * bolshee/menshee — «время второго», «время первого» в родительном
+ * или именительном падеже по месту, raznica — «$4$ ч».
+ */
+export function principRaznicy(bolshee: string, menshee: string, raznica: string): string {
+  return `Уравнение составляем по принципу **большее $-$ меньшее $=$ разница**: ${bolshee} больше, чем ${menshee}, на ${raznica}.`;
+}
+
 /** Подписи строк развёрнутой таблицы концентрации. */
 export const STROKI_KONC = [
   '$m_{\\text{в-ва}}$ — масса вещества',
@@ -282,7 +299,10 @@ export function kvadrat(a0: number, b0: number, c0: number, x = 'x'): Kvadrat {
   const ishodnoe = `${poly(a, b, c, x)}=0`;
   const g = gcd(gcd(a, b), c);
   if (g > 1) {
-    lines.push(`Делим обе части на $${d(g)}$: $${poly(a / g, b / g, c / g, x)}=0$.`);
+    /* Деление обеих частей — как в тетради: вертикальная черта справа. */
+    lines.push(`Делим обе части на $${d(g)}$:`);
+    lines.push(`$${poly(a, b, c, x)}=0\\qquad\\Big|\\,:${d(g)}$`);
+    lines.push(`$${poly(a / g, b / g, c / g, x)}=0$.`);
     a /= g;
     b /= g;
     c /= g;
@@ -311,16 +331,116 @@ export function kvadrat(a0: number, b0: number, c0: number, x = 'x'): Kvadrat {
   if (sqrtD === null) {
     throw new Error(`дискриминант не квадрат: ${tex}, D=${D}`);
   }
-  const big = razlozhenie(D);
+  /* Дискриминант по шагам: формула, подстановка, каждое слагаемое. */
+  const sk = (v: number) => (v < 0 ? `(${d(v)})` : d(v));
+  const minus4ac = -4 * a * c;
   lines.push(
-    `$D=${b < 0 ? `(${d(b)})` : d(b)}^2-4\\cdot${d(a)}\\cdot${c < 0 ? `(${d(c)})` : d(c)}=${d(D)}${big ? `=${big}` : ''}$, $\\sqrt{D}=${d(sqrtD)}$.`,
+    `$D=b^2-4ac=${sk(b)}^2-4\\cdot${d(a)}\\cdot${sk(c)}=${d(b * b)}${minus4ac < 0 ? '-' : '+'}${d(Math.abs(minus4ac))}=${d(D)}$.`,
   );
+  const big = razlozhenie(D);
+  if (big) {
+    lines.push(`$D=${big}$, значит, $\\sqrt{D}=${d(sqrtD)}$.`);
+  } else {
+    lines.push(...korenPodbor(D, sqrtD));
+  }
   const r1 = q(-b - sqrtD, 2 * a);
   const r2 = q(-b + sqrtD, 2 * a);
-  lines.push(
-    `$${x}_1=\\dfrac{${d(-b)}-${d(sqrtD)}}{${d(2 * a)}}=${fq(r1, true)}$, $${x}_2=\\dfrac{${d(-b)}+${d(sqrtD)}}{${d(2 * a)}}=${fq(r2, true)}$.`,
-  );
+  lines.push(`$${x}_{1,2}=\\dfrac{-b\\pm\\sqrt{D}}{2a}$:`);
+  lines.push(`$${x}_1=\\dfrac{${d(-b)}-${d(sqrtD)}}{${d(2 * a)}}=${fq(r1, true)}$,`);
+  lines.push(`$${x}_2=\\dfrac{${d(-b)}+${d(sqrtD)}}{${d(2 * a)}}=${fq(r2, true)}$.`);
   return { lines, roots: [r1, r2], tex, ishodnoe };
+}
+
+/** Квадраты чисел до 20 и круглые — знакомы: корень пишем сразу. */
+const ZNAKOMYE = (r: number) => r <= 20 || r % 10 === 0;
+
+/**
+ * Подбор корня из дискриминанта, как на уроке: зажимаем число между
+ * квадратами круглых чисел, по последней цифре оставляем кандидатов,
+ * проверяем возведением в квадрат.
+ */
+export function korenPodbor(D: number, r: number): string[] {
+  if (ZNAKOMYE(r)) {
+    return [`$\\sqrt{D}=\\sqrt{${d(D)}}=${d(r)}$.`];
+  }
+  const lo = Math.floor(r / 10) * 10;
+  const hi = lo + 10;
+  const posled = D % 10;
+  const cifry = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter((k) => (k * k) % 10 === posled);
+  const kandidaty = cifry.map((k) => lo + k);
+  const lines = [
+    `Подберём $\\sqrt{${d(D)}}$. Зажмём число между квадратами круглых чисел: $${d(lo)}^2=${d(lo * lo)}<${d(D)}<${d(hi * hi)}=${d(hi)}^2$, значит, корень — между $${d(lo)}$ и $${d(hi)}$.`,
+  ];
+  if (kandidaty.length === 1) {
+    lines.push(
+      `Число $${d(D)}$ оканчивается на $${posled}$, а квадрат оканчивается на $${posled}$, только если само число оканчивается на $${cifry[0]}$: кандидат — $${d(kandidaty[0]!)}$.`,
+    );
+  } else {
+    lines.push(
+      `Число $${d(D)}$ оканчивается на $${posled}$, а квадрат оканчивается на $${posled}$, только если само число оканчивается на $${cifry.join('$ или $')}$: кандидаты — $${kandidaty.map(d).join('$ и $')}$.`,
+    );
+  }
+  lines.push(`Проверяем: $${d(r)}^2=${d(r * r)}$ — подходит. Значит, $\\sqrt{D}=${d(r)}$.`);
+  return lines;
+}
+
+/** Разложение на простые множители в TeX: 24 → «2^3\cdot3». */
+export function prostyeTex(n: number): string {
+  const parts: string[] = [];
+  let m = n;
+  for (let p = 2; p * p <= m; p += 1) {
+    let k = 0;
+    while (m % p === 0) {
+      m /= p;
+      k += 1;
+    }
+    if (k > 0) parts.push(k === 1 ? `${p}` : `${p}^${k}`);
+  }
+  if (m > 1) parts.push(`${m}`);
+  return parts.join('\\cdot');
+}
+
+/**
+ * Сумма дробей 1/a + 1/b + …: общий знаменатель — НОК с разложением
+ * на множители, дополнительные множители, сложение и сокращение.
+ * Возвращает строки пояснения и итог (несократимую дробь).
+ */
+export function summaEdinichnyh(znam: readonly number[]): {
+  lines: string[];
+  itog: Q;
+  nok: number;
+} {
+  const nok = znam.reduce((acc, z) => (acc * z) / gcd(acc, z), 1);
+  const dop = znam.map((z) => nok / z);
+  const chislitel = dop.reduce((s, k) => s + k, 0);
+  const itog = q(chislitel, nok);
+  const sumTex = znam.map((z) => `\\dfrac{1}{${d(z)}}`).join('+');
+  const lines: string[] = [];
+  const odinIzNih = znam.find((z) => z === nok);
+  if (odinIzNih !== undefined) {
+    lines.push(
+      `Общий знаменатель — $${d(nok)}$: он делится на ${znam
+        .filter((z) => z !== nok)
+        .map((z) => `$${d(z)}$`)
+        .join(' и ')}.`,
+    );
+  } else {
+    lines.push(
+      `Общий знаменатель — наименьшее общее кратное. Раскладываем знаменатели на множители: ${znam
+        .map((z) => `$${d(z)}=${prostyeTex(z)}$`)
+        .join(
+          ', ',
+        )}. Берём каждый множитель в наибольшей степени: НОК $=${prostyeTex(nok)}=${d(nok)}$.`,
+    );
+  }
+  lines.push(
+    `Дополнительные множители: ${znam.map((z, i) => `$${d(nok)}:${d(z)}=${d(dop[i]!)}$`).join(', ')}.`,
+  );
+  const sokr = gcd(chislitel, nok) > 1;
+  lines.push(
+    `$${sumTex}=${dop.map((k) => `\\dfrac{${d(k)}}{${d(nok)}}`).join('+')}=\\dfrac{${d(chislitel)}}{${d(nok)}}${sokr ? `=${fq(itog)}` : ''}$.`,
+  );
+  return { lines, itog, nok };
 }
 
 /**
@@ -340,6 +460,25 @@ export function podbor(S: number, dd: number, x = 'x'): { x: number; line: strin
 }
 
 /**
+ * Строки после умножения на x(x + d) в уравнении N/x − N/(x + d) = k:
+ * раскрываем скобки, приводим подобные, делим обе части на k —
+ * с вертикальной чертой справа, как в тетради. Итог — x(x + d) = N·d/k.
+ */
+export function posleXxd(N: number, dd: number, k: number, x = 'x'): string[] {
+  const xd = `${x}(${x}+${d(dd)})`;
+  const kk = k === 1 ? '' : d(k);
+  const lines = [
+    `$${d(N)}(${x}+${d(dd)})-${d(N)}${x}=${kk}${xd}$`,
+    `Раскрываем скобки слева, $${d(N)}${x}$ и $-${d(N)}${x}$ взаимно уничтожаются: $${d(N * dd)}=${kk}${xd}$.`,
+  ];
+  if (k !== 1) {
+    lines.push(`Делим обе части на $${d(k)}$:`);
+    lines.push(`$${kk}${xd}=${d(N * dd)}\\qquad\\Big|\\,:${d(k)}$`);
+  }
+  return lines;
+}
+
+/**
  * Уравнение вида x(x + d) = S: решение подбором множителей,
  * обоснование, что других подходящих корней нет (теорема Виета), и
  * проверка дискриминантом. Возвращает строки, оба корня и
@@ -355,10 +494,11 @@ export function xxd(
   const vtoroy = -(guess.x + dd);
   return {
     lines: [
-      `$${x}(${x}+${d(dd)})=${d(S)}$, то есть $${poly(1, dd, -S, x)}=0$.`,
+      `$${x}(${x}+${d(dd)})=${d(S)}$`,
+      `Раскрываем скобки и переносим всё влево: $${poly(1, dd, -S, x)}=0$.`,
       `**Лайфхак:** ${guess.line}`,
       `**Других подходящих корней нет:** по теореме Виета $${x}_1\\cdot ${x}_2=-${d(S)}$, поэтому второй корень $${x}_2=-\\dfrac{${d(S)}}{${d(guess.x)}}=${d(vtoroy)}<0$.`,
-      `Проверка дискриминантом: $${sol.ishodnoe}$.`,
+      `**Проверка дискриминантом.** $${sol.ishodnoe}$.`,
       ...sol.lines,
     ],
     roots: [vtoroy, guess.x],

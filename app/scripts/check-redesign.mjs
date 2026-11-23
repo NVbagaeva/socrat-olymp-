@@ -509,6 +509,28 @@ const ODOBRENO = {
     'dcc512fbd36ac5ea5e77130ddf6a56bad1aad00debfead66140807f056e30f18',
   'app/src/lib/planimetriya/stseny/chasti.ts':
     'b2db181af3ddde18f99d009f9e323ede50f0f7681bd870af5fd31cad007231c9',
+  /* №11, одобрено владельцем 23.11.2026: оформление решений — деление
+     с чертой справа, подбор корня из дискриминанта, НОК с пояснением,
+     совместная производительность, «большее − меньшее = разница» со
+     стрелкой в таблице, рисунок к обгону (ПТ-03). */
+  'app/src/lib/zadanie11/kartinki.ts':
+    '2b9337551c98500226553dabc14517a5457b4abbbaeab3aaa769c1d086a9e2b0',
+  'app/src/lib/zadanie11/kit.ts':
+    '53dafeee3c0c1d661798cdeadee539297fa3e1921bceac35000d48557248d8da',
+  'app/src/lib/zadanie11/prototypes/dp.ts':
+    '5cfd49d062554228747bdab429a65e93ca5c5a000839bb858189cf3fd38b70d8',
+  'app/src/lib/zadanie11/prototypes/ezhemesyachnye.ts':
+    'e06c939a39575bfa38766e377d0c908dc2a84de47c93400dab7f0f2fef20bfc1',
+  'app/src/lib/zadanie11/prototypes/ok.ts':
+    '4a2a1750dd3d10b9d97bc65a3ee7d900e6fe85ab10dc08060e7244f79d94a442',
+  'app/src/lib/zadanie11/prototypes/pt.ts':
+    'ff411db6247acc5693b2d4749a530f5119ed76b76c2d2c980c450251a2429d8b',
+  'app/src/lib/zadanie11/prototypes/rb.ts':
+    '19f78830c04813e6749d6ec40a286182a703cce1f16f0243177bf116d4daf258',
+  'app/src/lib/zadanie11/prototypes/vd.ts':
+    '1964a97dbeccc511a0d623264e1283a80fcbd9ed9b977f062a3fdcd61f4b2c9b',
+  'app/src/lib/zadanie11/types.ts':
+    '9b1bb8b5f4b057f91d55117ff32376c0d691fb33a3e7d5cd794668c8cff96dc4',
 };
 
 /** Какие картинки реестра принадлежат разделу. */
