@@ -42,6 +42,9 @@ jobs:
           # Журнал решения задач: те же Variables, что у сборки сайта.
           ZHURNAL: ${{ vars.NEXT_PUBLIC_ZHURNAL }}
           ZHURNAL_RAZDELY: ${{ vars.NEXT_PUBLIC_ZHURNAL_RAZDELY }}
+          # Новая выдача ДЗ: те же Variables, что у сборки сайта.
+          DZ_NOVYE: ${{ vars.NEXT_PUBLIC_DZ2 }}
+          DZ_NOVYE_RAZDELY: ${{ vars.NEXT_PUBLIC_DZ2_RAZDELY }}
         run: infra/lite/actions/migrate.sh
 
       - name: Письмо о сбое
