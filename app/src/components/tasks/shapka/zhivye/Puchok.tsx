@@ -147,7 +147,7 @@ export default function Puchok({ label, avtofokus }: ZhivoyProps) {
             if (x - XP > 0.6) postavit(y / (x - XP));
           }}
           strelka={(d) => postavit(a + (d[0] !== 0 ? d[0] : -d[1]) * 0.05)}
-          label="Прямая пучка: наклон a"
+          label="Прямая пучка: наклон"
         />
       </svg>
       <span className="zhv__plashka zhv__plashka--verh">

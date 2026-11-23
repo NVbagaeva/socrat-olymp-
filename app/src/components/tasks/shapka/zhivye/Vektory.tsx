@@ -103,7 +103,7 @@ export default function Vektory({ label, avtofokus }: ZhivoyProps) {
           y={e(A)[1]}
           tyanut={tyanut(setA)}
           strelka={sdvinut(setA)}
-          label="Конец вектора a"
+          label="Конец первого вектора"
         />
         <Ruchka
           svg={svg}
@@ -111,7 +111,7 @@ export default function Vektory({ label, avtofokus }: ZhivoyProps) {
           y={e(B)[1]}
           tyanut={tyanut(setB)}
           strelka={sdvinut(setB)}
-          label="Конец вектора b"
+          label="Конец второго вектора"
         />
       </svg>
       <span className="zhv__plashka zhv__plashka--verh">

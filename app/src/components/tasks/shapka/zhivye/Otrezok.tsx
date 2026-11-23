@@ -106,7 +106,7 @@ export default function Otrezok({ label, avtofokus }: ZhivoyProps) {
           y={ay}
           tyanut={(p) => zadatA(sEkrana(ST, p)[0])}
           strelka={(d) => zadatA(a + d[0] * 0.1)}
-          label="Левый конец отрезка a"
+          label="Левый конец отрезка"
           r={5}
         />
         <Ruchka
@@ -115,7 +115,7 @@ export default function Otrezok({ label, avtofokus }: ZhivoyProps) {
           y={by}
           tyanut={(p) => zadatB(sEkrana(ST, p)[0])}
           strelka={(d) => zadatB(b + d[0] * 0.1)}
-          label="Правый конец отрезка b"
+          label="Правый конец отрезка"
           r={5}
         />
       </svg>
