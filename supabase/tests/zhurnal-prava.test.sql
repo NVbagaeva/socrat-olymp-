@@ -7,6 +7,10 @@
 
 \set ON_ERROR_STOP on
 set client_min_messages = notice;
+-- Дни журнала — по Москве (свёртка zhurnal_dni). current_date в запросах
+-- ниже — тоже московская дата, иначе с 21:00 до 24:00 UTC проверка
+-- «за последние 30 дней» теряла сегодняшние задачи.
+set timezone = 'Europe/Moscow';
 
 insert into public.legal_editions (version) values ('2026-11-11');
 
@@ -178,8 +182,9 @@ select pg_temp.fails($q$select public.zhurnal_push(jsonb_build_object('zadachi',
   'too_big');
 
 -- Вариант целиком.
+-- Начат минуту назад: «час назад» после полуночи по Москве — уже вчера, раньше дня связи с учителем.
 select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(jsonb_build_object(
-  'id', :'v1', 'source', 'sobrat', 'set_code', 'ABC123', 'variant_no', 1, 'started_at', now() - interval '1 hour',
+  'id', :'v1', 'source', 'sobrat', 'set_code', 'ABC123', 'variant_no', 1, 'started_at', now() - interval '1 minute',
   'finished_at', now(), 'primary_score', 10, 'max_score', 32, 'test_score', 58, 'active_ms', 3000000,
   'total_ms', 3600000))));
 select pg_temp.push(pg_temp.z('d1000000-0000-0000-0000-0000000000a1', 5, '5:P02', 'right', 40000,
