@@ -338,3 +338,174 @@
 .z2-tri .kz-primer__risunok {
   max-width: 420px;
 }
+
+
+/* Интерактивная координатная схема в шапке: векторы можно двигать
+   мышью, касанием или клавишами-стрелками. */
+.z2-stsena .z2-head-media {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.z2-stsena .z2-vector-art {
+  width: 100%;
+  max-width: 420px;
+  margin: 0;
+}
+.z2-stsena .z2-vector-art__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.z2-stsena .z2-vector-art__panel {
+  stroke: rgb(171 198 239 / 0.65);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 10px 18px rgb(31 95 208 / 0.12));
+}
+.z2-stsena .z2-vector-art__grid line {
+  stroke: rgb(155 180 218 / 0.24);
+  stroke-width: 1;
+}
+.z2-stsena .z2-vector-art__axes line {
+  stroke: #8198bb;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.z2-stsena .z2-vector-art__axes text,
+.z2-stsena .z2-vector-art__vectors text {
+  fill: #17315d;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 15px;
+  font-weight: 650;
+}
+.z2-stsena .z2-vector-art__construction line {
+  stroke: rgb(32 89 184 / 0.35);
+  stroke-width: 2;
+  stroke-dasharray: 5 6;
+}
+.z2-stsena .z2-vector-art__line-a,
+.z2-stsena .z2-vector-art__arrow-a {
+  stroke: #2463d5;
+}
+.z2-stsena .z2-vector-art__line-b,
+.z2-stsena .z2-vector-art__arrow-b {
+  stroke: #e7792b;
+}
+.z2-stsena .z2-vector-art__line-sum,
+.z2-stsena .z2-vector-art__arrow-sum {
+  stroke: #183b83;
+}
+.z2-stsena .z2-vector-art__line-a,
+.z2-stsena .z2-vector-art__line-b,
+.z2-stsena .z2-vector-art__line-sum {
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.z2-stsena .z2-vector-art__line-sum {
+  stroke-dasharray: 7 4;
+}
+.z2-stsena .z2-vector-art__arrow-a,
+.z2-stsena .z2-vector-art__arrow-b,
+.z2-stsena .z2-vector-art__arrow-sum {
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z2-stsena .z2-vector-art__origin {
+  fill: #fff;
+  stroke: #17315d;
+  stroke-width: 2.5;
+}
+.z2-stsena .z2-vector-art__handle {
+  cursor: grab;
+  touch-action: none;
+  outline: none;
+}
+.z2-stsena .z2-vector-art__handle:active {
+  cursor: grabbing;
+}
+.z2-stsena .z2-vector-art__handle-hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 2;
+}
+.z2-stsena .z2-vector-art__handle-dot {
+  fill: #fff;
+  stroke: #2463d5;
+  stroke-width: 4;
+}
+.z2-stsena .z2-vector-art__handle--b .z2-vector-art__handle-dot {
+  stroke: #e7792b;
+}
+.z2-stsena .z2-vector-art__handle:focus-visible .z2-vector-art__handle-hit {
+  stroke: #183b83;
+  stroke-dasharray: 4 3;
+}
+.z2-stsena .z2-vector-art__caption {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+}
+.z2-stsena .z2-vector-art__coordinates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.z2-stsena .z2-head-progress {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 0.85);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.82);
+  box-shadow: 0 6px 20px rgb(32 72 135 / 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.z2-stsena .z2-head-progress .topic-progress {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  width: auto;
+  max-width: none;
+  gap: 0;
+}
+.z2-stsena .z2-head-progress .progress-ring {
+  width: 56px;
+  height: 56px;
+}
+.z2-stsena .z2-head-progress .topic-progress__text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 767.98px) {
+  .z2-stsena {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .z2-stsena .stsena__media {
+    width: min(100%, 360px);
+    justify-self: center;
+    padding-top: 0;
+  }
+  .z2-stsena .z2-vector-art__coordinates {
+    gap: 4px 8px;
+  }
+}
