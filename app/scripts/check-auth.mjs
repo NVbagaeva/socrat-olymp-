@@ -1230,6 +1230,9 @@ async function runEnabled() {
       document.addEventListener(
         'click',
         (event) => {
+          audit.anyClick = true;
+          audit.lastClickTarget =
+            event.target instanceof Element ? event.target.outerHTML.slice(0, 240) : String(event.target);
           const target =
             event.target instanceof Element
               ? event.target.closest('.register-actions button[type="submit"]')
@@ -1237,6 +1240,7 @@ async function runEnabled() {
           if (target !== null) {
             audit.click = true;
             audit.target = target.outerHTML;
+            audit.trusted = event.isTrusted;
           }
         },
         true,
@@ -1276,6 +1280,20 @@ async function runEnabled() {
                 message: element.validationMessage,
               }))
           : [],
+        buttonRect: button
+          ? (() => {
+              const rect = button.getBoundingClientRect();
+              const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+              return {
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height,
+                hitIsButton: hit === button,
+                hit: hit instanceof Element ? hit.outerHTML.slice(0, 240) : null,
+              };
+            })()
+          : null,
       };
     });
     const passwordStepState = await page.evaluate(() => {
