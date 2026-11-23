@@ -20,6 +20,7 @@ export function hashParams(hash: string): URLSearchParams {
  */
 export function PodtverzhdenieScreen() {
   const [view, setView] = useState<View>('busy');
+  const [student, setStudent] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,7 +46,10 @@ export function PodtverzhdenieScreen() {
       setView(type === 'email_change' ? 'emailChange' : 'signup');
       const { loadProfile, syncOnboarding } = await import('@/lib/auth/profile');
       const profile = await loadProfile().catch(() => null);
-      if (profile !== null) await syncOnboarding(profile);
+      if (profile !== null) {
+        setStudent(profile.role === 'student');
+        await syncOnboarding(profile);
+      }
     })().catch(() => {
       if (!cancelled) setView('expired');
     });
@@ -78,7 +82,7 @@ export function PodtverzhdenieScreen() {
   return (
     <SuccessState
       title={text.title}
-      description={text.text}
+      description={view === 'signup' && student ? CONFIRM_SCREEN.signup.studentText : text.text}
       action={
         <Link className="btn btn--primary" href={AUTH_HREF.kabinet}>
           {text.go}

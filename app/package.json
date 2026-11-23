@@ -9,11 +9,11 @@
   },
   "scripts": {
     "predev": "node scripts/build-kartochki.mjs",
-    "dev": "next dev",
+    "dev": "node scripts/next-cli.mjs dev",
     "prebuild": "node scripts/build-kartochki.mjs && node scripts/audit-planimetry-hints.mjs --check",
-    "build": "NODE_OPTIONS=--max-old-space-size=6144 next build",
+    "build": "NODE_OPTIONS=--max-old-space-size=6144 node scripts/next-cli.mjs build",
     "postbuild": "node scripts/build-skrytye.mjs && node scripts/build-sitemap.mjs",
-    "start": "next start",
+    "start": "node scripts/next-cli.mjs start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
@@ -286,6 +286,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
     "@next/eslint-plugin-next": "15.5.27",
+    "@swc/helpers": "0.5.15",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.20.2",
     "@types/react": "^19.3.0",

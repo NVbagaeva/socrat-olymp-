@@ -32,6 +32,12 @@
 .auth-card__tabs {
   margin-bottom: var(--space-6);
 }
+.auth-card:has(.register-wizard) .tabs button {
+  min-height: 48px;
+  padding-bottom: var(--space-3);
+  font-size: 18px;
+  font-weight: 600;
+}
 
 .auth-form {
   display: grid;
@@ -108,6 +114,406 @@
   margin-top: 0;
 }
 
+/* Registration wizard: readable progress, field feedback and tap targets. */
+.auth-card:has(.register-wizard) {
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-info));
+  border-color: var(--color-border-info);
+  box-shadow: var(--shadow-md);
+}
+.register-wizard {
+  gap: var(--space-5);
+}
+.register-progress {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.register-progress__count {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+.register-progress ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-1);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.register-progress li {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+}
+.register-progress__mark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  font-weight: 700;
+}
+.register-progress li.is-current {
+  color: var(--color-text-brand);
+  font-weight: 700;
+}
+.register-progress li.is-current .register-progress__mark {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.register-progress li.is-complete {
+  color: var(--color-success);
+}
+.register-progress li.is-complete .register-progress__mark {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+.register-progress[data-role='tutor'] li.is-current .register-progress__mark {
+  border-color: var(--terracotta-700);
+  background: var(--terracotta-700);
+}
+.register-step {
+  display: grid;
+  gap: var(--space-5);
+}
+.register-step > .auth-form__title {
+  margin-bottom: calc(var(--space-1) * -1);
+}
+.register-wizard .input {
+  min-height: 48px;
+  font-size: 16px;
+}
+.register-wizard .input.is-success {
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m4 10 4 4 8-8' fill='none' stroke='%2315803d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 18px;
+}
+.register-wizard .password .input.is-success {
+  padding-right: 96px;
+  background-position: right 76px center;
+}
+.register-wizard .field__msg--error::before {
+  content: '⚠ ';
+  font-weight: 700;
+}
+.register-field__label,
+.password__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.register-help {
+  position: relative;
+  flex: none;
+}
+.register-help summary {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border-info);
+  border-radius: 50%;
+  color: var(--color-primary);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+.register-help summary::-webkit-details-marker {
+  display: none;
+}
+.register-help > span {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 6px);
+  right: 0;
+  width: min(280px, 80vw);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.register-providers__caption,
+.register-years__caption {
+  margin-top: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+.register-providers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+.register-providers__chip {
+  padding: 3px var(--space-2);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.register-email-suggestion,
+.register-email-status {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.register-email-suggestion .auth-form__link,
+.register-email-status .auth-form__link {
+  min-height: 44px;
+}
+.auth-form__domain {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-warm);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.auth-form__domain a {
+  color: var(--color-text-brand);
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+.auth-form__domain > * + * {
+  margin-top: var(--space-2);
+}
+.auth-form__domain button,
+.auth-form__domain .auth-form__link {
+  min-height: 44px;
+}
+.register-password-intro {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.register-password-intro > span:first-child {
+  color: var(--color-success);
+  font-size: 18px;
+}
+.password__label .register-help {
+  margin-left: auto;
+}
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+.password-strength__track {
+  display: block;
+  width: 96px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+}
+.password-strength__track i {
+  display: block;
+  width: 34%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-error);
+}
+.password-strength--2 .password-strength__track i {
+  width: 67%;
+  background: var(--color-warning);
+}
+.password-strength--3 .password-strength__track i {
+  width: 100%;
+  background: var(--color-success);
+}
+.register-years {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.register-years button {
+  min-width: 52px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.register-years button.is-selected {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.register-parent-note {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-warm);
+  border-radius: var(--radius-lg);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.register-parent-note__trial {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.register-review {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.register-review h3 {
+  margin-bottom: var(--space-1);
+  font-size: 16px;
+}
+.register-review__row {
+  display: grid;
+  grid-template-columns: minmax(58px, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  border-top: 1px solid var(--color-border);
+  font-size: 14px;
+}
+.register-review__row > span {
+  color: var(--color-text-secondary);
+}
+.register-review__row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+.register-review__row .auth-form__link {
+  min-height: 44px;
+  font-size: 14px;
+}
+.register-remaining {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+.register-remaining button,
+.register-remaining span {
+  min-height: 44px;
+  padding: var(--space-2) 0;
+}
+.register-remaining .is-done {
+  color: var(--color-success);
+}
+.register-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.register-actions .btn,
+.register-wizard > .auth-form__switch,
+.register-wizard .auth-form__link {
+  min-height: 44px;
+}
+.register-field--shake {
+  animation: register-shake 220ms ease-in-out 2;
+}
+@keyframes register-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+.auth-confirm {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+.auth-confirm__envelope {
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-size: 44px;
+}
+.auth-confirm__email {
+  color: var(--color-text-brand);
+  font-size: 18px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.auth-confirm__steps {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  padding-left: 28px;
+  color: var(--color-text);
+  line-height: 1.5;
+  text-align: left;
+}
+.auth-confirm__missing {
+  width: 100%;
+  text-align: left;
+}
+.auth-confirm__missing summary {
+  min-height: 44px;
+  padding: var(--space-3) 0;
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth-confirm__missing p {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+}
+.auth-confirm__error {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
 /* Поле пароля с кнопкой «Показать» внутри. */
 .password {
   position: relative;
@@ -159,6 +565,21 @@
 .role-card.is-checked {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+.role-card[data-role='student'] .role-card__icon {
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.role-card[data-role='tutor'] .role-card__icon {
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+}
+.role-card[data-role='tutor'].is-checked {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-border-accent);
+}
+.role-card[data-role='tutor'].is-checked::after {
+  background: var(--color-accent);
 }
 .role-card.is-checked::after {
   content: '';
@@ -239,6 +660,18 @@
 }
 .kabinet__name {
   overflow-wrap: anywhere;
+}
+.kabinet__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.kabinet__identity .avatar-illustration {
+  border: 2px solid var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.kabinet__identity .kabinet__who {
+  margin: 0;
 }
 .kabinet__trial {
   font-size: 14px;
@@ -464,6 +897,36 @@
 @media (prefers-reduced-motion: reduce) {
   .role-card {
     transition: none;
+  }
+  .register-field--shake {
+    animation: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .register-progress {
+    padding: var(--space-2);
+  }
+  .register-progress ol {
+    gap: 0;
+  }
+  .register-progress li {
+    font-size: 11px;
+  }
+  .register-progress__mark {
+    width: 26px;
+    height: 26px;
+  }
+  .register-actions {
+    grid-template-columns: 1fr;
+  }
+  .register-review__row {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+  .register-review__row .auth-form__link {
+    grid-column: 2;
+    justify-self: start;
+    padding: 0;
   }
 }
 

@@ -48,11 +48,11 @@ export function InvitePage() {
   return (
     <section className="card kab-narrow">
       <h1 className="t-h2">{t.title}</h1>
-      <p className="t-body muted kab-lead">
-        {t.as(roleName[inv.role])}
-        {inv.tutorName !== null ? ` ${t.tutor(inv.tutorName)}` : ''}
-        {inv.className !== null ? ` ${t.klass(inv.className)}` : ''}
-      </p>
+      <div className="kab-invite-banner" role="status">
+        <p className="t-body">{t.invited(inv.tutorName, inv.className)}</p>
+        <p className="t-caption muted">{t.as(roleName[inv.role])}</p>
+      </div>
+      {/* fixedRole skips role selection; this invite form keeps its existing API and checks. */}
       <RegistrationForm
         fixedRole={inv.role}
         api={{ register: (form) => kabinetApi().register(code, formFromRegistration(form)) }}

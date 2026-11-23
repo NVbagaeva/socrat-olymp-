@@ -42,6 +42,14 @@ export const ALLOWED_EMAIL_DOMAINS = [
 ] as const;
 
 const ALLOWED = new Set<string>(ALLOWED_EMAIL_DOMAINS);
+const COMMON_DOMAIN_TYPOS: Readonly<Record<string, string>> = {
+  'yadex.ru': 'yandex.ru',
+  'yandex.ry': 'yandex.ru',
+  'yndex.ru': 'yandex.ru',
+  'mail.ry': 'mail.ru',
+  'mial.ru': 'mail.ru',
+  'rambler.r': 'rambler.ru',
+};
 
 /** Слово, которым база отказывает: хук службы входа и триггеры. */
 export const DOMAIN_REJECTED_MARK = 'domain_not_allowed';
@@ -63,4 +71,17 @@ export function emailDomain(email: string): string | null {
 export function emailDomainAllowed(email: string): boolean {
   const domain = emailDomain(email);
   return domain !== null && ALLOWED.has(domain);
+}
+
+/** Похоже ли окончание адреса на частую опечатку российского сервиса? */
+export function suggestEmailDomain(email: string): string | null {
+  const at = email.lastIndexOf('@');
+  if (at < 1) return null;
+  const local = email.slice(0, at);
+  const domain = email
+    .slice(at + 1)
+    .trim()
+    .toLowerCase();
+  const corrected = COMMON_DOMAIN_TYPOS[domain];
+  return corrected === undefined ? null : `${local}@${corrected}`;
 }

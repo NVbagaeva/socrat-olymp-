@@ -20,7 +20,9 @@ export const AUTH_ERRORS = {
   /* Форма показывает вместо этой строки подсказку со ссылкой (VoytiScreen). */
   domainNotAllowed:
     'Регистрация доступна с адресами российских почтовых сервисов: Яндекс, Mail.ru, Рамблер.',
-  invalidCredentials: 'Неверная почта или пароль.',
+  invalidCredentials:
+    'Почта или пароль не подходят. Проверьте раскладку и Caps Lock или нажмите «Забыли пароль?».',
+  accountNotFound: 'Аккаунта с такой почтой нет. Зарегистрируйтесь, чтобы создать его.',
   emailNotConfirmed: (email: string) => `Подтвердите почту: письмо отправлено на ${email}.`,
   emailExists: 'Такая почта уже зарегистрирована. Попробуйте войти.',
   weakPassword: 'Пароль слишком простой. Нужно не меньше 8 знаков.',
@@ -61,6 +63,9 @@ export function describeAuthError(error: AuthFailure, email = ''): string {
   switch (error.code) {
     case 'invalid_credentials':
       return AUTH_ERRORS.invalidCredentials;
+    case 'user_not_found':
+    case 'email_not_found':
+      return AUTH_ERRORS.accountNotFound;
     case 'email_not_confirmed':
       return AUTH_ERRORS.emailNotConfirmed(email);
     case 'email_exists':

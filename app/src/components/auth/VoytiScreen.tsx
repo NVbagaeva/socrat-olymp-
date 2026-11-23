@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   Button,
@@ -13,24 +12,12 @@ import {
   SuccessState,
   Tabs,
 } from '@/components/ui';
-import {
-  AUTH_UI,
-  FORGOT_FORM,
-  LOGIN_FORM,
-  PASSWORD_MIN,
-  REGISTER_FORM,
-  emailLooksValid,
-} from '@/content/auth';
-import { ConsentChecks } from '@/components/account/ConsentChecks';
-import { legalDocs } from '@/content/legal/documents';
-import { birthYearValid, parentConsentNeeded } from '@/lib/account/consents';
+import { AUTH_UI, FORGOT_FORM, LOGIN_FORM, REGISTER_FORM, emailLooksValid } from '@/content/auth';
 import { AUTH_HREF } from '@/lib/auth/config';
-import { emailDomainAllowed } from '@/lib/auth/allowed-domains';
-import { AUTH_ERRORS, describeAuthError, isDomainRejected } from '@/lib/auth/errors';
-import { setRememberMe, useSessionUser, type UserRole } from '@/lib/auth/session';
-import { documentsVersion, operator, operatorFilled } from '@/lib/legal/operator';
+import { AUTH_ERRORS, describeAuthError } from '@/lib/auth/errors';
+import { setRememberMe, useSessionUser } from '@/lib/auth/session';
 import { PasswordField } from './PasswordField';
-import { RoleCards } from './RoleCards';
+import { RegisterWizard } from './RegisterWizard';
 
 type Tab = 'login' | 'register';
 
@@ -65,6 +52,8 @@ export function VoytiScreen() {
   const [tab, setTab] = useState<Tab>(
     params.get('vkladka') === 'registraciya' ? 'register' : 'login',
   );
+  const [loginEmail, setLoginEmail] = useState('');
+  const [openForgot, setOpenForgot] = useState(false);
 
   /* Уже вошли — странице входа нечего показывать. */
   useEffect(() => {
@@ -78,7 +67,7 @@ export function VoytiScreen() {
       </h1>
       <Tabs
         className="auth-card__tabs"
-        label="Вход или регистрация"
+        label={REGISTER_FORM.tabsLabel}
         value={tab}
         onValueChange={(id) => setTab(id as Tab)}
         items={[
@@ -87,9 +76,23 @@ export function VoytiScreen() {
         ]}
       />
       {tab === 'login' ? (
-        <LoginForm onRegister={() => setTab('register')} />
+        <LoginForm
+          initialEmail={loginEmail}
+          initialForgot={openForgot}
+          onRegister={(email) => {
+            setLoginEmail(email);
+            setOpenForgot(false);
+            setTab('register');
+          }}
+        />
       ) : (
-        <RegisterForm onLogin={() => setTab('login')} />
+        <RegisterWizard
+          onLogin={(email, forgot) => {
+            setLoginEmail(email);
+            setOpenForgot(forgot === true);
+            setTab('login');
+          }}
+        />
       )}
     </section>
   );
@@ -97,16 +100,25 @@ export function VoytiScreen() {
 
 /* ── Вход ─────────────────────────────────────────────────────── */
 
-function LoginForm({ onRegister }: { onRegister: () => void }) {
+function LoginForm({
+  initialEmail,
+  initialForgot,
+  onRegister,
+}: {
+  initialEmail: string;
+  initialForgot: boolean;
+  onRegister: (email: string) => void;
+}) {
   const router = useRouter();
   const id = useId();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unconfirmed, setUnconfirmed] = useState(false);
-  const [forgot, setForgot] = useState(false);
+  const [accountMissing, setAccountMissing] = useState(false);
+  const [forgot, setForgot] = useState(initialForgot);
   const [resent, setResent] = useState(false);
   const [cooldown, startCooldown] = useCooldown();
 
@@ -118,6 +130,7 @@ function LoginForm({ onRegister }: { onRegister: () => void }) {
     event.preventDefault();
     if (busy) return;
     setError(null);
+    setAccountMissing(false);
     setUnconfirmed(false);
     setResent(false);
     const clean = email.trim();
@@ -137,6 +150,7 @@ function LoginForm({ onRegister }: { onRegister: () => void }) {
       if (failure) {
         setError(describeAuthError(failure, clean));
         setUnconfirmed(failure.code === 'email_not_confirmed');
+        setAccountMissing(failure.code === 'user_not_found' || failure.code === 'email_not_found');
         return;
       }
       router.push(AUTH_HREF.kabinet);
@@ -178,7 +192,8 @@ function LoginForm({ onRegister }: { onRegister: () => void }) {
           name="email"
           type="email"
           inputMode="email"
-          autoComplete="username"
+          autoComplete="email"
+          enterKeyHint="next"
           placeholder={LOGIN_FORM.emailPlaceholder}
           value={email}
           onChange={(event) => setEmail(event.target.value)}
@@ -206,6 +221,16 @@ function LoginForm({ onRegister }: { onRegister: () => void }) {
         </button>
       </div>
       {error !== null ? <FieldMessage tone="error">{error}</FieldMessage> : null}
+      {accountMissing ? (
+        <Button
+          type="button"
+          variant="secondary"
+          fullWidth
+          onClick={() => onRegister(email.trim())}
+        >
+          {LOGIN_FORM.toRegister}
+        </Button>
+      ) : null}
       {unconfirmed ? (
         <p className="auth-form__resend">
           {resent ? (
@@ -224,7 +249,7 @@ function LoginForm({ onRegister }: { onRegister: () => void }) {
       </Button>
       <p className="auth-form__switch">
         {LOGIN_FORM.noAccount}{' '}
-        <button type="button" className="auth-form__link" onClick={onRegister}>
+        <button type="button" className="auth-form__link" onClick={() => onRegister(email.trim())}>
           {LOGIN_FORM.toRegister}
         </button>
       </p>
@@ -310,330 +335,6 @@ function ForgotForm({ initialEmail, onBack }: { initialEmail: string; onBack: ()
         <button type="button" className="auth-form__link" onClick={onBack}>
           {FORGOT_FORM.back}
         </button>
-      </p>
-    </form>
-  );
-}
-
-/* ── Регистрация ───────────────────────────────────────────────── */
-
-function RegisterForm({ onLogin }: { onLogin: () => void }) {
-  const router = useRouter();
-  const id = useId();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole | null>(null);
-  const [birthYear, setBirthYear] = useState('');
-  const [parentEmail, setParentEmail] = useState('');
-  const [consents, setConsents] = useState({ soglashenie: false, soglasie: false });
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [sentTo, setSentTo] = useState<string | null>(null);
-  /* Почта не российского сервиса — спокойная подсказка под полем. Адрес,
-     который человеку уже добавили вручную (форма о нём не знает),
-     отправляется после «Мой адрес уже добавили» — решает сервер. */
-  const [domainNote, setDomainNote] = useState(false);
-  const bypassFor = useRef<string | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-  const domainBlocked = (value: string) => {
-    const clean = value.trim().toLowerCase();
-    return emailLooksValid(clean) && !emailDomainAllowed(clean) && bypassFor.current !== clean;
-  };
-
-  /* Ученик указывает год рождения; младше 18 — ещё и почту родителя
-     (те же правила, что в базе: lib/account/consents.ts). */
-  const year = /^\d{4}$/.test(birthYear.trim()) ? Number(birthYear.trim()) : null;
-  const yearOk = year !== null && birthYearValid(year);
-  const needsParent = role === 'student' && yearOk && parentConsentNeeded(year);
-  const [resent, setResent] = useState(false);
-  const [cooldown, startCooldown] = useCooldown();
-
-  if (sentTo !== null) {
-    return (
-      <SuccessState
-        title={REGISTER_FORM.sent.title}
-        description={
-          <>
-            {REGISTER_FORM.sent.text(sentTo)}
-            <br />
-            <span className="auth-form__hint">{REGISTER_FORM.sent.hint}</span>
-          </>
-        }
-        action={
-          <div className="auth-form__actions">
-            <button type="button" className="btn btn--secondary" onClick={onLogin}>
-              {REGISTER_FORM.toLogin}
-            </button>
-            {resent ? (
-              <span className="auth-form__ok">{LOGIN_FORM.resent}</span>
-            ) : cooldown > 0 ? (
-              <span className="auth-form__muted">{LOGIN_FORM.wait(cooldown)}</span>
-            ) : (
-              <button
-                type="button"
-                className="btn btn--ghost"
-                onClick={async () => {
-                  const { getClient } = await import('@/lib/auth/client');
-                  const supabase = await getClient();
-                  const { error: failure } = await supabase.auth.resend({
-                    type: 'signup',
-                    email: sentTo,
-                    options: { emailRedirectTo: backTo(AUTH_HREF.podtverzhdenie) },
-                  });
-                  if (failure) {
-                    setError(describeAuthError(failure, sentTo));
-                    return;
-                  }
-                  setResent(true);
-                  startCooldown();
-                }}
-              >
-                {LOGIN_FORM.resend}
-              </button>
-            )}
-            {error !== null ? <FieldMessage tone="error">{error}</FieldMessage> : null}
-          </div>
-        }
-      />
-    );
-  }
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (busy) return;
-    setError(null);
-    const cleanName = name.trim();
-    const cleanEmail = email.trim();
-    if (cleanName === '') {
-      setError(REGISTER_FORM.nameRequired);
-      return;
-    }
-    if (!emailLooksValid(cleanEmail)) {
-      setError(REGISTER_FORM.emailInvalid);
-      return;
-    }
-    if (domainBlocked(cleanEmail)) {
-      setDomainNote(true);
-      return;
-    }
-    if (password.length < PASSWORD_MIN) {
-      setError(AUTH_ERRORS.weakPassword);
-      return;
-    }
-    if (role === null) {
-      setError(REGISTER_FORM.roleRequired);
-      return;
-    }
-    const cleanParent = parentEmail.trim().toLowerCase();
-    if (role === 'student') {
-      if (!yearOk) {
-        setError(REGISTER_FORM.birthYearInvalid);
-        return;
-      }
-      if (needsParent && !emailLooksValid(cleanParent)) {
-        setError(REGISTER_FORM.parentEmailInvalid);
-        return;
-      }
-      if (needsParent && cleanParent === cleanEmail.toLowerCase()) {
-        setError(REGISTER_FORM.parentEmailSame);
-        return;
-      }
-    }
-    if (!consents.soglashenie || !consents.soglasie) {
-      setError(REGISTER_FORM.consentsRequired);
-      return;
-    }
-    if (!operatorFilled) {
-      setError(REGISTER_FORM.draftDocuments);
-      return;
-    }
-    setBusy(true);
-    try {
-      /* Новый аккаунт — сессию помним: так ссылка из письма сразу откроет кабинет. */
-      setRememberMe(true);
-      const { getClient } = await import('@/lib/auth/client');
-      const supabase = await getClient();
-      const { data, error: failure } = await supabase.auth.signUp({
-        email: cleanEmail,
-        password,
-        options: {
-          /* Галочки и редакция документов уходят вместе с формой: база
-             не создаст аккаунт без них (триггер согласий), а дату и IP
-             согласия записывает сама. */
-          data: {
-            name: cleanName,
-            role,
-            documents_version: documentsVersion,
-            accept_soglashenie: true,
-            accept_soglasie: true,
-            ...(role === 'student' ? { birth_year: year } : {}),
-            ...(needsParent ? { parent_email: cleanParent } : {}),
-          },
-          emailRedirectTo: backTo(AUTH_HREF.podtverzhdenie),
-        },
-      });
-      if (failure) {
-        if (isDomainRejected(failure)) {
-          bypassFor.current = null;
-          setDomainNote(true);
-          return;
-        }
-        setError(describeAuthError(failure, cleanEmail));
-        return;
-      }
-      if (data.session !== null) {
-        /* Подтверждение почты выключено в настройках — сразу в кабинет. */
-        router.push(AUTH_HREF.kabinet);
-        return;
-      }
-      startCooldown();
-      setSentTo(cleanEmail);
-    } catch {
-      setError(AUTH_ERRORS.network);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <form ref={formRef} className="auth-form" onSubmit={submit} noValidate>
-      <p className="auth-form__text">{REGISTER_FORM.intro}</p>
-      <div className="field">
-        <FieldLabel htmlFor={`${id}-name`}>{REGISTER_FORM.name}</FieldLabel>
-        <Input
-          id={`${id}-name`}
-          name="name"
-          type="text"
-          autoComplete="name"
-          placeholder={REGISTER_FORM.namePlaceholder}
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          maxLength={80}
-          required
-          disabled={busy}
-        />
-      </div>
-      <div className="field">
-        <FieldLabel htmlFor={`${id}-email`}>{REGISTER_FORM.email}</FieldLabel>
-        <Input
-          id={`${id}-email`}
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="username"
-          placeholder={LOGIN_FORM.emailPlaceholder}
-          value={email}
-          onChange={(event) => {
-            setEmail(event.target.value);
-            if (domainNote && !domainBlocked(event.target.value)) setDomainNote(false);
-          }}
-          onBlur={() => setDomainNote(domainBlocked(email))}
-          aria-describedby={domainNote ? `${id}-domain` : undefined}
-          required
-          disabled={busy}
-        />
-        {domainNote ? (
-          <div className="auth-form__domain" id={`${id}-domain`} role="status">
-            <FieldMessage>
-              {REGISTER_FORM.domain.before}{' '}
-              <a
-                href={`mailto:${operator.pochta}?subject=${encodeURIComponent(REGISTER_FORM.domain.subject)}`}
-              >
-                {REGISTER_FORM.domain.link}
-              </a>
-              {REGISTER_FORM.domain.after}
-            </FieldMessage>
-            <button
-              type="button"
-              className="auth-form__link"
-              onClick={() => {
-                bypassFor.current = email.trim().toLowerCase();
-                setDomainNote(false);
-                formRef.current?.requestSubmit();
-              }}
-            >
-              {REGISTER_FORM.domain.added}
-            </button>
-          </div>
-        ) : null}
-      </div>
-      <PasswordField
-        label={REGISTER_FORM.password}
-        value={password}
-        onChange={setPassword}
-        fresh
-        autoComplete="new-password"
-        disabled={busy}
-      />
-      <fieldset className="auth-form__roles">
-        <legend className="field__label">{REGISTER_FORM.roleTitle}</legend>
-        <RoleCards
-          value={role}
-          onChange={setRole}
-          label={REGISTER_FORM.roleTitle}
-          disabled={busy}
-        />
-      </fieldset>
-      {role === 'student' ? (
-        <div className="field">
-          <FieldLabel htmlFor={`${id}-year`}>{REGISTER_FORM.birthYear}</FieldLabel>
-          <Input
-            id={`${id}-year`}
-            name="birth-year"
-            type="text"
-            inputMode="numeric"
-            autoComplete="bday-year"
-            maxLength={4}
-            placeholder={REGISTER_FORM.birthYearPlaceholder}
-            value={birthYear}
-            onChange={(event) => setBirthYear(event.target.value.replace(/\D/g, ''))}
-            disabled={busy}
-          />
-          <FieldMessage>{REGISTER_FORM.birthYearHint}</FieldMessage>
-        </div>
-      ) : null}
-      {needsParent ? (
-        <div className="field">
-          <FieldLabel htmlFor={`${id}-parent`}>{REGISTER_FORM.parentEmail}</FieldLabel>
-          <Input
-            id={`${id}-parent`}
-            name="parent-email"
-            type="email"
-            inputMode="email"
-            autoComplete="off"
-            placeholder={LOGIN_FORM.emailPlaceholder}
-            value={parentEmail}
-            onChange={(event) => setParentEmail(event.target.value)}
-            disabled={busy}
-          />
-          <FieldMessage>{REGISTER_FORM.parentEmailHint}</FieldMessage>
-        </div>
-      ) : null}
-      <ConsentChecks value={consents} onChange={setConsents} />
-      <p className="auth-form__hint auth-form__politika">
-        {REGISTER_FORM.politika.before}{' '}
-        <a href={legalDocs.politika.href} target="_blank" rel="noopener">
-          {REGISTER_FORM.politika.link}
-        </a>
-      </p>
-      {error !== null ? <FieldMessage tone="error">{error}</FieldMessage> : null}
-      <Button type="submit" size="lg" fullWidth loading={busy}>
-        {REGISTER_FORM.submit}
-      </Button>
-      {!consents.soglashenie || !consents.soglasie ? (
-        <FieldMessage className="auth-form__consents-hint">
-          {REGISTER_FORM.consentsHint}
-        </FieldMessage>
-      ) : null}
-      <p className="auth-form__switch">
-        {REGISTER_FORM.haveAccount}{' '}
-        <button type="button" className="auth-form__link" onClick={onLogin}>
-          {REGISTER_FORM.toLogin}
-        </button>
-      </p>
-      <p className="auth-form__hint">
-        <Link href="/">На главную</Link>
       </p>
     </form>
   );

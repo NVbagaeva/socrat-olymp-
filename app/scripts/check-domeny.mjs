@@ -86,6 +86,21 @@ for (const email of [
 ]) {
   if (D.emailDomainAllowed(email)) fail(`пропущен «${email}»`);
 }
+for (const [email, expected] of [
+  ['ivan@yadex.ru', 'ivan@yandex.ru'],
+  ['ivan@yandex.ry', 'ivan@yandex.ru'],
+  ['ivan@yndex.ru', 'ivan@yandex.ru'],
+  ['ivan@mail.ry', 'ivan@mail.ru'],
+  ['ivan@mial.ru', 'ivan@mail.ru'],
+  ['ivan@rambler.r', 'ivan@rambler.ru'],
+]) {
+  if (D.suggestEmailDomain(email) !== expected) {
+    fail(`не предложено исправление «${email}» → «${expected}»`);
+  }
+}
+if (D.suggestEmailDomain('ivan@gmail.com') !== null) {
+  fail('для обычного, но не российского домена показана опечатка вместо подсказки сервиса');
+}
 
 /* 3. Отказ базы. */
 const domainFail = { status: 403, message: 'domain_not_allowed' };

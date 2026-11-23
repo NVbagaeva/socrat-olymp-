@@ -7,7 +7,7 @@ import { ORTHO_AZIMUTH, ORTHO_ELEVATION, orthoAt } from '@/lib/solid/project';
 import { renderSolid } from '@/lib/solid/render';
 import { razbor3 } from '@/lib/stereo/razbory3';
 import { razbor15 } from '@/lib/stereo/razbory15';
-import { typeset } from '@/lib/tex';
+import { texPlain } from '@/lib/texPlain';
 import { BANK } from '@/lib/zadanie3';
 import { RAZDEL3, tipHref3 } from '@/lib/zadanie3/links';
 import { StereoOzhivit } from './StereoOzhivit';
@@ -119,7 +119,7 @@ export function StereoChast() {
       <div className="vst-razbor">
         <p className="vst-zadacha">
           <span className="vst-zadacha__m">{T.zadacha}</span>
-          <span dangerouslySetInnerHTML={{ __html: typeset(razbor.uslovie) }} />
+          <span>{texPlain(razbor.uslovie)}</span>
         </p>
         <p className="vst-shagi-z">{T.shagiZ}</p>
         <ol className="vit-punkty vst-shagi">
@@ -133,14 +133,8 @@ export function StereoChast() {
               >
                 <span className="vit-punkt__no">{String(k + 1).padStart(2, '0')}</span>
                 <span className="vit-punkt__tekst">
-                  <span
-                    className="vit-punkt__z"
-                    dangerouslySetInnerHTML={{ __html: typeset(s.z) }}
-                  />
-                  <span
-                    className="vst-formula"
-                    dangerouslySetInnerHTML={{ __html: typeset(s.f) }}
-                  />
+                  <span className="vit-punkt__z">{texPlain(s.z)}</span>
+                  <span className="vst-formula">{texPlain(s.f)}</span>
                 </span>
               </button>
             </li>
