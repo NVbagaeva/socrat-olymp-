@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import type { FormEvent, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, FieldLabel, FieldMessage, Input } from '@/components/ui';
 import { ConsentChecks } from '@/components/account/ConsentChecks';
@@ -290,29 +290,6 @@ export function RegisterWizard({
     setStep(next);
   };
 
-  const recoverNextClick = (event: ReactMouseEvent<HTMLFormElement>) => {
-    /*
-     * Some browser automation and assistive click paths can target the form
-     * itself even when the pointer is over the visible next button. Preserve
-     * the same action in that narrow case; keyboard submission still uses
-     * the native form submit handler below.
-     */
-    if (event.target !== event.currentTarget) return;
-    const button = event.currentTarget.querySelector<HTMLButtonElement>(
-      '.register-actions button[type="submit"]',
-    );
-    if (button === null) return;
-    const rect = button.getBoundingClientRect();
-    if (
-      event.clientX < rect.left ||
-      event.clientX > rect.right ||
-      event.clientY < rect.top ||
-      event.clientY > rect.bottom
-    ) return;
-    event.preventDefault();
-    nextStep();
-  };
-
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (busy) return;
@@ -550,13 +527,7 @@ export function RegisterWizard({
   const consentComplete = consents.soglashenie && consents.soglasie;
 
   return (
-    <form
-      ref={formRef}
-      className="auth-form register-wizard"
-      onClickCapture={recoverNextClick}
-      onSubmit={submit}
-      noValidate
-    >
+    <form ref={formRef} className="auth-form register-wizard" onSubmit={submit} noValidate>
       <p className="auth-form__text">{REGISTER_FORM.intro}</p>
       <nav
         className="register-progress"

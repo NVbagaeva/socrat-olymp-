@@ -1029,7 +1029,11 @@ async function chooseRegistrationRole(page, role) {
 }
 
 async function wizardNext(page) {
-  await page.locator('.register-actions button[type="submit"]').click();
+  const button = page.locator('.register-actions button[type="submit"]');
+  /* Scroll first and let the layout settle before Playwright computes the click point. */
+  await button.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(120);
+  await button.click();
 }
 
 async function prepareRegistration(page, { role, name, email, password, birthYear, parentEmail }) {
