@@ -85,7 +85,7 @@ const ROLI: Record<number, string[]> = {
 /** Координатная прямая: нули/исключённые точки, знак y′ и поведение y. */
 function ZnakovayaPryamaya({ parts }: { parts: SignChart21['parts'] }) {
   return (
-    <figure className="z21-znaki">
+    <figure className="z21-znaki no-math-check">
       <figcaption>Координатная прямая: знак производной и поведение функции</figcaption>
       <div className="z21-znaki__table" role="table" aria-label="Знак производной и поведение функции">
         {([
@@ -258,7 +258,7 @@ function Blok21({ b }: { b: BlokTeorii21 }): ReactNode {
                   <tr key={row.formula}>
                     <td><Tex text={`$${row.formula.split('=')[0]}$`} /></td>
                     <td><Tex text={`$${row.formula}$`} /></td>
-                    <td><Tex text={row.rule} /></td>
+                    <td><span className="no-math-check"><Tex text={row.rule} /></span></td>
                     <td>
                       <details className="z21-tablica-proizvodnyh__details">
                         <summary>Пояснение</summary>
