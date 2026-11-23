@@ -1,42 +1,29 @@
 import { AppShell } from '@/components/layout/AppShell';
-import { RisunokRazdela, StsenaShapka, tabletkiRazdela } from '@/components/tasks/stsena';
-import { STSENA } from '@/content/stsena';
-import { tasksPage } from '@/content/tasks';
+import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { ZADANIE10 } from '@/content/zadanie10';
 import { ZADANIYA } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
 import './shell10.css';
 
 /**
- * Оболочка задания №10: крошки, заголовок и липкая лента вкладок
- * (RazdelTabs). Вызывается из layout маршрута — при переходе между
- * вкладками остаётся на месте, как у №11.
+ * Оболочка раздела «Задачи с физическим смыслом»: общая шапка раздела (SectionHeader) и
+ * липкая лента вкладок (RazdelTabs). Номер, заголовок, чипы, картинка и
+ * кольцо прогресса — в шапке, одинаковой у всех разделов. Вызывается из
+ * layout маршрута: при переходе между вкладками остаётся на месте.
  */
 export function Shell10({ children }: { children: React.ReactNode }) {
   const base = `${ZADANIYA}/${ZADANIE10.slug}`;
-  const no = String(Number(ZADANIE10.no));
   return (
     <AppShell active="tasks">
       <main className="app-main">
         <div className="z10-shell">
-          <StsenaShapka
-            className="stsena--fizika"
-            crumbs={[
-              { label: 'Главная', href: '/' },
-              { label: 'Банк заданий', href: tasksPage.href },
-              { label: `№${no}` },
-            ]}
-            title={ZADANIE10.title}
-            lead={ZADANIE10.lead}
-            tabletki={tabletkiRazdela({ chast: ZADANIE10.badge })}
-            media={
-              <RisunokRazdela
-                no={ZADANIE10.slug}
-                label={`${STSENA.oblozhka}: ${ZADANIE10.title}`}
-              />
-            }
+          <SectionHeader kod="prikladnye-zadachi" />
+          <RazdelTabs
+            base={base}
+            tabs={ZADANIE10.tabs}
+            className="topic-tabs-row--stsena"
+            bezPary
           />
-          <RazdelTabs base={base} tabs={ZADANIE10.tabs} className="topic-tabs-row--stsena" />
           <div className="section-panel">{children}</div>
         </div>
       </main>
