@@ -350,7 +350,11 @@ function Konfigurator8({
           }}
           labels={TRENAZHER8.vybor}
           ryadomSoStartom={
-            <VDomashkuTrenazher taskNo={8} tipy={PROTOTYPES8_ORDER.filter((id) => selected.has(id))} />
+            <VDomashkuTrenazher
+              taskNo={8}
+              tipy={PROTOTYPES8_ORDER.filter((id) => selected.has(id))}
+              vse={selected.size === PROTOTYPES8_ORDER.length}
+            />
           }
         />
       </div>

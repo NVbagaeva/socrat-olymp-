@@ -2907,12 +2907,17 @@ async function runDz2() {
     await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.trn-start');
     await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
-    const knopka = page.locator('.trn-vybor__niz .dz2-knopka__glavnaya');
+    const knopka = page.locator('.trn-vybor__ryadom .dz2-knopka__glavnaya');
     await knopka.waitFor();
     await knopka.click();
-    await page.waitForSelector('.trn-vybor__niz .dz2-knopka__glavnaya[aria-pressed="true"]');
-    check((await page.locator('.trn-vybor__niz .dz2-knopka__korzina').textContent()).includes('(1)'),
+    await page.waitForSelector('.trn-vybor__ryadom .dz2-knopka__glavnaya[aria-pressed="true"]');
+    check((await page.locator('.trn-vybor__ryadom .dz2-knopka__korzina').textContent()).includes('(1)'),
       `ДЗ ${width}: в корзине один элемент`);
+    check(await page.evaluate(() => {
+      const a = document.querySelector('.trn-vybor__niz')?.getBoundingClientRect();
+      const b = document.querySelector('.trn-vybor__ryadom')?.getBoundingClientRect();
+      return a !== undefined && b !== undefined && b.top >= a.bottom - 1;
+    }), `ДЗ ${width}: «В домашку» под рядом «Начать», не налезает на него`);
     await snap(page, 'trenazher', width);
 
     await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/${blok.slug}/`, { waitUntil: 'networkidle' });

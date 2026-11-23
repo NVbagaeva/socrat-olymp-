@@ -1362,3 +1362,10 @@
 .trn-otvet-stroka {
   margin: var(--space-3) 0 0;
 }
+
+/* Под «Начать»: «В домашку» учителя (docs/kabinet-dz2.md) — отдельной строкой справа. */
+.trn-vybor__ryadom {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-3);
+}

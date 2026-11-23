@@ -568,7 +568,9 @@ function Konfigurator({
           bezPodskazok={vybor.bezPodskazok}
           onBezPodskazok={(bezPodskazok) => zapomnit({ ...vybor, bezPodskazok })}
           onBack={() => setEkran('rezhimy')}
-          ryadomSoStartom={<VDomashkuTrenazher taskNo={zadanie} tipy={tipy} />}
+          ryadomSoStartom={
+            <VDomashkuTrenazher taskNo={zadanie} tipy={tipy} vse={tipy.length === tipyVse.length} />
+          }
           onStart={() =>
             start(
               poTipam(

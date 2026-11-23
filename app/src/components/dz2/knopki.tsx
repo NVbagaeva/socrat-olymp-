@@ -15,7 +15,16 @@ import { nomerEgeRazdela } from '@/lib/zhurnal/vid';
 import { VDomashku } from './VDomashku';
 
 /** Тренажёр: выбранные типы (пусто — все), запас 10 задач, цель «решить все». */
-export function VDomashkuTrenazher({ taskNo, tipy }: { taskNo: number; tipy: readonly string[] }) {
+export function VDomashkuTrenazher({
+  taskNo,
+  tipy,
+  vse = false,
+}: {
+  taskNo: number;
+  tipy: readonly string[];
+  /** Выбраны все типы раздела — в названии «все типы». */
+  vse?: boolean;
+}) {
   const sorted = [...tipy].sort();
   return (
     <VDomashku
@@ -25,7 +34,7 @@ export function VDomashkuTrenazher({ taskNo, tipy }: { taskNo: number; tipy: rea
         key: `trenazher:${taskNo}:${sorted.join(',')}`,
         vid: 'trenazher',
         task_no: taskNo,
-        title: DZ2.elementy.trenazher(nomerEgeRazdela(taskNo), sorted.length),
+        title: DZ2.elementy.trenazher(nomerEgeRazdela(taskNo), vse ? 0 : sorted.length),
         spec: { tipy: sorted },
         tipy: sorted,
         zapas: 10,

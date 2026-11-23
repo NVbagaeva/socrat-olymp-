@@ -224,8 +224,10 @@ export function VyborTem({
         >
           {labels.nachat}
         </button>
-        {chosen === 0 ? null : ryadomSoStartom}
       </div>
+      {chosen === 0 || ryadomSoStartom === undefined ? null : (
+        <div className="trn-vybor__ryadom">{ryadomSoStartom}</div>
+      )}
     </section>
   );
 }
