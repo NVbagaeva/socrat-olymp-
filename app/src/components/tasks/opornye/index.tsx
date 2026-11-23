@@ -6,6 +6,7 @@ import { PrepCardLink } from '@/components/tasks/prep/PrepScroll';
 import { AnswerInput, FormatHint } from '@/components/tasks/otvet/AnswerInput';
 import { Ikonka, Metka, Polosa, ShagiResheniya, Znak, type Shag, type Ton } from '../steklo';
 import './opornye.css';
+import { KartinkaZadachi, type KartinkaProps } from '@/components/ui/KartinkaZadachi';
 
 /**
  * «Опорные задачи» в «Стеклянной сцене»: список блоков по навыкам и
@@ -145,6 +146,8 @@ export interface OpornayaZadachaProps {
   uslovieHtml: string;
   /** Чертёж или картинка задачи: под условием. Нет — ничего не выводится. */
   risunok?: ReactNode;
+  /** Картинка-иллюстрация сюжета: справа от условия (KartinkaZadachi). */
+  kartinka?: KartinkaProps;
   value: string;
   onValue: (value: string) => void;
   /** Итог проверки текущего ответа. */
@@ -188,6 +191,7 @@ export function OpornayaZadacha({
   onOpen,
   uslovieHtml,
   risunok,
+  kartinka,
   value,
   onValue,
   checked,
@@ -247,7 +251,14 @@ export function OpornayaZadacha({
           </span>
         </div>
 
-        <div className="op-zad__uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
+        {kartinka === undefined ? (
+          <div className="op-zad__uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
+        ) : (
+          <div className="kz-ryad">
+            <KartinkaZadachi {...kartinka} />
+            <div className="op-zad__uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
+          </div>
+        )}
         {risunok === undefined ? null : <div className="op-zad__ris">{risunok}</div>}
 
         {vybory === undefined ? (

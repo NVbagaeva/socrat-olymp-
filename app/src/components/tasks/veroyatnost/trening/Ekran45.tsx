@@ -6,7 +6,6 @@ import { useBeforeFinish } from '../../session/useBeforeFinish';
 import { useSessionReport } from '../../session/useSessionReport';
 import { EkranZadachi, type SostoyanieZadachi } from '../../trening/EkranZadachi';
 import { PodskazkaVoprosy } from '../../trening/PodskazkaVoprosy';
-import { assetUrl } from '@/lib/assetUrl';
 import { formatHint, fractionRightHint } from '@/lib/otvet';
 import type { LogOutcome } from '@/lib/progressLog';
 import type { TaskMark } from '@/lib/trainerSession/types';
@@ -22,6 +21,7 @@ import { zadachaBanka, type SessiyaPayload, type SessiyaZadacha } from '../sessi
 import type { TekstyTrenazhera45 } from '@/content/veroyatnost45';
 import { DerevoPodskazki, risunok45, shagi45, voprosy45 } from './shagi45';
 import type { Ui45 } from './ui45';
+import { src280 } from '@/components/ui/KartinkaZadachi';
 
 /**
  * Замены «Похожая задача»: экран подменяет задачу тренировки другим
@@ -175,7 +175,9 @@ export function Ekran45({
   const gotovaya = task === undefined ? undefined : gotovye.get(task.id);
   /* Журнал решения задач (lib/zhurnal): ученику, который вошёл, при флаге. */
   const zapis = useZapisZadachi(
-    gotovaya === undefined ? null : zhurnal45(zadanie, gotovaya, 'trenazher', roundKey, String(index)),
+    gotovaya === undefined
+      ? null
+      : zhurnal45(zadanie, gotovaya, 'trenazher', roundKey, String(index)),
   );
 
   /* Разбор и подсказка открываются, когда нужны: до этого в памяти их нет. */
@@ -362,15 +364,8 @@ export function Ekran45({
       {...(kartinka === undefined
         ? {}
         : {
-            risunok: (
-              /* Картинка к задаче — как есть: без обрезки, прозрачный фон. */
-              <img
-                className="z45-kartinka"
-                src={assetUrl(kartinka.path)}
-                alt={kartinka.alt}
-                decoding="async"
-              />
-            ),
+            /* Картинка сюжета — справа от условия (KartinkaZadachi). */
+            kartinka: { src: kartinka.path, src280: src280(kartinka.path), alt: kartinka.alt },
           })}
       value={value}
       onValue={(nextValue) => {
