@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ShagiResheniya } from '../steklo';
 import { SHAPKA9 } from '@/content/proizvodnaya9';
 import { FiguraSvg9 } from './FiguraSvg9';
-import type { Primer9Dannye, VidChertezha9 } from './primer9';
+import type { Primer9Dannye, VidChertezha9 } from './PrimerDannye9';
 
 function podpisVida(v: VidChertezha9): string {
   return v.vid === 'uslovie'
@@ -138,7 +138,7 @@ export function PrimerKarta9Lazy({
         return;
       }
       started = true;
-      void import('./primer9')
+      void import('./PrimerDannye9')
         .then((mod) => mod.primer9(prototip))
         .then(
           (ready) => {

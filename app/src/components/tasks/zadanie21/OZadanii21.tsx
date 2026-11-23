@@ -50,7 +50,7 @@ export function OZadanii21() {
           <p className="stk-lead">{SHAPKA21.gruppyLead}</p>
         </div>
         <div className="kz-gruppy">
-          {GRUPPY21.map((g, gi) => {
+          {GRUPPY21.map((g) => {
             const vid = GRUPPY21_VID[g.id];
             const tipy = prototypesOfGruppa(g.id);
             return (
@@ -63,9 +63,9 @@ export function OZadanii21() {
                 tipov={tipy.length}
                 progress={<GruppaProgress21 prototypes={tipy.map((p) => p.id)} />}
                 labels={SHAPKA21}
-                open={gi === 0}
+                open={false}
               >
-                {tipy.map((p, i) => {
+                {tipy.map((p) => {
                   const z = zadachaPoKlyuchu(`${p.id}|primer`);
                   return (
                     <KartaTip
@@ -73,7 +73,7 @@ export function OZadanii21() {
                       id={p.id}
                       nazvanieHtml={typeset(p.title)}
                       lead={typeset(`Например: $${p.primer}$`)}
-                      open={gi === 0 && i === 0}
+                      open={false}
                     >
                       <KartaPrimer
                         uslovieHtml={typeset(z.uslovie)}

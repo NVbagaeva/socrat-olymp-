@@ -277,10 +277,10 @@ function EylerPrimer({ alt }: { alt: string }) {
       />
       <circle className="vizo-eyler__krug" cx={levyy} cy={75} r={r} />
       <circle className="vizo-eyler__krug vizo-eyler__krug--b" cx={pravyy} cy={75} r={r} />
-      <Imya x={levyy - 18} y={34}>
+      <Imya x={levyy - 18} y={18}>
         A
       </Imya>
-      <Imya x={pravyy + 18} y={34}>
+      <Imya x={pravyy + 18} y={18}>
         B
       </Imya>
       {/* Исходы: только A — слева, только B — справа, общие — в

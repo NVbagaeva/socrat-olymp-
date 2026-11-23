@@ -26,6 +26,9 @@
 .z1-head .section-head__media {
   align-self: end;
 }
+.z1-head .z1-trezubets {
+  max-width: 240px;
+}
 
 /* ── Вкладка «О задании» ──────────────────────────────────────── */
 

@@ -220,7 +220,7 @@ export function OZadanii13() {
                 tipov={tipy.length}
                 progress={<GruppaProgress13 prototypes={tipy.map((p) => p.id)} />}
                 labels={SHAPKA13}
-                open={gi === 0}
+                open={false}
               >
                 <p className="stk-lead z13-gruppa__lead">{vid.lead}</p>
                 {tipy.map((p, i) => {
@@ -242,7 +242,7 @@ export function OZadanii13() {
                       id={p.id}
                       nazvanieHtml={typeset(p.title)}
                       {...(metki.length === 0 ? {} : { lead: metki.join(' · ') })}
-                      open={open}
+                      open={false}
                     >
                       {open ? (
                         <Primer13Karta

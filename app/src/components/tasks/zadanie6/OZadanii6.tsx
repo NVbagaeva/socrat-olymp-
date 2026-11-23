@@ -108,7 +108,7 @@ export function OZadanii6() {
                 tipov={tipy.length}
                 progress={<GruppaProgress6 prototypes={tipy.map((p) => p.id)} />}
                 labels={SHAPKA6}
-                open={gi === 0}
+                open={false}
               >
                 {tipy.map((p, i) => {
                   const open = gi === 0 && i === 0;
@@ -125,7 +125,7 @@ export function OZadanii6() {
                       id={p.id}
                       nazvanieHtml={typeset(p.title)}
                       lead={typeset(p.formula)}
-                      open={open}
+                      open={false}
                     >
                       {ex !== null ? (
                         <KartaPrimer

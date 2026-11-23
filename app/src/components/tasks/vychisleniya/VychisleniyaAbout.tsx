@@ -93,7 +93,7 @@ function TipySpisok({
             nazvanieHtml={typeset(teksty.nazvanie)}
             lead={teksty.lead}
             kod={id}
-            open={open}
+            open={false}
           >
             {ex === null ? (
               <PrimerLazy8
@@ -149,7 +149,7 @@ export function VychisleniyaAbout() {
               tipov={g.prototypes.length}
               progress={<GruppaProgress8 prototypes={g.prototypes} />}
               labels={SHAPKA8}
-              open={gi === 0}
+              open={false}
             >
               {g.podgruppy === undefined ? (
                 <TipySpisok gruppa={g} ids={g.prototypes} openFirst={gi === 0} />

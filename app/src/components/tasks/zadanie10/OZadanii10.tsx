@@ -120,7 +120,7 @@ export function OZadanii10() {
                 tipov={tipy.length}
                 progress={<GruppaProgress10 prototypes={tipy.map((p) => p.id)} />}
                 labels={SHAPKA10}
-                open={gi === 0}
+                open={false}
               >
                 {tipy.map((p, i) => {
                   const open = gi === 0 && i === 0;
@@ -142,7 +142,7 @@ export function OZadanii10() {
                       {...(ill === undefined
                         ? {}
                         : { miniatyura: <Kartinka10 ill={ill} alt="" /> })}
-                      open={open}
+                      open={false}
                     >
                       {ex !== null ? (
                         <KartaPrimer

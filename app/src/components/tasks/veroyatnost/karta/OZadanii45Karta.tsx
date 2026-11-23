@@ -124,10 +124,9 @@ export function OZadanii45Karta({ zadanie, shapka, opasnoTipov, formuly, ob }: O
                 tipov={tipy.length}
                 progress={<GruppaProgress45 zadanie={zadanie} metod={m.id} />}
                 labels={shapka}
-                open={gi === 0}
+                open={false}
               >
-                {tipy.map((k, i) => {
-                  const open = gi === 0 && i === 0;
+                {tipy.map((k) => {
                   const n = variantPrimera(zadanie, k.id);
                   const v = k.variants.find((x) => x.n === n);
                   const opasno = opasnoTipov[k.id];
@@ -141,7 +140,7 @@ export function OZadanii45Karta({ zadanie, shapka, opasnoTipov, formuly, ob }: O
                       id={k.id}
                       nazvanieHtml={typesetText(k.title)}
                       lead={typesetText(k.tip)}
-                      open={open}
+                      open={false}
                     >
                       {v === undefined ? null : (
                         /* Пример открывается в браузере по раскрытию: закрытый

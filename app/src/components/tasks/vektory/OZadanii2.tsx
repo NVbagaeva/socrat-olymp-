@@ -75,7 +75,7 @@ export function OZadanii2() {
                 tipov={tipy.length}
                 progress={<GruppaProgress2 prototypes={tipy.map((p) => p.id)} />}
                 labels={SHAPKA2}
-                open={gi === 0}
+                open={false}
               >
                 {tipy.map((p, i) => {
                   const open = gi === 0 && i === 0;
@@ -91,7 +91,7 @@ export function OZadanii2() {
                       id={p.id}
                       nazvanieHtml={typeset(p.nazvanie)}
                       lead={tex(p.formula)}
-                      open={open}
+                      open={false}
                     >
                       {ex === null ? (
                         <PrimerLazy2

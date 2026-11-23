@@ -61,7 +61,7 @@ export function OZadanii3() {
               tipov={g.tipy.length}
               progress={<GruppaProgress3 gruppa={g.id} />}
               labels={SHAPKA3}
-              open={gi === 0}
+              open={false}
             >
               {g.tipy.map((tip, ti) => {
                 const teksty = TIPY3[tip];
@@ -80,7 +80,7 @@ export function OZadanii3() {
                     id={tip}
                     nazvanieHtml={typeset(teksty.nazvanie)}
                     lead={typeset(teksty.lead)}
-                    open={open}
+                    open={false}
                   >
                     {srazu === null ? (
                       <Primer3Lazy

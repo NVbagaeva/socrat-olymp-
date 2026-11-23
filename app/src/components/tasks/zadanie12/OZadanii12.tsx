@@ -110,7 +110,7 @@ export function OZadanii12() {
                   /* Под названием вида — название графика и число типов. */
                   tipov: (n) => SHAPKA12.vidPodpis(vid.graphName, n),
                 }}
-                open={gi === 0}
+                open={false}
               >
                 <Link className="stk-ssylka z12-vid-ssylka" href={vidHref}>
                   {SHAPKA12.vidOtkryt(vid.title)} <span aria-hidden="true">→</span>
@@ -129,7 +129,7 @@ export function OZadanii12() {
                       key={nabor}
                       id={yakorTipa12(nabor)}
                       nazvanieHtml={typeset(skillTitle[nabor] ?? nabor)}
-                      open={open}
+                      open={false}
                     >
                       {/* Раскрытый с самого начала пример — в разметке;
                           остальные приезжают файлом по раскрытию. */}

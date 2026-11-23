@@ -8,7 +8,7 @@ import { typeset } from '@/lib/tex';
 import { FormulyRamka, KartaGruppa, KartaShapka, KartaTip } from '../karta';
 import { YakorTipa } from '../karta/YakorTipa';
 import { GruppaProgress9 } from './GruppaProgress9';
-import { primer9 } from './primer9';
+import { primer9 } from './PrimerDannye9';
 import { PrimerKarta9, PrimerKarta9Lazy } from './PrimerKarta9';
 
 /**
@@ -95,7 +95,7 @@ export function OZadanii9() {
                 tipov={tipy.length}
                 progress={<GruppaProgress9 prototypes={tipy.map((p) => p.id)} />}
                 labels={SHAPKA9}
-                open={gi === 0}
+                open={false}
               >
                 {tipy.map((p, i) => {
                   const open = gi === 0 && i === 0;
@@ -111,7 +111,7 @@ export function OZadanii9() {
                       id={tipYakor9(p.id)}
                       nazvanieHtml={typeset(p.nazvanie)}
                       lead={typeset(p.kratko)}
-                      open={open}
+                      open={false}
                     >
                       {/* Раскрытый с самого начала пример собирается на сборке;
                           остальные — в браузере по раскрытию. */}

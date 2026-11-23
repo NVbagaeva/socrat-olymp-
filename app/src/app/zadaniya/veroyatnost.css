@@ -1620,6 +1620,117 @@
   margin-top: var(--space-6);
 }
 .vteor-side__kartinka {
-  width: 88%;
+  width: min(76%, 168px);
   height: auto;
+}
+.vteor-side__decor .topic-side__note {
+  width: 100%;
+  max-width: 28ch;
+  margin: 0;
+  color: var(--color-primary);
+  font-size: clamp(18px, 1.25vw, 21px);
+  line-height: 1.45;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Теория событий №5: определение, правило, рисунок и полный пример. */
+.v5-sobytiya {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.v5-sobytiya__lead {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.v5-sobytiya__card,
+.v5-sobytiya__warning {
+  min-width: 0;
+  padding: clamp(18px, 2vw, 30px);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(155deg, var(--white), var(--color-surface-info));
+  box-shadow: var(--glass-hi), 0 12px 30px rgb(31 95 208 / 0.07);
+}
+.v5-sobytiya__card h3 {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+}
+.v5-sobytiya__card p,
+.v5-sobytiya__warning {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.v5-sobytiya__card p {
+  margin: 0 0 var(--space-3);
+}
+.v5-sobytiya__formula {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  text-align: center;
+  font-size: var(--fs-lg);
+  white-space: nowrap;
+}
+.v5-sobytiya__note {
+  margin-top: var(--space-3) !important;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--terracotta);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--terracotta-50);
+}
+.v5-sobytiya__figure {
+  max-width: 760px;
+  margin: var(--space-4) auto;
+  overflow: hidden;
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: #fff;
+}
+.v5-sobytiya__figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.v5-sobytiya__figure figcaption {
+  padding: 0 var(--space-4) var(--space-3);
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: var(--lh-caption);
+}
+.v5-sobytiya__steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding-left: var(--space-6);
+  color: var(--color-text);
+  line-height: var(--lh-body);
+}
+.v5-sobytiya__warning {
+  border-color: var(--terracotta-200);
+  background: linear-gradient(145deg, var(--white), var(--terracotta-50));
+}
+.v5-sobytiya__warning strong {
+  color: var(--terracotta-700);
+}
+.v5-sobytiya__card--small {
+  max-width: 900px;
+}
+@media (max-width: 600px) {
+  .v5-sobytiya__figure svg {
+    min-width: 560px;
+  }
+  .v5-sobytiya__figure {
+    overflow-x: auto;
+  }
 }
