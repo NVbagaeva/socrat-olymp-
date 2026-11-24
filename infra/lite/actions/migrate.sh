@@ -36,6 +36,8 @@ sync_files
   printf 'ZHURNAL_RAZDELY=%s\n' "$(printf '%s' "${ZHURNAL_RAZDELY:-}" | tr -d '\n ')"
   printf 'DZ_NOVYE=%s\n' "${DZ_NOVYE:-}"
   printf 'DZ_NOVYE_RAZDELY=%s\n' "$(printf '%s' "${DZ_NOVYE_RAZDELY:-}" | tr -d '\n ')"
+  printf 'UVEDOMLENIYA=%s\n' "${UVEDOMLENIYA:-}"
+  printf 'UVEDOMLENIYA_KANALY=%s\n' "$(printf '%s' "${UVEDOMLENIYA_KANALY:-}" | tr -d '\n ')"
 } | on_server "$REMOTE_DIR/bin/migrate.sh" | tee "$WORK/migrate.log"
 
 summary <<MD
