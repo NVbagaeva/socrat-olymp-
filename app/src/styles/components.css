@@ -2281,11 +2281,24 @@ a.task-card--bank:focus-visible {
 .solution-details.open .solution-details-body {
   grid-template-rows: 1fr;
 }
+/* Отступ над телом — не padding, а распорка: padding не сжимается
+   строкой 0fr, и у закрытой врезки оставалась полоса высотой в отступ —
+   пустая или с верхом первой строки (FAQ «Как пользоваться»). Закрытое
+   тело ещё и скрыто: его не видно и читалки его не читают. */
 .solution-details-body > div {
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  padding-top: var(--space-3);
+  padding-block: 0;
+}
+.solution-details-body > div::before {
+  content: '';
+  display: block;
+  height: var(--space-3);
+}
+.solution-details:not(.open) .solution-details-body > div {
+  visibility: hidden;
+  transition: visibility 0s linear var(--dur-reveal, 320ms);
 }
 .solution-details svg {
   display: block;
