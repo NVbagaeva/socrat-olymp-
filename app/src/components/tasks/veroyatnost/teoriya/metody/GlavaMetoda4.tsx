@@ -45,7 +45,7 @@ import './metody4.css';
  */
 
 /**
- * Адрес картинки главы с версией. Картинки карточек и задач — в своей
+ * Адрес картинки главы с версией. Картинки задач — в своей
  * таблице версий (METODY4_ASSET_VERSIONS, next.config.ts): компоненты
  * серверные, и общая таблица первой загрузки (assetUrl) от них не растёт.
  */
@@ -68,13 +68,6 @@ function estFayl(src: string): boolean {
 export function kartinkaZadachi(id: string): { s1: string; s2: string } | null {
   const s1 = `/images/zadanie-04/primery/${id}-180.webp`;
   const s2 = `/images/zadanie-04/primery/${id}-360.webp`;
-  return estFayl(s1) && estFayl(s2) ? { s1, s2 } : null;
-}
-
-/** Картинка карточки метода: 120 px и 240 px. */
-export function kartinkaMetoda(imya: string): { s1: string; s2: string } | null {
-  const s1 = `/images/zadanie-04/metody/${imya}-120.webp`;
-  const s2 = `/images/zadanie-04/metody/${imya}-240.webp`;
   return estFayl(s1) && estFayl(s2) ? { s1, s2 } : null;
 }
 

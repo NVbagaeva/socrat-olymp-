@@ -109,8 +109,7 @@ export interface OshibkaMetoda {
 export interface GlavaMetoda4 {
   /** Метод списка А: id из lib/veroyatnost/metody4.ts. */
   metod: string;
-  /** Картинка карточки: metody/<kartinka>-240.webp. */
-  kartinka: string;
+  /** Подпись картинки метода на карточке (MetodyKartochki4). */
   kartinkaAlt: string;
   kogda: { lead: string; slova: string[]; primer: MiniPrimer };
   /** Главная рамка — определение или формула метода. */
@@ -129,7 +128,6 @@ export const GLAVY_METODOV_4: readonly GlavaMetoda4[] = [
   /* ── 1. Подсчёт исходов ─────────────────────────────────────────── */
   {
     metod: 'klassicheskaya',
-    kartinka: 'metod-1',
     kartinkaAlt: 'Стеклянный поднос с шариками, три шарика светятся оранжевым',
     kogda: {
       lead: 'Метод подходит, когда опыт заканчивается одним из конечного числа исходов и ни у одного исхода нет преимущества перед другими.',
@@ -269,7 +267,6 @@ export const GLAVY_METODOV_4: readonly GlavaMetoda4[] = [
   /* ── 2. Игральные кости ─────────────────────────────────────────── */
   {
     metod: 'kubiki',
-    kartinka: 'metod-2',
     kartinkaAlt: 'Стеклянная и белая игральные кости на стеклянной плитке с сеткой 6 на 6',
     kogda: {
       lead: 'Метод подходит, когда в условии бросают игральную кость — один раз, дважды или две кости сразу.',
@@ -402,7 +399,6 @@ export const GLAVY_METODOV_4: readonly GlavaMetoda4[] = [
   /* ── 3. Броски монеты ───────────────────────────────────────────── */
   {
     metod: 'monety',
-    kartinka: 'metod-3',
     kartinkaAlt: 'Две стеклянные монеты и золотая монета, которая переворачивается в воздухе',
     kogda: {
       lead: 'Метод подходит, когда монету бросают несколько раз (или бросают несколько монет) и спрашивают, сколько раз выпал орёл или решка.',
@@ -533,7 +529,6 @@ export const GLAVY_METODOV_4: readonly GlavaMetoda4[] = [
   /* ── 4. Жеребьёвка и рассадка ───────────────────────────────────── */
   {
     metod: 'kruglyy-stol',
-    kartinka: 'metod-4',
     kartinkaAlt: 'Круглый стеклянный стол и шесть стульев, один стул оранжевый, соседний голубой',
     kogda: {
       lead: 'Метод подходит, когда людей случайно рассаживают, разбивают на пары или группы, а спрашивают о двух конкретных участниках.',
@@ -664,7 +659,6 @@ export const GLAVY_METODOV_4: readonly GlavaMetoda4[] = [
   /* ── 5. Через противоположное событие ───────────────────────────── */
   {
     metod: 'protivopolozhnye',
-    kartinka: 'metod-5',
     kartinkaAlt:
       'Стеклянный диск, разделённый на маленький оранжевый сектор и большую голубую часть',
     kogda: {

@@ -49,8 +49,8 @@ const ILLYUSTRACII = [
   '/images/zadanie-05/metod-',
 ];
 
-/** Картинки глав методов №4 — своей таблицей версий (METODY4_ASSET_VERSIONS). */
-const METODY4 = ['/images/zadanie-04/metody/', '/images/zadanie-04/primery/'];
+/** Картинки задач глав методов №4 — своей таблицей версий (METODY4_ASSET_VERSIONS). */
+const METODY4 = ['/images/zadanie-04/primery/'];
 
 const nextConfig: NextConfig = {
   ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
@@ -144,8 +144,8 @@ const nextConfig: NextConfig = {
     // DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts. И картинки
     // шапок разделов (public/images/shapki/): SHAPKI_ASSET_VERSIONS, адреса
     // считает серверная шапка (SectionHeader), в браузер таблица не идёт.
-    // Так же — картинки карточек и задач глав методов №4
-    // (public/images/zadanie-04/metody/, …/primery/): METODY4_ASSET_VERSIONS,
+    // Так же — картинки задач глав методов №4
+    // (public/images/zadanie-04/primery/): METODY4_ASSET_VERSIONS,
     // адреса считает серверная GlavaMetoda4.
     ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
@@ -155,6 +155,7 @@ const nextConfig: NextConfig = {
             !file.startsWith('/data/') &&
             !file.startsWith('/images/zadachi/') &&
             !file.startsWith('/images/shapki/') &&
+            !file.startsWith('/images/kak-polzovatsya/') &&
             !METODY4.some((dir) => file.startsWith(dir)) &&
             !ILLYUSTRACII.some((prefix) => file.startsWith(prefix)),
         ),
@@ -173,6 +174,14 @@ const nextConfig: NextConfig = {
     SHAPKI_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/shapki/')),
+      ),
+    ),
+    // Картинки и снимки страницы «Как пользоваться сайтом»: адреса с
+    // версией считает серверная страница (app/kak-polzovatsya/page.tsx)
+    // и передаёт готовыми — общая таблица первой загрузки не растёт.
+    HOWTO_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/kak-polzovatsya/')),
       ),
     ),
     METODY4_ASSET_VERSIONS: JSON.stringify(
