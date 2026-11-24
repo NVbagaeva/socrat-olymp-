@@ -49,13 +49,17 @@ const kb = (n) => Math.round(n / 1024);
    кнопки в строке вкладок и строчка ленивого куска в карте webpack; сама
    кнопка и код метки — отдельным куском, только пришедшим с карты) при
    запасе ~130 байт.
+   207 КБ: адреса разделов по коду — href() переводит номер хранения в
+   код раздела по таблице структуры, и этот код лежит в общих кусках
+   (layout и ещё два): сборка со входом 205,65 → 206,12 КБ (+0,47), без
+   входа — 204,94 КБ.
    HTML «Линейной функции» — 62 КБ: адреса разделов по коду
    (/zadaniya/grafiki-funkciy/ вместо /zadaniya/12/, 262 ссылки на
    странице) добавили 0,47 КБ gz — 60,35 КБ при прежнем пороге 60. */
 const BUDGET = [
-  { page: 'zadaniya/grafiki-funkciy/rational', htmlGz: 200 * 1024, scriptsGz: 206 * 1024 },
-  { page: 'zadaniya/grafiki-funkciy/quadratic', htmlGz: 260 * 1024, scriptsGz: 206 * 1024 },
-  { page: 'zadaniya/grafiki-funkciy/linear', htmlGz: 62 * 1024, scriptsGz: 206 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/rational', htmlGz: 200 * 1024, scriptsGz: 207 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/quadratic', htmlGz: 260 * 1024, scriptsGz: 207 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/linear', htmlGz: 62 * 1024, scriptsGz: 207 * 1024 },
 ];
 /* Признаки тяжёлого кода внутри скриптов первой загрузки. */
 const HEAVY = [
