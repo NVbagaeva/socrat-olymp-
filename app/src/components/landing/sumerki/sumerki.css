@@ -673,7 +673,7 @@
 .sm {
   --sumerki-text: var(--color-text);
   --sumerki-text-2: var(--color-text-secondary);
-  --sumerki-akcent-1: var(--blue-600);
+  --sumerki-akcent-1: var(--color-primary);
   --sumerki-akcent-2: var(--blue-400);
   --sumerki-steklo-kromka: var(--color-border);
 }
@@ -704,7 +704,7 @@
     radial-gradient(30% 30% at 78% 62%, rgb(240 138 60 / 0.12), transparent 70%);
 }
 .sm-chertezh * {
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
 }
 .sm-chertezh__osi {
   opacity: 0.14;
@@ -728,8 +728,8 @@
 .sm-h1__akcent {
   background: linear-gradient(
     100deg,
-    var(--blue-700) 0%,
-    var(--blue-600) 55%,
+    var(--color-primary-text) 0%,
+    var(--color-primary-fill) 55%,
     var(--blue-400) 100%
   );
   -webkit-background-clip: text;
@@ -752,7 +752,7 @@
 }
 .sm .avtor-pl__foto {
   box-shadow:
-    0 0 0 1.5px var(--white),
+    0 0 0 1.5px var(--color-surface),
     0 6px 16px -6px rgb(16 40 100 / 0.3);
 }
 .sm-kr {

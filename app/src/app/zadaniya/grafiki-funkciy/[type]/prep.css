@@ -54,7 +54,7 @@
     linear-gradient(to left, var(--color-bg) 45%, transparent) right center,
     radial-gradient(
         farthest-side at 100% 50%,
-        color-mix(in srgb, var(--grey-900) 14%, transparent),
+        color-mix(in srgb, var(--color-text) 14%, transparent),
         transparent
       )
       right center;
@@ -386,7 +386,7 @@
    и цвет решённой, иначе рамка спорила бы с заливкой. */
 .pdot.is-current {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 /* Решённая задача, на которой ученик сейчас стоит, заливается зелёным:
@@ -723,7 +723,7 @@
   background: var(--color-track);
 }
 .psol__dot.is-current {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 
 .psol__none {

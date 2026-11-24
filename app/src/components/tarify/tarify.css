@@ -623,7 +623,7 @@
 }
 .tf-tochka[aria-current='true'] span {
   width: 24px;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 
 /* Секции под плашками. */

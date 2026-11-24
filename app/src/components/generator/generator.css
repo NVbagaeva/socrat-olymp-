@@ -138,7 +138,7 @@
   padding: 4px 8px;
   border-radius: var(--radius-pill);
   background: var(--color-warning-soft);
-  color: var(--amber-700);
+  color: var(--color-status-progress-text);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -597,7 +597,7 @@
 }
 .gen-vtabs button[aria-pressed='true'] {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .gen-pv__note {
@@ -652,7 +652,7 @@
   height: 34px;
   flex: none;
   border-radius: 9px;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .gen-paper__brand {
@@ -689,7 +689,7 @@
 .gen-paper__chip {
   padding: 6px 10px;
   border-radius: var(--radius-md);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-weight: 800;
   font-size: 14px;
@@ -740,7 +740,7 @@
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-weight: 700;
   font-size: 14px;
@@ -901,7 +901,7 @@
   right: 8px;
   height: 3px;
   border-radius: 2px;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .gen-task.is-drop-before::before {
   top: -2px;
@@ -985,7 +985,7 @@
   height: 22px;
   padding: 0 6px;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-size: 12px;
   font-weight: 700;
@@ -1060,7 +1060,7 @@
   transition: transform 0.15s;
 }
 .gen-switch[aria-checked='true']::before {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .gen-switch[aria-checked='true']::after {
   transform: translateX(16px);

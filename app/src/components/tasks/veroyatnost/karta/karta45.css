@@ -36,7 +36,7 @@
   display: block;
   font-size: 2rem;
   line-height: 1.1;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-variant-numeric: tabular-nums;
 }
 .z45-ob__istochnik {

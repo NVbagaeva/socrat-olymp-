@@ -236,7 +236,7 @@ select.input {
   border-radius: 50%;
 }
 .check input:checked {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   border-color: var(--color-primary);
 }
 .check--box input:checked::after {
@@ -258,7 +258,7 @@ select.input {
   background: var(--color-text-inverse);
 }
 .check input:indeterminate {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   border-color: var(--color-primary);
 }
 .check input:indeterminate::after {
@@ -643,7 +643,7 @@ a.task-card--soon:hover {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   margin-top: 9px;
   flex: none;
 }
@@ -680,7 +680,7 @@ a.task-card--soon:hover {
   display: block;
   height: 100%;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   transition: width var(--dur-reveal) var(--ease);
 }
 .topic {
@@ -810,7 +810,7 @@ a.task-card--soon:hover {
   display: block;
 }
 .bars b.hi {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .bars span {
   font-size: 12px;
@@ -1706,7 +1706,7 @@ html[data-tabs-pending] .topic-panel,
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   margin-top: 8px;
   flex: none;
 }
@@ -1729,7 +1729,7 @@ html[data-tabs-pending] .topic-panel,
   /* Затемнение: половина непрозрачности самого тёмного тона палитры.
      Размытия нет — оно съедает производительность и ничего не даёт
      поверх и без того приглушённой страницы. */
-  background: color-mix(in srgb, var(--grey-900) 50%, transparent);
+  background: color-mix(in srgb, var(--color-text) 50%, transparent);
   z-index: 50;
 }
 /* Окно рядом с элементом, который его открыл: координаты приходят
@@ -2181,7 +2181,7 @@ a.task-card--bank:focus-visible {
   width: var(--sz-go);
   height: var(--sz-go);
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   display: grid;
   place-items: center;
   z-index: 1;
@@ -2205,13 +2205,13 @@ a.task-card--bank:focus-visible {
   right: 0;
   bottom: 0;
   height: 3px;
-  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  background: color-mix(in srgb, var(--color-primary-fill) 14%, transparent);
   pointer-events: none;
 }
 .task-card__progress > span {
   display: block;
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   transform-origin: left center;
   transition: transform var(--motion-slow) var(--ease-out);
 }
@@ -2441,7 +2441,7 @@ a.task-card--bank:focus-visible {
   font-family: var(--font-hand);
   /* Без прозрачности и на тон темнее: синий с opacity 0,8 давал на
      светлом фоне 3,9 : 1. */
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 
 /* ── адаптив компонентов ── */
@@ -2593,7 +2593,7 @@ a.task-card--bank:focus-visible {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
@@ -3299,7 +3299,7 @@ a.task-card--bank:focus-visible {
   bottom: 0.14em;
   width: 4px;
   border-radius: var(--radius-sm);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 
 /* ── Чип ─────────────────────────────────────────────────────

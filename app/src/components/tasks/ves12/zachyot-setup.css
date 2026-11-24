@@ -67,7 +67,7 @@
   font-weight: 600;
 }
 .steps__item.is-current .steps__no {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .steps__item:focus-visible {
@@ -222,7 +222,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .sostav-tile__check svg {
@@ -417,7 +417,7 @@
   transition: transform var(--dur-hover) var(--ease);
 }
 .sostav-switch.is-on {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .sostav-switch.is-on::after {
   transform: translateX(16px);
@@ -488,7 +488,7 @@
   cursor: pointer;
 }
 .seg__item.is-checked {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-weight: 600;
 }
@@ -707,7 +707,7 @@
   width: 20px;
   height: 20px;
   border-radius: 6px;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-weight: 600;
 }

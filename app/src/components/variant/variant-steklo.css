@@ -373,7 +373,7 @@
   font-weight: 600;
 }
 .var-bystro__chip--level .var-bystro__value {
-  color: var(--amber-700);
+  color: var(--color-status-progress-text);
 }
 .var-bystro__eshche {
   justify-self: center;
@@ -395,7 +395,7 @@
   font-size: 18px;
   font-weight: 600;
   text-align: left;
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
   background: var(--glass-tint-warm);
   box-shadow: var(--glass-ring-warm), var(--glass-hi);
   cursor: pointer;
@@ -408,7 +408,7 @@
   width: 22px;
   height: 22px;
   fill: none;
-  stroke: var(--terracotta);
+  stroke: var(--color-accent);
   stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -608,7 +608,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   color: #6b7588;
 }
 .okno .var-seg .var-seg__btn.var-stars.is-active {
-  color: var(--amber-600);
+  color: var(--color-warning);
 }
 .var-nastroyki > div + div {
   margin-top: var(--space-6);
@@ -720,7 +720,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   opacity: 0;
 }
 .var-podtip.is-on .var-podtip__check {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   box-shadow: none;
 }
 .var-podtip.is-on .var-podtip__check svg {
@@ -820,7 +820,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   height: 26px;
   border-radius: 50%;
   opacity: 0;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .bv__galka svg {
   width: 16px;

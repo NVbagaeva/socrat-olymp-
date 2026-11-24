@@ -234,7 +234,7 @@ body .site-head[data-compact] {
 }
 /* Главное действие группы — первая ссылка: значок залит синим. */
 .nav-drop__list li:first-child .nav-drop__ico {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 :is(.site-nav, .topnav) .nav-drop__item:hover,
@@ -499,11 +499,11 @@ body:has(.site-menu) .help-fab {
 .site-menu__hero {
   padding: var(--space-4);
   border-radius: var(--radius-xl);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .site-menu__hero:hover {
-  background: var(--color-primary-hover);
+  background: var(--color-primary-fill-hover);
 }
 .site-menu__hero .site-menu__ico {
   width: 44px;
@@ -764,7 +764,11 @@ body:has(.site-menu) .help-fab {
   }
 }
 .site-menu__row--akcent .site-menu__ico {
-  background: radial-gradient(circle at 70% 25%, var(--color-accent-soft-surface), var(--color-surface-soft));
+  background: radial-gradient(
+    circle at 70% 25%,
+    var(--color-accent-soft-surface),
+    var(--color-surface-soft)
+  );
   box-shadow: inset 0 0 0 1px var(--color-border-accent);
   color: var(--color-accent-text);
 }

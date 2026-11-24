@@ -117,7 +117,7 @@
   box-shadow: var(--glass-hi), var(--shadow-sm);
 }
 .z45-metod-knopka:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 .z45-metod-knopka:disabled {
@@ -130,11 +130,11 @@
 }
 .z45-metod-knopka.is-verno,
 .z45-metod-knopka.is-pravilny {
-  border-color: var(--emerald-200);
+  border-color: var(--color-uspeh-border);
   background: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(214 242 230 / 0.8));
 }
 .z45-metod-knopka.is-neverno {
-  border-color: var(--terracotta-200);
+  border-color: var(--color-border-accent);
   background: var(--glass-tint-warm);
 }
 .z45-metod-knopka:disabled:not(.is-verno, .is-neverno, .is-pravilny) {

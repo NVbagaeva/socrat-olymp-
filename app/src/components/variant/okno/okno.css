@@ -197,7 +197,7 @@
 }
 @media (prefers-reduced-transparency: reduce) {
   .okno__panel {
-    background: var(--white);
+    background: var(--color-surface);
   }
   .okno__fon {
     -webkit-backdrop-filter: none;

@@ -28,7 +28,7 @@ html {
     scrollbar-color: var(--scroll-thumb) var(--scroll-track);
   }
   html[data-tema='dark'] ::selection {
-    background: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    background: color-mix(in srgb, var(--color-primary-fill) 40%, transparent);
   }
 }
 /* Смена темы — плавный переход цветов 200 мс, только на время смены

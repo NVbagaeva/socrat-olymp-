@@ -107,9 +107,9 @@
   width: 34px;
   height: 34px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(160deg, var(--blue-600), var(--blue-800));
+  background: linear-gradient(160deg, var(--color-primary-fill), var(--color-primary-fill-active));
   box-shadow: var(--gloss-shadow-soft);
-  color: var(--white);
+  color: var(--color-text-inverse);
   font-size: var(--fs-caption);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -144,11 +144,11 @@
   line-height: var(--lh-caption);
   /* Не --color-text-secondary (--grey-700): на голубом блике это 3,7:1.
      --grey-800 — «второй голос» с запасом AA на обоих оттенках. */
-  color: var(--grey-800);
+  color: var(--color-text-lead);
 }
 .tipk__formula {
   overflow-x: auto;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .tipk__chipy {
   display: flex;
@@ -177,11 +177,11 @@
   gap: 6px;
   min-height: 40px;
   padding: 0 var(--space-3) 0 10px;
-  border: 1px solid var(--blue-200);
+  border: 1px solid var(--color-border-info);
   border-radius: var(--radius-pill);
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: 0 1px 2px rgb(16 40 100 / 0.06);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-size: var(--fs-caption);
   line-height: 1.2;
   font-weight: 600;
@@ -198,8 +198,8 @@
      «Главы» её отличают тон и иконка. Рамка прозрачная, а не нулевая:
      размер пилюль одинаковый. */
   border-color: transparent;
-  background: var(--blue-100);
-  color: var(--blue-800);
+  background: var(--color-surface-soft);
+  color: var(--color-primary-active);
 }
 .tipk__ik {
   flex: none;
@@ -209,11 +209,11 @@
 @media (hover: hover) {
   .tipk__ssylka:hover {
     border-color: var(--color-primary);
-    background: var(--blue-50);
+    background: var(--color-surface-info);
   }
   .tipk__ssylka--primer:hover {
     border-color: transparent;
-    background: var(--blue-200);
+    background: var(--color-border-info);
   }
 }
 .tipk__ssylka:active {

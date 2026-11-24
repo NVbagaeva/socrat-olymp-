@@ -5,9 +5,9 @@
 .d8 {
   --d8-r-card: 20px;
   --d8-r-control: 14px;
-  --d8-green: var(--emerald-600);
-  --d8-green-soft: var(--emerald-50);
-  --d8-green-border: var(--emerald-200);
+  --d8-green: var(--color-uspeh);
+  --d8-green-soft: var(--color-uspeh-soft);
+  --d8-green-border: var(--color-uspeh-border);
   display: grid;
   gap: var(--space-6);
   max-width: 1120px;
@@ -44,34 +44,34 @@
 .d8-znak--blue,
 .d8-gruppa--blue,
 .d8-ramka--blue {
-  --ton: var(--blue-600);
-  --ton-soft: var(--blue-100);
-  --ton-border: var(--blue-200);
-  --ton-text: var(--blue-700);
+  --ton: var(--color-primary);
+  --ton-soft: var(--color-surface-soft);
+  --ton-border: var(--color-border-info);
+  --ton-text: var(--color-primary-text);
 }
 .d8-znak--navy,
 .d8-gruppa--navy,
 .d8-ramka--navy {
-  --ton: var(--navy-700);
+  --ton: var(--color-text-brand);
   --ton-soft: var(--blue-glass-2);
-  --ton-border: var(--blue-300);
-  --ton-text: var(--navy-800);
+  --ton-border: var(--color-accent-soft);
+  --ton-text: var(--color-text-brand);
 }
 .d8-znak--orange,
 .d8-gruppa--orange,
 .d8-ramka--orange {
-  --ton: var(--amber-600);
-  --ton-soft: var(--amber-50);
-  --ton-border: var(--cream-200);
-  --ton-text: var(--amber-700);
+  --ton: var(--color-warning);
+  --ton-soft: var(--color-warning-soft);
+  --ton-border: var(--color-border-warm);
+  --ton-text: var(--color-status-progress-text);
 }
 .d8-znak--terra,
 .d8-gruppa--terra,
 .d8-ramka--terra {
-  --ton: var(--terracotta);
-  --ton-soft: var(--terracotta-50);
-  --ton-border: var(--terracotta-200);
-  --ton-text: var(--terracotta-700);
+  --ton: var(--color-accent);
+  --ton-soft: var(--color-accent-soft-surface);
+  --ton-border: var(--color-border-accent);
+  --ton-text: var(--color-accent-text);
 }
 
 /* ── Типографика ─────────────────────────────────────────────── */
@@ -107,7 +107,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .d8-lead {
   color: var(--color-text-secondary);
@@ -151,7 +151,7 @@
 .d8-demo-nav__ssylka.is-on {
   background: var(--gloss);
   box-shadow: var(--gloss-shadow-soft);
-  color: var(--white);
+  color: var(--color-text-inverse);
 }
 .d8-demo-lead {
   max-width: 68ch;
@@ -206,17 +206,17 @@
 .d8-btn--primary {
   background: var(--gloss);
   box-shadow: var(--gloss-shadow-soft);
-  color: var(--white);
+  color: var(--color-text-inverse);
 }
 .d8-btn--warm {
   background: var(--gloss-warm);
   box-shadow: var(--gloss-warm-shadow-soft);
-  color: var(--white);
+  color: var(--color-text-inverse);
 }
 .d8-btn--tihaya {
   background: var(--glass-bg-strong);
   box-shadow: var(--glass-ring), var(--glass-hi);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .d8-btn:hover {
   transform: translateY(-1px);
@@ -230,7 +230,7 @@
   padding: 0 var(--space-2);
   border: 0;
   background: none;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font: inherit;
   font-size: var(--fs-caption);
   font-weight: 600;
@@ -247,15 +247,15 @@
   min-height: 24px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-pill);
-  background: var(--blue-100);
-  color: var(--blue-700);
+  background: var(--color-surface-soft);
+  color: var(--color-primary-text);
   font-size: var(--fs-label);
   font-weight: 600;
   white-space: nowrap;
 }
 .d8-metka--terra {
-  background: var(--terracotta-50);
-  color: var(--terracotta-700);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
 }
 .d8-shevron {
   flex: none;
@@ -286,7 +286,7 @@ details[open] > summary .d8-shevron {
   border-radius: 50%;
   background: var(--glass-bg-strong);
   box-shadow: var(--glass-ring), var(--glass-hi);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   cursor: pointer;
 }
 .d8-kruglaya--tihaya {
@@ -307,7 +307,7 @@ details[open] > summary .d8-shevron {
   width: 56px;
   height: 56px;
   border-radius: 18px;
-  background: linear-gradient(160deg, var(--white), var(--ton-soft));
+  background: linear-gradient(160deg, var(--color-surface), var(--ton-soft));
   box-shadow:
     inset 0 0 0 1px var(--ton-border),
     var(--glass-hi),
@@ -330,17 +330,17 @@ details[open] > summary .d8-shevron {
   display: block;
   height: 6px;
   border-radius: var(--radius-pill);
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
   overflow: hidden;
 }
 .d8-polosa > span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--blue-600);
+  background: var(--color-primary-fill);
 }
 .d8-polosa--terra > span {
-  background: var(--terracotta);
+  background: var(--color-accent);
 }
 .d8-polosa--green > span {
   background: var(--d8-green);
@@ -376,7 +376,7 @@ details[open] > summary .d8-shevron {
   line-height: 1.1;
   font-weight: 640;
   font-variant-numeric: tabular-nums;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .d8-fakt span {
   font-size: var(--fs-label);
@@ -394,7 +394,7 @@ details[open] > summary .d8-shevron {
 .d8-opasno__zag {
   font-size: var(--fs-caption);
   font-weight: 700;
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
 }
 .d8-opasno ul {
   display: grid;
@@ -414,7 +414,7 @@ details[open] > summary .d8-shevron {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--terracotta);
+  background: var(--color-accent);
 }
 
 /* ── Группы и типы ───────────────────────────────────────────── */
@@ -474,7 +474,7 @@ details[open] > summary .d8-shevron {
   box-shadow: var(--glass-ring);
 }
 .d8-tip[open] {
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow:
     inset 0 0 0 1.5px var(--ton-border),
     var(--shadow-sm);
@@ -509,7 +509,7 @@ details[open] > summary .d8-shevron {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ton-text, var(--blue-700));
+  color: var(--ton-text, var(--color-primary-text));
 }
 .d8-uslovie {
   font-size: clamp(1.125rem, 0.95rem + 0.9vw, 1.5rem);
@@ -545,8 +545,8 @@ details[open] > summary .d8-shevron {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--blue-100);
-  color: var(--blue-700);
+  background: var(--color-surface-soft);
+  color: var(--color-primary-text);
   font-size: var(--fs-caption);
   font-weight: 700;
 }
@@ -558,7 +558,7 @@ details[open] > summary .d8-shevron {
   bottom: -8px;
   width: 2px;
   border-radius: 2px;
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
 }
 .d8-shag__chto {
   padding-top: 3px;
@@ -568,7 +568,7 @@ details[open] > summary .d8-shevron {
 .d8-shag__formula {
   padding: var(--space-3) var(--space-4);
   border-radius: 12px;
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   font-size: var(--fs-lg);
   overflow-x: auto;
   overflow-y: hidden;
@@ -582,7 +582,7 @@ details[open] > summary .d8-shevron {
   line-height: 1.5;
 }
 .d8-sovet b {
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
 }
 .d8-otvet {
   font-size: var(--fs-lg);
@@ -611,7 +611,7 @@ details[open] > summary .d8-shevron {
   padding: var(--space-6) var(--space-4) var(--space-4);
   border: 1.5px solid var(--ton-border);
   border-radius: var(--d8-r-card);
-  background: linear-gradient(160deg, var(--white), var(--ton-soft));
+  background: linear-gradient(160deg, var(--color-surface), var(--ton-soft));
 }
 .d8-ramka__plashka {
   position: absolute;
@@ -620,7 +620,7 @@ details[open] > summary .d8-shevron {
   padding: 3px var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--ton);
-  color: var(--white);
+  color: var(--color-text-inverse);
   font-size: var(--fs-caption);
   font-weight: 600;
 }
@@ -708,7 +708,7 @@ details[open] > summary .d8-shevron {
   border-radius: 16px;
   background: var(--gloss);
   box-shadow: var(--gloss-shadow-soft);
-  color: var(--white);
+  color: var(--color-text-inverse);
   font-weight: 700;
 }
 .d8-rezhim--terra {
@@ -765,7 +765,7 @@ details[open] > summary .d8-shevron {
   padding: 0 var(--space-4);
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: inset 0 0 0 1px var(--color-border-strong);
   color: var(--color-text);
   font: inherit;
@@ -776,19 +776,19 @@ details[open] > summary .d8-shevron {
 .d8-chip.is-on {
   background: var(--gloss);
   box-shadow: var(--gloss-shadow-soft);
-  color: var(--white);
+  color: var(--color-text-inverse);
 }
 .d8-chip__n {
   padding: 1px var(--space-2);
   border-radius: var(--radius-pill);
-  background: var(--blue-100);
-  color: var(--blue-700);
+  background: var(--color-surface-soft);
+  color: var(--color-primary-text);
   font-size: var(--fs-label);
   font-weight: 700;
 }
 .d8-chip.is-on .d8-chip__n {
   background: rgb(255 255 255 / 0.22);
-  color: var(--white);
+  color: var(--color-text-inverse);
 }
 .d8-chip--tip {
   min-height: 44px;
@@ -799,9 +799,9 @@ details[open] > summary .d8-shevron {
   text-align: left;
 }
 .d8-chip--tip.is-on {
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
   box-shadow: inset 0 0 0 1.5px var(--blue-500);
-  color: var(--blue-800);
+  color: var(--color-primary-active);
 }
 .d8-stroki {
   display: grid;
@@ -816,8 +816,8 @@ details[open] > summary .d8-shevron {
   box-shadow: var(--glass-ring);
 }
 .d8-stroka.is-on {
-  background: var(--white);
-  box-shadow: inset 0 0 0 1.5px var(--blue-300);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent-soft);
 }
 .d8-stroka__gruppa {
   display: flex;
@@ -865,7 +865,7 @@ details[open] > summary .d8-shevron {
   max-width: 100%;
   padding: 4px;
   border-radius: var(--d8-r-control);
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
 }
 .d8-seg button {
   flex: 1;
@@ -882,7 +882,7 @@ details[open] > summary .d8-shevron {
   cursor: pointer;
 }
 .d8-seg button.is-on {
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: var(--shadow-sm);
   color: var(--color-text);
   font-weight: 650;
@@ -914,7 +914,7 @@ details[open] > summary .d8-shevron {
   display: block;
   height: 4px;
   border-radius: var(--radius-pill);
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
   overflow: hidden;
 }
 .d8-panel__polosa > span {
@@ -986,7 +986,7 @@ details[open] > summary .d8-shevron {
   padding: 0 var(--space-4);
   border: 0;
   border-radius: var(--d8-r-control);
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: inset 0 0 0 1.5px var(--color-border-strong);
   color: var(--color-text);
   font: inherit;
@@ -998,14 +998,14 @@ details[open] > summary .d8-shevron {
 .d8-input:focus-visible {
   outline: none;
   box-shadow:
-    inset 0 0 0 2px var(--blue-600),
-    0 0 0 4px var(--blue-100);
+    inset 0 0 0 2px var(--color-primary),
+    0 0 0 4px var(--color-surface-soft);
 }
 .d8-ekran--verno .d8-input {
   box-shadow: inset 0 0 0 2px var(--d8-green);
 }
 .d8-ekran--neverno .d8-input {
-  box-shadow: inset 0 0 0 2px var(--terracotta);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
 }
 .d8-podskazka-knopka {
   justify-self: start;
@@ -1016,8 +1016,8 @@ details[open] > summary .d8-shevron {
   padding: 0 var(--space-3);
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--amber-50);
-  color: var(--amber-700);
+  background: var(--color-warning-soft);
+  color: var(--color-status-progress-text);
   font: inherit;
   font-size: 0.9375rem;
   font-weight: 600;
@@ -1036,7 +1036,7 @@ details[open] > summary .d8-shevron {
   border-radius: var(--d8-r-control);
   background: var(--glass-tint-warm);
   box-shadow: var(--glass-ring-warm), var(--glass-hi);
-  color: var(--amber-700);
+  color: var(--color-status-progress-text);
   line-height: 1.45;
 }
 .d8-podskazka span {
@@ -1060,7 +1060,7 @@ details[open] > summary .d8-shevron {
 .d8-verdikt--net {
   background: var(--glass-tint-warm);
   box-shadow:
-    0 0 0 1px var(--terracotta-200),
+    0 0 0 1px var(--color-border-accent),
     var(--glass-hi);
 }
 .d8-verdikt__ico {
@@ -1070,7 +1070,7 @@ details[open] > summary .d8-shevron {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  color: var(--white);
+  color: var(--color-text-inverse);
 }
 .d8-verdikt--da .d8-verdikt__ico {
   background: var(--d8-green);
@@ -1096,7 +1096,7 @@ details[open] > summary .d8-shevron {
   color: #06704f;
 }
 .d8-verdikt--net .d8-verdikt__text > b {
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
 }
 .d8-reshenie {
   display: grid;
@@ -1134,7 +1134,7 @@ details[open] > summary .d8-shevron {
   width: 96px;
   height: 96px;
   border-radius: 50%;
-  background: conic-gradient(var(--blue-600) 70%, var(--blue-100) 0);
+  background: conic-gradient(var(--color-primary-fill) 70%, var(--color-surface-soft) 0);
   position: relative;
   isolation: isolate;
 }
@@ -1144,7 +1144,7 @@ details[open] > summary .d8-shevron {
   inset: 8px;
   z-index: -1;
   border-radius: 50%;
-  background: var(--white);
+  background: var(--color-surface);
 }
 .d8-itogi__schet b {
   font-size: 2rem;
@@ -1234,7 +1234,7 @@ details[open] > summary .d8-shevron {
 }
 .d8--b .d8-shapka {
   background: var(--glass-bg-strong);
-  border-top: 4px solid var(--blue-600);
+  border-top: 4px solid var(--color-primary);
 }
 .d8--b .d8-fakty {
   display: flex;

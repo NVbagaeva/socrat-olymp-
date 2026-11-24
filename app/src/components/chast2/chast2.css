@@ -305,7 +305,7 @@ math-field.c2-math::part(menu-toggle) {
 }
 .c2-krit__ball.is-on {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .c2-krit__table {

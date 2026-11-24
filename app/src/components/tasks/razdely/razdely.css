@@ -450,7 +450,7 @@ a.razdel-karta:focus-visible .razdel-karta__go {
   stroke-linejoin: round;
 }
 .razdel-karta__check {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .razdel-karta__check svg {

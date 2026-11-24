@@ -29,7 +29,7 @@
     text-decoration: none;
   }
   .spr1p-bar__var[aria-current='true'] {
-    background: var(--color-primary);
+    background: var(--color-primary-fill);
     color: var(--color-text-inverse);
   }
   .spr1p-bar__var:focus-visible {

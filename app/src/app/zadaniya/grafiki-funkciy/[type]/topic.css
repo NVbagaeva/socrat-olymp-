@@ -1539,7 +1539,7 @@ a.tutor-card:hover {
   display: grid;
   place-items: center;
   justify-self: start;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
@@ -2189,7 +2189,7 @@ a.tutor-card:hover {
 }
 .play__preset[aria-pressed='true'] {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .play__preset:focus-visible {
@@ -2549,7 +2549,7 @@ a.tutor-card:hover {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-weight: 700;
 }
