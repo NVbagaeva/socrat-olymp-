@@ -420,7 +420,7 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
     ],
   },
   'vieta-delim-na-a': {
-    nazvanie: 'Сначала раздели на a',
+    nazvanie: 'Сначала раздели на старший коэффициент',
     kratko: 'Все коэффициенты делятся на $a$ — делим и решаем приведённое',
     pravilo: '$ax^2 + bx + c = 0 \\iff x^2 + \\frac{b}{a}x + \\frac{c}{a} = 0$',
     pochemu:
@@ -437,7 +437,7 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
     ],
   },
   'vieta-summa-koefficientov': {
-    nazvanie: 'Если a + b + c = 0',
+    nazvanie: 'Сумма коэффициентов равна нулю',
     kratko: 'Один корень — $1$ или $-1$, второй — $\\frac{c}{a}$ со знаком',
     pravilo:
       '$a + b + c = 0 \\Rightarrow x_1 = 1,\\ x_2 = \\frac{c}{a};\\quad a - b + c = 0 \\Rightarrow x_1 = -1,\\ x_2 = -\\frac{c}{a}$',
@@ -655,15 +655,15 @@ export const USTNYY = {
   konstruktor: {
     zag: 'Конструктор корней',
     lead: 'Двигай корни на прямой — мышью, пальцем или стрелками. Уравнение и парабола перестраиваются сами.',
-    x1: 'Корень x₁',
-    x2: 'Корень x₂',
+    x1: 'Первый корень',
+    x2: 'Второй корень',
     summa: 'сумма корней',
     proizvedenie: 'произведение корней',
     odin: '$c > 0$ — корни одного знака',
     raznye: '$c < 0$ — разных знаков',
     nol: '$c = 0$ — один из корней ноль',
     ravnye: '$x_1 = x_2$ — один корень',
-    grafik: (x1: string, x2: string) => `Парабола пересекает ось x в точках ${x1} и ${x2}`,
+    grafik: (x1: string, x2: string) => `Парабола пересекает ось абсцисс в точках ${x1} и ${x2}`,
   },
 
   /* Итоги */
