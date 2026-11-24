@@ -33,7 +33,7 @@ export function KartinkaZadachi({
   const s = assetUrl(src);
   const srcSet = src280 === undefined ? undefined : `${assetUrl(src280)} 280w, ${s} 560w`;
   return (
-    <figure className={clsx('kz', className)}>
+    <figure className={clsx('kartinka-zadachi', className)}>
       <img
         src={s}
         srcSet={srcSet}

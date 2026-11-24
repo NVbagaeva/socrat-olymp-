@@ -1,11 +1,13 @@
-/* Картинка-иллюстрация сюжета задачи (KartinkaZadachi.tsx). */
-.kz {
+/* Картинка-иллюстрация сюжета задачи (KartinkaZadachi.tsx). Класс —
+   kartinka-zadachi, не «kz»: .kz — «Карта задания» (karta.css), и
+   float с шириной 170 px сжимал её на страницах, где есть обе. */
+.kartinka-zadachi {
   float: right;
   width: 170px;
   margin: 0 0 var(--space-2, 8px) var(--space-4, 16px);
   shape-outside: margin-box;
 }
-.kz img {
+.kartinka-zadachi img {
   display: block;
   width: 100%;
   height: auto;
@@ -14,7 +16,7 @@
 }
 /* Телефон: над условием, по центру, поменьше — текст на всю ширину. */
 @media (max-width: 480px) {
-  .kz {
+  .kartinka-zadachi {
     float: none;
     width: 120px;
     margin: 0 auto var(--space-2, 8px);
@@ -27,7 +29,7 @@
 }
 
 @media print and (monochrome) {
-  .kz {
+  .kartinka-zadachi {
     display: none;
   }
 }
