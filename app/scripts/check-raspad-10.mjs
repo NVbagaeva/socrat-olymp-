@@ -22,7 +22,7 @@
 import { requireSrc } from './lib/load-ts.mjs';
 
 const R = requireSrc('lib/zadanie10/raspad.ts');
-const { RASPAD10: T } = requireSrc('content/teoriya10.ts');
+const { RASPAD10: T } = requireSrc('content/zhivye10.ts');
 
 const failures = [];
 let checks = 0;

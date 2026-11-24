@@ -20,7 +20,7 @@
 import { requireSrc } from './lib/load-ts.mjs';
 
 const M = requireSrc('lib/zadanie10/myach.ts');
-const { MYACH10: T } = requireSrc('content/teoriya10.ts');
+const { MYACH10: T } = requireSrc('content/zhivye10.ts');
 
 const failures = [];
 let checks = 0;

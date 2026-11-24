@@ -1,5 +1,5 @@
 import { Tex } from '@/components/ui/Tex';
-import { MYACH10 } from '@/content/teoriya10';
+import { MYACH10 } from '@/content/zhivye10';
 import { MyachLazy } from './MyachLazy';
 import '@/components/tasks/steklo/steklo.css';
 
@@ -9,7 +9,7 @@ import '@/components/tasks/steklo/steklo.css';
  * растёт график h(t), промежуток над отметкой H отмечается на оси
  * времени. Заголовок и условие набираются на сборке; сама сцена —
  * ленивый кусок myach/Scena.tsx. Числа — lib/zadanie10/myach.ts,
- * тексты — MYACH10 в content/teoriya10.ts.
+ * тексты — MYACH10 в content/zhivye10.ts.
  */
 export function Myach10() {
   const T = MYACH10;

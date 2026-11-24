@@ -12,7 +12,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
 } from 'react';
-import { RASPAD10 } from '@/content/teoriya10';
+import { RASPAD10 } from '@/content/zhivye10';
 import { motionLevel, type MotionLevel } from '@/lib/motion';
 import { typeset } from '@/lib/tex';
 import {

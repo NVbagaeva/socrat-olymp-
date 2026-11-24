@@ -30,7 +30,7 @@ const NOT_TEXT_KEYS = new Set([
      обычный текст, KaTeX не набрать. piPodskazka — подсказка о записи ответа
      под полем (FormatHint, components/tasks/otvet): тоже только текст. */
   'pravka', 'sostavleno', 'polePodskazka', 'piPodskazka',
-  /* Подписи внутри SVG живых сцен №9 (content/teoriya10.ts → MYACH10, RASPAD10):
+  /* Подписи внутри SVG живых сцен №9 (content/zhivye10.ts → MYACH10, RASPAD10):
      текст <text> в SVG, KaTeX туда не набрать — как labelX и axisLabels. */
   'podpisH', 'podpisPromezhutok', 'podpisCel', 'podpisOtvet',
 ]);

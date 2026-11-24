@@ -1,5 +1,5 @@
 import { Tex } from '@/components/ui/Tex';
-import { RASPAD10 } from '@/content/teoriya10';
+import { RASPAD10 } from '@/content/zhivye10';
 import { RaspadLazy } from './RaspadLazy';
 import '@/components/tasks/steklo/steklo.css';
 
@@ -9,7 +9,7 @@ import '@/components/tasks/steklo/steklo.css';
  * столбик массы и график m(t) в одном масштабе опускаются вдвое каждые
  * 7 минут. Заголовок и условие набираются на сборке; сама сцена —
  * ленивый кусок raspad/Scena.tsx. Числа — lib/zadanie10/raspad.ts,
- * тексты — RASPAD10 в content/teoriya10.ts.
+ * тексты — RASPAD10 в content/zhivye10.ts.
  */
 export function Raspad10() {
   const T = RASPAD10;

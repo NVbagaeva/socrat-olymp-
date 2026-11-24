@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ComponentType } from 'react';
-import { RASPAD10 } from '@/content/teoriya10';
+import { RASPAD10 } from '@/content/zhivye10';
 
 /**
  * Ленивая загрузка сцены «Распад изотопа»: код сцены, её стили и
