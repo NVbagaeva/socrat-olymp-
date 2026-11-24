@@ -4805,5 +4805,75 @@
   "scene": "Two delivery drones with parcels flying from a warehouse toward a village, one slightly ahead.",
   "alt": "Два дрона-доставщика",
   "stroka": 1019
+ },
+ {
+  "nomer": 4,
+  "key": "pirozhki-tarelka",
+  "ids": [
+   "k4-01"
+  ],
+  "size": "1024x1024",
+  "scene": "A large ceramic plate piled high with golden baked pies in a heap, the pies overlap so they cannot be counted; a few pies are slightly broken open showing fillings: meat, cabbage and red jam. Nothing else.",
+  "alt": "Тарелка с горкой пирожков: с мясом, капустой и вареньем"
+ },
+ {
+  "nomer": 4,
+  "key": "kot-v-podezde",
+  "ids": [
+   "k4-04"
+  ],
+  "size": "1024x1024",
+  "scene": "A long multi-storey apartment building seen at an angle, its row of identical entrance doors continues out of the frame on the right; at the nearest entrance a realistic ginger cat peeks out from behind a door; a faceless glass figurine owner stands nearby looking for it.",
+  "alt": "Кот выглядывает из подъезда длинного дома, хозяин ищет его"
+ },
+ {
+  "nomer": 4,
+  "key": "sad-foto",
+  "ids": [
+   "k4-06"
+  ],
+  "size": "1024x1024",
+  "scene": "A faceless glass figurine girl with a realistic camera standing in a fruit orchard among realistic apple trees, a pear tree and cherry trees; the orchard rows continue into the distance so the trees cannot be counted.",
+  "alt": "Девушка с фотоаппаратом в фруктовом саду: яблони, груша, вишни"
+ },
+ {
+  "nomer": 4,
+  "key": "zhrebiy-mars",
+  "ids": [
+   "k4-11"
+  ],
+  "size": "1024x1024",
+  "scene": "A realistic white rocket on a launch pad with the red planet Mars in the background; in front of it a glass lottery drum with small capsules, and a single realistic astronaut helmet on a stand. No people.",
+  "alt": "Ракета к Марсу, барабан жеребьёвки и шлем космонавта"
+ },
+ {
+  "nomer": 5,
+  "key": "pirozhki-paket",
+  "ids": [
+   "k5-38"
+  ],
+  "size": "1024x1024",
+  "scene": "A closed realistic brown paper bag of pies standing on a glass base, one golden pie peeking out of the top so the rest are hidden; a faceless glass figurine girl walking along a path beside it, reaching toward the bag.",
+  "alt": "Пакет с пирожками, девочка тянется за пирожком по дороге домой"
+ },
+ {
+  "nomer": 5,
+  "key": "monety-karmany",
+  "ids": [
+   "k5-55"
+  ],
+  "size": "1024x1024",
+  "scene": "Two realistic denim jacket pockets side by side, coins between them: exactly two smaller silver-coloured coins and exactly four larger golden coins, all coin faces completely blank with no digits or letters; a faceless glass hand moving some coins from one pocket to the other.",
+  "alt": "Два кармана и монеты двух видов, рука перекладывает часть монет"
+ },
+ {
+  "nomer": 5,
+  "key": "kinder-princessy",
+  "ids": [
+   "k5-60"
+  ],
+  "size": "1024x1024",
+  "scene": "Two realistic chocolate eggs in colourful foil, one unwrapped and split open with a small plastic capsule inside; next to it exactly two small different princess figurines standing on a glass shelf; a faceless glass figurine girl looking at them. No text, no logos.",
+  "alt": "Шоколадные яйца с сюрпризом и две фигурки принцесс на полке"
  }
 ]

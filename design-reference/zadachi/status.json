@@ -2190,5 +2190,46 @@
   "ok": true,
   "problemy": [],
   "popytok": 2
+ },
+ "pirozhki-paket": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "pirozhki-tarelka": {
+  "ok": false,
+  "problemy": [
+   "видно около 12 пирожков, в условии 16 — противоречит условию; не перерисовано — кончились средства OpenAI"
+  ],
+  "popytok": 1
+ },
+ "monety-karmany": {
+  "ok": false,
+  "problemy": [
+   "видно 3 серебряные и 3 золотые монеты, в условии 2 и 4; не перерисовано — кончились средства OpenAI"
+  ],
+  "popytok": 1
+ },
+ "zhrebiy-mars": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "kinder-princessy": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "sad-foto": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "kot-v-podezde": {
+  "ok": false,
+  "problemy": [
+   "дом кончается в кадре, видно 4–5 подъездов, в условии 10; не перерисовано — кончились средства OpenAI"
+  ],
+  "popytok": 1
  }
 }
