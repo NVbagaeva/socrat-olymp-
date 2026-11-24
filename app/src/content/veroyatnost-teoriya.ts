@@ -1,6 +1,7 @@
 import { assetUrl } from '@/lib/assetUrl';
 import { glavaMetoda, teoriyaYakor } from '@/lib/paths-teoriya';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
+import { METODY_5 } from '@/lib/veroyatnost/metody5';
 import { PODPUNKTY_GLAVY } from './veroyatnost4-metody-teoriya';
 
 /**
@@ -71,6 +72,16 @@ export const RAZDELY_5: readonly TeoriyaRazdel[] = [
   { id: 'koordinatnaya-pryamaya', title: 'Координатная прямая' },
   { id: 'nezavisimye', title: 'Независимые события' },
   { id: 'sovmestnye', title: 'Совместные события' },
+  /* Главы десяти ключевых методов: к ним ведут карточки вкладки
+     «Ключевые методы решения». Тексты — content/veroyatnost5-metody-teoriya.ts. */
+  ...METODY_5.map((m) => ({
+    id: glavaMetoda(m.id),
+    title: `Метод «${m.nazvanie}»`,
+    podpunkty: PODPUNKTY_GLAVY.map((p) => ({
+      id: `${teoriyaYakor(glavaMetoda(m.id))}-${p.tail}`,
+      title: p.title,
+    })),
+  })),
 ];
 
 /** Заголовок содержания и строка под ним. */

@@ -26,6 +26,10 @@ import {
 } from '@/lib/tarify/config';
 import { nomerRazdela, razdelNomera } from '@/content/struktura';
 
+/** Номера заданий на снимках — из struktura.js, не цифрой. */
+const N_VEROYATNOST = nomerRazdela('veroyatnost');
+const N_PLANIMETRIYA = nomerRazdela('planimetriya');
+
 /* ── Картинки и снимки ─────────────────────────────────────────── */
 
 /**
@@ -226,7 +230,7 @@ export const HOWTO = {
     podskazka: 'Подсказка',
     neverno: 'Пока не то. Открой подсказку — она подведёт к ответу шаг за шагом.',
     verno: 'Готово! Так устроен весь тренажёр: застрял — открой подсказку',
-    trenazher: `Открыть тренажёр №4 →`,
+    trenazher: `Открыть тренажёр №${N_VEROYATNOST} →`,
     zanovo: 'Решить заново',
     voprosy: {
       title: 'Подсказка — вопросами',
@@ -278,8 +282,8 @@ export const HOWTO = {
         text: 'Опорные задачи показывают главные приёмы — с них удобно начинать занятие.',
         ikonka: 'teoriya',
         snimok: 'teoriya',
-        snimokAlt: `Вкладка «Теория» задания №1`,
-        poyasnenie: 'Теория задания №1: всё нужное — на одной вкладке.',
+        snimokAlt: `Вкладка «Теория» задания №${N_PLANIMETRIYA}`,
+        poyasnenie: `Теория задания №${N_PLANIMETRIYA}: всё нужное — на одной вкладке.`,
         href: HOWTO_HREFS.teoriya,
       },
       {
@@ -305,8 +309,8 @@ export const HOWTO = {
         text: 'Ученик тренируется сам: подсказки-вопросы ведут к решению.',
         ikonka: 'trenazher',
         snimok: 'trenazher',
-        snimokAlt: 'Тренажёр задания №4 с открытой подсказкой',
-        poyasnenie: 'Тренажёр №4: подсказка задаёт вопрос к следующему шагу.',
+        snimokAlt: `Тренажёр задания №${N_VEROYATNOST} с открытой подсказкой`,
+        poyasnenie: `Тренажёр №${N_VEROYATNOST}: подсказка задаёт вопрос к следующему шагу.`,
         href: HOWTO_HREFS.trenazher,
       },
     ],
@@ -352,7 +356,10 @@ export const HOWTO = {
         text: 'Для самостоятельной работы ученика: подсказки-вопросы шаг за шагом ведут к решению.',
         kartinka: 'trenazher',
         kartinkaAlt: 'Стеклянная гантель и облачко с лампочкой',
-        snimok: { id: 'trenazher', alt: 'Тренажёр задания №4 с открытой подсказкой' },
+        snimok: {
+          id: 'trenazher',
+          alt: `Тренажёр задания №${N_VEROYATNOST} с открытой подсказкой`,
+        },
       },
     ],
     faqTitle: 'Частые вопросы',
@@ -414,8 +421,8 @@ export const HOWTO = {
         text: 'Коротко и по делу, с разобранными примерами.',
         ikonka: 'teoriya',
         snimok: 'teoriya',
-        snimokAlt: 'Вкладка «Теория» задания №1',
-        poyasnenie: 'Теория задания №1: коротко и с примерами.',
+        snimokAlt: `Вкладка «Теория» задания №${N_PLANIMETRIYA}`,
+        poyasnenie: `Теория задания №${N_PLANIMETRIYA}: коротко и с примерами.`,
         href: HOWTO_HREFS.teoriya,
       },
       {
@@ -423,8 +430,8 @@ export const HOWTO = {
         text: 'Это главные приёмы, на которых держится задание.',
         ikonka: 'opornye',
         snimok: 'opornye',
-        snimokAlt: 'Опорные задачи задания №1',
-        poyasnenie: 'Опорные задачи №1: главные приёмы по одному.',
+        snimokAlt: `Опорные задачи задания №${N_PLANIMETRIYA}`,
+        poyasnenie: `Опорные задачи №${N_PLANIMETRIYA}: главные приёмы по одному.`,
         href: HOWTO_HREFS.opornye,
       },
       {
@@ -432,8 +439,8 @@ export const HOWTO = {
         text: 'Застрял — открой подсказку: вопросы шаг за шагом ведут к решению.',
         ikonka: 'trenazher',
         snimok: 'trenazher',
-        snimokAlt: 'Тренажёр задания №4 с открытой подсказкой',
-        poyasnenie: 'Тренажёр №4: подсказка спрашивает, а не выдаёт ответ.',
+        snimokAlt: `Тренажёр задания №${N_VEROYATNOST} с открытой подсказкой`,
+        poyasnenie: `Тренажёр №${N_VEROYATNOST}: подсказка спрашивает, а не выдаёт ответ.`,
         href: HOWTO_HREFS.trenazher,
       },
     ],

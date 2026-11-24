@@ -611,6 +611,15 @@ jobs:
         working-directory: app
         run: pnpm test:nomera
 
+      # Главы «Ключевые методы» №4 и №5: ответы разобранных задач решаются
+      # заново перебором и точными дробями, числовые равенства в формулах
+      # вычисляются (scripts/check-metody-4.mjs, check-metody-5.mjs).
+      - name: Ответы глав ключевых методов №4 и №5
+        working-directory: app
+        run: |
+          pnpm test:metody-4
+          pnpm test:metody-5
+
   bez-sborki-3:
     name: Проверки без сборки (3)
     runs-on: ubuntu-24.04

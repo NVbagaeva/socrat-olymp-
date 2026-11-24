@@ -6,8 +6,10 @@ import { KoordinatnayaPryamaya } from './KoordinatnayaPryamaya';
 import { VidySobytiy } from './VidySobytiy';
 import { NezavisimyeSobytiya5, SovmestnyeSobytiya5 } from './Sobytiya5';
 import { GlavaMetoda4 } from './metody/GlavaMetoda4';
+import { GlavaMetoda5 } from './metody/GlavaMetoda5';
 import { glavaMetoda } from '@/lib/paths-teoriya';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
+import { METODY_5 } from '@/lib/veroyatnost/metody5';
 
 /**
  * Свёрстанные разделы теории по идентификатору из конфига.
@@ -33,6 +35,10 @@ export const telaRazdelov5: Record<string, ReactNode> = {
   'koordinatnaya-pryamaya': <KoordinatnayaPryamaya />,
   nezavisimye: <NezavisimyeSobytiya5 />,
   sovmestnye: <SovmestnyeSobytiya5 />,
+  /* Главы ключевых методов: ключ — glavaMetoda(id метода). */
+  ...Object.fromEntries(
+    METODY_5.map((m) => [glavaMetoda(m.id), <GlavaMetoda5 key={m.id} metod={m.id} />]),
+  ),
 };
 
 export { TeoriyaShell, type TeoriyaShellProps } from '@/components/tasks/teoriya/TeoriyaShell';
