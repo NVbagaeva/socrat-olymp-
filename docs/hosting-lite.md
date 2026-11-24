@@ -39,6 +39,7 @@
 | GoTrue | `supabase/gotrue:v2.196.0` | вход, регистрация, письма, JWT | 20 МиБ |
 | PostgREST | `postgrest/postgrest:v14.17` | таблицы по правилам RLS | 37 МиБ |
 | Caddy | `caddy:2.11.7-alpine` | HTTPS, маршруты, проверка `apikey`, CORS | 45 МиБ |
+| Рассыльщик (с ноября 2026) | `node:22.23.5-alpine` | уведомления: напоминания, письма, «Отписаться» (`docs/kabinet-uvedomleniya.md`) | лимит 96 МиБ, оценка около 40; замер — в сводке «Lite server» |
 
 \* Замер в GitHub Actions, прогон с обычными лимитами (раздел 4).
 

@@ -44,6 +44,7 @@ log "Окружение набора (.env.github)"
   env_line MAIL_NO_AUTH "${MAIL_NO_AUTH:-}"
   env_line MAIL_SMTP_HOST "${MAIL_SMTP_HOST:-}"
   env_line MAIL_SMTP_PORT "${MAIL_SMTP_PORT:-}"
+  env_line NOTIFIER_INTERVAL_MS "${NOTIFIER_INTERVAL_MS:-}"
   env_line SKIP_TIMERS "${SKIP_TIMERS:-}"
 } | on_server "umask 077 && cat > $REMOTE_DIR/.env.github"
 
