@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { VDomashkuOpornye5 } from '@/components/dz2/knopki';
+import { VDomashkuOpornye45 } from '@/components/dz2/knopki';
 import { notFound } from 'next/navigation';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { Opornye45Blok } from '@/components/tasks/veroyatnost/opornye/Opornye45Blok';
@@ -56,7 +56,12 @@ export default async function Opornye5BlokPage({ params }: { params: Params }) {
       </h2>
       {/* Учителю: блок целиком — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). */}
       <div className="dz2-ryad">
-        <VDomashkuOpornye5 blok={found.id} nazvanie={found.nazvanie} zadachi={found.zadachi} />
+        <VDomashkuOpornye45
+          taskNo={5}
+          blok={found.id}
+          nazvanie={found.nazvanie}
+          zadachi={found.zadachi}
+        />
       </div>
       <TabScrollOnMount />
       <Opornye45Blok

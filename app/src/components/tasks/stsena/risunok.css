@@ -27,7 +27,7 @@
 /* Синяя линия — основа мотива. */
 .rsz-sin {
   fill: none;
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -36,7 +36,7 @@
 /* Тёплая засечка — там, где у куба №3 тёплая кромка. */
 .rsz-tepl {
   fill: none;
-  stroke: var(--terracotta);
+  stroke: var(--color-accent);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -45,7 +45,7 @@
 /* Тонкая вспомогательная: оси, пунктир высоты. */
 .rsz-tonk {
   fill: none;
-  stroke: var(--blue-300);
+  stroke: var(--color-accent-soft);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -53,7 +53,7 @@
 
 /* Кружки-засечки заливаются своим цветом, а не только обводятся. */
 circle.rsz-tepl {
-  fill: var(--cream-50);
+  fill: var(--color-surface-warm);
 }
 
 /* На телефоне и планшете обложка-куб делит место с кнопкой «Можно

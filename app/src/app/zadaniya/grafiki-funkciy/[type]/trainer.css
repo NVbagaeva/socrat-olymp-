@@ -101,7 +101,7 @@
 }
 .ttask__dot.is-hinted {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 

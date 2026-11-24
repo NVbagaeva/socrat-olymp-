@@ -1257,7 +1257,11 @@ export function raskladka(layout: SheetLayoutId, withAnswers: boolean): SheetLay
 /** Описание листа по готовым блокам: лист генератора и сборник PDF. */
 export function specOfBlocks9(
   blocks: SheetBlock9[],
-  params: Pick<SheetParams9, 'theme' | 'layout' | 'kind' | 'date'> & { urok?: number },
+  params: Pick<SheetParams9, 'theme' | 'layout' | 'kind' | 'date'> & {
+    urok?: number;
+    /** Размер рисунков (sheet.js): по умолчанию крупный печатный профиль. */
+    figures?: 'large' | 'normal';
+  },
   withAnswers: boolean,
 ) {
   const layout = raskladka(params.layout, withAnswers);
@@ -1278,6 +1282,7 @@ export function specOfBlocks9(
     recap: null,
     withAnswerLine: !withAnswers,
     foot: contentSheet9.foot,
+    figures: params.figures,
   };
   const flow = blocks.flatMap((block) => flowOf(base, block));
   return {

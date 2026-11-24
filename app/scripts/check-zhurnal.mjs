@@ -243,6 +243,21 @@ const meta = { id: M.idIz('8|trenazher|r1|0|8.A|s1|base'), task_no: 8, kind: '8.
     && !/[\\/:*?"<>|]/.test(X.imyaFayla('Петров/Иван: 11"А"', 'a', 'b')), 'имя файла без запрещённых знаков');
 }
 
+/* Сложность (В-7, этап 4): одно место на все разделы — lib/zhurnal/uroven.ts.
+   Номера хранения; ЕГЭ-2027: первая часть — 1, вторая 13–17 — 2, 18–19 — 3. */
+{
+  const U = requireSrc('lib/zhurnal/uroven.ts');
+  const zhdem = {
+    1: 1, 2: 1, 3: 1, 4: 1, 5: 2, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1, 21: 1,
+    14: 2, 15: 2, 16: 2, 13: 2, 17: 2, 18: 2, 19: 3, 20: 3,
+  };
+  for (const [n, u] of Object.entries(zhdem)) {
+    check(U.urovenZadachi(Number(n)) === u, `сложность раздела хранения №${n} — ${u} (получили ${U.urovenZadachi(Number(n))})`);
+  }
+  check(U.urovenZadachi(8, true) === 2 && U.urovenZadachi(7, true) === 1, '№8 повышенного типа — 2, у других признак не влияет');
+  check(U.urovenZadachi(999) === 1, 'неизвестный раздел — 1');
+}
+
 console.log(`Журнал решения задач: ${checks} проверок, не прошло ${failures.length}.`);
 if (failures.length > 0) {
   for (const f of failures) console.error(`  НЕТ ${f}`);

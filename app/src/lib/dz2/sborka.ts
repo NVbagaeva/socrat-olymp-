@@ -7,6 +7,7 @@
  * набор задач.
  */
 
+import { urovenZadachi } from '@/lib/zhurnal/uroven';
 import { loadAdapters } from '@/lib/variant/load';
 import type { EgeNo } from '@/lib/variant/types';
 import { rngOf } from '@/lib/vychisleniya/rng';
@@ -31,6 +32,6 @@ export async function sobratZapas(
         { subtypes: null, source: 'mix', stars: null, prototype, exclude: uzhe },
         rngOf(`${seed}|${prototype}|${shag}`),
       ),
-    (z) => (taskNo === 5 || z.taskId.endsWith('|advanced') ? 2 : 1),
+    (z) => urovenZadachi(taskNo, z.taskId.endsWith('|advanced')),
   );
 }

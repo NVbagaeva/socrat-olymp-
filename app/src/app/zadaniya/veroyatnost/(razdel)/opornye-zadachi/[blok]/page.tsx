@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { VDomashkuOpornye45 } from '@/components/dz2/knopki';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { Opornye45Blok } from '@/components/tasks/veroyatnost/opornye/Opornye45Blok';
 import { navykKind } from '@/components/tasks/veroyatnost/metody';
@@ -53,10 +54,20 @@ export default async function Opornye4BlokPage({ params }: { params: Params }) {
       <h2 className="stk-h3" id="z4-opornye-blok-title">
         {found.nazvanie}
       </h2>
+      {/* Учителю: блок целиком — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). */}
+      <div className="dz2-ryad">
+        <VDomashkuOpornye45
+          taskNo={4}
+          blok={found.id}
+          nazvanie={found.nazvanie}
+          zadachi={found.zadachi}
+        />
+      </div>
       <TabScrollOnMount />
       <Opornye45Blok
         zadanie={4}
         zadachi={found.zadachi}
+        blok={found.id}
         zapomni={
           <div
             className={

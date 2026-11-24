@@ -3,11 +3,11 @@
    (styles/tokens.css), стекло — рецептура «Стеклянной сцены». */
 
 .pz {
-  --pz-blue: var(--blue-600);
+  --pz-blue: var(--color-primary);
   --pz-navy: var(--navy-800);
-  --pz-terra: var(--terracotta);
-  --pz-terra-t: var(--terracotta-700);
-  --pz-text: var(--grey-900);
+  --pz-terra: var(--color-accent);
+  --pz-terra-t: var(--color-accent-text);
+  --pz-text: var(--color-text);
   --pz-text-2: #4e5a70;
   --pz-line: rgb(31 95 208 / 0.1);
   --pz-glass: rgb(255 255 255 / 0.62);
@@ -19,7 +19,8 @@
   padding: 48px 16px 96px;
   background:
     radial-gradient(40rem 28rem at 8% 0%, rgb(31 95 208 / 0.12), transparent 70%),
-    radial-gradient(36rem 26rem at 100% 30%, rgb(245 160 74 / 0.12), transparent 70%), var(--ice);
+    radial-gradient(36rem 26rem at 100% 30%, rgb(245 160 74 / 0.12), transparent 70%),
+    var(--color-bg);
   color: var(--pz-text);
   font-family: var(--font-sans);
 }
@@ -295,7 +296,7 @@
 .pz-demo__otvet {
   padding: 10px 14px;
   border-radius: 12px;
-  background: var(--grey-50);
+  background: var(--color-surface-2);
 }
 .pz-demo__otvet--oshibka span {
   float: right;
@@ -306,7 +307,7 @@
   margin-top: 12px;
   padding: 14px;
   border-radius: 14px;
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   box-shadow: inset 0 0 0 1px rgb(31 95 208 / 0.12);
 }
 .pz-demo__hint p {
@@ -527,7 +528,7 @@
   font-size: 1.3rem;
 }
 .pz-list--uchitel {
-  background: linear-gradient(180deg, #fff, var(--cream-50));
+  background: linear-gradient(180deg, #fff, var(--color-surface-warm));
 }
 .pz-primechanie {
   margin-top: 14px;

@@ -288,7 +288,7 @@
   height: 26px;
   border-radius: var(--radius-pill);
   background: var(--color-spr-vaz);
-  color: var(--color-text-inverse);
+  color: var(--color-text-on-accent);
 }
 .prv-itog--verno .prv-itog__znak {
   background: var(--color-success);

@@ -96,7 +96,7 @@
   padding: 2px var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--m4-cvet);
-  color: var(--color-text-inverse);
+  color: var(--color-text-on-accent);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   font-weight: 600;
@@ -341,7 +341,7 @@
   gap: var(--space-4);
   padding: var(--space-5) var(--space-4);
   border-radius: var(--radius-xl);
-  background: linear-gradient(160deg, var(--blue-50, #eef5ff), var(--color-surface));
+  background: linear-gradient(160deg, var(--blue-50), var(--color-surface));
   box-shadow:
     inset 0 0 0 1px var(--color-border-info),
     0 8px 24px -18px rgba(30, 80, 160, 0.45);
@@ -411,7 +411,7 @@
   border-radius: 999px;
   background: radial-gradient(
     ellipse at 40% 30%,
-    rgba(255, 255, 255, 0.9),
+    color-mix(in srgb, var(--color-surface) 90%, transparent),
     rgba(190, 215, 250, 0.55)
   );
   box-shadow:
@@ -432,7 +432,7 @@
     #5f92d6 100%
   );
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-surface) 70%, transparent),
     0 3px 6px rgba(40, 90, 170, 0.25);
   cursor: pointer;
   transition: transform 160ms ease;
@@ -489,7 +489,7 @@
   width: 44px;
   height: 36px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.75);
+  background: color-mix(in srgb, var(--color-surface) 75%, transparent);
   box-shadow: inset 0 0 0 1px rgba(120, 165, 230, 0.45);
   color: var(--color-text-secondary);
   font-size: 0.8rem;

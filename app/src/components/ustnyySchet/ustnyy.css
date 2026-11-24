@@ -538,7 +538,7 @@
 }
 .us-chip.is-on {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .us-chip--tekst {
@@ -618,7 +618,7 @@
   transition: transform 0.15s var(--ease);
 }
 .us-vykl input:checked + .us-vykl__polzunok {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .us-vykl input:checked + .us-vykl__polzunok::after {
   transform: translateX(18px);
@@ -808,7 +808,7 @@
 }
 .us-igra__klaviatura .keypad__key--ok {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 

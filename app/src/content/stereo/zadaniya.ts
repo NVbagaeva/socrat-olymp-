@@ -8,6 +8,7 @@
  * Устройство раздела и план работ — docs/stereometry-plan.md.
  */
 
+import { TUTORS_LABEL } from '../vkladki';
 import { VKLADKA_KARTOCHKI } from '../kartochkiUi';
 import { NOMERA_S_KARTOCHKAMI } from '../kartochki/spisok';
 import { OPORNYE } from '../opornye';
@@ -25,7 +26,7 @@ export const VKLADKI_STEREO: readonly RazdelTab[] = [
   { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
   { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
-  { id: 'repetitory', label: 'Для репетиторов', tail: 'dlya-repetitorov/', icon: 'materials' },
+  { id: 'repetitory', label: TUTORS_LABEL, tail: 'dlya-repetitorov/', icon: 'materials' },
 ];
 
 /**

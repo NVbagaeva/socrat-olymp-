@@ -177,7 +177,11 @@ export function checkNoAnswersTracked(app, fail) {
     return;
   }
 
-  const marked = tracked.filter((file) =>
+  /* Официальные бланки ЕГЭ (public/blanki/<год>/) — пустые «бланки
+     ответов»: слово «otvety» в имени у них про бланк, а не про ответы
+     (то же исключение — в check-repo-files.mjs). */
+  const BLANKI = /^public\/blanki\/\d{4}\//;
+  const marked = tracked.filter((file) => !BLANKI.test(file) &&
     outputs.ANSWER_MARKS.some((mark) => path.basename(file).includes(mark)));
 
   if (marked.length) {

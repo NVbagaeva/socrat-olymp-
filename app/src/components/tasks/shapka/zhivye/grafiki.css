@@ -6,7 +6,7 @@
   stroke: none;
 }
 .zhv .zhg__rost {
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 3;
 }
 .zhv .zhg__spad {
@@ -23,11 +23,11 @@
 }
 .zhv .zhg__znak circle {
   fill: #fff;
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 2;
 }
 .zhv .zhg__znak text {
-  fill: var(--blue-700);
+  fill: var(--color-primary-text);
   font-size: 15px;
   font-weight: 700;
 }
@@ -52,8 +52,8 @@
   font-weight: 600;
 }
 .zhg__tag--rost {
-  background: var(--blue-50);
-  color: var(--blue-700);
+  background: var(--color-surface-info);
+  color: var(--color-primary-text);
 }
 .zhg__tag--spad {
   background: #f1eafd;
@@ -63,7 +63,7 @@
 /* Мяч и следы траектории (№9). */
 .zhv .zhg__myach {
   fill: url(#zhg-myach);
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 1.2;
 }
 .zhv .zhg__sled {
@@ -88,7 +88,7 @@
 }
 .zhv .zhg__busina {
   fill: url(#zhg-busina);
-  stroke: var(--blue-700);
+  stroke: var(--color-primary-text);
   stroke-width: 1.5;
 }
 .zhv .zhg__vybor {
@@ -135,17 +135,17 @@
 /* Столбики и монеты (№16). */
 .zhv .zhg__stolbik-pered {
   fill: rgb(200 222 252 / 0.75);
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 1.2;
 }
 .zhv .zhg__stolbik-bok {
   fill: rgb(130 175 240 / 0.7);
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 1.2;
 }
 .zhv .zhg__stolbik-verh {
   fill: rgb(240 248 255 / 0.9);
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 1.2;
 }
 .zhv .zhg__stolbik--posl .zhg__stolbik-bok {

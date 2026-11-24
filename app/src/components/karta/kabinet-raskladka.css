@@ -34,7 +34,7 @@
   gap: 12px;
   padding: 10px 12px;
   border-radius: 14px;
-  color: var(--navy-800);
+  color: var(--color-text-brand);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9375rem;
@@ -57,7 +57,7 @@
 }
 .kab-menu__punkt.is-tekushchiy {
   background: var(--glass-bg-strong);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
 }
 
@@ -93,7 +93,7 @@
 }
 .kab-skhemy__tekst b {
   font-size: 0.9375rem;
-  color: var(--navy-900);
+  color: var(--color-text-brand);
 }
 .kab-skhemy__tekst span {
   font-size: 0.75rem;
@@ -104,8 +104,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--terracotta-50);
-  color: var(--terracotta-700);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
   display: grid;
   place-items: center;
   font-weight: 700;

@@ -7,6 +7,7 @@
  * пособия в репозиторий не кладутся (scripts/check-repo-files.mjs).
  */
 
+import { TUTORS_LABEL } from './vkladki';
 import { plural } from '@/lib/plural';
 import { VKLADKA_KARTOCHKI } from './kartochkiUi';
 import { OPORNYE } from './opornye';
@@ -31,7 +32,7 @@ export const ZADANIE18 = {
     { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
     { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
     { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
-    { id: 'repetitory', label: 'Для репетиторов', tail: 'dlya-repetitorov/', icon: 'materials' },
+    { id: 'repetitory', label: TUTORS_LABEL, tail: 'dlya-repetitorov/', icon: 'materials' },
   ] as readonly RazdelTab[],
 } as const;
 
