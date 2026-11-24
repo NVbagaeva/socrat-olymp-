@@ -102,9 +102,6 @@
 .z19-opornaya {
   scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
 }
-.z19-zhivoy {
-  margin-top: var(--space-2);
-}
 
 /* ── Тренировочная работа ─────────────────────────────────────── */
 

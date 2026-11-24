@@ -704,8 +704,13 @@ for (const b of spisok) {
      подписи для экранного диктора (aria-label, alt, title). */
   {
     const context = await b.browser.newContext(b.ctx);
-    const page = await context.newPage();
-    for (const adres of stranitsyDlyaBrauzera) {
+    let page = await context.newPage();
+    /* Осмотр одной страницы. У evaluate своего тайм-аута нет, и WebKit
+       на CI изредка повисает на странице навсегда: прогон стоял часами.
+       Поэтому у страницы бюджет; зависшую вкладку закрываем и смотрим
+       страницу ещё раз в новой. */
+    const BUDZHET = 45000;
+    const osmotret = async (adres) => {
       await page.goto(`${BASE}/${adres}`, { waitUntil: 'load' }).catch(() => {});
       /* Карта и списки догружают данные после загрузки страницы. */
       await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
@@ -725,6 +730,27 @@ for (const b of spisok) {
           ],
         }))
         .catch(() => ({ tekst: '', ssylki: [], podpisi: [] }));
+      return vidno;
+    };
+    for (const adres of stranitsyDlyaBrauzera) {
+      let vidno = null;
+      for (let popytka = 1; popytka <= 2 && vidno === null; popytka += 1) {
+        let taymer;
+        const istek = new Promise((resolve) => {
+          taymer = setTimeout(() => resolve(null), BUDZHET);
+        });
+        vidno = await Promise.race([osmotret(adres), istek]);
+        clearTimeout(taymer);
+        if (vidno === null) {
+          console.log(
+            `  ${b.imya}: /${adres} не ответила за ${BUDZHET / 1000} с (попытка ${popytka})`,
+          );
+          void page.close().catch(() => {});
+          page = await context.newPage();
+        }
+      }
+      ok(vidno !== null, `${b.imya}: /${adres} дважды не ответила за ${BUDZHET / 1000} с`);
+      if (vidno === null) continue;
       for (const r of razdely) {
         const ssylka = vidno.ssylki.find((h) =>
           new RegExp(`^/zadaniya/(${r.hranenie}|${r.kod})(/|$)`).test(h ?? ''),
@@ -748,7 +774,11 @@ for (const b of spisok) {
         }
       }
     }
-    await context.close();
+    /* Закрытие с зависшей вкладкой тоже может не вернуться. */
+    await Promise.race([
+      context.close().catch(() => {}),
+      new Promise((resolve) => setTimeout(resolve, 10000)),
+    ]);
     console.log(`  ${b.imya}: страниц осмотрено на экране — ${stranitsyDlyaBrauzera.length}`);
   }
 }

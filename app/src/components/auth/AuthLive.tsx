@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { AUTH_UI } from '@/content/auth-ui';
@@ -8,7 +9,17 @@ import { AUTH_HREF, AUTH_IN_HEADER } from '@/lib/auth/config';
 import { initialsOf, useSessionUser } from '@/lib/auth/session';
 import type { AuthWidgetProps } from './AuthWidget';
 import { StartButton } from './StartButton';
+import { UVEDOMLENIYA_ON } from '@/lib/uvedomleniya/config';
 import './auth-widget.css';
+
+/* Колокольчик уведомлений — отдельным куском и только при флаге: этот
+   модуль попадает в первую загрузку всех страниц (меню сайта берёт из него
+   LogoutItem), и статический импорт потянул бы туда тексты уведомлений. */
+const Kolokolchik = UVEDOMLENIYA_ON
+  ? dynamic(() => import('@/components/uvedomleniya/Kolokolchik').then((m) => m.Kolokolchik), {
+      ssr: false,
+    })
+  : null;
 
 /**
  * Живой блок аккаунта: «Войти» или кружок с инициалами и меню. Отдельный
@@ -136,45 +147,49 @@ export function LiveWidget({ variant, className }: AuthWidgetProps) {
   const label = user.name !== '' ? user.name : user.email;
 
   return (
-    <div className={clsx('auth-widget', `auth-widget--${variant}`, className)} ref={root}>
-      <button
-        type="button"
-        ref={button}
-        className="auth-widget__button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={open ? menuId : undefined}
-        aria-label={`${AUTH_UI.userMenu}: ${label}`}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <span className="avatar auth-widget__avatar" aria-hidden="true">
-          {initialsOf(user)}
-        </span>
-      </button>
-      {open ? (
-        <div
-          className="auth-widget__menu"
-          id={menuId}
-          ref={menu}
-          role="menu"
-          aria-label={AUTH_UI.userMenu}
+    <>
+      {/* Колокольчик уведомлений (docs/kabinet-uvedomleniya.md) — за флагом. */}
+      {Kolokolchik === null ? null : <Kolokolchik />}
+      <div className={clsx('auth-widget', `auth-widget--${variant}`, className)} ref={root}>
+        <button
+          type="button"
+          ref={button}
+          className="auth-widget__button"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-controls={open ? menuId : undefined}
+          aria-label={`${AUTH_UI.userMenu}: ${label}`}
+          onClick={() => setOpen((value) => !value)}
         >
-          <p className="auth-widget__who" role="presentation">
-            <span className="auth-widget__name">{label}</span>
-            {user.name !== '' ? <span className="auth-widget__email">{user.email}</span> : null}
-          </p>
-          <Link
-            className="auth-widget__item"
-            role="menuitem"
-            href={AUTH_HREF.kabinet}
-            onClick={close}
+          <span className="avatar auth-widget__avatar" aria-hidden="true">
+            {initialsOf(user)}
+          </span>
+        </button>
+        {open ? (
+          <div
+            className="auth-widget__menu"
+            id={menuId}
+            ref={menu}
+            role="menu"
+            aria-label={AUTH_UI.userMenu}
           >
-            {AUTH_UI.kabinet}
-          </Link>
-          <LogoutItem onDone={close} role="menuitem" />
-        </div>
-      ) : null}
-    </div>
+            <p className="auth-widget__who" role="presentation">
+              <span className="auth-widget__name">{label}</span>
+              {user.name !== '' ? <span className="auth-widget__email">{user.email}</span> : null}
+            </p>
+            <Link
+              className="auth-widget__item"
+              role="menuitem"
+              href={AUTH_HREF.kabinet}
+              onClick={close}
+            >
+              {AUTH_UI.kabinet}
+            </Link>
+            <LogoutItem onDone={close} role="menuitem" />
+          </div>
+        ) : null}
+      </div>
+    </>
   );
 }
 

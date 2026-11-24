@@ -29,12 +29,16 @@ type Razmery = Readonly<Record<string, readonly [number, number]>>;
 
 /** Размеры обрезанных кадров по методам. */
 const RAZMERY: Readonly<Record<Zadanie, Razmery>> = {
+  /* У №4 карточки — ссылки на главы теории (MetodyKartochki4), картинка
+     в той же плашке, что у №5. Исходники — design-reference/zadanie-04/
+     metod-N.png (те же рисунки, что metody/metod-N-*.webp), обрезанные
+     по контуру. */
   4: {
-    klassicheskaya: [1085, 574],
-    kubiki: [993, 657],
-    monety: [801, 686],
-    'kruglyy-stol': [1027, 569],
-    protivopolozhnye: [827, 726],
+    klassicheskaya: [963, 727],
+    kubiki: [998, 691],
+    monety: [863, 856],
+    'kruglyy-stol': [1028, 809],
+    protivopolozhnye: [917, 736],
   },
   5: {
     nesovmestnye: [1019, 562],

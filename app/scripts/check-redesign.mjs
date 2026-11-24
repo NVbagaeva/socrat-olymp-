@@ -326,6 +326,17 @@ const SODERZHANIE = {
  * образец уже содержит эту версию.
  */
 const ODOBRENO = {
+  /* №11, одобрено владельцем 24.11.2026: «экскурсии» живых графиков —
+     кнопка «Показать» проходит ключевые случаи. Зафиксированы версии
+     четырёх файлов; последующие изменения снова проверяются. */
+  'app/src/components/tasks/theory/quadratic/ParabolaPlayground.tsx':
+    '5b3929097827a71c53ddafa0069547d8967ca6aa5bdd496931a9f7a90d4a22ca',
+  'app/src/components/tasks/theory/live/TrigPlayground.tsx':
+    '13218753ba971f53a6d732d026d2c516214c25b70cdb7cae74eab4cb692befbb',
+  'app/src/components/tasks/theory/live/LogPlayground.tsx':
+    '473119daba3b85363e32884e921875fe871ae97dacec81ecee3dc7607ec94d9d',
+  'app/src/components/tasks/theory/live/ExpPlayground.tsx':
+    '2a5201561181e9a332ac42ac236f857af148cd0bcc64dad2857f73e2639cbd9c',
   /* №9, одобрено владельцем 23.11.2026: русское объяснение физического смысла первой и второй производных и схемы к первообразной. */
   'app/src/content/theoryProizvodnaya.ts':
     'e3fd8b0581eaebd337d026f49ccbc3b3cf31def6df6c6fb4d35adc87aa58ec39',
@@ -338,10 +349,19 @@ const ODOBRENO = {
     '907dbcd064a3de13df1e084cce118d768db30e5ba7fc1aa97b26999bc6bf43ca',
   'app/src/components/tasks/veroyatnost/teoriya/Sobytiya5.tsx':
     'c4e1e698a7171c555ae3a7deb27e17c82670895ce0bccdff490fd29f7816003d',
+  /* №4: одобрено владельцем 24.11.2026 (PR #476) — главы теории по пяти
+     ключевым методам: тексты, разобранные задачи, интерактивы. Условия и
+     ответы банка не менялись; ответы глав проверяет test:metody-4. */
   'app/src/components/tasks/veroyatnost/teoriya/index.tsx':
-    'bc9a702586381afad4fb9aa3d994c8b7dd95e011057cce7efb9f84af5c92c2c8',
+    'df109eaf8e55d0e35e0bc1f06fc77bc487bf38f90d0d7bded5a4daa6f5970aa7',
   'app/src/content/veroyatnost-teoriya.ts':
-    '7421149ede2c6dbaad982983bbf9da08344b08ecbfeaeb6b5ae1dec51b4452ad',
+    '747a16e4e289942c12b1ee15dfc1750520f36b7949b95b37ce3076e899b53fef',
+  'app/src/components/tasks/veroyatnost/teoriya/metody/GlavaMetoda4.tsx':
+    '8eecfada9d777a283eb5f8eea372620d80b2c76c077d0115bdd885f6da23f25b',
+  'app/src/components/tasks/veroyatnost/teoriya/metody/Interaktivy4.tsx':
+    '53b9af1550d27f7bda47498a22e088da5c128e7d96ecdb9abeca7de0c801f134',
+  'app/src/components/tasks/veroyatnost/teoriya/metody/metody4.css':
+    'd57429114e3e74153e2f62d5b72d360d27531206facc1022f443e031db5cabfe',
   /* №1, одобрено владельцем 19.11.2026: подсказки (PR #451 — чертёж в
      шаге, буквы, реестр фактов «Показать свойство», тексты вопросов и
      решений) и «чертёж — схема, а не масштабный рисунок» (PR #452 —
@@ -651,7 +671,8 @@ if (puti === undefined) {
   const plohie = [];
   for (const stroka of neodobreno) {
     const [status, file] = stroka.split('\t');
-    const opisanie = /\.md$/.test(file);
+    /* Описания (README) и данные (JSON) — текстом. */
+    const opisanie = /\.(md|json)$/.test(file);
     if (status !== 'M' || !(opisanie || /\.(ts|tsx|js|mjs)$/.test(file))) {
       plohie.push(stroka);
       continue;
@@ -663,7 +684,7 @@ if (puti === undefined) {
         maxBuffer: 256 * 1024 * 1024,
       });
       const novyy = fs.readFileSync(path.join(REPO, file), 'utf8');
-      /* Описание (README) — текстом: та же запись после приведения адресов. */
+      /* Описание и данные — текстом: та же запись после приведения адресов. */
       const { ravno, gde } = opisanie
         ? { ravno: toZheTekst(staryy, novyy), gde: 'текст описания изменён' }
         : toZheSoderzhanie(staryy, novyy, file, STRUKTURA_OBRAZCA);

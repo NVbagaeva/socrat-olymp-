@@ -3,11 +3,12 @@ import { OPORNYE } from '@/content/opornye';
 import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
-import { SHIRINY_KARTINOK, kartinkaMetoda } from '@/lib/veroyatnost/metody-kartinki';
-import { illyustraciyaUrl } from '@/lib/illyustraciiUrl';
+import { kartinkaMetoda } from '@/lib/veroyatnost/metody-kartinki';
 import { bank4Pool, bank5Pool, prep4Pool, prep5Pool } from '@/lib/veroyatnost/pool';
 import type { Metod } from '@/lib/veroyatnost/tipologiya';
 import { MetodyKartochki, type KartochkaMetoda } from './MetodyKartochki';
+import { KartinkaMetodaImg } from './KartinkaMetodaImg';
+import { MetodyKartochki4 } from './MetodyKartochki4';
 import { navykiMetodov, yarlyki } from './navyki';
 import { Tex } from './Tex';
 import { razdelBase } from '@/lib/paths';
@@ -44,33 +45,6 @@ const OPORNYE_VMESTO_TRENAZHERA: Record<Zadanie, Partial<Record<string, string>>
 
 export interface KlyuchevyeMetodyProps {
   zadanie: Zadanie;
-}
-
-/**
- * Иллюстрация метода: WebP двух ширин и запасной PNG. Картинка
- * декоративная (alt пустой): название метода рядом, текстом.
- */
-function KartinkaMetodaImg({ zadanie, id }: { zadanie: Zadanie; id: string }) {
-  const k = kartinkaMetoda(zadanie, id);
-  if (k === undefined) return null;
-  const put = (w: number, ext: string) => illyustraciyaUrl(`${k.put}-${w}.${ext}`);
-  return (
-    <picture>
-      <source
-        type="image/webp"
-        srcSet={SHIRINY_KARTINOK.map((w) => `${put(w, 'webp')} ${w}w`).join(', ')}
-        sizes="220px"
-      />
-      <img
-        src={put(SHIRINY_KARTINOK[1], 'png')}
-        width={k.width}
-        height={k.height}
-        alt=""
-        loading="lazy"
-        decoding="async"
-      />
-    </picture>
-  );
 }
 
 function kartochki(zadanie: Zadanie): KartochkaMetoda[] {
@@ -115,7 +89,9 @@ export function KlyuchevyeMetody({ zadanie }: KlyuchevyeMetodyProps) {
       <header className="vmetody__head">
         <h2 className="t-h2 vmetody__title">{METODY_KARTOCHKI.title}</h2>
       </header>
-      <MetodyKartochki items={kartochki(zadanie)} />
+      {/* У №4 карточка ведёт в главу метода во вкладке «Теория»;
+          у №5 — прежняя модалка метода. */}
+      {zadanie === 4 ? <MetodyKartochki4 /> : <MetodyKartochki items={kartochki(zadanie)} />}
     </div>
   );
 }

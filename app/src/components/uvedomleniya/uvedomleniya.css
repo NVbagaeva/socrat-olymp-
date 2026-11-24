@@ -1,0 +1,204 @@
+/* Уведомления (docs/kabinet-uvedomleniya.md, PR 3б). Только токены. */
+
+/* Колокольчик: вид — общий .bell дизайн-системы; счётчик — оранжевый. */
+.kolokolchik {
+  margin-right: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.kolokolchik:hover {
+  background: var(--color-surface-soft);
+}
+.kolokolchik:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.kolokolchik__schet {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-on-brand);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--color-surface);
+}
+
+/* Страница */
+.uved {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+.uved h1 {
+  margin: 0;
+}
+.uved-vkladki {
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+.uved-vkladki__vkladka {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.uved-vkladki__vkladka[aria-selected='true'] {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+.uved-shapka {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+.uved-spisok {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.uved-stroka {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+}
+a.uved-stroka:hover {
+  border-color: var(--color-border-hover);
+}
+.uved-stroka.is-novoe {
+  border-color: var(--color-border-info);
+  background: var(--color-surface-info);
+}
+.uved-stroka__znak {
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+}
+.uved-stroka.is-novoe .uved-stroka__znak {
+  background: var(--color-primary);
+}
+.uved-stroka.is-novoe.is-vazhnoe .uved-stroka__znak {
+  background: var(--color-accent);
+}
+.uved-stroka__tekst {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.uved-stroka__kogda {
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+}
+
+/* Настройки */
+.uved-nastroyki {
+  display: grid;
+  gap: var(--space-5);
+}
+.uved-nastroyki fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.uved-nastroyki legend {
+  margin-bottom: var(--space-2);
+  font-weight: 700;
+}
+.uved-nastroyki p {
+  margin: 0;
+}
+.uved-tablica {
+  width: 100%;
+  border-collapse: collapse;
+}
+.uved-tablica th,
+.uved-tablica td {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  font-weight: 400;
+}
+.uved-tablica thead th {
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+}
+.uved-tablica td {
+  width: 64px;
+  text-align: center;
+}
+.uved-tablica td input {
+  width: 22px;
+  height: 22px;
+}
+.uved-ryad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+}
+.uved-pole {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+.uved-pole--vremya {
+  width: 9em;
+}
+.uved-galka {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 44px;
+}
+.uved-galka input {
+  width: 20px;
+  height: 20px;
+}
+.uved-oshibka,
+.uved-uspeh,
+.uved-zametka {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md, 12px);
+}
+.uved-oshibka {
+  background: var(--color-error-soft);
+}
+.uved-uspeh {
+  background: var(--color-success-soft);
+}
+.uved-zametka {
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-accent-soft-surface);
+}

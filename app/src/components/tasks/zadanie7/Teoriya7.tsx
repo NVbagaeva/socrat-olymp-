@@ -28,7 +28,7 @@ import { Irracionalnye7 } from './Irracionalnye7';
 import { ShagiResheniya } from '../steklo';
 import '../teoriya/teoriya-steklo.css';
 import { schitaemSUmom, shagiIzResheniya } from './shagi7';
-import { ZhivoyKrug7 } from './ZhivoyKrug7';
+import { ZhivoyKrug6 } from '@/components/zhivye/krug6/Krug6';
 
 export { GdeNaEge7 };
 
@@ -224,7 +224,7 @@ export function Blok7({
     case 'irracionalnye':
       return <Irracionalnye7 {...(trenazher ? { trenazher } : {})} />;
     case 'krug':
-      return bezPrimerov ? null : <ZhivoyKrug7 />;
+      return bezPrimerov ? null : <ZhivoyKrug6 />;
     case 'kartochki':
       return (
         <div className="z7-kartochki">
