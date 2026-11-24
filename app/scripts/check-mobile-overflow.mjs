@@ -72,6 +72,10 @@ function vseStranitsy() {
         if (e.name === '_next') continue;
         obhod(p);
       } else if (e.name === 'index.html') {
+        /* Заглушка «Страница переехала» сразу уводит на новый адрес —
+           своего содержимого у неё нет, а сама новая страница в обходе
+           есть. Мерить её незачем: замер шёл бы по чужой странице. */
+        if (/<meta\s+http-equiv="refresh"/i.test(fs.readFileSync(p, 'utf8'))) continue;
         const rel = path.relative(OUT, dir).split(path.sep).join('/');
         puti.push(rel === '' ? '/' : `/${rel}/`);
       }
