@@ -6,6 +6,7 @@
  */
 
 import { getClient } from '@/lib/auth/client';
+import type { DomashkaUchenika, ItogProverki, MoyaDomashka, Progress, ShagRazbora } from './uchenik';
 
 export class Dz2Error extends Error {
   constructor(
@@ -110,3 +111,14 @@ export async function dz2Chernovik(id: string): Promise<{
     items: (items.data ?? []) as Dz2ElementStroka[],
   };
 }
+
+/* ── Ученик (PR 2в): только функции, ключей не читает ───────────── */
+
+export const dz2Moi = () => rpc<MoyaDomashka[]>('dz2_moi', {});
+export const dz2Open = (id: string) => rpc<DomashkaUchenika>('dz2_open', { p_id: id });
+export const dz2Check = (task: string, answer: string, seconds: number) =>
+  rpc<ItogProverki>('dz2_check', { p_task: task, p_answer: answer, p_seconds: Math.max(0, Math.round(seconds)) });
+export const dz2Hint = (task: string, step: number) =>
+  rpc<{ step: ShagRazbora | null }>('dz2_hint', { p_task: task, p_step: step });
+export const dz2Mark = (item: string, done: number) => rpc<Progress>('dz2_mark', { p_item: item, p_done: done });
+export const dz2Submit = (id: string) => rpc<{ status: 'submitted' | 'late' }>('dz2_submit', { p_id: id });

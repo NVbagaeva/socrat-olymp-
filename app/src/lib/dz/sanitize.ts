@@ -21,6 +21,10 @@ const TAGS = new Set([
   'sub',
   'small',
   'div',
+  // Списки шагов разбора (решение задачи «Собрать вариант» в новой выдаче ДЗ).
+  'ol',
+  'ul',
+  'li',
   // MathML.
   'math',
   'semantics',
