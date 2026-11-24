@@ -13,7 +13,7 @@ import { YAKOR_11, type ChastRazdela11 } from '@/lib/zadanie11/teoriya-yakorya';
 import type { LifehackId } from '@/lib/zadanie11/types';
 import { IkonkaRazdela, MiniKartinka, Piktogramma, tsvetRazdela, Zvezdy } from './Piktogrammy';
 import { Tablitsa11 } from './Tablitsa11';
-import { illustrationRamka } from '@/components/ui/Illustration';
+import { illustrationRamka } from '@/components/ui/illustrationRamka';
 import '../teoriya/teoriya-steklo.css';
 
 /** Формула крупно (display), набранная на сервере. */

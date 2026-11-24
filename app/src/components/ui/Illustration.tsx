@@ -1,6 +1,9 @@
 import { clsx } from 'clsx';
 import type { CSSProperties } from 'react';
 import './illustration.css';
+import type { IllustrationVariant } from './illustrationRamka';
+
+export { illustrationRamka, type IllustrationVariant } from './illustrationRamka';
 
 /**
  * Единая система размеров картинок-иллюстраций.
@@ -29,8 +32,6 @@ import './illustration.css';
  * он так и помечается. Набор ширин (картинки, собранные скриптами в
  * нескольких размерах) — sources/srcSet + sizes, как у <picture>.
  */
-
-export type IllustrationVariant = 'header' | 'hero' | 'section' | 'inline' | 'task';
 
 /** Наибольшие ширина и высота варианта на компьютере, px. */
 export const ILLUSTRATION_NORMA: Record<IllustrationVariant, { w: number; h: number }> = {
@@ -170,17 +171,4 @@ export function Illustration({
       />
     </picture>
   );
-}
-
-/**
- * Рамка нормы для картинки, которую рисует сам компонент (next/image,
- * своя разметка <picture>): пропсы на обёртку — вариант для проверки и
- * потолок размера из illustration.css. Своя ширина картинки остаётся,
- * больше нормы она не станет ни на каком экране.
- */
-export function illustrationRamka(variant: IllustrationVariant, className?: string) {
-  return {
-    'data-ill': variant,
-    className: clsx('illu-r', `illu--${variant}`, className),
-  } as const;
 }

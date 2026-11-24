@@ -2,7 +2,7 @@ import { clsx } from 'clsx';
 import { LinkPoNamereniyu } from './LinkPoNamereniyu';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { Badge, type BadgeTone } from './Badge';
-import { illustrationRamka } from './Illustration';
+import { illustrationRamka } from './illustrationRamka';
 
 export type TaskStatusTone = 'neutral' | 'solved' | 'failed';
 

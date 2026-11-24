@@ -7,7 +7,7 @@ import { Details } from '@/components/ui';
 import { HOWTO, type HowtoTabContent } from '@/content/kakPolzovatsya';
 import { howtoHref, type HowtoTab } from '@/content/onboarding';
 import { requestIntro, startTour } from '@/lib/onboarding';
-import { illustrationRamka } from '@/components/ui/Illustration';
+import { illustrationRamka } from '@/components/ui/illustrationRamka';
 import './howto.css';
 
 /** Вкладка по умолчанию, когда в адресе её нет. */
