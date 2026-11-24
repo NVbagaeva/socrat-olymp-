@@ -12,7 +12,7 @@ import {
   type RamkaPravila,
   type ZadachaMetoda,
 } from '@/content/veroyatnost4-metody-teoriya';
-import { assetUrl } from '@/lib/assetUrl';
+import { withVersion } from '@/lib/assetUrl';
 import { katex } from '@/lib/graph/katex';
 import { TEORIYA_TAIL, ZADANIYA, glavaMetoda, href, teoriyaYakor } from '@/lib/paths';
 import { PODGOTOVKA_4 } from '@/lib/veroyatnost/index';
@@ -42,6 +42,17 @@ import './metody4.css';
  * --color-spr-*): определение, формула, алгоритм, пример, типичная
  * ошибка, лайфхак. Вся математика набирается KaTeX на сборке.
  */
+
+/**
+ * Адрес картинки главы с версией. Картинки карточек и задач — в своей
+ * таблице версий (METODY4_ASSET_VERSIONS, next.config.ts): компоненты
+ * серверные, и общая таблица первой загрузки (assetUrl) от них не растёт.
+ */
+let metodyVersii: Record<string, string> | null = null;
+export function kartinkaUrl(src: string): string {
+  metodyVersii ??= JSON.parse(process.env.METODY4_ASSET_VERSIONS ?? '{}') as Record<string, string>;
+  return withVersion(src, metodyVersii);
+}
 
 /** Картинка лежит в public (смотрится на сборке): нет файла — нет и картинки. */
 function estFayl(src: string): boolean {
@@ -144,8 +155,8 @@ function Zadacha({ z, nomer }: { z: ZadachaMetoda; nomer: number }) {
         {kartinka === null ? null : (
           <img
             className="m4g-zadacha__kartinka"
-            src={assetUrl(kartinka.s1)}
-            srcSet={`${assetUrl(kartinka.s1)} 180w, ${assetUrl(kartinka.s2)} 360w`}
+            src={kartinkaUrl(kartinka.s1)}
+            srcSet={`${kartinkaUrl(kartinka.s1)} 180w, ${kartinkaUrl(kartinka.s2)} 360w`}
             sizes="(max-width: 639px) 120px, 180px"
             width={180}
             height={180}

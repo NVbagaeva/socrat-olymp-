@@ -43,6 +43,9 @@ const ofertaPage =
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 
+/** Картинки глав методов №4 — своей таблицей версий (METODY4_ASSET_VERSIONS). */
+const METODY4 = ['/images/zadanie-04/metody/', '/images/zadanie-04/primery/'];
+
 const nextConfig: NextConfig = {
   ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
@@ -110,7 +113,9 @@ const nextConfig: NextConfig = {
     PROGRESS_UCHENIK_ON: process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1' ? '1' : '0',
     // Новая выдача ДЗ (docs/kabinet-dz2.md): «1» или «0» всегда; только при входе.
     DZ2_ON:
-      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' && process.env.NEXT_PUBLIC_DZ2 === '1' ? '1' : '0',
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' && process.env.NEXT_PUBLIC_DZ2 === '1'
+        ? '1'
+        : '0',
     DZ2_RAZDELY: process.env.NEXT_PUBLIC_DZ2_RAZDELY || '5,8',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
@@ -120,19 +125,28 @@ const nextConfig: NextConfig = {
     // DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts. И картинки
     // шапок разделов (public/images/shapki/): SHAPKI_ASSET_VERSIONS, адреса
     // считает серверная шапка (SectionHeader), в браузер таблица не идёт.
+    // Так же — картинки карточек и задач глав методов №4
+    // (public/images/zadanie-04/metody/, …/primery/): METODY4_ASSET_VERSIONS,
+    // адреса считают серверные GlavaMetoda4 и MetodyKartochki4.
     ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(
           ([file]) =>
             !file.startsWith('/intro/') &&
             !file.startsWith('/data/') &&
-            !file.startsWith('/images/shapki/'),
+            !file.startsWith('/images/shapki/') &&
+            !METODY4.some((dir) => file.startsWith(dir)),
         ),
       ),
     ),
     SHAPKI_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/shapki/')),
+      ),
+    ),
+    METODY4_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) => METODY4.some((dir) => file.startsWith(dir))),
       ),
     ),
     INTRO_ASSET_VERSIONS: JSON.stringify(

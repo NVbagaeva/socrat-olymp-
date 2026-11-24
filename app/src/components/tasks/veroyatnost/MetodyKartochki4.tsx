@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import { kartinkaMetoda } from './teoriya/metody/GlavaMetoda4';
+import { kartinkaMetoda, kartinkaUrl } from './teoriya/metody/GlavaMetoda4';
 import { GLAVA_METODA, glavaPoMetodu } from '@/content/veroyatnost4-metody-teoriya';
-import { assetUrl } from '@/lib/assetUrl';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 import { teoriyaMetodaHref45 } from '@/lib/veroyatnost/trening/links';
 import './metody-kartochki4.css';
@@ -33,8 +32,8 @@ export function MetodyKartochki4() {
               {kartinka === null || glava === undefined ? null : (
                 <img
                   className="m4k__kartinka"
-                  src={assetUrl(kartinka.s1)}
-                  srcSet={`${assetUrl(kartinka.s1)} 120w, ${assetUrl(kartinka.s2)} 240w`}
+                  src={kartinkaUrl(kartinka.s1)}
+                  srcSet={`${kartinkaUrl(kartinka.s1)} 120w, ${kartinkaUrl(kartinka.s2)} 240w`}
                   sizes="(max-width: 767px) 64px, 96px"
                   width={96}
                   height={96}
