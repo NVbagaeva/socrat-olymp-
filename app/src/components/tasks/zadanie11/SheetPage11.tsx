@@ -10,6 +10,7 @@ import { buildDocument } from '@/lib/sheet/sheet.js';
 import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery11, sheetSpec11, sobratList, type VidLista } from '@/lib/zadanie11/sheet11';
+import { PARAM_KARTINKI, kartinkiNaListe, listSKartinkami } from '@/lib/zadanie11/kartinkiLista';
 import type { UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
 import { pechatat } from '@/lib/sheet/pechat';
 
@@ -66,16 +67,24 @@ export function SheetPage11({ vid, bank }: { vid: VidLista; bank: UslovieBanka[]
         : Promise.resolve(undefined);
     void qr.then((svg) => {
       if (!alive) return;
+      /* «Картинки к задачам» (ki=1, lib/zadanie11/kartinkiLista.ts): к
+         условиям собранного листа; комплект сверяется по листу без них. */
+      const kartinki = query.get(PARAM_KARTINKI) === '1' && kartinkiNaListe(params);
+      const sobrat = () => {
+        const l = sobratList(params, bank);
+        return kartinki ? listSKartinkami(l, bank) : l;
+      };
       const built = sheetSpec11(params, sobratList(params, bank), vid, svg);
+      const sKart = kartinki ? sheetSpec11(params, sobrat(), vid, svg) : built;
       /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
       const kit = checkKitSheet(query, '11', vid === 'uchenik' ? 'student' : 'teacher', built);
       /* Место для решения (sp=) — только у листа ученика. */
       const space = spaceOfQuery(query);
       const printed =
         vid === 'vse'
-          ? vseWithSpace(built, space)
-          : sheetWithSpace(built, space, vid === 'uchenik', () =>
-              sheetSpec11(params, sobratList(params, bank), 'uchitel', svg),
+          ? vseWithSpace(sKart, space)
+          : sheetWithSpace(sKart, space, vid === 'uchenik', () =>
+              sheetSpec11(params, sobrat(), 'uchitel', svg),
             );
       const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
       import('@/lib/sheet/paginate.js').then(() => {
