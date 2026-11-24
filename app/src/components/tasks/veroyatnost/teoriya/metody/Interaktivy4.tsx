@@ -168,8 +168,10 @@ interface VariantDereva {
   formuly: string[];
 }
 
-const SHAG_X = 120;
-const SHAG_Y = 40;
+/* Дерево растёт сверху вниз: уровень — бросок, лист — цепочка. */
+const SHAG_UROVNYA = 76;
+const SHAG_LISTA = 44;
+const BUKVA_V_LISTE = 17;
 
 export function Derevo4({ varianty }: { varianty: VariantDereva[] }) {
   const [n, setN] = useState(varianty[0]?.n ?? 2);
@@ -179,25 +181,36 @@ export function Derevo4({ varianty }: { varianty: VariantDereva[] }) {
     return null;
   }
   const listev = v.cepochki.length;
-  const shirina = 40 + n * SHAG_X + 90;
-  const vysota = listev * SHAG_Y + 10;
-  /* Узел уровня k с префиксом p: y — середина его листьев. */
-  const yUzla = (k: number, indeks: number) => {
+  const yUrovnya = (k: number) => 16 + k * SHAG_UROVNYA;
+  /* Лист — капсула с буквами цепочки столбиком, сверху вниз. */
+  const vysotaLista = n * BUKVA_V_LISTE + 12;
+  const shirina = listev * SHAG_LISTA + 16;
+  const vysota = yUrovnya(n) + vysotaLista + 8;
+  /* Узел уровня k с номером indeks: x — середина его листьев. */
+  const xUzla = (k: number, indeks: number) => {
     const span = listev / 2 ** k;
-    return 5 + (indeks * span + span / 2) * SHAG_Y;
+    return 8 + (indeks * span + span / 2) * SHAG_LISTA;
   };
-  const vetki: { x1: number; y1: number; x2: number; y2: number; bukva: string; key: string }[] =
-    [];
+  const vetki: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    bukva: string;
+    key: string;
+    j: number;
+  }[] = [];
   for (let k = 0; k < n; k += 1) {
     for (let i = 0; i < 2 ** k; i += 1) {
       ['О', 'Р'].forEach((bukva, j) => {
         vetki.push({
-          x1: 30 + k * SHAG_X,
-          y1: yUzla(k, i),
-          x2: 30 + (k + 1) * SHAG_X,
-          y2: yUzla(k + 1, i * 2 + j),
+          x1: xUzla(k, i),
+          y1: yUrovnya(k),
+          x2: xUzla(k + 1, i * 2 + j),
+          y2: yUrovnya(k + 1),
           bukva,
           key: `${k}-${i}-${j}`,
+          j,
         });
       });
     }
@@ -250,8 +263,8 @@ export function Derevo4({ varianty }: { varianty: VariantDereva[] }) {
               <line className="m4i-derevo__vetka" x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} />
               <text
                 className="m4i-derevo__bukva"
-                x={(b.x1 + b.x2) / 2}
-                y={(b.y1 + b.y2) / 2 - 6}
+                x={(b.x1 + b.x2) / 2 + (b.j === 0 ? -9 : 9)}
+                y={(b.y1 + b.y2) / 2 + 4}
                 textAnchor="middle"
               >
                 {b.bukva}
@@ -263,16 +276,16 @@ export function Derevo4({ varianty }: { varianty: VariantDereva[] }) {
               <circle
                 key={`u${k}-${i}`}
                 className="m4i-derevo__uzel"
-                cx={30 + k * SHAG_X}
-                cy={yUzla(k, i)}
+                cx={xUzla(k, i)}
+                cy={yUrovnya(k)}
                 r={6}
               />
             )),
           )}
           {v.cepochki.map((c, i) => {
             const da = vybrany.has(c);
-            const y = yUzla(n, i);
-            const x = 30 + n * SHAG_X;
+            const x = xUzla(n, i);
+            const y = yUrovnya(n);
             return (
               <g
                 key={c}
@@ -284,9 +297,13 @@ export function Derevo4({ varianty }: { varianty: VariantDereva[] }) {
                 onClick={() => pereklyuchit(c)}
                 onKeyDown={(e) => klavisha(e, c)}
               >
-                <rect x={x - 8} y={y - 15} width={86} height={30} rx={15} />
-                <text x={x + 35} y={y + 5} textAnchor="middle">
-                  {c}
+                <rect x={x - 15} y={y - 6} width={30} height={vysotaLista} rx={15} />
+                <text x={x} textAnchor="middle">
+                  {[...c].map((bukva, k) => (
+                    <tspan key={k} x={x} y={y + 12 + k * BUKVA_V_LISTE}>
+                      {bukva}
+                    </tspan>
+                  ))}
                 </text>
               </g>
             );

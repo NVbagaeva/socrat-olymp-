@@ -252,7 +252,7 @@
 
 .m5i-derevo__svg {
   width: 100%;
-  max-width: 420px;
+  max-width: 360px;
   height: auto;
 }
 .m5i-vetka {
@@ -276,6 +276,13 @@
   fill: var(--color-text-secondary);
   font-size: 13px;
   text-anchor: middle;
+}
+.m5i-derevo__tekst--ne {
+  /* Лист «не A»: та же буква с чертой сверху. */
+  font-family: KaTeX_Math, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 15px;
+  text-decoration: overline;
 }
 .m5i-derevo__tekst--a {
   fill: #8a4a05;

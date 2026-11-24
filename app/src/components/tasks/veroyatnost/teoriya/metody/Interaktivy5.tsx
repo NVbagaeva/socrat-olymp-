@@ -616,6 +616,16 @@ export function Para5({ tex }: { tex: { p: string } }) {
 
 /* ── 9. Дерево полной вероятности ──────────────────────────────────── */
 
+/** Ветки вертикального дерева: корень сверху, листья внизу. */
+const VETKI_5 = [
+  { id: 'h1', x1: 160, y1: 22, x2: 80, y2: 104, a: false },
+  { id: 'h2', x1: 160, y1: 22, x2: 240, y2: 104, a: false },
+  { id: 'a1', x1: 80, y1: 104, x2: 40, y2: 186, a: true },
+  { id: 'n1', x1: 80, y1: 104, x2: 120, y2: 186, a: false },
+  { id: 'a2', x1: 240, y1: 104, x2: 200, y2: 186, a: true },
+  { id: 'n2', x1: 240, y1: 104, x2: 280, y2: 186, a: false },
+] as const;
+
 export function Derevo5({ tex }: { tex: { p: string } }) {
   /* Вероятности в сотых. */
   const [h, setH] = useState(40);
@@ -625,73 +635,65 @@ export function Derevo5({ tex }: { tex: { p: string } }) {
   const put2 = (100 - h) * q2;
   /* Толщина ветки — по её вероятности. */
   const tolsh = (p: number) => 1.5 + (p / 100) * 9;
+  const ves: Record<(typeof VETKI_5)[number]['id'], number> = {
+    h1: h,
+    h2: 100 - h,
+    a1: q1,
+    n1: 100 - q1,
+    a2: q2,
+    n2: 100 - q2,
+  };
   return (
     <div className="m4i m5i-derevo">
-      <svg className="m5i-derevo__svg" viewBox="0 0 320 180" aria-hidden="true">
-        <line className="m5i-vetka" x1={20} y1={90} x2={140} y2={45} strokeWidth={tolsh(h)} />
-        <line
-          className="m5i-vetka"
-          x1={20}
-          y1={90}
-          x2={140}
-          y2={135}
-          strokeWidth={tolsh(100 - h)}
-        />
-        <line
-          className="m5i-vetka m5i-vetka--a"
-          x1={140}
-          y1={45}
-          x2={280}
-          y2={20}
-          strokeWidth={tolsh(q1)}
-        />
-        <line
-          className="m5i-vetka"
-          x1={140}
-          y1={45}
-          x2={280}
-          y2={70}
-          strokeWidth={tolsh(100 - q1)}
-        />
-        <line
-          className="m5i-vetka m5i-vetka--a"
-          x1={140}
-          y1={135}
-          x2={280}
-          y2={110}
-          strokeWidth={tolsh(q2)}
-        />
-        <line
-          className="m5i-vetka"
-          x1={140}
-          y1={135}
-          x2={280}
-          y2={160}
-          strokeWidth={tolsh(100 - q2)}
-        />
-        <circle className="m5i-uzel" cx={20} cy={90} r={7} />
-        <circle className="m5i-uzel" cx={140} cy={45} r={7} />
-        <circle className="m5i-uzel" cx={140} cy={135} r={7} />
-        <circle className="m5i-uzel m5i-uzel--a" cx={280} cy={20} r={8} />
-        <circle className="m5i-uzel" cx={280} cy={70} r={6} />
-        <circle className="m5i-uzel m5i-uzel--a" cx={280} cy={110} r={8} />
-        <circle className="m5i-uzel" cx={280} cy={160} r={6} />
-        <text className="m5i-derevo__tekst" x={70} y={56}>
+      {/* Дерево растёт сверху вниз: корень — опыт, первый уровень — случаи
+          H₁ и H₂, второй — произошло A или нет. */}
+      <svg className="m5i-derevo__svg" viewBox="0 0 320 228" aria-hidden="true">
+        {VETKI_5.map((v) => (
+          <line
+            key={v.id}
+            className={v.a ? 'm5i-vetka m5i-vetka--a' : 'm5i-vetka'}
+            x1={v.x1}
+            y1={v.y1}
+            x2={v.x2}
+            y2={v.y2}
+            strokeWidth={tolsh(ves[v.id])}
+          />
+        ))}
+        <circle className="m5i-uzel" cx={160} cy={22} r={7} />
+        <circle className="m5i-uzel" cx={80} cy={104} r={7} />
+        <circle className="m5i-uzel" cx={240} cy={104} r={7} />
+        <circle className="m5i-uzel m5i-uzel--a" cx={40} cy={186} r={8} />
+        <circle className="m5i-uzel" cx={120} cy={186} r={6} />
+        <circle className="m5i-uzel m5i-uzel--a" cx={200} cy={186} r={8} />
+        <circle className="m5i-uzel" cx={280} cy={186} r={6} />
+        <text className="m5i-derevo__tekst" x={104} y={58}>
           {sotye(h)}
         </text>
-        <text className="m5i-derevo__tekst" x={70} y={136}>
+        <text className="m5i-derevo__tekst" x={216} y={58}>
           {sotye(100 - h)}
         </text>
-        <text className="m5i-derevo__tekst" x={196} y={24}>
+        <text className="m5i-derevo__tekst m5i-derevo__tekst--a" x={58} y={104}>
+          H₁
+        </text>
+        <text className="m5i-derevo__tekst m5i-derevo__tekst--a" x={262} y={104}>
+          H₂
+        </text>
+        <text className="m5i-derevo__tekst" x={42} y={146}>
           {sotye(q1)}
         </text>
-        <text className="m5i-derevo__tekst" x={196} y={114}>
+        <text className="m5i-derevo__tekst" x={198} y={146}>
           {sotye(q2)}
         </text>
-        <text className="m5i-derevo__tekst m5i-derevo__tekst--a" x={300} y={24}>
+        <text className="m5i-derevo__tekst m5i-derevo__tekst--a" x={40} y={214}>
           A
         </text>
-        <text className="m5i-derevo__tekst m5i-derevo__tekst--a" x={300} y={114}>
+        <text className="m5i-derevo__tekst m5i-derevo__tekst--ne" x={120} y={214}>
+          A
+        </text>
+        <text className="m5i-derevo__tekst m5i-derevo__tekst--a" x={200} y={214}>
+          A
+        </text>
+        <text className="m5i-derevo__tekst m5i-derevo__tekst--ne" x={280} y={214}>
           A
         </text>
       </svg>
