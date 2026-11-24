@@ -7,11 +7,12 @@
        у заполненного слота должны быть оба файла (webp и png) и png
        читаться. Пустой слот — не ошибка: картинку рисует автор.
      node scripts/check-illyustracii-10.mjs --site   — после pnpm build:
-       на страницах разделов (out/zadaniya/10/ и 11/) нет заглушек («Иллюстрация
+       на страницах разделов (out/zadaniya/{код №10}/ и №11) нет заглушек («Иллюстрация
        готовится» и т. п.), и каждое изображение, на которое ссылаются
        страницы out/, отдаётся статическим сервером с кодом 200 и типом
        image/*. (Заглушки других разделов ловит их собственная проверка.) */
 
+import { kod } from './lib/adres.mjs';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
@@ -93,7 +94,7 @@ if (!site) {
   for (const f of walk(OUT)) {
     const s = fs.readFileSync(f, 'utf8').replace(STYK, '');
     /* №11 — там та же общая теория единиц со слотами stepeni-*. */
-    const razdel = ['10', '11'].some((n) =>
+    const razdel = [kod(10), kod(11)].some((n) =>
       path.relative(OUT, f).startsWith(`zadaniya${path.sep}${n}${path.sep}`),
     );
     for (const z of razdel ? ZAGLUSHKI : []) {

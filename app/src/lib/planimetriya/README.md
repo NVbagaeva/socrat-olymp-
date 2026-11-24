@@ -36,8 +36,8 @@
 
 Теория: тексты карточек — `content/teoriya1.ts`, вкладка — `Teoriya1.tsx`
 и `Kartochka1.tsx` (карточка, «Где на ЕГЭ», «Пример» через `Razbor1.tsx`),
-адрес — `/zadaniya/1/`; печать — `/zadaniya/1/pechat/spravochnik/` и
-`/zadaniya/1/pechat/shpargalka/N/`.
+адрес — `/zadaniya/planimetriya/`; печать — `/zadaniya/planimetriya/pechat/spravochnik/` и
+`/zadaniya/planimetriya/pechat/shpargalka/N/`.
 
 ## Сцена
 
@@ -166,7 +166,7 @@ SVG нет NaN, на листе ученика нет слоёв подсказ�
 положение рисуется чисто, величины выполняют свойство карточки (сумма
 углов 180°, суммы противоположных сторон равны…).
 
-Раздел целиком: «О задании» — `/zadaniya/1/`, теория — `…/teoriya/`,
+Раздел целиком: «О задании» — `/zadaniya/planimetriya/`, теория — `…/teoriya/`,
 «Опорные задачи», «Тренажёр», «Генератор», «Для репетиторов».
 Проверки: `pnpm test:planimetria` (движок, банк, теория, тренажёр и
 листы), `pnpm test:seriya-1` (серия уроков по коду, байт в байт),

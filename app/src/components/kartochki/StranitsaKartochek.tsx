@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { VKLADKA_KARTOCHKI } from '@/content/kartochkiUi';
 import { kolodaNomera } from '@/content/kartochki';
 import { podgotovit } from '@/lib/kartochki/podgotovka';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { Kartochki } from './Kartochki';
 /* Стеклянная сцена №3: стили только под обёрткой .z3-kart. */
 import '@/components/tasks/solid3/z3-kart.css';
@@ -22,6 +22,6 @@ export function metadataKartochek(task: number): Metadata {
  */
 export function StranitsaKartochek({ task }: { task: number }) {
   const koloda = kolodaNomera(task);
-  const kolodaGotova = <Kartochki koloda={podgotovit(koloda, `${ZADANIYA}/${koloda.slug}`)} />;
+  const kolodaGotova = <Kartochki koloda={podgotovit(koloda, `${razdelBase(koloda.slug)}`)} />;
   return task === 3 ? <div className="z3-kart">{kolodaGotova}</div> : kolodaGotova;
 }

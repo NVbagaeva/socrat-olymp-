@@ -78,12 +78,12 @@ const BASE = 'http://127.0.0.1:' + server.address().port;
 
 const ONLY = process.argv.slice(2).filter((arg) => arg.startsWith('/'));
 const ALL_PAGES = [
-  '/zadaniya/3/teoriya/',
-  '/zadaniya/15/teoriya/',
+  '/zadaniya/stereometriya/teoriya/',
+  '/zadaniya/stereometriya-dokazatelstvo/teoriya/',
   /* Карточки типов — общие (KartochkiTipov): «О задании» №3, №15, №14. */
-  '/zadaniya/3/',
-  '/zadaniya/15/',
-  '/zadaniya/14/',
+  '/zadaniya/stereometriya/',
+  '/zadaniya/stereometriya-dokazatelstvo/',
+  '/zadaniya/uravnenie-s-otborom/',
 ];
 const PAGES =
   ONLY.length === 0 ? ALL_PAGES : ALL_PAGES.filter((url) => ONLY.some((p) => url.startsWith(p)));

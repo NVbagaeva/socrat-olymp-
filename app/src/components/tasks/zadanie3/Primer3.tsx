@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ZhivoyChertezh3d } from '@/components/stereo/ZhivoyChertezh3d';
 import { SHAPKA3 } from '@/content/zadanie3/spravka';
 import { dataUrl } from '@/lib/dataUrl';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import type { Primer3 as Dannye } from '@/lib/zadanie3/primery';
 
 /**
@@ -112,7 +112,7 @@ const KESH = new Map<string, Promise<Dannye>>();
 function zagruzit(tip: string): Promise<Dannye> {
   let zhdyot = KESH.get(tip);
   if (zhdyot === undefined) {
-    zhdyot = fetch(dataUrl(`${ZADANIYA}/3/dannye/primer/${tip}.json`)).then((r) => {
+    zhdyot = fetch(dataUrl(`${razdelBase(3)}/dannye/primer/${tip}.json`)).then((r) => {
       if (!r.ok) throw new Error(`${tip}.json: ${r.status}`);
       return r.json() as Promise<Dannye>;
     });

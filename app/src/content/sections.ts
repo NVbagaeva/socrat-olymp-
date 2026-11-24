@@ -263,6 +263,13 @@ export function findSubtopic(sectionSlug: string, subtopicSlug: string): Subtopi
   return findSection(sectionSlug)?.subtopics.find((item) => item.id === subtopicSlug);
 }
 
+/**
+ * Номер хранения раздела «Графики функций» — единственного с подтемами.
+ * Подтемы собираются в app/zadaniya/grafiki-funkciy/[type]/: адрес
+ * раздела — код, а номер нужен ключам и поиску раздела.
+ */
+export const SEKCIYA_GRAFIKOV = '12';
+
 /* ── Параметры статического экспорта ──────────────────────────────
    Сборка без сервера: каждый динамический сегмент перечисляется
    заранее. Списки считаются из конфига, руками нигде не повторяются. */

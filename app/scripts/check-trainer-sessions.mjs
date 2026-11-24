@@ -424,11 +424,23 @@ async function chooseAllFiltry(page) {
 }
 
 const TRAINERS = [
-  { name: '№14', url: '/zadaniya/14/trenazher/', scope: '14', answer: answer14, all: chooseAll14 },
-  { name: '№19', url: '/zadaniya/19/trenazher/', scope: '19', answer: answer19, all: chooseAll19 },
+  {
+    name: '№14',
+    url: '/zadaniya/uravnenie-s-otborom/trenazher/',
+    scope: '14',
+    answer: answer14,
+    all: chooseAll14,
+  },
+  {
+    name: '№19',
+    url: '/zadaniya/parametr/trenazher/',
+    scope: '19',
+    answer: answer19,
+    all: chooseAll19,
+  },
   ...['linear', 'quadratic', 'rational', 'irrational'].map((sub) => ({
     name: `№12 ${sub}`,
-    url: `/zadaniya/12/${sub}/trenazher/`,
+    url: `/zadaniya/grafiki-funkciy/${sub}/trenazher/`,
     scope: `12:${sub}`,
     answer: answer12,
     all: chooseAllFiltry,
@@ -436,7 +448,7 @@ const TRAINERS = [
   })),
   {
     name: '№12 все типы',
-    url: '/zadaniya/12/trenazher/',
+    url: '/zadaniya/grafiki-funkciy/trenazher/',
     scope: '12',
     answer: answer12bank,
     /* Общий тренажёр по банку, как у №7 и №6: тренировка начинается карточкой. */
@@ -446,7 +458,7 @@ const TRAINERS = [
   },
   {
     name: '№8',
-    url: '/zadaniya/8/trenazher/',
+    url: '/zadaniya/vychisleniya/trenazher/',
     scope: '8',
     answer: answer8,
     /* Стартовый экран — три режима: тренировка начинается карточкой. */
@@ -457,7 +469,7 @@ const TRAINERS = [
   },
   {
     name: '№2',
-    url: '/zadaniya/2/trenazher/',
+    url: '/zadaniya/vektory/trenazher/',
     scope: '2',
     answer: answer2,
     /* Тот же общий тренажёр по банку, что у №7 и №6. */
@@ -467,7 +479,7 @@ const TRAINERS = [
   },
   {
     name: '№1',
-    url: '/zadaniya/1/trenazher/',
+    url: '/zadaniya/planimetriya/trenazher/',
     scope: '1',
     answer: answer1,
     /* Тот же общий тренажёр по банку, что у №7 и №6. */
@@ -477,7 +489,7 @@ const TRAINERS = [
   },
   {
     name: '№13',
-    url: '/zadaniya/13/trenazher/',
+    url: '/zadaniya/ekonomika/trenazher/',
     scope: '13',
     answer: answer13,
     /* Тот же общий тренажёр по банку, что у №7 и №6. */
@@ -487,7 +499,7 @@ const TRAINERS = [
   },
   {
     name: '№11',
-    url: '/zadaniya/11/trenazher/',
+    url: '/zadaniya/tekstovye-zadachi/trenazher/',
     scope: '11',
     answer: answer11,
     /* Общий тренажёр по банку, как у №7 и №6: тренировка начинается карточкой. */
@@ -498,7 +510,7 @@ const TRAINERS = [
   },
   {
     name: '№7',
-    url: '/zadaniya/7/trenazher/',
+    url: '/zadaniya/uravneniya/trenazher/',
     scope: '7',
     answer: answer7,
     /* Стартовый экран — три режима, как у №8: тренировка начинается карточкой. */
@@ -508,7 +520,7 @@ const TRAINERS = [
   },
   {
     name: '№6',
-    url: '/zadaniya/6/trenazher/',
+    url: '/zadaniya/sluchainye-velichiny/trenazher/',
     scope: '6',
     answer: answer6,
     /* Тот же общий тренажёр по банку, что у №7. */
@@ -518,7 +530,7 @@ const TRAINERS = [
   },
   {
     name: '№10',
-    url: '/zadaniya/10/trenazher/',
+    url: '/zadaniya/prikladnye-zadachi/trenazher/',
     scope: '10',
     answer: answer10,
     /* Тот же общий тренажёр по банку, что у №7 и №6. */
@@ -528,7 +540,7 @@ const TRAINERS = [
   },
   {
     name: '№9',
-    url: '/zadaniya/9/trenazher/',
+    url: '/zadaniya/proizvodnaya/trenazher/',
     scope: '9',
     answer: answer9,
     /* Тот же общий тренажёр по банку, что у №7 и №6. */
@@ -538,7 +550,7 @@ const TRAINERS = [
   },
   {
     name: '№4',
-    url: '/zadaniya/4/trenazher/',
+    url: '/zadaniya/veroyatnost/trenazher/',
     scope: '4',
     answer: answer45,
     /* «Стеклянная сцена»: четыре режима карточками, как у №7 и №6. */
@@ -549,7 +561,7 @@ const TRAINERS = [
   },
   {
     name: '№5',
-    url: '/zadaniya/5/trenazher/',
+    url: '/zadaniya/slozhnaya-veroyatnost/trenazher/',
     scope: '5',
     answer: answer45,
     start: start45,
@@ -558,7 +570,7 @@ const TRAINERS = [
   },
   {
     name: '№5 «Узнай метод»',
-    url: '/zadaniya/5/trenazher/',
+    url: '/zadaniya/slozhnaya-veroyatnost/trenazher/',
     scope: '5',
     answer: answer45,
     start: startUznay45,
@@ -566,7 +578,7 @@ const TRAINERS = [
   },
   {
     name: '№4 «Узнай метод»',
-    url: '/zadaniya/4/trenazher/',
+    url: '/zadaniya/veroyatnost/trenazher/',
     scope: '4',
     answer: answer45,
     /* Четвёртая карточка режима. */
@@ -576,7 +588,7 @@ const TRAINERS = [
   /* №3: один тренажёр на всё задание — вкладка раздела стереометрии. */
   {
     name: '№3',
-    url: '/zadaniya/3/trenazher/',
+    url: '/zadaniya/stereometriya/trenazher/',
     scope: '3',
     answer: answer3,
     /* Стартовый экран — три режима, как у №8: тренировка начинается карточкой. */
@@ -1199,7 +1211,7 @@ async function pauza1Scenario() {
   await inContext('№1, прежняя пауза', async (context) => {
     const tag = '№1, пауза прежнего тренажёра';
     const page = await newPage(context);
-    await open(page, '/zadaniya/1/');
+    await open(page, '/zadaniya/planimetriya/');
     await page.evaluate(() => {
       localStorage.setItem(
         'budetege:planimetriya-1:trenazher-pauza:v1',
@@ -1491,10 +1503,10 @@ console.log('\n10. Вход по ссылке на набор');
 for (const [name, link, tag] of [
   [
     '№12 linear',
-    '/zadaniya/12/linear/trenazher/value/',
+    '/zadaniya/grafiki-funkciy/linear/trenazher/value/',
     '№12 linear, ярлык «Найти значение функции»',
   ],
-  ['№11', '/zadaniya/11/trenazher/?tip=RZ-17', '№11, ссылка ?tip=RZ-17'],
+  ['№11', '/zadaniya/tekstovye-zadachi/trenazher/?tip=RZ-17', '№11, ссылка ?tip=RZ-17'],
 ]) {
   const trainer = chosen.find((item) => item.name === name);
   if (trainer !== undefined) {

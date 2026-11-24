@@ -20,8 +20,12 @@
      — шаблонная строка, в которой после этого не осталось вставок,
        становится обычной строкой; оставшиеся вставки сравниваются как код;
      — строка сравнивается по значению: кавычки и переносы записи не важны;
-     — подключение struktura.js, комментарии, отступы, переносы строк и
-       запятая после последнего элемента списка не сравниваются.
+     — подключение struktura.js и lib/paths, комментарии, отступы,
+       переносы строк и запятая после последнего элемента списка не
+       сравниваются;
+     — адрес раздела банка — по коду (docs/ege-2027-struktura-shag-0.md,
+       PR 3): `${ZADANIYA}/4`, `${razdelBase(4)}` и «/zadaniya/veroyatnost»
+       — одна запись того же адреса.
 
    Всё остальное сравнивается знак за знаком: другая буква в условии,
    другое число в ответе, другая формула, новая или пропавшая строка
@@ -48,9 +52,36 @@ function vidFayla(file) {
  * @param {string | null} tekst
  */
 export function strukturaObrazca(tekst) {
-  const m = tekst === null ? null : /STRUKTURA\s*=[^;]*:\s*STRUKTURA_(\d{4})_(\d{2})\s*;/.exec(tekst);
+  const m =
+    tekst === null ? null : /STRUKTURA\s*=[^;]*:\s*STRUKTURA_(\d{4})_(\d{2})\s*;/.exec(tekst);
   const id = m === null ? '2027-20' : `${m[1]}-${m[2]}`;
   return struktura.STRUKTURY[id] ?? struktura.STRUKTURY['2027-20'];
+}
+
+const NOMER_PO_KODU = new Map(struktura.RAZDELY.map((r) => [r.kod, r.hranenie]));
+const nomer = (x) => String(NOMER_PO_KODU.get(x) ?? x);
+
+/**
+ * Адреса разделов банка — в одной записи, по номеру хранения: переезд на
+ * коды раздела (lib/paths.ts) меняет запись адреса, а не содержание.
+ * Подключение lib/paths — не содержание.
+ */
+function adresaPoNomeru(tekst) {
+  return tekst
+    .replace(/^import[^;]*from\s*['"]@\/lib\/paths['"];?\s*$/gm, '')
+    .replace(/\$\{razdelBase\(\s*['"]?([\w-]+)['"]?\s*\)\}/g, (_, x) => `\${ZADANIYA}/${nomer(x)}`)
+    .replace(/(^|[^\w/-])\/zadaniya\/([a-z][a-z0-9-]*)(?=[/'"`#?])/g, (m, pre, kod) =>
+      NOMER_PO_KODU.has(kod) ? `${pre}/zadaniya/${nomer(kod)}` : m,
+    );
+}
+
+/**
+ * Одно ли содержание у двух текстов без разбора кода (README и другие
+ * описания): равны после того, как адреса разделов приведены к одной
+ * записи.
+ */
+export function toZheTekst(staryy, novyy) {
+  return adresaPoNomeru(staryy) === adresaPoNomeru(novyy);
 }
 
 /** Текст файла как ряд знаков в единой записи. */
@@ -165,8 +196,8 @@ function znaki(tekst, file, s) {
  * @returns {{ ravno: boolean, gde?: string }} gde — первое расхождение
  */
 export function toZheSoderzhanie(staryy, novyy, file, s = struktura.STRUKTURA) {
-  const a = znaki(staryy, file, s);
-  const b = znaki(novyy, file, s);
+  const a = znaki(adresaPoNomeru(staryy), file, s);
+  const b = znaki(adresaPoNomeru(novyy), file, s);
   let i = 0;
   while (i < a.length && i < b.length && a[i] === b[i]) i += 1;
   if (i === a.length && i === b.length) return { ravno: true };

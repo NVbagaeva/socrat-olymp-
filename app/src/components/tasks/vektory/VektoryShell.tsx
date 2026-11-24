@@ -1,7 +1,7 @@
 import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { VEKTORY } from '@/content/vektory';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
 
 /**
@@ -10,7 +10,7 @@ import { RazdelTabs } from '../RazdelTabs';
  * при переходе между вкладками остаётся на месте.
  */
 export function VektoryShell({ children }: { children: React.ReactNode }) {
-  const base = `${ZADANIYA}/${VEKTORY.slug}`;
+  const base = `${razdelBase(VEKTORY.slug)}`;
 
   return (
     <AppShell active="tasks">

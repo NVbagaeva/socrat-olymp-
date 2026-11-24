@@ -4,7 +4,7 @@
 
    Запуск: pnpm build && pnpm test:pdf-spravochnik-1
 
-   Собранная страница /zadaniya/1/pechat/spravochnik/ открывается
+   Собранная страница /zadaniya/planimetriya/pechat/spravochnik/ открывается
    в Chromium дважды — с примерами и без (?primery=0) — и после
    раскладки (paginate.js, две колонки) проверяется готовый лист:
      — раскладка без ошибок, ни один кусок не выше колонки;
@@ -163,7 +163,9 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
       window.__pechat = (window.__pechat ?? 0) + 1;
     };
   });
-  await page.goto(`${BASE}/zadaniya/1/pechat/spravochnik/${zapros}`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/planimetriya/pechat/spravochnik/${zapros}`, {
+    waitUntil: 'networkidle',
+  });
   await page.waitForFunction(() => window.sheetPagination !== undefined, null, {
     timeout: 120000,
   });
@@ -270,7 +272,7 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
   await page.addInitScript(() => {
     window.print = () => {};
   });
-  await page.goto(`${BASE}/zadaniya/1/teoriya/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/planimetriya/teoriya/`, { waitUntil: 'networkidle' });
   const knopka = page.locator('.spr1-pdf__knopka');
   const adres = async () => (await knopka.getAttribute('href')) ?? '';
   proverka(
@@ -301,7 +303,7 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
     `веб: скачался файл «${zagruzka.suggestedFilename()}»`,
   );
   proverka(
-    page.url().endsWith('/zadaniya/1/teoriya/'),
+    page.url().endsWith('/zadaniya/planimetriya/teoriya/'),
     `веб: после скачивания вкладка на ${page.url()}`,
   );
   await page.locator('.spr1-pdf__switch').click();
@@ -339,9 +341,9 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
   await page.locator('.spr1-pdf__pechat').click();
   await page.waitForURL(/\/pechat\/spravochnik\//);
   await page.locator('.spr1-nazad__knopka').click();
-  await page.waitForURL(/\/zadaniya\/1\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
+  await page.waitForURL(/\/zadaniya\/planimetriya\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
   proverka(
-    page.url().endsWith('/zadaniya/1/teoriya/'),
+    page.url().endsWith('/zadaniya/planimetriya/teoriya/'),
     `назад: с печати после теории попали на ${page.url()}`,
   );
   await page.close();
@@ -353,7 +355,9 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
   await page.addInitScript(() => {
     window.print = () => {};
   });
-  await page.goto(`${BASE}/zadaniya/1/pechat/spravochnik/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/planimetriya/pechat/spravochnik/`, {
+    waitUntil: 'networkidle',
+  });
   const nazad = page.locator('.spr1-nazad__knopka');
   const box = await nazad.boundingBox();
   proverka(
@@ -368,9 +372,9 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
     'назад: кнопка не липкая при прокрутке',
   );
   await nazad.click();
-  await page.waitForURL(/\/zadaniya\/1\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
+  await page.waitForURL(/\/zadaniya\/planimetriya\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
   proverka(
-    page.url().endsWith('/zadaniya/1/teoriya/'),
+    page.url().endsWith('/zadaniya/planimetriya/teoriya/'),
     `назад: с прямого захода попали на ${page.url()}`,
   );
   await page.close();
@@ -388,13 +392,15 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
       window.__pechat = (window.__pechat ?? 0) + 1;
     };
   });
-  await page.goto(`${BASE}/zadaniya/1/teoriya/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/planimetriya/teoriya/`, { waitUntil: 'networkidle' });
   const vPaneli = (await page.locator('.spr1-pdf__pechat').getAttribute('href')) ?? '';
   proverka(
     vPaneli.split('?')[0] === MANIFEST.sPrimerami.fayl,
     `iPhone: «Печать» в панели ведёт на ${vPaneli}, а не на готовый PDF`,
   );
-  await page.goto(`${BASE}/zadaniya/1/pechat/spravochnik/?primery=0`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/planimetriya/pechat/spravochnik/?primery=0`, {
+    waitUntil: 'networkidle',
+  });
   await page.waitForFunction(() => window.sheetPagination !== undefined, null, {
     timeout: 120000,
   });

@@ -49,26 +49,30 @@ const OUT = path.join(app, 'out');
 const DOP_11 =
   'm=v&i=m&ps=2&s=PR-04:1,SM-06:1,DP-03:1,VD-01:1,RB-04:1,PG-01:1&seed=FJ85&tr=1&pr=1&vr=dz&qr=1&d=2026-10-24';
 const LISTY = [
-  ['№11 в клетку', '/zadaniya/11/pechat/', `${DOP_11}&sp=B`],
-  ['№11 без поля', '/zadaniya/11/pechat/', DOP_11],
-  ['№11 ч/б в клетку', '/zadaniya/11/pechat/', `${DOP_11}&sp=B&t=print`],
-  ['№11 учитель', '/zadaniya/11/pechat/otvety/', DOP_11],
+  ['№11 в клетку', '/zadaniya/tekstovye-zadachi/pechat/', `${DOP_11}&sp=B`],
+  ['№11 без поля', '/zadaniya/tekstovye-zadachi/pechat/', DOP_11],
+  ['№11 ч/б в клетку', '/zadaniya/tekstovye-zadachi/pechat/', `${DOP_11}&sp=B&t=print`],
+  ['№11 учитель', '/zadaniya/tekstovye-zadachi/pechat/otvety/', DOP_11],
   [
     '№12 генератор',
-    '/zadaniya/12/generator/pechat/',
+    '/zadaniya/grafiki-funkciy/generator/pechat/',
     'ps=2&s=12.A:1,12Q.B:1,12R.A:1,12S.A:1,12E.A:1,12L.A:1,12T.A:1&seed=print-check&th=1&pr=1&sp=B',
   ],
   [
     '№1 с «Дополнительно»',
-    '/zadaniya/1/pechat/',
+    '/zadaniya/planimetriya/pechat/',
     'm=v&i=m&ps=2&s=p01:1,p13:1,p24:1,p41:1&seed=print-check&tr=1&pr=1&qr=1&sp=B',
   ],
   [
     '№9 генератор',
-    '/zadaniya/9/pechat/',
+    '/zadaniya/proizvodnaya/pechat/',
     'ps=2&s=9.1.1:1,9.2.1:1,9.4.1:2&seed=print-check&tr=1&r=1&sp=B',
   ],
-  ['№6 в клетку', '/zadaniya/6/pechat/', 't=P01:2,P02:2,P03:2&i=m&v=1&e=0&st=v&seed=PRINT1&sp=B'],
+  [
+    '№6 в клетку',
+    '/zadaniya/sluchainye-velichiny/pechat/',
+    't=P01:2,P02:2,P03:2&i=m&v=1&e=0&st=v&seed=PRINT1&sp=B',
+  ],
   ['Вариант в клетку', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00.PB'],
   /* Генератор базы: чертежи №12 и лист учителя с разбором №16. */
   [

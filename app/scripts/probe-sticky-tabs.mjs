@@ -27,7 +27,7 @@ if (!DIR) {
   console.error('Укажите папку для кадров: node scripts/probe-sticky-tabs.mjs <папка>');
   process.exit(1);
 }
-const URL_PATH = process.argv[3] ?? '/zadaniya/11/generator/';
+const URL_PATH = process.argv[3] ?? '/zadaniya/tekstovye-zadachi/generator/';
 const PROFILE = process.argv[4] ?? 'phone';
 const STEP = Number(process.argv[5] ?? 50);
 const MAX = Number(process.argv[6] ?? 800);

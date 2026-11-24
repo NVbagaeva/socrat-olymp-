@@ -5,8 +5,8 @@
 
    1. Вес (по собранному сайту): three.js лежит отдельным файлом и не
       подключён ни к одной странице сразу; на страницах вне
-      /zadaniya/15/ он не грузится и в браузере.
-   2. Витрина /zadaniya/15/vitrina/ закрыта от поиска (noindex) и не
+      /zadaniya/stereometriya-dokazatelstvo/ он не грузится и в браузере.
+   2. Витрина /zadaniya/stereometriya-dokazatelstvo/vitrina/ закрыта от поиска (noindex) и не
       связана ссылками с другими страницами (меню, сайдбар).
    3. Телефон 390 px, касания (Chromium): чертёж появляется, есть
       сплошные и штриховые линии и подписи; поворот пальцем меняет
@@ -39,7 +39,7 @@ const check = (ok, what) => {
   if (!ok) failures.push(what);
 };
 
-const VITRINA = '/zadaniya/15/vitrina/';
+const VITRINA = '/zadaniya/stereometriya-dokazatelstvo/vitrina/';
 /** Признак файла three.js: имя класса рендерера есть в его коде. */
 const THREE_MARK = 'WebGLRenderer';
 
@@ -65,14 +65,25 @@ for (const f of pages) {
   for (const n of threeNames) {
     check(!html.includes(n), `${rel}: three.js подключён к странице сразу (${n})`);
   }
-  if (!rel.startsWith('/zadaniya/15/vitrina/')) {
-    check(!html.includes('/zadaniya/15/vitrina'), `${rel}: ссылка на служебную витрину`);
+  /* Сама витрина и её прежний адрес по номеру (заглушка, уводящая на
+     неё же, content/pereezd) на неё ссылаться могут. */
+  if (
+    !rel.startsWith('/zadaniya/stereometriya-dokazatelstvo/vitrina/') &&
+    !rel.startsWith('/zadaniya/15/vitrina/')
+  ) {
+    check(
+      !html.includes('/zadaniya/stereometriya-dokazatelstvo/vitrina'),
+      `${rel}: ссылка на служебную витрину`,
+    );
   }
 }
 
 /* ── 2. noindex ─────────────────────────────────────────── */
 
-const vitrinaHtml = fs.readFileSync(path.join(OUT, 'zadaniya/15/vitrina/index.html'), 'utf8');
+const vitrinaHtml = fs.readFileSync(
+  path.join(OUT, 'zadaniya/stereometriya-dokazatelstvo/vitrina/index.html'),
+  'utf8',
+);
 check(/<meta name="robots" content="noindex, ?nofollow"/.test(vitrinaHtml), 'витрина без noindex');
 
 /* ── 3. Браузер ─────────────────────────────────────────── */
@@ -111,7 +122,12 @@ const browser = await chromium.launch(
 );
 
 // three.js не грузится на обычных страницах.
-for (const url of ['/', '/zadaniya/', '/zadaniya/11/', '/zadaniya/15/']) {
+for (const url of [
+  '/',
+  '/zadaniya/',
+  '/zadaniya/tekstovye-zadachi/',
+  '/zadaniya/stereometriya-dokazatelstvo/',
+]) {
   const page = await browser.newPage();
   const loaded = [];
   page.on('response', (r) => loaded.push(path.basename(new URL(r.url()).pathname)));

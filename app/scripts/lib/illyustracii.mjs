@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { RAZDELY } from '../../src/content/struktura.js';
 
 export const APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 /** Папка собранного сайта; ILL_OUT — другая сборка (снимок «было»). */
@@ -105,7 +106,7 @@ function estStranica(url) {
 
 /**
  * Все страницы проверки: главная, «Об авторе», «Как пользоваться»,
- * тарифы, кабинеты и вкладки каждого раздела /zadaniya/N/… (сама
+ * тарифы, кабинеты и вкладки каждого раздела /zadaniya/{код}/… (сама
  * вкладка «О задании» и вкладки первого уровня: теория, карточки,
  * опорные задачи, тренажёр, генератор, для репетиторов и свои вкладки
  * раздела), плюс страницы теории второго уровня.
@@ -113,10 +114,11 @@ function estStranica(url) {
 export function spisokStranic() {
   const urls = OBSHCHIE.filter(estStranica);
   const root = path.join(OUT, 'zadaniya');
-  const nomera = fs
-    .readdirSync(root)
-    .filter((n) => /^\d+$/.test(n))
-    .sort((a, b) => Number(a) - Number(b));
+  /* Разделы — по коду (/zadaniya/planimetriya/), в порядке хранения. */
+  const nomera = [...RAZDELY]
+    .sort((a, b) => a.hranenie - b.hranenie)
+    .map((r) => r.kod)
+    .filter((k) => fs.existsSync(path.join(root, k)));
   for (const n of nomera) {
     const base = `/zadaniya/${n}/`;
     if (estStranica(base)) urls.push(base);

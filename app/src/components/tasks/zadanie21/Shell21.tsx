@@ -1,7 +1,7 @@
 import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { ZADANIE21 } from '@/content/zadanie21';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
 
 /**
@@ -10,7 +10,7 @@ import { RazdelTabs } from '../RazdelTabs';
  * маршрута — при переходе между вкладками остаётся на месте.
  */
 export function Shell21({ children }: { children: React.ReactNode }) {
-  const base = `${ZADANIYA}/${ZADANIE21.slug}`;
+  const base = `${razdelBase(ZADANIE21.slug)}`;
   return (
     <AppShell active="tasks">
       <main className="app-main">

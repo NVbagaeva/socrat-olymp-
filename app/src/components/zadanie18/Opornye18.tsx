@@ -3,11 +3,11 @@ import { Tex } from '@/components/ui/Tex';
 import { ZADANIE18 } from '@/content/zadanie18';
 import { OPORNYE_18, OPORNYE_18_UI } from '@/content/zadanie18/opornye';
 import { GRUPPY_18 } from '@/content/zadanie18/tipy';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { OpornayaMini18 } from './OpornayaMini18';
 import { SchetchikOpornyh18, StatusOpornoy18 } from './ProgressOpornyh18';
 
-const BASE = `${ZADANIYA}/${ZADANIE18.slug}`;
+const BASE = `${razdelBase(ZADANIE18.slug)}`;
 
 /**
  * Вкладка «Опорные задачи» №18: вводный абзац и плитки задач по темам

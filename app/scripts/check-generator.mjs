@@ -27,6 +27,7 @@
    Ненулевой код возврата — проверка не прошла. */
 
 import { requireSrc } from './lib/load-ts.mjs';
+import { kod } from './lib/adres.mjs';
 
 const { dannyeTrenazhera } = requireSrc('lib/zadanie11/trenazher/dannye.ts');
 const G = requireSrc('lib/generator/obshchiy/state.ts');
@@ -70,13 +71,13 @@ function ok(cond, what) {
 const okTop = ok;
 
 const { razdely, bank } = dannyeTrenazhera();
-const config = A.config11(razdely, '/zadaniya/11');
-const engine = A.engine11(config, razdely, bank, '/zadaniya/11');
+const config = A.config11(razdely, '/zadaniya/tekstovye-zadachi');
+const engine = A.engine11(config, razdely, bank, '/zadaniya/tekstovye-zadachi');
 const SEEDS = ['7K3F', 'Q2M8', '0000', 'ZZZZ', 'A1B2'];
 
 /* Разделы на общем генераторе: адаптер, лист и что у них своё. */
 const d1 = dannyeTrenazhera1();
-const config1 = A1.config1(d1.razdely, '/zadaniya/1');
+const config1 = A1.config1(d1.razdely, '/zadaniya/planimetriya');
 const RAZDELY = [
   {
     name: '№11',
@@ -100,7 +101,7 @@ const RAZDELY = [
   {
     name: '№1',
     config: config1,
-    engine: A1.engine1(config1, d1.razdely, d1.bank, '/zadaniya/1'),
+    engine: A1.engine1(config1, d1.razdely, d1.bank, '/zadaniya/planimetriya'),
     params: (st) => A1.paramsIzSostoyaniya(st, config1),
     parse: (q) => S1.parseSheetQuery1(q),
     query: (p) => S1.sheetQuery1(p),
@@ -119,11 +120,11 @@ const RAZDELY = [
     /* №3: задачи — файл «Собрать вариант» (lib/variant/data/z03.ts), здесь собран на месте. */
     const razdely3 = info3();
     const dannye3 = D03.dannye();
-    const config3 = A3.config3(razdely3, '/zadaniya/3/generator/');
+    const config3 = A3.config3(razdely3, '/zadaniya/stereometriya/generator/');
     return {
       name: '№3',
       config: config3,
-      engine: A3.engine3(config3, razdely3, '/zadaniya/3', async () => dannye3),
+      engine: A3.engine3(config3, razdely3, '/zadaniya/stereometriya', async () => dannye3),
       params: (st) => A3.paramsIzSostoyaniya3(st),
       parse: (q) => L3.parseSheetQuery3(q),
       query: (p) => L3.sheetQuery3(p),
@@ -140,7 +141,7 @@ const RAZDELY = [
     };
   })(),
   (() => {
-    const config2 = A2.config2('/zadaniya/2');
+    const config2 = A2.config2('/zadaniya/vektory');
     /* У №2 нет «сборки» — лист строится по вариантам; задачи только генерируются. */
     const sobrat = (p) => ({
       poVariantam: S2.sheetVariants2(p, true).map((blocks) => blocks.flatMap((b) => b.tasks)),
@@ -148,7 +149,7 @@ const RAZDELY = [
     return {
       name: '№2',
       config: config2,
-      engine: A2.engine2(config2, '/zadaniya/2'),
+      engine: A2.engine2(config2, '/zadaniya/vektory'),
       params: (st) => A2.paramsIzSostoyaniya(st, config2),
       parse: (q) => S2.parseSheetQuery2(q),
       query: (p) => S2.sheetQuery2(p),
@@ -164,14 +165,14 @@ const RAZDELY = [
     };
   })(),
   (() => {
-    const config8 = A8.config8('/zadaniya/8');
+    const config8 = A8.config8('/zadaniya/vychisleniya');
     const sobrat = (p) => ({
       poVariantam: S8.sheetVariants8(p, true).map((blocks) => blocks.flatMap((b) => b.tasks)),
     });
     return {
       name: '№8',
       config: config8,
-      engine: A8.engine8(config8, '/zadaniya/8'),
+      engine: A8.engine8(config8, '/zadaniya/vychisleniya'),
       params: (st) => A8.paramsIzSostoyaniya(st, config8),
       parse: (q) => S8.parseSheetQuery8(q),
       query: (p) => S8.sheetQuery8(p),
@@ -191,14 +192,14 @@ const RAZDELY = [
     };
   })(),
   (() => {
-    const config9 = A9.config9('/zadaniya/9');
+    const config9 = A9.config9('/zadaniya/proizvodnaya');
     const sobrat = (p) => ({
       poVariantam: S9.sheetVariants9(p, true).map((blocks) => blocks.flatMap((b) => b.tasks)),
     });
     return {
       name: '№9',
       config: config9,
-      engine: A9.engine9(config9, '/zadaniya/9'),
+      engine: A9.engine9(config9, '/zadaniya/proizvodnaya'),
       params: (st) => A9.paramsIzSostoyaniya(st, config9),
       parse: (q) => S9.parseSheetQuery9(q),
       query: (p) => S9.sheetQuery9(p),
@@ -262,7 +263,7 @@ const RAZDELY = [
       indeks: async () => indeks,
       zadachi: async (ps) => new Map([...vse].filter(([, x]) => ps.includes(x.prototypeId))),
     };
-    const base = `/zadaniya/${z}`;
+    const base = `/zadaniya/${kod(z)}`;
     const config = C[`config${z}`](base, P[`protoInfo${z}`](), P[`gruppy${z}`](), indeks);
     const engine =
       z === '10' ? E.engine10(config, base, ill, dannye) : E[`engine${z}`](config, base, dannye);
@@ -371,7 +372,7 @@ const RAZDELY = [
     const { nabratFormuly } = requireSrc('lib/generator/nabrat.ts');
     const pool = z === 4 ? P.bank4Pool() : P.bank5Pool();
     const list = listSlova(z);
-    const base = `/zadaniya/${z}`;
+    const base = `/zadaniya/${kod(z)}`;
     const config = C.config45(z, base, navykiZadaniya(z), syuzhetyPrototipov(pool));
     const dannye = dannyeVeroyatnosti(z);
     const engine = E.engine45(config, base, z, async () => dannye);
@@ -430,16 +431,16 @@ const RAZDELY = [
   ...[
     {
       name: '№12 все типы',
-      base: '/zadaniya/12/generator',
-      config: C12.config12('/zadaniya/12/generator'),
+      base: '/zadaniya/grafiki-funkciy/generator',
+      config: C12.config12('/zadaniya/grafiki-funkciy/generator'),
       title: 'Графики функций',
       old: 's=12.A,12Q.A&n=2&v=3&seed=K7Q2&t=color&c=1&o=types&th=1&pr=1&pp=12.A:1,12Q.A:1',
       oldIds: '12.A,12Q.A',
     },
     {
       name: '№12 подтема',
-      base: '/zadaniya/12/quadratic',
-      config: C12.config12('/zadaniya/12/quadratic', {
+      base: '/zadaniya/grafiki-funkciy/quadratic',
+      config: C12.config12('/zadaniya/grafiki-funkciy/quadratic', {
         tip: 'quadratic',
         title: 'Квадратичная функция',
       }),
@@ -1119,7 +1120,7 @@ for (const R of RAZDELY.filter((x) => x.name.startsWith('База') && x.name.st
 /* ── №8: уровень листа и повторы ────────────────────────────────── */
 console.log('№8: уровень и повторы');
 {
-  const config8 = A8.config8('/zadaniya/8');
+  const config8 = A8.config8('/zadaniya/vychisleniya');
   const G8 = requireSrc('lib/vychisleniya/generate.ts');
   const P8 = requireSrc('lib/vychisleniya/prototypes/index.ts');
   const { typeset } = requireSrc('lib/tex.ts');
@@ -1132,7 +1133,9 @@ console.log('№8: уровень и повторы');
     const st = { ...G.stateFromPreset(config8, one, 'new'), levels, seed: 'K7Q2' };
     const p = A8.paramsIzSostoyaniya(st, config8);
     okTop(p.level === want, `№8 уровни ${levels.join()} → лист «${want ?? 'любой'}»`);
-    const back = A8.engine8(config8, '/zadaniya/8').parse(new URLSearchParams(S8.sheetQuery8(p)));
+    const back = A8.engine8(config8, '/zadaniya/vychisleniya').parse(
+      new URLSearchParams(S8.sheetQuery8(p)),
+    );
     okTop(back?.levels.join() === levels.join(), `№8 уровни ${levels.join()} в ссылке на набор`);
   }
   /* Шесть задач одного прототипа в варианте — без одинаковых условий. */
@@ -1198,8 +1201,8 @@ console.log('№10: картинки сюжетов');
 /* ── №9: серия уроков по одному коду ───────────────────────────── */
 console.log('№9: серия уроков');
 {
-  const config9 = A9.config9('/zadaniya/9');
-  const engine9 = A9.engine9(config9, '/zadaniya/9');
+  const config9 = A9.config9('/zadaniya/proizvodnaya');
+  const engine9 = A9.engine9(config9, '/zadaniya/proizvodnaya');
   for (const preset of config9.presets) {
     for (const seed of SEEDS.slice(0, 2)) {
       const base = { ...G.stateFromPreset(config9, preset, 'new'), seed };

@@ -172,9 +172,9 @@ const browser = await chromium.launch({
     : {}),
 });
 
-const SKILLS = path.join(OUT, 'zadaniya', '12', 'rational', 'opornye-zadachi');
+const SKILLS = path.join(OUT, 'zadaniya', 'grafiki-funkciy', 'rational', 'opornye-zadachi');
 const skill = fs.readdirSync(SKILLS).find((name) => !name.includes('.'));
-const TASKS = `${BASE}/zadaniya/12/rational/opornye-zadachi/${skill}/`;
+const TASKS = `${BASE}/zadaniya/grafiki-funkciy/rational/opornye-zadachi/${skill}/`;
 
 /* Сбой при чтении закрытой части задачи: разбор лежит в JSON с ключом
    steps, его читает экран после «Проверить». */
@@ -248,7 +248,7 @@ async function breakSolutionDecode(context) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await welcomeSeen(context);
   const page = await context.newPage();
-  await page.goto(`${BASE}/zadaniya/12/rational/`);
+  await page.goto(`${BASE}/zadaniya/grafiki-funkciy/rational/`);
   await page.waitForLoadState('load');
   /* Слушатель сбоев ставится, когда страница ожила (TopicTabs ставит
      метку __tabsReady). Раньше сбой послать бессмысленно: ловить некому. */
@@ -294,7 +294,7 @@ async function breakSolutionDecode(context) {
   const context2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await welcomeSeen(context2);
   const page2 = await context2.newPage();
-  await page2.goto(`${BASE}/zadaniya/12/rational/`);
+  await page2.goto(`${BASE}/zadaniya/grafiki-funkciy/rational/`);
   await page2.evaluate(() => {
     window.__marker = 'жив';
     Promise.reject(new TypeError('обычная ошибка'));
@@ -330,7 +330,7 @@ if (safari !== null) {
     await welcomeSeen(context);
     const page = await context.newPage();
     cuts.length = 0;
-    await page.goto(`${BASE}/zadaniya/12/rational/`, { waitUntil: 'load' });
+    await page.goto(`${BASE}/zadaniya/grafiki-funkciy/rational/`, { waitUntil: 'load' });
     await page.waitForTimeout(1500);
     if (target === '.ptask') {
       await page.getByRole('tab', { name: /Опорные задачи/ }).click();

@@ -1,0 +1,31 @@
+import type { Metadata } from 'next';
+import { Repetitory1 } from '@/components/tasks/planimetriya/Repetitory1';
+import { ZADANIE1 } from '@/content/zadanie1';
+import { razdelBase } from '@/lib/paths';
+import { dannyeTrenazhera1 } from '@/lib/planimetriya/trenazher/dannye';
+import '../../../tekstovye-zadachi/zadanie11.css';
+import '../../../komplekt.css';
+import '../../trenazher1.css';
+import { zadanie1Zagolovok } from '@/lib/seo-razdely';
+
+const DANNYE = dannyeTrenazhera1();
+const VKLADKA = ZADANIE1.tabs.find((tab) => tab.id === 'repetitory')?.label ?? '';
+
+export const metadata: Metadata = {
+  title: zadanie1Zagolovok(VKLADKA),
+};
+
+/**
+ * Вкладка «Для репетиторов» задания №1: серия из 16 уроков по коду
+ * комплекта и методические заметки по блокам. Числа задач банка и
+ * аналогов приходят без ответов: листы собирает движок в браузере.
+ */
+export default function Repetitory1Tab() {
+  return (
+    <Repetitory1
+      razdely={DANNYE.razdely}
+      bank={DANNYE.bank}
+      base={`${razdelBase(ZADANIE1.slug)}`}
+    />
+  );
+}

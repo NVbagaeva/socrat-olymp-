@@ -28,7 +28,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { strukturaObrazca, toZheSoderzhanie } from './sverka-soderzhaniya.mjs';
+import { strukturaObrazca, toZheSoderzhanie, toZheTekst } from './sverka-soderzhaniya.mjs';
+import { kod } from './lib/adres.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = path.join(APP, '..');
@@ -326,7 +327,8 @@ const SODERZHANIE = {
  */
 const ODOBRENO = {
   /* №9, одобрено владельцем 23.11.2026: русское объяснение физического смысла первой и второй производных и схемы к первообразной. */
-  'app/src/content/theoryProizvodnaya.ts': 'e3fd8b0581eaebd337d026f49ccbc3b3cf31def6df6c6fb4d35adc87aa58ec39',
+  'app/src/content/theoryProizvodnaya.ts':
+    'e3fd8b0581eaebd337d026f49ccbc3b3cf31def6df6c6fb4d35adc87aa58ec39',
   /* №4–5: одобрено владельцем 23.11.2026 — подробные материалы по
      изображению событий и противоположному событию. Зафиксированы только
      версии пяти затронутых файлов; последующие изменения снова проверяются. */
@@ -400,8 +402,7 @@ const ODOBRENO = {
     'd3d9ffc9c8563c412af99d4deb1778cc8c024bb15c6b79ae66ab666c9626ebac',
   /* №7: одобрено владельцем 23.11.2026 — подробная теория линейных и
      квадратных уравнений; остальные файлы банка и теории сверяются как прежде. */
-  'app/src/content/teoriya7.ts':
-    '4ed092c1bcd909b8e15128dc6f3db46d91b0ea0a196bcca971059d5713f38212',
+  'app/src/content/teoriya7.ts': '4ed092c1bcd909b8e15128dc6f3db46d91b0ea0a196bcca971059d5713f38212',
   /* №16 (экономика) во второй части, одобрено владельцем 15.11.2026: часть,
      вид ответа и баллы из структуры, оптимизация — второй вид задания,
      ответ не в тех единицах — «уже не 2 балла». Банк задач не менялся. */
@@ -575,7 +576,7 @@ for (const { sha, file } of reestr) {
 
 /* ── 2. Картинки раздела на страницах ─────────────────────────── */
 const svoi = reestr.filter((item) => razdelKartinki(item.file) === razdel);
-if (!fs.existsSync(path.join(OUT, 'zadaniya', razdel, 'index.html'))) {
+if (!fs.existsSync(path.join(OUT, 'zadaniya', kod(razdel), 'index.html'))) {
   check(false, `нет сборки раздела №${razdel}: сначала pnpm build`);
 } else {
   const walk = (dir, out = []) => {
@@ -588,7 +589,7 @@ if (!fs.existsSync(path.join(OUT, 'zadaniya', razdel, 'index.html'))) {
   };
   /* Страницы раздела и скрипты сайта: адрес картинки может собираться в коде. */
   const tekst = [
-    ...walk(path.join(OUT, 'zadaniya', razdel)),
+    ...walk(path.join(OUT, 'zadaniya', kod(razdel))),
     ...walk(path.join(OUT, '_next', 'static', 'chunks')),
   ]
     .map((file) => fs.readFileSync(file, 'utf8'))
@@ -650,7 +651,8 @@ if (puti === undefined) {
   const plohie = [];
   for (const stroka of neodobreno) {
     const [status, file] = stroka.split('\t');
-    if (status !== 'M' || !/\.(ts|tsx|js|mjs)$/.test(file)) {
+    const opisanie = /\.md$/.test(file);
+    if (status !== 'M' || !(opisanie || /\.(ts|tsx|js|mjs)$/.test(file))) {
       plohie.push(stroka);
       continue;
     }
@@ -661,7 +663,10 @@ if (puti === undefined) {
         maxBuffer: 256 * 1024 * 1024,
       });
       const novyy = fs.readFileSync(path.join(REPO, file), 'utf8');
-      const { ravno, gde } = toZheSoderzhanie(staryy, novyy, file, STRUKTURA_OBRAZCA);
+      /* Описание (README) — текстом: та же запись после приведения адресов. */
+      const { ravno, gde } = opisanie
+        ? { ravno: toZheTekst(staryy, novyy), gde: 'текст описания изменён' }
+        : toZheSoderzhanie(staryy, novyy, file, STRUKTURA_OBRAZCA);
       if (ravno) inayaZapis.push(file);
       else plohie.push(`${stroka}\n      ${gde}`);
     } catch (error) {

@@ -164,7 +164,7 @@ for (const size of SIZES) {
   page.on('pageerror', (error) => errors.push(error.message));
   const where = (what) => `${size.name}: ${what}`;
 
-  await page.goto(BASE + '/zadaniya/12/irrational/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/grafiki-funkciy/irrational/', { waitUntil: 'networkidle' });
 
   /* Плашка: в липкой строке над лентой, нажимается, иконка на месте. */
   const plate = await page.evaluate(() => {
@@ -317,10 +317,10 @@ for (const size of SIZES) {
     window.__bezPerezagruzki = true;
   });
   await page.locator(`${MENU} a.razdel-karta`, { hasText: 'Квадратичная функция' }).click();
-  await page.waitForURL(/\/zadaniya\/12\/quadratic\//);
+  await page.waitForURL(/\/zadaniya\/grafiki-funkciy\/quadratic\//);
   await page.waitForTimeout(600);
   check(
-    page.url().endsWith('/zadaniya/12/quadratic/?vkladka=theory'),
+    page.url().endsWith('/zadaniya/grafiki-funkciy/quadratic/?vkladka=theory'),
     where(`адрес параболы ${page.url()}`),
   );
   check(
@@ -338,7 +338,7 @@ for (const size of SIZES) {
   );
 
   await page.goBack();
-  await page.waitForURL(/\/zadaniya\/12\/irrational\//);
+  await page.waitForURL(/\/zadaniya\/grafiki-funkciy\/irrational\//);
   await page.waitForTimeout(600);
   check(
     (await page
@@ -397,18 +397,20 @@ for (const size of SIZES) {
   );
 
   /* С «Опорных задач» — на «Опорные задачи» другого раздела. */
-  await page.goto(BASE + '/zadaniya/12/irrational/opornye-zadachi/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/grafiki-funkciy/irrational/opornye-zadachi/', {
+    waitUntil: 'networkidle',
+  });
   await openByPlate(page);
   await page.locator(`${MENU} a.razdel-karta`, { hasText: 'Дробно-линейная функция' }).click();
-  await page.waitForURL(/\/zadaniya\/12\/rational\//);
+  await page.waitForURL(/\/zadaniya\/grafiki-funkciy\/rational\//);
   await page.waitForTimeout(400);
   check(
-    page.url().endsWith('/zadaniya/12/rational/opornye-zadachi/'),
+    page.url().endsWith('/zadaniya/grafiki-funkciy/rational/opornye-zadachi/'),
     where(`с опорных задач попали на ${page.url()}`),
   );
 
   /* Блок «Другие разделы №12». */
-  await page.goto(BASE + '/zadaniya/12/irrational/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/grafiki-funkciy/irrational/', { waitUntil: 'networkidle' });
   const drugie = await page.evaluate(() => {
     const block = document.querySelector('.drugie-razdely');
     return block === null
@@ -427,7 +429,7 @@ for (const size of SIZES) {
       JSON.stringify(drugie.links) ===
         JSON.stringify(
           RAZDELY.filter((r) => r.open && r.id !== 'irrational').map(
-            (r) => `/zadaniya/12/${r.id}/`,
+            (r) => `/zadaniya/grafiki-funkciy/${r.id}/`,
           ),
         ),
       where(`в «Других разделах» ${JSON.stringify(drugie.links)}`),
@@ -463,7 +465,7 @@ for (const size of SIZES) {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   /* Самое длинное название на плашке: помещается, без многоточия. */
-  await page.goto(BASE + '/zadaniya/12/trigonometric/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/grafiki-funkciy/trigonometric/', { waitUntil: 'networkidle' });
   const longName = await page.evaluate(() => {
     const node = document.querySelector('.razdely-plashka__text');
     return {
@@ -478,7 +480,7 @@ for (const size of SIZES) {
   /* Иконки разделов на странице «Подтемы» (карта «О задании»: вид функции —
      группа): одна на раздел, из общего компонента, декоративные, с
      размерами и srcset; «Скоро» — бледные; шеврон не налезает на иконку. */
-  await page.goto(BASE + '/zadaniya/12/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/grafiki-funkciy/', { waitUntil: 'networkidle' });
   const podtemy = await page.evaluate(() => {
     const cards = Array.from(document.querySelectorAll('.z12-karta .kz-gruppa'));
     return {
@@ -539,7 +541,7 @@ for (const size of SIZES) {
     .filter({ hasText: /Графики функций/ })
     .first()
     .getAttribute('href');
-  check(bank12 === '/zadaniya/12/', where(`банк: карточка №12 ведёт на ${bank12}`));
+  check(bank12 === '/zadaniya/grafiki-funkciy/', where(`банк: карточка №12 ведёт на ${bank12}`));
   check(
     (await page.locator('.tasks-grid button, .tasks-grid [role=button]').count()) === 0,
     where('банк: карточка открывает окно, а не страницу раздела'),
@@ -548,7 +550,9 @@ for (const size of SIZES) {
   /* Статистика тренажёра: иконка раздела и только свои наборы. Счётчики
      всех разделов №12 лежат в одном журнале; здесь он собирается из
      прежней записи budetege:trainer:v1. */
-  await page.goto(BASE + '/zadaniya/12/quadratic/trenazher/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/grafiki-funkciy/quadratic/trenazher/', {
+    waitUntil: 'networkidle',
+  });
   await page.evaluate(() =>
     localStorage.setItem(
       'budetege:trainer:v1',
@@ -624,7 +628,9 @@ for (const size of SIZES) {
   /* Закрытый раздел: страница «Скоро» с той же плашкой. */
   const closed = RAZDELY.find((r) => !r.open);
   if (closed) {
-    await page.goto(BASE + '/zadaniya/12/' + closed.id + '/', { waitUntil: 'networkidle' });
+    await page.goto(BASE + '/zadaniya/grafiki-funkciy/' + closed.id + '/', {
+      waitUntil: 'networkidle',
+    });
     check(
       (await page.locator('.topic-tabs-row:not([inert]) .razdely-plashka').count()) === 1,
       where('на странице закрытого раздела нет плашки'),

@@ -107,7 +107,8 @@ const ZHURNAL_ON = process.env.NEXT_PUBLIC_ZHURNAL === '1';
 /* Сборка с новой выдачей ДЗ (NEXT_PUBLIC_DZ2=1). */
 const DZ2_ON = process.env.NEXT_PUBLIC_DZ2 === '1';
 const PROGRESS_ON =
-  process.env.NEXT_PUBLIC_PROGRESS_UCHITEL === '1' && process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1';
+  process.env.NEXT_PUBLIC_PROGRESS_UCHITEL === '1' &&
+  process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1';
 const DISABLED = process.argv.includes('--disabled');
 const NO_HEADER = process.argv.includes('--no-header');
 /* Снимки классов и ДЗ №8 для описания PR этапа 3. */
@@ -533,14 +534,23 @@ function makeMock() {
         for (const v of pachka.varianty ?? []) zhurnalVarianty.push({ ...v, user_id: me.id });
         return {
           status: 200,
-          body: { saved: (pachka.zadachi ?? []).length + (pachka.varianty ?? []).length, skipped: 0 },
+          body: {
+            saved: (pachka.zadachi ?? []).length + (pachka.varianty ?? []).length,
+            skipped: 0,
+          },
         };
       }
       /* Чтение журнала (функции uchitel_*, moya_*): как в базе — учитель
          видит только учеников своих классов, ученику не уходит «очень быстро». */
       const ZHURNAL_RPC = [
-        'uchitel_klass', 'uchitel_uchenik', 'uchitel_lenta', 'uchitel_zadacha', 'uchitel_variant',
-        'moya_statistika', 'moya_lenta', 'moy_variant',
+        'uchitel_klass',
+        'uchitel_uchenik',
+        'uchitel_lenta',
+        'uchitel_zadacha',
+        'uchitel_variant',
+        'moya_statistika',
+        'moya_lenta',
+        'moy_variant',
       ];
       const rpcName = table.startsWith('rpc/') ? table.slice(4) : '';
       if (ZHURNAL_RPC.includes(rpcName) && method === 'POST') {
@@ -560,9 +570,14 @@ function makeMock() {
         if (fn === 'dz2_save') {
           const p = body.p ?? {};
           const old = p.id ? mine(p.id) : undefined;
-          if (p.id && (old === undefined || !['draft', 'template'].includes(old.status))) return pg('P0001', 'not_draft');
+          if (p.id && (old === undefined || !['draft', 'template'].includes(old.status)))
+            return pg('P0001', 'not_draft');
           const row = old ?? { id: `dz2-${dz2.length + 1}`, tutor_id: me.id, chernovik: null };
-          Object.assign(row, { status: p.status ?? 'draft', p, created_at: new Date().toISOString() });
+          Object.assign(row, {
+            status: p.status ?? 'draft',
+            p,
+            created_at: new Date().toISOString(),
+          });
           if (old === undefined) dz2.push(row);
           return { status: 200, body: row.id };
         }
@@ -577,7 +592,8 @@ function makeMock() {
           if (d === undefined || d.status !== 'draft') return pg('P0001', 'not_draft');
           const ids = new Set();
           for (const t of d.p.targets ?? []) {
-            if (t.class_id) for (const m of members) if (m.class_id === t.class_id) ids.add(m.user_id);
+            if (t.class_id)
+              for (const m of members) if (m.class_id === t.class_id) ids.add(m.user_id);
             if (t.student_id) ids.add(t.student_id);
           }
           if (ids.size === 0) return pg('P0001', 'no_recipients');
@@ -591,22 +607,39 @@ function makeMock() {
             body: dz2
               .filter((d) => d.tutor_id === me.id)
               .map((d) => ({
-                id: d.id, title: d.p.title, status: d.status, created_at: d.created_at,
-                ...(d.p.due_at ? { due_at: d.p.due_at } : {}), ...(d.p.publish_at ? { publish_at: d.p.publish_at } : {}),
-                items: (d.p.items ?? []).length, recipients: (d.recipients ?? []).length, submitted: 0,
+                id: d.id,
+                title: d.p.title,
+                status: d.status,
+                created_at: d.created_at,
+                ...(d.p.due_at ? { due_at: d.p.due_at } : {}),
+                ...(d.p.publish_at ? { publish_at: d.p.publish_at } : {}),
+                items: (d.p.items ?? []).length,
+                recipients: (d.recipients ?? []).length,
+                submitted: 0,
               })),
           };
         }
         if (fn === 'dz2_copy') {
           const d = mine(body.p_id);
           if (d === undefined) return pg('42501', 'forbidden');
-          const row = { id: `dz2-${dz2.length + 1}`, tutor_id: me.id, status: body.p_status ?? 'draft',
-            p: { ...d.p, targets: [] }, chernovik: d.chernovik, created_at: new Date().toISOString() };
+          const row = {
+            id: `dz2-${dz2.length + 1}`,
+            tutor_id: me.id,
+            status: body.p_status ?? 'draft',
+            p: { ...d.p, targets: [] },
+            chernovik: d.chernovik,
+            created_at: new Date().toISOString(),
+          };
           dz2.push(row);
           return { status: 200, body: row.id };
         }
         if (fn === 'dz2_delete') {
-          const i = dz2.findIndex((d) => d.id === body.p_id && d.tutor_id === me.id && ['draft', 'template'].includes(d.status));
+          const i = dz2.findIndex(
+            (d) =>
+              d.id === body.p_id &&
+              d.tutor_id === me.id &&
+              ['draft', 'template'].includes(d.status),
+          );
           if (i < 0) return pg('42501', 'forbidden');
           dz2.splice(i, 1);
           return { status: 200, body: null };
@@ -624,12 +657,23 @@ function makeMock() {
       if (table === 'homework2' && method === 'GET') {
         const id = (u.searchParams.get('id') ?? '').replace(/^eq\./, '');
         const d = dz2.find((x) => x.id === id && x.tutor_id === me.id);
-        if (d === undefined) return err(406, 'PGRST116', 'JSON object requested, multiple (or no) rows returned');
-        const row = { id: d.id, title: d.p.title, note: d.p.note ?? null, status: d.status,
-          publish_at: d.p.publish_at ?? null, due_at: d.p.due_at ?? null, after_due: d.p.after_due ?? 'late_ok',
-          hints_allowed: d.p.hints_allowed ?? true, attempts_limit: d.p.attempts_limit ?? null,
-          solutions_when: d.p.solutions_when ?? 'instant', individual: d.p.individual ?? false,
-          kontrol: d.p.kontrol ?? false, chernovik: d.chernovik };
+        if (d === undefined)
+          return err(406, 'PGRST116', 'JSON object requested, multiple (or no) rows returned');
+        const row = {
+          id: d.id,
+          title: d.p.title,
+          note: d.p.note ?? null,
+          status: d.status,
+          publish_at: d.p.publish_at ?? null,
+          due_at: d.p.due_at ?? null,
+          after_due: d.p.after_due ?? 'late_ok',
+          hints_allowed: d.p.hints_allowed ?? true,
+          attempts_limit: d.p.attempts_limit ?? null,
+          solutions_when: d.p.solutions_when ?? 'instant',
+          individual: d.p.individual ?? false,
+          kontrol: d.p.kontrol ?? false,
+          chernovik: d.chernovik,
+        };
         return { status: 200, body: prefersObject ? row : [row] };
       }
       if (table === 'rpc/delete_my_account' && method === 'POST') {
@@ -741,16 +785,25 @@ function makeMock() {
 
   /* ── Чтение журнала для экранов прогресса ── */
   /* Ошибка функции базы — в формате PostgREST: код в начале message. */
-  const perr = (status, code, message) => ({ status, body: { code, message, details: null, hint: null } });
+  const perr = (status, code, message) => ({
+    status,
+    body: { code, message, details: null, hint: null },
+  });
   const SOLVED = ['right', 'hinted', 'wrong', 'revealed'];
   const moyStudent = (tutorId, studentId) =>
     classes.some(
-      (c) => c.tutor_id === tutorId && members.some((m) => m.class_id === c.id && m.user_id === studentId),
+      (c) =>
+        c.tutor_id === tutorId &&
+        members.some((m) => m.class_id === c.id && m.user_id === studentId),
     );
   const day = (iso) => new Date(Date.parse(iso) + 3 * 3600000).toISOString().slice(0, 10);
   const bystro = (z) =>
-    z.outcome === 'right' && z.attempts_n <= 1 && z.hint_steps === 0 && !z.shown_solution &&
-    (z.level ?? 1) >= 2 && z.active_ms < 8000;
+    z.outcome === 'right' &&
+    z.attempts_n <= 1 &&
+    z.hint_steps === 0 &&
+    !z.shown_solution &&
+    (z.level ?? 1) >= 2 &&
+    z.active_ms < 8000;
   const vid = (z, uchitel, polno) => {
     const last = [...(z.popytki ?? [])].reverse()[0];
     const out = { ...z, last_answer: last?.answer, verified: false };
@@ -764,7 +817,9 @@ function makeMock() {
     return out;
   };
   const vPeriode = (z, b) =>
-    day(z.started_at) >= b.p_from && day(z.started_at) <= b.p_to && (b.p_task_no == null || z.task_no === b.p_task_no);
+    day(z.started_at) >= b.p_from &&
+    day(z.started_at) <= b.p_to &&
+    (b.p_task_no == null || z.task_no === b.p_task_no);
   function svodka(uid, b) {
     const rows = zhurnal.filter((z) => z.user_id === uid && vPeriode(z, b));
     const solved = rows.filter((z) => SOLVED.includes(z.outcome));
@@ -786,10 +841,17 @@ function makeMock() {
       solved: solved.length,
       right: rows.filter((z) => z.outcome === 'right').length,
       po_zadaniyam: group((z) => z.task_no)
-        .map((g) => ({ task_no: g.z.task_no, solved: g.solved, right: g.right, active_ms: g.active_ms }))
+        .map((g) => ({
+          task_no: g.z.task_no,
+          solved: g.solved,
+          right: g.right,
+          active_ms: g.active_ms,
+        }))
         .sort((a, c) => a.task_no - c.task_no),
       dni: group((z) => day(z.started_at)).map((g) => ({
-        day: day(g.z.started_at), solved: g.solved, active_ms: g.active_ms,
+        day: day(g.z.started_at),
+        solved: g.solved,
+        active_ms: g.active_ms,
       })),
       slabye: group((z) => `${z.task_no}|${z.kind}`)
         .filter((g) => g.solved >= 3)
@@ -797,7 +859,10 @@ function makeMock() {
         .slice(0, 5)
         .map((g) => ({ task_no: g.z.task_no, kind: g.z.kind, solved: g.solved, right: g.right })),
       varianty: zhurnalVarianty
-        .filter((v) => v.user_id === uid && day(v.finished_at) >= b.p_from && day(v.finished_at) <= b.p_to)
+        .filter(
+          (v) =>
+            v.user_id === uid && day(v.finished_at) >= b.p_from && day(v.finished_at) <= b.p_to,
+        )
         .map((v) => {
           const out = { ...v };
           delete out.user_id;
@@ -807,7 +872,10 @@ function makeMock() {
   }
   function lenta(uid, b, uchitel) {
     return zhurnal
-      .filter((z) => z.user_id === uid && vPeriode(z, b) && (b.p_before == null || z.started_at < b.p_before))
+      .filter(
+        (z) =>
+          z.user_id === uid && vPeriode(z, b) && (b.p_before == null || z.started_at < b.p_before),
+      )
       .sort((a, c) => (a.started_at < c.started_at ? 1 : -1))
       .slice(0, 50)
       .map((z) => vid(z, uchitel, false));
@@ -815,21 +883,28 @@ function makeMock() {
   function variant(uid, id, uchitel) {
     const v = zhurnalVarianty.find((x) => x.user_id === uid && x.id === id);
     if (v === undefined) return perr(400, 'P0002', 'not_found');
-    const out = { ...v, zadachi: zhurnal.filter((z) => z.user_id === uid && z.place_ref === id).map((z) => vid(z, uchitel, true)) };
+    const out = {
+      ...v,
+      zadachi: zhurnal
+        .filter((z) => z.user_id === uid && z.place_ref === id)
+        .map((z) => vid(z, uchitel, true)),
+    };
     delete out.user_id;
     return { status: 200, body: out };
   }
   function zhurnalRead(name, b, me) {
     const role = profiles.get(me.id)?.role;
     if (name.startsWith('uchitel_')) {
-      if (role !== 'tutor') return perr(403, '42501', name === 'uchitel_klass' ? 'forbidden' : 'not_your_student');
+      if (role !== 'tutor')
+        return perr(403, '42501', name === 'uchitel_klass' ? 'forbidden' : 'not_your_student');
       if (name === 'uchitel_klass') {
         const c = classes.find((x) => x.id === b.p_class && x.tutor_id === me.id);
         if (c === undefined) return perr(403, '42501', 'forbidden');
         const ids = members.filter((m) => m.class_id === c.id).map((m) => m.user_id);
         const karta = [];
         for (const uid of ids) {
-          for (const g of svodka(uid, { ...b, p_task_no: null }).po_zadaniyam) karta.push({ id: uid, ...g });
+          for (const g of svodka(uid, { ...b, p_task_no: null }).po_zadaniyam)
+            karta.push({ id: uid, ...g });
         }
         return {
           status: 200,
@@ -837,8 +912,15 @@ function makeMock() {
             class: { id: c.id, name: c.name },
             ucheniki: ids.map((uid) => {
               const mine = zhurnal.filter((z) => z.user_id === uid);
-              const last = mine.map((z) => day(z.started_at)).sort().at(-1);
-              const ned = svodka(uid, { p_from: '2000-01-01', p_to: '2100-01-01', p_task_no: null });
+              const last = mine
+                .map((z) => day(z.started_at))
+                .sort()
+                .at(-1);
+              const ned = svodka(uid, {
+                p_from: '2000-01-01',
+                p_to: '2100-01-01',
+                p_task_no: null,
+              });
               return {
                 id: uid,
                 name: profiles.get(uid)?.display_name ?? '',
@@ -857,14 +939,21 @@ function makeMock() {
       if (name === 'uchitel_uchenik') {
         return {
           status: 200,
-          body: { id: uid, name: profiles.get(uid)?.display_name ?? '', s: '2026-01-01', progress_allowed: true,
-            svodka: svodka(uid, b) },
+          body: {
+            id: uid,
+            name: profiles.get(uid)?.display_name ?? '',
+            s: '2026-01-01',
+            progress_allowed: true,
+            svodka: svodka(uid, b),
+          },
         };
       }
       if (name === 'uchitel_lenta') return { status: 200, body: lenta(uid, b, true) };
       if (name === 'uchitel_zadacha') {
         const z = zhurnal.find((x) => x.user_id === uid && x.id === b.p_id);
-        return z === undefined ? perr(400, 'P0002', 'not_found') : { status: 200, body: vid(z, true, true) };
+        return z === undefined
+          ? perr(400, 'P0002', 'not_found')
+          : { status: 200, body: vid(z, true, true) };
       }
       return variant(uid, b.p_id, true);
     }
@@ -1234,7 +1323,7 @@ async function runDisabled() {
     !(await page.locator('#site-menu').innerText()).includes('Войти'),
     'меню телефона: «Войти» нет',
   );
-  await page.goto(`${SITE}/zadaniya/12/linear/`, { waitUntil: 'networkidle' });
+  await page.goto(`${SITE}/zadaniya/grafiki-funkciy/linear/`, { waitUntil: 'networkidle' });
   check(
     (await page.locator('.topbar .auth-widget, .topbar ' + LOGIN).count()) === 0,
     'оболочка заданий: входа нет',
@@ -2242,7 +2331,7 @@ async function runEnabled() {
         await new Promise((done) => setTimeout(done, 250));
       }
     };
-    const TRAINER = `${SITE}/zadaniya/8/trenazher/`;
+    const TRAINER = `${SITE}/zadaniya/vychisleniya/trenazher/`;
     const CARD = '.trn-zadacha[data-task]';
 
     const desk = await newPage(mock, 1280, errors);
@@ -2476,7 +2565,7 @@ async function runEnabled() {
         /сделано 0 из \d+/.test(await text(st1.page, '.karta-dz')),
       'ДЗ: у ученика под картой — карточка задания, «сделано 0 из N»',
     );
-    await st1.page.goto(`${SITE}/zadaniya/8/`, { waitUntil: 'networkidle' });
+    await st1.page.goto(`${SITE}/zadaniya/vychisleniya/`, { waitUntil: 'networkidle' });
     await st1.page.waitForSelector('[data-block="dz-plashka"]');
     check(
       (await text(st1.page, '[data-block="dz-plashka"]')).includes('У вас домашнее задание до'),
@@ -2664,7 +2753,7 @@ async function runEnabled() {
     check(await noHorizontalScroll(page), 'кабинет 390: горизонтальной прокрутки нет');
     await shot(page, 'kabinet-repetitor-390');
 
-    await page.goto(`${SITE}/zadaniya/8/generator/`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/zadaniya/vychisleniya/generator/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.topbar ' + AVATAR);
     check(await noHorizontalScroll(page), 'генератор 390: горизонтальной прокрутки нет');
     await shot(page, 'shapka-posle-vhoda-390');
@@ -2774,7 +2863,7 @@ async function runEnabled() {
 
 /** SDK входа не должен попадать в первую загрузку страниц. */
 function sdkOutsideFirstLoad() {
-  for (const p of ['', 'zadaniya/12/linear']) {
+  for (const p of ['', 'zadaniya/grafiki-funkciy/linear']) {
     const html = fs.readFileSync(path.join(OUT, p, 'index.html'), 'utf8');
     const srcs = [...html.matchAll(/<script[^>]*\ssrc="([^"]+)"[^>]*>/g)].map((m) => m[1]);
     let sdk = false;
@@ -2797,7 +2886,9 @@ async function runZhurnal() {
      и второй вход продолжил бы начатую. */
   const uchenik = { 375: 'zhurnal@yandex.ru', 1280: 'zhurnal2@yandex.ru' };
   for (const email of Object.values(uchenik)) {
-    registerInMock(mock, email, 'zhurnal-parol-1', 'Журнал Ученик', 'student', { birth_year: 2000 });
+    registerInMock(mock, email, 'zhurnal-parol-1', 'Журнал Ученик', 'student', {
+      birth_year: 2000,
+    });
   }
   const errors = [];
   const answerOfTask = (id) => {
@@ -2808,7 +2899,7 @@ async function runZhurnal() {
     const { context, page } = await newPage(mock, width, errors);
     await welcomeSeen(context);
     await login(page, uchenik[width], 'zhurnal-parol-1');
-    await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/zadaniya/vychisleniya/trenazher/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.trn-start');
     await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
     await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
@@ -2850,20 +2941,36 @@ async function runZhurnal() {
     const b = rowOf(second);
     check(a !== undefined && b !== undefined, `журнал ${width}: обе задачи ушли в базу`);
     if (a !== undefined) {
-      check(a.task_no === 8 && a.kind === parseTaskId(first).prototype && a.place === 'trenazher',
-        `журнал ${width}: раздел, тип и место задачи`);
-      check(a.popytki.length === 2 && a.popytki[0].answer === wrongTyped && !a.popytki[0].ok
-        && a.popytki[1].ok && a.popytki[1].n === 2,
-        `журнал ${width}: обе попытки с ответом как есть: ${JSON.stringify(a.popytki)}`);
-      check(a.outcome === 'wrong', `журнал ${width}: верно со второй попытки — ошибка (${a.outcome})`);
-      check(typeof a.gen_hash === 'string' && a.gen_hash.length === 16 && a.uslovie_tex.length > 0,
-        `журнал ${width}: отпечаток и условие для учителя`);
-      check(a.total_ms > 0 && a.active_ms > 0 && a.active_ms <= a.total_ms,
-        `журнал ${width}: активное и общее время (${a.active_ms} из ${a.total_ms})`);
+      check(
+        a.task_no === 8 && a.kind === parseTaskId(first).prototype && a.place === 'trenazher',
+        `журнал ${width}: раздел, тип и место задачи`,
+      );
+      check(
+        a.popytki.length === 2 &&
+          a.popytki[0].answer === wrongTyped &&
+          !a.popytki[0].ok &&
+          a.popytki[1].ok &&
+          a.popytki[1].n === 2,
+        `журнал ${width}: обе попытки с ответом как есть: ${JSON.stringify(a.popytki)}`,
+      );
+      check(
+        a.outcome === 'wrong',
+        `журнал ${width}: верно со второй попытки — ошибка (${a.outcome})`,
+      );
+      check(
+        typeof a.gen_hash === 'string' && a.gen_hash.length === 16 && a.uslovie_tex.length > 0,
+        `журнал ${width}: отпечаток и условие для учителя`,
+      );
+      check(
+        a.total_ms > 0 && a.active_ms > 0 && a.active_ms <= a.total_ms,
+        `журнал ${width}: активное и общее время (${a.active_ms} из ${a.total_ms})`,
+      );
     }
     if (b !== undefined) {
-      check(b.outcome === (hinted ? 'hinted' : 'right') && b.hint_steps === (hinted ? 1 : 0),
-        `журнал ${width}: подсказка и исход второй задачи (${b.outcome}, ${b.hint_steps})`);
+      check(
+        b.outcome === (hinted ? 'hinted' : 'right') && b.hint_steps === (hinted ? 1 : 0),
+        `журнал ${width}: подсказка и исход второй задачи (${b.outcome}, ${b.hint_steps})`,
+      );
     }
     await context.close();
     mock.zhurnal.length = 0;
@@ -2873,7 +2980,7 @@ async function runZhurnal() {
   const { context, page } = await newPage(mock, 1280, errors);
   await welcomeSeen(context);
   await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
-  await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+  await page.goto(`${SITE}/zadaniya/vychisleniya/trenazher/`, { waitUntil: 'networkidle' });
   await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
   await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
   await page.locator('.trn-vybor__start').click();
@@ -2884,7 +2991,10 @@ async function runZhurnal() {
   await new Promise((done) => setTimeout(done, 5000));
   check(mock.zhurnal.length === 0, 'журнал: учитель в журнал не пишет');
   await context.close();
-  check(errors.length === 0, `журнал: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
+  check(
+    errors.length === 0,
+    `журнал: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`,
+  );
 }
 
 /* ── Экраны прогресса (кабинет v2, этап 1б; docs/kabinet-zhurnal.md) ──
@@ -2914,13 +3024,34 @@ async function runProgress() {
     const p = parseTaskId(ref);
     const g = generate(p.prototype, p.seed, p.level);
     return {
-      id: M.idIz(ref), task_no: 8, kind: p.prototype, task_ref: ref, place: 'trenazher', place_ref: 'r1',
-      gen_hash: M.otpechatokUsloviya(g.uslovie), uslovie_tex: g.uslovie, level, outcome,
-      answer_key: String(g.otvet), attempts_n: popytki.length, hint_steps: 0, hint_wrong: [],
-      shown_fact: false, shown_solution: false, skipped: false, active_ms: activeMs, total_ms: activeMs + 30000,
-      started_at: iso(60 * 24 * (i % 6) + i), closed_at: iso(60 * 24 * (i % 6) + i - 1),
-      popytki: popytki.map((a, n) => ({ n: n + 1, answer: a === true ? ru(g.otvet) : a, ok: a === true, vid: 'answer',
-        at: iso(i) })),
+      id: M.idIz(ref),
+      task_no: 8,
+      kind: p.prototype,
+      task_ref: ref,
+      place: 'trenazher',
+      place_ref: 'r1',
+      gen_hash: M.otpechatokUsloviya(g.uslovie),
+      uslovie_tex: g.uslovie,
+      level,
+      outcome,
+      answer_key: String(g.otvet),
+      attempts_n: popytki.length,
+      hint_steps: 0,
+      hint_wrong: [],
+      shown_fact: false,
+      shown_solution: false,
+      skipped: false,
+      active_ms: activeMs,
+      total_ms: activeMs + 30000,
+      started_at: iso(60 * 24 * (i % 6) + i),
+      closed_at: iso(60 * 24 * (i % 6) + i - 1),
+      popytki: popytki.map((a, n) => ({
+        n: n + 1,
+        answer: a === true ? ru(g.otvet) : a,
+        ok: a === true,
+        vid: 'answer',
+        at: iso(i),
+      })),
       ...extra,
     };
   };
@@ -2936,22 +3067,63 @@ async function runProgress() {
   ].map((z) => ({ ...z, user_id: a }));
   for (let i = 0; i < 4; i += 1) {
     rows.push({
-      id: M.idIz(`5|${i}`), user_id: a, task_no: 5, kind: '5:P03', task_ref: `5:P03:${i + 1}`, place: 'opornye',
-      place_ref: 'summa', uslovie_tex: 'В урне 4 белых и 6 чёрных шаров. Наугад достают два. Найдите вероятность того, что оба белые.',
-      level: 2, outcome: i < 3 ? 'right' : 'wrong', answer_key: '0,13', attempts_n: 1, hint_steps: 0, hint_wrong: [],
-      shown_fact: false, shown_solution: false, skipped: false, active_ms: 70000, total_ms: 90000,
-      started_at: iso(60 * 24 * i + 30), closed_at: iso(60 * 24 * i + 29),
+      id: M.idIz(`5|${i}`),
+      user_id: a,
+      task_no: 5,
+      kind: '5:P03',
+      task_ref: `5:P03:${i + 1}`,
+      place: 'opornye',
+      place_ref: 'summa',
+      uslovie_tex:
+        'В урне 4 белых и 6 чёрных шаров. Наугад достают два. Найдите вероятность того, что оба белые.',
+      level: 2,
+      outcome: i < 3 ? 'right' : 'wrong',
+      answer_key: '0,13',
+      attempts_n: 1,
+      hint_steps: 0,
+      hint_wrong: [],
+      shown_fact: false,
+      shown_solution: false,
+      skipped: false,
+      active_ms: 70000,
+      total_ms: 90000,
+      started_at: iso(60 * 24 * i + 30),
+      closed_at: iso(60 * 24 * i + 29),
       popytki: [{ n: 1, answer: i < 3 ? '0,13' : '0,4', ok: i < 3, vid: 'answer', at: iso(30) }],
     });
   }
   const variantId = M.idIz('variant|demo');
   mock.zhurnalVarianty.push(
-    { id: M.idIz('variant|old'), user_id: a, source: 'sobrat', set_code: 'K7M2', variant_no: 1, title: 'Вариант 1',
-      started_at: iso(60 * 24 * 9), finished_at: iso(60 * 24 * 9 - 200), primary_score: 9, max_score: 32,
-      test_score: 52, active_ms: 9000000, total_ms: 11000000 },
-    { id: variantId, user_id: a, source: 'sobrat', set_code: 'K7M2', variant_no: 2, title: 'Вариант 2',
-      started_at: iso(300), finished_at: iso(100), primary_score: 14, max_score: 32, test_score: 70,
-      active_ms: 10000000, total_ms: 12000000 },
+    {
+      id: M.idIz('variant|old'),
+      user_id: a,
+      source: 'sobrat',
+      set_code: 'K7M2',
+      variant_no: 1,
+      title: 'Вариант 1',
+      started_at: iso(60 * 24 * 9),
+      finished_at: iso(60 * 24 * 9 - 200),
+      primary_score: 9,
+      max_score: 32,
+      test_score: 52,
+      active_ms: 9000000,
+      total_ms: 11000000,
+    },
+    {
+      id: variantId,
+      user_id: a,
+      source: 'sobrat',
+      set_code: 'K7M2',
+      variant_no: 2,
+      title: 'Вариант 2',
+      started_at: iso(300),
+      finished_at: iso(100),
+      primary_score: 14,
+      max_score: 32,
+      test_score: 70,
+      active_ms: 10000000,
+      total_ms: 12000000,
+    },
   );
   rows.push(
     { ...z8(9, 'right', 240000, 1, [true]), user_id: a, place: 'variant', place_ref: variantId },
@@ -2973,10 +3145,16 @@ async function runProgress() {
         [...document.querySelectorAll('main *')]
           .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1)
           .slice(0, 4)
-          .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).split(' ')[0]}:${Math.round(e.getBoundingClientRect().right)}`)
+          .map(
+            (e) =>
+              `${e.tagName.toLowerCase()}.${String(e.className).split(' ')[0]}:${Math.round(e.getBoundingClientRect().right)}`,
+          )
           .join(', '),
       );
-      check(await noHorizontalScroll(page), `прогресс ${width} ${name}: без горизонтальной прокрутки страницы ${shire}`);
+      check(
+        await noHorizontalScroll(page),
+        `прогресс ${width} ${name}: без горизонтальной прокрутки страницы ${shire}`,
+      );
       if (SHOTS === null) return;
       await page.evaluate(() => document.fonts.ready);
       await page.screenshot({
@@ -2989,46 +3167,90 @@ async function runProgress() {
     await page.goto(`${SITE}/kabinet/progress/klass/?id=${klass}`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.pu-karta');
     const imena = await page.locator('.pu-karta tbody th').allTextContents();
-    check(imena.join('|') === 'Аня Смирнова|Борис Ким', `класс ${width}: свои ученики (${imena.join('|')})`);
-    check((await page.locator('.pu-karta thead th').allTextContents()).includes('№7'),
-      `класс ${width}: №8 показан как задание 7 ЕГЭ-2027`);
+    check(
+      imena.join('|') === 'Аня Смирнова|Борис Ким',
+      `класс ${width}: свои ученики (${imena.join('|')})`,
+    );
+    check(
+      (await page.locator('.pu-karta thead th').allTextContents()).includes('№7'),
+      `класс ${width}: №8 показан как задание 7 ЕГЭ-2027`,
+    );
     check(!(await page.content()).includes('Чужой ученик'), `класс ${width}: чужого ученика нет`);
     await snap('klass');
 
-    await page.goto(`${SITE}/kabinet/progress/uchenik/?id=${a}&klass=${klass}`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/kabinet/progress/uchenik/?id=${a}&klass=${klass}`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('.pu-lenta');
-    check((await page.locator('.pu-bystro').count()) === 1, `ученик ${width}: одна пометка «очень быстро»`);
-    check((await page.locator('.pu-dinamika').count()) === 1, `ученик ${width}: динамика тестового балла`);
+    check(
+      (await page.locator('.pu-bystro').count()) === 1,
+      `ученик ${width}: одна пометка «очень быстро»`,
+    );
+    check(
+      (await page.locator('.pu-dinamika').count()) === 1,
+      `ученик ${width}: динамика тестового балла`,
+    );
     if (width === 1280) {
-      const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('button:has-text("Excel")').click()]);
+      const [dl] = await Promise.all([
+        page.waitForEvent('download'),
+        page.locator('button:has-text("Excel")').click(),
+      ]);
       /* Имя файла (по-русски) проверяет test:zhurnal: headless-Chromium
          отдаёт для не-ASCII имени «download». Здесь — сам файл. */
       const file = path.join(os.tmpdir(), `progress-${Date.now()}.xlsx`);
       await dl.saveAs(file);
-      const py = spawnSync('python3', ['-c',
-        'import sys,openpyxl;ws=openpyxl.load_workbook(sys.argv[1]).active;print(ws.max_row, ws["F2"].value)', file],
-        { encoding: 'utf8' });
-      if (py.status === 0) check(/^14 /.test(py.stdout.trim()), `Excel ученика: строки на месте (${py.stdout.trim()})`);
+      const py = spawnSync(
+        'python3',
+        [
+          '-c',
+          'import sys,openpyxl;ws=openpyxl.load_workbook(sys.argv[1]).active;print(ws.max_row, ws["F2"].value)',
+          file,
+        ],
+        { encoding: 'utf8' },
+      );
+      if (py.status === 0)
+        check(
+          /^14 /.test(py.stdout.trim()),
+          `Excel ученика: строки на месте (${py.stdout.trim()})`,
+        );
       else check(spawnSync('unzip', ['-t', file]).status === 0, 'Excel ученика: архив .xlsx цел');
       fs.rmSync(file, { force: true });
     }
     await snap('uchenik');
 
-    await page.goto(`${SITE}/kabinet/progress/zadacha/?u=${a}&id=${bystraya}`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/kabinet/progress/zadacha/?u=${a}&id=${bystraya}`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('.pu-uslovie .katex');
-    check((await page.locator('.pu-vnimanie').count()) === 0, `задача ${width}: собрана заново, не по записи`);
-    check((await page.locator('.pu-bystro').count()) === 1, `задача ${width}: пометка «очень быстро»`);
+    check(
+      (await page.locator('.pu-vnimanie').count()) === 0,
+      `задача ${width}: собрана заново, не по записи`,
+    );
+    check(
+      (await page.locator('.pu-bystro').count()) === 1,
+      `задача ${width}: пометка «очень быстро»`,
+    );
     await snap('zadacha');
 
-    await page.goto(`${SITE}/kabinet/progress/variant/?u=${a}&id=${variantId}`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/kabinet/progress/variant/?u=${a}&id=${variantId}`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('.pu-tablica tbody tr');
-    check((await page.locator('.pu-tablica tbody tr').count()) === 2, `вариант ${width}: две задачи`);
+    check(
+      (await page.locator('.pu-tablica tbody tr').count()) === 2,
+      `вариант ${width}: две задачи`,
+    );
     await snap('variant');
 
     /* Чужой ученик: база отказывает, экран говорит спокойно. */
-    await page.goto(`${SITE}/kabinet/progress/uchenik/?id=${uid(emails[2])}`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/kabinet/progress/uchenik/?id=${uid(emails[2])}`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('text=Этого ученика нет среди ваших учеников.');
-    check(!(await page.content()).includes('Чужой ученик'), `чужой ученик ${width}: имени и данных нет`);
+    check(
+      !(await page.content()).includes('Чужой ученик'),
+      `чужой ученик ${width}: имени и данных нет`,
+    );
     await context.close();
   }
 
@@ -3039,21 +3261,33 @@ async function runProgress() {
     await login(page, emails[0], 'zhurnal-parol-1');
     await page.goto(`${SITE}/kabinet/statistika/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.pu-lenta');
-    check((await page.locator('.pu-bystro').count()) === 0 && !(await page.content()).includes('очень быстро'),
-      `статистика ${width}: без пометки «очень быстро»`);
-    check((await page.locator('.pu-lenta a').count()) === 0, `статистика ${width}: лента без ссылок учителя`);
+    check(
+      (await page.locator('.pu-bystro').count()) === 0 &&
+        !(await page.content()).includes('очень быстро'),
+      `статистика ${width}: без пометки «очень быстро»`,
+    );
+    check(
+      (await page.locator('.pu-lenta a').count()) === 0,
+      `статистика ${width}: лента без ссылок учителя`,
+    );
     check(await noHorizontalScroll(page), `статистика ${width}: без горизонтальной прокрутки`);
     if (SHOTS !== null) {
       await page.evaluate(() => document.fonts.ready);
-      await page.screenshot({ path: path.join(SHOTS, `progress-statistika-${width}.png`), fullPage: true,
-        style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+      await page.screenshot({
+        path: path.join(SHOTS, `progress-statistika-${width}.png`),
+        fullPage: true,
+        style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+      });
     }
     /* Ученик не открывает экраны учителя. */
     await page.goto(`${SITE}/kabinet/progress/uchenik/?id=${a}`, { waitUntil: 'networkidle' });
     await page.waitForSelector('text=Эта страница — для учителя.');
     await context.close();
   }
-  check(errors.length === 0, `прогресс: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
+  check(
+    errors.length === 0,
+    `прогресс: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`,
+  );
 }
 
 /* ── Новая выдача ДЗ (кабинет v2, этап 2б; docs/kabinet-dz2.md) ──
@@ -3069,17 +3303,30 @@ async function runDz2() {
   const mock = makeMock();
   registerInMock(mock, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2', 'Журнал Учитель', 'tutor');
   for (const e of ['zhurnal@yandex.ru', 'zhurnal2@yandex.ru']) {
-    registerInMock(mock, e, 'zhurnal-parol-1', e.startsWith('zhurnal2') ? 'Борис Ким' : 'Аня Смирнова', 'student',
-      { birth_year: 2000 });
+    registerInMock(
+      mock,
+      e,
+      'zhurnal-parol-1',
+      e.startsWith('zhurnal2') ? 'Борис Ким' : 'Аня Смирнова',
+      'student',
+      { birth_year: 2000 },
+    );
   }
-  mock.seedClass('zhurnal-uchitel@yandex.ru', ['zhurnal@yandex.ru', 'zhurnal2@yandex.ru'], '11 «А»');
+  mock.seedClass(
+    'zhurnal-uchitel@yandex.ru',
+    ['zhurnal@yandex.ru', 'zhurnal2@yandex.ru'],
+    '11 «А»',
+  );
   const errors = [];
   const snap = async (page, name, width) => {
     check(await noHorizontalScroll(page), `ДЗ ${width} ${name}: без горизонтальной прокрутки`);
     if (SHOTS === null) return;
     await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: path.join(SHOTS, `dz2-${name}-${width}.png`), fullPage: true,
-      style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+    await page.screenshot({
+      path: path.join(SHOTS, `dz2-${name}-${width}.png`),
+      fullPage: true,
+      style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+    });
   };
 
   for (const width of [375, 1280]) {
@@ -3087,32 +3334,42 @@ async function runDz2() {
     await welcomeSeen(context);
     await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
 
-    await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/zadaniya/vychisleniya/trenazher/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.trn-start');
     await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
     const knopka = page.locator('.trn-vybor__ryadom .dz2-knopka__glavnaya');
     await knopka.waitFor();
     await knopka.click();
     await page.waitForSelector('.trn-vybor__ryadom .dz2-knopka__glavnaya[aria-pressed="true"]');
-    check((await page.locator('.trn-vybor__ryadom .dz2-knopka__korzina').textContent()).includes('(1)'),
-      `ДЗ ${width}: в корзине один элемент`);
+    check(
+      (await page.locator('.trn-vybor__ryadom .dz2-knopka__korzina').textContent()).includes('(1)'),
+      `ДЗ ${width}: в корзине один элемент`,
+    );
     /* Ряд «Начать» на телефоне прилипает к низу экрана: проверяется, что
        кнопка, прокрученная в видимую часть, не закрыта им и нажимается. */
     await knopka.scrollIntoViewIfNeeded();
-    check(await knopka.evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-      return top !== null && el.contains(top);
-    }), `ДЗ ${width}: «В домашку» видна и не закрыта рядом «Начать»`);
+    check(
+      await knopka.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return top !== null && el.contains(top);
+      }),
+      `ДЗ ${width}: «В домашку» видна и не закрыта рядом «Начать»`,
+    );
     await snap(page, 'trenazher', width);
 
-    await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/${blok.slug}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/zadaniya/vychisleniya/opornye-zadachi/${blok.slug}/`, {
+      waitUntil: 'networkidle',
+    });
     await page.locator('.dz2-ryad .dz2-knopka__glavnaya').click();
     await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
 
     await page.goto(`${SITE}/kabinet/dz2/vydat/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.dz2-element');
-    check((await page.locator('.dz2-element').count()) === 2, `ДЗ ${width}: в мастере два элемента`);
+    check(
+      (await page.locator('.dz2-element').count()) === 2,
+      `ДЗ ${width}: в мастере два элемента`,
+    );
     const tr = page.locator('.dz2-element').first();
     await tr.locator('select').nth(1).selectOption('streak');
     await tr.locator('input[type="number"]').fill('3');
@@ -3122,27 +3379,53 @@ async function runDz2() {
     await snap(page, 'master', width);
     await page.locator('.dz2-deystviya button:has-text("Выдать")').click();
     await page.waitForSelector('.dz2-uspeh');
-    check((await page.locator('.dz2-uspeh').textContent()).includes('учеников — 2'), `ДЗ ${width}: выдано двоим`);
+    check(
+      (await page.locator('.dz2-uspeh').textContent()).includes('учеников — 2'),
+      `ДЗ ${width}: выдано двоим`,
+    );
 
     const d = mock.dz2.find((x) => x.p.title === `ДЗ на ${width}`);
     check(d !== undefined && d.status === 'published', `ДЗ ${width}: опубликовано`);
     if (d !== undefined) {
       const [t1, t2] = d.p.items;
-      check(t1.kind === 'trenazher' && t1.goal_kind === 'streak' && t1.goal_n === 3 && t1.tasks.length === 10,
-        `ДЗ ${width}: тренажёр — цель «3 подряд», запас 10 (${t1.tasks.length})`);
-      check(t1.tasks.every((t) => NORM.test(t.answer) && t.question_html.length > 0 && t.task_ref.length > 0),
-        `ДЗ ${width}: задачи тренажёра с ответами`);
-      check(t2.kind === 'opornye' && t2.tasks.length > 0 && t2.tasks.every((t) => NORM.test(t.answer)),
-        `ДЗ ${width}: опорные с ответами (${t2.tasks.length})`);
-      check(d.p.due_at === '2027-05-20T15:00:00.000Z', `ДЗ ${width}: дедлайн по Москве в UTC (${d.p.due_at})`);
-      check(JSON.stringify(d.p.targets) === JSON.stringify([{ class_id: mock.classes[0].id }]), `ДЗ ${width}: класс`);
+      check(
+        t1.kind === 'trenazher' &&
+          t1.goal_kind === 'streak' &&
+          t1.goal_n === 3 &&
+          t1.tasks.length === 10,
+        `ДЗ ${width}: тренажёр — цель «3 подряд», запас 10 (${t1.tasks.length})`,
+      );
+      check(
+        t1.tasks.every(
+          (t) => NORM.test(t.answer) && t.question_html.length > 0 && t.task_ref.length > 0,
+        ),
+        `ДЗ ${width}: задачи тренажёра с ответами`,
+      );
+      check(
+        t2.kind === 'opornye' && t2.tasks.length > 0 && t2.tasks.every((t) => NORM.test(t.answer)),
+        `ДЗ ${width}: опорные с ответами (${t2.tasks.length})`,
+      );
+      check(
+        d.p.due_at === '2027-05-20T15:00:00.000Z',
+        `ДЗ ${width}: дедлайн по Москве в UTC (${d.p.due_at})`,
+      );
+      check(
+        JSON.stringify(d.p.targets) === JSON.stringify([{ class_id: mock.classes[0].id }]),
+        `ДЗ ${width}: класс`,
+      );
       check(d.chernovik?.korzina?.elementy?.length === 2, `ДЗ ${width}: рабочая копия сохранена`);
     }
-    check((await page.locator('.dz2-element').count()) === 0, `ДЗ ${width}: корзина очищена после выдачи`);
+    check(
+      (await page.locator('.dz2-element').count()) === 0,
+      `ДЗ ${width}: корзина очищена после выдачи`,
+    );
 
     await page.goto(`${SITE}/kabinet/dz2/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.dz2-kartochka');
-    check((await page.locator('.dz2-kartochka:has-text("Выдано")').count()) >= 1, `ДЗ ${width}: в списке «Выдано»`);
+    check(
+      (await page.locator('.dz2-kartochka:has-text("Выдано")').count()) >= 1,
+      `ДЗ ${width}: в списке «Выдано»`,
+    );
     await snap(page, 'spisok', width);
     await context.close();
   }
@@ -3151,7 +3434,7 @@ async function runDz2() {
   const { context, page } = await newPage(mock, 1280, errors);
   await welcomeSeen(context);
   await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
-  await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+  await page.goto(`${SITE}/zadaniya/vychisleniya/trenazher/`, { waitUntil: 'networkidle' });
   await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
   await page.waitForSelector('.trn-vybor__start');
   check((await page.locator('.dz2-knopka').count()) === 0, 'ДЗ: ученик не видит «В домашку»');
@@ -3271,7 +3554,7 @@ async function runDz2Uchenik(mock, errors, snap) {
     const dSvoe = mock.dz2.find((d) => d.id === svoe);
     const teor = page.locator('.dz2-u-element[data-kind="teoriya"]');
     check((await teor.locator('a:has-text("Открыть главу")').getAttribute('href')) ===
-      '/zadaniya/5/teoriya/#teoriya-koordinatnaya-pryamaya', `ДЗ ученик ${width}: ссылка на главу теории`);
+      '/zadaniya/slozhnaya-veroyatnost/teoriya/#teoriya-koordinatnaya-pryamaya', `ДЗ ученик ${width}: ссылка на главу теории`);
     await teor.locator('.dz2-u-element__telo button:has-text("Прочитано")').click();
     await teor.locator('.dz2-u-verdikt--da').waitFor();
     check((await teor.locator('.dz2-u-element__gotovo').count()) === 1, `ДЗ ученик ${width}: теория — «Выполнено»`);
@@ -3289,7 +3572,7 @@ async function runDz2Uchenik(mock, errors, snap) {
     /* Карточки: из ДЗ — на вкладку раздела, пройденные засчитываются. */
     await page.locator('.dz2-u-element[data-kind="kartochki"] .dz2-u-element__verh').click();
     await page.locator('.dz2-u-element[data-kind="kartochki"] a:has-text("Открыть карточки")').click();
-    await page.waitForURL(/\/zadaniya\/5\/kartochki\//);
+    await page.waitForURL(/\/zadaniya\/slozhnaya-veroyatnost\/kartochki\//);
     await page.locator('.dz2-plashka').waitFor();
     check((await page.locator('.dz2-plashka').textContent()).includes(dSvoe.p.title), `ДЗ ученик ${width}: плашка «засчитывается в ДЗ»`);
     await page.locator('.kart-start__main button:has-text("Начать")').click();
@@ -3373,7 +3656,7 @@ async function runNoHeader() {
       'меню телефона: «Войти» нет',
     );
     await shot(page, 'bez-knopki-menyu-390');
-    await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/zadaniya/vychisleniya/trenazher/`, { waitUntil: 'networkidle' });
     check(
       (await page.locator('.topbar .auth-widget, .topbar ' + LOGIN).count()) === 0,
       'оболочка заданий: входа нет',
@@ -3559,7 +3842,7 @@ async function runGalleryDz(dir) {
     await login(st.page, 'dz-uchenik1@yandex.ru', 'dz-uchenik-1');
     await st.page.waitForSelector('.karta-dz');
     await snap(st.page, '06-kabinet-uchenika');
-    await st.page.goto(`${SITE}/zadaniya/8/`, { waitUntil: 'networkidle' });
+    await st.page.goto(`${SITE}/zadaniya/vychisleniya/`, { waitUntil: 'networkidle' });
     await st.page.waitForSelector('[data-block="dz-plashka"]');
     await snap(st.page, '07-plashka-8', false);
     await st.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
@@ -3599,7 +3882,7 @@ async function runGalleryZ8(dir) {
     const page = await context.newPage();
     await login(page, 'dva@yandex.ru', 'dva-ustroystva-1');
     if (!trained) {
-      await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+      await page.goto(`${SITE}/zadaniya/vychisleniya/trenazher/`, { waitUntil: 'networkidle' });
       /* Стартовый экран тренажёра: «Выбрать темы» → 5 задач → «Начать». */
       await page.waitForSelector('.trn-start');
       await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();

@@ -33,10 +33,10 @@ const SHIRINY = [360, 768, 1440];
 const STRANITSY = [
   '/',
   '/zadaniya/',
-  '/zadaniya/3/',
-  '/zadaniya/4/',
-  '/zadaniya/5/',
-  '/zadaniya/15/',
+  '/zadaniya/stereometriya/',
+  '/zadaniya/veroyatnost/',
+  '/zadaniya/slozhnaya-veroyatnost/',
+  '/zadaniya/stereometriya-dokazatelstvo/',
 ];
 
 /* Адреса из описания pull request. Берём только то, что похоже
@@ -50,7 +50,7 @@ function dopolnitelnye() {
     .map((p) => (p.endsWith('/') ? p : `${p}/`));
 }
 
-/* Имя файла из адреса: /zadaniya/4/ → zadaniya-4. */
+/* Имя файла из адреса: /zadaniya/veroyatnost/ → zadaniya-4. */
 function imya(put) {
   const chistyy = put.replace(/^\/|\/$/g, '');
   return chistyy === '' ? 'glavnaya' : chistyy.replace(/\//g, '-');

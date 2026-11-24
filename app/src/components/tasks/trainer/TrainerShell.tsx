@@ -3,7 +3,7 @@ import { trainerPage } from '@/content/trainerModes';
 import type { TrainerModeId } from '@/content/trainerModes';
 import type { Subtopic } from '@/content/sections';
 import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { izmenit, kRazdelu, NACHALNYY } from '@/lib/trenazher/filtr';
 import type { Filtr, TrenazherConfig } from '@/lib/trenazher/types';
 import { podtemaNabora, trenazherConfig12, zadachi12 } from '@/lib/ves12/trenazher12';
@@ -58,7 +58,10 @@ export function ssylki12(): Record<string, { teoriya: string; opornye: string }>
   return Object.fromEntries(
     Object.entries(podtemaNabora()).map(([set, tip]) => [
       set,
-      { teoriya: `${ZADANIYA}/12/${tip}/`, opornye: `${ZADANIYA}/12/${tip}/opornye-zadachi/` },
+      {
+        teoriya: `${razdelBase(12)}/${tip}/`,
+        opornye: `${razdelBase(12)}/${tip}/opornye-zadachi/`,
+      },
     ]),
   );
 }

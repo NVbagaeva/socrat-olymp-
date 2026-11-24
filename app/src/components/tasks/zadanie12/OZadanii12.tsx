@@ -7,7 +7,7 @@ import { skillTitle } from '@/content/skills12';
 import { functionTypes } from '@/data/functionTypes';
 import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
-import { href, ZADANIYA } from '@/lib/paths';
+import { href, razdelBase, ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
 import { podtemaNabora } from '@/lib/ves12/trenazher12';
 import { katalog12 } from '@/lib/ves12/trening/katalog';
@@ -37,7 +37,7 @@ export function yakorTipa12(nabor: string): string {
 }
 
 export function tipTrenazherHref12(nabor: string): string {
-  return `${ZADANIYA}/12/trenazher/?tip=${encodeURIComponent(nabor)}`;
+  return `${razdelBase(12)}/trenazher/?tip=${encodeURIComponent(nabor)}`;
 }
 
 export function OZadanii12() {

@@ -84,11 +84,14 @@ for (const vid of VIDY) {
     const imya = (hvost) =>
       path.join(OUT, `p${String(z.proto).padStart(2, '0')}-${vid.imya}-${hvost}.png`);
     const snimok = async (hvost, lokator) => {
-      if (STRANICA || lokator === null) await page.screenshot({ path: imya(hvost), fullPage: STRANICA });
+      if (STRANICA || lokator === null)
+        await page.screenshot({ path: imya(hvost), fullPage: STRANICA });
       else await lokator.screenshot({ path: imya(hvost) });
     };
     try {
-      await page.goto(`${BASE}/zadaniya/1/trenazher/?zadacha=${encodeURIComponent(z.klyuch)}`);
+      await page.goto(
+        `${BASE}/zadaniya/planimetriya/trenazher/?zadacha=${encodeURIComponent(z.klyuch)}`,
+      );
       const knopka = page.locator('.trn-podskazka-knopka');
       await knopka.waitFor({ timeout: 30000 });
       /* Плашки поверх экрана (cookie) — убрать, если есть. */
@@ -114,7 +117,12 @@ for (const vid of VIDY) {
           await page.locator('.fakt1-okno .fakt1').waitFor({ timeout: 30000 });
           await page.waitForTimeout(300);
           await page.screenshot({ path: imya(`shag${shag}-fakt`) });
-          zhurnal.push({ proto: z.proto, vid: vid.imya, shag, fakt: await fakt.first().getAttribute('data-fakt') });
+          zhurnal.push({
+            proto: z.proto,
+            vid: vid.imya,
+            shag,
+            fakt: await fakt.first().getAttribute('data-fakt'),
+          });
           await page.keyboard.press('Escape');
           await page.locator('.fakt1-okno').waitFor({ state: 'detached' });
         } else zhurnal.push({ proto: z.proto, vid: vid.imya, shag, fakt: null });
@@ -136,7 +144,11 @@ for (const vid of VIDY) {
       if (STRANICA) await snimok('9-vse-shagi', null);
       else await page.locator('.trn-voprosy').screenshot({ path: imya('vse-shagi') });
     } catch (e) {
-      zhurnal.push({ proto: z.proto, vid: vid.imya, oshibka: String(e.message ?? e).split('\n')[0] });
+      zhurnal.push({
+        proto: z.proto,
+        vid: vid.imya,
+        oshibka: String(e.message ?? e).split('\n')[0],
+      });
     }
   }
   if (oshibki.length > 0) zhurnal.push({ vid: vid.imya, oshibkiStranicy: [...new Set(oshibki)] });
@@ -145,5 +157,7 @@ for (const vid of VIDY) {
 await browser.close();
 fs.writeFileSync(path.join(OUT, 'zhurnal.json'), `${JSON.stringify(zhurnal, null, 1)}\n`);
 const sboi = zhurnal.filter((x) => x.oshibka !== undefined || x.oshibkiStranicy !== undefined);
-console.log(`Снимки: ${OUT}; шагов ${zhurnal.filter((x) => x.shag !== undefined).length}, сбоев ${sboi.length}`);
+console.log(
+  `Снимки: ${OUT}; шагов ${zhurnal.filter((x) => x.shag !== undefined).length}, сбоев ${sboi.length}`,
+);
 for (const x of sboi) console.log('  ', JSON.stringify(x));

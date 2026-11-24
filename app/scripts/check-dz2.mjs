@@ -265,8 +265,8 @@ for (const n of [8, 5]) {
 /* Ссылки ученика из ДЗ — на настоящие адреса разделов. */
 {
   const L = requireSrc('lib/dz2/links.ts');
-  check(L.dz2KartochkiHref(5) === '/zadaniya/5/kartochki/', `карточки №5: ${L.dz2KartochkiHref(5)}`);
-  check(L.dz2TeoriyaHref(5, 'koordinatnaya-pryamaya') === '/zadaniya/5/teoriya/#teoriya-koordinatnaya-pryamaya',
+  check(L.dz2KartochkiHref(5) === '/zadaniya/slozhnaya-veroyatnost/kartochki/', `карточки №5: ${L.dz2KartochkiHref(5)}`);
+  check(L.dz2TeoriyaHref(5, 'koordinatnaya-pryamaya') === '/zadaniya/slozhnaya-veroyatnost/teoriya/#teoriya-koordinatnaya-pryamaya',
     `глава теории №5: ${L.dz2TeoriyaHref(5, 'koordinatnaya-pryamaya')}`);
 }
 

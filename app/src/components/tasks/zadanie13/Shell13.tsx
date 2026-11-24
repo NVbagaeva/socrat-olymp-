@@ -1,7 +1,7 @@
 import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { ZADANIE13 } from '@/content/zadanie13';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
 
 /**
@@ -11,7 +11,7 @@ import { RazdelTabs } from '../RazdelTabs';
  * layout маршрута: при переходе между вкладками остаётся на месте.
  */
 export function Shell13({ children }: { children: React.ReactNode }) {
-  const base = `${ZADANIYA}/${ZADANIE13.slug}`;
+  const base = `${razdelBase(ZADANIE13.slug)}`;
   return (
     <AppShell active="tasks">
       <main className="app-main">
