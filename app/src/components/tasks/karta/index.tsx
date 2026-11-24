@@ -22,6 +22,19 @@ export interface Fakt {
   podpis: string;
 }
 
+/**
+ * Шапка «О задании» — одна раскладка у всех разделов.
+ *
+ * Компьютер: сетка 60 / 40. Слева заголовок, вводный текст и плашки с
+ * цифрами одной колонкой, справа — обложка раздела (Illustration
+ * variant="hero": не больше 360 × 300), обе колонки по центру по
+ * вертикали. «Чем опасно» — во всю ширину шапки под ними, пункты в две
+ * колонки: ни плашки, ни карточка не висят отдельно, под текстом нет
+ * пустого поля. Колонка текста не уже 420 px.
+ *
+ * Телефон и планшет: обложка по центру над текстом (до 220 px на
+ * телефоне), дальше текст, плашки и «Чем опасно» друг под другом.
+ */
 export function KartaShapka({
   nadzagolovok,
   zagolovok,
@@ -30,7 +43,6 @@ export function KartaShapka({
   opasnoTitle,
   opasno,
   oblozhka,
-  oblozhkaShirokaya = false,
 }: {
   nadzagolovok: string;
   zagolovok: string;
@@ -39,37 +51,29 @@ export function KartaShapka({
   opasnoTitle: string;
   /** Пункты «чем опасно», HTML (формулы набраны). */
   opasno: string[];
-  /** Обложка раздела — крупно рядом с заголовком (готовая картинка). */
+  /** Обложка раздела — <Illustration variant="hero" …/>. */
   oblozhka?: ReactNode;
-  /**
-   * Обложка — широкая картинка (шапка №1, 1567×1004), а не квадратная
-   * иконка: на телефоне и планшете она во всю ширину над текстом,
-   * целиком; на компьютере — справа, в половину шапки.
-   */
-  oblozhkaShirokaya?: boolean;
 }) {
   return (
     <header
-      className={clsx(
-        'kz-shapka stk-glass',
-        oblozhka !== undefined && 'kz-shapka--oblozhka',
-        oblozhka !== undefined && oblozhkaShirokaya && 'kz-shapka--shirokaya',
-      )}
+      className={clsx('kz-shapka stk-glass', oblozhka !== undefined && 'kz-shapka--oblozhka')}
     >
-      {oblozhka === undefined ? null : <div className="kz-shapka__oblozhka">{oblozhka}</div>}
-      <div className="kz-shapka__text">
-        <p className="stk-nad">{nadzagolovok}</p>
-        <h2 className="kz-h2">{zagolovok}</h2>
-        <p className="stk-lead">{lead}</p>
+      <div className="kz-shapka__glavnoe">
+        <div className="kz-shapka__text">
+          <p className="stk-nad">{nadzagolovok}</p>
+          <h2 className="kz-h2">{zagolovok}</h2>
+          <p className="stk-lead">{lead}</p>
+        </div>
+        <ul className="kz-fakty">
+          {fakty.map((f) => (
+            <li className="kz-fakt" key={f.podpis}>
+              <b>{f.znachenie}</b>
+              <span>{f.podpis}</span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul className="kz-fakty">
-        {fakty.map((f) => (
-          <li className="kz-fakt" key={f.podpis}>
-            <b>{f.znachenie}</b>
-            <span>{f.podpis}</span>
-          </li>
-        ))}
-      </ul>
+      {oblozhka === undefined ? null : <div className="kz-shapka__oblozhka">{oblozhka}</div>}
       <div className="kz-opasno">
         <p className="kz-opasno__zag">{opasnoTitle}</p>
         <ul>

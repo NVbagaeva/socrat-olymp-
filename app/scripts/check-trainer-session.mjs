@@ -154,11 +154,11 @@ check('чужой раздел сброшен', S.readSession('8').status === 'r
 check('нет записи', S.readSession('11').status === 'none');
 
 /* Раздел по адресу. */
-check('раздел 12', P.scopeOfPath('/zadaniya/12/linear/trenazher/') === '12:linear');
-check('раздел 8 по базе', P.scopeOfPath('/zadaniya/8') === '8');
-check('раздел 8 по вкладке', P.scopeOfPath('/zadaniya/8/trenazher/') === '8');
-check('фигура', P.scopeOfPath('/zadaniya/3/konus/trenazher/') === '3:konus');
-check('ярлык режима', P.scopeOfPath('/zadaniya/5/trenazher/uznay/') === '5');
+check('раздел 12', P.scopeOfPath('/zadaniya/grafiki-funkciy/linear/trenazher/') === '12:linear');
+check('раздел 8 по базе', P.scopeOfPath('/zadaniya/vychisleniya') === '8');
+check('раздел 8 по вкладке', P.scopeOfPath('/zadaniya/vychisleniya/trenazher/') === '8');
+check('фигура', P.scopeOfPath('/zadaniya/stereometriya/konus/trenazher/') === '3:konus');
+check('ярлык режима', P.scopeOfPath('/zadaniya/slozhnaya-veroyatnost/trenazher/uznay/') === '5');
 check('вне заданий', P.scopeOfPath('/about/') === null);
 check(
   'вложенный раздел',

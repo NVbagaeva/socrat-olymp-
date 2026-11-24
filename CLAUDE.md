@@ -10,6 +10,11 @@
   задач, пропсы вроде `listHref`, адреса, собираемые в коде. Хвосты
   адресов бери из общих констант (`content/opornye.ts` → `OPORNYE.tail`,
   `lib/paths.ts`), а не пиши строкой.
+- Адрес раздела банка профиля — по коду (`/zadaniya/uravneniya/`), не
+  по номеру: собирай его через `href(ZADANIYA, номер, …)` или
+  `razdelBase(номер)` из `lib/paths.ts`, цифру раздела в адрес не пиши.
+  Прежние адреса по номеру — таблица `content/pereezd/starye-adresa.json`
+  и блок 301 (`pnpm build:pereezd`, проверка `pnpm test:pereezd`).
 - Заглушки «Страница переехала» (`components/layout/Redirect.tsx`,
   `RedirectPage`) — только для старых внешних ссылок и закладок.
   Внутри сайта на них не ссылаться никогда.

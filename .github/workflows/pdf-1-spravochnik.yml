@@ -20,7 +20,7 @@ on:
       - 'app/src/lib/planimetriya/spravochnik-pdf.ts'
       - 'app/src/lib/planimetriya/spravochnik-chertezhi.ts'
       - 'app/src/lib/sheet/**'
-      - 'app/src/app/zadaniya/1/pechat/spravochnik/**'
+      - 'app/src/app/zadaniya/planimetriya/pechat/spravochnik/**'
       - 'app/src/components/tasks/planimetriya/spravochnik/SpravochnikPdf1.tsx'
       - 'app/scripts/build-pdf-spravochnik-1.mjs'
       - '.github/workflows/pdf-1-spravochnik.yml'

@@ -40,6 +40,7 @@ import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 import { metkaAdministratora } from './lib/metka-skrytyh.mjs';
+import { kod } from './lib/adres.mjs';
 
 bezBanneraCookieVsyudu(chromium);
 
@@ -54,7 +55,7 @@ if (!['6', '7', '2', '13', '1', '9', '11', '10', '12'].includes(N) && !VEROYATNO
   );
   process.exit(2);
 }
-if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
+if (!fs.existsSync(path.join(OUT, 'zadaniya', kod(N), 'index.html'))) {
   console.error('Нет сборки: сначала pnpm build (в app/).');
   process.exit(1);
 }
@@ -282,7 +283,7 @@ try {
     if (!request.url().startsWith(BASE)) vSet.push(request.url());
   });
 
-  await page.goto(`${BASE}/zadaniya/${N}/trenazher/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/${kod(N)}/trenazher/`, { waitUntil: 'networkidle' });
 
   /* 1. «Мой прогресс». */
   const progress = page.locator('.trn-progress').first();
@@ -349,7 +350,7 @@ try {
 
   /* 5. Опорные задачи: прежний прогресс блока. */
   if (OLD_OPORNYE !== null) {
-    await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/zadaniya/${kod(N)}/opornye-zadachi/`, { waitUntil: 'networkidle' });
     const reshenoOp = ZHURNAL
       ? reshenoOp10
       : N === '9'
@@ -378,7 +379,7 @@ try {
     );
     const p2 = await sessiya.newPage();
     p2.on('pageerror', (error) => oshibki.push(String(error)));
-    await p2.goto(`${BASE}/zadaniya/12/trenazher/`, { waitUntil: 'networkidle' });
+    await p2.goto(`${BASE}/zadaniya/grafiki-funkciy/trenazher/`, { waitUntil: 'networkidle' });
     const prodolzhit = p2.getByRole('button', { name: /^Продолжить/ }).first();
     try {
       await prodolzhit.waitFor({ timeout: 15000 });
@@ -409,12 +410,12 @@ try {
   if (N === '1' && obrazec[SESSION] !== undefined) {
     const sPage = await context.newPage();
     sPage.on('pageerror', (error) => oshibki.push(String(error)));
-    await sPage.goto(`${BASE}/zadaniya/${N}/`, { waitUntil: 'networkidle' });
+    await sPage.goto(`${BASE}/zadaniya/${kod(N)}/`, { waitUntil: 'networkidle' });
     await sPage.evaluate(
       ([key, value]) => window.localStorage.setItem(key, value),
       [SESSION, obrazec[SESSION]],
     );
-    await sPage.goto(`${BASE}/zadaniya/${N}/trenazher/`, { waitUntil: 'networkidle' });
+    await sPage.goto(`${BASE}/zadaniya/${kod(N)}/trenazher/`, { waitUntil: 'networkidle' });
     const dalshe = sPage.getByRole('button', { name: /^Продолжить/ }).first();
     if (await dalshe.isVisible().catch(() => false)) await dalshe.click();
     const z = sPage.locator('.trn-zadacha');
@@ -436,7 +437,7 @@ try {
       ([key, value]) => window.localStorage.setItem(key, value),
       [SESSION, JSON.stringify(obrazec[SESSION])],
     );
-    await page.goto(`${BASE}/zadaniya/${N}/trenazher/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/zadaniya/${kod(N)}/trenazher/`, { waitUntil: 'networkidle' });
     const ui = obrazec[SESSION].ui;
     const [kind, n] = obrazec[SESSION].payload.tasks[ui.index];
     const ekran = page.locator('.trn-zadacha');
@@ -476,7 +477,7 @@ try {
     const p2 = await ctx.newPage();
     const oshibki2 = [];
     p2.on('pageerror', (error) => oshibki2.push(String(error)));
-    await p2.goto(`${BASE}/zadaniya/9/trenazher/`, { waitUntil: 'networkidle' });
+    await p2.goto(`${BASE}/zadaniya/proizvodnaya/trenazher/`, { waitUntil: 'networkidle' });
     const zapis = await p2.evaluate(() => localStorage.getItem('budetege:trainer:9:session'));
     const z = zapis === null ? null : JSON.parse(zapis);
     check(

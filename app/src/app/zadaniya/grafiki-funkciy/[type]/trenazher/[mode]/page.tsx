@@ -1,0 +1,85 @@
+import type { Metadata } from 'next';
+import { ikonkaRazdela } from '@/components/tasks/razdely/ikonka';
+import { notFound } from 'next/navigation';
+import { AppShell } from '@/components/layout/AppShell';
+import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
+import { TrainerShell } from '@/components/tasks/trainer/TrainerShell';
+import {
+  findSection,
+  findSubtopic,
+  trainerSubtopicParams,
+  SEKCIYA_GRAFIKOV,
+} from '@/content/sections';
+import { findTrainerShortcut, trainerPage, trainerShortcutIds } from '@/content/trainerModes';
+import 'katex/dist/katex.min.css';
+import '@/lib/graph/graph.css';
+import '../../../../zadaniya.css';
+import '../../../../[task]/section.css';
+import '../../topic.css';
+import '../../prep.css';
+import '../../trainer.css';
+import '../../configurator.css';
+import { razdelBase } from '@/lib/paths';
+
+/* Адреса перечислимы на сборке: подтемы с тренажёром × их ярлыки. */
+export function generateStaticParams() {
+  return trainerSubtopicParams().flatMap((params) =>
+    trainerShortcutIds(params.type).map((mode) => ({ ...params, mode })),
+  );
+}
+export const dynamicParams = false;
+
+type Params = Promise<{ type: string; mode: string }>;
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { type, mode } = await params;
+  const task = SEKCIYA_GRAFIKOV;
+  const subtopic = findSubtopic(task, type);
+  const found = findTrainerShortcut(type, mode);
+  return subtopic && found
+    ? { title: `${found.title} · ${trainerPage.title} · ${subtopic.title} — Будет на ЕГЭ` }
+    : {};
+}
+
+/**
+ * Ярлык к конфигуратору: прежний адрес режима открывает ту же
+ * вкладку с уже выбранным навыком или режимом. Своих задач у
+ * адреса нет — тренировка собирается там же, где и без него.
+ */
+export default async function Page({ params }: { params: Params }) {
+  const { type, mode } = await params;
+  const task = SEKCIYA_GRAFIKOV;
+  const section = findSection(task);
+  const subtopic = findSubtopic(task, type);
+  const found = findTrainerShortcut(type, mode);
+  if (!section || !subtopic || !found) {
+    notFound();
+  }
+
+  const base = `${razdelBase(section.slug)}/${subtopic.id}`;
+
+  return (
+    <AppShell active="tasks">
+      <FunctionTopicPage
+        section={section}
+        subtopic={subtopic}
+        initialTab="trainer"
+        trail={[{ label: trainerPage.title, href: `${base}/trenazher/` }, { label: found.title }]}
+        trainer={
+          <TrainerShell
+            subtopic={subtopic}
+            icon={ikonkaRazdela(section.slug, subtopic.icon)}
+            base={`${base}/trenazher/`}
+            preset={{
+              skill: found.skills[0] ?? null,
+              skills: found.skills,
+              mode: found.mode,
+              ...(found.rules === undefined ? {} : { rules: found.rules }),
+              ...(found.filter === undefined ? {} : { filter: found.filter }),
+            }}
+          />
+        }
+      />
+    </AppShell>
+  );
+}

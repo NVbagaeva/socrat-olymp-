@@ -6,7 +6,7 @@ import { zachyotText } from '@/content/ves12';
 
 export interface CopyLinkProps {
   label: string;
-  /** Адрес от корня сайта: /zadaniya/12/zachyot/rabota/?… */
+  /** Адрес от корня сайта: /zadaniya/grafiki-funkciy/zachyot/rabota/?… */
   path: string;
   testId?: string;
 }

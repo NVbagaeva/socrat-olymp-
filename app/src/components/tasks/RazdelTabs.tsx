@@ -7,6 +7,7 @@ import { Tabs } from '@/components/ui';
 import type { RazdelTab } from '@/content/vkladki';
 import { VKLADKA_KARTOCHKI } from '@/content/kartochkiUi';
 import { NOMERA_S_KARTOCHKAMI } from '@/content/kartochki/spisok';
+import { nomerPoKodu } from '@/lib/paths';
 import type { TutorMaterial } from '@/content/sections';
 import { TutorMenu } from './TutorMenu';
 import { TabsRow } from './TabsRow';
@@ -19,7 +20,7 @@ import { EtoZheV } from '@/components/level/EtoZheV';
 import { levelInfo, LEVELS } from '@/lib/level';
 
 export interface RazdelTabsProps {
-  /** Адрес раздела без хвоста: /zadaniya/4, /zadaniya/3/konus. */
+  /** Адрес раздела без хвоста: /zadaniya/4, /zadaniya/stereometriya/konus. */
   base: string;
   tabs: readonly RazdelTab[];
   /** Материалы для репетитора. Не заданы — меню в ленте нет. */
@@ -67,7 +68,9 @@ export interface RazdelTabsProps {
  * вкладок номеров о ней не знают.
  */
 function sKartochkami(base: string, tabs: readonly RazdelTab[]): readonly RazdelTab[] {
-  const nomer = base.match(/^\/zadaniya\/(\d+)$/)?.[1];
+  /* Адрес раздела — по коду: номер колоды — номер хранения раздела. */
+  const kod = base.match(/^\/zadaniya\/([a-z0-9-]+)$/)?.[1];
+  const nomer = kod === undefined ? undefined : String(nomerPoKodu(kod) ?? '');
   if (nomer === undefined || !NOMERA_S_KARTOCHKAMI.includes(nomer)) return tabs;
   if (tabs.some((tab) => tab.id === VKLADKA_KARTOCHKI.id)) return tabs;
   const teoriya = tabs.findIndex((tab) => tab.id === 'teoriya');
@@ -83,7 +86,9 @@ function sKartochkami(base: string, tabs: readonly RazdelTab[]): readonly Razdel
 function paraUrovnya(base: string): ReactNode {
   for (const level of LEVELS) {
     const prefix = `${levelInfo(level).bankBase}/`;
-    const slug = base.startsWith(prefix) ? base.slice(prefix.length) : '';
+    const hvost = base.startsWith(prefix) ? base.slice(prefix.length) : '';
+    /* Профиль — по коду раздела, база — по номеру; пара — по номеру хранения. */
+    const slug = level === 'profile' ? String(nomerPoKodu(hvost) ?? '') : hvost;
     if (/^\d+$/.test(slug)) return <EtoZheV level={level} slug={slug} />;
   }
   return null;

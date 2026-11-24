@@ -54,17 +54,34 @@ export interface Razbor5 {
   shagi: { text: string; tex?: string }[];
 }
 
-export function zadachaOpornaya5(z: Zadacha5, r: Razbor5): ZadachaDz | null {
+/**
+ * Набор формул для №5: условие и шаги в банке — текст с $…$ и TeX.
+ * В базу ДЗ уходит готовая вёрстка (как у №8 и тренажёра): ученику
+ * KaTeX не нужен, он только очищает HTML.
+ */
+export interface Nabor {
+  /** Текст с $…$ → HTML (всё вне формул экранировано). */
+  tekst: (s: string) => string;
+  /** Формула TeX → HTML KaTeX. */
+  formula: (tex: string) => string;
+}
+
+export function zadachaOpornaya5(z: Zadacha5, r: Razbor5, nabor: Nabor): ZadachaDz | null {
   const answer = normalnayaZapis(r.otvet);
   if (answer === null) return null;
   return {
     kind: z.id,
     task_ref: z.id,
-    question_html: z.uslovie,
+    question_html: `<p>${nabor.tekst(z.uslovie)}</p>`,
     ...(z.illustration === undefined ? {} : { risunok: z.illustration.path }),
     level: 2,
     answer,
-    razbor: { shagi: r.shagi.map((s) => ({ chto: s.text, ...(s.tex === undefined ? {} : { tex: s.tex }) })) },
+    razbor: {
+      shagi: r.shagi.map((s) => ({
+        chto: nabor.tekst(s.text),
+        ...(s.tex === undefined ? {} : { tex: nabor.formula(s.tex) }),
+      })),
+    },
   };
 }
 

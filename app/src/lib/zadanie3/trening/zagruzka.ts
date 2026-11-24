@@ -8,7 +8,7 @@
 
 import type { Model } from '@/lib/solid/model';
 import { dataUrl } from '@/lib/dataUrl';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { openText } from '../secret';
 import type { PrototipDannye3, ShagTekst3, VariantDannye3 } from './dannye';
 import { razobratKlyuch3 } from './session';
@@ -35,7 +35,7 @@ export function nabrat(text: string): string {
 }
 
 export function adresPrototipa(prototip: string): string {
-  return dataUrl(`${ZADANIYA}/3/dannye/prototip/${prototip}.json`);
+  return dataUrl(`${razdelBase(3)}/dannye/prototip/${prototip}.json`);
 }
 
 function zagruzitPrototip(prototip: string): Promise<PrototipDannye3> {

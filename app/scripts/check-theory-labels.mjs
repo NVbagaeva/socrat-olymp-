@@ -50,21 +50,21 @@ const TYPES = [
 ];
 const TARGETS = ALL
   ? [
-      { url: '/zadaniya/12/linear/', theory: true, scope: '' },
-      { url: '/zadaniya/12/irrational/', theory: true, scope: '' },
-      { url: '/zadaniya/12/exponential/', theory: true, scope: '' },
-      { url: '/zadaniya/12/logarithmic/', theory: true, scope: '' },
-      { url: '/zadaniya/12/trigonometric/', theory: true, scope: '' },
+      { url: '/zadaniya/grafiki-funkciy/linear/', theory: true, scope: '' },
+      { url: '/zadaniya/grafiki-funkciy/irrational/', theory: true, scope: '' },
+      { url: '/zadaniya/grafiki-funkciy/exponential/', theory: true, scope: '' },
+      { url: '/zadaniya/grafiki-funkciy/logarithmic/', theory: true, scope: '' },
+      { url: '/zadaniya/grafiki-funkciy/trigonometric/', theory: true, scope: '' },
     ]
   : [
-      { url: '/zadaniya/12/linear/', theory: true, scope: '#lin-q-argument ' },
+      { url: '/zadaniya/grafiki-funkciy/linear/', theory: true, scope: '#lin-q-argument ' },
       ...TYPES.map((id) => ({
-        url: `/zadaniya/12/quadratic/#${id}`,
+        url: `/zadaniya/grafiki-funkciy/quadratic/#${id}`,
         theory: false,
         scope: `#${id}-razbor `,
       })),
-      { url: '/zadaniya/12/quadratic/', theory: false, scope: '.about-skills ' },
-      { url: '/zadaniya/12/linear/', theory: false, scope: '.about-skills ' },
+      { url: '/zadaniya/grafiki-funkciy/quadratic/', theory: false, scope: '.about-skills ' },
+      { url: '/zadaniya/grafiki-funkciy/linear/', theory: false, scope: '.about-skills ' },
     ];
 const SIZES = [1440, 390];
 
@@ -176,7 +176,12 @@ function inspect(scope) {
       if (
         dots.some(
           (d) =>
-            !(d.right < a.box.left || a.box.right < d.left || d.bottom < a.box.top || a.box.bottom < d.top),
+            !(
+              d.right < a.box.left ||
+              a.box.right < d.left ||
+              d.bottom < a.box.top ||
+              a.box.bottom < d.top
+            ),
         )
       ) {
         problems.push(`${where}: «${a.text}» лежит на точке`);

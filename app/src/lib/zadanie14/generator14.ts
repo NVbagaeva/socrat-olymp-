@@ -42,7 +42,7 @@ import { krugHtml, krugiHtml, krugiOtbora } from './krugHtml';
 import { otvetA, otvetB, razborB, uslovieA, uslovieB } from './tekst';
 import type { Metod14, Uravnenie14 } from './tipy';
 
-export const BASE_14 = '/zadaniya/14';
+export const BASE_14 = '/zadaniya/uravnenie-s-otborom';
 
 const VIDY = GEN_UI.vidyRaboty as Record<string, string>;
 

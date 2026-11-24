@@ -2,7 +2,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { ZADANIE11 } from '@/content/zadanie11';
 import { RazdelTabs } from '../RazdelTabs';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 
 /**
  * Оболочка раздела «Текстовые задачи»: общая шапка раздела (SectionHeader) и
@@ -11,7 +11,7 @@ import { ZADANIYA } from '@/lib/paths';
  * layout маршрута: при переходе между вкладками остаётся на месте.
  */
 export function Shell11({ children }: { children: React.ReactNode }) {
-  const base = `${ZADANIYA}/${ZADANIE11.slug}`;
+  const base = `${razdelBase(ZADANIE11.slug)}`;
   return (
     <AppShell active="tasks">
       <main className="app-main">

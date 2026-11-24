@@ -30,7 +30,10 @@ const nazvanie = (no) => {
 };
 
 /** Общий тренажёр с фильтрами: ?t=<id темы>. */
-const T = (no, gruppa) => `/zadaniya/${no}/trenazher/?t=${gruppa}`;
+/* Адрес раздела — по коду (src/lib/paths.ts): номер хранения → код. */
+const { RAZDELY } = requireSrc('content/struktura.js');
+const kodPo = (no) => RAZDELY.find((r) => r.hranenie === no).kod;
+const T = (no, gruppa) => `/zadaniya/${kodPo(no)}/trenazher/?t=${gruppa}`;
 
 const razdely = [];
 const dobavit = (no, gruppy, trenazher, status = 'gotov') => {
@@ -80,7 +83,7 @@ const dobavit = (no, gruppy, trenazher, status = 'gotov') => {
         nazvanie: g.title,
         tipy: PROTOTYPES.filter((p) => p.gruppa === g.id).map((p) => p.id),
       })),
-    (g) => `/zadaniya/2/trenazher/?tip=${g.tipy[0]}`,
+    (g) => `/zadaniya/vektory/trenazher/?tip=${g.tipy[0]}`,
   );
 }
 
@@ -95,7 +98,7 @@ const dobavit = (no, gruppy, trenazher, status = 'gotov') => {
       tipy: g.tipy.flatMap((tip) => prototipyTipa(tip)),
       pervyyTip: g.tipy[0],
     })),
-    (g) => `/zadaniya/3/trenazher/?tip=${g.pervyyTip}`,
+    (g) => `/zadaniya/stereometriya/trenazher/?tip=${g.pervyyTip}`,
   );
 }
 
@@ -106,7 +109,7 @@ const dobavit = (no, gruppy, trenazher, status = 'gotov') => {
     dobavit(
       no,
       navykiZadaniya(no).map((m) => ({ id: m.id, nazvanie: m.nazvanie, tipy: [m.id] })),
-      (g) => `/zadaniya/${no}/trenazher/${g.id}/`,
+      (g) => `/zadaniya/${kodPo(no)}/trenazher/${g.id}/`,
     );
   }
 }
@@ -125,7 +128,7 @@ for (const [no, modul] of [
       nazvanie: g.title,
       tipy: PROTOTYPES.filter((p) => p.group === g.id).map((p) => p.id),
     })),
-    (g) => `/zadaniya/${no}/trenazher/?tipy=${g.tipy.join(',')}`,
+    (g) => `/zadaniya/${kodPo(no)}/trenazher/?tipy=${g.tipy.join(',')}`,
   );
 }
 
@@ -135,7 +138,7 @@ for (const [no, modul] of [
   dobavit(
     8,
     GRUPPY8.map((g) => ({ id: g.id, nazvanie: g.nazvanie, tipy: g.prototypes })),
-    (g) => `/zadaniya/8/trenazher/?tip=${g.tipy[0]}`,
+    (g) => `/zadaniya/vychisleniya/trenazher/?tip=${g.tipy[0]}`,
   );
 }
 
@@ -149,7 +152,7 @@ for (const [no, modul] of [
       nazvanie: g.nazvanie,
       tipy: prototypesOfGroup(g.id).map((p) => p.id),
     })),
-    (g) => `/zadaniya/9/trenazher/?g=${g.id}`,
+    (g) => `/zadaniya/proizvodnaya/trenazher/?g=${g.id}`,
   );
 }
 
@@ -174,7 +177,7 @@ for (const [no, modul] of [
   dobavit(
     12,
     functionTypes.map((t) => ({ id: t.id, nazvanie: t.title, tipy: t.bank.prototypes })),
-    (g) => `/zadaniya/12/${g.id}/trenazher/`,
+    (g) => `/zadaniya/grafiki-funkciy/${g.id}/trenazher/`,
   );
 }
 
@@ -253,7 +256,7 @@ dobavit(20, [], null, 'skoro');
       nazvanie: g.title,
       tipy: prototypesOfGruppa(g.id).map((p) => p.id),
     })),
-    (g) => `/zadaniya/21/trenazher/?tipy=${g.tipy.join(',')}`,
+    (g) => `/zadaniya/naibolshee-naimenshee/trenazher/?tipy=${g.tipy.join(',')}`,
   );
 }
 

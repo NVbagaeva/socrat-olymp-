@@ -42,7 +42,8 @@ function SAkcentom({ tekst, akcent, klass }: { tekst: string; akcent: string; kl
   );
 }
 
-const SIZES = '(max-width: 1023.98px) 80vw, 480px';
+/* Сцена не шире 309 px (норма hero), снимок в ней — до 86 % ширины. */
+const SIZES = '270px';
 
 /**
  * Сцена пункта: снимки в своей раскладке (веер, внахлёст, коллаж).
@@ -62,6 +63,7 @@ function Scena({
     <button
       type="button"
       className={clsx('vit-scena', `vit-scena--${punkt.id}`)}
+      data-ill="hero"
       onClick={onOtkryt}
       aria-label={`Рассмотреть: ${punkt.zagolovok}`}
     >

@@ -2,7 +2,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { type VeroyatnostSection } from '@/content/veroyatnost';
 import { RazdelTabs } from '../RazdelTabs';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 
 export interface VeroyatnostShellProps {
   section: VeroyatnostSection;
@@ -19,7 +19,7 @@ export interface VeroyatnostShellProps {
  * не мигает и не исчезает.
  */
 export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
-  const base = `${ZADANIYA}/${section.slug}`;
+  const base = `${razdelBase(section.slug)}`;
 
   return (
     <AppShell active="tasks">

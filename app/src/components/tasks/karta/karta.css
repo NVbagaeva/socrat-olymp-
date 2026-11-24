@@ -419,12 +419,7 @@
 /* ── Широкие экраны ───────────────────────────────────────────── */
 @media (min-width: 768px) {
   .kz-shapka {
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    align-items: start;
     padding: var(--space-8);
-  }
-  .kz-shapka__text {
-    grid-row: span 2;
   }
   .kz-gruppa__summary {
     grid-template-columns: auto minmax(0, 1fr) minmax(200px, 260px) auto;
@@ -482,99 +477,44 @@
   height: auto;
 }
 
-/* Обложка раздела в шапке: прозрачная картинка на стекле, крупно. Сама
-   картинка не обрезается и не растягивается (object-fit: contain). */
+/* ── Шапка с обложкой: одна раскладка у всех разделов ─────────────
+   Компьютер: сетка 60 / 40 — слева текст и плашки с цифрами, справа
+   обложка (Illustration variant="hero", ≤ 360 × 300), обе колонки по
+   центру по вертикали; «Чем опасно» во всю ширину, пункты в две
+   колонки. Ниже 1024 px — одна колонка, обложка над текстом. */
+.kz-shapka__glavnoe {
+  display: grid;
+  gap: var(--space-5);
+  align-content: center;
+  min-width: 0;
+}
 .kz-shapka__oblozhka {
   display: grid;
   place-items: center;
   min-width: 0;
 }
 .kz-shapka__oblozhka img {
-  display: block;
-  width: min(100%, 220px);
-  height: auto;
-  object-fit: contain;
   filter: drop-shadow(0 18px 28px rgb(31 95 208 / 0.18));
 }
-@media (min-width: 640px) {
+@media (max-width: 1023.98px) {
+  .kz-shapka--oblozhka .kz-shapka__oblozhka {
+    order: -1;
+  }
+}
+@media (min-width: 1024px) {
   .kz-shapka--oblozhka {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(420px, 3fr) minmax(0, 2fr);
+    column-gap: var(--space-8);
     align-items: center;
   }
-  .kz-shapka--oblozhka .kz-shapka__oblozhka {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  .kz-shapka--oblozhka .kz-shapka__text {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .kz-shapka--oblozhka .kz-fakty,
   .kz-shapka--oblozhka .kz-opasno {
     grid-column: 1 / -1;
   }
-  .kz-shapka__oblozhka img {
-    width: 240px;
-  }
-}
-@media (min-width: 1024px) {
-  .kz-shapka--oblozhka {
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  }
-  .kz-shapka--oblozhka .kz-shapka__text {
-    grid-row: 1;
-  }
-  .kz-shapka--oblozhka .kz-shapka__oblozhka {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  .kz-shapka--oblozhka .kz-fakty {
-    grid-column: 1;
-    grid-row: 2;
-    align-self: start;
-  }
-  .kz-shapka--oblozhka .kz-opasno {
-    grid-column: 2;
-    grid-row: 2;
-  }
-  .kz-shapka__oblozhka img {
-    width: 280px;
-  }
-}
-
-/* Широкая обложка (№1: стеклянная подставка с чертежами, 1567×1004).
-   Картинка целиком, без обрезки: на телефоне и планшете — во всю ширину
-   шапки над текстом, на компьютере — справа, в половину шапки. */
-.kz-shapka--shirokaya .kz-shapka__oblozhka {
-  width: 100%;
-}
-.kz-shapka--shirokaya .kz-shapka__oblozhka picture,
-.kz-shapka--shirokaya .kz-shapka__oblozhka img {
-  display: block;
-  width: 100%;
-  max-width: 600px;
-  height: auto;
-  margin-inline: auto;
-}
-@media (min-width: 640px) and (max-width: 1023.98px) {
-  .kz-shapka--shirokaya {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .kz-shapka--shirokaya .kz-shapka__oblozhka,
-  .kz-shapka--shirokaya .kz-shapka__text {
-    grid-column: 1;
-    grid-row: auto;
-  }
-  .kz-shapka--shirokaya .kz-shapka__oblozhka img {
-    width: 100%;
-  }
-}
-@media (min-width: 1024px) {
-  .kz-shapka--shirokaya {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-  .kz-shapka--shirokaya .kz-shapka__oblozhka img {
-    width: 100%;
+  .kz-shapka--oblozhka .kz-opasno ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-8);
+    align-items: start;
   }
 }
 

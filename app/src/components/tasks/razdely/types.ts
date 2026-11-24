@@ -58,7 +58,7 @@ export const VKLADKA_PO_UMOLCHANIYU = 'about';
 
 /**
  * Параметр адреса, которым открывается вкладка без своего адреса
- * («Теория», «Методы», «Генератор»): /zadaniya/12/quadratic/?vkladka=theory.
+ * («Теория», «Методы», «Генератор»): /zadaniya/grafiki-funkciy/quadratic/?vkladka=theory.
  */
 export const VKLADKA_PARAM = 'vkladka';
 

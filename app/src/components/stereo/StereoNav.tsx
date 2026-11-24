@@ -9,12 +9,12 @@ import {
   type RazdelyData,
 } from '@/components/tasks/razdely';
 import { NAV_STEREO, STEREO, vkladkiStereo, type StereoNo } from '@/content/stereo/zadaniya';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 
 /** Карточка задания в меню: все вкладки — по своим адресам. */
 function karta(no: StereoNo): RazdelKarta {
   const z = STEREO[no];
-  const base = `${ZADANIYA}/${z.slug}/`;
+  const base = `${razdelBase(z.slug)}/`;
   return {
     id: z.no,
     title: z.title,
@@ -38,7 +38,7 @@ function dannye(no: StereoNo): RazdelyData {
 /** Открытая вкладка по адресу: хвост после /zadaniya/<no>/. */
 function useVkladka(no: StereoNo): string {
   const pathname = usePathname();
-  const tail = pathname.replace(`${ZADANIYA}/${STEREO[no].slug}`, '').replace(/^\/+/, '');
+  const tail = pathname.replace(`${razdelBase(STEREO[no].slug)}`, '').replace(/^\/+/, '');
   const vkladki = vkladkiStereo(no);
   const tab = vkladki.find((item) => item.tail !== '' && tail.startsWith(item.tail)) ?? vkladki[0];
   return tab?.id ?? 'o-zadanii';

@@ -7,7 +7,7 @@
  * шага — свой чертёж (построения до его слоя, у последнего — все).
  *
  * Собирается на сборке: первый пример — в разметку, остальные —
- * файлами /zadaniya/1/dannye/primer/{тип}.json по раскрытию карточки.
+ * файлами /zadaniya/planimetriya/dannye/primer/{тип}.json по раскрытию карточки.
  */
 
 import { typesetKrupno as typeset } from '../../tex';

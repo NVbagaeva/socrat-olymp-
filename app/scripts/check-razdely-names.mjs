@@ -228,13 +228,17 @@ function checkSite() {
       pages.push(rel);
     }
   };
-  walk(path.join(OUT, 'zadaniya', '12'), 'zadaniya/12');
+  walk(path.join(OUT, 'zadaniya', 'grafiki-funkciy'), 'zadaniya/grafiki-funkciy');
   walk(path.join(OUT, 'zadaniya', 'index.html').replace(/index\.html$/, ''), 'zadaniya');
-  const task12 = pages.filter((rel) => rel === 'zadaniya/12' || rel.startsWith('zadaniya/12/'));
+  const task12 = pages.filter(
+    (rel) => rel === 'zadaniya/grafiki-funkciy' || rel.startsWith('zadaniya/grafiki-funkciy/'),
+  );
   check(task12.length > 20, `страниц №12 в сборке ${task12.length}`);
 
   const OLD = [...OLD_NAMES];
-  for (const rel of new Set(pages.filter((p) => p === 'zadaniya' || p.startsWith('zadaniya/12')))) {
+  for (const rel of new Set(
+    pages.filter((p) => p === 'zadaniya' || p.startsWith('zadaniya/grafiki-funkciy')),
+  )) {
     const html = decode(read(rel) ?? '');
     for (const old of OLD) {
       check(!html.includes(old), `/${rel}/: прежнее название «${old}»`);
@@ -268,7 +272,7 @@ function checkSite() {
 
   /* Данные навигации в странице подтемы: пары как в таблице и в том же порядке. */
   for (const row of TABLE.filter((r) => ['linear', 'irrational'].includes(r.id))) {
-    const html = decode(read(`zadaniya/12/${row.id}`) ?? '');
+    const html = decode(read(`zadaniya/grafiki-funkciy/${row.id}`) ?? '');
     let from = 0;
     let ordered = true;
     for (const item of TABLE) {
@@ -278,45 +282,51 @@ function checkSite() {
         ordered = false;
         check(
           false,
-          `/zadaniya/12/${row.id}/: в данных нет пары «${item.title}» → «${item.graphName}» по порядку`,
+          `/zadaniya/grafiki-funkciy/${row.id}/: в данных нет пары «${item.title}» → «${item.graphName}» по порядку`,
         );
         break;
       }
       from = at;
     }
-    check(ordered, `/zadaniya/12/${row.id}/: порядок разделов в данных не как в таблице`);
+    check(
+      ordered,
+      `/zadaniya/grafiki-funkciy/${row.id}/: порядок разделов в данных не как в таблице`,
+    );
 
     /* Заголовок страницы, описание, Open Graph. */
     const title = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? '';
-    check(title.startsWith(row.title), `/zadaniya/12/${row.id}/: title «${title}»`);
+    check(title.startsWith(row.title), `/zadaniya/grafiki-funkciy/${row.id}/: title «${title}»`);
     const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? '';
     check(
       description.includes(row.title) && description.includes(row.graphName),
-      `/zadaniya/12/${row.id}/: description «${description}»`,
+      `/zadaniya/grafiki-funkciy/${row.id}/: description «${description}»`,
     );
     const ogTitle = html.match(/<meta property="og:title" content="([^"]*)"/)?.[1] ?? '';
     const ogDescription =
       html.match(/<meta property="og:description" content="([^"]*)"/)?.[1] ?? '';
-    check(ogTitle.startsWith(row.title), `/zadaniya/12/${row.id}/: og:title «${ogTitle}»`);
+    check(
+      ogTitle.startsWith(row.title),
+      `/zadaniya/grafiki-funkciy/${row.id}/: og:title «${ogTitle}»`,
+    );
     check(
       ogDescription.includes(row.graphName),
-      `/zadaniya/12/${row.id}/: og:description «${ogDescription}»`,
+      `/zadaniya/grafiki-funkciy/${row.id}/: og:description «${ogDescription}»`,
     );
     /* Шапка: название раздела и под ним название графика. */
     check(
       html.includes(`class="topic-head__graph">${row.graphName}<`),
-      `/zadaniya/12/${row.id}/: в шапке нет подписи «${row.graphName}»`,
+      `/zadaniya/grafiki-funkciy/${row.id}/: в шапке нет подписи «${row.graphName}»`,
     );
     /* Крошки: последняя — название раздела. */
     check(
       new RegExp(`aria-current="page">${escaped(row.title)}<`).test(html),
-      `/zadaniya/12/${row.id}/: в крошках нет «${row.title}»`,
+      `/zadaniya/grafiki-funkciy/${row.id}/: в крошках нет «${row.title}»`,
     );
   }
 
   /* Страница выбора разделов (карта «О задании»): все семь видов группами,
      в порядке таблицы; под названием вида — название графика. */
-  const choose = decode(read('zadaniya/12') ?? '');
+  const choose = decode(read('zadaniya/grafiki-funkciy') ?? '');
   let at = 0;
   for (const row of TABLE) {
     const nazvanie = choose.indexOf(`class="kz-gruppa__nazvanie">${row.title}<`, at);

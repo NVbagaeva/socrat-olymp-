@@ -42,6 +42,12 @@ const ofertaPage =
 
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
+/** Папки иллюстраций со своей таблицей версий (lib/illyustraciiUrl.ts). */
+const ILLYUSTRACII = [
+  '/images/zadanie-11/gorod-',
+  '/images/zadanie-05/metod-',
+  '/images/zadanie-04/metod-',
+];
 
 /** Картинки глав методов №4 — своей таблицей версий (METODY4_ASSET_VERSIONS). */
 const METODY4 = ['/images/zadanie-04/metody/', '/images/zadanie-04/primery/'];
@@ -136,7 +142,18 @@ const nextConfig: NextConfig = {
             !file.startsWith('/data/') &&
             !file.startsWith('/images/zadachi/') &&
             !file.startsWith('/images/shapki/') &&
-            !METODY4.some((dir) => file.startsWith(dir)),
+            !METODY4.some((dir) => file.startsWith(dir)) &&
+            !ILLYUSTRACII.some((prefix) => file.startsWith(prefix)),
+        ),
+      ),
+    ),
+    // Иллюстрации живых сцен и карточек методов: ILLYUSTRACII_ASSET_VERSIONS,
+    // её подставляет только lib/illyustraciiUrl.ts (ленивая сцена №10 и
+    // серверная карточка метода №5) — первая загрузка других страниц не растёт.
+    ILLYUSTRACII_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) =>
+          ILLYUSTRACII.some((prefix) => file.startsWith(prefix)),
         ),
       ),
     ),

@@ -35,18 +35,50 @@ const L = requireSrc('lib/progressLog/model.ts');
 
 /* Страница тренажёра → прежний ключ → журнал. */
 const RAZDELY = [
-  ['/zadaniya/1/trenazher/', 'budetege:planimetriya-1:v1', 'budetege:planimetriya-1:log:v1'],
-  ['/zadaniya/2/trenazher/', 'budetege:vektory-2:v1', 'budetege:vektory-2:log:v1'],
-  ['/zadaniya/4/trenazher/', 'budetege:veroyatnost-4:v2', 'budetege:veroyatnost-4:log:v1'],
-  ['/zadaniya/5/trenazher/', 'budetege:veroyatnost-5:v2', 'budetege:veroyatnost-5:log:v1'],
-  ['/zadaniya/6/trenazher/', 'budetege:zadanie-6:v1', 'budetege:zadanie-6:log:v1'],
-  ['/zadaniya/7/trenazher/', 'budetege:zadanie-7:v1', 'budetege:zadanie-7:log:v1'],
-  ['/zadaniya/9/trenazher/', 'budetege:proizvodnaya-9:v1', 'budetege:proizvodnaya-9:log:v1'],
-  ['/zadaniya/11/trenazher/', 'budetege:zadanie-11:v1', 'budetege:zadanie-11:log:v1'],
-  ['/zadaniya/12/trenazher/', 'budetege:trainer:v1', 'budetege:zadanie-12:log:v1'],
-  ['/zadaniya/13/trenazher/', 'budetege:zadanie-13:v1', 'budetege:zadanie-13:log:v1'],
-  ['/zadaniya/14/trenazher/', 'budetege:zadanie-14:v1', 'budetege:zadanie-14:log:v1'],
-  ['/zadaniya/18/trenazher/', 'budetege:zadanie-18:trenazher:v1', 'budetege:zadanie-18:log:v1'],
+  [
+    '/zadaniya/planimetriya/trenazher/',
+    'budetege:planimetriya-1:v1',
+    'budetege:planimetriya-1:log:v1',
+  ],
+  ['/zadaniya/vektory/trenazher/', 'budetege:vektory-2:v1', 'budetege:vektory-2:log:v1'],
+  [
+    '/zadaniya/veroyatnost/trenazher/',
+    'budetege:veroyatnost-4:v2',
+    'budetege:veroyatnost-4:log:v1',
+  ],
+  [
+    '/zadaniya/slozhnaya-veroyatnost/trenazher/',
+    'budetege:veroyatnost-5:v2',
+    'budetege:veroyatnost-5:log:v1',
+  ],
+  [
+    '/zadaniya/sluchainye-velichiny/trenazher/',
+    'budetege:zadanie-6:v1',
+    'budetege:zadanie-6:log:v1',
+  ],
+  ['/zadaniya/uravneniya/trenazher/', 'budetege:zadanie-7:v1', 'budetege:zadanie-7:log:v1'],
+  [
+    '/zadaniya/proizvodnaya/trenazher/',
+    'budetege:proizvodnaya-9:v1',
+    'budetege:proizvodnaya-9:log:v1',
+  ],
+  [
+    '/zadaniya/tekstovye-zadachi/trenazher/',
+    'budetege:zadanie-11:v1',
+    'budetege:zadanie-11:log:v1',
+  ],
+  ['/zadaniya/grafiki-funkciy/trenazher/', 'budetege:trainer:v1', 'budetege:zadanie-12:log:v1'],
+  ['/zadaniya/ekonomika/trenazher/', 'budetege:zadanie-13:v1', 'budetege:zadanie-13:log:v1'],
+  [
+    '/zadaniya/uravnenie-s-otborom/trenazher/',
+    'budetege:zadanie-14:v1',
+    'budetege:zadanie-14:log:v1',
+  ],
+  [
+    '/zadaniya/planimetriya-dokazatelstvo/trenazher/',
+    'budetege:zadanie-18:trenazher:v1',
+    'budetege:zadanie-18:log:v1',
+  ],
 ];
 
 /* Тренажёры, которые не показывают прогресс на первом экране. */
@@ -145,7 +177,9 @@ for (const [url, old, logKey] of RAZDELY) {
   /* Тип задач выбран адресом — как по прежней ссылке из теории: общий
      тренажёр по банку сразу начинает тренировку этого типа. Неверный
      ответ уходит в журнал, когда ученик идёт дальше. */
-  await page.goto(BASE + '/zadaniya/10/trenazher/?tipy=P22', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/prikladnye-zadachi/trenazher/?tipy=P22', {
+    waitUntil: 'networkidle',
+  });
   const pole = page.locator('.trn-otvetnaya input').first();
   await pole.waitFor({ timeout: 20000 });
   await pole.fill('123456');

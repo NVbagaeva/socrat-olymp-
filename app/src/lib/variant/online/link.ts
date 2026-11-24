@@ -16,6 +16,8 @@
  * может поменять в адресе — это закроет этап 2 (выдача через кабинет).
  */
 
+import { razdelBase } from '@/lib/paths';
+
 export type Mode = 'trening' | 'kontrol';
 
 export type Timer = { kind: 'none' } | { kind: 'up' } | { kind: 'down'; minutes: number };
@@ -127,6 +129,6 @@ export function sectionLinks(
 ): { opornye: string; trenazher: string } {
   /* №12 разбит по типам функций: подтип варианта — это тип раздела. */
   const base =
-    egeNumber === 12 && subtype !== '' ? `/zadaniya/12/${subtype}` : `/zadaniya/${egeNumber}`;
+    egeNumber === 12 && subtype !== '' ? `${razdelBase(12)}/${subtype}` : razdelBase(egeNumber);
   return { opornye: `${base}/opornye-zadachi/`, trenazher: `${base}/trenazher/` };
 }

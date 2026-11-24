@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { EmptyState } from '@/components/ui';
 import { STEREO, ZAGLUSHKA_STEREO, type StereoNo } from '@/content/stereo/zadaniya';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 
 /**
  * Вкладка стереометрии, которая ещё не собрана: заголовок и честное
@@ -9,7 +9,7 @@ import { ZADANIYA } from '@/lib/paths';
  * вкладки откроются по мере наполнения (docs/stereometry-plan.md, п. 8).
  */
 export function ZaglushkaStereo({ no, vkladka }: { no: StereoNo; vkladka: string }) {
-  const base = `${ZADANIYA}/${STEREO[no].slug}`;
+  const base = `${razdelBase(STEREO[no].slug)}`;
   return (
     <>
       <h2 className="t-h2 vtab__title">{vkladka}</h2>

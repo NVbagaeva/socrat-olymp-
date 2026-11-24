@@ -113,7 +113,12 @@ export const GLAVY_3: readonly GlavaStereo[] = [
     id: 'kombinacii',
     nomer: 7,
     title: 'Комбинации тел',
-    podglavy: ['Всё — через осевое сечение', 'Шар и куб', 'Шар, конус и цилиндр', 'Призма и цилиндр'],
+    podglavy: [
+      'Всё — через осевое сечение',
+      'Шар и куб',
+      'Шар, конус и цилиндр',
+      'Призма и цилиндр',
+    ],
     prototipy: ot(74, 91),
   },
   {
@@ -127,7 +132,12 @@ export const GLAVY_3: readonly GlavaStereo[] = [
     id: 'schet',
     nomer: 9,
     title: 'Как считать без калькулятора',
-    podglavy: ['Разность квадратов', 'Пифагоровы тройки', '$\\sqrt{ab} = \\sqrt{a}\\cdot\\sqrt{b}$', 'Проверка правдоподобия'],
+    podglavy: [
+      'Разность квадратов',
+      'Пифагоровы тройки',
+      '$\\sqrt{ab} = \\sqrt{a}\\cdot\\sqrt{b}$',
+      'Проверка правдоподобия',
+    ],
   },
   {
     id: 'formuly',
@@ -207,7 +217,7 @@ export const GLAVA_PLAN = {
 } as const;
 
 /**
- * Прежние разделы №3 по фигурам (/zadaniya/3/<фигура>/) → глава теории.
+ * Прежние разделы №3 по фигурам (/zadaniya/stereometriya/<фигура>/) → глава теории.
  * По этим адресам стоят страницы-редиректы: закладки учеников не ломаются.
  */
 export const FIGURA_GLAVA: Readonly<Record<string, string>> = {

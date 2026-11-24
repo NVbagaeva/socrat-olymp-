@@ -162,6 +162,13 @@
   align-self: center;
   min-width: 0;
 }
+/* Норма header (components/ui/Illustration.tsx): картинка шапки не
+   больше 260 px по любой стороне, на узком экране — 112. Вертикальная
+   картинка (куб с шаром №3) по ширине колонки вышла бы выше нормы:
+   высота ограничена, картинка вписывается (object-fit: contain). */
+.shapka__media img {
+  max-block-size: 260px;
+}
 
 /* ── Кольцо прогресса ───────────────────────────────────────── */
 
@@ -722,6 +729,9 @@
   .shapka__media {
     grid-area: m;
     align-self: start;
+  }
+  .shapka:not(.shapka--zhivaya) .shapka__media img {
+    max-block-size: var(--shapka-media);
   }
   .koltso__tekst,
   .koltso__tekst--gost {

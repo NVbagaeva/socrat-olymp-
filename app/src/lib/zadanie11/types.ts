@@ -31,6 +31,16 @@ export type LifehackId =
 export interface Etap {
   title: string;
   lines: string[];
+  /** Поясняющая схема шага (обгон поездов): рисуется под строками. */
+  skhema?: Skhema11;
+}
+
+/** Схема-чертёж к шагу разбора: адрес уже с версией (assetUrl), подпись, размер. */
+export interface Skhema11 {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
 }
 
 /**
@@ -51,6 +61,11 @@ export interface Tablitsa {
   rows: string[][];
   /** Строка, по которой составляют уравнение: подсвечена и подписана. */
   uravnenie?: number;
+  /**
+   * Уравнение-разность: справа от таблицы стрелка от строки с меньшим
+   * значением к строке с большим и подпись «на 4 ч больше».
+   */
+  raznica?: { bolshe: number; menshe: number; podpis: string };
 }
 
 /** Шаг подсказки: вопрос и кнопки-ответы, одна верная. */

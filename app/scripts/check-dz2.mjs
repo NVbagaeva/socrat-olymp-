@@ -182,16 +182,127 @@ for (const n of [8, 5]) {
 {
   const { prep5Pool } = requireSrc('lib/veroyatnost/pool.ts');
   const { otkrytRazbor } = requireSrc('lib/veroyatnost/razbor.ts');
+  const { typeset, typesetText } = requireSrc('lib/tex.ts');
+  const nabor = { tekst: typesetText, formula: (tex) => typeset(`$${tex}$`) };
   let vsego = 0;
   let sobrano = 0;
+  let dollar = 0;
+  let formul = 0;
   for (const blok of prep5Pool()) {
     for (const z of blok.zadachi) {
       vsego += 1;
-      const d = Z.zadachaOpornaya5(z, otkrytRazbor(z.steps, z.seal));
+      const r = otkrytRazbor(z.steps, z.seal);
+      const d = Z.zadachaOpornaya5(z, r, nabor);
       if (d !== null && NORM.test(d.answer) && d.razbor.shagi.length > 0) sobrano += 1;
+      /* В базу — готовая вёрстка: ни одной формулы в $…$, у шага с TeX — KaTeX. */
+      const html = d === null ? '' : [d.question_html, ...d.razbor.shagi.flatMap((s) => [s.chto, s.tex ?? ''])].join('');
+      if (/\$[^$]+\$/.test(html.replace(/<annotation[^>]*>[\s\S]*?<\/annotation>/g, ''))) dollar += 1;
+      if (d !== null && r.shagi.some((s) => s.tex !== undefined) && !d.razbor.shagi.some((s) => s.tex?.includes('katex')))
+        formul += 1;
     }
   }
   check(vsego > 0 && sobrano === vsego, `опорные №5: собрано ${sobrano} из ${vsego}`);
+  check(dollar === 0, `опорные №5: формулы набраны KaTeX, без $…$ (осталось у ${dollar})`);
+  check(formul === 0, `опорные №5: шаги с формулой набраны KaTeX (нет у ${formul})`);
+  {
+    const z = { id: 'k', uslovie: 'Найдите <b>a</b> & $x^2$' };
+    const d = Z.zadachaOpornaya5(z, { otvet: '0,5', shagi: [{ text: 'Шаг' }] }, nabor);
+    check(d.question_html.includes('&lt;b&gt;') && d.question_html.includes('katex'),
+      'опорные №5: текст условия экранирован, формула набрана');
+  }
+}
+
+/* ── Ученик (PR 2в): «Мои домашки» и экран решения ────────────── */
+{
+  const U = requireSrc('lib/dz2/uchenik.ts');
+  const now = Date.parse('2026-11-25T12:00:00Z');
+  const d = (id, status, due, after = 'late_ok', extra = {}) => ({
+    id, title: id, status, after_due: after, kontrol: false, items: 3, items_done: 1,
+    ...(due === null ? {} : { due_at: due }), ...extra,
+  });
+  const list = [
+    d('sdano', 'submitted', '2026-11-20T15:00:00Z', 'late_ok', { submitted_at: '2026-11-19T10:00:00Z' }),
+    d('bez-sroka', 'not_started', null),
+    d('pozzhe', 'in_progress', '2026-11-30T15:00:00Z'),
+    d('ranshe', 'not_started', '2026-11-26T15:00:00Z'),
+    d('vernuli', 'returned', '2026-12-10T15:00:00Z'),
+    d('zakryto', 'missed', '2026-11-24T15:00:00Z', 'closed'),
+    d('opozdal-mozhno', 'missed', '2026-11-24T15:00:00Z', 'late_ok'),
+  ];
+  const ids = U.poryadok(list, now).map((x) => x.id);
+  check(ids.join() === 'vernuli,opozdal-mozhno,ranshe,pozzhe,bez-sroka,sdano,zakryto' ||
+    ids.join() === 'vernuli,opozdal-mozhno,ranshe,pozzhe,bez-sroka,zakryto,sdano',
+    `порядок «Моих домашек»: доработка, по сроку, без срока, потом сданные (${ids.join()})`);
+  check(!U.aktivnaya(list[5], now) && U.aktivnaya(list[6], now), 'срок прошёл: закрытое — не активное, «с опозданием» — активное');
+  check(!U.aktivnaya(list[0], now) && U.sdano('late') && !U.sdano('returned'), 'сданное не активно; «с опозданием» — сдано');
+
+  check(U.risunokSrc('/images/veroyatnost/zadanie-5/k5-21.webp') === '/images/veroyatnost/zadanie-5/k5-21.webp',
+    'картинка условия из /images/ показывается');
+  for (const bad of ['https://evil.example/x.png', '//evil.example/x.png', '/images/../api/x.png',
+    'javascript:alert(1)', '/images/x.png?track=1', '/kabinet/x.png']) {
+    check(U.risunokSrc(bad) === null, `чужая картинка не грузится: ${bad}`);
+  }
+
+  const dz = { hints_allowed: true, kontrol: false };
+  const op = { kind: 'opornye' };
+  const tr = { kind: 'trenazher' };
+  check(U.estPodskazki(dz, op) && !U.estPodskazki(dz, tr), 'подсказки — у опорных, у тренажёра нет (разбор одним куском)');
+  check(!U.estPodskazki({ ...dz, kontrol: true }, op) && !U.estPodskazki({ ...dz, hints_allowed: false }, op),
+    'контрольная и «без подсказок» — подсказок нет');
+
+  const e = (progress, tasks) => ({ progress, tasks });
+  check(JSON.stringify(U.cel(e({ done: 7, need: 3, completed: true }))) === '{"done":3,"need":3}', 'цель: не больше нужного');
+  check(JSON.stringify(U.cel(e({ done: 1, need: null, completed: false }, [{}, {}]))) === '{"done":1,"need":2}',
+    'цель без числа — все задачи');
+  const t3 = [{ state: 'right' }, { state: 'open' }, { state: 'open' }];
+  check(U.pervayaOtkrytaya({ tasks: t3 }) === 1 && U.otkrytye({ tasks: t3 }) === 2, 'открывается первая незакрытая задача');
+  check(U.pervayaOtkrytaya({ tasks: [{ state: 'right' }] }) === 0, 'всё закрыто — первая');
+  check(U.vypolneno({ items: [{ progress: { completed: true } }, { progress: { completed: false } }] }) === 1,
+    'выполнено элементов');
+  check(U.srokProshel({ due_at: '2026-11-24T15:00:00Z' }, now) && !U.srokProshel({}, now), 'срок прошёл / без срока');
+}
+
+/* ── Итоги учителя (PR 2г) ──────────────────────────────────────── */
+{
+  const I = requireSrc('lib/dz2/itogi.ts');
+  check(I.yacheyka(undefined) === 'net' && I.yacheyka({ done: 0, need: 3, completed: false }) === 'net',
+    'клетка: не начато');
+  check(I.yacheyka({ done: 1, need: 3, completed: false }) === 'nachato', 'клетка: начато');
+  check(I.yacheyka({ done: 0, need: 3, completed: false, closed: 2, total: 10 }) === 'nachato',
+    'клетка «подряд»: серия сорвалась, но задачи решались — начато');
+  check(I.yacheyka({ done: 3, need: 3, completed: true }) === 'gotovo', 'клетка: выполнено');
+  const tr = { kind: 'trenazher' };
+  const te = { kind: 'teoriya' };
+  check(I.podpisYacheyki(tr, { done: 5, need: 3, completed: true }) === '3/3', 'подпись: не больше цели');
+  check(I.podpisYacheyki(te, { done: 1, need: 1, completed: true }) === '✓' &&
+    I.podpisYacheyki(te, { done: 0, need: 1, completed: false }) === '—', 'подпись теории');
+  check(I.podpisYacheyki(tr, undefined) === '—', 'подпись без прогресса');
+  const u = (id, name, status, progress = {}) => ({ id, name, status, seconds: 0, progress });
+  const list = [
+    u('a', 'Яна', 'not_started'), u('b', 'Борис', 'late', { e1: { done: 1, need: 1, completed: true } }),
+    u('c', 'Аня', 'submitted', { e1: { done: 1, need: 1, completed: true } }), u('d', 'Вера', 'returned'),
+    u('e', 'Гоша', 'missed'), u('f', 'Дина', 'in_progress', { e1: { done: 0, need: 1, completed: false } }),
+  ];
+  check(I.poryadokUchenikov(list).map((x) => x.id).join() === 'c,b,d,f,a,e',
+    `порядок учеников: сдавшие, на доработке, в работе, не начавшие, не сдавшие (${I.poryadokUchenikov(list).map((x) => x.id).join()})`);
+  check(I.sdali(list) === 2 && I.vypolnili(list, 'e1') === 2, 'сдали 2, элемент выполнили 2');
+  check(JSON.stringify(I.poStatusam(list)) === '{"not_started":1,"late":1,"submitted":1,"returned":1,"missed":1,"in_progress":1}',
+    'счёт по статусам');
+  check(I.mozhnoVernut(list[1]) && I.mozhnoVernut(list[2]) && !I.mozhnoVernut(list[3]) && !I.mozhnoVernut(list[0]),
+    'вернуть можно только сданное');
+  const items = [{ id: 'e2', position: 2 }, { id: 'e1', position: 1 }];
+  const ot = [{ id: 't2', item_id: 'e1', position: 2 }, { id: 't1', item_id: 'e1', position: 1 }, { id: 't3', item_id: 'e2', position: 1 }];
+  const pe = I.poElementam(items, ot);
+  check(pe[0].e.id === 'e2' && pe[0].zadachi.length === 1 && pe[1].zadachi.map((x) => x.id).join() === 't1,t2',
+    'ответы по элементам и по порядку задач');
+}
+
+/* Ссылки ученика из ДЗ — на настоящие адреса разделов. */
+{
+  const L = requireSrc('lib/dz2/links.ts');
+  check(L.dz2KartochkiHref(5) === '/zadaniya/slozhnaya-veroyatnost/kartochki/', `карточки №5: ${L.dz2KartochkiHref(5)}`);
+  check(L.dz2TeoriyaHref(5, 'koordinatnaya-pryamaya') === '/zadaniya/slozhnaya-veroyatnost/teoriya/#teoriya-koordinatnaya-pryamaya',
+    `глава теории №5: ${L.dz2TeoriyaHref(5, 'koordinatnaya-pryamaya')}`);
 }
 
 console.log(`Новая выдача ДЗ: ${checks} проверок, не прошло ${failures.length}.`);

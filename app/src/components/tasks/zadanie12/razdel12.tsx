@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { FigureZoom } from '@/components/ui';
 import type { Shagi } from '@/components/trenazher/types';
 import { TRENAZHER12 } from '@/content/zadanie12';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { readOtvet12 } from '@/lib/ves12/trening/otvet12';
 import { log12, vybor12 } from '@/lib/ves12/trening/progress';
 import { KLYUCH12, perenos12 } from '@/lib/ves12/trening/session';
@@ -126,6 +126,6 @@ export const RAZDEL12: RazdelBanka<Zadacha12, Reshenie12> = {
   varianty: (z) =>
     z.task.options === null ? null : z.task.options.map((o) => ({ id: o.number, html: o.html })),
   poyasnenie: (z, verno) => (verno ? z.task.rightHint : z.task.wrongHint),
-  zadachaHref: (id) => `${ZADANIYA}/12/trenazher/?zadacha=${encodeURIComponent(id)}`,
+  zadachaHref: (id) => `${razdelBase(12)}/trenazher/?zadacha=${encodeURIComponent(id)}`,
   prezhnyayaZapis: perenos12,
 };

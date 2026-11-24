@@ -31,5 +31,5 @@
 - `primery.ts` — сцены витрины: сечения из тестов ядра, для
   пятиугольника — построение следами.
 
-Витрина: `/zadaniya/15/vitrina/` (noindex, без ссылок).
+Витрина: `/zadaniya/stereometriya-dokazatelstvo/vitrina/` (noindex, без ссылок).
 Проверка на сайте: `pnpm test:zadanie15-vitrina`.

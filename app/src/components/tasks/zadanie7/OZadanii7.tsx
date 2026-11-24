@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { IRRACIONALNYE_7 } from '@/content/teoriya7-irr';
 import { FORMULY7, GRUPPY7_VID, SHAPKA7, TIPY7_OPASNO } from '@/content/uravneniya7';
+import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { typeset } from '@/lib/tex';
 import { zadachiPrototipa } from '@/lib/zadanie7/bank/index';
@@ -65,13 +66,14 @@ export function OZadanii7({ base }: { base: string }) {
         opasno={SHAPKA7.opasno.map((line) => typeset(line))}
         oblozhka={
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
-             пережатия, прозрачный фон на стекле шапки. */
-          <img
+             пережатия, прозрачный фон на стекле шапки; размер — норма hero. */
+          <Illustration
+            variant="hero"
             src={assetUrl('/images/task-07.svg')}
             alt={SHAPKA7.oblozhkaAlt}
             width={512}
             height={512}
-            decoding="async"
+            priority
           />
         }
       />
@@ -156,7 +158,9 @@ export function OZadanii7({ base }: { base: string }) {
               formuly={blok.formuly.map((f) => ({
                 html: tex(f.tex),
                 primerHtml: tex(f.primer),
-                ...(f.details === undefined ? {} : { detailsHtml: f.details.map((line) => typeset(line)) }),
+                ...(f.details === undefined
+                  ? {}
+                  : { detailsHtml: f.details.map((line) => typeset(line)) }),
               }))}
             />
           ))}
