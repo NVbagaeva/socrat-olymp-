@@ -295,7 +295,7 @@
   display: block;
   height: 100%;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 
 /* Итоговый экран: две кнопки в ряд. */

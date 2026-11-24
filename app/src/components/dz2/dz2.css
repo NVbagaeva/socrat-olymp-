@@ -193,7 +193,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .dz2-u-mini {
   list-style: none;
@@ -290,7 +290,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-on-brand);
   font-weight: 700;
 }
@@ -681,7 +681,7 @@
   height: 22px;
   margin-right: var(--space-1);
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-on-brand);
   font-size: 0.75rem;
   font-weight: 700;

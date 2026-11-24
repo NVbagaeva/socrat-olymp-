@@ -83,7 +83,7 @@
   background: var(--color-border-info);
 }
 .z3t__seg.is-current {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 
 .z3t__card {

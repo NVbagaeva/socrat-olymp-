@@ -4,12 +4,12 @@
    токенов сайта есть запасные значения: в сборке PDF токенов нет. */
 
 .z13-r-shag {
-  --z13r-accent: var(--color-accent, #e8590c);
-  --z13r-rule: var(--color-border, #d0d7e2);
-  --z13r-info: var(--color-surface-info, #eef4ff);
-  --z13r-warm: var(--color-surface-warm, #fff6e8);
-  --z13r-ink: var(--color-text, #111827);
-  --z13r-ink-soft: var(--color-text-secondary, #5b6475);
+  --z13r-accent: var(--color-accent);
+  --z13r-rule: var(--color-border);
+  --z13r-info: var(--color-surface-info);
+  --z13r-warm: var(--color-surface-warm);
+  --z13r-ink: var(--color-text);
+  --z13r-ink-soft: var(--color-text-secondary);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 6px;
@@ -22,7 +22,7 @@
   margin: 0;
 }
 .z13-r-shag__head b {
-  color: var(--color-text-brand, #1f3a8a);
+  color: var(--color-text-brand);
 }
 .z13-r-shag p {
   margin: 0;
@@ -43,7 +43,7 @@
 .z13-r-shag--vnimanie {
   padding: 10px 14px;
   border: 1px solid var(--z13r-rule);
-  border-left: 4px solid var(--color-primary, #2563eb);
+  border-left: 4px solid var(--color-primary);
   border-radius: 8px;
   background: var(--z13r-info);
 }
@@ -161,7 +161,7 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 0 6px;
-  background: var(--color-surface, #fff);
+  background: var(--color-surface);
   color: var(--z13r-accent);
   font-size: 0.82em;
   font-weight: 600;

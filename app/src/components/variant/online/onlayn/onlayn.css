@@ -250,9 +250,9 @@
   height: 44px;
   padding: 0 var(--space-5);
   font-size: 16px;
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
   background: var(--glass-bg-strong);
-  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
 }
 @media (hover: hover) {
   .onl-btn--siniy:hover {
@@ -264,7 +264,7 @@
     box-shadow: var(--gloss-warm-shadow-soft-hover);
   }
   .onl-btn--kontur:hover {
-    background: var(--terracotta-50);
+    background: var(--color-accent-soft-surface);
   }
 }
 
@@ -342,7 +342,7 @@
 }
 .onl-rezhim--kontrol {
   /* Иконки — графика, им достаточно 3:1: сама терракота даёт 3,0:1. */
-  --onl-akcent: var(--terracotta);
+  --onl-akcent: var(--color-accent);
   background: var(--glass-tint-warm);
   box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow-warm);
 }
@@ -428,7 +428,7 @@
 .onl-uchitel__znak.onl-ik {
   width: 28px;
   height: 28px;
-  color: var(--terracotta);
+  color: var(--color-accent);
 }
 .onl-uchitel__tekst {
   margin: 0;

@@ -19,6 +19,32 @@ html {
   font-size: var(--font-size-base);
 }
 
+/* Тёмная тема — наша, «ночное стекло» (tokens.css, lib/tema.ts); запрет
+   браузеру затемнять страницу сам остаётся: «only dark». На печати —
+   светлая всегда: тёмные значения переменных стоят только в @media screen. */
+@media screen {
+  html[data-tema='dark'] {
+    color-scheme: only dark;
+    scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  }
+  html[data-tema='dark'] ::selection {
+    background: color-mix(in srgb, var(--color-primary-fill) 40%, transparent);
+  }
+}
+/* Смена темы — плавный переход цветов 200 мс, только на время смены
+   (атрибут ставит postavitTemu). При reduce — сразу. */
+html[data-tema-smena]:not([data-motion-level='reduce']) *,
+html[data-tema-smena]:not([data-motion-level='reduce']) *::before,
+html[data-tema-smena]:not([data-motion-level='reduce']) *::after {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    fill 0.2s ease,
+    stroke 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
 body {
   font-family: var(--font);
   background: var(--color-bg);

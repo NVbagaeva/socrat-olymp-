@@ -123,7 +123,7 @@
     0 4px 10px -2px rgba(18, 48, 110, 0.35);
 }
 .z10-rs__polzunok:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 8px;
 }
@@ -171,7 +171,7 @@
   }
 }
 .z10-rs__scena:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 .z10-rs__svg {
@@ -306,7 +306,7 @@
   border: 0;
   border-radius: 999px;
   background: none;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font: inherit;
   font-size: 15px;
   font-weight: 650;
@@ -329,7 +329,7 @@
     0 4px 10px -4px rgba(180, 80, 28, 0.35);
 }
 .z10-rs__seg button:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 .z10-rs__podskazka {

@@ -112,26 +112,26 @@
   gap: 6px;
   min-height: 30px;
   padding: 0 11px;
-  border: 1px solid var(--blue-200);
+  border: 1px solid var(--color-border-info);
   border-radius: var(--radius-pill);
-  background: linear-gradient(180deg, var(--white), var(--blue-50));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
-  color: var(--blue-700);
+  background: linear-gradient(180deg, var(--color-surface), var(--color-surface-info));
+  box-shadow: var(--glass-hi);
+  color: var(--color-primary-text);
   font-size: 14px;
   font-weight: 500;
   line-height: 19px;
   white-space: nowrap;
 }
 .shapka__chip--uroven {
-  color: var(--white);
+  color: var(--color-text-inverse);
   border-color: transparent;
-  background: linear-gradient(180deg, var(--blue-500), var(--blue-700));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
+  background: linear-gradient(180deg, var(--blue-500), var(--color-primary-fill-hover));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 25%, transparent);
 }
 .shapka__chip--warm {
-  color: var(--amber-700);
-  border-color: var(--cream-200, var(--amber-50));
-  background: linear-gradient(180deg, var(--white), var(--amber-50));
+  color: var(--color-status-progress-text);
+  border-color: var(--cream-200, var(--color-warning-soft));
+  background: linear-gradient(180deg, var(--color-surface), var(--color-warning-soft));
 }
 .shapka__chip-ik,
 .shapka__chip-ik svg {
@@ -174,7 +174,7 @@
 
 .koltso {
   --koltso-d: var(--shapka-media);
-  --koltso-oranzh: #f5a04a;
+  --koltso-oranzh: var(--color-accent);
   display: grid;
   justify-items: center;
   gap: 6px;
@@ -206,7 +206,7 @@
 }
 /* Дорожка — матовое стекло. */
 .koltso__lozhe {
-  stroke: rgb(255 255 255 / 0.7);
+  stroke: color-mix(in srgb, var(--color-surface) 70%, transparent);
   stroke-width: 7;
   filter: drop-shadow(0 2px 6px rgb(31 95 208 / 0.18));
 }
@@ -238,11 +238,11 @@
   transform: rotate(calc(var(--koltso-p) * 360deg));
 }
 .koltso__golova circle {
-  fill: #fff6ea;
+  fill: var(--color-accent-soft-surface);
   filter: drop-shadow(0 0 4px rgb(255 190 120 / 0.95));
 }
 .koltso--gotovo {
-  --koltso-oranzh: #f2c14e;
+  --koltso-oranzh: var(--color-star);
 }
 @media (prefers-reduced-motion: no-preference) {
   .koltso__hod,
@@ -297,7 +297,7 @@
 .koltso__tekst--gost {
   font-size: 13px;
   font-weight: 500;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   text-decoration: underline;
   text-decoration-color: rgb(31 95 208 / 0.35);
   text-underline-offset: 3px;
@@ -306,7 +306,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--amber-700);
+  color: var(--color-status-progress-text);
 }
 .koltso__galochka svg {
   width: 18px;
@@ -414,7 +414,7 @@
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-size: 12px;
   line-height: 16px;
   font-weight: 600;
@@ -427,7 +427,7 @@
   width: 14px;
   height: 14px;
   fill: none;
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -501,27 +501,27 @@
 }
 /* Подписи вершин — синие и жирные, курсивом. */
 .zhv .zhv__v {
-  fill: var(--blue-700);
+  fill: var(--color-primary-text);
   font-weight: 700;
   font-style: italic;
   font-size: 15px;
   paint-order: stroke;
-  stroke: rgb(255 255 255 / 0.85);
+  stroke: color-mix(in srgb, var(--color-surface) 85%, transparent);
   stroke-width: 3px;
   stroke-linejoin: round;
 }
 .zhv .zhv__t {
-  fill: var(--blue-800, var(--blue-700));
+  fill: var(--blue-800, var(--color-primary-text));
   font-size: 12px;
   font-weight: 600;
   paint-order: stroke;
-  stroke: rgb(255 255 255 / 0.85);
+  stroke: color-mix(in srgb, var(--color-surface) 85%, transparent);
   stroke-width: 3px;
   stroke-linejoin: round;
 }
 .zhv .zhv__ln {
   fill: none;
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -533,7 +533,7 @@
   stroke-dasharray: 5 5;
 }
 .zhv .zhv__ln--or {
-  stroke: #f08a2c;
+  stroke: var(--color-accent);
 }
 .zhv .zhv__ln--skryt {
   stroke-dasharray: 4 5;
@@ -544,7 +544,7 @@
   stroke-width: 1;
 }
 .zhv .zhv__plita {
-  fill: rgb(255 255 255 / 0.55);
+  fill: color-mix(in srgb, var(--color-surface) 55%, transparent);
   stroke: rgb(61 121 224 / 0.55);
   stroke-width: 1.5;
 }
@@ -572,8 +572,8 @@
   fill: transparent;
 }
 .zhv .zhv__ruchka-tochka {
-  fill: #fff;
-  stroke: #f08a2c;
+  fill: var(--color-surface);
+  stroke: var(--color-accent);
   stroke-width: 3;
   filter: drop-shadow(0 0 4px rgb(255 160 80 / 0.7));
   transition: r 150ms ease;
@@ -583,10 +583,10 @@
   r: 8;
 }
 .zhv .zhv__tochka {
-  fill: var(--blue-600);
+  fill: var(--color-primary);
 }
 .zhv .zhv__tochka--or {
-  fill: #f08a2c;
+  fill: var(--color-accent);
 }
 /* Плашка с формулой или числом под чертежом. */
 .zhv__plashka {
@@ -648,23 +648,23 @@
 .zhv__begunok input {
   width: 100%;
   margin: 0;
-  accent-color: #f08a2c;
+  accent-color: var(--color-accent);
   /* Ползунок тянут вбок: вертикальный жест — странице. */
   touch-action: pan-y;
 }
 .zhv__begunok b {
   min-width: 3.5em;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-weight: 700;
   text-align: right;
 }
 .zhv__knopka {
   justify-self: center;
   padding: 3px 12px;
-  border: 1px solid var(--blue-200);
+  border: 1px solid var(--color-border-info);
   border-radius: var(--radius-pill);
-  background: linear-gradient(180deg, var(--white), var(--blue-50));
-  color: var(--blue-700);
+  background: linear-gradient(180deg, var(--color-surface), var(--color-surface-info));
+  color: var(--color-primary-text);
   font: inherit;
   font-size: 12px;
   font-weight: 600;

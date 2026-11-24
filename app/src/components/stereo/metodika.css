@@ -137,15 +137,15 @@
   align-items: center;
 }
 .o3-teoriya .contents-item.is-active {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   color: var(--color-primary);
 }
 .o3-teoriya .contents-item.is-active::before {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .o3-teoriya .contents-item.is-active .contents-item__no {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .o3-teoriya .contents-sub {
@@ -169,7 +169,7 @@
   font-variant-numeric: tabular-nums;
 }
 .o3-teoriya .contents-sub__item.is-active {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   color: var(--color-primary);
   font-weight: 600;
   box-shadow: inset 3px 0 0 var(--color-primary);
@@ -195,7 +195,7 @@
   display: none;
 }
 .o3-teoriya .topic-open__btn[aria-expanded='true'] {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   border-color: var(--color-primary);
 }
 
@@ -209,7 +209,7 @@
   font-weight: 800;
 }
 .o3-teoriya .vteor-razdel__no {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   color: var(--color-primary);
 }
 @media (max-width: 767.98px) {
@@ -501,7 +501,7 @@ a.o3-schet__btn:focus-visible {
   box-shadow: none;
 }
 .o3-ramka--layfhak .o3-ramka__krug {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .o3-ramka--opredelenie {
   display: grid;
@@ -517,7 +517,7 @@ a.o3-schet__btn:focus-visible {
   margin: 0;
   padding: 2px var(--space-3);
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-size: var(--fs-caption);
   font-weight: 700;
@@ -536,7 +536,7 @@ a.o3-schet__btn:focus-visible {
   margin: 0;
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-md);
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
   color: var(--color-primary);
   font-size: var(--fs-body);
   font-weight: 700;
@@ -569,7 +569,7 @@ a.o3-schet__btn:focus-visible {
   left: 19px;
   top: 44px;
   bottom: calc(var(--space-3) * -1 - 4px);
-  border-left: 2px dashed var(--blue-300);
+  border-left: 2px dashed var(--color-accent-soft);
 }
 .o3-stepper__n {
   display: inline-grid;
@@ -578,11 +578,11 @@ a.o3-schet__btn:focus-visible {
   height: 40px;
   margin-top: var(--space-2);
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-weight: 800;
   font-size: var(--fs-lg);
-  box-shadow: 0 0 0 5px var(--blue-100);
+  box-shadow: 0 0 0 5px var(--color-surface-soft);
 }
 .o3-stepper__karta {
   min-width: 0;
@@ -616,7 +616,7 @@ a.o3-schet__btn:focus-visible {
     height: 32px;
     margin-top: var(--space-2);
     font-size: var(--fs-body);
-    box-shadow: 0 0 0 4px var(--blue-100);
+    box-shadow: 0 0 0 4px var(--color-surface-soft);
   }
   .o3-stepper__shag:not(:last-child)::before {
     left: 15px;
@@ -661,7 +661,7 @@ a.o3-schet__btn:focus-visible {
   padding: var(--space-5);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  background: linear-gradient(180deg, var(--color-surface) 0%, var(--blue-50) 100%);
+  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-surface-info) 100%);
   box-shadow: var(--shadow-sm);
 }
 .o3-panel__head {
@@ -720,7 +720,7 @@ a.o3-schet__btn:focus-visible {
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-lg);
   background: var(--color-accent-soft-surface);
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   font-weight: 600;
@@ -923,13 +923,13 @@ a.o3-schet__btn:focus-visible {
   height: 8px;
   overflow: hidden;
   border-radius: var(--radius-pill);
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
 }
 .o3-polosa > span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .o3-polosa--uspeh > span {
   background: var(--color-uspeh);
@@ -968,7 +968,7 @@ a.o3-schet__btn:focus-visible {
   color: var(--color-uspeh);
 }
 .o3-chip--vProcesse {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   color: var(--color-primary);
 }
 .o3-chip--skoro {
@@ -1051,7 +1051,7 @@ a.o3-kart:focus-visible {
 }
 .o3-kart.is-tekushchiy .o3-kart__no,
 .o3-kart.is-vProcesse .o3-kart__no {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .o3-kart__text {
@@ -1444,11 +1444,11 @@ button.o3-schet__btn:disabled {
 }
 .o3-var__btn.is-chosen {
   border-color: var(--color-primary);
-  background: var(--blue-50);
+  background: var(--color-surface-info);
 }
 .o3-var__btn.is-chosen .o3-var__box {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .o3-var__btn.is-chosen .o3-var__box::after {
   content: '';
@@ -1510,8 +1510,8 @@ button.o3-schet__btn:disabled {
 .o3-btn-podskazka {
   flex: 1 1 160px;
   max-width: 280px;
-  background: var(--blue-50);
-  border-color: var(--blue-200);
+  background: var(--color-surface-info);
+  border-color: var(--color-border-info);
   color: var(--color-primary);
 }
 .o3-btn-podskazka .o3i {
@@ -1567,7 +1567,7 @@ button.o3-schet__btn:disabled {
   position: absolute;
   inset: 8px;
   border-radius: var(--radius-pill);
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
 }
 .o3-tochka.is-right::before {
   background: var(--color-uspeh);
@@ -1580,8 +1580,8 @@ button.o3-schet__btn:disabled {
 }
 .o3-tochka.is-current::before {
   inset: 5px;
-  background: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--blue-100);
+  background: var(--color-primary-fill);
+  box-shadow: 0 0 0 3px var(--color-surface-soft);
 }
 .o3-tochka:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -1663,7 +1663,7 @@ button.o3-schet__btn:disabled {
   left: 21px;
   top: 38px;
   bottom: -8px;
-  border-left: 2px dashed var(--blue-200);
+  border-left: 2px dashed var(--color-border-info);
 }
 .o3-pod__shag-btn {
   display: flex;
@@ -1704,19 +1704,19 @@ button.o3-schet__btn:disabled {
 }
 .o3-pod__shag.is-gotov .o3-pod__n {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .o3-pod__shag.is-tek .o3-pod__shag-btn {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   color: var(--color-primary);
   font-weight: 700;
 }
 .o3-pod__shag.is-tek .o3-pod__n {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
-  box-shadow: 0 0 0 4px var(--blue-100);
+  box-shadow: 0 0 0 4px var(--color-surface-soft);
 }
 .o3-pod__shag.is-gotov .o3-pod__shag-btn {
   color: var(--color-text);
@@ -2036,10 +2036,10 @@ button.o3-schet__btn:disabled {
   background: var(--color-error);
 }
 .o3-itog2__krug--teoriya {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .o3-itog2__krug--dalshe {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   color: var(--color-primary);
 }
 .o3-itog2__tekst {
