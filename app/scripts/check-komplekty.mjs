@@ -26,6 +26,7 @@
 
 import { requireSrc, SRC } from './lib/load-ts.mjs';
 import { generatorVersions } from './lib/generator-versions.mjs';
+import { kod } from './lib/adres.mjs';
 
 const args = process.argv.slice(2);
 const KITS = args.includes('--kits') ? Number(args[args.indexOf('--kits') + 1]) : 200;
@@ -84,7 +85,9 @@ const { listSlova } = requireSrc('content/veroyatnost.ts');
 const S8 = requireSrc('lib/vychisleniya/sheet8.ts');
 const { SKILLS: SKILLS8 } = requireSrc('lib/vychisleniya/skills.ts');
 const S9 = requireSrc('lib/proizvodnaya/sheet9.ts');
-const { GRUPPY: GRUPPY9, prototypesOfGroup: protoOfGroup9 } = requireSrc('lib/proizvodnaya/skills.ts');
+const { GRUPPY: GRUPPY9, prototypesOfGroup: protoOfGroup9 } = requireSrc(
+  'lib/proizvodnaya/skills.ts',
+);
 const S11 = requireSrc('lib/zadanie11/sheet11.ts');
 const { dannyeTrenazhera } = requireSrc('lib/zadanie11/trenazher/dannye.ts');
 const S1 = requireSrc('lib/planimetriya/sheet1.ts');
@@ -110,10 +113,20 @@ for (const family of manifest.families) {
     }),
     hrefs: (s, seed) => {
       const q = G12.sheetQuery({
-        skills: s.skills, count: s.count, level: null, seed, theme: 'color', layout: 'single',
-        kind: '', date: '', variants: s.variants,
+        skills: s.skills,
+        count: s.count,
+        level: null,
+        seed,
+        theme: 'color',
+        layout: 'single',
+        kind: '',
+        date: '',
+        variants: s.variants,
       });
-      return { student: `/zadaniya/12/${family.id}/pechat/?${q}`, teacher: `/zadaniya/12/${family.id}/pechat/otvety/?${q}` };
+      return {
+        student: `/zadaniya/grafiki-funkciy/${family.id}/pechat/?${q}`,
+        teacher: `/zadaniya/grafiki-funkciy/${family.id}/pechat/otvety/?${q}`,
+      };
     },
     spec: (href, teacher) => G12.sheetSpec(G12.parseSheetQuery(query(href)), teacher),
   });
@@ -123,16 +136,30 @@ generators.push({
   name: '№2',
   scope: '2',
   settings: (random) => ({
-    prototypes: sample(PROTOTYPES.map((p) => p.id), 1 + Math.floor(random() * 3), random),
+    prototypes: sample(
+      PROTOTYPES.map((p) => p.id),
+      1 + Math.floor(random() * 3),
+      random,
+    ),
     count: 3 + Math.floor(random() * 5),
     variants: random() < 0.05 ? 2 : 1,
   }),
   hrefs: (s, seed) => {
     const q = S2.sheetQuery2({
-      prototypes: s.prototypes, count: s.count, variants: s.variants, seed, theme: 'color',
-      layout: 'single', kind: '', date: '', bank: false,
+      prototypes: s.prototypes,
+      count: s.count,
+      variants: s.variants,
+      seed,
+      theme: 'color',
+      layout: 'single',
+      kind: '',
+      date: '',
+      bank: false,
     });
-    return { student: `/zadaniya/2/pechat/?${q}`, teacher: `/zadaniya/2/pechat/otvety/?${q}` };
+    return {
+      student: `/zadaniya/vektory/pechat/?${q}`,
+      teacher: `/zadaniya/vektory/pechat/otvety/?${q}`,
+    };
   },
   spec: (href, teacher) => S2.sheetSpec2(S2.parseSheetQuery2(query(href)), teacher),
 });
@@ -144,16 +171,30 @@ for (const zadanie of [4, 5]) {
     name: `№${zadanie}`,
     scope: String(zadanie),
     settings: (random) => ({
-      skills: sample(pool.kinds.map((k) => k.id), 1 + Math.floor(random() * 3), random),
+      skills: sample(
+        pool.kinds.map((k) => k.id),
+        1 + Math.floor(random() * 3),
+        random,
+      ),
       count: 3 + Math.floor(random() * 6),
       variants: random() < 0.05 ? 2 : 1,
     }),
     hrefs: (s, seed) => {
       const q = G12.sheetQuery({
-        skills: s.skills, count: s.count, level: null, seed, theme: 'color', layout: 'single',
-        kind: '', date: '', variants: s.variants,
+        skills: s.skills,
+        count: s.count,
+        level: null,
+        seed,
+        theme: 'color',
+        layout: 'single',
+        kind: '',
+        date: '',
+        variants: s.variants,
       });
-      return { student: `/zadaniya/${zadanie}/pechat/?${q}`, teacher: `/zadaniya/${zadanie}/pechat/otvety/?${q}` };
+      return {
+        student: `/zadaniya/${kod(zadanie)}/pechat/?${q}`,
+        teacher: `/zadaniya/${kod(zadanie)}/pechat/otvety/?${q}`,
+      };
     },
     spec: (href, teacher) => S4.sheet4Spec(pool, S4.parseSheet4Query(query(href)), teacher, list),
   });
@@ -163,15 +204,28 @@ generators.push({
   name: '№8',
   scope: '8',
   settings: (random) => ({
-    skills: sample(SKILLS8.map((s) => s.id), 1 + Math.floor(random() * 3), random),
+    skills: sample(
+      SKILLS8.map((s) => s.id),
+      1 + Math.floor(random() * 3),
+      random,
+    ),
     count: 3 + Math.floor(random() * 6),
   }),
   hrefs: (s, seed) => {
     const q = S8.sheetQuery8({
-      skills: s.skills, count: s.count, level: null, seed, theme: 'color', layout: 'single',
-      kind: '', date: '',
+      skills: s.skills,
+      count: s.count,
+      level: null,
+      seed,
+      theme: 'color',
+      layout: 'single',
+      kind: '',
+      date: '',
     });
-    return { student: `/zadaniya/8/pechat/?${q}`, teacher: `/zadaniya/8/pechat/otvety/?${q}` };
+    return {
+      student: `/zadaniya/vychisleniya/pechat/?${q}`,
+      teacher: `/zadaniya/vychisleniya/pechat/otvety/?${q}`,
+    };
   },
   spec: (href, teacher) => S8.sheetSpec8(S8.parseSheetQuery8(query(href)), teacher),
 });
@@ -191,10 +245,20 @@ generators.push({
   }),
   hrefs: (s, seed) => {
     const q = S9.sheetQuery9({
-      groups: s.groups, prototypes: [], count: s.count, seed, theme: 'color', layout: s.layout,
-      kind: '', date: '', ramki: s.ramki,
+      groups: s.groups,
+      prototypes: [],
+      count: s.count,
+      seed,
+      theme: 'color',
+      layout: s.layout,
+      kind: '',
+      date: '',
+      ramki: s.ramki,
     });
-    return { student: `/zadaniya/9/pechat/?${q}`, teacher: `/zadaniya/9/pechat/otvety/?${q}` };
+    return {
+      student: `/zadaniya/proizvodnaya/pechat/?${q}`,
+      teacher: `/zadaniya/proizvodnaya/pechat/otvety/?${q}`,
+    };
   },
   spec: (href, teacher) => S9.sheetSpec9(S9.parseSheetQuery9(query(href)), teacher),
 });
@@ -210,10 +274,19 @@ generators.push({
   }),
   hrefs: (s, seed) => {
     const q = S11.sheetQuery11({
-      rezhim: 'komplekt', istochnik: 'mix', sostav: s.sostav, variants: s.variants, seed,
-      zameny: {}, marshrut: 1, theme: 'color',
+      rezhim: 'komplekt',
+      istochnik: 'mix',
+      sostav: s.sostav,
+      variants: s.variants,
+      seed,
+      zameny: {},
+      marshrut: 1,
+      theme: 'color',
     });
-    return { student: `/zadaniya/11/pechat/?${q}`, teacher: `/zadaniya/11/pechat/otvety/?${q}` };
+    return {
+      student: `/zadaniya/tekstovye-zadachi/pechat/?${q}`,
+      teacher: `/zadaniya/tekstovye-zadachi/pechat/otvety/?${q}`,
+    };
   },
   spec: (href, teacher) => {
     const p = S11.parseSheetQuery11(query(href));
@@ -232,10 +305,22 @@ generators.push({
   }),
   hrefs: (s, seed) => {
     const q = S1.sheetQuery1({
-      rezhim: 'komplekt', istochnik: 'mix', sostav: s.sostav, variants: s.variants, seed,
-      zameny: {}, urok: 1, kod: '', nastroyki: { vykl: [], n: {} }, theme: 'color', ramka: -1,
+      rezhim: 'komplekt',
+      istochnik: 'mix',
+      sostav: s.sostav,
+      variants: s.variants,
+      seed,
+      zameny: {},
+      urok: 1,
+      kod: '',
+      nastroyki: { vykl: [], n: {} },
+      theme: 'color',
+      ramka: -1,
     });
-    return { student: `/zadaniya/1/pechat/?${q}`, teacher: `/zadaniya/1/pechat/otvety/?${q}` };
+    return {
+      student: `/zadaniya/planimetriya/pechat/?${q}`,
+      teacher: `/zadaniya/planimetriya/pechat/otvety/?${q}`,
+    };
   },
   spec: (href, teacher) => {
     const p = S1.parseSheetQuery1(query(href));
@@ -249,7 +334,10 @@ generators.push({
   scope: '13',
   settings: (random) => ({
     sostav: Object.fromEntries(
-      sample(VIDY_13, 1 + Math.floor(random() * 3), random).map((id) => [id, 1 + Math.floor(random() * 2)]),
+      sample(VIDY_13, 1 + Math.floor(random() * 3), random).map((id) => [
+        id,
+        1 + Math.floor(random() * 2),
+      ]),
     ),
     variants: random() < 0.05 ? 2 : 1,
     vid: random() < 0.3 ? 'full' : 'compact',
@@ -258,7 +346,15 @@ generators.push({
     urok: random() < 0.15 ? 1 + Math.floor(random() * 6) : 0,
   }),
   hrefs: (s, seed) => {
-    const p = { ...P13.GEN_PARAMS_13, sostav: s.sostav, variants: s.variants, vid: s.vid, zachet: s.zachet, urok: s.urok, seed };
+    const p = {
+      ...P13.GEN_PARAMS_13,
+      sostav: s.sostav,
+      variants: s.variants,
+      vid: s.vid,
+      zachet: s.zachet,
+      urok: s.urok,
+      seed,
+    };
     return { student: P13.listHref13(p, 'uchenik'), teacher: P13.listHref13(p, 'uchitel') };
   },
   spec: (href, teacher) => {
@@ -306,13 +402,19 @@ function sceneProblems(task) {
   const scene = figures12.conditionScene(task);
   const out = [];
   for (const point of scene.points ?? []) {
-    if (!point.label || /\?/.test(point.label) || !figures12.namedInCondition(point.label, task.question)) {
+    if (
+      !point.label ||
+      /\?/.test(point.label) ||
+      !figures12.namedInCondition(point.label, task.question)
+    ) {
       out.push(`точка «${point.label ?? ''}» не названа в условии`);
     }
   }
   if ((scene.shapes ?? []).length > 0) out.push('на рисунке условия фигуры построения');
-  if ((scene.curves ?? []).some((curve) => curve.style === 'dashed')) out.push('пунктирная кривая (асимптота)');
-  if (figures12.conditionSvg(task) !== task.figureSvg) out.push('рисунок условия не в режиме student');
+  if ((scene.curves ?? []).some((curve) => curve.style === 'dashed'))
+    out.push('пунктирная кривая (асимптота)');
+  if (figures12.conditionSvg(task) !== task.figureSvg)
+    out.push('рисунок условия не в режиме student');
   return out;
 }
 
@@ -336,7 +438,11 @@ for (const gen of generators) {
   for (let i = 0; i < KITS; i += 1) {
     const settings = gen.settings(random);
     const kit = K.makeKit({
-      scope: gen.scope, slot: gen.name, section: gen.name, count: 0, id: K.newKitId(random),
+      scope: gen.scope,
+      slot: gen.name,
+      section: gen.name,
+      count: 0,
+      id: K.newKitId(random),
       hrefs: (seed) => gen.hrefs(settings, seed),
     });
     let student;
@@ -361,13 +467,16 @@ for (const gen of generators) {
         figureProblems1(task.figureSvg).forEach((p) => where(kit.code, `задача ${n + 1}: ${p}`));
       } else if (task.figureSvg) {
         const noGrid = gen.scope === '2' && /class="vp-proj"/.test(task.figureSvg);
-        figureProblems(task.figureSvg, noGrid).forEach((p) => where(kit.code, `задача ${n + 1}: ${p}`));
+        figureProblems(task.figureSvg, noGrid).forEach((p) =>
+          where(kit.code, `задача ${n + 1}: ${p}`),
+        );
       }
       sceneProblems(task).forEach((p) => where(kit.code, `задача ${n + 1}: ${p}`));
     });
 
     /* 2. Ученик и учитель — одни задачи, условия и рисунки. */
-    if (a.length !== b.length) where(kit.code, `задач у ученика ${a.length}, у учителя ${b.length}`);
+    if (a.length !== b.length)
+      where(kit.code, `задач у ученика ${a.length}, у учителя ${b.length}`);
     a.forEach((task, n) => {
       const other = b[n];
       if (other === undefined) return;
@@ -376,7 +485,8 @@ for (const gen of generators) {
       }
       /* №9: у учителя на месте рисунка — режим 'teacher'; рисунок
          условия (режим 'student') лежит рядом, по нему и сверяем. */
-      const otherFigure = gen.scope === '9' ? (other.figureCondition ?? null) : (other.figureSvg ?? null);
+      const otherFigure =
+        gen.scope === '9' ? (other.figureCondition ?? null) : (other.figureSvg ?? null);
       if ((task.figureSvg ?? null) !== otherFigure) {
         where(kit.code, `задача ${n + 1}: рисунок условия у учителя другой`);
       }
@@ -394,26 +504,40 @@ for (const gen of generators) {
     if (gen.scope === '9') {
       student.blocks.forEach((block, n) => {
         const other = teacher.blocks[n];
-        if (other === undefined || JSON.stringify(block.primery) !== JSON.stringify(other.primery)) {
+        if (
+          other === undefined ||
+          JSON.stringify(block.primery) !== JSON.stringify(other.primery)
+        ) {
           where(kit.code, `блок ${n + 1}: разобранные примеры у ученика и учителя разные`);
         }
-        if (other !== undefined && !other.theory[0]?.includes('sheet-recap') && block.primery.length > 0) {
+        if (
+          other !== undefined &&
+          !other.theory[0]?.includes('sheet-recap') &&
+          block.primery.length > 0
+        ) {
           where(kit.code, `блок ${n + 1}: у учителя нет рамки «Запомни»`);
         }
         const settings = new URLSearchParams(kit.studentHref.split('?')[1]);
         const wantExamples = Number(settings.get('r'));
         const examples = block.theory.filter((item) => item.includes('sheet-example')).length;
-        if (examples !== wantExamples) where(kit.code, `блок ${n + 1}: примеров ${examples}, а выбрано ${wantExamples}`);
-        if (wantExamples > 0 && !block.theory[0].includes('sheet-recap')) where(kit.code, `блок ${n + 1}: нет рамки «Запомни»`);
+        if (examples !== wantExamples)
+          where(kit.code, `блок ${n + 1}: примеров ${examples}, а выбрано ${wantExamples}`);
+        if (wantExamples > 0 && !block.theory[0].includes('sheet-recap'))
+          where(kit.code, `блок ${n + 1}: нет рамки «Запомни»`);
       });
       a.forEach((task, n) => {
-        if (task.answer !== '' || task.solutionHtml !== null) where(kit.code, `задача ${n + 1}: у ученика есть ответ или разбор`);
-        if (!b[n].solutionHtml || !b[n].solutionHtml.includes('sheet-step')) where(kit.code, `задача ${n + 1}: у учителя нет разбора по этапам`);
+        if (task.answer !== '' || task.solutionHtml !== null)
+          where(kit.code, `задача ${n + 1}: у ученика есть ответ или разбор`);
+        if (!b[n].solutionHtml || !b[n].solutionHtml.includes('sheet-step'))
+          where(kit.code, `задача ${n + 1}: у учителя нет разбора по этапам`);
       });
     }
 
     /* 3. Сохранили — прочитали — те же задания и ответы. */
-    const fingerprints = { student: K.sheetFingerprint(student), teacher: K.sheetFingerprint(teacher) };
+    const fingerprints = {
+      student: K.sheetFingerprint(student),
+      teacher: K.sheetFingerprint(teacher),
+    };
     const saved = K.markDownloaded({ ...kit, fingerprints }, 'student');
     /* Кэш снимков сброшен записью: findKit читает строку из хранилища. */
     const back = K.findKit(saved.code, gen.scope);
@@ -421,30 +545,58 @@ for (const gen of generators) {
       where(kit.code, 'комплект не нашёлся в истории');
     } else {
       const again = gen.spec(back.teacherHref, true);
-      const key = (spec) => JSON.stringify(tasksOf(spec).map((t) => [t.questionHtml, t.figureSvg ?? null, t.options ?? null, t.answer ?? null]));
-      if (key(again) !== key(teacher)) where(kit.code, 'из сохранённого комплекта собрались другие задания или ответы');
-      if (K.sheetFingerprint(gen.spec(back.studentHref, false)) !== back.fingerprints.student ||
-          K.sheetFingerprint(again) !== back.fingerprints.teacher) {
+      const key = (spec) =>
+        JSON.stringify(
+          tasksOf(spec).map((t) => [
+            t.questionHtml,
+            t.figureSvg ?? null,
+            t.options ?? null,
+            t.answer ?? null,
+          ]),
+        );
+      if (key(again) !== key(teacher))
+        where(kit.code, 'из сохранённого комплекта собрались другие задания или ответы');
+      if (
+        K.sheetFingerprint(gen.spec(back.studentHref, false)) !== back.fingerprints.student ||
+        K.sheetFingerprint(again) !== back.fingerprints.teacher
+      ) {
         where(kit.code, 'отпечаток сохранённого комплекта не сошёлся');
       }
       const check = K.checkKitSheet(query(back.studentHref), gen.scope, 'student', student);
-      if (check.code !== kit.code || check.warning !== null) where(kit.code, `проверка листа: ${check.warning ?? check.code}`);
+      if (check.code !== kit.code || check.warning !== null)
+        where(kit.code, `проверка листа: ${check.warning ?? check.code}`);
       const html = buildDocument({ ...student, kit: K.kitFootLabel(check.code) }, {});
-      if (!html.includes(`Комплект ${kit.code}`)) where(kit.code, 'кода комплекта нет в колонтитуле');
+      if (!html.includes(`Комплект ${kit.code}`))
+        where(kit.code, 'кода комплекта нет в колонтитуле');
     }
   }
   kitsTotal += kits;
-  console.log(`  ${gen.name.padEnd(16)} комплектов ${kits}/${KITS} · ${((Date.now() - started) / 1000).toFixed(1)} с`);
+  console.log(
+    `  ${gen.name.padEnd(16)} комплектов ${kits}/${KITS} · ${((Date.now() - started) / 1000).toFixed(1)} с`,
+  );
 }
 
 /* Истории — не больше двадцати комплектов. */
-if (K.loadKits().length > K.KIT_HISTORY) problems.push(`в истории ${K.loadKits().length} комплектов`);
+if (K.loadKits().length > K.KIT_HISTORY)
+  problems.push(`в истории ${K.loadKits().length} комплектов`);
 
 /* Чужая версия генератора: отпечаток не сошёлся — лист предупреждает. */
 {
   const gen = generators[0];
-  const kit = K.makeKit({ scope: gen.scope, slot: 'x', section: 'x', count: 0, id: 'AB12', hrefs: (seed) => gen.hrefs({ skills: [manifest.families[0].skills[0].id], count: 4, variants: 1 }, seed) });
-  K.rememberKit({ ...kit, fingerprints: { student: 'другой', teacher: null }, downloaded: { student: true, teacher: false } });
+  const kit = K.makeKit({
+    scope: gen.scope,
+    slot: 'x',
+    section: 'x',
+    count: 0,
+    id: 'AB12',
+    hrefs: (seed) =>
+      gen.hrefs({ skills: [manifest.families[0].skills[0].id], count: 4, variants: 1 }, seed),
+  });
+  K.rememberKit({
+    ...kit,
+    fingerprints: { student: 'другой', teacher: null },
+    downloaded: { student: true, teacher: false },
+  });
   const spec = gen.spec(kit.studentHref, false);
   const check = K.checkKitSheet(query(kit.studentHref), gen.scope, 'student', spec);
   if (check.warning === null) problems.push('лист не предупредил о сменившемся генераторе');
@@ -455,7 +607,13 @@ if (K.loadKits().length > K.KIT_HISTORY) problems.push(`в истории ${K.lo
 }
 
 /* Разбор кода руками. */
-for (const [text, want] of [['7k3f-2b', '7K3F-2B'], [' 7K3F 2B ', '7K3F-2B'], ['oi1l-00', '0111-00'], ['7K3F', null], ['UUUU-UU', null]]) {
+for (const [text, want] of [
+  ['7k3f-2b', '7K3F-2B'],
+  [' 7K3F 2B ', '7K3F-2B'],
+  ['oi1l-00', '0111-00'],
+  ['7K3F', null],
+  ['UUUU-UU', null],
+]) {
   const got = K.parseKitCode(text);
   const code = got === null ? null : K.kitCode(got.id, got.version);
   if (code !== want) problems.push(`код «${text}» разобран как ${code}, а не ${want}`);

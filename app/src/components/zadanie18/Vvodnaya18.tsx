@@ -7,12 +7,12 @@ import { Tex } from '@/components/ui/Tex';
 import { VKLADKA_KARTOCHKI } from '@/content/kartochkiUi';
 import { VVODNAYA_18, ZADANIE18 } from '@/content/zadanie18';
 import { SOBRANNYE } from '@/content/zadanie18/spisok';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { kPovtoreniyu, neznakomyh, status18, useProgress18 } from '@/lib/zadanie18/progress';
 
 /* Кнопки плашки открывают общую вкладку «Карточки» сразу с сессией:
    ?nabor=… разбирает components/kartochki/Kartochki.tsx. */
-const KARTOCHKI = `${ZADANIYA}/${ZADANIE18.slug}/${VKLADKA_KARTOCHKI.tail}`;
+const KARTOCHKI = `${razdelBase(ZADANIE18.slug)}/${VKLADKA_KARTOCHKI.tail}`;
 
 /**
  * Вводная плашка вкладки: зачем схемы (две аналогии), как работать с

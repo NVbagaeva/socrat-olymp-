@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Zadanie } from '@/content/veroyatnost';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import type { RazboryVida } from '@/lib/veroyatnost/pool';
 import type { SessiyaZadacha } from './sessiyaPayload';
 
@@ -22,7 +22,7 @@ function zagruzitVid(zadanie: Zadanie, kind: string, versiya: string): Promise<R
   const klyuch = `${zadanie}:${kind}:${versiya}`;
   let p = KESH.get(klyuch);
   if (p === undefined) {
-    p = fetch(`${ZADANIYA}/${zadanie}/dannye/razbory/${kind}.json?v=${versiya}`).then((r) => {
+    p = fetch(`${razdelBase(zadanie)}/dannye/razbory/${kind}.json?v=${versiya}`).then((r) => {
       if (!r.ok) {
         throw new Error(`razbory ${kind}: ${r.status}`);
       }

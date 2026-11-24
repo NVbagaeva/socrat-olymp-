@@ -2,6 +2,7 @@ import { Abzacy, RamkaLovushka } from '@/components/teoriya/Ramki';
 import { OSHIBKI_2, UMET_2 } from '@/content/oZadanii2';
 import { O_ZADANII } from '@/content/vektory';
 import { GRUPPY2_VID, SHAPKA2, TIPY2_OPASNO, ZNAT2 } from '@/content/vektory2';
+import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { typeset } from '@/lib/tex';
 import { opornyeTipaHref2, tipTrenazherHref2 } from '@/lib/vektory/links';
@@ -43,13 +44,14 @@ export function OZadanii2() {
         opasno={SHAPKA2.opasno.map((line) => typeset(line))}
         oblozhka={
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
-             пережатия, прозрачный фон на стекле шапки. */
-          <img
+             пережатия, прозрачный фон на стекле шапки; размер — норма hero. */
+          <Illustration
+            variant="hero"
             src={assetUrl('/images/task-02.svg')}
             alt={SHAPKA2.oblozhkaAlt}
             width={512}
             height={512}
-            decoding="async"
+            priority
           />
         }
       />

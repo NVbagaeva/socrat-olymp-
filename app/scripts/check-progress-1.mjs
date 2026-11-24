@@ -281,7 +281,10 @@ for (const [chto, raw] of [
 {
   const { analogi } = requireSrc('lib/planimetriya/bank/analogi.ts');
   const vsegoAnalogov = PROTOTIPY.reduce((n, p) => n + analogi(p.id).length, 0);
-  check(Object.keys(katalog).length === PROTOTIPY.length, `в каталоге ${Object.keys(katalog).length} типов`);
+  check(
+    Object.keys(katalog).length === PROTOTIPY.length,
+    `в каталоге ${Object.keys(katalog).length} типов`,
+  );
   check(
     poZadache.size === BANK_FIPI.length + vsegoAnalogov,
     `в каталоге ${poZadache.size} задач, а в банке ${BANK_FIPI.length} + ${vsegoAnalogov}`,
@@ -475,7 +478,7 @@ const vse = Object.keys(katalog);
       `тип ${kp(p.id)}: нет опорного блока`,
     );
     check(
-      s1?.razbor === `/zadaniya/1/#tip-${kp(p.id)}`,
+      s1?.razbor === `/zadaniya/planimetriya/#tip-${kp(p.id)}`,
       `тип ${kp(p.id)}: разбор не на карточку типа`,
     );
   }

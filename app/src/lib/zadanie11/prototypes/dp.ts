@@ -18,7 +18,10 @@ import {
   slovo,
   str,
   vopros,
+  posleXxd,
   xxd,
+  principRaznicy,
+  sRaznicey,
 } from '../kit';
 import { add, d, div, fq, frac, mul, q, round9, sub, txt, val } from '../num';
 import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
@@ -501,12 +504,7 @@ const DP07: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        st === dd
-          ? `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(dd)}x(x+${d(dd)})$, то есть $${d(S * dd)}=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`
-          : `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(st)}x(x+${d(dd)})$, то есть $${d(S * dd)}=${d(st)}x(x+${d(dd)})$. Делим на $${d(st)}$:`,
-        ...res.lines,
-      ],
+      posle: [...posleXxd(S, dd, st), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -520,13 +518,18 @@ const DP07: Subtype = {
         [
           'Таблица',
           [
-            `Время из А в В — $\\dfrac{${d(S)}}{x}$, обратно в движении — $\\dfrac{${d(S)}}{x+${d(dd)}}$, плюс остановка $${d(st)}$ ч.`,
+            `По формуле $t=\\dfrac{S}{v}$: время из А в В — $\\dfrac{${d(S)}}{x}$ ч, обратно в движении — $\\dfrac{${d(S)}}{x+${d(dd)}}$ ч, плюс остановка $${d(st)}$ ч.`,
           ],
         ],
         [
           'Уравнение',
           [
-            `Путь А→В занял больше времени в движении, разница — остановка: $\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(dd)}}=${d(st)}$.`,
+            principRaznicy(
+              'время в движении из А в В',
+              'время в движении обратно',
+              `время остановки $${d(st)}$ ч`,
+            ),
+            `$\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(dd)}}=${d(st)}$.`,
           ],
         ],
         t.odz,
@@ -543,10 +546,15 @@ const DP07: Subtype = {
         ],
       ),
       tables: [
-        dvizhenie([
-          ['А → В', `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
-          ['В → А', `${d(S)}`, `x+${d(dd)}`, `\\dfrac{${d(S)}}{x+${d(dd)}}+${d(st)}`],
-        ]),
+        sRaznicey(
+          dvizhenie([
+            ['А → В', `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
+            ['В → А', `${d(S)}`, `x+${d(dd)}`, `\\dfrac{${d(S)}}{x+${d(dd)}}+${d(st)}`],
+          ]),
+          0,
+          1,
+          `в движении на $${d(st)}$ ч больше`,
+        ),
       ],
       hints: [
         vopros('Что обозначим за $x$?', 'скорость на пути из А в В', [
@@ -613,10 +621,7 @@ const DP08: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`,
-        ...res.lines,
-      ],
+      posle: [...posleXxd(S, dd, dd), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -628,12 +633,19 @@ const DP08: Subtype = {
         ['Обозначаем', [`Скорость второго — $x$ км/ч, первого — $x+${d(dd)}$ км/ч.`]],
         [
           'Таблица',
-          [`Время второго $\\dfrac{${d(S)}}{x}$, первого $\\dfrac{${d(S)}}{x+${d(dd)}}$.`],
+          [
+            `По формуле $t=\\dfrac{S}{v}$: время второго $\\dfrac{${d(S)}}{x}$ ч, первого $\\dfrac{${d(S)}}{x+${d(dd)}}$ ч.`,
+          ],
         ],
         [
           'Уравнение',
           [
-            `${vtor} ${glagol(g, 'shel')} дольше на $${d(dd)}$ ч: $\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(dd)}}=${d(dd)}$.`,
+            principRaznicy(
+              `время ${vtor === 'Вторая' ? 'второй' : 'второго'}`,
+              `время ${vtor === 'Вторая' ? 'первой' : 'первого'}`,
+              `$${d(dd)}$ ч`,
+            ),
+            `$\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(dd)}}=${d(dd)}$.`,
           ],
         ],
         t.odz,
@@ -650,10 +662,15 @@ const DP08: Subtype = {
         ],
       ),
       tables: [
-        dvizhenie([
-          ['Первый', `${d(S)}`, `x+${d(dd)}`, `\\dfrac{${d(S)}}{x+${d(dd)}}`],
-          ['Второй', `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
-        ]),
+        sRaznicey(
+          dvizhenie([
+            ['Первый', `${d(S)}`, `x+${d(dd)}`, `\\dfrac{${d(S)}}{x+${d(dd)}}`],
+            ['Второй', `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
+          ]),
+          1,
+          0,
+          `на $${d(dd)}$ ч больше`,
+        ),
       ],
       hints: [
         vopros(`Кто ${g.gl.prishel.m} к финишу первым?`, 'тот, у кого скорость больше', [
@@ -726,7 +743,9 @@ const DP09: Subtype = {
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(dv)})`,
       posle: [
-        `$${d(S)}(x+${d(dv)})-${d(S)}x=${chasyTex(dt)}\\,x(x+${d(dv)})$, то есть $${d(S * dv)}=${chasyTex(dt)}\\,x(x+${d(dv)})$, откуда`,
+        `$${d(S)}(x+${d(dv)})-${d(S)}x=${chasyTex(dt)}\\,x(x+${d(dv)})$`,
+        `Раскрываем скобки слева, $${d(S)}x$ и $-${d(S)}x$ взаимно уничтожаются: $${d(S * dv)}=${chasyTex(dt)}\\,x(x+${d(dv)})$.`,
+        `Делим обе части на $${chasyTex(dt)}$:`,
         ...res.lines,
       ],
       roots: res.roots,
@@ -746,9 +765,17 @@ const DP09: Subtype = {
         ],
         [
           'Таблица',
-          [`Время ${medlRod} $\\dfrac{${d(S)}}{x}$, ${kogo} $\\dfrac{${d(S)}}{x+${d(dv)}}$.`],
+          [
+            `По формуле $t=\\dfrac{S}{v}$: время ${medlRod} $\\dfrac{${d(S)}}{x}$ ч, ${kogo} $\\dfrac{${d(S)}}{x+${d(dv)}}$ ч.`,
+          ],
         ],
-        ['Уравнение', [`$\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(dv)}}=${chasyTex(dt)}$.`]],
+        [
+          'Уравнение',
+          [
+            principRaznicy(`время ${medlRod}`, `время ${kogo}`, `$${chasyTex(dt)}$ ч`),
+            `$\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(dv)}}=${chasyTex(dt)}$.`,
+          ],
+        ],
         t.odz,
         t.reshenie,
         [
@@ -763,10 +790,15 @@ const DP09: Subtype = {
         ],
       ),
       tables: [
-        dvizhenie([
-          [zaglavnaya(medl), `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
-          [zaglavnaya(kto), `${d(S)}`, `x+${d(dv)}`, `\\dfrac{${d(S)}}{x+${d(dv)}}`],
-        ]),
+        sRaznicey(
+          dvizhenie([
+            [zaglavnaya(medl), `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
+            [zaglavnaya(kto), `${d(S)}`, `x+${d(dv)}`, `\\dfrac{${d(S)}}{x+${d(dv)}}`],
+          ]),
+          0,
+          1,
+          `на $${chasyTex(dt)}$ ч больше`,
+        ),
       ],
       hints: [
         vopros(`Как записать ${vremya(dt, true)} в часах?`, `$${chasyTex(dt)}$`, [
@@ -926,7 +958,9 @@ const DP11: Subtype = {
       pochemu: `${medl} в пути дольше, чем ${bys}, а время ${bysRod} $x-${d(Dl)}$ положительно`,
       znamenatel: `x(x-${d(Dl)})`,
       posle: [
-        `$${tTex}(2x-${d(Dl)})=x(x-${d(Dl)})$, $x^2-${fq(b, true)}x+${fq(c, true)}=0$; умножаем на $${d(L)}$:`,
+        `$${tTex}(2x-${d(Dl)})=x(x-${d(Dl)})$`,
+        `Раскрываем скобки и переносим всё в одну сторону: $x^2-${fq(b, true)}x+${fq(c, true)}=0$.`,
+        `Коэффициенты дробные — умножаем обе части на $${d(L)}$:`,
         `$${sol.ishodnoe}$.`,
         ...sol.lines,
       ],
@@ -1023,7 +1057,7 @@ const DP12: Subtype = {
       znamenatel: `${d(u)}x(x-${d(dd)})`,
       posle: [
         `$${d(2 * u)}(x-${d(dd)})=${d(u)}x+x(x-${d(dd)})$.`,
-        `$${sol.ishodnoe}$.`,
+        `Раскрываем скобки и переносим всё в одну сторону: $${sol.ishodnoe}$.`,
         ...sol.lines,
       ],
       roots,
@@ -1096,10 +1130,7 @@ const DP13: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(h)})`,
-      posle: [
-        `$${d(S)}(x+${d(h)})-${d(S)}x=${d(h)}x(x+${d(h)})$. Делим на $${d(h)}$:`,
-        ...res.lines,
-      ],
+      posle: [...posleXxd(S, h, h), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -1109,12 +1140,15 @@ const DP13: Subtype = {
         ['Обозначаем', [`Скорость первого — $x$ км/ч, второго — $x+${d(h)}$ км/ч.`]],
         [
           'Таблица',
-          [`Время первого $\\dfrac{${d(S)}}{x}$, второго $\\dfrac{${d(S)}}{x+${d(h)}}$.`],
+          [
+            `По формуле $t=\\dfrac{S}{v}$: время первого $\\dfrac{${d(S)}}{x}$ ч, второго $\\dfrac{${d(S)}}{x+${d(h)}}$ ч.`,
+          ],
         ],
         [
           'Уравнение',
           [
-            `Первый был в пути на $${d(h)}$ ч дольше: $\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(h)}}=${d(h)}$.`,
+            principRaznicy('время первого', 'время второго', `$${d(h)}$ ч`),
+            `$\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(h)}}=${d(h)}$.`,
           ],
         ],
         t.odz,
@@ -1122,10 +1156,15 @@ const DP13: Subtype = {
         ['Отбор корней и ответ', [...t.otbor, `Спрашивают скорость первого ${ktoRod}.`, otvet(x)]],
       ),
       tables: [
-        dvizhenie([
-          ['Первый', `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
-          ['Второй', `${d(S)}`, `x+${d(h)}`, `\\dfrac{${d(S)}}{x+${d(h)}}`],
-        ]),
+        sRaznicey(
+          dvizhenie([
+            ['Первый', `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
+            ['Второй', `${d(S)}`, `x+${d(h)}`, `\\dfrac{${d(S)}}{x+${d(h)}}`],
+          ]),
+          0,
+          1,
+          `на $${d(h)}$ ч больше`,
+        ),
       ],
       hints: [
         vopros(

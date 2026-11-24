@@ -35,10 +35,13 @@ const { qrSvg } = requireSrc('lib/generator/qr.ts');
 /** Печатная CSS листа без блока :root: шрифты сборке задаёт sheet-render. */
 const EXTRA_CSS =
   fs
-    .readFileSync(path.join(APP, 'src', 'app', 'zadaniya', '13', 'pechat', 'pechat13.css'), 'utf8')
+    .readFileSync(
+      path.join(APP, 'src', 'app', 'zadaniya', 'ekonomika', 'pechat', 'pechat13.css'),
+      'utf8',
+    )
     .replace(/^:root\s*\{[^}]*\}\s*/m, '') +
   /* Решения учителя — та же разметка и те же стили, что на экране. */
-  fs.readFileSync(path.join(APP, 'src', 'app', 'zadaniya', '13', 'reshenie13.css'), 'utf8');
+  fs.readFileSync(path.join(APP, 'src', 'app', 'zadaniya', 'ekonomika', 'reshenie13.css'), 'utf8');
 
 function paramsOf(presetId) {
   const p = PRESETY_13.find((x) => x.id === presetId);

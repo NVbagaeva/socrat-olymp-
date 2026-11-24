@@ -4,7 +4,7 @@ import { tasksPage } from '@/content/tasks';
 import { SHAPKA6 } from '@/content/sluchainye6';
 import { STSENA } from '@/content/stsena';
 import { ZADANIE6 } from '@/content/zadanie6';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { PROTOTYPES } from '@/lib/zadanie6/prototypes';
 import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
 import { RazdelTabs } from '../RazdelTabs';
@@ -19,7 +19,7 @@ import { RazdelTabs } from '../RazdelTabs';
  * показывает вкладка «О задании».
  */
 export function Shell6({ children }: { children: React.ReactNode }) {
-  const base = `${ZADANIYA}/${ZADANIE6.slug}`;
+  const base = `${razdelBase(ZADANIE6.slug)}`;
   const no = String(Number(ZADANIE6.no));
   return (
     <AppShell active="tasks">

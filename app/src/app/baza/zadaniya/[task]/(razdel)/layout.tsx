@@ -5,14 +5,14 @@ import '@/app/zadaniya/zadaniya.css';
 import '@/app/zadaniya/[task]/section.css';
 /* Лента, тренажёр, опорные задачи, карточки — те же стили, что у
    разделов профиля с тренажёром по банку (№6): своих копий нет. */
-import '@/app/zadaniya/[task]/[type]/topic.css';
-import '@/app/zadaniya/[task]/[type]/trainer.css';
-import '@/app/zadaniya/[task]/[type]/prep.css';
+import '@/app/zadaniya/grafiki-funkciy/[type]/topic.css';
+import '@/app/zadaniya/grafiki-funkciy/[type]/trainer.css';
+import '@/app/zadaniya/grafiki-funkciy/[type]/prep.css';
 import '@/app/zadaniya/veroyatnost.css';
 import '@/app/zadaniya/komplekt.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/zadanie6/zadanie6.css';
-import '@/app/zadaniya/6/zadanie6.css';
+import '@/app/zadaniya/sluchainye-velichiny/zadanie6.css';
 import '@/components/kartochki/kartochki.css';
 import '@/lib/planimetriya/planimetriya.css';
 import '@/components/baza/baza.css';

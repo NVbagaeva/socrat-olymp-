@@ -2,7 +2,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { RazdelTabs } from '@/components/tasks/RazdelTabs';
 import { ZADANIE16 } from '@/content/zadanie16';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 
 /**
  * Оболочка раздела «Неравенство»: общая шапка раздела (SectionHeader) и
@@ -11,7 +11,7 @@ import { ZADANIYA } from '@/lib/paths';
  * layout маршрута: при переходе между вкладками остаётся на месте.
  */
 export function Shell16({ children }: { children: React.ReactNode }) {
-  const base = `${ZADANIYA}/${ZADANIE16.slug}`;
+  const base = `${razdelBase(ZADANIE16.slug)}`;
   return (
     <AppShell active="tasks">
       <main className="app-main">

@@ -5,8 +5,9 @@ import { OPORNYE } from '@/content/opornye';
 import { findSection } from '@/content/sections';
 import { skillTitle } from '@/content/skills12';
 import { functionTypes } from '@/data/functionTypes';
+import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
-import { href, ZADANIYA } from '@/lib/paths';
+import { href, razdelBase, ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
 import { podtemaNabora } from '@/lib/ves12/trenazher12';
 import { katalog12 } from '@/lib/ves12/trening/katalog';
@@ -36,7 +37,7 @@ export function yakorTipa12(nabor: string): string {
 }
 
 export function tipTrenazherHref12(nabor: string): string {
-  return `${ZADANIYA}/12/trenazher/?tip=${encodeURIComponent(nabor)}`;
+  return `${razdelBase(12)}/trenazher/?tip=${encodeURIComponent(nabor)}`;
 }
 
 export function OZadanii12() {
@@ -64,13 +65,14 @@ export function OZadanii12() {
         opasno={SHAPKA12.opasno.map((line) => typeset(line))}
         oblozhka={
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
-             пережатия, прозрачный фон на стекле шапки. */
-          <img
+             пережатия, прозрачный фон на стекле шапки; размер — норма hero. */
+          <Illustration
+            variant="hero"
             src={assetUrl('/images/task-12.svg')}
             alt={SHAPKA12.oblozhkaAlt}
             width={512}
             height={512}
-            decoding="async"
+            priority
           />
         }
       />

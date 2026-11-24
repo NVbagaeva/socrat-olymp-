@@ -29,6 +29,7 @@ import { KartaUchenika } from '@/components/karta/KartaUchenika';
 import { DZ2 } from '@/content/dz2';
 import { DZ2_ON } from '@/lib/dz2/config';
 import { DZ2_HREF } from '@/lib/dz2/links';
+import { MoiDomashkiKartochka } from '@/components/dz2/MoiDomashki';
 import { PROGRESS } from '@/content/progressUchitel';
 import { PROGRESS_UCHENIK_ON } from '@/lib/zhurnal/config';
 import { PROGRESS_HREF } from '@/lib/zhurnal/links';
@@ -335,6 +336,8 @@ function StudentHome({ klassy, onJoined }: { klassy: KlassView[] | null; onJoine
           {PROGRESS.statistika.zagolovok}
         </Link>
       ) : null}
+      {/* «Мои домашки» новой выдачи ДЗ (docs/kabinet-dz2.md) — за флагом. */}
+      {DZ2_ON ? <MoiDomashkiKartochka /> : null}
       {pokazatVstuplenie ? (
         <Card className="kabinet__card" title={t.classes.title} data-section="join">
           <p className="auth-form__text">{t.classes.none}</p>

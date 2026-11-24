@@ -1,5 +1,6 @@
 import { O_ZADANII_9 } from '@/content/proizvodnaya';
 import { GRUPPY9_VID, SHAPKA9, TIPY9_OPASNO, TIPY_BLOKA9, ZNAT9 } from '@/content/proizvodnaya9';
+import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { OPORNYE9_HREF, blokHref9, tipTrenazherHref9, tipYakor9 } from '@/lib/proizvodnaya/links';
 import { PROTOTYPES } from '@/lib/proizvodnaya/prototypes';
@@ -64,12 +65,13 @@ export function OZadanii9() {
         oblozhka={
           /* Обложка раздела — векторный чертёж (public/images/task-09.svg):
              касательная посчитана точно, прозрачный фон на стекле шапки. */
-          <img
+          <Illustration
+            variant="hero"
             src={assetUrl('/images/task-09.svg')}
             alt={SHAPKA9.oblozhkaAlt}
             width={512}
             height={512}
-            decoding="async"
+            priority
           />
         }
       />

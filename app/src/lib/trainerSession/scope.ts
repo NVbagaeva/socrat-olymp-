@@ -1,10 +1,17 @@
 /**
  * Раздел тренажёра по адресу страницы. Чистые функции без браузера:
  * зовутся и на сервере (сборка страницы), и в браузере (метка в меню).
+ *
+ * Адрес раздела профиля — по коду, раздел тренажёра — по номеру
+ * хранения: на нём ключи браузера (budetege:trainer:<раздел>:session) и
+ * trainer_sessions.scope в базе. Код переводится в номер, ключи не
+ * меняются.
  */
 
+import { nomerPoKodu } from '@/lib/paths';
+
 /**
- * Раздел тренажёра по адресу страницы: «/zadaniya/12/linear/trenazher/»
+ * Раздел тренажёра по адресу страницы: «/zadaniya/grafiki-funkciy/linear/trenazher/»
  * → «12:linear». Адрес вкладки тренажёра и адрес раздела дают один и тот же.
  */
 export function scopeOfPath(path: string): string | null {
@@ -25,7 +32,10 @@ export function scopeOfPath(path: string): string | null {
   }
   /* Разделы базы — со своим префиксом: «/baza/zadaniya/5/» → «baza-5»,
      иначе тренировка №5 базы легла бы на место №5 профиля. */
-  return (parts[at - 1] === 'baza' ? 'baza-' : '') + own.join(':');
+  if (parts[at - 1] === 'baza') return `baza-${own.join(':')}`;
+  const nomer = nomerPoKodu(own[0]!);
+  if (nomer !== null) own[0] = String(nomer);
+  return own.join(':');
 }
 
 /** Есть ли незавершённая тренировка в этом разделе или в его подразделах. */

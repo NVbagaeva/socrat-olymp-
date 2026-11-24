@@ -145,7 +145,7 @@ export function Stsena({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="oa-sm" ref={root}>
+    <div className="oa-sm" data-ill="hero" ref={root}>
       <svg className="oa-sm__geo" viewBox="0 0 600 600" aria-hidden="true" focusable="false">
         <defs>
           {/* Ветви параболы и концы осей растворяются за окружностью. */}

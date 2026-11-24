@@ -262,6 +262,53 @@
     border-color var(--dur-switch) var(--ease),
     background-color var(--dur-switch) var(--ease);
 }
+/* Карточка с иллюстрацией: стеклянная плашка с картинкой — первым
+   рядом во всю ширину, над номером и названием. */
+.vmetod--kartinka {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+.vmetod__kartinka {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  height: 148px;
+  margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) var(--space-2);
+  border-radius: calc(var(--radius-xl) - 6px);
+  background:
+    radial-gradient(70% 90% at 20% 15%, rgba(31, 95, 208, 0.12), transparent 70%),
+    radial-gradient(60% 90% at 85% 20%, rgba(240, 138, 36, 0.12), transparent 70%),
+    linear-gradient(180deg, #f6f9ff, #eaf1fc);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    inset 0 -18px 30px -24px rgba(31, 95, 208, 0.35);
+  overflow: hidden;
+}
+.vmetod__kartinka img {
+  display: block;
+  width: auto;
+  height: 132px;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 14px rgba(18, 48, 110, 0.18));
+  transition: transform var(--dur-switch) var(--ease);
+}
+.vmetod:hover .vmetod__kartinka img {
+  transform: translateY(-3px) scale(1.03);
+}
+@media (max-width: 639px) {
+  .vmetod__kartinka {
+    height: 128px;
+  }
+  .vmetod__kartinka img {
+    height: 112px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vmetod__kartinka img {
+    transition: none;
+  }
+}
+
 .vmetod:hover {
   border-color: var(--color-primary);
   background: var(--color-surface-info);
@@ -866,13 +913,11 @@
    убывает вместе с ним. Подписи так масштабировать нельзя: на
    телефоне они становились нечитаемыми, на мониторе — крупнее
    формулы решения. Поэтому кегль подписи задаётся в единицах
-   рисунка так, чтобы на экране выходил ровно токен:
-   токен × 760 / ширина плашки. Деление длины на длину в CSS
-   считается через tan(atan2()) — это единственный способ. На экране
-   подпись — --fs-caption: на ступень мельче формулы (--fs-body) и
-   выше нижнего предела читаемости при любой ширине. Браузер без
-   tan(atan2()) берёт строку выше — крупный кегль для сжатого
-   рисунка. Тренажёра это не касается — правила скоупятся плашкой.
+   рисунка ступенями по ширине контейнера (@container ниже), чтобы
+   на экране выходило около --fs-caption. Раньше кегль считался
+   через tan(atan2(760px, 100cqw)), но в Safari внутри SVG это не
+   работало и подписи пропадали. Тренажёра это не касается —
+   правила скоупятся плашкой.
 
    Гарнитура — та же, что у формулы: переменная курсивом
    математического шрифта KaTeX, цифры, скобки и знаки — прямым
@@ -894,50 +939,76 @@
 .vteor-shema .vizo-eyler__imya,
 .vteor-shema .vizo-eyler__chislo,
 .vteor-shema .pr-tochka__label {
-  font-size: var(--fs-h3);
-  font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
+  /* Кегль — в единицах рисунка (ширина 760) ступенями по ширине
+     контейнера: расчёт через cqw внутри SVG Safari не понимал, и
+     подписи пропадали. Ступени держат экранный кегль около токена. */
+  font-size: 19px;
 }
-/* Подпись под скобой — жирная и кеглем основного текста: итог
-   промежутка, а не пометка; подписи над лучами остаются мелкими. */
 .vteor-shema .pr-brace text {
-  font-size: calc(var(--fs-body) * tan(atan2(760px, 100cqw)));
+  font-size: 22px;
   font-weight: 700;
 }
-/* На узком чертеже (телефон) подписи лучей стоят слишком близко по
-   высоте для кегля --fs-caption и налезают друг на друга: там они
-   на ступень мельче, до нижнего предела 12px (--fs-label); подпись
-   под скобой — --fs-caption. */
+@container vteor-shema (max-width: 560px) {
+  .vteor-shema .pr-band-label,
+  .vteor-shema .pr-axis-name,
+  .vteor-shema .pr-tick text,
+  .vteor-shema .pr-sobytie__label,
+  .vteor-shema .vizo-eyler__imya,
+  .vteor-shema .vizo-eyler__chislo,
+  .vteor-shema .pr-tochka__label {
+    font-size: 24px;
+  }
+  .vteor-shema .pr-brace text {
+    font-size: 27px;
+  }
+}
 @container vteor-shema (max-width: 400px) {
   .vteor-shema .pr-band-label,
   .vteor-shema .pr-axis-name,
-  .vteor-shema .pr-tick text {
-    font-size: calc(var(--fs-label) * tan(atan2(760px, 100cqw)));
+  .vteor-shema .pr-tick text,
+  .vteor-shema .pr-sobytie__label,
+  .vteor-shema .vizo-eyler__imya,
+  .vteor-shema .vizo-eyler__chislo,
+  .vteor-shema .pr-tochka__label {
+    font-size: 36px;
   }
   .vteor-shema .pr-brace text {
-    font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
+    font-size: 40px;
   }
 }
 .vteor-shema .pr-tick text {
-  /* Подпись деления стоит на 26 единиц рисунка под осью; на
-     сжатом рисунке это меньше высоты цифры, и она упирается в
-     ось. Опускаем на ступень сетки — тоже в экранных пикселях. */
-  translate: 0 12px;
-  translate: 0 calc(var(--space-2) * tan(atan2(760px, 100cqw)));
+  /* Подпись деления стоит на 26 единиц рисунка под осью; на сжатом
+     рисунке крупная цифра упирается в ось — опускаем. Сдвиги, как и
+     кегль, — в единицах рисунка, ступенями по ширине. */
+  translate: 0 8px;
 }
 .vteor-shema .pr-brace {
-  /* Скоба стоит на 34 единицы под осью и на сжатом рисунке
-     упирается в подписи делений, которые на экране не сжимаются.
-     Опускаем её на столько, чтобы между подписью деления и скобой
-     осталась ступень сетки; на крупном рисунке сдвиг сходит
-     на нет. */
-  translate: 0 max(0px, calc(var(--space-3) * tan(atan2(760px, 100cqw)) - 8px));
+  translate: 0 6px;
 }
 .vteor-shema .pr-brace text {
-  /* Подпись скобы стоит на 28 единиц под ней; на сжатом рисунке
-     это меньше высоты буквы. Держим на экране высоту буквы и
-     ступень сетки: --fs-caption + --space-1. */
-  translate: 0
-    max(0px, calc((var(--fs-caption) + var(--space-1)) * tan(atan2(760px, 100cqw)) - 28px));
+  translate: 0 4px;
+}
+@container vteor-shema (max-width: 560px) {
+  .vteor-shema .pr-tick text {
+    translate: 0 12px;
+  }
+  .vteor-shema .pr-brace {
+    translate: 0 14px;
+  }
+  .vteor-shema .pr-brace text {
+    translate: 0 10px;
+  }
+}
+@container vteor-shema (max-width: 400px) {
+  .vteor-shema .pr-tick text {
+    translate: 0 16px;
+  }
+  .vteor-shema .pr-brace {
+    translate: 0 22px;
+  }
+  .vteor-shema .pr-brace text {
+    translate: 0 16px;
+  }
 }
 .vteor-shema .pr-axis-line,
 .vteor-shema .pr-tick line {
@@ -1628,8 +1699,8 @@
   max-width: 28ch;
   margin: 0;
   color: var(--color-primary);
-  font-size: clamp(18px, 1.25vw, 21px);
-  line-height: 1.45;
+  font-size: clamp(22px, 1.6vw, 27px);
+  line-height: 1.4;
   text-align: center;
   overflow-wrap: anywhere;
 }
@@ -1654,7 +1725,9 @@
   border: 1px solid var(--color-border-info);
   border-radius: var(--radius-lg);
   background: linear-gradient(155deg, var(--white), var(--color-surface-info));
-  box-shadow: var(--glass-hi), 0 12px 30px rgb(31 95 208 / 0.07);
+  box-shadow:
+    var(--glass-hi),
+    0 12px 30px rgb(31 95 208 / 0.07);
 }
 .v5-sobytiya__card h3 {
   margin: 0 0 var(--space-3);
@@ -1733,4 +1806,30 @@
   .v5-sobytiya__figure {
     overflow-x: auto;
   }
+}
+
+/* ── Нормы иллюстраций теории №4 и №5 ─────────────────────────────
+   Те же потолки, что у вариантов Illustration (components/ui/
+   Illustration.tsx): section — до 280 px, inline — до 140 px. Разметка
+   теории (components/tasks/veroyatnost/teoriya) — содержание раздела
+   под сторожем scripts/check-redesign.mjs, поэтому норма задаётся
+   здесь, по её классам. :where() — без веса: своя меньшая ширина
+   картинки остаётся. */
+:where(
+    .vizo-eylerblok__figura,
+    .vklass-primer,
+    .vklass-kosti,
+    .vvid__figura,
+    .vusloviya__figura,
+    .vsvyaz__figura
+  )
+  img {
+  max-inline-size: min(100%, 280px);
+  max-block-size: 280px;
+  object-fit: contain;
+}
+:where(.vteor-sluchay__figura) img {
+  max-inline-size: min(100%, 140px);
+  max-block-size: 140px;
+  object-fit: contain;
 }

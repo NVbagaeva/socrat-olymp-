@@ -38,7 +38,8 @@
   isolation: isolate;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(200px, 264px);
+  /* Колонка обложки — норма header Illustration: 260 px (телефон 112). */
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 260px);
   gap: var(--space-6);
   align-items: center;
   margin: 0 0 var(--space-4);
@@ -409,7 +410,7 @@
   /* Телефон: обложка справа от текста узкой колонкой, кнопка под ней —
      так шапка, лента и начало вкладки умещаются в экран 375×667. */
   .stsena {
-    grid-template-columns: minmax(0, 1fr) 108px;
+    grid-template-columns: minmax(0, 1fr) 112px;
     column-gap: var(--space-3);
     align-items: start;
   }
@@ -424,6 +425,7 @@
   }
   .stsena__media {
     --oblozhka-h: 108px;
+    max-width: 112px;
     grid-template-columns: minmax(0, 1fr);
     justify-items: center;
     gap: var(--space-2);

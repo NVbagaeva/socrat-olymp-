@@ -42,7 +42,7 @@ const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(app, 'out');
 const require = createRequire(import.meta.url);
 
-const PAGE = '/zadaniya/4/';
+const PAGE = '/zadaniya/veroyatnost/';
 const FROM = '/zadaniya/';
 const TXT = PAGE + 'index.txt';
 

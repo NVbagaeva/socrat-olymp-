@@ -13,9 +13,9 @@
        public/images/zadaniya/12/hero-*.
 
      node scripts/check-razdely-12-images.mjs --site
-       Собранный сайт (out/, после pnpm build). Страница /zadaniya/12/ и
+       Собранный сайт (out/, после pnpm build). Страница /zadaniya/grafiki-funkciy/ и
        страницы всех открытых разделов: на каждой есть иконки всех
-       разделов (плашка, меню, «Другие разделы»), у самой /zadaniya/12/ —
+       разделов (плашка, меню, «Другие разделы»), у самой /zadaniya/grafiki-funkciy/ —
        стеклянная картинка шапки (images/shapki/), каждый адрес картинки
        №12 отдаётся с кодом 200 и типом image/*, заглушек вроде
        «Иллюстрация готовится» нет.
@@ -38,7 +38,11 @@ const URL_ARG = args.includes('--url') ? args[args.indexOf('--url') + 1] : null;
 
 const WIDTHS = [96, 192, 384];
 const HERO = [480, 768, 1152];
-const ZAGLUSHKI = [/Иллюстраци[яи]\s+готовится/i, /Портрета\s+пока\s+нет/i, /Здесь\s+появится\s+фотография/i];
+const ZAGLUSHKI = [
+  /Иллюстраци[яи]\s+готовится/i,
+  /Портрета\s+пока\s+нет/i,
+  /Здесь\s+появится\s+фотография/i,
+];
 
 const { functionTypes } = requireSrc('data/functionTypes.ts');
 const errors = [];
@@ -48,7 +52,10 @@ const bad = (text) => errors.push(text);
 
 /** Углы картинки прозрачные: на любом фоне сайта нет каймы. */
 async function transparentCorners(file) {
-  const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp(file)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
   const at = (x, y) => data[(y * info.width + x) * info.channels + 3];
   const w = info.width - 1;
   const h = info.height - 1;
@@ -101,8 +108,13 @@ function serveOut() {
     console.error('Нет out/index.html — сначала pnpm build.');
     process.exit(1);
   }
-  const TYPES = { '.html': 'text/html; charset=utf-8', '.png': 'image/png', '.webp': 'image/webp',
-    '.svg': 'image/svg+xml', '.jpg': 'image/jpeg' };
+  const TYPES = {
+    '.html': 'text/html; charset=utf-8',
+    '.png': 'image/png',
+    '.webp': 'image/webp',
+    '.svg': 'image/svg+xml',
+    '.jpg': 'image/jpeg',
+  };
   const server = http.createServer((req, res) => {
     let file = path.join(OUT, decodeURIComponent(req.url.split('?')[0]));
     if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
@@ -123,7 +135,9 @@ function serveOut() {
     роутера, откуда карточки дорисовываются в браузере. */
 function imagesIn(html) {
   const urls = new Set();
-  for (const m of html.matchAll(/\/images\/(?:(?:razdely|zadaniya)\/12|shapki)\/[a-z0-9-]+\.(?:webp|png)(?:\?v=[0-9a-f]+)?/g)) {
+  for (const m of html.matchAll(
+    /\/images\/(?:(?:razdely|zadaniya)\/12|shapki)\/[a-z0-9-]+\.(?:webp|png)(?:\?v=[0-9a-f]+)?/g,
+  )) {
     urls.add(m[0]);
   }
   return [...urls];
@@ -145,8 +159,10 @@ async function fetchRetry(url, tries = 3) {
 if (SITE || URL_ARG) {
   const server = URL_ARG ? null : await serveOut();
   const base = URL_ARG ? URL_ARG.replace(/\/$/, '') : `http://127.0.0.1:${server.address().port}`;
-  const pages = ['/zadaniya/12/'].concat(
-    functionTypes.filter((t) => t.status === 'active').map((t) => `/zadaniya/12/${t.id}/`),
+  const pages = ['/zadaniya/grafiki-funkciy/'].concat(
+    functionTypes
+      .filter((t) => t.status === 'active')
+      .map((t) => `/zadaniya/grafiki-funkciy/${t.id}/`),
   );
   const checked = new Map();
   for (const page of pages) {
@@ -166,7 +182,9 @@ if (SITE || URL_ARG) {
        его плашка и «Другие разделы»: остальные открытые разделы. Меню
        «Все разделы» собирается по нажатию, в исходной странице его нет. */
     const own = page.split('/')[3];
-    const wanted = functionTypes.filter((t) => page === '/zadaniya/12/' || t.id === own || t.status === 'active');
+    const wanted = functionTypes.filter(
+      (t) => page === '/zadaniya/grafiki-funkciy/' || t.id === own || t.status === 'active',
+    );
     for (const razdel of wanted) {
       if (razdel.icon && !urls.some((u) => u.includes(`/images/razdely/12/${razdel.icon}-`))) {
         bad(`${page}: нет иконки раздела ${razdel.id} (${razdel.icon})`);
@@ -174,7 +192,10 @@ if (SITE || URL_ARG) {
     }
     /* Картинка шапки хаба — из серии шапок разделов (content/shapki.ts):
        «Графики функций» — задание №11 ЕГЭ-2027. */
-    if (page === '/zadaniya/12/' && !urls.some((u) => u.includes('/images/shapki/zadanie-11-'))) {
+    if (
+      page === '/zadaniya/grafiki-funkciy/' &&
+      !urls.some((u) => u.includes('/images/shapki/zadanie-11-'))
+    ) {
       bad(`${page}: нет картинки шапки`);
     }
     for (const url of urls) {
@@ -191,7 +212,9 @@ if (SITE || URL_ARG) {
     }
   }
   server?.close();
-  console.log(`Сайт ${URL_ARG ?? 'out/'}: страниц ${pages.length}, адресов картинок №12 ${checked.size}.`);
+  console.log(
+    `Сайт ${URL_ARG ?? 'out/'}: страниц ${pages.length}, адресов картинок №12 ${checked.size}.`,
+  );
 }
 
 if (errors.length) {

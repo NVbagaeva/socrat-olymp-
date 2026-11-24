@@ -117,7 +117,7 @@ export function SectionHeader({ kod, pereklyuchatel, actions }: SectionHeaderPro
           <EtoZheV level="profile" slug={task.slug} />
           {actions === undefined ? null : <div className="shapka__actions">{actions}</div>}
         </div>
-        <div className="shapka__media">
+        <div className="shapka__media" data-ill="header">
           <KoltsoProgressa
             hranenie={hranenie}
             logKey={KARTA_ZHURNALY[hranenie] ?? null}

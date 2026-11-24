@@ -32,7 +32,8 @@ import { YAKOR_10 } from '@/lib/zadanie10/teoriya-yakorya';
 import { GROUPS, PROTOTYPES, prototype } from '@/lib/zadanie10/prototypes';
 import { Illyustraciya10 } from './Illyustraciya10';
 import { Most10 } from './Most10';
-import { ZhivoyMyach, ZhivoyRaspad } from './Zhivye10';
+import { Myach10 } from './myach/Myach10';
+import { Raspad10 } from './raspad/Raspad10';
 import '../teoriya/teoriya-steklo.css';
 
 /** Задача банка по id (F001, P11-a02). */
@@ -284,7 +285,7 @@ export function Blok10({
         />
       );
     case 'zhivoy':
-      return b.chto === 'myach' ? <ZhivoyMyach /> : <ZhivoyRaspad />;
+      return b.chto === 'myach' ? <Myach10 /> : <Raspad10 />;
     case 'most': {
       const z = zadachaBanka(b.zadacha);
       return <Most10 params={z.params} rezhim="uchenik" />;

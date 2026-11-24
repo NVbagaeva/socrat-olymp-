@@ -13,7 +13,7 @@
 import { ZAGOLOVOK_4, ZAGOLOVOK_5 } from './veroyatnost';
 
 import { assetUrl } from '@/lib/assetUrl';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { nomerRazdela } from '@/content/struktura';
 /**
  * Карточка статистики: решаемость задания на экзамене.
@@ -51,7 +51,7 @@ export const V_ZADANII_5 = {
     'обязательно: такие задачи решаются перебором и подсчётом сочетаний.',
   /** Ссылка под текстом: подпись и адрес раздела. */
   ssylka: ZAGOLOVOK_5,
-  href: `${ZADANIYA}/5/`,
+  href: `${razdelBase(5)}/`,
 } as const;
 
 /** Фотография к блоку «Немного истории». */
@@ -126,7 +126,7 @@ export const V_ZADANII_4 = {
     'Подсчёт равновозможных исходов, игральные кости, броски монеты, жеребьёвка ' +
     `и рассадка в задании №${nomerRazdela('slozhnaya-veroyatnost')} не встречаются: это задачи предыдущего задания.`,
   ssylka: ZAGOLOVOK_4,
-  href: `${ZADANIYA}/4/`,
+  href: `${razdelBase(4)}/`,
 } as const;
 
 /**

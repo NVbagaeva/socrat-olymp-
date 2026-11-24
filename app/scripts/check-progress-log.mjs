@@ -202,7 +202,7 @@ const kindOf = (task) => task.split('|')[0];
     place: 'trenazher',
     ref: '8.A|s|base',
     title: '№8',
-    href: '/zadaniya/8/trenazher/?zadacha=x',
+    href: '/zadaniya/vychisleniya/trenazher/?zadacha=x',
   };
   let phone = Z.toggleBookmark(Z.EMPTY_BOOKMARKS, item, 100);
   check(Z.isBookmarked(phone, item.id), 'отложено');

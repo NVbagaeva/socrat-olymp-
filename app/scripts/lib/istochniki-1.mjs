@@ -22,7 +22,7 @@ export const SOURCES = path.join(ROOT, '_sources', 'zadanie-1');
 const MESTA = [
   'app/src/lib/planimetriya',
   'app/src/components/tasks/planimetriya',
-  'app/src/app/zadaniya/1',
+  'app/src/app/zadaniya/planimetriya',
   'app/src/app/styleguide/planimetriya-1',
   'app/src/content/zadanie1.ts',
   'app/src/content/teoriya1.ts',

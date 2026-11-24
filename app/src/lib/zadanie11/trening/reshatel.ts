@@ -9,7 +9,7 @@
 import { typesetKrupno as typeset } from '../../tex';
 import { strokaHtml } from '../proporciya/html';
 import { subtype } from '../prototypes';
-import type { Params, Solved, Tablitsa } from '../types';
+import type { Params, Skhema11, Solved, Tablitsa } from '../types';
 
 export interface EtapHtml {
   /** Название этапа без «Шаг N.», текстом и набранное. */
@@ -17,6 +17,8 @@ export interface EtapHtml {
   zagHtml: string;
   /** Строки этапа: готовый HTML. */
   stroki: string[];
+  /** Поясняющая схема шага, если есть. */
+  skhema?: Skhema11;
 }
 
 export interface VoprosHtml {
@@ -51,6 +53,7 @@ export function razobrat11(s: Solved): Razbor11 {
         zag,
         zagHtml: typeset(zag),
         stroki: e.lines.map((line) => strokaHtml(line, { typeset })),
+        ...(e.skhema === undefined ? {} : { skhema: e.skhema }),
       };
     }),
     tables: s.tables ?? [],

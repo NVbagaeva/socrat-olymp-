@@ -8,11 +8,11 @@ import { Tex } from '@/components/ui/Tex';
 import { SKHEMA_18, ZADANIE18 } from '@/content/zadanie18';
 import { SOBRANNYE, skhema18 } from '@/content/zadanie18/spisok';
 import { GRUPPY_18 } from '@/content/zadanie18/tipy';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { ZhivoyChertezh18 } from './ZhivoyChertezh18';
 import { ZnayuNeZnayu18 } from './ZnayuNeZnayu18';
 
-const BASE = `${ZADANIYA}/${ZADANIE18.slug}`;
+const BASE = `${razdelBase(ZADANIE18.slug)}`;
 
 /**
  * Страница ключевой схемы. Слева (на телефоне — сверху) живой

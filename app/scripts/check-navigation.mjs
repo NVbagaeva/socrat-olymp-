@@ -12,7 +12,7 @@
       файлы и несуществующие адреса не перенаправляются; index.txt,
       открытый как страница, — 302 тоже на https.
    B. Браузер на ширине iPhone (WebKit и Chromium) через тот же Apache:
-      с /zadaniya/4/trenazher/, /zadaniya/12/, /zadaniya/2/teoriya/ и
+      с /zadaniya/veroyatnost/trenazher/, /zadaniya/grafiki-funkciy/, /zadaniya/vektory/teoriya/ и
       с главной нижняя кнопка «Банк заданий» открывает банк — адрес
       /zadaniya/, на экране список заданий, не пустая страница и не экран
       ошибки (с главной — через меню сайта: нижней панели на лендинге
@@ -78,14 +78,19 @@ console.log('A. Косая черта на конце: Apache + public/.htaccess
   const host = { Host: 'budetege.ru' };
   for (const [from, to] of [
     ['/zadaniya', 'https://budetege.ru/zadaniya/'],
-    ['/zadaniya/12', 'https://budetege.ru/zadaniya/12/'],
-    ['/zadaniya/4/trenazher', 'https://budetege.ru/zadaniya/4/trenazher/'],
+    ['/zadaniya/grafiki-funkciy', 'https://budetege.ru/zadaniya/grafiki-funkciy/'],
+    ['/zadaniya/veroyatnost/trenazher', 'https://budetege.ru/zadaniya/veroyatnost/trenazher/'],
     ['/zadaniya?part=2', 'https://budetege.ru/zadaniya/?part=2'],
   ]) {
     const r = await request(from, host);
     check(r.status === 301 && r.location === to, `${from} → 301 ${to} (${r.status} ${r.location})`);
   }
-  for (const url of ['/', '/zadaniya/', '/zadaniya/12/', '/zadaniya/4/trenazher/']) {
+  for (const url of [
+    '/',
+    '/zadaniya/',
+    '/zadaniya/grafiki-funkciy/',
+    '/zadaniya/veroyatnost/trenazher/',
+  ]) {
     const r = await request(url, host);
     check(r.status === 200, `${url} → 200 (${r.status})`);
   }
@@ -104,13 +109,13 @@ console.log('A. Косая черта на конце: Apache + public/.htaccess
   check(file.status === 200, `файл /favicon.ico — 200 без перенаправления (${file.status})`);
   const missing = await request('/net-takoy-stranicy', host);
   check(missing.status === 404, `несуществующий адрес — 404, не редирект (${missing.status})`);
-  const txt = await request('/zadaniya/4/index.txt?_rsc=x', {
+  const txt = await request('/zadaniya/veroyatnost/index.txt?_rsc=x', {
     ...host,
     'Sec-Fetch-Dest': 'document',
     Accept: 'text/html',
   });
   check(
-    txt.status === 302 && txt.location === 'https://budetege.ru/zadaniya/4/',
+    txt.status === 302 && txt.location === 'https://budetege.ru/zadaniya/veroyatnost/',
     `index.txt как страница → 302 https (${txt.status} ${txt.location})`,
   );
   /* Проверки в CI ходят на 127.0.0.1 по http: туда и уводим. */
@@ -140,7 +145,12 @@ browsers.push([
   ),
 ]);
 
-const FROM = ['/zadaniya/4/trenazher/', '/zadaniya/12/', '/zadaniya/2/teoriya/', '/'];
+const FROM = [
+  '/zadaniya/veroyatnost/trenazher/',
+  '/zadaniya/grafiki-funkciy/',
+  '/zadaniya/vektory/teoriya/',
+  '/',
+];
 
 /* В кабинете — нижняя панель; на главной (лендинг) её нет, там банк —
    в меню сайта под кнопкой «Открыть меню». */
@@ -208,7 +218,7 @@ for (const [name, browser] of browsers) {
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
-    await page.goto(A + '/zadaniya/12/', { waitUntil: 'load' });
+    await page.goto(A + '/zadaniya/grafiki-funkciy/', { waitUntil: 'load' });
     await page.waitForTimeout(800);
     /* Ссылка без «/», как раньше в нижней панели. */
     await page.evaluate(() => {
@@ -242,7 +252,7 @@ for (const [name, browser] of browsers) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
     await page.route(/\/zadaniya\/index\.txt\?_rsc=/, () => {});
-    await page.goto(A + '/zadaniya/4/trenazher/', { waitUntil: 'load' });
+    await page.goto(A + '/zadaniya/veroyatnost/trenazher/', { waitUntil: 'load' });
     await page.waitForTimeout(800);
     let ok = false;
     try {
@@ -259,7 +269,7 @@ for (const [name, browser] of browsers) {
        перехвата, а обработчик самой ссылки после неё гасит переход. */
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
-    await page.goto(A + '/zadaniya/12/', { waitUntil: 'load' });
+    await page.goto(A + '/zadaniya/grafiki-funkciy/', { waitUntil: 'load' });
     await page.waitForTimeout(800);
     await page.evaluate(() => {
       const a = document.createElement('a');
@@ -273,7 +283,10 @@ for (const [name, browser] of browsers) {
     await page.click('#zavis');
     await page.waitForTimeout(10_000);
     const still = new URL(page.url()).pathname;
-    check(still === '/zadaniya/12/', `страховка не торопится: через 10 с ещё ${still}`);
+    check(
+      still === '/zadaniya/grafiki-funkciy/',
+      `страховка не торопится: через 10 с ещё ${still}`,
+    );
     let opened = true;
     await page
       .waitForURL((u) => u.pathname === '/zadaniya/', { timeout: 10_000 })

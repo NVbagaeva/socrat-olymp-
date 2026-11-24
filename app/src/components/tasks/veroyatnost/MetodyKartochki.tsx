@@ -29,6 +29,11 @@ export interface KartochkaMetoda {
   /** Плашка с формулой; null — у метода формулы нет. */
   formula: ReactNode | null;
   /**
+   * Иллюстрация метода — стеклянная картинка в плашке над названием
+   * (готовая разметка <picture> с сервера). Нет — карточка как раньше.
+   */
+  kartinka?: ReactNode;
+  /**
    * Тренировки метода: обычно одна, но метод может отрабатываться
    * несколькими наборами — тогда у каждого своя кнопка и свой счётчик.
    */
@@ -69,7 +74,11 @@ function scroller(node: HTMLElement): HTMLElement | null {
  * Следит за открытым окном метода: время открытия и дочитано ли до
  * конца. Окно без прокрутки дочитано сразу, ему нужно только время.
  */
-function useReadWatch(id: string | null, body: RefObject<HTMLDivElement | null>, trackKey?: string) {
+function useReadWatch(
+  id: string | null,
+  body: RefObject<HTMLDivElement | null>,
+  trackKey?: string,
+) {
   useEffect(() => {
     if (id === null || trackKey === undefined) {
       return undefined;
@@ -178,11 +187,16 @@ export function MetodyKartochki({ items, trackKey }: MetodyKartochkiProps) {
           <li key={m.id}>
             <button
               type="button"
-              className="vmetod"
+              className={m.kartinka === undefined ? 'vmetod' : 'vmetod vmetod--kartinka'}
               onClick={() => setOtkryt(m.id)}
               aria-haspopup="dialog"
               aria-label={`${METODY_KARTOCHKI.otkryt}: ${m.nazvanieText ?? (typeof m.nazvanie === 'string' ? m.nazvanie : '')}`}
             >
+              {m.kartinka === undefined ? null : (
+                <span className="vmetod__kartinka" aria-hidden="true">
+                  {m.kartinka}
+                </span>
+              )}
               <span className="vmetod__no" aria-hidden="true">
                 {m.nomer}
               </span>

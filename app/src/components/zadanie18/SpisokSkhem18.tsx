@@ -8,11 +8,11 @@ import { SPISOK_18, STATUSY_18, ZADANIE18, type Status18 } from '@/content/zadan
 import { SPISOK_SKHEM, skhema18 } from '@/content/zadanie18/spisok';
 import { GRUPPY_18, type Gruppa18 } from '@/content/zadanie18/tipy';
 import { status18, useProgress18 } from '@/lib/zadanie18/progress';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { MiniChertezh18 } from './MiniChertezh18';
 import { TON_STATUSA } from './ZnayuNeZnayu18';
 
-const BASE = `${ZADANIYA}/${ZADANIE18.slug}`;
+const BASE = `${razdelBase(ZADANIE18.slug)}`;
 const STATUSY: readonly Status18[] = ['known', 'learning', 'new'];
 
 /**

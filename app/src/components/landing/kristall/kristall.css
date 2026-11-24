@@ -1,9 +1,19 @@
 /* Кристалл героя (Kristall.tsx): рендер в покое, живая модель по
    первому касанию. Ширину и место в сетке задаёт страница. */
 
+/* Кристалл — вводная иллюстрация (норма hero Illustration: не шире 360
+   и не выше 300; телефон — до 220): при пропорциях 1122 × 946 это
+   356 × 300. Пиксели, а не доли: на широком экране не растёт. */
 .kristall {
   position: relative;
   width: 100%;
+  max-width: 356px;
+  margin-inline: auto;
+}
+@media (max-width: 639.98px) {
+  .kristall {
+    max-width: 220px;
+  }
 }
 .kristall__oblast {
   position: relative;

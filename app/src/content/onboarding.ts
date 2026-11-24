@@ -19,7 +19,7 @@ import { nomerRazdela } from '@/content/struktura';
 export { HOWTO_HREF, howtoHref, type HowtoTab } from '@/content/howto';
 
 /** Генератор, который открывают кнопки «Создать вариант» и «Открыть генератор». */
-export const GENERATOR_HREF = '/zadaniya/11/generator/';
+export const GENERATOR_HREF = '/zadaniya/tekstovye-zadachi/generator/';
 
 /* ── Туры ──────────────────────────────────────────────────────── */
 
@@ -191,7 +191,7 @@ export const TOUR_REPETITOR: Tour = {
       id: 'bank',
       short: 'Банк заданий',
       href: tasksPage.href,
-      target: ['.task-card[href="/zadaniya/11/"]'],
+      target: ['.task-card[href="/zadaniya/tekstovye-zadachi/"]'],
       title: 'Банк заданий',
       text:
         'Все задания ЕГЭ в одном месте. У каждого готового задания один маршрут: ' +
@@ -200,10 +200,10 @@ export const TOUR_REPETITOR: Tour = {
     {
       id: 'trenazher',
       short: 'Опорные задачи и тренажёр',
-      href: '/zadaniya/11/trenazher/',
+      href: '/zadaniya/tekstovye-zadachi/trenazher/',
       target: [
-        '.topic-tabs a[href$="/zadaniya/11/opornye-zadachi/"]',
-        '.topic-tabs a[href$="/zadaniya/11/trenazher/"]',
+        '.topic-tabs a[href$="/zadaniya/tekstovye-zadachi/opornye-zadachi/"]',
+        '.topic-tabs a[href$="/zadaniya/tekstovye-zadachi/trenazher/"]',
       ],
       title: 'Опорные задачи и тренажёр',
       text:
@@ -268,7 +268,7 @@ export const TOUR_REPETITOR: Tour = {
     {
       id: 'repetitory',
       short: 'Для репетиторов',
-      href: '/zadaniya/11/dlya-repetitorov/',
+      href: '/zadaniya/tekstovye-zadachi/dlya-repetitorov/',
       /* Первый ряд готовых уроков: весь список выше экрана, и подсказке
          рядом с ним негде встать. */
       target: ['.z11-rep__marshruty > :nth-child(1)', '.z11-rep__marshruty > :nth-child(3)'],
@@ -313,7 +313,7 @@ export const TOUR_UCHENIK: Tour = {
       id: 'bank',
       short: 'Банк заданий',
       href: tasksPage.href,
-      target: ['.task-card[href="/zadaniya/11/"]'],
+      target: ['.task-card[href="/zadaniya/tekstovye-zadachi/"]'],
       title: 'Банк заданий',
       text:
         'Все задания ЕГЭ в одном месте. Открыты те, у которых раздел уже готов. ' +
@@ -322,7 +322,7 @@ export const TOUR_UCHENIK: Tour = {
     {
       id: 'progress',
       short: 'Прогресс',
-      href: '/zadaniya/11/',
+      href: '/zadaniya/tekstovye-zadachi/',
       /* Кольцо прогресса вокруг картинки шапки (SectionHeader). */
       target: ['.koltso'],
       title: 'Твой прогресс',
@@ -334,7 +334,7 @@ export const TOUR_UCHENIK: Tour = {
     {
       id: 'teoriya',
       short: 'Теория',
-      href: '/zadaniya/11/teoriya/',
+      href: '/zadaniya/tekstovye-zadachi/teoriya/',
       /* Начало первого раздела: вся теория — десятки экранов. */
       target: [
         '.vteor-razdel:first-of-type .vteor-razdel__title',
@@ -348,7 +348,7 @@ export const TOUR_UCHENIK: Tour = {
     {
       id: 'opornye',
       short: 'Опорные задачи',
-      href: '/zadaniya/11/opornye-zadachi/',
+      href: '/zadaniya/tekstovye-zadachi/opornye-zadachi/',
       /* Первый навык с его блоками; на телефоне — только первая карточка блока. */
       target: ['.op-navyk:first-of-type'],
       narrowTarget: ['.op-navyk:first-of-type .op-blok'],
@@ -360,7 +360,7 @@ export const TOUR_UCHENIK: Tour = {
     {
       id: 'filtry',
       short: 'Режимы тренажёра',
-      href: '/zadaniya/11/trenazher/',
+      href: '/zadaniya/tekstovye-zadachi/trenazher/',
       /* Три карточки режима; на телефоне они столбиком — рамка на первой. */
       target: ['.trn-rezhimy'],
       narrowTarget: ['.trn-rezhimy .trn-rezhim:first-child'],
@@ -373,7 +373,7 @@ export const TOUR_UCHENIK: Tour = {
     {
       id: 'trenazher',
       short: 'Тренажёр',
-      href: '/zadaniya/11/trenazher/',
+      href: '/zadaniya/tekstovye-zadachi/trenazher/',
       /* «Мой прогресс» под режимами: решено и верно по группам, ошибки, история. */
       target: ['.trn-progress'],
       title: 'Тренажёр',

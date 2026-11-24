@@ -9,6 +9,7 @@ import { MetodKartinka } from '../MetodKartinka';
 import { navykKind, navykiZadaniya } from '../metody';
 import { tonMetoda } from '../trening/Trenazher45Tab';
 import type { tekstyKarty45 } from '@/content/veroyatnost45';
+import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { typeset, typesetText } from '@/lib/tex';
 import { BANK_4, BANK_5, PODGOTOVKA_4, PODGOTOVKA_5 } from '@/lib/veroyatnost/index';
@@ -93,12 +94,13 @@ export function OZadanii45Karta({ zadanie, shapka, opasnoTipov, formuly, ob }: O
         oblozhka={
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
              пережатия, прозрачный фон на стекле шапки. */
-          <img
+          <Illustration
+            variant="hero"
             src={assetUrl(`/images/task-0${zadanie}.svg`)}
             alt={shapka.oblozhkaAlt}
             width={512}
             height={512}
-            decoding="async"
+            priority
           />
         }
       />

@@ -41,7 +41,7 @@ function eq(got, want, what) {
 for (const [path, level] of [
   ['/', 'profile'],
   ['/zadaniya/', 'profile'],
-  ['/zadaniya/4/trenazher/', 'profile'],
+  ['/zadaniya/veroyatnost/trenazher/', 'profile'],
   ['/variant/', 'profile'],
   ['/variant/onlayn/', 'profile'],
   ['/povyshennye/', 'profile'],
@@ -61,7 +61,7 @@ for (const [path, to, twin] of [
   ['/', 'base', '/baza/'],
   ['/baza/', 'profile', '/'],
   ['/zadaniya/', 'base', '/baza/zadaniya/'],
-  ['/zadaniya/4/teoriya/', 'base', '/baza/zadaniya/'],
+  ['/zadaniya/veroyatnost/teoriya/', 'base', '/baza/zadaniya/'],
   ['/baza/zadaniya/5/', 'profile', '/zadaniya/'],
   ['/variant/', 'base', '/baza/variant/'],
   ['/baza/variant/', 'profile', '/variant/'],
@@ -112,9 +112,13 @@ eq(
 );
 
 /* 4. Раздел тренажёра. */
-eq(scopeOfPath('/zadaniya/5/trenazher/'), '5', 'раздел тренажёра профиля');
+eq(scopeOfPath('/zadaniya/slozhnaya-veroyatnost/trenazher/'), '5', 'раздел тренажёра профиля');
 eq(scopeOfPath('/baza/zadaniya/5/trenazher/'), 'baza-5', 'раздел тренажёра базы');
-eq(scopeOfPath('/zadaniya/12/linear/trenazher/'), '12:linear', 'раздел подтемы профиля');
+eq(
+  scopeOfPath('/zadaniya/grafiki-funkciy/linear/trenazher/'),
+  '12:linear',
+  'раздел подтемы профиля',
+);
 
 /* 5. Проверка ответа по типу (lib/otvet/tipy.ts). */
 const { proverit, normalnyeNomera } = requireSrc('lib/otvet/tipy.ts');

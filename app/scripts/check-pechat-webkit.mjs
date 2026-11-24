@@ -31,12 +31,12 @@ const LISTY =
     ? own
     : [
         /* №11: 1, 6, 25 задач; варианты; клетка; рамки теории; лист учителя. */
-        '/zadaniya/11/pechat/?m=o&i=n&ps=2&s=VD-05:1&seed=t1',
-        '/zadaniya/11/pechat/?m=o&i=n&ps=2&s=VD-05:6&seed=t6',
-        '/zadaniya/11/pechat/?m=v&i=m&ps=2&s=PR-04:5,SM-04:5,DP-07:5,VD-05:5,RB-01:5&seed=t25',
-        '/zadaniya/11/pechat/?m=v&i=n&ps=2&s=PR-04:4,SM-04:4,DP-07:4,VD-05:4&v=3&seed=abc',
-        '/zadaniya/11/pechat/?m=o&i=n&ps=2&s=VD-05:6,PR-04:6&seed=kl&sp=9&tr=1',
-        '/zadaniya/11/pechat/otvety/?m=v&i=m&ps=2&s=PR-04:5,SM-04:5,DP-07:5,VD-05:5,RB-01:5&seed=t25&tr=1',
+        '/zadaniya/tekstovye-zadachi/pechat/?m=o&i=n&ps=2&s=VD-05:1&seed=t1',
+        '/zadaniya/tekstovye-zadachi/pechat/?m=o&i=n&ps=2&s=VD-05:6&seed=t6',
+        '/zadaniya/tekstovye-zadachi/pechat/?m=v&i=m&ps=2&s=PR-04:5,SM-04:5,DP-07:5,VD-05:5,RB-01:5&seed=t25',
+        '/zadaniya/tekstovye-zadachi/pechat/?m=v&i=n&ps=2&s=PR-04:4,SM-04:4,DP-07:4,VD-05:4&v=3&seed=abc',
+        '/zadaniya/tekstovye-zadachi/pechat/?m=o&i=n&ps=2&s=VD-05:6,PR-04:6&seed=kl&sp=9&tr=1',
+        '/zadaniya/tekstovye-zadachi/pechat/otvety/?m=v&i=m&ps=2&s=PR-04:5,SM-04:5,DP-07:5,VD-05:5,RB-01:5&seed=t25&tr=1',
       ];
 const BUMAGA = [
   ['a4', '0'],

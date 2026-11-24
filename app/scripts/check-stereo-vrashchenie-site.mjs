@@ -78,10 +78,10 @@ await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = 'http://127.0.0.1:' + server.address().port;
 
 const STRANICY = [
-  ['теория №3', '/zadaniya/3/teoriya/'],
+  ['теория №3', '/zadaniya/stereometriya/teoriya/'],
   /* Разобранный пример №3 — в карточке типа на «О задании». */
-  ['пример №3', '/zadaniya/3/#tip-diagonali'],
-  ['разбор №15', '/zadaniya/15/razbor/ploshchad-secheniya/'],
+  ['пример №3', '/zadaniya/stereometriya/#tip-diagonali'],
+  ['разбор №15', '/zadaniya/stereometriya-dokazatelstvo/razbor/ploshchad-secheniya/'],
 ];
 
 const browser = await chromium.launch(
@@ -302,7 +302,7 @@ for (const size of SIZES) {
     const where = (w) => `${size.name}, «Нажмите на чертеже»: ${w}`;
     const context = await browser.newContext({ ...size.opts, hasTouch: size.touch });
     const page = await context.newPage();
-    await page.goto(BASE + '/zadaniya/3/opornye-zadachi/chitayu-chertezh/', {
+    await page.goto(BASE + '/zadaniya/stereometriya/opornye-zadachi/chitayu-chertezh/', {
       waitUntil: 'networkidle',
     });
     for (let i = 0; i < 10 && (await page.locator('.o3-nazhmi').count()) === 0; i += 1) {

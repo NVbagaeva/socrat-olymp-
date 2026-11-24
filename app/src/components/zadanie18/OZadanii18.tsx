@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { Badge, Callout } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
 import { O_ZADANII_18, ZADANIE18 } from '@/content/zadanie18';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 
-const BASE = `${ZADANIYA}/${ZADANIE18.slug}`;
+const BASE = `${razdelBase(ZADANIE18.slug)}`;
 
 /* Наполненные вкладки: остальные в маршруте — «Скоро», без ссылки. */
 const GOTOVY: ReadonlySet<string> = new Set([

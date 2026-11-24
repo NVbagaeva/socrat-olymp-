@@ -37,7 +37,7 @@ function zavershit() {
   z?.();
 }
 
-/** Адрес без хвостового «/»: /zadaniya/10/teoriya/ и /zadaniya/10/teoriya — одно. */
+/** Адрес без хвостового «/»: /zadaniya/prikladnye-zadachi/teoriya/ и /zadaniya/prikladnye-zadachi/teoriya — одно. */
 function bezSlesha(adres: string): string {
   return adres.length > 1 ? adres.replace(/\/+$/, '') : adres;
 }

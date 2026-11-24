@@ -75,10 +75,10 @@ function normalize(path: string): string {
 
 /**
  * Пункт текущий, когда открыта его страница или страница внутри него:
- * раздел №12 подсвечен на /zadaniya/12 и на всём, что под ним, и не
+ * раздел №12 подсвечен на /zadaniya/grafiki-funkciy и на всём, что под ним, и не
  * подсвечен на /zadaniya — список разделов лежит не внутри раздела.
  *
- * Сравниваются целые отрезки пути, а не строки: иначе /zadaniya/1
+ * Сравниваются целые отрезки пути, а не строки: иначе /zadaniya/planimetriya
  * отмечал бы себя на странице /zadaniya/12.
  */
 function isCurrent(pathname: string | null, href: string): boolean {

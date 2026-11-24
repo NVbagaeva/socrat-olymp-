@@ -203,10 +203,10 @@ try {
   /* ── 5. Где заставки нет ───────────────────────────────────────── */
   console.log('5. Заставка только на главных: / и /baza/');
   for (const url of [
-    '/zadaniya/12/',
-    '/zadaniya/4/teoriya/',
+    '/zadaniya/grafiki-funkciy/',
+    '/zadaniya/veroyatnost/teoriya/',
     '/tarify/',
-    '/zadaniya/4/trenazher/',
+    '/zadaniya/veroyatnost/trenazher/',
     '/?kit=ABCD-EFGH',
   ]) {
     const context = await browser.newContext(desktop);
@@ -222,7 +222,7 @@ try {
   {
     /* Пришёл по ссылке в раздел, потом открыл главную базы — заставка там. */
     const context = await browser.newContext(desktop);
-    const first = await open(context, '/zadaniya/12/');
+    const first = await open(context, '/zadaniya/grafiki-funkciy/');
     await first.page.waitForTimeout(3500);
     await first.page.close();
     const { page } = await open(context, '/baza/');

@@ -44,7 +44,10 @@ const { GRUPPY, prototypesOfGroup } = requireSrc('lib/proizvodnaya/skills.ts');
     переменные сайта (--font-sans), которых в сборке PDF нет, и текст
     уходил в системную антикву. Шрифты сборке задаёт sheet-render. */
 export const EXTRA_CSS = fs
-  .readFileSync(path.join(APP, 'src', 'app', 'zadaniya', '9', 'pechat', 'pechat9.css'), 'utf8')
+  .readFileSync(
+    path.join(APP, 'src', 'app', 'zadaniya', 'proizvodnaya', 'pechat', 'pechat9.css'),
+    'utf8',
+  )
   .replace(/^:root\s*\{[^}]*\}\s*/m, '');
 
 /** Варианты прототипа: банк тренажёра, а без него — десять seed подряд. */
@@ -84,13 +87,15 @@ function blocksOf(plan, withAnswers) {
 }
 
 function specOf(blocks, options) {
-  return withPrintFigures(() => S9.printSpec9({
-    ...S9.specOfBlocks9(
-      blocks,
-      { theme: options.theme, layout: 'single', kind: '', date: '' },
-      options.withAnswers,
-    ),
-  }));
+  return withPrintFigures(() =>
+    S9.printSpec9({
+      ...S9.specOfBlocks9(
+        blocks,
+        { theme: options.theme, layout: 'single', kind: '', date: '' },
+        options.withAnswers,
+      ),
+    }),
+  );
 }
 
 async function build(name, plan, options) {

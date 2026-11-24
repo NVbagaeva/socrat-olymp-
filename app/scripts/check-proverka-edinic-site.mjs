@@ -106,7 +106,7 @@ async function snimok(page, imya, w) {
 for (const w of [1440, 390]) {
   const ctx = await browser.newContext({ viewport: { width: w, height: 1000 } });
   const page = await ctx.newPage();
-  await page.goto(`${BASE}/zadaniya/10/teoriya/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/prikladnye-zadachi/teoriya/`, { waitUntil: 'networkidle' });
   const g = (s) => `@${w}: ${s}`;
 
   check((await page.locator('.prv').count()) === 3, g('в теории №10 не три блока «Проверь себя»'));
@@ -279,7 +279,7 @@ for (const w of [1440, 390]) {
     reducedMotion: 'reduce',
   });
   const page = await ctx.newPage();
-  await page.goto(`${BASE}/zadaniya/10/teoriya/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/prikladnye-zadachi/teoriya/`, { waitUntil: 'networkidle' });
   const prv = page.locator('#ed-kak-perevodit .prv');
   const { verny } = indeksy(ZADACHI[0], 0);
   await prv.getByRole('radio').nth(verny).click();
@@ -296,7 +296,7 @@ for (const w of [1440, 390]) {
 /* №11: блоки в разделе «Единицы измерения». */
 {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-  await page.goto(`${BASE}/zadaniya/11/teoriya/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/tekstovye-zadachi/teoriya/`, { waitUntil: 'networkidle' });
   check(
     (await page.locator('#ed-kak-perevodit .prv').count()) === 1,
     '№11: нет «Проверь себя» в «Как переводить единицы»',
