@@ -341,16 +341,26 @@ const ODOBRENO = {
   /* №4: одобрено владельцем 24.11.2026 (PR #476) — главы теории по пяти
      ключевым методам: тексты, разобранные задачи, интерактивы. Условия и
      ответы банка не менялись; ответы глав проверяет test:metody-4. */
-  'app/src/components/tasks/veroyatnost/teoriya/index.tsx':
-    'df109eaf8e55d0e35e0bc1f06fc77bc487bf38f90d0d7bded5a4daa6f5970aa7',
-  'app/src/content/veroyatnost-teoriya.ts':
-    '747a16e4e289942c12b1ee15dfc1750520f36b7949b95b37ce3076e899b53fef',
   'app/src/components/tasks/veroyatnost/teoriya/metody/GlavaMetoda4.tsx':
     '8eecfada9d777a283eb5f8eea372620d80b2c76c077d0115bdd885f6da23f25b',
   'app/src/components/tasks/veroyatnost/teoriya/metody/Interaktivy4.tsx':
     '53b9af1550d27f7bda47498a22e088da5c128e7d96ecdb9abeca7de0c801f134',
   'app/src/components/tasks/veroyatnost/teoriya/metody/metody4.css':
     'd57429114e3e74153e2f62d5b72d360d27531206facc1022f443e031db5cabfe',
+  /* №5: одобрено владельцем 24.11.2026 (PR #497) — главы теории по десяти
+     ключевым методам: тексты, задачи с литературными героями, интерактивы.
+     index.tsx и veroyatnost-teoriya.ts — общие с №4 (главы №4 и №5). Условия
+     и ответы банка не менялись; ответы глав проверяет test:metody-5. */
+  'app/src/components/tasks/veroyatnost/teoriya/index.tsx':
+    '98042b26eb68af99dfa01531007ae7da1e0f26a0bf50ff102fe353de57efe3bd',
+  'app/src/content/veroyatnost-teoriya.ts':
+    '20d808cb5f66a8c2ca2492c49508163ec04d442faaf120829c204a901ab53756',
+  'app/src/components/tasks/veroyatnost/teoriya/metody/GlavaMetoda5.tsx':
+    '0d0893640883c7f8cfec64d6c678ac9b1480f644b1e58731d41ab464473381b4',
+  'app/src/components/tasks/veroyatnost/teoriya/metody/Interaktivy5.tsx':
+    '7a1f55edce0d62f00bfd604ec1f6addd3e010bfb6e319939220ad37541249f8a',
+  'app/src/components/tasks/veroyatnost/teoriya/metody/metody5.css':
+    '78491f37bab1b8c23026bdd8e005a3193d7c2c31b6da71a49e0ecb9c083e4aeb',
   /* №1, одобрено владельцем 19.11.2026: подсказки (PR #451 — чертёж в
      шаге, буквы, реестр фактов «Показать свойство», тексты вопросов и
      решений) и «чертёж — схема, а не масштабный рисунок» (PR #452 —
