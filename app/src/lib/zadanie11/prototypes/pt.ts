@@ -10,6 +10,7 @@ import { FAKT, KMCH_V_MS_POYASNENIE, kmchVMs, minutyVChasy, perevod } from '../.
 import { chtoSprashivayut, dvizhenie, etapy, num, slovo, str, vopros } from '../kit';
 import { d, div, fq, mul, q, sub, txt, val } from '../num';
 import { sk, zaglavnaya, SLOVA } from '../sklonenie';
+import { assetUrl } from '../../assetUrl';
 import type { Etap, Skhema11, Subtype } from '../types';
 import { otvet } from './common';
 
@@ -145,7 +146,8 @@ const PT02: Subtype = {
 
 /** Схема обгона: начало и конец, смещение — сумма длин поездов. */
 const SKHEMA_OBGON: Skhema11 = {
-  src: '/images/zadanie11/pt-03-obgon.svg',
+  /* С версией: файл в public/ отдаётся с годовым кешем. */
+  src: assetUrl('/images/zadanie11/pt-03-obgon.svg'),
   alt: 'Начало и конец обгона: пассажирский поезд длины x смещается относительно товарного на x плюс длина товарного',
   width: 640,
   height: 330,

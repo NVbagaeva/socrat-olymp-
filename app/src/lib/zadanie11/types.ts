@@ -35,7 +35,7 @@ export interface Etap {
   skhema?: Skhema11;
 }
 
-/** Схема-чертёж к шагу разбора: файл в public, подпись, размер. */
+/** Схема-чертёж к шагу разбора: адрес уже с версией (assetUrl), подпись, размер. */
 export interface Skhema11 {
   src: string;
   alt: string;

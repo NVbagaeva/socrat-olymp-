@@ -2,7 +2,6 @@ import type { Shag } from '../steklo';
 import type { VoprosPodskazki } from '../trening';
 import type { Razbor11 } from '@/lib/zadanie11/trening/reshatel';
 import type { Tablitsa } from '@/lib/zadanie11/types';
-import { assetUrl } from '@/lib/assetUrl';
 import { Tablitsa11 } from './Tablitsa11';
 
 /**
@@ -51,7 +50,7 @@ export function shagi11(r: Razbor11): Shag[] {
               risunok: (
                 <img
                   className="z11-skhema"
-                  src={assetUrl(e.skhema.src)}
+                  src={e.skhema.src}
                   alt={e.skhema.alt}
                   width={e.skhema.width}
                   height={e.skhema.height}

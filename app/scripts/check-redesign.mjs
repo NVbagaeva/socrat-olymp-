@@ -522,13 +522,13 @@ const ODOBRENO = {
   'app/src/lib/zadanie11/prototypes/ok.ts':
     '4a2a1750dd3d10b9d97bc65a3ee7d900e6fe85ab10dc08060e7244f79d94a442',
   'app/src/lib/zadanie11/prototypes/pt.ts':
-    '6583d7760190f6811380eb75ec161cde86f8213f225e95451fa9c1f8c6a44f2b',
+    'bddeeaa40f1b7e66f3a7276ed3861575b063de7fa4f90d244ba080d97b2c2417',
   'app/src/lib/zadanie11/prototypes/rb.ts':
     '19f78830c04813e6749d6ec40a286182a703cce1f16f0243177bf116d4daf258',
   'app/src/lib/zadanie11/prototypes/vd.ts':
     'f790fc3f3bd178d23f56bae28d83a187089d76a5f7722b89ff66d24ac284470d',
   'app/src/lib/zadanie11/types.ts':
-    '0956d24cb3688743248b159f68ef3516a54a78d7a68557f970fc7df81bd71b08',
+    '9fb2ff443383f90461d50b22c9d125fdf9f2a9bb88e3982aea462e49f9064349',
 };
 
 /** Какие картинки реестра принадлежат разделу. */
