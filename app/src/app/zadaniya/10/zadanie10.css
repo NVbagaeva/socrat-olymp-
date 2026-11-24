@@ -473,25 +473,9 @@
    teoriya-steklo.css). Здесь — только своё. ───────────────────────── */
 
 /* Картинка сюжета: готовый рисунок как есть — целиком, по пропорциям
-   файла, прозрачный фон на стекле. Вертикальные рисунки — уже. */
-.z10-kartinka {
-  display: block;
-  min-width: 0;
-}
-.z10-kartinka img {
-  display: block;
-  width: 100%;
-  max-width: 560px;
-  height: auto;
-  margin-inline: auto;
-}
-.z10-kartinka--vert img {
-  max-width: 320px;
-}
-
-/* Пример типа: картинка крупнее, чем у чертежей других разделов. */
+   файла, прозрачный фон на стекле. Размер — норма Illustration task
+   (components/ui/illustration.css), по центру своего места. */
 .z10-karta .kz-primer__risunok {
-  max-width: 560px;
   min-width: 0;
 }
 .z10-primer-risunok {

@@ -1678,7 +1678,9 @@
   border: 1px solid var(--color-border-info);
   border-radius: var(--radius-lg);
   background: linear-gradient(155deg, var(--white), var(--color-surface-info));
-  box-shadow: var(--glass-hi), 0 12px 30px rgb(31 95 208 / 0.07);
+  box-shadow:
+    var(--glass-hi),
+    0 12px 30px rgb(31 95 208 / 0.07);
 }
 .v5-sobytiya__card h3 {
   margin: 0 0 var(--space-3);
@@ -1757,4 +1759,30 @@
   .v5-sobytiya__figure {
     overflow-x: auto;
   }
+}
+
+/* ── Нормы иллюстраций теории №4 и №5 ─────────────────────────────
+   Те же потолки, что у вариантов Illustration (components/ui/
+   Illustration.tsx): section — до 280 px, inline — до 140 px. Разметка
+   теории (components/tasks/veroyatnost/teoriya) — содержание раздела
+   под сторожем scripts/check-redesign.mjs, поэтому норма задаётся
+   здесь, по её классам. :where() — без веса: своя меньшая ширина
+   картинки остаётся. */
+:where(
+    .vizo-eylerblok__figura,
+    .vklass-primer,
+    .vklass-kosti,
+    .vvid__figura,
+    .vusloviya__figura,
+    .vsvyaz__figura
+  )
+  img {
+  max-inline-size: min(100%, 280px);
+  max-block-size: 280px;
+  object-fit: contain;
+}
+:where(.vteor-sluchay__figura) img {
+  max-inline-size: min(100%, 140px);
+  max-block-size: 140px;
+  object-fit: contain;
 }

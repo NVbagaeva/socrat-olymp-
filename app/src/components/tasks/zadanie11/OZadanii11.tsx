@@ -1,4 +1,5 @@
 import { FORMULY11, GRUPPY11_TON, SHAPKA11, TIPY11_OPASNO } from '@/content/tekstovye11';
+import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { typeset, typesetKrupno } from '@/lib/tex';
 import { OPORNYE11_HREF, blokHref11, tipTrenazherHref11 } from '@/lib/zadanie11/links';
@@ -74,13 +75,14 @@ export function OZadanii11() {
         opasno={SHAPKA11.opasno.map((line) => typeset(line))}
         oblozhka={
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
-             пережатия, прозрачный фон на стекле шапки. */
-          <img
+             пережатия, прозрачный фон на стекле шапки; размер — норма hero. */
+          <Illustration
+            variant="hero"
             src={assetUrl('/images/task-11.svg')}
             alt={SHAPKA11.oblozhkaAlt}
             width={512}
             height={512}
-            decoding="async"
+            priority
           />
         }
       />

@@ -126,19 +126,8 @@
   height: auto;
 }
 
-/* Картинки сюжетов — PNG/WebP с прозрачным фоном: без рамки и тени,
-   ширина ограничена, чтобы не заслонять условие. */
-.z10-ill {
-  display: block;
-}
-
-.z10-ill img {
-  display: block;
-  width: auto;
-  max-width: min(100%, 440px);
-  height: auto;
-  max-height: 320px;
-}
+/* Картинки сюжетов — PNG/WebP с прозрачным фоном: без рамки и тени.
+   Размер — норма Illustration section (до 280), не заслоняет текст. */
 
 .z10-ill__svernuto summary {
   margin-bottom: var(--space-2, 8px);
