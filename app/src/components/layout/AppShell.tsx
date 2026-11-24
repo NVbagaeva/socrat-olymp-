@@ -14,7 +14,7 @@ import { levelInfo, type Level } from '@/lib/level';
 
 import { assetUrl } from '@/lib/assetUrl';
 import { NavIcon } from '@/components/ui/NavIcons';
-import { SiteHeader } from './SiteHeader';
+import { Shapka } from './Shapka';
 import { levelNav, withActive } from './navUrovnya';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
@@ -110,7 +110,7 @@ export function AppShell({ active, level = 'profile', children }: AppShellProps)
         {/* Шапка — та же, что у страниц сайта: одно верхнее меню на весь
             сайт (VerhneeMenu). Логотип и «Профиль / База» на компьютере —
             в сайдбаре, на телефоне — в шапке. */}
-        <SiteHeader
+        <Shapka
           kabinet
           current={active}
           level={level}
