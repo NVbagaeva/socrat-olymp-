@@ -148,6 +148,18 @@
     min-height: 38px;
   }
 }
+/* Узкий телефон: знак, переключатель, «Войти» и бургер — в одну строку. */
+@media (max-width: 399.98px) {
+  .site-head__level .level-switch__seg {
+    padding: 0 10px;
+    font-size: 14px;
+  }
+}
+@media (max-width: 359.98px) {
+  .site-head__level .level-switch__seg {
+    padding: 0 6px;
+  }
+}
 @media (min-width: 768px) {
   .site-menu__panel .site-menu__level {
     display: none;

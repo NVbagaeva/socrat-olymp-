@@ -503,6 +503,11 @@ body:has(.site-menu) .help-fab {
 @media (max-width: 399.98px) {
   .site-head__in > .logo {
     gap: 0;
+    flex: none;
+  }
+  .site-head .site-head__in {
+    gap: var(--space-2);
+    padding: 0 var(--space-4);
   }
   .logo__name {
     position: absolute;

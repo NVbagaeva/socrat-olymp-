@@ -1562,7 +1562,9 @@ async function phoneHead(page) {
       burger: box(q('.site-head .burger')),
       startVisible: box(q('.site-head .site-head__start')) !== null,
       logo: box(logo),
-      nameVisible: logo !== null && parseFloat(getComputedStyle(logo).fontSize) >= 14,
+      nameVisible:
+        box(logo?.querySelector('.logo__name') ?? null) !== null &&
+        (logo?.querySelector('.logo__name')?.getBoundingClientRect().width ?? 0) > 1,
       heroStart: heroBox,
       /* Ширина содержимого первого экрана — по дверям (у прежнего
          первого экрана это ряд дверей, у синей сцены — сама дверь). */
@@ -1749,7 +1751,11 @@ async function runEnabled() {
       `главная ${width}: бургер не меньше 44×44`,
     );
     check(!head.startVisible, `главная ${width}: «Начать бесплатно» в шапке нет`);
-    check(head.nameVisible, `главная ${width}: название сайта видно рядом со знаком`);
+    /* До 400px от логотипа остаётся знак (site.css), рядом «Профиль / База». */
+    check(
+      width < 400 || head.nameVisible,
+      `главная ${width}: название сайта видно рядом со знаком`,
+    );
     check(
       head.login !== null && head.logo.right <= head.login.x - 4,
       `главная ${width}: логотип не налезает на «Войти»`,
@@ -2244,7 +2250,7 @@ async function runEnabled() {
         `после входа ${width}: кружок не налезает на бургер`,
       );
       check(!head.startVisible, `после входа ${width}: «Начать бесплатно» в шапке нет`);
-      check(head.nameVisible, `после входа ${width}: название сайта видно`);
+      check(width < 400 || head.nameVisible, `после входа ${width}: название сайта видно`);
     }
     await page.focus(AVATAR);
     await page.keyboard.press('Enter');
