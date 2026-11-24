@@ -17,8 +17,10 @@
 
 Исходники PNG 1024×1024 — design-reference/zadanie-04/<имя>.png.
 Экспорт:
-  карточки  app/public/images/zadanie-04/metody/<имя>-240.webp, -120.webp
   задачи    app/public/images/zadanie-04/primery/<имя>-360.webp, -180.webp
+Картинки карточек (metod-N) здесь не экспортируются: исходник копируется
+в app/assets/zadanie-04/metod-<id>.png, файлы собирает
+app/scripts/build-shapka.mjs (как у карточек №5).
 Журнал попыток — tools/metody4/zhurnal.json (переносится в
 docs/plans/zadanie-04-metody.md).
 
@@ -134,12 +136,13 @@ def obrezat(im: Image.Image) -> Image.Image:
 
 
 def export(name: str) -> None:
+    if name.startswith('metod-'):
+        # Карточки методов собирает app/scripts/build-shapka.mjs.
+        print(f'{name}: скопируйте исходник в app/assets/zadanie-04/ и запустите pnpm build:shapka')
+        return
     src = SRC_DIR / f'{name}.png'
     im = obrezat(Image.open(src).convert('RGBA'))
-    if name.startswith('metod-'):
-        folder, sizes = PUBLIC / 'zadanie-04' / 'metody', (240, 120)
-    else:
-        folder, sizes = PUBLIC / 'zadanie-04' / 'primery', (360, 180)
+    folder, sizes = PUBLIC / 'zadanie-04' / 'primery', (360, 180)
     folder.mkdir(parents=True, exist_ok=True)
     for s in sizes:
         im.resize((s, s), Image.LANCZOS).save(
