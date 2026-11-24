@@ -426,11 +426,9 @@ export function summaEdinichnyh(znam: readonly number[]): {
     );
   } else {
     lines.push(
-      `Общий знаменатель — наименьшее общее кратное. Раскладываем знаменатели на множители: ${znam
+      `Общий знаменатель — НОК$(${znam.map(d).join(';')})=${prostyeTex(nok)}=${d(nok)}$: ${znam
         .map((z) => `$${d(z)}=${prostyeTex(z)}$`)
-        .join(
-          ', ',
-        )}. Берём каждый множитель в наибольшей степени: НОК $=${prostyeTex(nok)}=${d(nok)}$.`,
+        .join(', ')}, каждый множитель берём в наибольшей степени.`,
     );
   }
   lines.push(

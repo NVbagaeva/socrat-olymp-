@@ -516,7 +516,7 @@ const ODOBRENO = {
   'app/src/lib/zadanie11/kartinki.ts':
     '2b9337551c98500226553dabc14517a5457b4abbbaeab3aaa769c1d086a9e2b0',
   'app/src/lib/zadanie11/kit.ts':
-    '53dafeee3c0c1d661798cdeadee539297fa3e1921bceac35000d48557248d8da',
+    'e987db3499eb42618f41544fd2bc95243e067d16593b1aaff49ebb9205a10fae',
   'app/src/lib/zadanie11/prototypes/dp.ts':
     '5cfd49d062554228747bdab429a65e93ca5c5a000839bb858189cf3fd38b70d8',
   'app/src/lib/zadanie11/prototypes/ezhemesyachnye.ts':
@@ -528,7 +528,7 @@ const ODOBRENO = {
   'app/src/lib/zadanie11/prototypes/rb.ts':
     '19f78830c04813e6749d6ec40a286182a703cce1f16f0243177bf116d4daf258',
   'app/src/lib/zadanie11/prototypes/vd.ts':
-    '1964a97dbeccc511a0d623264e1283a80fcbd9ed9b977f062a3fdcd61f4b2c9b',
+    'f790fc3f3bd178d23f56bae28d83a187089d76a5f7722b89ff66d24ac284470d',
   'app/src/lib/zadanie11/types.ts':
     '9b1bb8b5f4b057f91d55117ff32376c0d691fb33a3e7d5cd794668c8cff96dc4',
 };
