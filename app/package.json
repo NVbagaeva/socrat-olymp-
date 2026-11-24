@@ -136,6 +136,7 @@
     "test:galereya-1": "node scripts/check-galereya-1.mjs",
     "build:bank-1": "node scripts/build-bank-1.mjs",
     "test:zadanie11": "node scripts/check-zadanie11.mjs",
+    "test:vstrecha-11": "node scripts/check-vstrecha-11.mjs",
     "build:bank-11": "node scripts/build-bank-11.mjs",
     "test:bank-11": "node scripts/build-bank-11.mjs --check",
     "test:mnogo-zadach-11": "node scripts/check-mnogo-zadach-11.mjs",

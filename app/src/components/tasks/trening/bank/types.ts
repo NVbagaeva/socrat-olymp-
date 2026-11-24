@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LogStore } from '@/lib/progressLog';
+import type { KartinkaProps } from '@/components/ui/KartinkaZadachi';
 import type { Reading } from '@/lib/otvet';
 import type { SyncedStore } from '@/lib/syncedStore';
 import type { Zagruzka, ZadachaFayla } from '@/lib/trening/zagruzka';
@@ -102,6 +103,8 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
    * показывает слой этого шага, при открытом решении — все построения).
    */
   pod: (z: Z, rezhim: string | undefined, sost: SostoyaniePod<S>) => ReactNode;
+  /** Картинка-иллюстрация сюжета задачи: справа от условия. Нет — без картинки. */
+  kartinka?: (z: Z) => KartinkaProps | undefined;
   /** Решение шагами сцены, панель под ними и подсказка-вопросы. */
   shagi: (s: S, rezhim?: string) => Shag[];
   posle?: (s: S, rezhim?: string) => ReactNode;

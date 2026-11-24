@@ -4,7 +4,7 @@ import { GRUPPY10_VID, TRENAZHER10 } from '@/content/prikladnye10';
 import { texPlain, typeset } from '@/lib/tex';
 import type { KatalogBanka } from '@/lib/trening/bank';
 import { zadachiPrototipa } from '@/lib/zadanie10/bank/index';
-import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
+import { kartinkiZadach10 } from '@/lib/zadanie10/kartinkiZadach10';
 import { GROUPS, PROTOTYPES, prototypesOfGroup } from '@/lib/zadanie10/prototypes';
 import { Trenazher10 } from './Trenazher10';
 
@@ -55,7 +55,7 @@ export function Trenazher10Tab({ base }: { base: string }) {
         gruppy={gruppy}
         nazvaniyaTekst={nazvaniyaTekst}
         katalog={katalog10()}
-        kartinki={kartinkiPrototipov()}
+        kartinki={kartinkiZadach10()}
       />
     </section>
   );

@@ -6,7 +6,6 @@ import { useBeforeFinish } from '../../session/useBeforeFinish';
 import { useSessionReport } from '../../session/useSessionReport';
 import { EkranZadachi, type SostoyanieZadachi } from '../../trening/EkranZadachi';
 import { PodskazkaVoprosy } from '../../trening/PodskazkaVoprosy';
-import { assetUrl } from '@/lib/assetUrl';
 import { formatHint, fractionRightHint } from '@/lib/otvet';
 import type { LogOutcome } from '@/lib/progressLog';
 import type { TaskMark } from '@/lib/trainerSession/types';
@@ -175,7 +174,9 @@ export function Ekran45({
   const gotovaya = task === undefined ? undefined : gotovye.get(task.id);
   /* Журнал решения задач (lib/zhurnal): ученику, который вошёл, при флаге. */
   const zapis = useZapisZadachi(
-    gotovaya === undefined ? null : zhurnal45(zadanie, gotovaya, 'trenazher', roundKey, String(index)),
+    gotovaya === undefined
+      ? null
+      : zhurnal45(zadanie, gotovaya, 'trenazher', roundKey, String(index)),
   );
 
   /* Разбор и подсказка открываются, когда нужны: до этого в памяти их нет. */
@@ -362,15 +363,12 @@ export function Ekran45({
       {...(kartinka === undefined
         ? {}
         : {
-            risunok: (
-              /* Картинка к задаче — как есть: без обрезки, прозрачный фон. */
-              <img
-                className="z45-kartinka"
-                src={assetUrl(kartinka.path)}
-                alt={kartinka.alt}
-                decoding="async"
-              />
-            ),
+            /* Картинка сюжета — справа от условия (KartinkaZadachi). */
+            kartinka: {
+              src: kartinka.path,
+              ...(kartinka.path280 === undefined ? {} : { src280: kartinka.path280 }),
+              alt: kartinka.alt,
+            },
           })}
       value={value}
       onValue={(nextValue) => {

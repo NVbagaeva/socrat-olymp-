@@ -1,0 +1,719 @@
+/* «Встречное движение» — стили сцены (грузятся вместе с ней, лениво).
+   Оболочка карточки — z11-steklo.css. Цвета путников: синий #1f5fd0,
+   терракотовый #c4553a. Подписи не мельче 13 px, кнопки — от 44 px. */
+
+.z11-vst__osnova {
+  --vst-sin: #1f5fd0;
+  --vst-sin-text: #1a4fb0;
+  --vst-terra: #c4553a;
+  --vst-terra-text: #a8452c;
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+@container z11-vst (min-width: 900px) {
+  .z11-vst__osnova {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+  }
+}
+
+.z11-vst__kadr {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* ── Часы-таймлайн ── */
+.z11-vst__chasy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-1) var(--space-3);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(234, 241, 255, 0.7));
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.z11-vst__ciferblat {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+.z11-vst__ciferblat line {
+  stroke: rgba(26, 79, 176, 0.45);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+.z11-vst__ciferblat-krug {
+  fill: rgba(255, 255, 255, 0.9);
+  stroke: rgba(31, 95, 208, 0.35);
+  stroke-width: 1.2;
+}
+.z11-vst__ciferblat .z11-vst__strelka-chas {
+  stroke: #12306e;
+  stroke-width: 2.2;
+}
+.z11-vst__ciferblat .z11-vst__strelka-min {
+  stroke: var(--vst-sin);
+  stroke-width: 1.5;
+}
+.z11-vst__ciferblat-os {
+  fill: #f08a24;
+}
+.z11-vst__lenta-vremeni {
+  --thumb: 24px;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-top: 30px;
+}
+.z11-vst__puzyr {
+  position: absolute;
+  top: 0;
+  left: calc(var(--p) * (100% - var(--thumb)) + var(--thumb) / 2);
+  transform: translateX(-50%);
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #12306e;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.z11-vst__polzunok-t,
+.z11-vst__param input {
+  --p: 0;
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: pan-y;
+}
+.z11-vst__polzunok-t {
+  --p: inherit;
+}
+.z11-vst__polzunok-t::-webkit-slider-runnable-track,
+.z11-vst__param input::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--track-on, var(--vst-sin)), var(--track-on2, #f08a24)) 0 0 /
+      calc(var(--p) * 100%) 100% no-repeat,
+    rgba(31, 95, 208, 0.12);
+  box-shadow: inset 0 1px 2px rgba(18, 48, 110, 0.12);
+}
+.z11-vst__polzunok-t::-moz-range-track,
+.z11-vst__param input::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--track-on, var(--vst-sin)), var(--track-on2, #f08a24)) 0 0 /
+      calc(var(--p) * 100%) 100% no-repeat,
+    rgba(31, 95, 208, 0.12);
+}
+.z11-vst__polzunok-t::-webkit-slider-thumb,
+.z11-vst__param input::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+  margin-top: -8px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.35),
+    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.z11-vst__polzunok-t::-moz-range-thumb,
+.z11-vst__param input::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.35),
+    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+}
+.z11-vst__polzunok-t:focus-visible,
+.z11-vst__param input:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.z11-vst__metki {
+  position: relative;
+  height: 18px;
+  margin: -8px calc(var(--thumb) / 2) 0;
+}
+.z11-vst__metki span {
+  position: absolute;
+  left: calc(var(--k) * 100%);
+  transform: translateX(-50%);
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+.z11-vst__metki span:first-child {
+  transform: none;
+  left: calc(var(--thumb) / -2);
+}
+.z11-vst__metki span:last-child {
+  transform: none;
+  left: auto;
+  right: calc(var(--thumb) / -2);
+}
+.z11-vst__metki span.is-proydena {
+  color: var(--vst-sin-text);
+}
+
+/* ── Сцена ── */
+.z11-vst__scena {
+  position: relative;
+  min-height: 262px;
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(70% 90% at 8% 10%, rgba(31, 95, 208, 0.16), transparent 70%),
+    radial-gradient(60% 90% at 94% 10%, rgba(240, 138, 36, 0.16), transparent 70%),
+    linear-gradient(180deg, #f6f9ff 0%, #eef3fc 58%, #e4ecf9 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    inset 0 -24px 40px -30px rgba(31, 95, 208, 0.35),
+    0 18px 36px -28px rgba(18, 48, 110, 0.45);
+}
+.z11-vst__scena:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 3px;
+}
+@container z11-vst (min-width: 560px) {
+  .z11-vst__scena {
+    min-height: 286px;
+  }
+}
+.z11-vst__svg {
+  display: block;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.z11-vst__svg text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Дорога — стеклянная лента. */
+.z11-vst__lenta {
+  stroke: rgba(255, 255, 255, 0.95);
+  stroke-width: 1;
+  filter: drop-shadow(0 4px 6px rgba(18, 48, 110, 0.18));
+}
+.z11-vst__lenta-blik {
+  fill: rgba(255, 255, 255, 0.9);
+}
+.z11-vst__shtrih {
+  stroke: rgba(18, 48, 110, 0.35);
+  stroke-width: 1;
+}
+.z11-vst__shtrih.is-krupnyy {
+  stroke: rgba(18, 48, 110, 0.6);
+  stroke-width: 1.4;
+}
+.z11-vst__km {
+  fill: #5a6b8c;
+}
+
+/* Города: подпись буквой под картинкой. */
+.z11-vst__gorod image {
+  filter: drop-shadow(0 10px 12px rgba(18, 48, 110, 0.18));
+}
+.z11-vst__gorod rect {
+  fill: rgba(255, 255, 255, 0.9);
+  stroke: var(--vst-sin);
+  stroke-opacity: 0.4;
+}
+.z11-vst__gorod text {
+  fill: var(--vst-sin-text);
+  font-weight: 750;
+}
+.z11-vst__gorod--b rect {
+  stroke: var(--vst-terra);
+}
+.z11-vst__gorod--b text {
+  fill: var(--vst-terra-text);
+}
+
+/* Подписи пути. */
+.z11-vst__podpis rect {
+  fill: rgba(255, 255, 255, 0.88);
+  stroke: rgba(255, 255, 255, 1);
+  filter: drop-shadow(0 2px 4px rgba(18, 48, 110, 0.12));
+}
+.z11-vst__podpis.is-sin text {
+  fill: var(--vst-sin-text);
+}
+.z11-vst__podpis.is-terra text {
+  fill: var(--vst-terra-text);
+}
+.z11-vst__podpis.is-ost text {
+  fill: #33405a;
+}
+.z11-vst__razmer {
+  fill: none;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+.z11-vst__razmer.is-sin {
+  stroke: var(--vst-sin);
+}
+.z11-vst__razmer.is-terra {
+  stroke: var(--vst-terra);
+}
+.z11-vst__razmer.is-ost {
+  stroke: #7a879f;
+  stroke-dasharray: 3 3;
+}
+
+/* Плашки скорости над головами. */
+.z11-vst__plashki {
+  transition: opacity 0.35s ease;
+}
+.z11-vst__plashki.is-skryty {
+  opacity: 0;
+}
+.z11-vst__plashka rect {
+  fill: rgba(255, 255, 255, 0.82);
+  stroke: currentColor;
+  stroke-opacity: 0.35;
+  filter: drop-shadow(0 4px 8px rgba(18, 48, 110, 0.16));
+}
+.z11-vst__plashka text {
+  fill: currentColor;
+}
+.z11-vst__plashka .z11-vst__strelka {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z11-vst__plashki .is-sin {
+  color: var(--vst-sin-text);
+}
+.z11-vst__plashki .is-terra {
+  color: var(--vst-terra-text);
+}
+
+/* ── Путник ── */
+.z11-put {
+  --kurtka: var(--vst-sin);
+  --kurtka-dal: #17489f;
+  --bryuki: #1d2f57;
+  --bryuki-dal: #14213f;
+  --ryukzak: #7fa6ec;
+}
+.z11-put--terra {
+  --kurtka: var(--vst-terra);
+  --kurtka-dal: #9c3f2a;
+  --bryuki: #4a2a22;
+  --bryuki-dal: #33201a;
+  --ryukzak: #eaa58f;
+}
+.z11-put__ten {
+  fill: rgba(18, 48, 110, 0.22);
+}
+.z11-put line {
+  stroke-linecap: round;
+}
+.z11-put__noga line {
+  stroke: var(--bryuki);
+  stroke-width: 7;
+}
+.z11-put__noga--dal line {
+  stroke: var(--bryuki-dal);
+}
+.z11-put__botinok {
+  fill: #20242e;
+}
+.z11-put__ruka line {
+  stroke: var(--kurtka);
+  stroke-width: 5.5;
+}
+.z11-put__ruka--dal line {
+  stroke: var(--kurtka-dal);
+}
+.z11-put__kist,
+.z11-put__kozha {
+  fill: #f2c4a2;
+}
+.z11-put__ryukzak {
+  fill: var(--ryukzak);
+}
+.z11-put__kurtka {
+  fill: var(--kurtka);
+}
+.z11-put__blik {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.45);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.z11-put__volosy {
+  fill: #2a2f3b;
+}
+.z11-put__glaz {
+  fill: #2a2f3b;
+}
+.z11-put--prizrak {
+  opacity: 0.28;
+  filter: saturate(0.6);
+}
+
+/* Встреча: флажок поднимается, вспышка гаснет. */
+.z11-vst__flag line {
+  stroke: #8a5a1c;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.z11-vst__flag circle {
+  fill: #ffb547;
+}
+.z11-vst__flag {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: z11-vst-flag 0.7s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+@keyframes z11-vst-flag {
+  from {
+    transform: scaleY(0.1);
+    opacity: 0;
+  }
+}
+.z11-vst__vspyshka {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: z11-vst-vspyshka 1.3s ease-out both;
+}
+@keyframes z11-vst-vspyshka {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+}
+.z11-vst__konfetti rect {
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 0.8;
+}
+.z11-vst__konfetti .is-sin {
+  fill: rgba(31, 95, 208, 0.55);
+}
+.z11-vst__konfetti .is-terra {
+  fill: rgba(196, 85, 58, 0.55);
+}
+.z11-vst__konfetti .is-bel {
+  fill: rgba(255, 214, 140, 0.75);
+}
+
+/* ── Строка состояния и управление ── */
+.z11-vst__status {
+  min-height: 3em;
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.z11-vst__upr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.z11-vst__pusk {
+  min-width: 156px;
+}
+.z11-vst__ikonka {
+  position: relative;
+  width: 12px;
+  height: 14px;
+}
+.z11-vst__ikonka.is-pusk {
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  background: currentColor;
+}
+.z11-vst__ikonka.is-pauza {
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 4px 100% no-repeat,
+    linear-gradient(currentColor, currentColor) 100% 0 / 4px 100% no-repeat;
+}
+.z11-vst__skorost {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(31, 95, 208, 0.08);
+  box-shadow: var(--glass-ring);
+}
+.z11-vst__x {
+  min-width: 48px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--blue-700);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.z11-vst__x.is-on {
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.2),
+    0 4px 10px -4px rgba(18, 48, 110, 0.35);
+}
+.z11-vst__x:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z11-vst__podskazka {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+@media (hover: none) {
+  .z11-vst__podskazka {
+    display: none;
+  }
+}
+
+/* Свои числа. */
+.z11-vst__chisla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  border: 0;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.z11-vst__chisla legend {
+  float: left;
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-700);
+}
+.z11-vst__param label {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.z11-vst__param output {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+.z11-vst__param input {
+  --track-on: #12306e;
+  --track-on2: var(--vst-sin);
+}
+.z11-vst__param.is-sin input {
+  --track-on: var(--vst-sin);
+  --track-on2: var(--vst-sin);
+}
+.z11-vst__param.is-terra input {
+  --track-on: var(--vst-terra);
+  --track-on2: var(--vst-terra);
+}
+.z11-vst__chisla-lead {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+/* ── Таблица S, v, t и решение ── */
+.z11-vst__panel {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z11-vst__tablica {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  font-variant-numeric: tabular-nums;
+}
+.z11-vst__tablica caption {
+  padding: 0 0 var(--space-2);
+  caption-side: top;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+.z11-vst__tablica th,
+.z11-vst__tablica td {
+  padding: 9px 6px;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(31, 95, 208, 0.1);
+  font-size: 15px;
+  text-align: center;
+}
+.z11-vst__tablica tbody tr:last-child th,
+.z11-vst__tablica tbody tr:last-child td,
+.z11-vst__tablica .z11-vst__t {
+  border-bottom: 0;
+}
+.z11-vst__tablica thead th {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 650;
+  background: rgba(234, 241, 255, 0.7);
+}
+.z11-vst__tablica thead td {
+  background: rgba(234, 241, 255, 0.7);
+}
+.z11-vst__tablica tbody th {
+  font-size: 14px;
+  font-weight: 650;
+  text-align: left;
+  white-space: nowrap;
+}
+.z11-vst__tablica .is-sin th {
+  color: var(--vst-sin-text);
+}
+.z11-vst__tablica .is-terra th {
+  color: var(--vst-terra-text);
+}
+.z11-vst__tochka {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 1px;
+}
+.z11-vst__S {
+  white-space: nowrap;
+}
+.z11-vst__formula {
+  display: block;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+.z11-vst__S b {
+  display: block;
+  font-size: 17px;
+}
+.z11-vst__S.is-itog {
+  background: rgba(240, 138, 36, 0.1);
+}
+.z11-vst__v.is-vidno {
+  animation: z11-vst-poyavlenie 0.45s ease-out both;
+}
+.z11-vst__t {
+  border-left: 1px solid rgba(31, 95, 208, 0.1);
+  background: rgba(234, 241, 255, 0.45);
+}
+.z11-vst__t b {
+  display: block;
+  font-size: 18px;
+}
+.z11-vst__t small {
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  white-space: nowrap;
+}
+@keyframes z11-vst-poyavlenie {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.92);
+  }
+}
+
+.z11-vst__reshenie {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(253, 241, 234, 0.75));
+  box-shadow: var(--glass-ring-warm, var(--glass-ring)), var(--glass-hi);
+}
+.z11-vst__reshenie:not(.is-vidno) {
+  display: none;
+}
+.z11-vst__reshenie ol {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 1.4em;
+}
+.z11-vst__reshenie li {
+  font-size: 16px;
+  line-height: 1.5;
+  animation: z11-vst-poyavlenie 0.5s ease-out both;
+  animation-delay: calc(var(--i) * 0.45s + 0.2s);
+}
+.z11-vst__otvet {
+  margin: 0;
+  font-weight: 650;
+  animation: z11-vst-poyavlenie 0.5s ease-out both;
+  animation-delay: 1.6s;
+}
+
+/* «Уменьшить движение»: состояния меняются сразу, без каскадов. */
+@media (prefers-reduced-motion: reduce) {
+  .z11-vst__flag,
+  .z11-vst__vspyshka,
+  .z11-vst__v.is-vidno,
+  .z11-vst__reshenie li,
+  .z11-vst__otvet {
+    animation: none;
+  }
+  .z11-vst__plashki,
+  .z11-vst__metki span,
+  .z11-vst__x {
+    transition: none;
+  }
+}
+:root[data-motion-level='reduce'] .z11-vst__flag,
+:root[data-motion-level='reduce'] .z11-vst__vspyshka,
+:root[data-motion-level='reduce'] .z11-vst__reshenie li,
+:root[data-motion-level='reduce'] .z11-vst__otvet {
+  animation: none;
+}

@@ -11,7 +11,7 @@
  */
 
 import { BANK_4, BANK_5, otvetUchenika } from '@/lib/veroyatnost/index';
-import { vydelitOtvet } from '@/lib/veroyatnost/pool';
+import { illyustratsiyaVarianta, vydelitOtvet } from '@/lib/veroyatnost/pool';
 import { klyuchZadachi, sealAnswer, sealText } from '@/lib/veroyatnost/secret';
 import { dec, type Prototype, type Variant } from '@/lib/veroyatnost/types';
 import type { Dannye45, Razbor45, Variant45 } from '../adapters/z04/veroyatnost';
@@ -36,11 +36,21 @@ function variant45(prototype: Prototype, variant: Variant): Variant45 {
     /* Как в pool.ts: у прототипа с методикой ответ пишет модель (dec). */
     otvet: prototype.metodika === undefined ? String(otvet).replace('.', ',') : dec(otvet),
   };
+  const ill = illyustratsiyaVarianta(prototype.id, variant.n);
   return {
     n: variant.n,
     uslovie: prototype.uslovie(p),
     seal,
     razbor: sealText(JSON.stringify(razbor), seal),
+    ...(ill === undefined
+      ? {}
+      : {
+          kartinka: {
+            src: ill.path,
+            alt: ill.alt,
+            ...(ill.path280 === undefined ? {} : { src280: ill.path280 }),
+          },
+        }),
   };
 }
 

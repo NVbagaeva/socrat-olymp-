@@ -83,6 +83,8 @@ for (const file of [
   path.join(src, 'razmetka.ts'),
   path.join(src, 'texPlain.ts'),
   path.join(src, 'assetUrl.ts'),
+  /* Картинки сюжетов (lib/kartinkiZadach.ts): их просят pool.ts и sheet4.ts. */
+  path.join(src, 'kartinkiZadach.ts'),
   path.join(src, 'zadanie3', 'podhod.ts'),
   path.join(src, 'sheetPlan.ts'),
   path.join(src, 'paths.ts'),
@@ -93,10 +95,20 @@ for (const file of [
   path.join(src, 'vychisleniya', 'rng.ts'),
 ]) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    /* esModuleInterop: импорт JSON по умолчанию (data/kartinkiZadach.json). */
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      esModuleInterop: true,
+    },
     fileName: file,
   }).outputText
     .replace(/require\("@\/lib\//g, `require("${out.replace(/\\/g, '/')}/`)
+    /* Данные (data/*.json) читаются из исходников как есть. */
+    .replace(
+      /require\("@\/data\//g,
+      `require("${path.join(src, '..', 'data').replace(/\\/g, '/')}/`,
+    )
     /* lib/level.ts берёт число заданий профиля из структуры экзамена. */
     .replace(
       /require\("@\/content\/struktura"\)/g,
