@@ -16,6 +16,8 @@ import {
   Tabs,
 } from '@/components/ui';
 import { KABINET, dateRu, editionRu } from '@/content/auth';
+import { AvatarStudio } from '@/components/account/AvatarStudio';
+import { AvatarIllustration } from '@/components/account/AvatarIllustration';
 import { legalDocs } from '@/content/legal/documents';
 import { AUTH_HREF } from '@/lib/auth/config';
 import { AUTH_ERRORS, describeAuthError } from '@/lib/auth/errors';
@@ -206,10 +208,17 @@ export function KabinetScreen() {
     <div className="kabinet" data-role={profile.role}>
       <header className="kabinet__head">
         <h1 className="auth-card__title">{KABINET.title}</h1>
-        <p className="kabinet__who">
-          <span className="kabinet__role">{KABINET.roleLine[profile.role]}</span>
-          {profile.name !== '' ? <span className="kabinet__name">{profile.name}</span> : null}
-        </p>
+        <div className="kabinet__identity">
+          <AvatarIllustration
+            config={profile.avatarConfig}
+            size={60}
+            label={profile.name !== '' ? `Аватар: ${profile.name}` : 'Аватар профиля'}
+          />
+          <p className="kabinet__who">
+            <span className="kabinet__role">{KABINET.roleLine[profile.role]}</span>
+            {profile.name !== '' ? <span className="kabinet__name">{profile.name}</span> : null}
+          </p>
+        </div>
       </header>
       <Tabs
         className="kabinet__tabs"
@@ -260,6 +269,7 @@ export function KabinetScreen() {
       ) : (
         <>
           <ProfileCard profile={profile} email={email} onSaved={setProfile} />
+          <AvatarStudio profile={profile} onSaved={setProfile} />
           <SavedCard
             profile={profile}
             imported={imported}

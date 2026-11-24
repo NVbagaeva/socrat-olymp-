@@ -19,7 +19,9 @@ python3 tools/metody4/gen_images.py <имя>
 
 Скрипт проверяет прозрачность краёв (до 3 попыток), кладёт исходник PNG в
 `design-reference/zadanie-04/` и WebP — в
-`app/public/images/zadanie-04/metody/` (240, 120) и `…/primery/` (360, 180).
+`app/public/images/zadanie-04/primery/` (360, 180). Картинки карточек методов
+(`metod-N`) собирает `app/scripts/build-shapka.mjs` из
+`app/assets/zadanie-04/metod-<id>.png` — как у карточек №5.
 Счётчик попыток — `tools/metody4/zhurnal.json`.
 
 ## Параметры

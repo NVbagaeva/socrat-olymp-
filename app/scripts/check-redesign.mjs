@@ -326,6 +326,23 @@ const SODERZHANIE = {
  * образец уже содержит эту версию.
  */
 const ODOBRENO = {
+  /* №9: одобрено владельцем 24.11.2026 — печатный сборник №9 собирается
+     компактно, как раньше (рисунки обычного размера): у листа появился
+     необязательный параметр figures. Сайт его не передаёт — лист
+     генератора прежний. */
+  'app/src/lib/proizvodnaya/sheet9.ts':
+    '53f8f8d56cc276daaf86adb7caec3d31a913882804fd024d8b623504a6b081d8',
+  /* №11, одобрено владельцем 24.11.2026: «экскурсии» живых графиков —
+     кнопка «Показать» проходит ключевые случаи. Зафиксированы версии
+     четырёх файлов; последующие изменения снова проверяются. */
+  'app/src/components/tasks/theory/quadratic/ParabolaPlayground.tsx':
+    '5b3929097827a71c53ddafa0069547d8967ca6aa5bdd496931a9f7a90d4a22ca',
+  'app/src/components/tasks/theory/live/TrigPlayground.tsx':
+    '13218753ba971f53a6d732d026d2c516214c25b70cdb7cae74eab4cb692befbb',
+  'app/src/components/tasks/theory/live/LogPlayground.tsx':
+    '473119daba3b85363e32884e921875fe871ae97dacec81ecee3dc7607ec94d9d',
+  'app/src/components/tasks/theory/live/ExpPlayground.tsx':
+    '2a5201561181e9a332ac42ac236f857af148cd0bcc64dad2857f73e2639cbd9c',
   /* №9, одобрено владельцем 23.11.2026: русское объяснение физического смысла первой и второй производных и схемы к первообразной. */
   'app/src/content/theoryProizvodnaya.ts':
     'e3fd8b0581eaebd337d026f49ccbc3b3cf31def6df6c6fb4d35adc87aa58ec39',
@@ -672,7 +689,8 @@ if (puti === undefined) {
   const plohie = [];
   for (const stroka of neodobreno) {
     const [status, file] = stroka.split('\t');
-    const opisanie = /\.md$/.test(file);
+    /* Описания (README) и данные (JSON) — текстом. */
+    const opisanie = /\.(md|json)$/.test(file);
     if (status !== 'M' || !(opisanie || /\.(ts|tsx|js|mjs)$/.test(file))) {
       plohie.push(stroka);
       continue;
@@ -684,7 +702,7 @@ if (puti === undefined) {
         maxBuffer: 256 * 1024 * 1024,
       });
       const novyy = fs.readFileSync(path.join(REPO, file), 'utf8');
-      /* Описание (README) — текстом: та же запись после приведения адресов. */
+      /* Описание и данные — текстом: та же запись после приведения адресов. */
       const { ravno, gde } = opisanie
         ? { ravno: toZheTekst(staryy, novyy), gde: 'текст описания изменён' }
         : toZheSoderzhanie(staryy, novyy, file, STRUKTURA_OBRAZCA);

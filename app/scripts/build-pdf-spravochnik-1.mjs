@@ -9,8 +9,8 @@
    открывается в Chromium из собранного сайта (out/), и после раскладки
    лист печатается в PDF — два файла, с примерами и без:
 
-     app/public/materials/zadanie-1/spravochnik-po-planimetrii.pdf
-     app/public/materials/zadanie-1/spravochnik-po-planimetrii-bez-primerov.pdf
+     app/public/materials/planimetriya/spravochnik-po-planimetrii.pdf
+     app/public/materials/planimetriya/spravochnik-po-planimetrii-bez-primerov.pdf
 
    Ответов в справочнике нет — оба файла публичные, их отдаёт сайт
    («Скачать справочник» на вкладке «Теория»). Число страниц каждого
@@ -34,7 +34,7 @@ if (!fs.existsSync(OUT)) {
   process.exit(1);
 }
 
-const PAPKA = path.join(APP, 'public', 'materials', 'zadanie-1');
+const PAPKA = path.join(APP, 'public', 'materials', 'planimetriya');
 const MANIFEST = path.join(APP, 'src', 'content', 'spravochnik1', 'pdf.json');
 const FAYLY = [
   { klyuch: 'sPrimerami', imya: 'spravochnik-po-planimetrii.pdf', zapros: '' },
@@ -107,7 +107,7 @@ for (const f of FAYLY) {
   if (stranic !== otchet.pages) {
     throw new Error(`${f.imya}: в PDF ${stranic} стр., а в листе ${otchet.pages}`);
   }
-  manifest[f.klyuch] = { fayl: `/materials/zadanie-1/${f.imya}`, stranic };
+  manifest[f.klyuch] = { fayl: `/materials/planimetriya/${f.imya}`, stranic };
   console.log(
     `${f.imya}: ${stranic} стр., ${(fs.statSync(file).size / 1024 / 1024).toFixed(1)} МБ`,
   );

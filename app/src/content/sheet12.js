@@ -118,10 +118,10 @@ export const blocks = [
 
 /** Названия файлов сборника. */
 export const files = {
-  uchenik: 'zadanie-12-lineynaya-funkciya-uchenik',
-  uchenikChb: 'zadanie-12-lineynaya-funkciya-uchenik-chb',
-  uchitel: 'zadanie-12-lineynaya-funkciya-uchitel',
-  uchitelChb: 'zadanie-12-lineynaya-funkciya-uchitel-chb',
+  uchenik: 'lineynaya-funkciya-uchenik',
+  uchenikChb: 'lineynaya-funkciya-uchenik-chb',
+  uchitel: 'lineynaya-funkciya-uchitel',
+  uchitelChb: 'lineynaya-funkciya-uchitel-chb',
 };
 
 /* Сборка одним объектом: анонимный export default ESLint не любит,

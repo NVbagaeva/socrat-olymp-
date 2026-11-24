@@ -74,7 +74,7 @@ jobs:
         with:
           name: zadanie-13-pdf
           path: |
-            app/public/materials/zadanie-13/*.pdf
+            app/public/materials/ekonomika/*.pdf
             app/pdf-private/*.pdf
           if-no-files-found: error
           retention-days: 90

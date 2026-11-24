@@ -10,7 +10,7 @@
   /* Единый шаг между блоками. */
   --oa-sec: clamp(72px, 9vw, 128px);
   --oa-ink: var(--navy-900);
-  --oa-text: var(--grey-800);
+  --oa-text: var(--color-text-lead);
   --oa-line: rgb(31 95 208 / 0.14);
   position: relative;
   /* clip, а не hidden: липкая шапка остаётся липкой. */
@@ -31,13 +31,6 @@
 }
 
 /* Шапка, подвал и кнопки — как на главной (landing.css, .glavnaya). */
-.oa .site-head--steklo {
-  background: var(--glass-bg-strong);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border-bottom: 0;
-  box-shadow: 0 1px 0 rgb(31 95 208 / 0.08);
-}
 .oa .site-foot--steklo {
   background: var(--glass-bg);
   border-top: 1px solid var(--glass-edge);
@@ -179,7 +172,7 @@
   height: 3px;
   margin-top: var(--space-8);
   border-radius: 2px;
-  background: var(--terracotta);
+  background: var(--color-accent);
 }
 
 /* Фоновые надписи: две школьные формулы за текстом, почти в тон фона. */
@@ -198,7 +191,7 @@
   font-style: italic;
   font-size: clamp(30px, 4.2vw, 64px);
   white-space: nowrap;
-  color: var(--navy-700);
+  color: var(--color-text-brand);
   opacity: 0.09;
 }
 .oa-fon__f + .oa-fon__f {
@@ -242,7 +235,7 @@
 .oa-geo-os,
 .oa-geo-tik {
   fill: none;
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 1.25;
   vector-effect: non-scaling-stroke;
 }
@@ -260,7 +253,7 @@
 }
 .oa-geo-parabola {
   fill: none;
-  stroke: var(--terracotta);
+  stroke: var(--color-accent);
   stroke-width: 2.5;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
@@ -269,7 +262,7 @@
   font-family: var(--font-serif);
   font-style: italic;
   font-size: 24px;
-  fill: var(--navy-700);
+  fill: var(--color-text-brand);
 }
 .oa-sm__krug {
   fill: rgb(226 237 255 / 0.4);
@@ -278,14 +271,14 @@
 }
 .oa-sm__treugolnik {
   fill: rgb(31 95 208 / 0.07);
-  stroke: var(--blue-700);
+  stroke: var(--color-primary-text);
   stroke-width: 1.75;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
 .oa-sm__tochka,
 .oa-sm__centr {
-  fill: var(--blue-600);
+  fill: var(--color-primary);
 }
 .oa-sm__os {
   fill: var(--color-text-secondary);
@@ -514,7 +507,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--terracotta);
+  background: var(--color-accent);
 }
 
 .oa-put {

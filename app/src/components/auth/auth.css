@@ -168,7 +168,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .role-card__icon {
   display: grid;

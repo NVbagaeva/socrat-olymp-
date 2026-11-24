@@ -26,7 +26,7 @@
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  background: linear-gradient(160deg, var(--blue-100), var(--cream-50));
+  background: linear-gradient(160deg, var(--color-surface-soft), var(--color-surface-warm));
   box-shadow:
     0 0 0 2px #fff,
     0 4px 12px -4px rgb(31 95 208 / 0.35);

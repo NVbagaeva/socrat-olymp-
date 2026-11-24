@@ -76,7 +76,7 @@
   border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
 }
 .ramka--opredelenie .ramka__plashka {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 
@@ -105,7 +105,7 @@
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-size: var(--fs-caption);
   font-weight: 800;
@@ -253,7 +253,7 @@
   border: 2px solid var(--color-primary);
 }
 .ramka__znak--layfhak {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   font-size: 1.15rem;
 }
 

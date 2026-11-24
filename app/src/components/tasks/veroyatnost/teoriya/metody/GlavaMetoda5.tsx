@@ -68,13 +68,6 @@ function kartinkaZadachi5(id: string): { s1: string; s2: string } | null {
   return estFayl(s1) && estFayl(s2) ? { s1, s2 } : null;
 }
 
-/** Картинка карточки метода: 120 px и 240 px. */
-export function kartinkaMetoda5(imya: string): { s1: string; s2: string } | null {
-  const s1 = `/images/zadanie-05/metody/${imya}-120.webp`;
-  const s2 = `/images/zadanie-05/metody/${imya}-240.webp`;
-  return estFayl(s1) && estFayl(s2) ? { s1, s2 } : null;
-}
-
 function Formula({ tex }: { tex: string }) {
   return (
     <div

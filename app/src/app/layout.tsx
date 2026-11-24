@@ -8,7 +8,9 @@ import { OnboardingLazy } from '@/components/onboarding/OnboardingLazy';
 import { PodpisiChertezhey } from '@/components/PodpisiChertezhey';
 import { caveat, inter, interGreek, ptSerif } from '@/lib/fonts';
 import { MOTION_LEVEL_SCRIPT } from '@/lib/motion';
+import { TEMA_SCRIPT } from '@/lib/tema';
 import { ogStranicy, SITE_URL } from '@/lib/og';
+import { UVEDOMLENIYA_PUSH_ON } from '@/lib/uvedomleniya/config';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -26,14 +28,19 @@ export const metadata: Metadata = {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
+  /* Push (PR 3г): на iPhone push работает только у сайта, добавленного на
+     экран «Домой», — для этого нужен manifest. Без флага его нет. */
+  ...(UVEDOMLENIYA_PUSH_ON ? { manifest: '/manifest.webmanifest' } : {}),
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  /* То же, что color-scheme в base.css, но до загрузки CSS. */
+  /* То же, что color-scheme в base.css, но до загрузки CSS. Тёмную тему
+     скрипт TEMA_SCRIPT меняет на «only dark» (lib/tema.ts). */
   colorScheme: 'only light',
-  /* Цвет панели браузера на телефоне — фон сайта (--ice). */
+  /* Цвет панели браузера на телефоне — фон сайта (--ice); в тёмной теме
+     его меняет TEMA_SCRIPT. */
   themeColor: '#f5f9ff',
 };
 
@@ -49,6 +56,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Уровень движения до первой отрисовки (lib/motion.ts). */}
         <script dangerouslySetInnerHTML={{ __html: MOTION_LEVEL_SCRIPT }} />
+        {/* Тема до первой отрисовки — без белой вспышки (lib/tema.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: TEMA_SCRIPT }} />
       </head>
       <body>
         <ChunkReloadGuard />

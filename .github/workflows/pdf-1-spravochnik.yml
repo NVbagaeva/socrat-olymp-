@@ -1,7 +1,7 @@
 name: PDF 1 справочник
 
 # Пересобирает готовые PDF справочника по планиметрии №1 (с примерами и
-# без) — по образцу pdf-4.yml. Файлы лежат в app/public/materials/zadanie-1,
+# без) — по образцу pdf-4.yml. Файлы лежат в app/public/materials/planimetriya,
 # их отдаёт кнопка «Скачать справочник»; число страниц —
 # в app/src/content/spravochnik1/pdf.json. Ответов в справочнике нет,
 # поэтому оба файла публичные и коммитятся в ветку.
@@ -88,7 +88,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: zadanie-1-spravochnik-pdf
-          path: app/public/materials/zadanie-1/*.pdf
+          path: app/public/materials/planimetriya/*.pdf
           if-no-files-found: error
           retention-days: 90
 
@@ -96,14 +96,14 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/public/materials/zadanie-1 app/src/content/spravochnik1/pdf.json
-          if git diff --cached --quiet -- app/public/materials/zadanie-1 app/src/content/spravochnik1/pdf.json; then
+          git add app/public/materials/planimetriya app/src/content/spravochnik1/pdf.json
+          if git diff --cached --quiet -- app/public/materials/planimetriya app/src/content/spravochnik1/pdf.json; then
             echo "файлы не менялись"
             exit 0
           fi
           echo "сравнение с файлами ветки:"
           if git diff --cached --quiet -- app/src/content/spravochnik1/pdf.json && \
-             [ "$(node app/scripts/pdf-changed.mjs app/public/materials/zadanie-1)" = same ]; then
+             [ "$(node app/scripts/pdf-changed.mjs app/public/materials/planimetriya)" = same ]; then
             echo "содержимое то же — коммит не нужен"
             exit 0
           fi

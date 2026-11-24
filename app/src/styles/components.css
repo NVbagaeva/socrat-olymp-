@@ -39,7 +39,7 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: rgb(255 255 255 / 0.14);
+  background: color-mix(in srgb, var(--color-surface) 14%, transparent);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--motion-fast) var(--ease-out);
@@ -236,7 +236,7 @@ select.input {
   border-radius: 50%;
 }
 .check input:checked {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   border-color: var(--color-primary);
 }
 .check--box input:checked::after {
@@ -258,7 +258,7 @@ select.input {
   background: var(--color-text-inverse);
 }
 .check input:indeterminate {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   border-color: var(--color-primary);
 }
 .check input:indeterminate::after {
@@ -643,7 +643,7 @@ a.task-card--soon:hover {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   margin-top: 9px;
   flex: none;
 }
@@ -680,7 +680,7 @@ a.task-card--soon:hover {
   display: block;
   height: 100%;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   transition: width var(--dur-reveal) var(--ease);
 }
 .topic {
@@ -810,7 +810,7 @@ a.task-card--soon:hover {
   display: block;
 }
 .bars b.hi {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .bars span {
   font-size: 12px;
@@ -993,7 +993,7 @@ a.task-card--soon:hover {
      прокручивается вместе со списком: свечение стоит у низа экрана. */
   background:
     radial-gradient(120% 40% at 0% 100%, rgb(59 130 246 / 0.12), transparent 70%),
-    linear-gradient(180deg, var(--navy-800), var(--navy-900));
+    linear-gradient(180deg, var(--color-sidebar-verh), var(--color-sidebar-niz));
   background-color: var(--color-surface-brand);
   padding: var(--space-5) var(--space-3);
   min-height: 340px;
@@ -1223,138 +1223,6 @@ a.task-card--soon:hover {
   font-size: 18px;
   line-height: 24px;
   color: var(--color-text-inverse);
-}
-
-/* Меню разделов в шапке. Пункты не переносятся, поэтому строка может
-   оказаться шире своего места (1024–1159 px: iPad альбомно, окно в
-   пол-экрана) — тогда она прокручивается внутри себя, а не распирает
-   страницу вбок (docs/launch-audit.md, A3). Полоса прокрутки скрыта,
-   у правого края — затухание: видно, что пункты есть дальше. Поля
-   сверху и снизу — место для кольца фокуса: overflow его не обрезает. */
-.topnav {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-width: 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  padding-block: var(--space-1);
-  /* Затухание ложится на это поле: когда пункты помещаются, гаснет
-     пустое место, а не последний пункт. */
-  padding-inline-end: 24px;
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
-  mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
-}
-.topnav::-webkit-scrollbar {
-  display: none;
-}
-.topnav a {
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  font-size: 14px;
-  white-space: nowrap;
-  transition:
-    background var(--dur-hover) var(--ease),
-    color var(--dur-hover) var(--ease);
-}
-.topnav a:hover {
-  background: var(--color-surface-2);
-  color: var(--color-text);
-}
-.topnav a.is-active {
-  background: var(--color-surface-soft);
-  color: var(--color-primary);
-  font-weight: 500;
-}
-/* Меню с выпадающим списком «Варианты» (Topbar, navSlot): листается
-   вбок только лента пунктов до списка, сам список и пункты после него
-   стоят вне прокрутки — иначе выпавший список обрезался бы краем
-   прокручиваемой ленты. */
-.topnav--so-spiskom {
-  overflow: visible;
-  padding-inline-end: 0;
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-.topnav__lenta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-width: 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-}
-.topnav__lenta::-webkit-scrollbar {
-  display: none;
-}
-.topnav .nav-drop {
-  flex: none;
-}
-/* Кнопка списка — как соседние пункты меню кабинета. */
-.topnav .nav-drop__button {
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  transition:
-    background var(--dur-hover) var(--ease),
-    color var(--dur-hover) var(--ease);
-}
-.topnav .nav-drop__button:hover,
-.topnav .nav-drop[data-open] .nav-drop__button {
-  background: var(--color-surface-2);
-  color: var(--color-text);
-}
-.topnav .nav-drop__button.is-current {
-  background: var(--color-surface-soft);
-  color: var(--color-primary);
-  font-weight: 500;
-}
-.topnav .nav-drop__list {
-  left: 0;
-}
-/* Список без JavaScript (NavSpisok): виден, пока указатель или фокус
-   внутри группы. Скрыт прозрачностью, а не display/visibility: так
-   ссылки остаются в порядке табуляции сразу за кнопкой, и фокус,
-   войдя в них, сам держит список открытым. */
-.nav-drop--css .nav-drop__list {
-  opacity: 0;
-  transform: translateY(-4px);
-  pointer-events: none;
-  transition:
-    opacity var(--motion-fast) var(--ease-out),
-    transform var(--motion-fast) var(--ease-out);
-}
-.nav-drop--css:is(:hover, :focus-within) .nav-drop__list {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-}
-.nav-drop--css:is(:hover, :focus-within) .nav-drop__button svg {
-  transform: rotate(180deg);
-}
-.topnav .nav-drop--css:is(:hover, :focus-within) .nav-drop__button {
-  background: var(--color-surface-2);
-  color: var(--color-text);
-}
-
-/* Полные названия пунктов помещаются в шапку от 1600px; уже — короткие
-   (те же, что в нижней панели и на экране «Ещё»). */
-.topnav__short {
-  display: none;
-}
-@media (max-width: 1599.98px) {
-  .topnav__full {
-    display: none;
-  }
-  .topnav__short {
-    display: inline;
-  }
 }
 
 /* В оболочке кабинета поиск делит шапку с меню разделов: он больше
@@ -1706,7 +1574,7 @@ html[data-tabs-pending] .topic-panel,
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   margin-top: 8px;
   flex: none;
 }
@@ -1729,7 +1597,7 @@ html[data-tabs-pending] .topic-panel,
   /* Затемнение: половина непрозрачности самого тёмного тона палитры.
      Размытия нет — оно съедает производительность и ничего не даёт
      поверх и без того приглушённой страницы. */
-  background: color-mix(in srgb, var(--grey-900) 50%, transparent);
+  background: color-mix(in srgb, var(--color-text) 50%, transparent);
   z-index: 50;
 }
 /* Окно рядом с элементом, который его открыл: координаты приходят
@@ -1989,7 +1857,7 @@ a.task-card--bank:focus-visible {
 }
 /* Неоткрытый раздел — то же стекло, приглушённое. */
 .task-card--bank.task-card--soon {
-  background: rgb(255 255 255 / 0.4);
+  background: color-mix(in srgb, var(--color-surface) 40%, transparent);
   box-shadow: var(--glass-ring);
 }
 .task-card--bank.task-card--soon:hover {
@@ -2181,7 +2049,7 @@ a.task-card--bank:focus-visible {
   width: var(--sz-go);
   height: var(--sz-go);
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   display: grid;
   place-items: center;
   z-index: 1;
@@ -2205,13 +2073,13 @@ a.task-card--bank:focus-visible {
   right: 0;
   bottom: 0;
   height: 3px;
-  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  background: color-mix(in srgb, var(--color-primary-fill) 14%, transparent);
   pointer-events: none;
 }
 .task-card__progress > span {
   display: block;
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   transform-origin: left center;
   transition: transform var(--motion-slow) var(--ease-out);
 }
@@ -2413,11 +2281,24 @@ a.task-card--bank:focus-visible {
 .solution-details.open .solution-details-body {
   grid-template-rows: 1fr;
 }
+/* Отступ над телом — не padding, а распорка: padding не сжимается
+   строкой 0fr, и у закрытой врезки оставалась полоса высотой в отступ —
+   пустая или с верхом первой строки (FAQ «Как пользоваться»). Закрытое
+   тело ещё и скрыто: его не видно и читалки его не читают. */
 .solution-details-body > div {
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  padding-top: var(--space-3);
+  padding-block: 0;
+}
+.solution-details-body > div::before {
+  content: '';
+  display: block;
+  height: var(--space-3);
+}
+.solution-details:not(.open) .solution-details-body > div {
+  visibility: hidden;
+  transition: visibility 0s linear var(--dur-reveal, 320ms);
 }
 .solution-details svg {
   display: block;
@@ -2441,7 +2322,7 @@ a.task-card--bank:focus-visible {
   font-family: var(--font-hand);
   /* Без прозрачности и на тон темнее: синий с opacity 0,8 давал на
      светлом фоне 3,9 : 1. */
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 
 /* ── адаптив компонентов ── */
@@ -2490,11 +2371,6 @@ a.task-card--bank:focus-visible {
      прячется по признаку «не номер», а не по месту в ряду: у текущего
      задания за ней идёт ещё стрелка, и :last-child её не находил. */
   .shell--responsive .snav .is-soon > span:not(.snav__no) {
-    display: none;
-  }
-  /* Меню разделов в шапке на планшете не помещается рядом с поиском:
-     его пункты доступны в нижней панели и на экране «Ещё». */
-  .topnav {
     display: none;
   }
   .shell--responsive .topbar__who {
@@ -2593,7 +2469,7 @@ a.task-card--bank:focus-visible {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
@@ -3299,7 +3175,7 @@ a.task-card--bank:focus-visible {
   bottom: 0.14em;
   width: 4px;
   border-radius: var(--radius-sm);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 
 /* ── Чип ─────────────────────────────────────────────────────
@@ -3716,18 +3592,7 @@ a.task-card--bank:focus-visible {
   }
 }
 
-/* ── Пункт с тёплым акцентом в меню кабинета и нижней панели ── */
-.topnav a.is-akcent {
-  background: linear-gradient(120deg, var(--color-accent-soft-surface), var(--color-surface-info));
-  box-shadow: inset 0 0 0 1px var(--color-border-accent);
-  color: var(--color-accent-text);
-  font-weight: 600;
-}
-.topnav a.is-akcent:hover,
-.topnav a.is-akcent.is-active {
-  box-shadow: inset 0 0 0 1px var(--color-accent);
-  color: var(--color-accent-text);
-}
+/* ── Пункт с тёплым акцентом в нижней панели ── */
 .bnav a.is-akcent {
   color: var(--color-accent-text);
   font-weight: 600;

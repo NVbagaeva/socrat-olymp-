@@ -134,10 +134,21 @@
   --color-surface: var(--white);
   --color-surface-2: var(--grey-50);
   --color-surface-brand: var(--navy-800);
+  /* Тёмный сайдбар кабинета: градиент сверху вниз. */
+  --color-sidebar-verh: var(--navy-800);
+  --color-sidebar-niz: var(--navy-900);
   --color-surface-soft: var(--blue-100);
   --color-primary: var(--blue-600);
   --color-primary-hover: var(--blue-700);
   --color-primary-active: var(--blue-800);
+  /* Синий текст на тон темнее основного (подписи, ссылки в рамках). */
+  --color-primary-text: var(--blue-700);
+  /* Синяя заливка под белым текстом. В светлой теме совпадает с
+     --color-primary; в тёмной основной синий светлый, а заливка
+     остаётся насыщенной — иначе белый текст на ней не читается. */
+  --color-primary-fill: var(--blue-600);
+  --color-primary-fill-hover: var(--blue-700);
+  --color-primary-fill-active: var(--blue-800);
   --color-text: var(--grey-900);
   --color-text-secondary: var(--grey-700);
   --color-text-tertiary: var(--grey-500);
@@ -351,6 +362,15 @@
   --color-uspeh: var(--emerald-600);
   --color-uspeh-soft: var(--emerald-50);
   --color-uspeh-border: var(--emerald-200);
+  /* Текст «успеха» на светлой заливке. */
+  --color-uspeh-text: #06704f;
+  /* Текст на яркой цветной плашке (ярлыки справочника, методов): в
+     светлой теме белый, в тёмной плашки светлые — текст тёмный. */
+  --color-text-on-accent: var(--white);
+  /* Светлая подложка под картинки и рисунки со своим белым фоном: в
+     обеих темах светлая, текст на ней — тёмный. */
+  --color-podlozhka: var(--white);
+  --color-podlozhka-text: var(--grey-700);
 
   /* «Стеклянная сцена» (DESIGN_AUDIT.md, раздел 5; демо —
      /styleguide/steklo). Одна рецептура стекла на все поверхности:
@@ -573,10 +593,9 @@
   --flow-block: var(--space-6);
   --flow-section: var(--space-10);
 
-  --h-site-head: 72px;
-  /* Шапка после начала прокрутки (site.css, .site-head[data-compact]):
-     ниже, место под ней в потоке остаётся --h-site-head. */
-  --h-site-head-compact: 60px;
+  /* Шапка — одна на весь сайт и в кабинете (verh-menu.css), на
+     прокрутке не сжимается. */
+  --h-site-head: 64px;
   --h-control-sm: 36px;
   --h-control: 44px;
   --h-control-lg: 52px;
@@ -802,5 +821,266 @@
     --card-title: 18px;
     --card-title-lh: 26px;
     --grid-cols: 4;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   3. ТЁМНАЯ ТЕМА — «ночное стекло» (lib/tema.ts, html[data-tema='dark']).
+   Переопределяет только смысловые переменные: компоненты о теме не
+   знают. Стоит в @media screen — печать всегда светлая.
+   Контраст (на --noch-bg #0a1430 / поверхности ≈ #121e3c):
+   --color-text #eef3ff — 16 : 1; вторичный #a9b8d6 — 9 : 1;
+   третичный #8495b8 — 6 : 1; ссылки --noch-blue #7fb0ff — 8 : 1;
+   белый на кнопке #2f6fe8 — 4,6 : 1.
+   ══════════════════════════════════════════════════════════ */
+:root {
+  --noch-bg: #0a1430;
+  --noch-bg-2: #0d1a3b;
+  --noch-menu: #070f26;
+  --noch-surface: #121e3c;
+  --noch-surface-2: #172548;
+  --noch-surface-3: #1d2d55;
+  --noch-line: #26365e;
+  --noch-line-strong: #34477a;
+  --noch-text: #eef3ff;
+  --noch-text-2: #a9b8d6;
+  --noch-text-3: #8495b8;
+  --noch-blue: #7fb0ff;
+  --noch-blue-hover: #a3c6ff;
+  --noch-blue-knopka: #2f6fe8;
+  --noch-orange: #ff9a4d;
+  --noch-terracotta: #f08a52;
+  --noch-green: #4ade80;
+  --noch-amber: #fbbf4a;
+  --noch-red: #ff7a7a;
+  --noch-teal: #3fd1c0;
+  --noch-violet: #b79cff;
+  --noch-gold: #f0c050;
+  --noch-pink: #ff86c0;
+  --noch-brown: #d9a070;
+}
+
+@media screen {
+  :root[data-tema='dark'] {
+    --color-bg: var(--noch-bg);
+    --color-surface: var(--noch-surface);
+    --color-surface-2: var(--noch-surface-2);
+    --color-surface-brand: var(--noch-menu);
+    --color-sidebar-verh: #0b1838;
+    --color-sidebar-niz: var(--noch-menu);
+    /* Цветные примитивы, которыми компоненты пользуются напрямую:
+       тёмные тона (текст, линии) — светлыми, светлые (заливки) —
+       мягкими поверх поверхности. */
+    --navy-600: #c4d3f0;
+    --navy-700: #d3ddf2;
+    --navy-800: #e2e9f8;
+    --navy-900: var(--noch-text);
+    --blue-400: #8fbaff;
+    --blue-500: #7fb0ff;
+    --violet-600: var(--noch-violet);
+    --violet-700: var(--noch-violet);
+    --violet-50: color-mix(in srgb, var(--noch-violet) 14%, var(--noch-surface));
+    --teal-600: var(--noch-teal);
+    --teal-700: var(--noch-teal);
+    --teal-50: color-mix(in srgb, var(--noch-teal) 14%, var(--noch-surface));
+    --sun-500: var(--noch-gold);
+    --sun-50: color-mix(in srgb, var(--noch-gold) 14%, var(--noch-surface));
+    --gold-500: var(--noch-gold);
+    --gold-700: var(--noch-gold);
+    --pink-600: var(--noch-pink);
+    --pink-50: color-mix(in srgb, var(--noch-pink) 14%, var(--noch-surface));
+    --brown-600: var(--noch-brown);
+    --brown-50: color-mix(in srgb, var(--noch-brown) 14%, var(--noch-surface));
+    --rust-700: #ff9273;
+    --rust-50: color-mix(in srgb, #ff9273 14%, var(--noch-surface));
+    --slate-600: #b4c3e0;
+    --amber-50: color-mix(in srgb, var(--noch-amber) 14%, var(--noch-surface));
+    --amber-600: var(--noch-amber);
+    --amber-700: #ffd27a;
+    --terracotta: var(--noch-terracotta);
+    --terracotta-50: color-mix(in srgb, var(--noch-terracotta) 14%, var(--noch-surface));
+    --terracotta-600: #ff9a7a;
+    --terracotta-700: #ffab80;
+    --cream-50: color-mix(in srgb, var(--noch-amber) 8%, var(--noch-surface));
+    --cream-200: color-mix(in srgb, var(--noch-amber) 28%, var(--noch-surface));
+    --color-surface-soft: color-mix(in srgb, var(--noch-blue) 14%, var(--noch-surface));
+    --color-primary: var(--noch-blue);
+    --color-primary-hover: var(--noch-blue-hover);
+    --color-primary-active: #c4daff;
+    --color-primary-text: var(--noch-blue-hover);
+    --color-primary-fill: #2a63d6;
+    --color-primary-fill-hover: #2560d8;
+    --color-primary-fill-active: #1f52bd;
+    --color-text: var(--noch-text);
+    --color-text-secondary: var(--noch-text-2);
+    --color-text-tertiary: var(--noch-text-3);
+    --color-text-lead: #d3ddf2;
+    /* Текст на синей кнопке: заливку кнопок даёт --gloss, она тёмная. */
+    --color-text-inverse: #ffffff;
+    --color-border: var(--noch-line);
+    --color-border-strong: var(--noch-line-strong);
+    --color-success: var(--noch-green);
+    --color-success-soft: color-mix(in srgb, var(--noch-green) 14%, var(--noch-surface));
+    --color-warning: var(--noch-amber);
+    --color-warning-soft: color-mix(in srgb, var(--noch-amber) 14%, var(--noch-surface));
+    --color-error: var(--noch-red);
+    --color-error-soft: color-mix(in srgb, var(--noch-red) 14%, var(--noch-surface));
+    --color-status-new: #4a5c86;
+    --color-status-new-text: var(--noch-text-3);
+    --color-status-progress: var(--noch-amber);
+    --color-status-progress-text: #ffd27a;
+    --color-status-done: var(--noch-green);
+    --color-status-done-text: #86efac;
+    --color-status-oshibki: var(--noch-terracotta);
+    --color-status-oshibki-text: #ffab80;
+    --color-border-hover: #5a6d98;
+    --color-focus-ring: color-mix(in srgb, var(--noch-blue) 30%, transparent);
+    --color-track: var(--noch-surface-3);
+    --color-skeleton: var(--noch-surface-2);
+    --color-skeleton-sheen: var(--noch-surface-3);
+    --color-surface-inverse: #e6eeff;
+    --color-surface-info: color-mix(in srgb, var(--noch-blue) 12%, var(--noch-surface));
+    --color-accent: var(--noch-terracotta);
+    --color-accent-soft-surface: color-mix(
+      in srgb,
+      var(--noch-terracotta) 14%,
+      var(--noch-surface)
+    );
+    --color-border-accent: color-mix(in srgb, var(--noch-terracotta) 45%, var(--noch-surface));
+    --color-accent-text: #ffab80;
+    --color-surface-warm: color-mix(in srgb, var(--noch-amber) 8%, var(--noch-surface));
+    --color-border-warm: color-mix(in srgb, var(--noch-amber) 28%, var(--noch-surface));
+    --color-border-info: color-mix(in srgb, var(--noch-blue) 40%, var(--noch-surface));
+    --color-text-brand: var(--noch-text);
+    --color-accent-soft: #4f78c0;
+    --color-heat-1: #16264d;
+    --color-heat-2: #1d3a78;
+    --color-heat-3: #2a56a8;
+    --color-heat-4: #4a80dc;
+    --color-heat-5: #7fb0ff;
+    --color-on-brand-accent: var(--noch-blue);
+    --color-glass-mid: var(--noch-surface);
+    --color-glass-end: var(--noch-surface-2);
+    --color-grid-soft: var(--noch-line);
+    --color-bg-translucent: rgb(10 20 48 / 0.92);
+    --color-bg-translucent-strong: rgb(10 20 48 / 0.9);
+
+    /* Справочник, №11, №13, методы, рамки — светлые тона на тёмном и
+       «мягкие» фоны как 14 % цвета поверх поверхности. */
+    --color-spr-def: var(--noch-blue);
+    --color-spr-def-soft: color-mix(in srgb, var(--noch-blue) 12%, var(--noch-surface));
+    --color-spr-svo: var(--noch-teal);
+    --color-spr-svo-soft: color-mix(in srgb, var(--noch-teal) 12%, var(--noch-surface));
+    --color-spr-pri: var(--noch-violet);
+    --color-spr-pri-soft: color-mix(in srgb, var(--noch-violet) 12%, var(--noch-surface));
+    --color-spr-teo: var(--noch-gold);
+    --color-spr-teo-soft: color-mix(in srgb, var(--noch-gold) 12%, var(--noch-surface));
+    --color-spr-vaz: #ff9273;
+    --color-spr-vaz-soft: color-mix(in srgb, #ff9273 12%, var(--noch-surface));
+    --color-spr-priem: var(--noch-amber);
+    --color-spr-priem-soft: color-mix(in srgb, var(--noch-amber) 12%, var(--noch-surface));
+    --color-spr-vyvod: var(--noch-blue);
+    --color-spr-vyvod-soft: var(--noch-surface);
+    --color-spr-primer: #b4c3e0;
+    --color-spr-primer-soft: var(--noch-surface-2);
+    --color-z13-priznak: var(--noch-violet);
+    --color-z13-priznak-soft: color-mix(in srgb, var(--noch-violet) 12%, var(--noch-surface));
+    --color-spr-primenenie: #c4d3f0;
+    --color-spr-primenenie-soft: var(--noch-surface-2);
+    --color-spr-klyuch: var(--noch-gold);
+    --color-z11-rz: var(--noch-gold);
+    --color-z11-rz-soft: color-mix(in srgb, var(--noch-gold) 14%, var(--noch-surface));
+    --color-z11-pr: var(--noch-blue);
+    --color-z11-pr-soft: color-mix(in srgb, var(--noch-blue) 14%, var(--noch-surface));
+    --color-z11-sm: var(--noch-teal);
+    --color-z11-sm-soft: color-mix(in srgb, var(--noch-teal) 14%, var(--noch-surface));
+    --color-z11-dp: var(--noch-terracotta);
+    --color-z11-dp-soft: color-mix(in srgb, var(--noch-terracotta) 14%, var(--noch-surface));
+    --color-z11-pt: var(--noch-brown);
+    --color-z11-pt-soft: color-mix(in srgb, var(--noch-brown) 14%, var(--noch-surface));
+    --color-z11-vd: #9cc2ff;
+    --color-z11-vd-soft: color-mix(in srgb, #9cc2ff 12%, var(--noch-surface));
+    --color-z11-ok: var(--noch-violet);
+    --color-z11-ok-soft: color-mix(in srgb, var(--noch-violet) 14%, var(--noch-surface));
+    --color-z11-rb: var(--noch-green);
+    --color-z11-rb-soft: color-mix(in srgb, var(--noch-green) 14%, var(--noch-surface));
+    --color-z11-pg: var(--noch-pink);
+    --color-z11-pg-soft: color-mix(in srgb, var(--noch-pink) 14%, var(--noch-surface));
+    --color-metod-4: var(--noch-blue);
+    --color-metod-4-soft: color-mix(in srgb, var(--noch-blue) 14%, var(--noch-surface));
+    --color-metod-4-border: color-mix(in srgb, var(--noch-blue) 40%, var(--noch-surface));
+    --color-metod-5: var(--noch-violet);
+    --color-metod-5-soft: color-mix(in srgb, var(--noch-violet) 14%, var(--noch-surface));
+    --color-metod-5-border: color-mix(in srgb, var(--noch-violet) 40%, var(--noch-surface));
+    --color-callout-surface: color-mix(in srgb, var(--noch-amber) 6%, var(--noch-surface));
+    --color-callout-vazhno: var(--noch-terracotta);
+    --color-callout-vazhno-border: color-mix(
+      in srgb,
+      var(--noch-terracotta) 45%,
+      var(--noch-surface)
+    );
+    --color-callout-vazhno-text: #ffab80;
+    --color-callout-zapomni: var(--noch-blue);
+    --color-callout-zapomni-border: color-mix(in srgb, var(--noch-blue) 45%, var(--noch-surface));
+    --color-callout-zapomni-text: #a3c6ff;
+    --color-callout-layfhak: var(--noch-amber);
+    --color-callout-layfhak-border: color-mix(in srgb, var(--noch-amber) 40%, var(--noch-surface));
+    --color-callout-layfhak-text: #ffd27a;
+    --color-star: var(--noch-gold);
+    --color-star-off: var(--noch-line-strong);
+    --color-uspeh: #34d399;
+    --color-uspeh-soft: color-mix(in srgb, #34d399 14%, var(--noch-surface));
+    --color-uspeh-border: color-mix(in srgb, #34d399 40%, var(--noch-surface));
+    --color-uspeh-text: #6ee7b7;
+    --color-text-on-accent: var(--noch-bg);
+
+    /* Стекло: тёмное полупрозрачное, светлая тонкая кромка, мягкое
+       голубое свечение вместо серой тени. */
+    --glass-bg: rgb(22 36 72 / 0.55);
+    --glass-bg-strong: rgb(24 40 80 / 0.78);
+    --glass-edge: rgb(160 195 255 / 0.18);
+    --glass-ring: 0 0 0 1px rgb(150 190 255 / 0.16);
+    --glass-hi: inset 0 1px 0 rgb(200 220 255 / 0.12);
+    --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 12px 32px -12px rgb(80 140 255 / 0.28);
+    --glass-shadow-hover: 0 2px 4px rgb(0 0 0 / 0.4), 0 22px 44px -14px rgb(100 160 255 / 0.4);
+    --gloss: linear-gradient(180deg, #4f8cf5 0%, #2f6fe8 52%, #1f58c8 100%);
+    --gloss-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 -1px 0 rgb(0 0 0 / 0.2),
+      0 8px 20px -6px rgb(70 130 255 / 0.55);
+    --gloss-shadow-hover:
+      inset 0 1px 0 rgb(255 255 255 / 0.35), inset 0 -1px 0 rgb(0 0 0 / 0.2),
+      0 12px 26px -8px rgb(90 150 255 / 0.65);
+    --gloss-shadow-soft:
+      inset 0 1px 0 rgb(255 255 255 / 0.28), inset 0 -1px 0 rgb(0 0 0 / 0.2),
+      0 6px 16px -8px rgb(70 130 255 / 0.5);
+    --gloss-shadow-soft-hover:
+      inset 0 1px 0 rgb(255 255 255 / 0.32), inset 0 -1px 0 rgb(0 0 0 / 0.2),
+      0 10px 22px -10px rgb(90 150 255 / 0.6);
+    --glass-tint-blue: linear-gradient(160deg, rgb(28 46 92 / 0.78), rgb(18 32 68 / 0.6));
+    --glass-tint-warm: linear-gradient(160deg, rgb(40 36 60 / 0.78), rgb(60 36 30 / 0.55));
+    --glass-ring-warm: 0 0 0 1px rgb(255 160 100 / 0.2);
+    --glass-shadow-warm: 0 1px 2px rgb(0 0 0 / 0.35), 0 12px 32px -12px rgb(255 140 70 / 0.25);
+    --aura-blue: rgb(70 130 255 / 0.22);
+    --aura-orange: rgb(255 150 70 / 0.16);
+    --aura-terracotta: rgb(240 138 82 / 0.12);
+
+    --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-sm: 0 2px 6px rgb(0 0 0 / 0.32);
+    --shadow-md: 0 8px 24px rgb(0 0 0 / 0.36);
+    --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.44);
+    --glow-accent: 0 0 24px rgb(100 160 255 / 0.16);
+    --glow-tab: 0 6px 16px rgb(70 130 255 / 0.4);
+    --color-tab-top: #4f8cf5;
+    --color-tab-bottom: #1f58c8;
+
+    --vit-siniy-ton: color-mix(in srgb, var(--noch-blue) 12%, var(--noch-surface));
+    --vit-siniy-ton-2: color-mix(in srgb, var(--noch-blue) 20%, var(--noch-surface));
+    --vit-teplyy-ton: color-mix(in srgb, var(--noch-orange) 12%, var(--noch-surface));
+    --vit-teplyy-ton-2: color-mix(in srgb, var(--noch-orange) 20%, var(--noch-surface));
+    --vit-teplyy-text: #ffab80;
+
+    /* Полосы прокрутки и выделение. */
+    --scroll-thumb: #34477a;
+    --scroll-track: var(--noch-bg);
   }
 }

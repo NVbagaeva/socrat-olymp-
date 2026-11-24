@@ -23,8 +23,19 @@ const OUT = path.join(app, 'out');
 const versions = assetVersions(path.join(app, 'public'));
 
 /* Файлы, которые браузер или поисковик берут по постоянному имени сами,
-   без ссылки со страницы: значки вкладки и экрана «Домой». */
-const FIXED = new Set(['/favicon.ico', '/apple-touch-icon.png', '/icon-192.png', '/icon-512.png']);
+   без ссылки со страницы: значки вкладки и экрана «Домой». И файлы push
+   (PR 3г): service worker браузер узнаёт по адресу — с ?v= каждое
+   обновление сайта давало бы новый service worker и теряло подписку;
+   manifest — по адресу же для сайта на экране «Домой». Оба Apache отдаёт
+   с no-cache (.htaccess). */
+const FIXED = new Set([
+  '/favicon.ico',
+  '/apple-touch-icon.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/sw.js',
+  '/manifest.webmanifest',
+]);
 
 /* Путь к файлу из public/ в тексте: в кавычках, в url(…), в srcset. */
 const paths = Object.keys(versions).filter((p) => !FIXED.has(p));

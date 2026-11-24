@@ -2,9 +2,8 @@ import { Tex } from '@/components/ui/Tex';
 import { krugHtml, krugiHtml, krugiOtbora, krugSerii } from '@/lib/zadanie14/krugHtml';
 import type { KrugSpec } from '@/lib/zadanie14/krug';
 import type { Risunok14 } from '@/lib/zadanie14/teoriyaTipy';
-import { KrugDelenie14 } from './KrugDelenie14';
+import { ZhivoeDelenie13, ZhivoyUgol13 } from '@/components/zhivye/krug13/Kartochki';
 import { KrugSechenie14 } from './KrugSechenie14';
-import { KrugZhivoy14 } from './KrugZhivoy14';
 import { TablicaKorni14 } from './TablicaKorni14';
 
 /**
@@ -43,10 +42,10 @@ export function Risunok14View({ r }: { r: Risunok14 }) {
       telo = <Krugi14 specs={krugiOtbora(r.serii, r.promezhutok)} />;
       break;
     case 'zhivoy':
-      telo = <KrugZhivoy14 />;
+      telo = <ZhivoyUgol13 />;
       break;
     case 'delenie':
-      telo = <KrugDelenie14 />;
+      telo = <ZhivoeDelenie13 />;
       break;
     case 'sechenie':
       telo = <KrugSechenie14 funkciya={r.funkciya} />;

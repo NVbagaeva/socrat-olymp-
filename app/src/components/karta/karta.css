@@ -10,7 +10,7 @@
   --karta-teplo: #f0a04a;
   --karta-teplo-2: #e77f2e;
   --karta-terra: var(--terracotta-600);
-  --karta-sinij: var(--blue-600);
+  --karta-sinij: var(--color-primary);
   --karta-navy: var(--navy-800);
   --karta-panel: 380px;
   position: relative;
@@ -59,9 +59,9 @@
   align-items: center;
   padding: 2px 12px;
   border-radius: var(--radius-pill);
-  background: var(--terracotta-50);
-  color: var(--terracotta-700);
-  border: 1px solid var(--terracotta-200);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+  border: 1px solid var(--color-border-accent);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -72,16 +72,16 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  border: 1px solid var(--blue-200);
+  border: 1px solid var(--color-border-info);
   background: var(--glass-bg-strong);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-weight: 700;
   font-size: 0.875rem;
   cursor: pointer;
 }
 .karta-prognoz__chto:hover,
 .karta-prognoz__chto[aria-expanded='true'] {
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
 }
 .karta-prognoz__podskazka {
   margin-top: var(--space-2);
@@ -236,7 +236,7 @@
   stroke: rgb(255 255 255 / 0.9);
 }
 .karta-ostrov__kontur:focus-visible {
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 4;
   stroke-dasharray: 10 6;
 }
@@ -275,12 +275,12 @@
   fill: currentColor;
 }
 .karta-podpis__znachok {
-  color: var(--navy-700);
+  color: var(--color-text-brand);
 }
 .karta-ostrov--skoro .karta-ostrov__podpis,
 .karta-ostrov--pozzhe .karta-ostrov__podpis,
 .karta-svobodnyy .karta-ostrov__podpis {
-  color: var(--navy-600);
+  color: var(--color-text-brand);
   opacity: 0.7;
 }
 .karta-ostrov--skoro .karta-podpis__nazvanie,
@@ -290,7 +290,7 @@
 }
 .karta-podpis__kolco-fon {
   fill: rgb(255 255 255 / 0.85);
-  stroke: var(--blue-100);
+  stroke: var(--color-surface-soft);
   stroke-width: 3.5;
 }
 .karta-podpis__kolco-hod {
@@ -303,7 +303,7 @@
 .karta-podpis__procent {
   font-size: 8.5px;
   font-weight: 700;
-  fill: var(--blue-700);
+  fill: var(--color-primary-text);
 }
 .karta-podpis__flag path {
   fill: none;
@@ -420,7 +420,7 @@
   filter: drop-shadow(0 6px 14px rgb(31 95 208 / 0.22));
 }
 .karta-tablichka:focus-visible rect {
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 3;
 }
 .karta-tablichka text {
@@ -552,8 +552,8 @@ a.karta-okoshko__nazvanie:hover svg {
 }
 .karta-okoshko__zakryt:hover,
 .karta-panel__zakryt:hover {
-  background: var(--blue-100);
-  color: var(--blue-700);
+  background: var(--color-surface-soft);
+  color: var(--color-primary-text);
 }
 .karta-okoshko__zakryt svg,
 .karta-panel__zakryt svg {
@@ -601,14 +601,14 @@ a.karta-okoshko__nazvanie:hover svg {
 }
 a.karta-gorod__ssylka:hover,
 a.karta-gorod__ssylka:focus-visible {
-  background: var(--blue-50);
-  color: var(--blue-700);
+  background: var(--color-surface-info);
+  color: var(--color-primary-text);
 }
 .karta-gorod__tochka {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid var(--blue-200);
+  border: 2px solid var(--color-border-info);
   background: #fff;
   display: grid;
   place-items: center;
@@ -649,7 +649,7 @@ a.karta-gorod__ssylka:focus-visible {
   left: -50%;
   right: 50%;
   top: 11px;
-  border-top: 2px dashed var(--blue-200);
+  border-top: 2px dashed var(--color-border-info);
 }
 .karta-gorod--osvoeno + .karta-gorod--osvoeno::before,
 .karta-gorod--osvoeno + .karta-gorod--tekushchaya::before {
@@ -696,10 +696,10 @@ a.karta-gorod__ssylka:focus-visible {
   cursor: pointer;
 }
 .karta-masshtab button + button {
-  border-top: 1px solid var(--blue-100);
+  border-top: 1px solid var(--color-surface-soft);
 }
 .karta-masshtab button:hover {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
 }
 .karta-ves-mir {
   --stk-r-card: 14px;
@@ -769,11 +769,11 @@ a.karta-gorod__ssylka:focus-visible {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(160deg, #fff, var(--blue-100));
-  box-shadow: inset 0 0 0 1px var(--blue-200);
+  background: linear-gradient(160deg, #fff, var(--color-surface-soft));
+  box-shadow: inset 0 0 0 1px var(--color-border-info);
   display: grid;
   place-items: center;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .karta-panel__znak svg {
   width: 26px;
@@ -789,7 +789,7 @@ a.karta-gorod__ssylka:focus-visible {
   letter-spacing: -0.01em;
 }
 .karta-panel__nazvanie span {
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .karta-panel__zakladka {
   width: 36px;
@@ -811,8 +811,8 @@ a.karta-gorod__ssylka:focus-visible {
   stroke-linejoin: round;
 }
 .karta-panel__zakladka:hover {
-  background: var(--terracotta-50);
-  color: var(--terracotta-700);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
 }
 .karta-panel__zakladka.is-est {
   color: var(--karta-terra);
@@ -838,18 +838,18 @@ a.karta-gorod__ssylka:focus-visible {
   gap: 2px;
   padding: var(--space-3) var(--space-4);
   border-radius: 14px;
-  background: var(--terracotta-50);
-  border: 1px solid var(--terracotta-200);
+  background: var(--color-accent-soft-surface);
+  border: 1px solid var(--color-border-accent);
 }
 .karta-panel__itog b {
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
 }
 .karta-panel__itog.is-mozhno {
-  background: var(--emerald-50);
-  border-color: var(--emerald-200);
+  background: var(--color-uspeh-soft);
+  border-color: var(--color-uspeh-border);
 }
 .karta-panel__itog.is-mozhno b {
-  color: #06704f;
+  color: var(--color-uspeh-text);
 }
 
 .karta-polosy {
@@ -875,7 +875,7 @@ a.karta-gorod__ssylka:focus-visible {
 .karta-polosa__shkala {
   height: 8px;
   border-radius: var(--radius-pill);
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
   overflow: hidden;
 }
 .karta-polosa__shkala span {
@@ -902,13 +902,13 @@ a.karta-gorod__ssylka:focus-visible {
   align-items: flex-start;
   padding: var(--space-3) var(--space-4);
   border-radius: 14px;
-  background: var(--terracotta-50);
-  border: 1px solid var(--terracotta-200);
+  background: var(--color-accent-soft-surface);
+  border: 1px solid var(--color-border-accent);
   color: var(--color-text-secondary);
   font-size: var(--fs-caption);
 }
 .karta-panel__povtorit b {
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
 }
 .karta-panel__povtorit svg {
   width: 20px;
@@ -933,7 +933,7 @@ a.karta-gorod__ssylka:focus-visible {
   border-radius: 14px;
   border: 1px solid var(--glass-edge);
   background: var(--glass-bg-strong);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-weight: 700;
   font-size: 0.9375rem;
   text-decoration: none;
@@ -987,7 +987,7 @@ a.karta-gorod__ssylka:focus-visible {
   font-size: 0.8125rem;
 }
 .karta-svyazka.is-gotovo {
-  background: var(--emerald-50);
+  background: var(--color-uspeh-soft);
 }
 .karta-svyazka__zadanie,
 .karta-svyazka__ssylka,
@@ -1007,7 +1007,7 @@ a.karta-gorod__ssylka:focus-visible {
   color: var(--color-text-secondary);
 }
 .karta-svyazka__ssylka {
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
   font-weight: 600;
   text-decoration: underline dotted;
 }
@@ -1022,7 +1022,7 @@ a.karta-gorod__ssylka:focus-visible {
   font-size: 0.875rem;
 }
 .karta-spisok__oblast:hover {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
 }
 .karta-spisok__nomer {
   font-weight: 800;
@@ -1032,11 +1032,11 @@ a.karta-gorod__ssylka:focus-visible {
   color: var(--color-text-tertiary);
 }
 .karta-spisok__oblast--osvoeno .karta-spisok__status {
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
   font-weight: 600;
 }
 .karta-spisok__oblast--v-processe .karta-spisok__status {
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-weight: 600;
 }
 
@@ -1070,12 +1070,12 @@ a.karta-gorod__ssylka:focus-visible {
 }
 .karta-legenda__p--v-processe::before {
   border: 3px solid var(--karta-sinij);
-  border-right-color: var(--blue-100);
+  border-right-color: var(--color-surface-soft);
   background: #fff;
 }
 .karta-legenda__p--ne-nachato::before {
   background: var(--karta-tuman);
-  border: 1px solid var(--blue-200);
+  border: 1px solid var(--color-border-info);
 }
 .karta-legenda__p--povtorit::before {
   background: var(--karta-terra);
@@ -1108,11 +1108,11 @@ a.karta-gorod__ssylka:focus-visible {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: linear-gradient(160deg, #fff, var(--blue-100));
-  box-shadow: inset 0 0 0 1px var(--blue-200);
+  background: linear-gradient(160deg, #fff, var(--color-surface-soft));
+  box-shadow: inset 0 0 0 1px var(--color-border-info);
   display: grid;
   place-items: center;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .karta-dz__znak svg {
   width: 24px;
@@ -1141,7 +1141,7 @@ a.karta-gorod__ssylka:focus-visible {
 .karta-dz__polosa {
   height: 10px;
   border-radius: var(--radius-pill);
-  background: var(--blue-100);
+  background: var(--color-surface-soft);
   overflow: hidden;
 }
 .karta-dz__polosa span {
@@ -1157,7 +1157,7 @@ a.karta-gorod__ssylka:focus-visible {
 }
 .karta-dz__strelka {
   font-size: 1.25rem;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 
 /* ── Телефон и планшет ────────────────────────────────────────── */
@@ -1204,7 +1204,7 @@ a.karta-gorod__ssylka:focus-visible {
     width: 40px;
     height: 4px;
     border-radius: 2px;
-    background: var(--blue-200);
+    background: var(--color-border-info);
     margin: 8px auto 0;
   }
   .karta-panel__telo {
@@ -1226,7 +1226,7 @@ a.karta-gorod__ssylka:focus-visible {
   }
   .karta-masshtab button + button {
     border-top: 0;
-    border-left: 1px solid var(--blue-100);
+    border-left: 1px solid var(--color-surface-soft);
   }
   .karta-masshtab button,
   .karta-ves-mir {

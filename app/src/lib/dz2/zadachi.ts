@@ -41,7 +41,7 @@ export function zadachaOpornaya8(
   };
 }
 
-/* ── Опорные №5: задача банка, разбор открыт отпечатком ─────────── */
+/* ── Опорные №4 и №5: задача банка, разбор открыт отпечатком ────── */
 
 export interface Zadacha5 {
   id: string;
@@ -66,7 +66,13 @@ export interface Nabor {
   formula: (tex: string) => string;
 }
 
-export function zadachaOpornaya5(z: Zadacha5, r: Razbor5, nabor: Nabor): ZadachaDz | null {
+/** level — сложность раздела (lib/zhurnal/uroven.ts): №5 — 2, №4 — 1. */
+export function zadachaOpornaya5(
+  z: Zadacha5,
+  r: Razbor5,
+  nabor: Nabor,
+  level: 1 | 2 | 3 = 2,
+): ZadachaDz | null {
   const answer = normalnayaZapis(r.otvet);
   if (answer === null) return null;
   return {
@@ -74,7 +80,7 @@ export function zadachaOpornaya5(z: Zadacha5, r: Razbor5, nabor: Nabor): Zadacha
     task_ref: z.id,
     question_html: `<p>${nabor.tekst(z.uslovie)}</p>`,
     ...(z.illustration === undefined ? {} : { risunok: z.illustration.path }),
-    level: 2,
+    level,
     answer,
     razbor: {
       shagi: r.shagi.map((s) => ({

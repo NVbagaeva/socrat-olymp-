@@ -228,6 +228,15 @@ jobs:
         working-directory: app
         run: pnpm test:soglasiya-sql
 
+      # Кабинет v2 без браузера: журнал решения задач (модель, таймер,
+      # очередь), новая выдача ДЗ (корзина, мастер, задачи на настоящих
+      # генераторах, сторона ученика и итоги учителя), уведомления (тексты,
+      # ссылки, время, настройки). Docs: kabinet-zhurnal, kabinet-dz2,
+      # kabinet-uvedomleniya.
+      - name: Кабинет v2 — журнал, новая выдача ДЗ, уведомления
+        working-directory: app
+        run: pnpm test:zhurnal && pnpm test:dz2 && pnpm test:uvedomleniya
+
       # Ответ ученика: запись бланка, подсказки о формате, точное
       # сравнение, дробь с верным значением в тренажёре (lib/otvet).
       - name: Модуль ответов

@@ -5,8 +5,8 @@
 #   /auth/v1/*  → GoTrue,    /rest/v1/* → PostgREST;
 #   заголовок apikey обязателен и должен быть ключом anon или
 #   service_role, иначе 401 — как у Supabase;
-#   без apikey открыты только адреса из писем (/auth/v1/verify),
-#   по ним человек переходит из почты обычной ссылкой;
+#   без apikey открыты только адреса из писем (/auth/v1/verify и
+#   /otpiska), по ним человек переходит из почты обычной ссылкой;
 #   CORS — только для адресов сайта.
 #
 # Сертификат Caddy получает и продлевает сам (Let's Encrypt), как только
@@ -89,6 +89,14 @@
 			# Адреса в письмах GoTrue строит из API_EXTERNAL_URL, а не из
 			# заголовков запроса.
 			header_up -X-Forwarded-Host
+			header_down -Access-Control-Allow-Origin
+		}
+	}
+
+	# «Отписаться» из писем уведомлений (RFC 8058): ключа в ссылке нет,
+	# подпись проверяет база; отвечает рассыльщик (compose.yml, notifier).
+	handle /otpiska* {
+		reverse_proxy notifier:8090 {
 			header_down -Access-Control-Allow-Origin
 		}
 	}
