@@ -12,7 +12,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 import { VSTRECHA11 } from '@/content/tekstovye11';
-import { assetUrl } from '@/lib/assetUrl';
+import { illyustraciyaUrl } from '@/lib/illyustraciiUrl';
 import { motionLevel, type MotionLevel } from '@/lib/motion';
 import { typeset } from '@/lib/tex';
 import {
@@ -259,7 +259,7 @@ function Gorod({ r, storona }: { r: Razmetka; storona: 'a' | 'b' }) {
   return (
     <g className={clsx('z11-vst__gorod', `z11-vst__gorod--${storona}`)}>
       <image
-        href={assetUrl(fail)}
+        href={illyustraciyaUrl(fail)}
         x={cx - w / 2}
         y={r.yDoroga + 10 - h}
         width={w}
