@@ -1,0 +1,85 @@
+/* Единая система размеров иллюстраций — components/ui/Illustration.tsx.
+   Префикс illu-. Нормы — в пикселях: на широком экране не растут.
+
+   !important у размеров картинки намеренный: соседние компоненты задают
+   своим картинкам width: 100% по колонке, а норма должна держаться
+   везде. Отображаемая ширина — меньшая из трёх: размер, рассчитанный
+   компонентом (--illu-dw, в пропорциях исходника), норма варианта для
+   этого экрана (--illu-w) и ширина места (max-width: 100%). */
+
+.illu {
+  --illu-w: 280px;
+  --illu-h: 280px;
+  display: block;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  margin-inline: auto;
+  line-height: 0;
+}
+.illu--start {
+  margin-inline: 0;
+}
+.illu img {
+  display: block;
+  inline-size: min(var(--illu-dw, var(--illu-w)), var(--illu-w)) !important;
+  block-size: auto !important;
+  max-inline-size: 100% !important;
+  max-block-size: var(--illu-h) !important;
+  aspect-ratio: var(--illu-ar, auto);
+  object-fit: contain !important;
+}
+
+/* Рамка нормы для уже свёрстанной картинки (illustrationRamka): своя
+   ширина картинки остаётся, норма варианта — потолок. Без !important и с
+   нулевым весом рамки (:where): если у самой картинки потолок ниже нормы
+   (max-width: 200px), он и остаётся — рамка ничего не увеличивает. Что
+   картинка всё же не крупнее нормы, проверяет scripts/check-illyustracii.mjs. */
+.illu-r {
+  --illu-w: 280px;
+  --illu-h: 280px;
+}
+:where(.illu-r) img {
+  max-inline-size: min(100%, var(--illu-w));
+  max-block-size: var(--illu-h);
+  object-fit: contain;
+}
+
+.illu--header {
+  --illu-w: 260px;
+  --illu-h: 260px;
+}
+.illu--hero {
+  --illu-w: 360px;
+  --illu-h: 300px;
+}
+.illu--section {
+  --illu-w: 280px;
+  --illu-h: 280px;
+}
+.illu--inline {
+  --illu-w: 140px;
+  --illu-h: 140px;
+}
+.illu--task {
+  --illu-w: 180px;
+  --illu-h: 180px;
+}
+
+/* Телефон: шапка 112, вводная картинка до 220 по ширине (по центру над
+   текстом или скрыта), картинка к условию 120. */
+@media (max-width: 639.98px) {
+  .illu--header {
+    --illu-w: 112px;
+    --illu-h: 112px;
+  }
+  .illu--hero {
+    --illu-w: 220px;
+  }
+  .illu--task {
+    --illu-w: 120px;
+    --illu-h: 120px;
+  }
+  .illu--skryt-tel {
+    display: none;
+  }
+}

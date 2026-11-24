@@ -172,14 +172,14 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
 }
-/* Настоящий фрагмент интерфейса сайта. */
+/* Настоящий фрагмент интерфейса сайта: целиком (object-fit: contain),
+   не шире нормы section Illustration (280). */
 .howto__shot {
   display: block;
   width: 100%;
   height: auto;
   aspect-ratio: 12 / 7;
-  object-fit: cover;
-  object-position: top left;
+  object-fit: contain;
   margin-bottom: var(--space-2);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);

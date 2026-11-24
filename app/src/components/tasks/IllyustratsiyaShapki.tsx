@@ -1,3 +1,4 @@
+import { Illustration, type IllustrationVariant } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 
 /**
@@ -16,17 +17,9 @@ export interface ShapkaArt {
 }
 
 /**
- * Ширина картинки в шапке: правая колонка сетки 1.8fr : 1fr. На
- * компьютере это треть ширины раздела, не больше 400px; ниже 1024px
- * картинки нет (общий слой section.css прячет колонку), браузеру всё
- * равно надо что-то сказать — пусть берёт самый лёгкий файл.
- */
-const SIZES = '(min-width: 1024px) 400px, 1px';
-
-/**
  * Картинка шапки раздела (слот media у ShapkaRazdela) — одна на все
- * разделы с иллюстрацией: №4 и №1. Раскладку шапки задаёт метка
- * section-head--art (section.css), сама картинка себя не позиционирует.
+ * разделы с иллюстрацией. Размер — норма Illustration: в шапке раздела
+ * вариант header (260, телефон 112), в шапке «О задании» — hero.
  *
  * Декор: заголовок стоит рядом текстом, поэтому alt пустой, а картинка
  * скрыта от скринридера. Она в первом экране — без loading="lazy" и с
@@ -34,46 +27,41 @@ const SIZES = '(min-width: 1024px) 400px, 1px';
  */
 export function IllyustratsiyaShapki({
   art,
-  sizes = SIZES,
   alt = '',
+  variant = 'header',
 }: {
   art: ShapkaArt;
-  /** Ширина в раскладке (sizes): своя, если картинка стоит не в шапке раздела (№1 — «О задании»). */
-  sizes?: string;
   /** Описание: у картинки шапки раздела — пустое (декор). */
   alt?: string;
+  variant?: Extract<IllustrationVariant, 'header' | 'hero'>;
 }) {
   if (art.shiriny === undefined) {
     return (
-      <img
+      <Illustration
+        variant={variant}
         className="shapka-art"
         src={art.src}
         alt={alt}
-        aria-hidden={alt === '' ? 'true' : undefined}
         width={art.width}
         height={art.height}
-        fetchPriority="high"
-        decoding="async"
+        priority
       />
     );
   }
   const file = (width: number, ext: string) => assetUrl(`${art.src}-${width}.${ext}`);
-  const set = (ext: string) => art.shiriny?.map((w) => `${file(w, ext)} ${w}w`).join(', ');
+  const set = (ext: string) => art.shiriny?.map((w) => `${file(w, ext)} ${w}w`).join(', ') ?? '';
   const fallback = art.shiriny[1] ?? art.shiriny[0] ?? 0;
   return (
-    <picture className="shapka-art">
-      <source type="image/webp" srcSet={set('webp')} sizes={sizes} />
-      <img
-        src={file(fallback, 'png')}
-        srcSet={set('png')}
-        sizes={sizes}
-        alt={alt}
-        aria-hidden={alt === '' ? 'true' : undefined}
-        width={art.width}
-        height={art.height}
-        fetchPriority="high"
-        decoding="async"
-      />
-    </picture>
+    <Illustration
+      variant={variant}
+      className="shapka-art"
+      src={file(fallback, 'png')}
+      srcSet={set('png')}
+      sources={[{ type: 'image/webp', srcSet: set('webp') }]}
+      alt={alt}
+      width={art.width}
+      height={art.height}
+      priority
+    />
   );
 }

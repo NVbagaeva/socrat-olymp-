@@ -85,7 +85,11 @@ export function StsenaShapka({
           {progress === undefined ? null : <div className="stsena__progress">{progress}</div>}
           {actions === undefined ? null : <div className="stsena__actions">{actions}</div>}
         </div>
-        {media === undefined ? null : <div className="stsena__media">{media}</div>}
+        {media === undefined ? null : (
+          <div className="stsena__media" data-ill="header">
+            {media}
+          </div>
+        )}
       </header>
     </>
   );

@@ -2,6 +2,7 @@ import { clsx } from 'clsx';
 import type { Metadata } from 'next';
 import { ogStranicy } from '@/lib/og';
 import { SiteFooter, SiteHeader } from '@/components/layout';
+import { Illustration } from '@/components/ui/Illustration';
 import { about, type Illyustraciya, type Nadpis } from '@/content/about';
 import { Dvizhenie } from './Dvizhenie';
 import { Stsena } from './Stsena';
@@ -228,22 +229,18 @@ export default function AboutPage() {
             {/* Иллюстрация занимает пустое левое поле и стоит вровень с
                 текстом; на телефоне сетка распадается, и она встаёт над ним. */}
             <figure className="oa-ill">
-              <picture>
-                <source
-                  type="image/webp"
-                  srcSet={`${sajt.illyustraciya.webp400} 400w, ${sajt.illyustraciya.webp800} 800w`}
-                  sizes="(max-width: 899px) 300px, 400px"
-                />
-                <img
-                  src={sajt.illyustraciya.png}
-                  alt=""
-                  aria-hidden="true"
-                  width={sajt.illyustraciya.width}
-                  height={sajt.illyustraciya.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </picture>
+              <Illustration
+                variant="section"
+                src={sajt.illyustraciya.png}
+                sources={[
+                  {
+                    type: 'image/webp',
+                    srcSet: `${sajt.illyustraciya.webp400} 400w, ${sajt.illyustraciya.webp800} 800w`,
+                  },
+                ]}
+                width={sajt.illyustraciya.width}
+                height={sajt.illyustraciya.height}
+              />
             </figure>
             <div className="oa-sec__body oa-sec__body--after">
               <h3 className="oa-h3 oa-h3--big">{sajt.personal.title}</h3>

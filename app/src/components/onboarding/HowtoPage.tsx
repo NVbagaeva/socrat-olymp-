@@ -7,6 +7,7 @@ import { Details } from '@/components/ui';
 import { HOWTO, type HowtoTabContent } from '@/content/kakPolzovatsya';
 import { howtoHref, type HowtoTab } from '@/content/onboarding';
 import { requestIntro, startTour } from '@/lib/onboarding';
+import { illustrationRamka } from '@/components/ui/illustrationRamka';
 import { assetUrl } from '@/lib/assetUrl';
 import './howto.css';
 
@@ -105,7 +106,7 @@ export function HowtoView({ tab }: { tab: HowtoTab }) {
         </h2>
         <ul className="howto__features">
           {content.features.map((f) => (
-            <li key={f.title} className="howto__feature">
+            <li key={f.title} {...illustrationRamka('section', 'howto__feature')}>
               {f.image !== undefined ? (
                 <img
                   className="howto__shot"

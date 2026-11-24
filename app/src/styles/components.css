@@ -2044,6 +2044,17 @@ a.task-card--bank:focus-visible {
   pointer-events: none;
 }
 
+/* Норма inline (components/ui/Illustration.tsx): до 140 px, картинка
+   вписывается целиком. Задана классом, а не рамкой illustrationRamka:
+   TaskCard — в первой загрузке каждой страницы, лишние байты скриптов
+   там на счету (scripts/check-first-load.mjs). Вариант для проверки —
+   lib/illyustracii.mjs → VARIANT_PO_KLASSU. */
+:where(.task-card__ill) img {
+  max-inline-size: min(100%, 140px);
+  max-block-size: 140px;
+  object-fit: contain;
+}
+
 /* Плашка «Скоро» на неоткрытой карточке: фон бейджа и фон карточки —
    один и тот же --color-surface-2, поэтому плашка не читалась. Поднимаем
    её на поверхность. Бейдж «структура 2027» не трогаем: он с тоном info

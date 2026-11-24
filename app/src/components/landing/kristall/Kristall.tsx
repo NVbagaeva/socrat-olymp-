@@ -84,7 +84,7 @@ const FORMATY = [
 export function Kristall({
   className,
   podpisi = [],
-  sizes = '(max-width: 767.98px) 285px, (max-width: 1023.98px) 420px, 560px',
+  sizes = '(max-width: 639.98px) 220px, 356px',
   hint = 'Покрутите фигуру',
   temnyyFon = false,
   vozvrat = false,
@@ -298,6 +298,7 @@ export function Kristall({
         zhivoy && 'is-zhivoy',
         className,
       )}
+      data-ill="hero"
     >
       <div
         ref={oblast}

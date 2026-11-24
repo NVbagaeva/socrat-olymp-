@@ -51,15 +51,17 @@
   background: var(--glass-tint-warm);
   box-shadow: var(--glass-ring-warm), var(--glass-hi);
 }
-/* Фотография — как есть, целиком: обычный снимок без прозрачности. */
+/* Фотография — как есть, целиком: обычный снимок без прозрачности.
+   Размер — норма Illustration section (до 280); на компьютере — справа
+   от текста блока, на телефоне — под ним. */
 .z45-ob__foto {
-  margin: var(--space-2) 0 0;
+  /* Ширина фигуры — ширина фото (норма section, 280): подпись
+     переносится по ней, а не растягивает колонку в одну длинную строку. */
+  width: 280px;
+  max-width: 100%;
+  margin: var(--space-2) auto 0;
 }
 .z45-ob__foto img {
-  display: block;
-  width: 100%;
-  max-width: 640px;
-  height: auto;
   border-radius: 14px;
 }
 .z45-ob__foto figcaption {
@@ -75,6 +77,17 @@
   }
   .z45-ob__istoriya {
     grid-column: 1 / -1;
+    grid-template-columns: minmax(420px, 1fr) auto;
+    column-gap: var(--space-8);
+    align-items: start;
+  }
+  .z45-ob__istoriya > :not(.z45-ob__foto) {
+    grid-column: 1;
+  }
+  .z45-ob__istoriya .z45-ob__foto {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    margin: 0;
   }
 }
 .z45-ob__metody {
