@@ -51,6 +51,7 @@ export function Teoriya2({ vkladka }: { vkladka: string }) {
   );
   return (
     <TeoriyaShell
+      taskNo={2}
       vkladka={vkladka}
       razdely={RAZDELY_TEORII}
       tela={tela}

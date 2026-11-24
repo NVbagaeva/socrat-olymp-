@@ -173,6 +173,7 @@ export function Teoriya19({ vkladka }: { vkladka: string }) {
   );
   return (
     <TeoriyaShell
+      taskNo={19}
       vkladka={vkladka}
       razdely={GLAVY_19.map((g) => ({
         id: g.id,

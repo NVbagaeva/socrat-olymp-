@@ -298,6 +298,7 @@ export function Teoriya6({ vkladka, base }: { vkladka: string; base: string }) {
   );
   return (
     <TeoriyaShell
+      taskNo={6}
       vkladka={vkladka}
       razdely={RAZDELY_TEORII_6.map((r) => ({ id: r.id, title: r.title }))}
       tela={tela}
