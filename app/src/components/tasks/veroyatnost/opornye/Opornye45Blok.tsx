@@ -6,7 +6,6 @@ import { tekstyKarty45, tekstyOpornyh45 } from '@/content/veroyatnost45';
 import { zhurnal45 } from '@/lib/veroyatnost/trening/zhurnal45';
 import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { PodskazkaVoprosy } from '../../trening/PodskazkaVoprosy';
-import { assetUrl } from '@/lib/assetUrl';
 import { formatHint, fractionRightHint } from '@/lib/otvet';
 import type { TaskOutcome } from '@/lib/progressStore';
 import { scrollTabTo } from '@/lib/tabScroll';
@@ -77,7 +76,9 @@ export function Opornye45Blok({
   );
   /* Журнал решения задач (lib/zhurnal): ученику, который вошёл, при флаге. */
   const zapis = useZapisZadachi(
-    z === undefined ? null : zhurnal45(zadanie, { ...z, kind: blok ?? z.id }, 'opornye', blok ?? 'opornye', z.id),
+    z === undefined
+      ? null
+      : zhurnal45(zadanie, { ...z, kind: blok ?? z.id }, 'opornye', blok ?? 'opornye', z.id),
   );
   if (z === undefined) {
     return null;
@@ -140,23 +141,11 @@ export function Opornye45Blok({
   }
 
   const kartinka = zadacha.illustration ?? zadacha.model?.illustration;
+  /* Чертёж нарисован на сборке готовой разметкой (лабиринт №5): под
+     условием, как был. Картинка сюжета — справа от условия. */
   const risunok =
-    kartinka === undefined && zadacha.risunok === undefined ? undefined : (
-      <>
-        {kartinka === undefined ? null : (
-          /* Картинка к условию — как есть: целиком, прозрачный фон. */
-          <img
-            className="z45-kartinka"
-            src={assetUrl(kartinka.path)}
-            alt={kartinka.alt}
-            decoding="async"
-          />
-        )}
-        {zadacha.risunok === undefined ? null : (
-          /* Чертёж нарисован на сборке готовой разметкой (лабиринт №5). */
-          <div className="z45-chertezh" dangerouslySetInnerHTML={{ __html: zadacha.risunok }} />
-        )}
-      </>
+    zadacha.risunok === undefined ? undefined : (
+      <div className="z45-chertezh" dangerouslySetInnerHTML={{ __html: zadacha.risunok }} />
     );
 
   return (
@@ -166,6 +155,15 @@ export function Opornye45Blok({
       onOpen={open}
       uslovieHtml={zadacha.uslovie}
       {...(risunok === undefined ? {} : { risunok })}
+      {...(kartinka === undefined
+        ? {}
+        : {
+            kartinka: {
+              src: kartinka.path,
+              ...(kartinka.path280 === undefined ? {} : { src280: kartinka.path280 }),
+              alt: kartinka.alt,
+            },
+          })}
       value={value}
       onValue={(next) => {
         setValue(next);

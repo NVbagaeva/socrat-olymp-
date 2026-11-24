@@ -15,7 +15,8 @@
      node scripts/check-razdely-12-images.mjs --site
        Собранный сайт (out/, после pnpm build). Страница /zadaniya/12/ и
        страницы всех открытых разделов: на каждой есть иконки всех
-       разделов (плашка, меню, «Другие разделы»), каждый адрес картинки
+       разделов (плашка, меню, «Другие разделы»), у самой /zadaniya/12/ —
+       стеклянная картинка шапки (images/shapki/), каждый адрес картинки
        №12 отдаётся с кодом 200 и типом image/*, заглушек вроде
        «Иллюстрация готовится» нет.
 
@@ -122,7 +123,7 @@ function serveOut() {
     роутера, откуда карточки дорисовываются в браузере. */
 function imagesIn(html) {
   const urls = new Set();
-  for (const m of html.matchAll(/\/images\/(?:razdely|zadaniya)\/12\/[a-z0-9-]+\.(?:webp|png)(?:\?v=[0-9a-f]+)?/g)) {
+  for (const m of html.matchAll(/\/images\/(?:(?:razdely|zadaniya)\/12|shapki)\/[a-z0-9-]+\.(?:webp|png)(?:\?v=[0-9a-f]+)?/g)) {
     urls.add(m[0]);
   }
   return [...urls];
@@ -171,8 +172,10 @@ if (SITE || URL_ARG) {
         bad(`${page}: нет иконки раздела ${razdel.id} (${razdel.icon})`);
       }
     }
-    if (page === '/zadaniya/12/' && !urls.some((u) => u.includes('/images/zadaniya/12/hero-'))) {
-      bad(`${page}: нет главной иллюстрации`);
+    /* Картинка шапки хаба — из серии шапок разделов (content/shapki.ts):
+       «Графики функций» — задание №11 ЕГЭ-2027. */
+    if (page === '/zadaniya/12/' && !urls.some((u) => u.includes('/images/shapki/zadanie-11-'))) {
+      bad(`${page}: нет картинки шапки`);
     }
     for (const url of urls) {
       if (checked.has(url)) {

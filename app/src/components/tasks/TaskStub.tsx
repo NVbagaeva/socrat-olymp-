@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { RisunokRazdela, StsenaShapka, tabletkiRazdela } from '@/components/tasks/stsena';
 import { STSENA } from '@/content/stsena';
+import { SHAPKI } from '@/content/shapki';
+import { SectionHeader } from './shapka/SectionHeader';
 import { taskBase, taskParts, tasksPage, type ExamTask } from '@/content/tasks';
 import { VKLADKI_ZAGLUSHKI } from '@/content/vkladki';
 import { assetUrl } from '@/lib/assetUrl';
@@ -17,7 +19,7 @@ export function stubTitle(task: ExamTask): string {
 /**
  * Страница неоткрытого задания: /zadaniya/{slug}/.
  *
- * Устроена как раздел — крошки, шапка «Стеклянная сцена», липкая лента
+ * Устроена как раздел — общая шапка раздела (SectionHeader), липкая лента
  * вкладок, — чтобы открытие раздела не меняло каркас страницы: вместо
  * карточки «Раздел в разработке» встанет содержимое вкладок. В шапке —
  * мотив раздела, нарисованный кодом; ниже, в карточке, остаётся та же
@@ -31,21 +33,26 @@ export function TaskStub({ task }: { task: ExamTask }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <StsenaShapka
-          crumbs={[
-            { label: stub.crumb, href: tasksPage.href },
-            { label: part.title, href: partHref },
-            { label: `Задание №${Number(task.no)}` },
-          ]}
-          title={stubTitle(task)}
-          tabletki={tabletkiRazdela({ chast: stub.badge })}
-          media={<RisunokRazdela no={task.slug} label={`${STSENA.oblozhka}: ${task.name}`} />}
-        />
+        {task.kod !== undefined && SHAPKI[task.kod] !== undefined ? (
+          <SectionHeader kod={task.kod} />
+        ) : (
+          <StsenaShapka
+            crumbs={[
+              { label: stub.crumb, href: tasksPage.href },
+              { label: part.title, href: partHref },
+              { label: `Задание №${Number(task.no)}` },
+            ]}
+            title={stubTitle(task)}
+            tabletki={tabletkiRazdela({ chast: stub.badge })}
+            media={<RisunokRazdela no={task.slug} label={`${STSENA.oblozhka}: ${task.name}`} />}
+          />
+        )}
 
         <RazdelTabs
           base={taskBase(task)}
           tabs={VKLADKI_ZAGLUSHKI}
           className="topic-tabs-row--stsena"
+          bezPary
         />
 
         <div className="section-panel">

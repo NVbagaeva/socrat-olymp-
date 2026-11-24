@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import { kartinka11 } from '@/lib/zadanie11/kartinki';
 import Link from 'next/link';
 import { TRENAZHER11 } from '@/content/tekstovye11';
 import { teoriyaHref11, zadachaHref11 } from '@/lib/zadanie11/links';
@@ -133,6 +134,13 @@ export function razdel11(
     pole: (z, _rezhim, ui) =>
       z.vybory === undefined ? null : <VyborVarianta varianty={z.vybory} {...ui} />,
     pod: (z) => <Pod11 z={z} ssylki={ssylki[z.prototypeId]} />,
+    /* Картинка сюжета справа от условия: у аналога — по его ключу,
+       у задачи банка и генератора — по подтипу и шаблону. */
+    kartinka: (z) => {
+      if (z.source === 'analog' && z.ks === undefined) return undefined;
+      const k = kartinka11(z.prototypeId, z.params, z.ks);
+      return k === undefined ? undefined : { src: k.src, src280: k.src280, alt: k.alt };
+    },
     shagi: shagi11,
     voprosy: voprosy11,
     podskazka: (s, ui) => <Podskazka11 razbor={s} otkryto={ui.otkryto} dalshe={ui.dalshe} />,
