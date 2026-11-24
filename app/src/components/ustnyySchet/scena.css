@@ -1,0 +1,255 @@
+/* Сцена шапки «Устного счёта» (UstnyyScena.tsx): секундомер и знаки
+   на орбите. Орбита — эллипс, точки ключевых кадров посчитаны заранее
+   (16 точек, x = 40 % · cos t, y = 15 % · sin t): ближняя половина —
+   крупнее и плотнее и над секундомером, дальняя — меньше, прозрачнее
+   и за ним. Цвета — только токены. */
+
+.us-scena {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  isolation: isolate;
+}
+.us-scena__orbita {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.us-scena__put {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* Центр орбиты — чуть ниже середины, на уровне циферблата. */
+  top: 14%;
+  animation: us-orbita 20s linear infinite;
+}
+.us-scena__put--2 {
+  animation-delay: -5s;
+}
+.us-scena__put--3 {
+  animation-delay: -10s;
+}
+.us-scena__put--4 {
+  animation-delay: -15s;
+}
+.us-scena__znak {
+  width: 31%;
+  height: auto;
+  filter: drop-shadow(0 6px 10px var(--color-glass-mid));
+  animation: us-kach 3.4s ease-in-out infinite alternate;
+}
+.us-scena__znak--2 {
+  animation-duration: 4.1s;
+  animation-delay: -1.2s;
+}
+.us-scena__znak--3 {
+  width: 34%;
+  animation-duration: 3.7s;
+  animation-delay: -2.1s;
+}
+.us-scena__znak--4 {
+  width: 29%;
+  animation-duration: 4.6s;
+  animation-delay: -0.6s;
+}
+.us-scena__sekundomer {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  width: 62%;
+  transform: translate(-50%, -50%);
+}
+.us-scena__sekundomer img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 14px 24px var(--color-glass-mid));
+}
+/* Ободок «Реши за 10 секунд» — по циферблату (центр циферблата на
+   картинке — 50 % по ширине, 60 % по высоте). */
+.us-scena__obodok {
+  position: absolute;
+  left: 4%;
+  top: 31%;
+  width: 92%;
+  height: auto;
+  aspect-ratio: 1;
+  overflow: visible;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+.us-scena__obodok circle {
+  fill: none;
+  stroke-width: 3.5;
+}
+.us-scena__obodok-lozhe {
+  stroke: transparent;
+}
+.us-scena__obodok-hod {
+  stroke: var(--color-accent);
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 4px var(--color-accent));
+  opacity: 0;
+}
+.us-scena[data-vyzov='idet'] .us-scena__obodok-lozhe,
+.us-scena[data-vyzov='konec'] .us-scena__obodok-lozhe {
+  stroke: var(--color-glass-mid);
+}
+.us-scena[data-vyzov='idet'] .us-scena__obodok-hod {
+  opacity: 1;
+  animation: us-obodok 10s linear forwards;
+}
+.us-scena[data-vyzov='konec'] .us-scena__obodok-hod {
+  opacity: 1;
+  stroke-dashoffset: var(--us-obodok-ostatok, 0);
+}
+@keyframes us-obodok {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* Верный ответ: знаки вспыхивают и разлетаются. */
+.us-scena.is-vsplesk .us-scena__znak {
+  animation:
+    us-vsplesk 700ms cubic-bezier(0.2, 0.8, 0.3, 1) both,
+    us-kach 3.4s ease-in-out infinite alternate;
+}
+@keyframes us-vsplesk {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 var(--color-accent));
+  }
+  40% {
+    transform: scale(1.45) translateY(-12%);
+    filter: drop-shadow(0 0 14px var(--color-accent));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 6px 10px var(--color-glass-mid));
+  }
+}
+@keyframes us-kach {
+  from {
+    translate: 0 -5%;
+    rotate: -8deg;
+  }
+  to {
+    translate: 0 5%;
+    rotate: 7deg;
+  }
+}
+@keyframes us-orbita {
+  0.00% {
+    transform: translate(40%, 0%) scale(0.87);
+    opacity: 0.75;
+    z-index: 1;
+  }
+  6.25% {
+    transform: translate(36.96%, 5.74%) scale(0.966);
+    opacity: 0.85;
+    z-index: 3;
+  }
+  12.50% {
+    transform: translate(28.28%, 10.61%) scale(1.047);
+    opacity: 0.93;
+    z-index: 3;
+  }
+  18.75% {
+    transform: translate(15.31%, 13.86%) scale(1.101);
+    opacity: 0.98;
+    z-index: 3;
+  }
+  25.00% {
+    transform: translate(0%, 15%) scale(1.12);
+    opacity: 1;
+    z-index: 3;
+  }
+  31.25% {
+    transform: translate(-15.31%, 13.86%) scale(1.101);
+    opacity: 0.98;
+    z-index: 3;
+  }
+  37.50% {
+    transform: translate(-28.28%, 10.61%) scale(1.047);
+    opacity: 0.93;
+    z-index: 3;
+  }
+  43.75% {
+    transform: translate(-36.96%, 5.74%) scale(0.966);
+    opacity: 0.85;
+    z-index: 3;
+  }
+  50.00% {
+    transform: translate(-40%, 0%) scale(0.87);
+    opacity: 0.75;
+    z-index: 1;
+  }
+  56.25% {
+    transform: translate(-36.96%, -5.74%) scale(0.774);
+    opacity: 0.65;
+    z-index: 1;
+  }
+  62.50% {
+    transform: translate(-28.28%, -10.61%) scale(0.693);
+    opacity: 0.57;
+    z-index: 1;
+  }
+  68.75% {
+    transform: translate(-15.31%, -13.86%) scale(0.639);
+    opacity: 0.52;
+    z-index: 1;
+  }
+  75.00% {
+    transform: translate(-0%, -15%) scale(0.62);
+    opacity: 0.5;
+    z-index: 1;
+  }
+  81.25% {
+    transform: translate(15.31%, -13.86%) scale(0.639);
+    opacity: 0.52;
+    z-index: 1;
+  }
+  87.50% {
+    transform: translate(28.28%, -10.61%) scale(0.693);
+    opacity: 0.57;
+    z-index: 1;
+  }
+  93.75% {
+    transform: translate(36.96%, -5.74%) scale(0.774);
+    opacity: 0.65;
+    z-index: 1;
+  }
+  100.00% {
+    transform: translate(40%, -0%) scale(0.87);
+    opacity: 0.75;
+    z-index: 1;
+  }
+}
+
+/* Без движения: знаки стоят по орбите, всплеска нет, ободок не течёт. */
+@media (prefers-reduced-motion: reduce) {
+  .us-scena__put,
+  .us-scena__znak,
+  .us-scena.is-vsplesk .us-scena__znak,
+  .us-scena[data-vyzov='idet'] .us-scena__obodok-hod {
+    animation: none;
+  }
+  .us-scena__put {
+    animation: us-orbita 20s linear infinite paused;
+  }
+}
+:root[data-motion-level='reduce'] .us-scena__put {
+  animation-play-state: paused;
+}
+:root[data-motion-level='reduce'] .us-scena__znak,
+:root[data-motion-level='reduce'] .us-scena.is-vsplesk .us-scena__znak,
+:root[data-motion-level='reduce'] .us-scena[data-vyzov='idet'] .us-scena__obodok-hod {
+  animation: none;
+}
