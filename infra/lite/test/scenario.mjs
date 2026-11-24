@@ -1174,7 +1174,7 @@ try {
     `exec -T db psql -U postgres -tAc "select pg_size_pretty(pg_database_size('postgres'))"`,
   ).trim();
 
-  const SERVICES = ["db", "auth", "rest", "caddy"];
+  const SERVICES = ["db", "auth", "rest", "caddy", "notifier"];
   const total = (bucket) =>
     SERVICES.reduce((sum, name) => sum + (bucket[name]?.used ?? 0), 0);
   const daemonsSum = (set) => Object.values(set).reduce((a, b) => a + b, 0);

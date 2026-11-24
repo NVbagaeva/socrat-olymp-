@@ -3,7 +3,9 @@
 #   db     — PostgreSQL 17;
 #   auth   — GoTrue, служба входа Supabase (регистрация, письма, JWT);
 #   rest   — PostgREST, доступ к таблицам по правилам RLS;
-#   caddy  — HTTPS (Let's Encrypt), /auth/v1 и /rest/v1, apikey, CORS.
+#   caddy  — HTTPS (Let's Encrypt), /auth/v1 и /rest/v1, apikey, CORS;
+#   notifier — рассыльщик уведомлений: напоминания, письма, «Отписаться»
+#            (docs/kabinet-uvedomleniya.md, PR 3в).
 #
 # Адреса и ключи те же, что у облачного Supabase, поэтому supabase-js на
 # сайте работает без изменений. Почему без Kong, Studio, Storage и
@@ -213,6 +215,44 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  # Рассыльщик уведомлений (docs/kabinet-uvedomleniya.md, PR 3в): раз в
+  # минуту — напоминания и сводки (notify_tick_pochta), письма из очереди
+  # через тот же SMTP Яндекс 360, «Отписаться» (/otpiska через Caddy).
+  # Node без зависимостей, код — папка notifier/. Пока флаг базы
+  # uvedomleniya выключен, ничего не делает.
+  notifier:
+    image: node:22.23.5-alpine
+    restart: unless-stopped
+    mem_limit: ${NOTIFIER_MEM:-96m}
+    logging: *logging
+    depends_on:
+      rest: { condition: service_healthy }
+    user: node
+    working_dir: /app
+    command: [node, notifier.mjs]
+    environment:
+      NODE_OPTIONS: --max-old-space-size=48
+      REST_URL: http://rest:3000
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SITE_ORIGIN: ${SITE_ORIGIN}
+      API_DOMAIN: ${API_DOMAIN}
+      SMTP_HOST: ${SMTP_HOST:-smtp.yandex.ru}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-noreply@budetege.ru}
+      # Только в CI: Mailpit без входа.
+      MAIL_NO_AUTH: ${MAIL_NO_AUTH:-}
+      NOTIFIER_INTERVAL_MS: ${NOTIFIER_INTERVAL_MS:-60000}
+    volumes:
+      - ./notifier:/app:ro
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://localhost:8090/health]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
 
 volumes:
   db-data:
