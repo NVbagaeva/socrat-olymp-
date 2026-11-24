@@ -103,6 +103,8 @@ const PORT = 4181;
 const SUPABASE = 'http://127.0.0.1:54321';
 /* Сборка с журналом решения задач (NEXT_PUBLIC_ZHURNAL=1): сценарий журнала. */
 const ZHURNAL_ON = process.env.NEXT_PUBLIC_ZHURNAL === '1';
+/* Разделы журнала на этой сборке (этап 4б): сценарий тренажёра банка — при №7. */
+const ZHURNAL_RAZDELY = (process.env.NEXT_PUBLIC_ZHURNAL_RAZDELY || '5,8').split(',').map((x) => Number(x.trim()));
 /* Сборка с экранами прогресса (NEXT_PUBLIC_PROGRESS_UCHITEL=1 и _UCHENIK=1). */
 /* Сборка с новой выдачей ДЗ (NEXT_PUBLIC_DZ2=1). */
 const DZ2_ON = process.env.NEXT_PUBLIC_DZ2 === '1';
@@ -3203,6 +3205,87 @@ function sdkOutsideFirstLoad() {
    с подсказкой. В «базу» уходят ответы как есть, номера попыток,
    подсказка, время и исход. Учитель журнал не пишет. Снимки экрана
    тренажёра с записью — на телефоне и компьютере. */
+/* ── Этап 4б: тренажёр по банку (№7) — журнал и «В домашку» ────────
+   Сборка с NEXT_PUBLIC_ZHURNAL_RAZDELY и NEXT_PUBLIC_DZ2_RAZDELY с №7.
+   Ученик решает задачу №7 неверно и уходит дальше — в журнале строка
+   раздела 7 с типом, попыткой и исходом «ошибка». Учитель на том же
+   экране выбора тем кладёт тренажёр «В домашку»; в №11 разминки в ДЗ не
+   идут (кнопка берёт только типы адаптера). */
+async function runZhurnalBanka(mock, errors) {
+  registerInMock(mock, 'zhurnal-bank@yandex.ru', 'zhurnal-parol-1', 'Банк Ученик', 'student', {
+    birth_year: 2000,
+  });
+  for (const width of [375, 1280]) {
+    mock.zhurnal.length = 0;
+    const { context, page } = await newPage(mock, width, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-bank@yandex.ru', 'zhurnal-parol-1');
+    await page.goto(`${SITE}/zadaniya/uravneniya/trenazher/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.trn-start');
+    await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+    check((await page.locator('.dz2-knopka').count()) === 0, `журнал банка ${width}: ученик не видит «В домашку»`);
+    await page.locator('.trn-vybor__start').click();
+    const CARD = '.trn-zadacha[data-task]';
+    await page.waitForSelector(CARD);
+    const first = await page.locator(CARD).getAttribute('data-task');
+    await page.fill('.trn-ekran .otvet-input__field', '987654');
+    await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
+    await page.waitForSelector('.trn-verdikt--net');
+    await page.locator('.trn-knopki button:has-text("Дальше")').click();
+    await page.waitForFunction(
+      ([sel, id]) => document.querySelector(sel)?.getAttribute('data-task') !== id,
+      [CARD, first],
+    );
+    const until = Date.now() + 15000;
+    const rowOf = (id) =>
+      mock.zhurnal.find((r) => r.task_ref === id && r.outcome !== null && r.outcome !== undefined);
+    while (Date.now() < until && rowOf(first) === undefined) {
+      await new Promise((done) => setTimeout(done, 250));
+    }
+    const a = rowOf(first);
+    check(a !== undefined, `журнал банка ${width}: задача №7 ушла в базу`);
+    if (a !== undefined) {
+      check(a.task_no === 7 && a.place === 'trenazher' && a.kind.length > 0 && a.level === 1,
+        `журнал банка ${width}: раздел 7, тип, место, сложность (${a.task_no}, ${a.kind}, ${a.level})`);
+      check(a.popytki.length === 1 && a.popytki[0].answer === '987654' && !a.popytki[0].ok && a.outcome === 'wrong',
+        `журнал банка ${width}: попытка и исход «ошибка» (${a.outcome})`);
+      check(typeof a.gen_hash === 'string' && a.gen_hash.length === 16 && a.uslovie_tex.length > 0,
+        `журнал банка ${width}: отпечаток и условие для учителя`);
+    }
+    await context.close();
+  }
+
+  /* Учитель: «В домашку» у тренажёра №7; №11 — без разминок. */
+  if (DZ2_RAZDELY.includes(7) && DZ2_RAZDELY.includes(11)) {
+    const { context, page } = await newPage(mock, 1280, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+    await page.goto(`${SITE}/zadaniya/uravneniya/trenazher/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.trn-start');
+    await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+    const knopka = page.locator('.trn-vybor__ryadom .dz2-knopka__glavnaya');
+    await knopka.waitFor();
+    await knopka.click();
+    await page.waitForSelector('.trn-vybor__ryadom .dz2-knopka__glavnaya[aria-pressed="true"]');
+    await page.goto(`${SITE}/zadaniya/tekstovye-zadachi/trenazher/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.trn-start');
+    await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+    await page.locator('.trn-vybor__ryadom .dz2-knopka__glavnaya').click();
+    await page.waitForSelector('.trn-vybor__ryadom .dz2-knopka__glavnaya[aria-pressed="true"]');
+    const korz = await page.evaluate(() => {
+      for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
+      return null;
+    });
+    const el = JSON.parse(korz ?? '{}').elementy ?? [];
+    const t7 = el.find((e) => e.task_no === 7 && e.vid === 'trenazher');
+    const t11 = el.find((e) => e.task_no === 11 && e.vid === 'trenazher');
+    check(t7 !== undefined && t7.tipy.length > 0, `ДЗ 4б: тренажёр №7 в корзине (${t7?.tipy?.length} типов)`);
+    check(t11 !== undefined && t11.tipy.length > 0 && t11.tipy.every((t) => !t.startsWith('RZ-')),
+      `ДЗ 4б: тренажёр №11 без разминок (${t11?.tipy?.length} типов)`);
+    await context.close();
+  }
+}
+
 async function runZhurnal() {
   const mock = makeMock();
   /* У каждой ширины свой ученик: тренировка синхронизируется с аккаунтом,
@@ -3314,6 +3397,7 @@ async function runZhurnal() {
   await new Promise((done) => setTimeout(done, 5000));
   check(mock.zhurnal.length === 0, 'журнал: учитель в журнал не пишет');
   await context.close();
+  if (ZHURNAL_RAZDELY.includes(7)) await runZhurnalBanka(mock, errors);
   check(
     errors.length === 0,
     `журнал: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`,

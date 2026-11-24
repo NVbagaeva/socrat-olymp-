@@ -39,6 +39,7 @@ import {
 } from '@/lib/trening/bank';
 import type { VyborBanka } from '@/lib/trening/vybor';
 import { activeBookmarks, bookmarks } from '@/lib/zakladki';
+import { VDomashkuTrenazher } from '@/components/dz2/knopki';
 import { EkranBanka } from './EkranBanka';
 import type { RazdelBanka, ZadachaBanka } from './types';
 import { readUiBanka, type UiBanka } from './ui';
@@ -445,6 +446,8 @@ function Konfigurator<Z extends ZadachaBanka, S>({
     const istochnik = razdel.bezIstochnika === true ? 'vse' : vybor.istochnik;
     const est = skolkoZadach(katalog, tipy, istochnik, stil);
     const stili = T.vybor.stili;
+    /* «В домашку» (этап 4б): выбранные типы, которые есть у адаптера ДЗ. */
+    const tipyDz = tipy.filter((t) => razdel.vDomashku?.(t) ?? true);
     return (
       <div className="trn">
         <VyborTem
@@ -461,6 +464,15 @@ function Konfigurator<Z extends ZadachaBanka, S>({
           bezPodskazok={vybor.bezPodskazok}
           onBezPodskazok={(bezPodskazok) => zapomnit({ ...vybor, bezPodskazok })}
           onBack={() => setEkran('rezhimy')}
+          ryadomSoStartom={
+            /^[0-9]{1,2}$/.test(razdel.razdel) ? (
+              <VDomashkuTrenazher
+                taskNo={Number(razdel.razdel)}
+                tipy={tipyDz}
+                vse={tipyDz.length === tipyVse.filter((t) => razdel.vDomashku?.(t) ?? true).length}
+              />
+            ) : undefined
+          }
           onStart={() =>
             start(
               buildByTipy(

@@ -159,6 +159,55 @@ for (const n of [8, 5]) {
     `№${n}: тот же seed — тот же набор`);
 }
 
+/* Этап 4б: тренажёр по банку — «В домашку» у №1, 2, 7, 9, 10, 11, 12, 13, 21.
+   Типы тренажёра (id из выбора тем) должны совпадать с прототипами адаптера
+   «Собрать вариант», из которого собирается запас ДЗ: каждый тип, который
+   раздел пускает в ДЗ (RazdelBanka.vDomashku), даёт задачу с числовым
+   ответом; каждый не пущенный — правда без задач у адаптера. */
+{
+  const TIPY = {
+    1: () => {
+      const { klyuchProto } = requireSrc('lib/planimetriya/trenazher/sessiya.ts');
+      return requireSrc('lib/planimetriya/stseny/index.ts').PROTOTIPY.map((p) => klyuchProto(p.id));
+    },
+    2: () => requireSrc('lib/vektory/prototypes/index.ts').PROTOTYPES.map((p) => p.id),
+    7: () => requireSrc('lib/zadanie7/prototypes/index.ts').PROTOTYPES.map((p) => p.id),
+    9: () => requireSrc('lib/proizvodnaya/prototypes/index.ts').PROTOTYPES.map((p) => p.id),
+    10: () => requireSrc('lib/zadanie10/prototypes/index.ts').PROTOTYPES.map((p) => p.id),
+    11: () => requireSrc('lib/zadanie11/prototypes/index.ts').SUBTYPES.map((p) => p.id),
+    12: () => Object.keys(requireSrc('lib/ves12/trening/katalog.ts').katalog12()),
+    13: () => requireSrc('lib/zadanie13/trening/katalog.ts').PROTOTIPY_TRENAZHERA_13.map((p) => p.id),
+    21: () => requireSrc('lib/zadanie21/prototypes.ts').PROTOTYPES.map((p) => p.id),
+  };
+  const FILTR = {
+    11: requireSrc('components/tasks/zadanie11/razdel11.tsx').razdel11({}, {}).vDomashku,
+    12: requireSrc('components/tasks/zadanie12/razdel12.tsx').RAZDEL12.vDomashku,
+  };
+  for (const [nStr, tipyOf] of Object.entries(TIPY)) {
+    const n = Number(nStr);
+    const a = adapter(n);
+    const vzyat = (tip, seed) =>
+      a.getRandomTask({ subtypes: null, source: 'mix', stars: null, prototype: tip, exclude: new Set() }, rngOf(seed));
+    const tipy = tipyOf();
+    const filtr = FILTR[n] ?? (() => true);
+    const vDz = tipy.filter(filtr);
+    const net = vDz.filter((t) => vzyat(t, `proba|${t}`) === null);
+    check(net.length === 0, `№${n}: типы ДЗ без задач у адаптера: ${net.slice(0, 6).join(', ')}`);
+    const lishnie = tipy.filter((t) => !filtr(t) && vzyat(t, `proba|${t}`) !== null);
+    check(lishnie.length === 0, `№${n}: тип не пущен в ДЗ, а у адаптера задачи есть: ${lishnie.slice(0, 6).join(', ')}`);
+    const zapas = Z.zapasTrenazhera(
+      vDz.slice(0, 3),
+      9,
+      (prototype, uzhe, shag) =>
+        a.getRandomTask({ subtypes: null, source: 'mix', stars: null, prototype, exclude: uzhe },
+          rngOf(`dz-4b|${prototype}|${shag}`)),
+      () => 1,
+    );
+    check(zapas.length > 0 && zapas.every((t) => NORM.test(t.answer) && vDz.slice(0, 3).includes(t.kind)),
+      `№${n}: запас ДЗ из трёх типов с ответами (${zapas.length})`);
+  }
+}
+
 /* Опорные №8: весь блок, ответ генератора, разбор открыт отпечатком. */
 {
   const { prepPool } = requireSrc('lib/vychisleniya/prep/pool.ts');
