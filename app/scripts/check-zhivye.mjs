@@ -28,6 +28,8 @@ const P18 = requireSrc('lib/zhivye/parametr18.ts');
 const Z19 = requireSrc('lib/zadanie19/zhivye.ts');
 const T18 = requireSrc('content/zhivye18.ts');
 const T11 = requireSrc('content/zhivye11.ts');
+const Z15 = requireSrc('lib/zhivye/znaki15.ts');
+const T15 = requireSrc('content/zhivye15.ts');
 
 const failures = [];
 let checks = 0;
@@ -280,9 +282,49 @@ check(
   }
 }
 
+/* ── №15: знаки произведения ── */
+{
+  const ozhid = {
+    tri: '(-2;\\,1)\\cup(4;\\,+\\infty)',
+    kvadrat: '(1;\\,3)\\cup(3;\\,+\\infty)',
+    nestrogoe: '\\{-1\\}\\cup[2;\\,4]',
+  };
+  for (const p of T15.PRIMERY_15) {
+    check(
+      Z15.otvetTex(Z15.otvet(p)) === ozhid[p.id],
+      `№15 ${p.id}: ответ ${Z15.otvetTex(Z15.otvet(p))}`,
+    );
+    const { xMin, xMax } = Z15.granicy(p);
+    for (let x = xMin; x <= xMax; x += 0.013) {
+      const f = Z15.znachenie(p, x);
+      const z = Z15.znakProizvedeniya(p, x);
+      if (Math.abs(f) > 1e-9) check(Math.sign(f) === z, `№15 ${p.id}: знак в x=${x.toFixed(3)}`);
+      const m = p.mnozhiteli;
+      check(
+        m.reduce((s, q) => s * Z15.znakMnozhitelya(q, x), 1) === z,
+        `№15 ${p.id}: знак = произведение знаков`,
+      );
+      const v = Z15.vysotaKrivoy(p, x, Z15.masshtabKrivoy(p));
+      check(
+        Math.abs(v) < 1 && (Math.abs(f) < 1e-9 || Math.sign(v) === Math.sign(f)),
+        `№15 ${p.id}: кривая в рамке и того же знака`,
+      );
+    }
+    const o = Z15.hodZnakov(p);
+    check(
+      JSON.stringify(o.ostanovki) === JSON.stringify(Z15.nuli(p).map((z) => z.a - xMin)),
+      `№15 ${p.id}: остановки — на нулях`,
+    );
+    check(
+      o.ostanovki.every((s) => s > 0 && s < o.tMax),
+      `№15 ${p.id}: остановки внутри шкалы`,
+    );
+  }
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6, T13, T18, T11], (k, val) =>
+  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15], (k, val) =>
     typeof val === 'function' ? String(val) : val,
   );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');

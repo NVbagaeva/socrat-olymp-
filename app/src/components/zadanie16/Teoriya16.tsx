@@ -18,6 +18,7 @@ import {
 import { katex } from '@/lib/graph/katex';
 import { typeset } from '@/lib/tex';
 import { YAKOR_16 } from '@/lib/zadanie16/teoriya-yakorya';
+import { ZhivyeZnaki15 } from '@/components/zhivye/znaki15/Znaki15';
 import { Chertezh16 } from './Chertezh16';
 import { Rabota16 } from './Rabota16';
 import { VkladkiGlavy16 } from './VkladkiGlavy16';
@@ -226,6 +227,8 @@ function Telo({ g, nomer }: { g: Glava16; nomer: number }) {
                 ))}
               </div>
             )}
+            {/* Живая сцена «Как меняется знак» — после алгоритма и кратности. */}
+            {t.id === 'intervaly-algoritm' ? <ZhivyeZnaki15 /> : null}
           </div>
         );
       })}

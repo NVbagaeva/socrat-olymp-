@@ -1,0 +1,128 @@
+/* Живая сцена «Как меняется знак» (№15). Общее — ../zhivye.css.
+   Плюс — синий, минус — тёплый. */
+.zv15-vybor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.zv15-vybor-zag {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.zv15-vybor .zv-seg {
+  flex-wrap: wrap;
+  border-radius: 18px;
+}
+.zv15-krivaya-ten {
+  fill: none;
+  stroke: rgba(31, 95, 208, 0.2);
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+}
+.zv15-krivaya {
+  fill: none;
+  stroke: var(--zv-sin);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(31, 95, 208, 0.35));
+}
+.zv15-nul line {
+  stroke: rgba(18, 48, 110, 0.18);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+}
+.zv15-nul circle {
+  fill: #fff;
+  stroke: #12306e;
+  stroke-width: 2;
+}
+.zv15-nul.is-proyden circle {
+  stroke: var(--zv-zhar);
+}
+.zv15-nul circle.is-vkl {
+  fill: var(--zv-zhar);
+  stroke: #fff;
+}
+.zv15-nul text {
+  font-size: 14px;
+  font-weight: 700;
+  fill: #12306e;
+}
+.zv15-znak-os {
+  font-size: 18px;
+  font-weight: 800;
+}
+.zv15-znak-os.is-plus {
+  fill: var(--zv-sin-text);
+}
+.zv15-znak-os.is-minus {
+  fill: var(--zv-zhar-text);
+}
+.zv15-metka {
+  font-size: 14px;
+  font-weight: 600;
+  fill: #12306e;
+}
+.zv15-metka.is-glavnaya {
+  font-weight: 800;
+}
+.zv15-dorozhka {
+  fill: rgba(18, 48, 110, 0.06);
+  stroke: rgba(18, 48, 110, 0.12);
+}
+.zv15-kusok.is-plus {
+  fill: rgba(31, 95, 208, 0.22);
+}
+.zv15-kusok.is-minus {
+  fill: rgba(240, 138, 36, 0.3);
+}
+.zv15-znak {
+  font-size: 16px;
+  font-weight: 800;
+  fill: #12306e;
+}
+.zv15-proba line {
+  stroke: rgba(18, 48, 110, 0.45);
+  stroke-width: 1.4;
+}
+.zv15-proba-graf {
+  fill: var(--zv-sin);
+  stroke: #fff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px rgba(31, 95, 208, 0.6));
+}
+.zv15-fishka circle {
+  stroke: #fff;
+  stroke-width: 2;
+}
+.zv15-fishka.is-plus circle {
+  fill: var(--zv-sin);
+}
+.zv15-fishka.is-minus circle {
+  fill: var(--zv-zhar);
+}
+.zv15-fishka.is-nul circle {
+  fill: #12306e;
+}
+.zv15-fishka text {
+  font-size: 15px;
+  font-weight: 800;
+  fill: #fff;
+}
+.zv15-otvet {
+  fill: rgba(240, 138, 36, 0.55);
+}
+.is-full .zv15-otvet {
+  animation: zv15-otvet 0.6s ease-out;
+}
+@keyframes zv15-otvet {
+  from {
+    opacity: 0;
+  }
+}
