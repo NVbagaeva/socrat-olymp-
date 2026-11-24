@@ -150,7 +150,7 @@
   background: var(--color-border-strong);
 }
 .tour-card__dot.is-current {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 
 /* Финал: галочка в стиле сайта вместо хлопушки. */
@@ -207,7 +207,7 @@
   height: 20px;
   margin-top: 1px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .tour-card__foot--final {
@@ -302,7 +302,7 @@
   font-weight: 600;
 }
 .tour-panel__item.is-current .tour-panel__no {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   border-color: var(--color-primary);
   color: var(--color-text-inverse);
 }
@@ -371,7 +371,7 @@
   border-radius: 50%;
 }
 .help-fab__button[aria-expanded='true'] {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .help-fab__button svg {

@@ -26,7 +26,7 @@
   margin-bottom: var(--okno-klava, 0px);
   padding-bottom: env(safe-area-inset-bottom);
   border-radius: 24px 24px 0 0;
-  background: rgb(250 252 255 / 0.94);
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
   -webkit-backdrop-filter: blur(24px) saturate(150%);
   backdrop-filter: blur(24px) saturate(150%);
   border: 1px solid var(--glass-edge);
@@ -197,7 +197,7 @@
 }
 @media (prefers-reduced-transparency: reduce) {
   .okno__panel {
-    background: var(--white);
+    background: var(--color-surface);
   }
   .okno__fon {
     -webkit-backdrop-filter: none;

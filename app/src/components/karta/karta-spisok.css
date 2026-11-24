@@ -66,20 +66,20 @@
   left: calc(var(--ps-pole) + var(--ps-metka) / 2 - 1px);
   top: 28px;
   bottom: 28px;
-  border-left: 2px dashed var(--blue-300);
+  border-left: 2px dashed var(--color-accent-soft);
   pointer-events: none;
 }
 .karta-ps__uzel {
   position: relative;
   border-radius: 16px;
   background: rgb(255 255 255 / 0.86);
-  border: 1px solid var(--blue-100);
+  border: 1px solid var(--color-surface-soft);
 }
 .karta-ps__uzel.is-sleduyushchaya {
   border-color: var(--karta-teplo);
 }
 .karta-ps__uzel.is-otkryt {
-  border-color: var(--blue-300);
+  border-color: var(--color-accent-soft);
   background: #fff;
 }
 .karta-ps__knopka {
@@ -100,7 +100,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .karta-ps__knopka:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 .karta-ps__metka {
@@ -120,7 +120,7 @@
   stroke-linejoin: round;
 }
 .karta-ps__krug {
-  stroke: var(--blue-200);
+  stroke: var(--color-border-info);
   stroke-width: 2;
   fill: #fff;
 }
@@ -139,7 +139,7 @@
   stroke: #fff;
 }
 .karta-ps__uzel--v-processe .karta-ps__krug {
-  stroke: var(--blue-300);
+  stroke: var(--color-accent-soft);
 }
 .karta-ps__uzel--skoro .karta-ps__krug,
 .karta-ps__uzel--pozzhe .karta-ps__krug {
@@ -172,11 +172,11 @@
   color: var(--color-text-secondary);
 }
 .karta-ps__uzel--osvoeno .karta-ps__status {
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
   font-weight: 600;
 }
 .karta-ps__uzel--v-processe .karta-ps__status {
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-weight: 600;
 }
 .karta-ps__povtorit {
@@ -187,8 +187,8 @@
   margin-top: 2px;
   padding: 1px 10px;
   border-radius: var(--radius-pill);
-  background: var(--terracotta-50);
-  color: var(--terracotta-700);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -196,7 +196,7 @@
   width: 20px;
   height: 20px;
   fill: none;
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -254,7 +254,7 @@
 @keyframes karta-ps-vernulis {
   0%,
   30% {
-    background: var(--blue-100);
+    background: var(--color-surface-soft);
     border-color: var(--blue-400);
   }
   100% {
@@ -268,7 +268,7 @@
   }
   .karta-ps__uzel.is-vernulis {
     animation: none;
-    background: var(--blue-100);
+    background: var(--color-surface-soft);
     border-color: var(--blue-400);
   }
 }

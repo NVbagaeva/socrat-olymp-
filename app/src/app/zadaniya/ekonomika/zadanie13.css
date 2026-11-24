@@ -395,7 +395,7 @@
   border-radius: 3px;
 }
 .z13-ris-metka--dolg {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .z13-ris-metka--pereplata {
   background: var(--color-accent);
@@ -1077,7 +1077,7 @@
   width: 2rem;
   height: 2rem;
   border-radius: var(--radius-md);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-weight: 700;
 }
@@ -1244,7 +1244,7 @@
 }
 .z13-zap__uroven.is-active {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .z13-zap__uroven.is-active b {
@@ -1333,7 +1333,7 @@
   cursor: pointer;
 }
 .z13-zap__q.is-open {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .z13-zap__hint {
@@ -1688,7 +1688,7 @@
 .z13-kl__k--gotovo {
   grid-column: span 2;
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-weight: 600;
 }

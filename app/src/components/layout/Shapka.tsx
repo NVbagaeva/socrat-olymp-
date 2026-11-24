@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { AuthWidget } from '@/components/auth/AuthWidget';
 import { LevelSwitch } from '@/components/level/LevelSwitch';
+import { TemaSwitch } from '@/components/tema/TemaSwitch';
 import { site } from '@/content/site';
 import type { Level } from '@/lib/level';
 import { SiteMenu } from './SiteMenu';
@@ -65,6 +66,8 @@ export function Shapka({
           {/* «Войти» или кружок аккаунта и «Начать бесплатно» (её на
             телефоне нет). Вход выключен — остаётся одна «Начать
             бесплатно». */}
+          {/* Переключатель темы — в обеих шапках на одном месте. */}
+          <TemaSwitch />
           <AuthWidget variant="site" />
           {bell}
           <SiteMenu />

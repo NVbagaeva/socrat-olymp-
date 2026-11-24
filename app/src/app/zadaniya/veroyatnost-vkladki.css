@@ -130,7 +130,7 @@
 }
 .vop__shag--tekushchiy .vop__nomer {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .vop__shag--vperedi .vop__nomer {
@@ -155,7 +155,7 @@
   height: 12px;
   margin-top: 4px;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .vop__shag--vperedi .vop__tochka {
   background: var(--color-border-strong);
@@ -213,7 +213,7 @@
   right: var(--space-5);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-size: var(--fs-label);
   line-height: var(--lh-label);
@@ -477,7 +477,7 @@
   width: 24px;
   height: 24px;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .vtr-karta__check svg {
@@ -603,7 +603,7 @@
   width: 20px;
   height: 20px;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .vtr-rezhim__check svg {
@@ -811,7 +811,7 @@
   transition: transform var(--dur-switch) var(--ease);
 }
 .vtr-toggle input:checked + .vtr-toggle__track {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .vtr-toggle input:checked + .vtr-toggle__track::after {
   transform: translateX(20px);
@@ -898,7 +898,7 @@
     color var(--dur-switch) var(--ease);
 }
 .vtr-switch__btn.is-active {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .vtr-switch__btn:focus-visible {

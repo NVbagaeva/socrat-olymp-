@@ -1143,7 +1143,7 @@
   --z11-c-soft: var(--color-surface-soft);
 }
 .z11-filtr__btn.is-active .z11-filtr__vse {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 
@@ -1440,7 +1440,7 @@
   background: var(--color-surface-info);
 }
 .z11-istochnik__btn.is-active {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-weight: 600;
 }
@@ -2242,7 +2242,7 @@
   background: var(--color-z11-pg);
 }
 .z11-urok__polosa .is-b {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .z11-urok__polosa .is-n {
   background: var(--color-success);

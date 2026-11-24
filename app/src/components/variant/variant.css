@@ -128,7 +128,7 @@
   cursor: pointer;
 }
 .var-seg__btn.is-active {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .var-stars {
@@ -200,7 +200,7 @@
   transition: transform var(--dur-hover) var(--ease);
 }
 .var-switch input:checked + .var-switch__track {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .var-switch input:checked + .var-switch__track::after {
   transform: translateX(18px);
@@ -281,7 +281,7 @@
 }
 .var-tabs__btn.is-active {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .var-preview__empty {

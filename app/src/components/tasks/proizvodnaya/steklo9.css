@@ -62,7 +62,7 @@
   gap: var(--space-1);
   padding: var(--space-2);
   border-radius: 16px;
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: var(--glass-ring), var(--glass-shadow);
 }
 .z9-primer__panel {
@@ -85,19 +85,19 @@
   padding: 0 var(--space-3);
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--blue-50);
-  color: var(--blue-700);
+  background: var(--color-surface-info);
+  color: var(--color-primary-text);
   font: inherit;
   font-size: var(--fs-label);
   font-weight: 600;
   cursor: pointer;
 }
 .z9-vid.is-on {
-  background: var(--blue-600);
-  color: var(--white);
+  background: var(--color-primary-fill);
+  color: var(--color-text-inverse);
 }
 .z9-vid:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 .z9-primer__svernut {
@@ -160,7 +160,7 @@
   width: 100%;
   padding: var(--space-2);
   border-radius: 16px;
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: var(--glass-ring);
 }
 
@@ -174,7 +174,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-weight: 600;
   text-decoration: none;
 }
@@ -191,7 +191,7 @@
   margin-inline: auto;
   padding: var(--space-2);
   border-radius: 14px;
-  background: var(--white);
+  background: var(--color-surface);
 }
 .z9-opornye .op-zad__ris {
   max-width: 520px;
@@ -224,11 +224,11 @@
   border-radius: 14px;
   background: var(--glass-bg-strong);
   box-shadow: var(--glass-ring), var(--glass-hi);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   text-decoration: none;
 }
 .z9-gde__chip:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -238,12 +238,12 @@
   .teor-steklo .rich-example,
   .teor-steklo .nofn-note,
   .teor-steklo .z9-tabl {
-    --ton: var(--blue-600);
-    --ton-soft: var(--blue-50);
-    --ton-border: var(--blue-200);
+    --ton: var(--color-primary);
+    --ton-soft: var(--color-surface-info);
+    --ton-border: var(--color-border-info);
     border: 0;
     border-radius: var(--teor-r, 18px);
-    background: linear-gradient(160deg, var(--white), var(--ton-soft));
+    background: linear-gradient(160deg, var(--color-surface), var(--ton-soft));
     box-shadow:
       inset 0 0 0 1px var(--ton-border),
       inset 4px 0 0 var(--ton),
@@ -251,17 +251,17 @@
       0 8px 24px rgb(31 95 208 / 0.06);
   }
   .teor-steklo .rich-main__frame {
-    --ton: var(--navy-700);
-    --ton-border: var(--blue-300);
+    --ton: var(--color-text-brand);
+    --ton-border: var(--color-accent-soft);
   }
   .teor-steklo .rich-example {
-    --ton: var(--amber-600);
-    --ton-soft: var(--amber-50);
-    --ton-border: var(--cream-200);
+    --ton: var(--color-warning);
+    --ton-soft: var(--color-warning-soft);
+    --ton-border: var(--color-border-warm);
   }
   .teor-steklo .nofn-note--warm {
-    --ton: var(--terracotta);
-    --ton-soft: var(--terracotta-50);
-    --ton-border: var(--terracotta-200);
+    --ton: var(--color-accent);
+    --ton-soft: var(--color-accent-soft-surface);
+    --ton-border: var(--color-border-accent);
   }
 }

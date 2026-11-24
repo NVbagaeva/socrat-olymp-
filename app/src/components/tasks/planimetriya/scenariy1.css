@@ -18,7 +18,7 @@
   margin: 0;
 }
 .sc1-da b {
-  color: #06704f;
+  color: var(--color-uspeh-text);
 }
 
 .sc1-formula {
@@ -33,7 +33,7 @@
   gap: var(--space-2);
   padding: var(--space-3);
   border-radius: 12px;
-  background: var(--amber-50, #fff7e6);
+  background: var(--amber-50);
   font-size: 0.9375rem;
   line-height: 1.5;
 }
@@ -41,7 +41,7 @@
   margin: 0;
 }
 .sc1-utochnenie > p > b {
-  color: var(--amber-700);
+  color: var(--color-status-progress-text);
 }
 .sc1-podvoprosy {
   display: grid;
@@ -53,7 +53,7 @@
   font-weight: 600;
 }
 .sc1-utochnenie__mini {
-  color: var(--terracotta-700);
+  color: var(--color-accent-text);
 }
 
 .sc1-vybor {
@@ -66,13 +66,13 @@
 .sc1-sposob {
   margin: 0;
   font-weight: 600;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .sc1-vyvod {
   margin: 0;
   padding: var(--space-3);
-  border-left: 3px solid var(--blue-600);
-  background: var(--blue-50);
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-surface-info);
   border-radius: 0 12px 12px 0;
   line-height: 1.5;
 }
@@ -87,8 +87,8 @@
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   border-radius: 14px;
-  background: var(--teal-50, #e8f6f3);
-  box-shadow: inset 0 0 0 1px var(--teal-700, #0f766e);
+  background: var(--teal-50);
+  box-shadow: inset 0 0 0 1px var(--teal-700);
 }
 .sc1-priem p {
   margin: 0;
@@ -98,7 +98,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--teal-700, #0f766e);
+  color: var(--teal-700);
 }
 .sc1-priem__nazvanie {
   font-weight: 600;
