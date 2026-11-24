@@ -4813,8 +4813,8 @@
    "k4-01"
   ],
   "size": "1024x1024",
-  "scene": "A large ceramic plate piled high with golden baked pies in a heap, the pies overlap so they cannot be counted; a few pies are slightly broken open showing fillings: meat, cabbage and red jam. Nothing else.",
-  "alt": "Тарелка с горкой пирожков: с мясом, капустой и вареньем"
+  "scene": "A realistic wicker basket of baked pies covered with a linen napkin so that the pies inside cannot be seen or counted; on top of the napkin lie exactly three golden pies broken open, showing three different fillings: minced meat, cabbage and red jam. Nothing else.",
+  "alt": "Корзинка с пирожками под салфеткой, сверху разломленные пирожки с мясом, капустой и вареньем"
  },
  {
   "nomer": 4,
@@ -4823,8 +4823,8 @@
    "k4-04"
   ],
   "size": "1024x1024",
-  "scene": "A long multi-storey apartment building seen at an angle, its row of identical entrance doors continues out of the frame on the right; at the nearest entrance a realistic ginger cat peeks out from behind a door; a faceless glass figurine owner stands nearby looking for it.",
-  "alt": "Кот выглядывает из подъезда длинного дома, хозяин ищет его"
+  "scene": "A close-up of a single apartment entrance porch: one wooden entrance door slightly open with a realistic ginger cat peeking out, a small canopy above, two steps and a lamp; only this one doorway is shown, no other doors or building parts visible. A faceless glass figurine owner stands on the steps looking at the cat.",
+  "alt": "Кот выглядывает из двери подъезда, хозяин нашёл его"
  },
  {
   "nomer": 4,
@@ -4863,8 +4863,8 @@
    "k5-55"
   ],
   "size": "1024x1024",
-  "scene": "Two realistic denim jacket pockets side by side, coins between them: exactly two smaller silver-coloured coins and exactly four larger golden coins, all coin faces completely blank with no digits or letters; a faceless glass hand moving some coins from one pocket to the other.",
-  "alt": "Два кармана и монеты двух видов, рука перекладывает часть монет"
+  "scene": "Two realistic bulging denim jacket pockets side by side; the coins are hidden inside the pockets and are not visible at all; a faceless glass hand is moving between the pockets with its fingers closed, holding something unseen. No coins visible anywhere.",
+  "alt": "Два кармана с монетами, рука перекладывает монеты из одного в другой"
  },
  {
   "nomer": 5,

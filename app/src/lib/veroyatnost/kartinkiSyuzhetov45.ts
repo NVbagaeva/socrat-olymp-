@@ -113,8 +113,11 @@ export const SYUZHET_KARTINKI_45: Readonly<Record<string, string>> = {
   'k5-sl-3': 'basketbolist-do-popadaniya',
   /* Новые картинки вместо прежних «не по условию» (KARTINKA_NE_PO_USLOVIYU):
      предметы на них нельзя пересчитать или их число совпадает с условием. */
+  'k4-01': 'pirozhki-tarelka',
+  'k4-04': 'kot-v-podezde',
   'k4-06': 'sad-foto',
   'k4-11': 'zhrebiy-mars',
   'k5-38': 'pirozhki-paket',
+  'k5-55': 'monety-karmany',
   'k5-60': 'kinder-princessy',
 };
