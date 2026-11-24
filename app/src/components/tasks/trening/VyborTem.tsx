@@ -38,6 +38,8 @@ export interface VyborTemProps {
   onBack?: () => void;
   /** Ещё настройки раздела рядом с числом задач: например, источник задач (№3). */
   dop?: ReactNode;
+  /** Рядом с «Начать»: например, «В домашку» учителя (docs/kabinet-dz2.md). */
+  ryadomSoStartom?: ReactNode;
   labels: VyborTemLabels;
 }
 
@@ -59,6 +61,7 @@ export function VyborTem({
   onBezPodskazok,
   onStart,
   onBack,
+  ryadomSoStartom,
   dop,
   labels,
 }: VyborTemProps) {
@@ -222,6 +225,9 @@ export function VyborTem({
           {labels.nachat}
         </button>
       </div>
+      {chosen === 0 || ryadomSoStartom === undefined ? null : (
+        <div className="trn-vybor__ryadom">{ryadomSoStartom}</div>
+      )}
     </section>
   );
 }

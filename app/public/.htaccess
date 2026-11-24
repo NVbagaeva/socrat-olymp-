@@ -117,6 +117,9 @@ ErrorDocument 404 /ne-naydeno/index.html
   RewriteRule ^zadaniya/7/dlya-repetitorov(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/7/generator/ [R=301,L]
   # Задание №18: «О задании» стало главной страницей раздела.
   RewriteRule ^zadaniya/18/o-zadanii(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/18/ [R=301,L]
+  # Прежний раздел «Задача на оптимизацию» (номер хранения 17): в ЕГЭ-2027
+  # его задачи — вкладка «На оптимизацию» экономической задачи.
+  RewriteRule ^zadaniya/17(/.*)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/13/optimizaciya/ [R=301,L]
   # «Подготовительные задачи» → «Опорные задачи» (content/opornye.ts):
   # …/podgotovka/ и …/podgotovka/{блок}/ у заданий и подтем.
   RewriteRule ^zadaniya/(.+)/podgotovka(/[^/.]+)?(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/$1/opornye-zadachi$2/ [R=301,L]

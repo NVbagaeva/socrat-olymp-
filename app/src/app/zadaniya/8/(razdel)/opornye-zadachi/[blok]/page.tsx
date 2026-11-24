@@ -1,5 +1,6 @@
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Metadata } from 'next';
+import { VDomashkuOpornye8 } from '@/components/dz2/knopki';
 import { notFound } from 'next/navigation';
 import { Podgotovka8Screen } from '@/components/tasks/vychisleniya/Podgotovka8Screen';
 import { IssueHomeworkBlock8 } from '@/components/dz/Razdel8Dz';
@@ -48,6 +49,10 @@ export default async function Podgotovka8BlockPage({ params }: { params: Params 
           listHref={`${base}/${OPORNYE.tail}`}
         />
       </ErrorBoundary>
+      {/* Учителю: блок целиком — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). */}
+      <div className="dz2-ryad">
+        <VDomashkuOpornye8 blockId={block.id} title={block.nazvanie} tasks={block.zadachi} />
+      </div>
       {/* Репетитору со входом: типы этого блока — домашним заданием. */}
       <IssueHomeworkBlock8 group={prepBlockBySlug(block.slug)?.group ?? ''} />
     </Podgotovka8Shell>

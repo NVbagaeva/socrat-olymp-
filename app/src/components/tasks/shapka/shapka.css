@@ -1,0 +1,787 @@
+/* Шапка раздела (SectionHeader), кольцо прогресса (KoltsoProgressa)
+   и оживающая картинка (ZhivayaKartinka). Одна вёрстка на все разделы:
+   высота, отступы и размер картинки одинаковые. Значения — токены
+   сайта (styles/tokens.css), стекло — рецептура steklo.css. */
+
+.shapka-crumbs {
+  margin-bottom: var(--space-4);
+}
+.shapka-pereklyuchatel {
+  display: none;
+}
+
+/* ── Карточка ───────────────────────────────────────────────── */
+
+.shapka {
+  --shapka-media: 268px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--shapka-media);
+  grid-template-rows: auto auto;
+  align-content: center;
+  column-gap: var(--space-6);
+  row-gap: var(--space-3);
+  align-items: start;
+  min-height: 320px;
+  margin: 0 0 var(--space-4);
+  padding: var(--space-5) calc(var(--space-6) + var(--space-1));
+  border: 1px solid var(--glass-edge);
+  border-radius: 28px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow:
+    var(--glass-ring),
+    var(--glass-hi),
+    0 1px 2px rgb(16 40 100 / 0.06),
+    0 24px 48px -20px rgb(31 95 208 / 0.28);
+}
+/* Мягкое голубое свечение за картинкой и тёплое — в углу. */
+.shapka::before,
+.shapka::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.shapka::before {
+  right: 2%;
+  top: 50%;
+  width: 44%;
+  max-width: 420px;
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  background: radial-gradient(closest-side, rgb(61 121 224 / 0.36), rgb(61 121 224 / 0));
+}
+.shapka::after {
+  right: -8%;
+  top: -42%;
+  width: 36%;
+  max-width: 360px;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, rgb(255 176 112 / 0.5), rgb(255 176 112 / 0));
+}
+
+.shapka__title {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  margin: 0;
+  font-size: clamp(28px, 1.6vw + 12px, 38px);
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.shapka__title-korotko {
+  display: none;
+}
+.shapka__text {
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.shapka__lead {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+  /* Описание — не длиннее двух строк. Тексты в content/shapki.ts
+     короче; обрезка — страховка от узкого окна. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.shapka__chipy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.shapka__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, var(--white), var(--blue-50));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
+  color: var(--blue-700);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 19px;
+  white-space: nowrap;
+}
+.shapka__chip--uroven {
+  color: var(--white);
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--blue-500), var(--blue-700));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
+}
+.shapka__chip--warm {
+  color: var(--amber-700);
+  border-color: var(--cream-200, var(--amber-50));
+  background: linear-gradient(180deg, var(--white), var(--amber-50));
+}
+.shapka__chip-ik,
+.shapka__chip-ik svg {
+  display: grid;
+  width: 16px;
+  height: 16px;
+}
+.shapka__chip-ik svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.shapka__chip--warm .shapka__chip-ik svg path {
+  fill: currentColor;
+}
+.shapka .eto-zhe {
+  margin: 0;
+}
+.shapka__actions {
+  margin-top: var(--space-1);
+}
+
+.shapka__media {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  min-width: 0;
+}
+
+/* ── Кольцо прогресса ───────────────────────────────────────── */
+
+.koltso {
+  --koltso-d: var(--shapka-media);
+  --koltso-oranzh: #f5a04a;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.koltso__krug {
+  position: relative;
+  width: var(--koltso-d);
+  height: var(--koltso-d);
+}
+.koltso__media {
+  position: absolute;
+  inset: 3.5%;
+}
+.koltso__svg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  /* Кольцо жесты не ловит: картинку внутри крутят и тянут. */
+  pointer-events: none;
+}
+.koltso__media {
+  z-index: 1;
+}
+.koltso__svg circle {
+  fill: none;
+}
+/* Дорожка — матовое стекло. */
+.koltso__lozhe {
+  stroke: rgb(255 255 255 / 0.7);
+  stroke-width: 7;
+  filter: drop-shadow(0 2px 6px rgb(31 95 208 / 0.18));
+}
+.koltso--gost .koltso__lozhe {
+  stroke: rgb(31 95 208 / 0.28);
+  stroke-width: 3;
+  stroke-dasharray: 2 7;
+  stroke-linecap: round;
+  filter: none;
+}
+/* Дуга прогресса: оранжевый градиент, свечение и точка на конце. */
+.koltso__hod,
+.koltso__svet {
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: calc(var(--koltso-p) * 100) 100;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(-90deg);
+}
+.koltso__svet {
+  stroke: var(--koltso-oranzh);
+  stroke-width: 9;
+  opacity: 0.5;
+  filter: blur(5px);
+}
+.koltso__golova {
+  transform-origin: 100px 100px;
+  transform: rotate(calc(var(--koltso-p) * 360deg));
+}
+.koltso__golova circle {
+  fill: #fff6ea;
+  filter: drop-shadow(0 0 4px rgb(255 190 120 / 0.95));
+}
+.koltso--gotovo {
+  --koltso-oranzh: #f2c14e;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .koltso__hod,
+  .koltso__svet {
+    transition: stroke-dasharray 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .koltso__golova {
+    transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .koltso--vspyshka .koltso__svet {
+    animation: koltso-vspyshka 1400ms ease-out both;
+  }
+}
+@keyframes koltso-vspyshka {
+  0% {
+    opacity: 0.5;
+    stroke-width: 9;
+  }
+  35% {
+    opacity: 1;
+    stroke-width: 22;
+  }
+  100% {
+    opacity: 0.5;
+    stroke-width: 9;
+  }
+}
+
+.koltso__podpis {
+  position: relative;
+  display: grid;
+  justify-items: center;
+}
+.koltso__tekst {
+  padding: 2px 8px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.koltso__tekst:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.koltso__tekst--gost {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blue-700);
+  text-decoration: underline;
+  text-decoration-color: rgb(31 95 208 / 0.35);
+  text-underline-offset: 3px;
+}
+.koltso__galochka {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--amber-700);
+}
+.koltso__galochka svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.koltso__razbivka {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 5;
+  padding: 8px 12px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.koltso__razbivka[hidden] {
+  display: none;
+}
+
+/* ── Оживающая картинка ─────────────────────────────────────── */
+
+.zhk {
+  --naklon-x: 0deg;
+  --naklon-y: 0deg;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 700px;
+}
+.zhk__plitka {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: rotateX(var(--naklon-x)) rotateY(var(--naklon-y));
+  transform-style: preserve-3d;
+}
+.zhk__poster {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* Касание по картинке — оживить; вертикальный жест — прокрутка. */
+  touch-action: pan-y;
+  transition:
+    opacity 250ms ease,
+    transform 250ms ease;
+}
+.zhk__poster:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
+.zhk__poster picture,
+.zhk__poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+.zhk__zhivoy {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+.zhk.is-zhivoy .zhk__zhivoy {
+  opacity: 1;
+}
+.zhk.is-zhivoy .zhk__poster {
+  opacity: 0;
+  transform: scale(0.97);
+  pointer-events: none;
+}
+.zhk__chip {
+  position: absolute;
+  left: 50%;
+  bottom: -2%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  color: var(--blue-700);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+  transition: opacity 250ms ease;
+}
+.zhk__chip svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--blue-600);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.zhk.is-zhivoy .zhk__chip {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .zhk__poster,
+  .zhk__zhivoy,
+  .zhk__chip {
+    transition: none;
+  }
+  .zhk__plitka {
+    transform: none;
+  }
+}
+
+/* ── Живые чертежи: общий вид ───────────────────────────────── */
+
+.zhv {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Пальцем по фигуре — жест чертежа только вбок; вертикаль — странице. */
+  touch-action: pan-y;
+}
+.zhv:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+.zhv svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.zhv text {
+  font-family: var(--font-sans, inherit);
+}
+/* Подписи вершин — синие и жирные, курсивом. */
+.zhv .zhv__v {
+  fill: var(--blue-700);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 15px;
+  paint-order: stroke;
+  stroke: rgb(255 255 255 / 0.85);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.zhv .zhv__t {
+  fill: var(--blue-800, var(--blue-700));
+  font-size: 12px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: rgb(255 255 255 / 0.85);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.zhv .zhv__ln {
+  fill: none;
+  stroke: var(--blue-600);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.zhv .zhv__ln--tonko {
+  stroke-width: 1.4;
+}
+.zhv .zhv__ln--pk {
+  stroke-dasharray: 5 5;
+}
+.zhv .zhv__ln--or {
+  stroke: #f08a2c;
+}
+.zhv .zhv__ln--skryt {
+  stroke-dasharray: 4 5;
+  opacity: 0.55;
+}
+.zhv .zhv__setka {
+  stroke: rgb(31 95 208 / 0.13);
+  stroke-width: 1;
+}
+.zhv .zhv__plita {
+  fill: rgb(255 255 255 / 0.55);
+  stroke: rgb(61 121 224 / 0.55);
+  stroke-width: 1.5;
+}
+.zhv .zhv__grani {
+  fill: rgb(170 200 245 / 0.28);
+  stroke: none;
+}
+/* Ручка: видимая точка и невидимый круг побольше для пальца. */
+.zhv .zhv__ruchka {
+  cursor: grab;
+  touch-action: none;
+}
+.zhv .zhv__ruchka:active {
+  cursor: grabbing;
+}
+/* Ручка в фокусе: без чёрной рамки браузера, точка обводится синим. */
+.zhv .zhv__ruchka:focus {
+  outline: none;
+}
+.zhv .zhv__ruchka:focus-visible .zhv__ruchka-tochka {
+  stroke: var(--color-primary);
+  r: 8;
+}
+.zhv .zhv__ruchka-hit {
+  fill: transparent;
+}
+.zhv .zhv__ruchka-tochka {
+  fill: #fff;
+  stroke: #f08a2c;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px rgb(255 160 80 / 0.7));
+  transition: r 150ms ease;
+}
+.zhv .zhv__ruchka:hover .zhv__ruchka-tochka,
+.zhv .zhv__ruchka.is-aktiv .zhv__ruchka-tochka {
+  r: 8;
+}
+.zhv .zhv__tochka {
+  fill: var(--blue-600);
+}
+.zhv .zhv__tochka--or {
+  fill: #f08a2c;
+}
+/* Плашка с формулой или числом под чертежом. */
+.zhv__plashka {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 96%;
+  padding: 4px 10px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 12px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.zhv__plashka .katex {
+  font-size: 1em;
+}
+.zhv__plashka--verh {
+  top: 2%;
+  bottom: auto;
+}
+/* Бегунки живых чертежей. */
+.zhv__begunki {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 0;
+  z-index: 2;
+  display: grid;
+  gap: 2px;
+  padding: 6px 10px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+}
+.zhv__begunok {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-secondary);
+}
+.zhv__begunok input {
+  width: 100%;
+  margin: 0;
+  accent-color: #f08a2c;
+  /* Ползунок тянут вбок: вертикальный жест — странице. */
+  touch-action: pan-y;
+}
+.zhv__begunok b {
+  min-width: 3.5em;
+  color: var(--blue-700);
+  font-weight: 700;
+  text-align: right;
+}
+.zhv__knopka {
+  justify-self: center;
+  padding: 3px 12px;
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, var(--white), var(--blue-50));
+  color: var(--blue-700);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.zhv__knopka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.zhv--3d {
+  cursor: grab;
+}
+.zhv--3d:active {
+  cursor: grabbing;
+}
+
+/* ── Телефон и планшет ──────────────────────────────────────── */
+
+@media (max-width: 1023.98px) {
+  .shapka-crumbs {
+    display: none;
+  }
+  .shapka-pereklyuchatel {
+    display: block;
+    margin-bottom: var(--space-3);
+  }
+  .shapka-pereklyuchatel .razdely-plashka {
+    margin-bottom: 0;
+    min-height: 48px;
+    background: var(--glass-bg-strong);
+    border-color: var(--glass-edge);
+    box-shadow: var(--glass-ring), var(--glass-hi);
+  }
+  .shapka-pereklyuchatel .razdely-plashka__ico {
+    display: none;
+  }
+  /* Заголовок — во всю ширину, чтобы не ломался на узкой колонке;
+     картинка в кольце — справа от описания и чипов. */
+  .shapka {
+    --shapka-media: 112px;
+    grid-template-columns: minmax(0, 1fr) var(--shapka-media);
+    grid-template-rows: none;
+    grid-template-areas:
+      't t'
+      'c c'
+      'l m'
+      'e e'
+      'a a';
+    align-content: start;
+    column-gap: var(--space-3);
+    row-gap: var(--space-2);
+    min-height: 0;
+    padding: var(--space-4);
+    border-radius: 24px;
+  }
+  .shapka__title--est-korotko .shapka__title-polno {
+    display: none;
+  }
+  .shapka__title--est-korotko .shapka__title-korotko {
+    display: inline;
+  }
+  .shapka__title {
+    grid-area: t;
+    margin: 0 0 var(--space-1);
+    font-size: 24px;
+    line-height: 1.18;
+  }
+  /* Чипы — во всю ширину, описание — слева от кольца, ссылка «Это же
+     в базе» — под ними. */
+  .shapka__text {
+    display: contents;
+  }
+  .shapka__chipy {
+    grid-area: c;
+  }
+  .shapka__lead {
+    grid-area: l;
+    font-size: 14px;
+    line-height: 20px;
+    -webkit-line-clamp: 6;
+    align-self: center;
+  }
+  .shapka .eto-zhe {
+    grid-area: e;
+  }
+  .shapka__actions {
+    grid-area: a;
+  }
+  .shapka__media {
+    grid-area: m;
+    align-self: start;
+  }
+  .koltso__tekst,
+  .koltso__tekst--gost {
+    white-space: normal;
+  }
+  .shapka__chipy {
+    gap: 6px;
+  }
+  .shapka__chip {
+    min-height: 26px;
+    padding: 0 9px;
+    font-size: 12px;
+  }
+  .koltso__tekst {
+    padding: 0;
+    font-size: 11px;
+    line-height: 14px;
+  }
+  .koltso__razbivka {
+    right: 0;
+    white-space: normal;
+    width: 200px;
+  }
+  .koltso__lozhe {
+    stroke-width: 9;
+  }
+  .koltso__hod {
+    stroke-width: 8;
+  }
+  .zhk__chip {
+    bottom: -6%;
+    padding: 2px 7px 2px 5px;
+    font-size: 10px;
+    line-height: 14px;
+  }
+  .zhk__chip svg {
+    width: 11px;
+    height: 11px;
+  }
+  .shapka .eto-zhe {
+    font-size: 13px;
+  }
+  .shapka--zhivaya {
+    --shapka-media: min(288px, calc(100vw - 72px));
+  }
+  .shapka--zhivaya {
+    grid-template-areas:
+      't t'
+      'c c'
+      'l l'
+      'm m'
+      'e e'
+      'a a';
+  }
+  .shapka--zhivaya .shapka__media {
+    justify-self: center;
+    width: var(--shapka-media);
+  }
+  .shapka--zhivaya .koltso__tekst {
+    font-size: 13px;
+    line-height: 18px;
+  }
+}

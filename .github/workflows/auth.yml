@@ -86,6 +86,8 @@ jobs:
           # Экраны прогресса (этап 1б): сценарий runProgress в check-auth.mjs.
           NEXT_PUBLIC_PROGRESS_UCHITEL: '1'
           NEXT_PUBLIC_PROGRESS_UCHENIK: '1'
+          # Новая выдача ДЗ (этап 2): сценарий runDz2 в check-auth.mjs.
+          NEXT_PUBLIC_DZ2: '1'
         run: pnpm build
 
       - name: Поставить Chromium
@@ -100,6 +102,7 @@ jobs:
           NEXT_PUBLIC_ZHURNAL: '1'
           NEXT_PUBLIC_PROGRESS_UCHITEL: '1'
           NEXT_PUBLIC_PROGRESS_UCHENIK: '1'
+          NEXT_PUBLIC_DZ2: '1'
         run: pnpm ${{ matrix.test }} ${{ matrix.shots }}
 
       # «← К карте» в обоих кабинетах (ученик — /kabinet/, учитель —
