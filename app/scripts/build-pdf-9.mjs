@@ -93,7 +93,10 @@ function specOf(blocks, options) {
     S9.printSpec9({
       ...S9.specOfBlocks9(
         blocks,
-        { theme: options.theme, layout: 'single', kind: '', date: '' },
+        /* Сборник — компактный, рисунки обычного размера (sheet.js,
+           figures: 'normal'): с крупным печатным профилем он вырос бы
+           со 144 до 390 страниц; решение владельца — компактно. */
+        { theme: options.theme, layout: 'single', kind: '', date: '', figures: 'normal' },
         options.withAnswers,
       ),
     }),
