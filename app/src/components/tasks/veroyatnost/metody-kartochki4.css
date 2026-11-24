@@ -1,0 +1,90 @@
+/* Карточки ключевых методов задания №4: ссылка на главу теории и
+   стеклянная картинка в правом верхнем углу (96 px, на телефоне 64 px).
+   Номер и заголовок — слева, текст под картинку не заходит. */
+
+.m4k {
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'no title'
+    'sut sut'
+    'chitat chitat';
+  text-decoration: none;
+}
+.m4k.has-kartinka {
+  grid-template-columns: 32px minmax(0, 1fr) 96px;
+  grid-template-areas:
+    'no title kartinka'
+    'sut sut kartinka'
+    'chitat chitat chitat';
+}
+.m4k .m4k__no {
+  grid-area: no;
+}
+.m4k .m4k__title {
+  grid-area: title;
+  /* Длинное слово рядом с картинкой переносится по слогам, а не по букве. */
+  overflow-wrap: normal;
+  hyphens: auto;
+}
+/* Поверх .vmetod__sut (grid-column: 2): описание — во всю ширину
+   под номером и заголовком, слева от картинки. */
+.m4k .m4k__sut {
+  grid-area: sut;
+}
+.m4k .m4k__kartinka {
+  grid-area: kartinka;
+  align-self: start;
+  width: 96px;
+  height: 96px;
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0 0;
+  object-fit: contain;
+  transform-origin: 50% 60%;
+}
+.m4k .m4k__chitat {
+  grid-area: chitat;
+  align-self: end;
+  margin-top: var(--space-2);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.m4k:hover .m4k__chitat {
+  text-decoration: underline;
+}
+
+/* Лёгкое покачивание картинки при наведении: ±4°, 200 мс. */
+@keyframes m4k-kach {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-4deg);
+  }
+  75% {
+    transform: rotate(4deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+.m4k:hover .m4k__kartinka,
+.m4k:focus-visible .m4k__kartinka {
+  animation: m4k-kach 200ms ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .m4k:hover .m4k__kartinka,
+  .m4k:focus-visible .m4k__kartinka {
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .m4k.has-kartinka {
+    grid-template-columns: 32px minmax(0, 1fr) 64px;
+  }
+  .m4k .m4k__kartinka {
+    width: 64px;
+    height: 64px;
+    margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-1)) 0 0;
+  }
+}

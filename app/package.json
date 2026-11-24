@@ -44,6 +44,7 @@
     "build:zadanie-12-teksty": "node scripts/build-zadanie-12-teksty.mjs",
     "test:zadanie-12-teksty": "node scripts/build-zadanie-12-teksty.mjs --check",
     "test:progress-4": "node scripts/check-progress-4.mjs",
+    "test:metody-4": "node scripts/check-metody-4.mjs",
     "test:progress-4-site": "node scripts/check-progress-site.mjs 4",
     "test:progress-5": "node scripts/check-progress-5.mjs",
     "test:progress-5-site": "node scripts/check-progress-site.mjs 5",
