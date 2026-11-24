@@ -340,9 +340,9 @@ const ODOBRENO = {
      ключевым методам: тексты, разобранные задачи, интерактивы. Условия и
      ответы банка не менялись; ответы глав проверяет test:metody-4. */
   'app/src/components/tasks/veroyatnost/teoriya/index.tsx':
-    '8e295f83b17354de08ba7fae8312c9e267cc36ffb049ed1d0a0c56903312f89b',
+    'df109eaf8e55d0e35e0bc1f06fc77bc487bf38f90d0d7bded5a4daa6f5970aa7',
   'app/src/content/veroyatnost-teoriya.ts':
-    'fe0d5a4acdfd33a4843fb7134e8cc098b53f7b66e3bd43028193a80119ecced8',
+    '747a16e4e289942c12b1ee15dfc1750520f36b7949b95b37ce3076e899b53fef',
   'app/src/components/tasks/veroyatnost/teoriya/metody/GlavaMetoda4.tsx':
     'fc143fd21ca00ccd96c21d00787544c9279c77eed1d3d43be7b1eceabb8831d1',
   'app/src/components/tasks/veroyatnost/teoriya/metody/Interaktivy4.tsx':
