@@ -111,7 +111,8 @@
 
 .sm__in {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  /* Текст около 60 %, кристалл около 40 % (сам он не больше 356 × 300). */
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   grid-template-areas:
     'nad kr'
     'lid kr'
@@ -383,7 +384,7 @@
   position: relative;
   container-type: inline-size;
   width: 100%;
-  max-width: 600px;
+  max-width: 356px;
   justify-self: center;
   --kristall-hint: #e9f1ff;
 }
@@ -546,7 +547,6 @@
     padding-inline: var(--space-6);
   }
   .sm-kr {
-    max-width: 440px;
     margin-top: var(--space-6);
   }
 }
@@ -576,7 +576,7 @@
     line-height: 1.06;
   }
   .sm-kr {
-    max-width: 300px;
+    max-width: 220px;
     margin-top: var(--space-10);
   }
   .sm__lid {

@@ -18,7 +18,7 @@ import { Primer1Lazy, Primer1View } from './Primer1';
  * Вкладка «О задании» №1: карта задания по типам («Стеклянная сцена»,
  * общие компоненты components/tasks/karta — как у №8, №3, №7 и №6).
  *
- * Шапка с широкой обложкой раздела (картинка целиком и на телефоне),
+ * Шапка с обложкой раздела (картинка целиком, норма hero),
  * десять групп с прогрессом ученика, 75 типов с разобранным примером —
  * задача открытого банка с чертежом, закреплённым рядом с шагами
  * решения, — и блок «Что нужно знать». Условия, чертежи и решения — из
@@ -44,15 +44,11 @@ export function OZadanii1() {
           ...O_ZADANII_1.oshibki.map((o) => `<b>${o.title}.</b> ${typeset(o.text)}`),
           `<b>${O_ZADANII_1.format.title}.</b> ${typeset(O_ZADANII_1.format.text)}`,
         ]}
-        oblozhkaShirokaya
         oblozhka={
-          /* Шапка раздела — готовая картинка, как есть: целиком, без
-             обрезки и пережатия, прозрачный фон на стекле шапки. */
-          <IllyustratsiyaShapki
-            art={ZADANIE1.art}
-            alt={SHAPKA1.oblozhkaAlt}
-            sizes="(min-width: 1024px) 480px, (min-width: 640px) 600px, 100vw"
-          />
+          /* Обложка раздела — готовая картинка, как есть: целиком, без
+             обрезки и пережатия; размер — норма hero, как у остальных
+             разделов. */
+          <IllyustratsiyaShapki art={ZADANIE1.art} alt={SHAPKA1.oblozhkaAlt} variant="hero" />
         }
       />
 

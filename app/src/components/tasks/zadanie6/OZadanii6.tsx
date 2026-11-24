@@ -1,4 +1,5 @@
 import { FORMULY6, GRUPPY6_VID, SHAPKA6, TIPY6_OPASNO } from '@/content/sluchainye6';
+import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { typeset } from '@/lib/tex';
 import { zadachiPrototipa } from '@/lib/zadanie6/bank/index';
@@ -76,13 +77,14 @@ export function OZadanii6() {
         opasno={SHAPKA6.opasno.map((line) => typeset(line))}
         oblozhka={
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
-             пережатия, прозрачный фон на стекле шапки. */
-          <img
+             пережатия, прозрачный фон на стекле шапки; размер — норма hero. */
+          <Illustration
+            variant="hero"
             src={assetUrl('/images/task-06.svg')}
             alt={SHAPKA6.oblozhkaAlt}
             width={512}
             height={512}
-            decoding="async"
+            priority
           />
         }
       />

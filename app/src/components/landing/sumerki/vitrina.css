@@ -38,7 +38,8 @@
   --svechenie: rgb(31 95 208 / 0.5);
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  /* Текст около 60 %, сцена около 40 % (сама не больше 309 × 300). */
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   grid-template-areas:
     'tekst scena'
     'punkty scena'
@@ -283,7 +284,12 @@
 .vit-scena {
   position: relative;
   display: block;
-  width: 100%;
+  /* Сцена со снимками — вводная иллюстрация части (норма hero
+     Illustration: не шире 360 и не выше 300; телефон — до 220): при
+     пропорциях 1 : 0.97 это 309 × 300. Крупно снимки открываются
+     кнопкой «Рассмотреть». */
+  width: min(100%, 309px);
+  margin-inline: auto;
   aspect-ratio: 1 / 0.97;
   overflow: hidden;
   padding: 0;
@@ -519,13 +525,14 @@
   bottom: 9%;
 }
 
-/* Переключатель «Без клетки / С клеткой» — над сценой. */
+/* Переключатель «Без клетки / С клеткой» — над сценой, отдельной
+   строкой: на сцене нормы hero он закрывал бы снимок. */
 .vit-kletka {
-  position: absolute;
-  top: 16px;
-  left: 50%;
+  position: relative;
   z-index: 5;
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
+  margin: 0 auto var(--space-3);
   padding: 4px;
   border: 1px solid rgb(255 255 255 / 0.9);
   border-radius: 999px;
@@ -533,7 +540,6 @@
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 22px -12px rgb(100 50 16 / 0.45);
-  transform: translateX(-50%);
 }
 .vit-kletka__var {
   min-height: 38px;
@@ -631,6 +637,12 @@
 
 /* ── Телефон ───────────────────────────────────────────────────── */
 
+@media (max-width: 639.98px) {
+  .vit-scena {
+    width: min(100%, 220px);
+  }
+}
+
 @media (max-width: 767.98px) {
   .vit__z {
     margin-bottom: var(--space-6);
@@ -660,9 +672,6 @@
   }
   .vit-punkt {
     max-width: 210px;
-  }
-  .vit-kletka {
-    top: 10px;
   }
   .vit-scena--listy .vit-kadr--0 {
     --y: 19%;

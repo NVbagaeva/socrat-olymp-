@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { FORMULY10, GRUPPY10_VID, SHAPKA10, TIPY10_OPASNO } from '@/content/prikladnye10';
+import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { typeset } from '@/lib/tex';
 import { zadachiPrototipa } from '@/lib/zadanie10/bank/index';
@@ -44,7 +45,7 @@ function zadachaPrimera(id: string) {
 }
 
 /**
- * Картинка сюжета к примеру — крупно, как есть; у моста ещё и чертёж
+ * Картинка сюжета к примеру — как есть, норма task; у моста ещё и чертёж
  * по числам примера (движок lib/zadanie10/chertezh).
  */
 function risunokPrimera(id: string, ill: IllInfo | undefined, params: Params): ReactNode {
@@ -89,12 +90,13 @@ export function OZadanii10() {
           /* Обложка раздела — векторный чертёж (public/images/task-10.svg),
              та же картинка, что на плашке банка; прозрачный фон на стекле
              шапки. */
-          <img
+          <Illustration
+            variant="hero"
             src={assetUrl('/images/task-10.svg')}
             alt={SHAPKA10.oblozhkaAlt}
             width={280}
             height={280}
-            decoding="async"
+            priority
           />
         }
       />
@@ -141,7 +143,7 @@ export function OZadanii10() {
                       lead={typeset(`Найти: ${p.ask}`)}
                       {...(ill === undefined
                         ? {}
-                        : { miniatyura: <Kartinka10 ill={ill} alt="" /> })}
+                        : { miniatyura: <Kartinka10 ill={ill} alt="" variant="inline" /> })}
                       open={false}
                     >
                       {ex !== null ? (
