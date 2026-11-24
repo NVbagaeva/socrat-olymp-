@@ -52,7 +52,7 @@ export function TablicaKorni14() {
             </tr>
             <tr>
               <th scope="row">
-                <Tex text="$\\sin x$" />
+                <Tex text="$\sin x$" />
               </th>
               {sin.map((t, i) => (
                 <td key={i}>{shag >= 1 ? <Tex text={`$${t}$`} /> : null}</td>
@@ -60,7 +60,7 @@ export function TablicaKorni14() {
             </tr>
             <tr>
               <th scope="row">
-                <Tex text="$\\cos x$" />
+                <Tex text="$\cos x$" />
               </th>
               {[...ZNACH].reverse().map((t, i) => (
                 <td key={i}>{shag >= 3 ? <Tex text={`$${t}$`} /> : null}</td>

@@ -16,8 +16,11 @@ import {
   num,
   slovo,
   str,
+  summaEdinichnyh,
   vopros,
   type DrobnoeEtapy,
+  principRaznicy,
+  sRaznicey,
 } from '../kit';
 import { d, div, fq, mul, q, sub, txt, val, type Q } from '../num';
 import { chasy, sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
@@ -65,8 +68,9 @@ function sobstvennaya(S: number, c: number, T: Q): { t: DrobnoeEtapy; x: number 
     pochemu: `против течения скорость $x-${d(c)}$ положительна`,
     znamenatel: `(x+${d(c)})(x-${d(c)})`,
     posle: [
-      `$${d(S)}(x-${d(c)})+${d(S)}(x+${d(c)})=${fq(T)}(x^2-${d(c * c)})$, то есть $${d(2 * S)}x=${fq(T)}(x^2-${d(c * c)})$.`,
-      `$${sol.ishodnoe}$.`,
+      `$${d(S)}(x-${d(c)})+${d(S)}(x+${d(c)})=${fq(T)}(x^2-${d(c * c)})$`,
+      `Раскрываем скобки и приводим подобные: $${d(2 * S)}x=${fq(T)}(x^2-${d(c * c)})$.`,
+      `Переносим всё в одну сторону: $${sol.ishodnoe}$.`,
       ...sol.lines,
     ],
     roots: sol.roots.map(val),
@@ -85,12 +89,31 @@ function techenie(S: number, v: number, T: Q): { t: DrobnoeEtapy; c: number } {
     pochemu: 'скорость течения положительна и меньше собственной скорости',
     znamenatel: `(${d(v)}+x)(${d(v)}-x)`,
     posle: [
-      `$${d(S)}(${d(v)}-x)+${d(S)}(${d(v)}+x)=${fq(T)}(${d(v * v)}-x^2)$, то есть $${d(2 * S)}\\cdot${d(v)}=${fq(T)}(${d(v * v)}-x^2)$.`,
-      `$${d(v * v)}-x^2=${fq(div(q(2 * S * v), T))}$, $x^2=${fq(c2)}$, $x=\\pm${d(c)}$.`,
+      `$${d(S)}(${d(v)}-x)+${d(S)}(${d(v)}+x)=${fq(T)}(${d(v * v)}-x^2)$`,
+      `Раскрываем скобки и приводим подобные: $${d(2 * S)}\\cdot${d(v)}=${fq(T)}(${d(v * v)}-x^2)$.`,
+      `Делим обе части на $${fq(T)}$: $${d(v * v)}-x^2=${fq(div(q(2 * S * v), T))}$.`,
+      `Переносим: $x^2=${d(v * v)}-${fq(div(q(2 * S * v), T))}=${fq(c2)}$,`,
+      `$x=\\pm\\sqrt{${fq(c2)}}=\\pm${d(c)}$.`,
     ],
     roots: [-c, c],
   });
   return { t, c: t.root };
+}
+
+/**
+ * x/a + x/b = T по строчкам: выносим x за скобку, складываем дроби
+ * через НОК, делим обе части на коэффициент (черта справа).
+ */
+function reshenieSummy(a: number, b: number, T: number, x: number): string[] {
+  const s = summaEdinichnyh([a, b]);
+  const k = s.itog;
+  const lines = [
+    `Выносим $x$ за скобку: $x\\cdot\\left(\\dfrac{1}{${d(a)}}+\\dfrac{1}{${d(b)}}\\right)=${d(T)}$.`,
+    ...s.lines,
+    `$x\\cdot${fq(k)}=${d(T)}\\qquad\\Big|\\,:${fq(k)}$`,
+  ];
+  lines.push(`$x=${d(T)}:${fq(k)}=${d(T)}\\cdot\\dfrac{${d(k.m)}}{${d(k.n)}}=${d(x)}$.`);
+  return lines;
 }
 
 /* ── ВД-01 Найти весь путь ───────────────────────────────────── */
@@ -118,17 +141,22 @@ const VD01: Subtype = {
         [
           'Обозначаем',
           [
-            `Расстояние в одну сторону — $x$ км. Скорость по течению $${d(v + c)}$, против — $${d(v - c)}$ км/ч.`,
+            `Расстояние в одну сторону — $x$ км.`,
+            `Скорость по течению $${d(v)}+${d(c)}=${d(v + c)}$ км/ч, против течения — $${d(v)}-${d(c)}=${d(v - c)}$ км/ч.`,
           ],
         ],
-        ['Время в движении', [`$${d(T)}-${d(st)}=${d(move)}$ ч.`]],
-        ['Уравнение', [`$\\dfrac{x}{${d(v + c)}}+\\dfrac{x}{${d(v - c)}}=${d(move)}$.`]],
         [
-          'Решение',
+          'Время в движении',
+          [`Из всего времени вычитаем стоянку: $${d(T)}-${d(st)}=${d(move)}$ ч.`],
+        ],
+        [
+          'Уравнение',
           [
-            `$x\\cdot\\dfrac{${d(v - c)}+${d(v + c)}}{${d(v + c)}\\cdot${d(v - c)}}=${d(move)}$, $x\\cdot\\dfrac{${d(2 * v)}}{${d(v * v - c * c)}}=${d(move)}$, $x=${d(S)}$.`,
+            'Время по течению $+$ время против течения $=$ время в движении:',
+            `$\\dfrac{x}{${d(v + c)}}+\\dfrac{x}{${d(v - c)}}=${d(move)}$.`,
           ],
         ],
+        ['Решение', reshenieSummy(v + c, v - c, move, S)],
         [
           'Ответ на вопрос задачи',
           [`Спрашивают весь рейс — туда и обратно: $2\\cdot${d(S)}=${d(ans)}$ км.`, otvet(ans)],
@@ -296,8 +324,9 @@ const VD04: Subtype = {
         pochemu: `скорость течения положительна и меньше скорости ${ktoRod}`,
         znamenatel: `(${d(v)}-x)(${d(v)}+x)`,
         posle: [
-          `$${d(S)}(${d(v)}+x)-${d(S)}(${d(v)}-x)=${d(Dl)}(${d(v * v)}-x^2)$, $${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`,
-          `$${sol.ishodnoe}$.`,
+          `$${d(S)}(${d(v)}+x)-${d(S)}(${d(v)}-x)=${d(Dl)}(${d(v * v)}-x^2)$`,
+          `Раскрываем скобки и приводим подобные: $${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`,
+          `Переносим всё в одну сторону: $${sol.ishodnoe}$.`,
           ...sol.lines,
         ],
         roots: sol.roots.map(val),
@@ -311,12 +340,25 @@ const VD04: Subtype = {
             [`Скорость течения — $x$ км/ч. Против течения $${d(v)}-x$, по течению $${d(v)}+x$.`],
           ],
           ['Таблица', [`Против течения ${shla} дольше.`]],
-          ['Уравнение', [`$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$.`]],
+          [
+            'Уравнение',
+            [
+              principRaznicy('время против течения', 'время по течению', `$${d(Dl)}$ ч`),
+              `$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$.`,
+            ],
+          ],
           dr.odz,
           dr.reshenie,
           ['Отбор корней и ответ', [...dr.otbor, otvet(c)]],
         ),
-        tables: [tablitsaReki(d(S), d(v), 'x', ['Обратно (по течению)', 'Туда (против течения)'])],
+        tables: [
+          sRaznicey(
+            tablitsaReki(d(S), d(v), 'x', ['Обратно (по течению)', 'Туда (против течения)']),
+            1,
+            0,
+            `на $${d(Dl)}$ ч больше`,
+          ),
+        ],
         hints: [
           vopros('Какой путь занял больше времени?', 'против течения', ['по течению', 'одинаково']),
           vopros(
@@ -343,8 +385,9 @@ const VD04: Subtype = {
       pochemu: `против течения скорость $x-${d(c)}$ положительна`,
       znamenatel: `(x-${d(c)})(x+${d(c)})`,
       posle: [
-        `$${d(S)}(x+${d(c)})-${d(S)}(x-${d(c)})=${d(Dl)}(x^2-${d(c * c)})$, $${d(2 * S * c)}=${d(Dl)}x^2-${d(Dl * c * c)}$.`,
-        `$${sol.ishodnoe}$.`,
+        `$${d(S)}(x+${d(c)})-${d(S)}(x-${d(c)})=${d(Dl)}(x^2-${d(c * c)})$`,
+        `Раскрываем скобки и приводим подобные: $${d(2 * S * c)}=${d(Dl)}x^2-${d(Dl * c * c)}$.`,
+        `Переносим всё в одну сторону: $${sol.ishodnoe}$.`,
         ...sol.lines,
       ],
       roots: sol.roots.map(val),
@@ -360,12 +403,25 @@ const VD04: Subtype = {
           ],
         ],
         ['Таблица', [`Против течения ${shla} дольше.`]],
-        ['Уравнение', [`$\\dfrac{${d(S)}}{x-${d(c)}}-\\dfrac{${d(S)}}{x+${d(c)}}=${d(Dl)}$.`]],
+        [
+          'Уравнение',
+          [
+            principRaznicy('время против течения', 'время по течению', `$${d(Dl)}$ ч`),
+            `$\\dfrac{${d(S)}}{x-${d(c)}}-\\dfrac{${d(S)}}{x+${d(c)}}=${d(Dl)}$.`,
+          ],
+        ],
         dr.odz,
         dr.reshenie,
         ['Отбор корней и ответ', [...dr.otbor, otvet(x)]],
       ),
-      tables: [tablitsaReki(d(S), 'x', d(c), ['Обратно (по течению)', 'Туда (против течения)'])],
+      tables: [
+        sRaznicey(
+          tablitsaReki(d(S), 'x', d(c), ['Обратно (по течению)', 'Туда (против течения)']),
+          1,
+          0,
+          `на $${d(Dl)}$ ч больше`,
+        ),
+      ],
       hints: [
         vopros('Какой путь занял больше времени?', 'против течения', ['по течению', 'одинаково']),
         vopros(
@@ -657,12 +713,18 @@ const VD07: Subtype = {
           [`Скорость течения — $x$ км/ч. По течению $${d(v)}+x$, против — $${d(v)}-x$.`],
         ],
         ['Таблица', ['Обратный путь — против течения, он дольше.']],
-        ['Уравнение', [`$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$.`]],
+        [
+          'Уравнение',
+          [
+            principRaznicy('время против течения', 'время по течению', `$${d(Dl)}$ ч`),
+            `$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$.`,
+          ],
+        ],
         dr.odz,
         dr.reshenie,
         ['Отбор корней и ответ', [...dr.otbor, otvet(c)]],
       ),
-      tables: [tablitsaReki(d(S), d(v), 'x')],
+      tables: [sRaznicey(tablitsaReki(d(S), d(v), 'x'), 1, 0, `на $${d(Dl)}$ ч больше`)],
       hints: [
         vopros('Какой путь дольше?', 'обратный — против течения', ['по течению', 'одинаково']),
         vopros(
