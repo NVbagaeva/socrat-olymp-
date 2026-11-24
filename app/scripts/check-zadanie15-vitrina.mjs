@@ -65,7 +65,12 @@ for (const f of pages) {
   for (const n of threeNames) {
     check(!html.includes(n), `${rel}: three.js подключён к странице сразу (${n})`);
   }
-  if (!rel.startsWith('/zadaniya/stereometriya-dokazatelstvo/vitrina/')) {
+  /* Сама витрина и её прежний адрес по номеру (заглушка, уводящая на
+     неё же, content/pereezd) на неё ссылаться могут. */
+  if (
+    !rel.startsWith('/zadaniya/stereometriya-dokazatelstvo/vitrina/') &&
+    !rel.startsWith('/zadaniya/15/vitrina/')
+  ) {
     check(
       !html.includes('/zadaniya/stereometriya-dokazatelstvo/vitrina'),
       `${rel}: ссылка на служебную витрину`,
