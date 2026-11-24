@@ -336,10 +336,19 @@ const ODOBRENO = {
     'f19f54b03e2eeb5fac4cfea5517681d1134bddce0dc6e21b55aa643d16b634d0',
   'app/src/components/tasks/veroyatnost/teoriya/Sobytiya5.tsx':
     '9c6a30cad1d2967620c601730688e0d7fe94411d7006fde08846e9e1db35f90f',
+  /* №4: одобрено владельцем 24.11.2026 (PR #476) — главы теории по пяти
+     ключевым методам: тексты, разобранные задачи, интерактивы. Условия и
+     ответы банка не менялись; ответы глав проверяет test:metody-4. */
   'app/src/components/tasks/veroyatnost/teoriya/index.tsx':
-    'bc9a702586381afad4fb9aa3d994c8b7dd95e011057cce7efb9f84af5c92c2c8',
+    '8e295f83b17354de08ba7fae8312c9e267cc36ffb049ed1d0a0c56903312f89b',
   'app/src/content/veroyatnost-teoriya.ts':
-    '7421149ede2c6dbaad982983bbf9da08344b08ecbfeaeb6b5ae1dec51b4452ad',
+    'fe0d5a4acdfd33a4843fb7134e8cc098b53f7b66e3bd43028193a80119ecced8',
+  'app/src/components/tasks/veroyatnost/teoriya/metody/GlavaMetoda4.tsx':
+    'fc143fd21ca00ccd96c21d00787544c9279c77eed1d3d43be7b1eceabb8831d1',
+  'app/src/components/tasks/veroyatnost/teoriya/metody/Interaktivy4.tsx':
+    '53b9af1550d27f7bda47498a22e088da5c128e7d96ecdb9abeca7de0c801f134',
+  'app/src/components/tasks/veroyatnost/teoriya/metody/metody4.css':
+    'd57429114e3e74153e2f62d5b72d360d27531206facc1022f443e031db5cabfe',
   /* №1, одобрено владельцем 19.11.2026: подсказки (PR #451 — чертёж в
      шаге, буквы, реестр фактов «Показать свойство», тексты вопросов и
      решений) и «чертёж — схема, а не масштабный рисунок» (PR #452 —
