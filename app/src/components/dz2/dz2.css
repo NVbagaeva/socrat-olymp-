@@ -530,3 +530,244 @@
   width: auto;
   object-fit: contain;
 }
+
+/* ── Итоги ДЗ у учителя (PR 2г). Телефон: строка — карточка ученика. ── */
+.dz2-tablica-obertka {
+  min-width: 0;
+}
+.dz2-tablica {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9375rem;
+}
+.dz2-tablica thead {
+  display: none;
+}
+.dz2-tablica tbody,
+.dz2-tablica tfoot {
+  display: grid;
+  gap: var(--space-3);
+}
+.dz2-tablica tfoot {
+  margin-top: var(--space-3);
+}
+.dz2-tablica tr {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface);
+}
+.dz2-tablica tr.is-vybran {
+  border-color: var(--color-primary);
+}
+.dz2-tablica th,
+.dz2-tablica td {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: center;
+  min-width: 0;
+  text-align: left;
+  font-weight: 400;
+}
+.dz2-tablica td::before {
+  content: attr(data-label);
+  flex: 1;
+  min-width: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.dz2-tablica td[data-label='']::before {
+  content: none;
+}
+.dz2-tablica tbody th,
+.dz2-tablica tfoot th {
+  font-weight: 600;
+}
+.dz2-tablica__imya {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.dz2-yach {
+  font-variant-numeric: tabular-nums;
+}
+.dz2-yach--gotovo {
+  color: var(--color-success);
+  font-weight: 600;
+}
+.dz2-yach--nachato {
+  color: var(--color-primary);
+}
+.dz2-yach--net {
+  color: var(--color-text-tertiary);
+}
+@media (min-width: 768px) {
+  .dz2-tablica-obertka {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg, 16px);
+    background: var(--color-surface);
+  }
+  .dz2-tablica thead {
+    display: table-header-group;
+  }
+  .dz2-tablica tbody {
+    display: table-row-group;
+  }
+  .dz2-tablica tfoot {
+    display: table-footer-group;
+  }
+  .dz2-tablica tr {
+    display: table-row;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+  .dz2-tablica tr.is-vybran,
+  .dz2-tablica tr.is-vybran th {
+    background: var(--color-surface-info);
+  }
+  .dz2-tablica th,
+  .dz2-tablica td {
+    display: table-cell;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .dz2-tablica td::before {
+    content: none;
+  }
+  .dz2-tablica thead th {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    white-space: normal;
+    min-width: 72px;
+  }
+  .dz2-tablica tbody th,
+  .dz2-tablica thead th:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--color-surface);
+  }
+  .dz2-tablica td.dz2-yach,
+  .dz2-tablica tfoot td {
+    text-align: center;
+  }
+  .dz2-tablica tfoot th,
+  .dz2-tablica tfoot td {
+    border-bottom: 0;
+    color: var(--color-text-secondary);
+  }
+}
+.dz2-tablica__nomer {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-right: var(--space-1);
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-brand);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.dz2-tablica__vid {
+  color: var(--color-accent-text);
+}
+.dz2-otvety {
+  scroll-margin-top: 80px;
+}
+.dz2-otvety .card {
+  display: grid;
+  gap: var(--space-4);
+}
+.dz2-otvety__verh {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+}
+.dz2-otvety__zag {
+  flex: 1 1 auto;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.dz2-otvety__element {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+.dz2-otvety__element-zag {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+.dz2-otvety__zadachi {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.dz2-otvety__zadacha {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface-soft);
+}
+.dz2-otvety__zadacha summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+}
+.dz2-otvety__zadacha details[open] > summary {
+  margin-bottom: var(--space-2);
+}
+.dz2-otvety__nomer {
+  font-weight: 600;
+}
+.dz2-otvety__sost {
+  font-size: 0.8125rem;
+}
+.dz2-otvety__sost--right {
+  color: var(--color-success);
+}
+.dz2-otvety__sost--wrong,
+.dz2-otvety__sost--revealed {
+  color: var(--color-error);
+}
+.dz2-otvety__sost--open {
+  color: var(--color-text-secondary);
+}
+.dz2-otvety__meta {
+  margin: var(--space-1) 0 0;
+}
+.dz2-otvety__formy {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+.dz2-otvety__forma {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  justify-items: start;
+}

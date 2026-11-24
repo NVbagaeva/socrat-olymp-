@@ -651,6 +651,54 @@ function makeMock() {
           if (body.p?.closed === false) d.status = 'published';
           return { status: 200, body: null };
         }
+        /* Итоги (PR 2г): только своё ДЗ, только его получатели. */
+        if (['dz2_itogi', 'dz2_otvety', 'dz2_vernut', 'dz2_comment'].includes(fn)) {
+          const d = mine(body.p_id);
+          if (d === undefined || !['published', 'closed'].includes(d.status)) return pg('42501', 'forbidden');
+          dz2Prepare(d);
+          const items = d.p.items ?? [];
+          if (fn === 'dz2_itogi') {
+            return {
+              status: 200,
+              body: {
+                id: d.id, title: d.p.title, status: d.status, due_at: d.p.due_at ?? null, publish_at: d.p.publish_at ?? null,
+                items: items.map((it) => ({ id: it.id, position: it.position, kind: it.kind, task_no: it.task_no, title: it.title,
+                  goal_kind: it.goal_kind ?? 'all', goal_n: it.goal_n ?? null })),
+                ucheniki: (d.recipients ?? []).map((uid) => ({
+                  id: uid, name: profiles.get(uid)?.display_name, status: dz2Status(d, uid),
+                  ...(d.u.sdano.has(uid) ? { submitted_at: d.u.sdano.get(uid).at } : {}),
+                  ...(d.u.kommentarii.get(uid) ? { comment: d.u.kommentarii.get(uid) } : {}),
+                  seconds: 0,
+                  progress: Object.fromEntries(items.map((it) => [it.id, dz2Progress(d, it, uid)])),
+                })),
+              },
+            };
+          }
+          if (!(d.recipients ?? []).includes(body.p_student)) return pg('42501', 'forbidden');
+          const uid = body.p_student;
+          if (fn === 'dz2_otvety') {
+            return {
+              status: 200,
+              body: items.flatMap((it) => dz2Tasks(d, it, uid).map((t) => {
+                const a = dz2Otvet(d, t, uid);
+                return { id: t.id, item_id: it.id, position: t.position, kind: t.kind, task_ref: t.task_ref,
+                  question_html: t.question_html, ...(t.risunok ? { risunok: t.risunok } : {}), answer_key: t.answer,
+                  state: a.state, attempts: a.attempts, hint_steps: a.hint_steps, seconds: 0,
+                  ...(a.entries.length ? { answers: a.entries } : {}) };
+              })),
+            };
+          }
+          if (fn === 'dz2_vernut') {
+            if (!d.u.sdano.has(uid)) return pg('23514', 'not_submitted: ученик ещё не сдал');
+            d.u.sdano.delete(uid);
+            d.u.vozvrat.set(uid, { comment: String(body.p_comment ?? '').trim(), at: new Date().toISOString() });
+            d.u.events.push({ user_id: uid, event: 'returned' });
+            return { status: 200, body: null };
+          }
+          d.u.kommentarii.set(uid, String(body.p_comment ?? '').trim());
+          d.u.events.push({ user_id: uid, event: 'commented' });
+          return { status: 200, body: null };
+        }
         return pg('P0001', 'unknown');
       }
       /* Черновик: учитель читает свою строку ДЗ с рабочей копией. */
@@ -984,7 +1032,7 @@ function makeMock() {
   const DZ2_UCHENIK = ['dz2_moi', 'dz2_open', 'dz2_check', 'dz2_hint', 'dz2_mark', 'dz2_submit'];
   function dz2Prepare(d) {
     if (d.u !== undefined) return d.u;
-    d.u = { otvety: new Map(), marks: new Map(), sdano: new Map(), events: [] };
+    d.u = { otvety: new Map(), marks: new Map(), sdano: new Map(), vozvrat: new Map(), kommentarii: new Map(), events: [] };
     (d.p.items ?? []).forEach((it, i) => {
       it.id ??= `${d.id}-e${i + 1}`;
       (it.tasks ?? []).forEach((t, j) => {
@@ -1024,6 +1072,7 @@ function makeMock() {
   function dz2Status(d, uid) {
     const s = d.u.sdano.get(uid);
     if (s !== undefined) return s.late ? 'late' : 'submitted';
+    if (d.u.vozvrat.has(uid)) return 'returned';
     if (dz2DuePassed(d)) return 'missed';
     const started = [...d.u.otvety.keys(), ...d.u.marks.keys()].some((k) => k.startsWith(`${uid}|`));
     return started ? 'in_progress' : 'not_started';
@@ -1086,6 +1135,8 @@ function makeMock() {
         ...(d.p.attempts_limit ? { attempts_limit: d.p.attempts_limit } : {}),
         solutions_when: d.p.solutions_when ?? 'instant', kontrol: d.p.kontrol ?? false,
         status: dz2Status(d, uid), ...(zakryto === null ? {} : { zakryto }),
+        ...(d.u.vozvrat.get(uid)?.comment ? { return_comment: d.u.vozvrat.get(uid).comment } : {}),
+        ...(d.u.kommentarii.get(uid) ? { comment: d.u.kommentarii.get(uid) } : {}),
         items: (d.p.items ?? []).map((it) => ({
           id: it.id, position: it.position, kind: it.kind, task_no: it.task_no, title: it.title, spec: it.spec ?? {},
           goal_kind: it.goal_kind ?? 'all', ...(it.goal_n ? { goal_n: it.goal_n } : {}),
@@ -3441,7 +3492,124 @@ async function runDz2() {
   await context.close();
 
   await runDz2Uchenik(mock, errors, snap);
+  await runDz2Itogi(mock, errors, snap);
   check(errors.length === 0, `ДЗ: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`);
+}
+
+/* ── Итоги ДЗ у учителя (PR 2г) ────────────────────────────────────
+   После решения учениками: таблица «ученики × элементы», ответы ученика
+   (неверный и верный, верный ответ, попытки, шаг подсказки),
+   комментарий, «Вернуть на доработку» — ученик видит ДЗ на доработке с
+   комментарием и снова решает. Права: чужой учитель итогов не видит,
+   ученик тоже. 375 и 1280. */
+async function runDz2Itogi(mock, errors, snap) {
+  registerInMock(mock, 'zhurnal-uchitel2@yandex.ru', 'zhurnal-parol-2', 'Другой учитель', 'tutor');
+  const anya = mock.users.get('zhurnal@yandex.ru');
+  const dz375 = mock.dz2.find((d) => d.p.title === 'ДЗ на 375');
+  const teoriya = mock.dz2.find((d) => d.id === 'dz2-teoriya-375');
+  const z1 = dz375.p.items[0].tasks[0];
+
+  /* 375: итоги из списка, ответы Ани, комментарий. */
+  {
+    const { context, page } = await newPage(mock, 375, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+    await page.goto(`${SITE}/kabinet/dz2/`, { waitUntil: 'networkidle' });
+    await page.locator('.dz2-kartochka', { hasText: 'ДЗ на 375' }).locator('a:has-text("Итоги")').click();
+    await page.waitForSelector('[data-page="itogi-dz2"]');
+    const rows = page.locator('.dz2-tablica tbody tr');
+    check((await rows.count()) === 2, 'Итоги 375: два ученика');
+    const anyaRow = page.locator(`.dz2-tablica tbody tr[data-uchenik="${anya.id}"]`);
+    check((await anyaRow.getAttribute('data-status')) === 'in_progress', 'Итоги 375: Аня — в работе');
+    const yach = anyaRow.locator(`td[data-item="${dz375.p.items[0].id}"]`);
+    check((await yach.textContent()).includes('1/3') && (await yach.getAttribute('class')).includes('nachato'),
+      `Итоги 375: тренажёр «подряд» — 1/3, начато (${await yach.textContent()})`);
+    await anyaRow.locator('.dz2-tablica__imya').click();
+    const panel = page.locator(`[data-otvety="${anya.id}"]`);
+    await panel.locator('.dz2-otvety__zadacha').first().waitFor();
+    const zad = panel.locator(`.dz2-otvety__zadacha[data-task="${z1.id}"]`);
+    check((await zad.locator('.dz2-u-otvety__otvet.is-net').count()) === 1 &&
+      (await zad.locator('.dz2-u-otvety__otvet.is-da').count()) === 1, 'Итоги 375: неверный и верный ответ');
+    const meta = await zad.locator('.dz2-otvety__meta').textContent();
+    check(meta.includes('попыток: 2') && meta.includes('верный ответ'), `Итоги 375: попытки и верный ответ (${meta})`);
+    const t2 = dz375.p.items[1].tasks[0];
+    check((await panel.locator(`.dz2-otvety__zadacha[data-task="${t2.id}"] .dz2-otvety__meta`).textContent())
+      .includes('шагов подсказки: 1'), 'Итоги 375: шаг подсказки виден учителю');
+    await panel.locator('textarea').first().fill('Тренажёр — хорошо, дорешай опорные.');
+    await panel.locator('button:has-text("Сохранить комментарий")').click();
+    await panel.locator('.dz2-uspeh').waitFor();
+    check(dz375.u.kommentarii.get(anya.id) === 'Тренажёр — хорошо, дорешай опорные.' &&
+      dz375.u.events.some((e) => e.event === 'commented' && e.user_id === anya.id), 'Итоги 375: комментарий и событие ученику');
+    check((await panel.locator('button:has-text("Вернуть на доработку")').count()) === 0,
+      'Итоги 375: несданное не возвращается');
+    await snap(page, 'itogi', 375);
+    await context.close();
+  }
+
+  /* 1280: сданное ДЗ — «Вернуть на доработку». */
+  {
+    const { context, page } = await newPage(mock, 1280, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+    await page.goto(`${SITE}/kabinet/dz2/itogi/?id=${teoriya.id}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-page="itogi-dz2"]');
+    check(await page.locator('.dz2-tablica thead').isVisible(), 'Итоги 1280: таблица с шапкой');
+    const row = page.locator(`.dz2-tablica tbody tr[data-uchenik="${anya.id}"]`);
+    check((await row.getAttribute('data-status')) === 'submitted', 'Итоги 1280: Аня сдала');
+    check((await row.locator('td.dz2-yach--gotovo').count()) === 2, 'Итоги 1280: теория и карточки выполнены');
+    await row.locator('.dz2-tablica__imya').click();
+    const panel = page.locator(`[data-otvety="${anya.id}"]`);
+    await panel.locator('button:has-text("Вернуть на доработку")').waitFor();
+    await panel.locator('textarea').nth(1).fill('Реши опорные задачи.');
+    await panel.locator('button:has-text("Вернуть на доработку")').click();
+    await page.locator('.modal button:has-text("Вернуть на доработку")').click();
+    await panel.locator('.dz2-uspeh').waitFor();
+    await page.waitForSelector(`.dz2-tablica tbody tr[data-uchenik="${anya.id}"][data-status="returned"]`);
+    check(!teoriya.u.sdano.has(anya.id) && teoriya.u.vozvrat.get(anya.id)?.comment === 'Реши опорные задачи.' &&
+      teoriya.u.events.some((e) => e.event === 'returned' && e.user_id === anya.id), 'Итоги 1280: возвращено, событие ученику');
+    await snap(page, 'itogi', 1280);
+    await context.close();
+  }
+
+  /* Ученик видит доработку и комментарий, снова решает. */
+  {
+    const { context, page } = await newPage(mock, 375, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
+    await page.goto(`${SITE}/kabinet/domashki/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.dz2-u-kartochka');
+    check((await page.locator('.dz2-u-kartochka').first().getAttribute('data-dz2')) === teoriya.id,
+      'Доработка: ДЗ на доработке — первым в «Моих домашках»');
+    await page.goto(`${SITE}/kabinet/domashki/reshat/?id=${teoriya.id}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-note="return"]');
+    check((await page.locator('[data-note="return"]').textContent()).includes('Реши опорные задачи.'),
+      'Доработка: комментарий учителя вверху ДЗ');
+    check((await page.locator('.dz2-u-sdat button').count()) === 1, 'Доработка: можно снова сдать');
+    await snap(page, 'vozvrat', 375);
+    await page.goto(`${SITE}/kabinet/domashki/reshat/?id=${dz375.id}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-note="comment"]');
+    check((await page.locator('[data-note="comment"]').textContent()).includes('дорешай опорные'),
+      'Комментарий учителя виден ученику');
+    await snap(page, 'dorabotka', 375);
+
+    /* Ученик итогов не видит. */
+    await page.goto(`${SITE}/kabinet/dz2/itogi/?id=${dz375.id}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.state');
+    check((await page.locator('.dz2-tablica').count()) === 0, 'Итоги: ученику не показываются');
+    await context.close();
+  }
+
+  /* Чужой учитель итогов не видит. */
+  {
+    const { context, page } = await newPage(mock, 1280, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-uchitel2@yandex.ru', 'zhurnal-parol-2');
+    await page.goto(`${SITE}/kabinet/dz2/itogi/?id=${dz375.id}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.state');
+    check((await page.locator('.dz2-tablica').count()) === 0 &&
+      (await page.locator('.state').textContent()).includes('другим учителем'), 'Итоги: чужой учитель не видит учеников');
+    await context.close();
+  }
 }
 
 /* ── Ученик решает ДЗ (PR 2в) ──────────────────────────────────────
