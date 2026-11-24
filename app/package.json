@@ -274,6 +274,7 @@
     "test:progress-log": "node scripts/check-progress-log.mjs",
     "test:zhurnal": "node scripts/check-zhurnal.mjs",
     "test:dz2": "node scripts/check-dz2.mjs",
+    "test:uvedomleniya": "node scripts/check-uvedomleniya.mjs",
     "test:progress-perevod": "node scripts/check-progress-perevod.mjs",
     "test:progress-perevod-site": "node scripts/check-progress-perevod-site.mjs",
     "test:z8-uchenik": "node scripts/check-z8-uchenik.mjs",

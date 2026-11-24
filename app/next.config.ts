@@ -122,6 +122,11 @@ const nextConfig: NextConfig = {
         ? '1'
         : '0',
     DZ2_RAZDELY: process.env.NEXT_PUBLIC_DZ2_RAZDELY || '5,8',
+    // Уведомления (docs/kabinet-uvedomleniya.md): колокольчик и настройки; только при входе.
+    UVEDOMLENIYA_ON:
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' && process.env.NEXT_PUBLIC_UVEDOMLENIYA === '1'
+        ? '1'
+        : '0',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
     // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,
