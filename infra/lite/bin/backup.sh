@@ -89,6 +89,13 @@ if [ "$(psql_db -tAc "select to_regprocedure('public.zhurnal_svernut()') is not 
   log "Журнал: удалено старых записей $(psql_db -tAc 'select public.zhurnal_svernut()')"
 fi
 
+# Уведомления (docs/kabinet-uvedomleniya.md): старше 180 дней — из
+# колокольчика, отправленное старше 90 дней — из очереди.
+step="срок хранения уведомлений"
+if [ "$(psql_db -tAc "select to_regprocedure('public.notify_svernut()') is not null")" = "t" ]; then
+  log "Уведомления: удалено $(psql_db -tAc 'select public.notify_svernut()')"
+fi
+
 rm -f "$dump" "$meta"
 printf '%s %s\n' "$(date -u +%s)" "$name" > "$STATE_DIR/last-backup"
 trap - ERR
