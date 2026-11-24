@@ -216,6 +216,8 @@ const ALLOWED = new Set([
   'zhurnal-uchitel@yandex.ru',
   'zhurnal-uchitel2@yandex.ru',
   'zhurnal-chuzhoy@yandex.ru',
+  /* Этап 4б: ученик тренажёра по банку. */
+  'zhurnal-bank@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -3897,9 +3899,15 @@ async function runDz2Etap4(mock, errors, snap) {
         style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
     }
 
-    await page.goto(`${SITE}/zadaniya/uravneniya/teoriya/`, { waitUntil: 'networkidle' });
-    await page.waitForSelector('.vteor-razdel');
-    check((await page.locator('.dz2-knopka').count()) === 0, `ДЗ 4а ${width}: в теории №7 (вне выдачи) кнопок нет`);
+    /* Раздел вне выдачи на этой сборке: первый из №10, №21, №7, которого нет в списке. */
+    const vne = [[10, 'prikladnye-zadachi'], [21, 'naibolshee-naimenshee'], [7, 'uravneniya']].find(
+      ([n]) => !DZ2_RAZDELY.includes(n),
+    );
+    if (vne !== undefined) {
+      await page.goto(`${SITE}/zadaniya/${vne[1]}/teoriya/`, { waitUntil: 'networkidle' });
+      await page.waitForSelector('.vteor-razdel');
+      check((await page.locator('.dz2-knopka').count()) === 0, `ДЗ 4а ${width}: в теории №${vne[0]} (вне выдачи) кнопок нет`);
+    }
 
     const korz = await page.evaluate(() => {
       for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
