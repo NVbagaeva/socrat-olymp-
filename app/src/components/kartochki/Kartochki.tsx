@@ -29,6 +29,9 @@ import { persistent, type PersistentStore } from '@/lib/storage';
 import { idIz } from '@/lib/zhurnal/model';
 import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { VDomashkuKartochki } from '@/components/dz2/knopki';
+import { Dz2PlashkaKartochek } from '@/components/dz2/Dz2Plashka';
+import { DZ2_ON } from '@/lib/dz2/config';
+import { otmetitKartochku } from '@/lib/dz2/otmetka';
 import { KartochkaFlip } from './KartochkaFlip';
 
 /** Начатая сессия: переживает переход в теорию и перезагрузку. */
@@ -177,6 +180,8 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
     if (id === null) return;
     zapis?.popytka(znayu ? 'знаю' : 'не знаю', znayu);
     zapis?.zakrytKak(znayu ? 'right' : 'wrong');
+    /* Пришли из ДЗ (PR 2в): пройденная карточка засчитывается в элемент ДЗ. */
+    if (DZ2_ON && koloda.klyuch === undefined) otmetitKartochku(koloda.task, id);
     if (menyaetKorobki(nachataya.s))
       zapisatProgress(task, otsenit(progress, id, znayu, Date.now()));
     const dalshe = otmetit(nachataya.s, znayu);
@@ -224,6 +229,7 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
     const it = itog(ekran.s, koloda.kartochki);
     return (
       <section ref={verh} className="kart" aria-labelledby="kart-itog-title">
+        {koloda.klyuch === undefined ? <Dz2PlashkaKartochek taskNo={koloda.task} /> : null}
         <div className="card kart-itog">
           <h2 className="t-h3" id="kart-itog-title">
             {T.itogTitle}
@@ -291,6 +297,7 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
 
   return (
     <section ref={verh} className="kart" aria-labelledby="kart-title">
+      {koloda.klyuch === undefined ? <Dz2PlashkaKartochek taskNo={koloda.task} /> : null}
       <div className="kart-start">
         <div className="card kart-start__main">
           <h2 className="t-h3" id="kart-title">

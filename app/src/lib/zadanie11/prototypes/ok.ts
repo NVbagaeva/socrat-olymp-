@@ -17,6 +17,8 @@ import {
   slovo,
   vopros,
   xxd,
+  principRaznicy,
+  sRaznicey,
 } from '../kit';
 import { d, div, fq, mul, q, txt, val, type Q } from '../num';
 import { plural } from '../../plural';
@@ -125,7 +127,9 @@ const OK02: Subtype = {
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(kk)})`,
       posle: [
-        `$${d(total)}(x+${d(kk)})-${d(total)}x=${fq(q(dt, 60))}\\,x(x+${d(kk)})$, то есть $${d(total)}\\cdot${d(kk)}=${fq(q(dt, 60))}\\,x(x+${d(kk)})$, откуда`,
+        `$${d(total)}(x+${d(kk)})-${d(total)}x=${fq(q(dt, 60))}\\,x(x+${d(kk)})$`,
+        `Раскрываем скобки и приводим подобные: $${d(total)}\\cdot${d(kk)}=${fq(q(dt, 60))}\\,x(x+${d(kk)})$.`,
+        `Делим обе части на $${fq(q(dt, 60))}$ — то есть умножаем на $${fq(q(60, dt))}$:`,
         ...res.lines,
       ],
       roots: res.roots,
@@ -147,7 +151,9 @@ const OK02: Subtype = {
         [
           'Уравнение',
           [
-            `Вся дистанция $${d(N)}\\cdot${d(L)}=${d(total)}$ км. $\\dfrac{${d(total)}}{x}-\\dfrac{${d(total)}}{x+${d(kk)}}=${fq(q(dt, 60))}$.`,
+            `Вся дистанция $${d(N)}\\cdot${d(L)}=${d(total)}$ км.`,
+            principRaznicy('время второго', 'время первого', `$${fq(q(dt, 60))}$ ч`),
+            `$\\dfrac{${d(total)}}{x}-\\dfrac{${d(total)}}{x+${d(kk)}}=${fq(q(dt, 60))}$.`,
           ],
         ],
         t.odz,
@@ -155,10 +161,15 @@ const OK02: Subtype = {
         ['Отбор корней и ответ', [...t.otbor, `Спрашивают скорость второго ${ktoRod}.`, otvet(x)]],
       ),
       tables: [
-        dvizhenie([
-          ['Первый', `${d(total)}`, `x+${d(kk)}`, `\\dfrac{${d(total)}}{x+${d(kk)}}`],
-          ['Второй', `${d(total)}`, 'x', `\\dfrac{${d(total)}}{x}`],
-        ]),
+        sRaznicey(
+          dvizhenie([
+            ['Первый', `${d(total)}`, `x+${d(kk)}`, `\\dfrac{${d(total)}}{x+${d(kk)}}`],
+            ['Второй', `${d(total)}`, 'x', `\\dfrac{${d(total)}}{x}`],
+          ]),
+          1,
+          0,
+          `на $${fq(q(dt, 60))}$ ч больше`,
+        ),
       ],
       hints: [
         vopros('Что даёт условие про первый обгон на круг?', 'разность скоростей', [
@@ -190,7 +201,10 @@ function drobnyKvadrat(k: Q, P: Q): { lines: string[]; roots: number[]; root: nu
   const root = Math.max(...roots);
   return {
     lines: [
-      `$x(x+${fq(k, true)})=${fq(P, true)}$, то есть $x^2+${fq(k, true)}x-${fq(P, true)}=0$. Коэффициенты дробные — умножаем обе части на $${d(L)}$: $${sol.ishodnoe}$.`,
+      `$x(x+${fq(k, true)})=${fq(P, true)}$`,
+      `Раскрываем скобки и переносим всё влево: $x^2+${fq(k, true)}x-${fq(P, true)}=0$.`,
+      `Коэффициенты дробные — умножаем обе части на $${d(L)}$:`,
+      `$${sol.ishodnoe}$.`,
       ...sol.lines,
     ],
     roots,
