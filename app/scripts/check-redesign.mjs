@@ -344,7 +344,7 @@ const ODOBRENO = {
   'app/src/content/veroyatnost-teoriya.ts':
     '747a16e4e289942c12b1ee15dfc1750520f36b7949b95b37ce3076e899b53fef',
   'app/src/components/tasks/veroyatnost/teoriya/metody/GlavaMetoda4.tsx':
-    'fc143fd21ca00ccd96c21d00787544c9279c77eed1d3d43be7b1eceabb8831d1',
+    '8eecfada9d777a283eb5f8eea372620d80b2c76c077d0115bdd885f6da23f25b',
   'app/src/components/tasks/veroyatnost/teoriya/metody/Interaktivy4.tsx':
     '53b9af1550d27f7bda47498a22e088da5c128e7d96ecdb9abeca7de0c801f134',
   'app/src/components/tasks/veroyatnost/teoriya/metody/metody4.css':
