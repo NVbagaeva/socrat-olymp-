@@ -202,9 +202,6 @@
    чуть плотнее. Так меню со входом занимает не больше места, чем без
    него. Ниже 1024px меню прячется, и места хватает на таблетку. */
 @media (min-width: 1024px) {
-  .topbar:has(.auth-widget__login) .topnav a {
-    padding-inline: var(--space-2);
-  }
   .auth-login--app {
     width: var(--auth-round);
     height: var(--auth-round);
@@ -250,8 +247,7 @@
   .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) {
     gap: var(--space-2);
   }
-  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) .bell,
-  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) .topnav + .topbar__spacer {
+  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) .bell {
     display: none;
   }
 }

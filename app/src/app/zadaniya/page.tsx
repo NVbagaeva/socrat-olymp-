@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function TasksPage() {
   return (
     /* Поиск в шапке выключен: на этой странице фильтрует свой. */
-    <AppShell active="tasks" search={false}>
+    <AppShell active="tasks">
       {/* Шапка, поиск и сетка живут в клиентской части: фильтрация
           идёт в браузере, серверу тут делать нечего. */}
       <TaskBank />
