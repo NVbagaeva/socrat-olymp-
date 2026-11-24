@@ -30,6 +30,8 @@ const T18 = requireSrc('content/zhivye18.ts');
 const T11 = requireSrc('content/zhivye11.ts');
 const Z15 = requireSrc('lib/zhivye/znaki15.ts');
 const T15 = requireSrc('content/zhivye15.ts');
+const O12 = requireSrc('lib/zhivye/otrezok12.ts');
+const T12 = requireSrc('content/zhivye12.ts');
 
 const failures = [];
 let checks = 0;
@@ -322,9 +324,53 @@ check(
   }
 }
 
+/* ── №12: наибольшее и наименьшее на отрезке ── */
+{
+  const ozhid = [
+    [16, -16],
+    [16, 0],
+    [11, -11],
+    [0, -16],
+    [16, -16],
+  ];
+  check(T12.KADRY_OTREZKA.length === ozhid.length, '№12: кадров столько же, сколько ответов');
+  T12.KADRY_OTREZKA.forEach((k, i) => {
+    const { max, min } = O12.itog(k.s.a, k.s.b);
+    const [mx, mn] = ozhid[i];
+    check(
+      max.y === mx && min.y === mn,
+      `№12 кадр ${i + 1}: наибольшее ${max.y}, наименьшее ${min.y}`,
+    );
+    check(
+      k.tex.includes(String(mx)) && k.tex.includes(String(mn)),
+      `№12 кадр ${i + 1}: числа в пояснении`,
+    );
+    check(
+      k.s.a < k.s.b && k.s.a >= -4 && k.s.b <= 4,
+      `№12 кадр ${i + 1}: отрезок в пределах ползунков`,
+    );
+  });
+  for (let a = -4; a < 4; a += 0.5) {
+    for (let b = a + 0.5; b <= 4; b += 0.5) {
+      const { max, min } = O12.itog(a, b);
+      let gMax = -Infinity;
+      let gMin = Infinity;
+      for (let i = 0; i <= 400; i += 1) {
+        const y = O12.f(a + ((b - a) * i) / 400);
+        gMax = Math.max(gMax, y);
+        gMin = Math.min(gMin, y);
+      }
+      check(
+        Math.abs(max.y - gMax) < 1e-3 && Math.abs(min.y - gMin) < 1e-3,
+        `№12 [${a}; ${b}]: кандидаты дают настоящие наибольшее и наименьшее`,
+      );
+    }
+  }
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15], (k, val) =>
+  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15, T12], (k, val) =>
     typeof val === 'function' ? String(val) : val,
   );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');

@@ -1,0 +1,115 @@
+/* Живая сцена «Где наибольшее и наименьшее» (№12). Общее — ../zhivye.css. */
+.zv12-polosa {
+  fill: rgba(31, 95, 208, 0.08);
+  stroke: rgba(31, 95, 208, 0.25);
+  stroke-dasharray: 5 5;
+}
+.zv12-krivaya-ten {
+  fill: none;
+  stroke: rgba(31, 95, 208, 0.25);
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+}
+.zv12-krivaya {
+  fill: none;
+  stroke: var(--zv-sin);
+  stroke-width: 3.2;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(31, 95, 208, 0.35));
+}
+.zv12-krit line {
+  stroke: rgba(18, 48, 110, 0.3);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+}
+.zv12-krit circle {
+  fill: #fff;
+  stroke: #12306e;
+  stroke-width: 2;
+}
+.zv12-krit text {
+  font-size: 13px;
+  font-weight: 700;
+  fill: #12306e;
+}
+.zv12-krit.is-vne {
+  opacity: 0.4;
+}
+.zv12-konec line {
+  stroke: rgba(31, 95, 208, 0.55);
+  stroke-width: 1.4;
+}
+.zv12-konec text {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--zv-sin-text);
+}
+.zv12-ekstr {
+  stroke: #fff;
+  stroke-width: 2.5;
+}
+.zv12-ekstr.is-zhar {
+  fill: var(--zv-zhar);
+  filter: drop-shadow(0 0 7px rgba(240, 138, 36, 0.8));
+}
+.zv12-ekstr.is-sin {
+  fill: var(--zv-sin);
+  filter: drop-shadow(0 0 7px rgba(31, 95, 208, 0.7));
+}
+.zv12-ruchki {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.zv12-ruchka {
+  display: grid;
+  gap: 2px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.zv12-ruchka input {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--blue-600);
+}
+.zv12-kandidaty {
+  display: grid;
+  gap: var(--space-2);
+}
+.zv12-kandidaty-zag {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+.zv12-kandidaty ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.zv12-kandidaty li {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--glass-ring);
+  font-size: 15px;
+}
+.zv12-kandidaty li.is-krit {
+  background: rgba(18, 48, 110, 0.06);
+}
+.zv12-kandidaty li.is-max {
+  background: rgba(240, 138, 36, 0.2);
+  box-shadow: 0 0 0 2px var(--zv-zhar);
+}
+.zv12-kandidaty li.is-min {
+  background: rgba(31, 95, 208, 0.14);
+  box-shadow: 0 0 0 2px var(--zv-sin);
+}
