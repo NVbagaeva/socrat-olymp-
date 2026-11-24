@@ -26,15 +26,20 @@ function proverit7(vvod: string, seal: string) {
 /** Экран блока опорных задач №7: общий экран блока с проверкой ответа №7. */
 export function Opornye7({
   blok,
+  nazvanie,
   zapomni,
   zadachi,
 }: {
   blok: string;
+  /** Название блока — для «В домашку» учителя. */
+  nazvanie: string;
   zapomni: ReactNode;
   zadachi: MikroZadachaBrauzera[];
 }) {
   return (
     <OpornyeBanka
+      taskNo={7}
+      nazvanie={nazvanie}
       blok={blok}
       zapomni={zapomni}
       zadachi={zadachi}

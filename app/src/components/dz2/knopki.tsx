@@ -139,6 +139,66 @@ export function VDomashkuOpornye45({
   );
 }
 
+/**
+ * Блок опорных на общем экране банка (№7, 10, 21; этап 4в): ответ и строки
+ * разбора открываются ключом задачи только по нажатию — в разметке
+ * страницы их нет.
+ */
+export function VDomashkuOpornyeBanka({
+  taskNo,
+  blok,
+  nazvanie,
+  zadachi,
+  raskryt,
+}: {
+  taskNo: number;
+  blok: string;
+  nazvanie: string;
+  zadachi: readonly { id: string; uslovie: string; razbor: string; otvet?: string }[];
+  /** Открыть текст, закрытый ключом (openText раздела). */
+  raskryt: (zakryto: string, klyuch: string) => string;
+}) {
+  return (
+    <VDomashku
+      taskNo={taskNo}
+      klyuch={`opornye:${taskNo}:${blok}`}
+      element={async () => {
+        const { typeset, typesetText } = await import('@/lib/tex');
+        const nabor = { tekst: typesetText, formula: (tex: string) => typeset(`$${tex}$`) };
+        const level = urovenZadachi(taskNo);
+        const tasks = zadachi
+          .map((z) => {
+            if (z.otvet === undefined) return null;
+            try {
+              const stroki = JSON.parse(raskryt(z.razbor, z.id)) as unknown;
+              const shagi = Array.isArray(stroki)
+                ? stroki.filter((x): x is string => typeof x === 'string').map((text) => ({ text }))
+                : [];
+              return zadachaOpornaya5(
+                { id: z.id, uslovie: z.uslovie },
+                { otvet: raskryt(z.otvet, `${z.id}|otvet`), shagi },
+                nabor,
+                level,
+              );
+            } catch {
+              return null;
+            }
+          })
+          .filter((z): z is ZadachaDz => z !== null);
+        if (tasks.length === 0) throw new Error('pusto');
+        return {
+          key: `opornye:${taskNo}:${blok}`,
+          vid: 'opornye',
+          task_no: taskNo,
+          title: DZ2.elementy.opornye(nomerEgeRazdela(taskNo), nazvanie),
+          spec: { blok },
+          tasks,
+        };
+      }}
+    />
+  );
+}
+
 /** Карточки раздела: пройти весь набор. */
 export function VDomashkuKartochki({ taskNo, kartochek }: { taskNo: number; kartochek: number }) {
   return (

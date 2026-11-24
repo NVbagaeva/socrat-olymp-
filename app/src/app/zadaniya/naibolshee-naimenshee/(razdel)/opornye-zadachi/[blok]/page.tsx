@@ -38,6 +38,7 @@ export default async function Opornye21Blok({ params }: { params: Promise<{ blok
       <TabScrollOnMount />
       <Opornye21
         blok={b.slug}
+        nazvanie={b.nazvanie}
         zapomni={
           <>
             <b>{OPORNYE21.zapomni}</b> <Tex text={b.zapomni} />

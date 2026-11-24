@@ -838,6 +838,8 @@ export interface MikroDlyaBrauzera {
   /** Строки разбора JSON-ом, закрытые sealText с seed = id задачи. */
   razbor: string;
   seal: string;
+  /** Ответ, закрытый sealText с seed «id|otvet»: только для «В домашку» учителя. */
+  otvet: string;
 }
 
 export function opornyeDlyaBrauzera(b: BlokOpornyh): MikroDlyaBrauzera[] {
@@ -847,5 +849,7 @@ export function opornyeDlyaBrauzera(b: BlokOpornyh): MikroDlyaBrauzera[] {
     podskazka,
     razbor: sealText(JSON.stringify(razbor), id),
     seal: sealAnswer(answer),
+    /* Ответ для «В домашку» учителя (этап 4в): закрыт ключом задачи, как разбор. */
+    otvet: sealText(String(answer), `${id}|otvet`),
   }));
 }

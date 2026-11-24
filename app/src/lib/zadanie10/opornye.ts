@@ -18,7 +18,7 @@ import {
   msVKmch,
   perevod,
 } from '../teoriya/perevod';
-import { sealAnswer } from './secret';
+import { sealAnswer, sealText } from './secret';
 import type { SkillId } from './types';
 
 export interface MikroZadacha {
@@ -616,12 +616,20 @@ export const SYUZHET_OPORNOY: Record<string, string> = {
 /** Задача для браузера: ответ — отпечатком. */
 export interface MikroDlyaBrauzera extends Omit<MikroZadacha, 'answer'> {
   seal: string;
+  /** Ответ, закрытый sealText с seed «id|otvet»: только для «В домашку» учителя. */
+  otvet: string;
   syuzhet?: string;
 }
 
 export function opornyeDlyaBrauzera(b: BlokOpornyh): MikroDlyaBrauzera[] {
   return b.zadachi.map(({ answer, ...rest }) => {
     const syuzhet = SYUZHET_OPORNOY[rest.id];
-    return { ...rest, seal: sealAnswer(answer), ...(syuzhet ? { syuzhet } : {}) };
+    return {
+      ...rest,
+      seal: sealAnswer(answer),
+      /* Ответ для «В домашку» учителя (этап 4в): закрыт ключом задачи, как разбор. */
+      otvet: sealText(String(answer), `${rest.id}|otvet`),
+      ...(syuzhet ? { syuzhet } : {}),
+    };
   });
 }
