@@ -7,7 +7,7 @@ import { BLOKI_19 } from '@/content/zadanie19';
 import type { Bukva19, Etap19, Kartochka19, Risunok19 } from '@/content/teoriya19/tipy';
 import { katex } from '@/lib/graph/katex';
 import { typesetKrupno } from '@/lib/tex';
-import { Zhivoy19 } from './Zhivoy19';
+import { ZhivoyParametr18 } from '@/components/zhivye/parametr18/Parametr18';
 
 /**
  * Части страниц №19, набранные на сервере: карточка теории, рисунок,
@@ -88,7 +88,7 @@ export function Etapy19({ etapy }: { etapy: readonly Etap19[] }) {
             </p>
           ))}
           {e.risunok === undefined ? null : <Risunok r={e.risunok} />}
-          {e.zhivoy === undefined ? null : <Zhivoy19 id={e.zhivoy} />}
+          {e.zhivoy === undefined ? null : <ZhivoyParametr18 id={e.zhivoy} />}
         </section>
       ))}
     </div>
