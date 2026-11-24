@@ -1,5 +1,5 @@
 /**
- * Иллюстрации карточек «Ключевые методы решения» задания №5: по
+ * Иллюстрации карточек «Ключевые методы решения» заданий №4 и №5: по
  * одной стеклянной картинке на метод, в стиле шапок разделов (синее
  * стекло с тёплыми акцентами, прозрачный фон, без надписей).
  *
@@ -29,9 +29,17 @@ type Razmery = Readonly<Record<string, readonly [number, number]>>;
 
 /** Размеры обрезанных кадров по методам. */
 const RAZMERY: Readonly<Record<Zadanie, Razmery>> = {
-  /* У №4 карточки — ссылки на главы теории со своими картинками
-     (MetodyKartochki4, public/images/zadanie-04/metody/). */
-  4: {},
+  /* У №4 карточки — ссылки на главы теории (MetodyKartochki4), картинка
+     в той же плашке, что у №5. Исходники — design-reference/zadanie-04/
+     metod-N.png (те же рисунки, что metody/metod-N-*.webp), обрезанные
+     по контуру. */
+  4: {
+    klassicheskaya: [963, 727],
+    kubiki: [998, 691],
+    monety: [863, 856],
+    'kruglyy-stol': [1028, 809],
+    protivopolozhnye: [917, 736],
+  },
   5: {
     nesovmestnye: [1019, 562],
     protivopolozhnoe: [922, 582],
