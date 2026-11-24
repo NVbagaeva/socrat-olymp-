@@ -26,9 +26,9 @@
   /* Стеклянная таблетка с синим акцентом: видна, но не кричит. */
   background: var(--glass-bg-strong, rgb(255 255 255 / 0.85));
   box-shadow:
-    inset 0 0 0 1px var(--blue-300),
+    inset 0 0 0 1px var(--color-accent-soft),
     var(--glass-hi, 0 0 0 0 transparent);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-size: 15px;
   font-weight: 650;
   line-height: 1;
@@ -44,11 +44,11 @@
   transform: translateY(-1px);
 }
 .karta-nazad:hover {
-  background: var(--blue-50, #eef5ff);
-  box-shadow: inset 0 0 0 1px var(--blue-400, #60a5fa);
+  background: var(--blue-50);
+  box-shadow: inset 0 0 0 1px var(--blue-400);
 }
 .karta-nazad:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 

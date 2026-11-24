@@ -13,7 +13,7 @@
   padding: var(--space-2) var(--space-4);
   border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+  background: color-mix(in srgb, var(--color-primary-fill) 6%, var(--color-surface));
   color: var(--color-primary);
   font: inherit;
   font-size: 0.9375rem;
@@ -29,7 +29,7 @@
   flex: none;
 }
 .fakt1-knopka:hover {
-  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  background: color-mix(in srgb, var(--color-primary-fill) 12%, var(--color-surface));
 }
 .fakt1-knopka:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -37,10 +37,10 @@
 }
 /* После неверного ответа: «загляни в свойство». */
 .fakt1-knopka.is-podsvechena {
-  border-color: var(--amber-600);
-  background: color-mix(in srgb, var(--amber-600) 14%, var(--color-surface));
-  color: var(--amber-700);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber-600) 22%, transparent);
+  border-color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+  color: var(--color-status-progress-text);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-warning) 22%, transparent);
 }
 @media (prefers-reduced-motion: no-preference) {
   .fakt1-knopka.is-podsvechena {
@@ -49,7 +49,7 @@
 }
 @keyframes fakt1-puls {
   from {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--amber-600) 45%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-warning) 45%, transparent);
   }
   to {
     box-shadow: 0 0 0 10px transparent;
@@ -170,7 +170,7 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--amber-700);
+  color: var(--color-status-progress-text);
 }
 .fakt1__nasha-tekst {
   margin: 0;
@@ -255,7 +255,7 @@
   display: flex;
   gap: var(--space-3);
   margin: 0;
-  color: var(--amber-700);
+  color: var(--color-status-progress-text);
 }
 .z1-op__podskazka-tekst span {
   min-width: 0;

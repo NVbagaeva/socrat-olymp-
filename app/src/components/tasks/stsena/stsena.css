@@ -121,20 +121,20 @@
   gap: 6px;
   min-height: 30px;
   padding: 0 11px;
-  border: 1px solid var(--blue-200);
+  border: 1px solid var(--color-border-info);
   border-radius: var(--radius-pill);
-  background: linear-gradient(180deg, var(--white), var(--blue-50));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
-  color: var(--blue-700);
+  background: linear-gradient(180deg, var(--color-surface), var(--color-surface-info));
+  box-shadow: var(--glass-hi);
+  color: var(--color-primary-text);
   font-size: 14px;
   font-weight: 500;
   line-height: 19px;
   white-space: nowrap;
 }
 .stsena__tabletka--warm {
-  color: var(--amber-700);
-  border-color: var(--cream-200, var(--amber-50));
-  background: linear-gradient(180deg, var(--white), var(--amber-50));
+  color: var(--color-status-progress-text);
+  border-color: var(--cream-200, var(--color-warning-soft));
+  background: linear-gradient(180deg, var(--color-surface), var(--color-warning-soft));
 }
 .stsena__tabletka-ik {
   display: grid;
@@ -306,7 +306,7 @@
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font: inherit;
   font-size: 12px;
   line-height: 16px;
@@ -318,7 +318,7 @@
   width: 20px;
   height: 20px;
   fill: none;
-  stroke: var(--blue-600);
+  stroke: var(--color-primary);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;

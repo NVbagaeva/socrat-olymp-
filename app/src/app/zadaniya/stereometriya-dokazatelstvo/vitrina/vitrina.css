@@ -103,7 +103,7 @@
 
 /* Окно чертежа. */
 .z15-ch {
-  --z15-liniya: var(--grey-900);
+  --z15-liniya: var(--color-text);
   --z15-liniya-3d: #24324a;
   --z15-gran: #9dbcf0;
   position: relative;
