@@ -344,13 +344,15 @@ const ODOBRENO = {
   'app/src/components/tasks/veroyatnost/teoriya/metody/GlavaMetoda4.tsx':
     '8eecfada9d777a283eb5f8eea372620d80b2c76c077d0115bdd885f6da23f25b',
   'app/src/components/tasks/veroyatnost/teoriya/metody/Interaktivy4.tsx':
-    '53b9af1550d27f7bda47498a22e088da5c128e7d96ecdb9abeca7de0c801f134',
+    '3f3e17b4ea61370478184c44c9ffbf149e1cf00604d5c000160e7a1643afc8f2',
   'app/src/components/tasks/veroyatnost/teoriya/metody/metody4.css':
     'd57429114e3e74153e2f62d5b72d360d27531206facc1022f443e031db5cabfe',
   /* №5: одобрено владельцем 24.11.2026 (PR #497) — главы теории по десяти
      ключевым методам: тексты, задачи с литературными героями, интерактивы.
      index.tsx и veroyatnost-teoriya.ts — общие с №4 (главы №4 и №5). Условия
-     и ответы банка не менялись; ответы глав проверяет test:metody-5. */
+     и ответы банка не менялись; ответы глав проверяет test:metody-5.
+     Тем же днём одобрены вертикальные деревья (Interaktivy4/5: корень
+     сверху) и дроби «Два предмета» в строку (metody5.css). */
   'app/src/components/tasks/veroyatnost/teoriya/index.tsx':
     '98042b26eb68af99dfa01531007ae7da1e0f26a0bf50ff102fe353de57efe3bd',
   'app/src/content/veroyatnost-teoriya.ts':
@@ -358,9 +360,9 @@ const ODOBRENO = {
   'app/src/components/tasks/veroyatnost/teoriya/metody/GlavaMetoda5.tsx':
     '0d0893640883c7f8cfec64d6c678ac9b1480f644b1e58731d41ab464473381b4',
   'app/src/components/tasks/veroyatnost/teoriya/metody/Interaktivy5.tsx':
-    '7a1f55edce0d62f00bfd604ec1f6addd3e010bfb6e319939220ad37541249f8a',
+    '8b4d7b62657e4591d2b26f1e0f53e88fa8137500f11ee131a982f341e8bc59c6',
   'app/src/components/tasks/veroyatnost/teoriya/metody/metody5.css':
-    '78491f37bab1b8c23026bdd8e005a3193d7c2c31b6da71a49e0ecb9c083e4aeb',
+    '9bc9e41e271b617a66fcdf2a199b0fdd782a84549f43e9dd1b0e06b46ca518cb',
   /* №1, одобрено владельцем 19.11.2026: подсказки (PR #451 — чертёж в
      шаге, буквы, реестр фактов «Показать свойство», тексты вопросов и
      решений) и «чертёж — схема, а не масштабный рисунок» (PR #452 —
