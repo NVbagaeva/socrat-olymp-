@@ -1,6 +1,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { AuthWidget } from '@/components/auth/AuthWidget';
+import { TemaSwitch } from '@/components/tema/TemaSwitch';
 import { LevelLink, LevelSwitch } from '@/components/level/LevelSwitch';
 import { isNavGroup, site } from '@/content/site';
 import { NavDropdown } from './NavDropdown';
@@ -65,6 +66,7 @@ export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
             {/* «Войти» или кружок аккаунта и «Начать бесплатно» (её на
               телефоне нет). Вход выключен — остаётся одна «Начать
               бесплатно». */}
+            <TemaSwitch />
             <AuthWidget variant="site" />
             <SiteMenu />
           </div>

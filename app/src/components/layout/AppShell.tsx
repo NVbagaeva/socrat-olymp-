@@ -20,6 +20,7 @@ import { taskHasPage, taskHref, taskParts, tasksOf, type ExamTask } from '@/cont
 import { LevelSwitch } from '@/components/level/LevelSwitch';
 import { levelInfo, type Level } from '@/lib/level';
 import { AuthWidget } from '@/components/auth/AuthWidget';
+import { TemaSwitch } from '@/components/tema/TemaSwitch';
 
 import { assetUrl } from '@/lib/assetUrl';
 import { SiteMenu } from './SiteMenu';
@@ -160,6 +161,7 @@ export function AppShell({ active, search = false, level = 'profile', children }
              Выдуманного пользователя в шапке больше нет. */
           userSlot={
             <>
+              <TemaSwitch />
               <AuthWidget variant="app" />
               {/* Три полоски — то же меню сайта, что в шапке главной: на
                   узком экране (ниже 1024px) оно не пропадает при переходе
