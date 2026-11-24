@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { EmptyState } from '@/components/ui';
 import { ZADANIE18, ZAGLUSHKA_18 } from '@/content/zadanie18';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 
 /**
  * Вкладка №18, которая ещё не собрана: заголовок вкладки и честное
@@ -15,7 +15,7 @@ export function Zaglushka18({ vkladka }: { vkladka: string }) {
         title={ZAGLUSHKA_18.title}
         description={ZAGLUSHKA_18.text}
         action={
-          <Link className="btn btn--primary btn--sm" href={`${ZADANIYA}/${ZADANIE18.slug}/skhemy/`}>
+          <Link className="btn btn--primary btn--sm" href={`${razdelBase(ZADANIE18.slug)}/skhemy/`}>
             {ZAGLUSHKA_18.kSkhemam}
           </Link>
         }

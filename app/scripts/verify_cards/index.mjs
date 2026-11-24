@@ -26,6 +26,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { requireSrc } from '../lib/load-ts.mjs';
 import { yakorya } from './yakorya.mjs';
+import { kod } from '../lib/adres.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
@@ -183,7 +184,7 @@ for (const k of KOLODY) {
   }
 
   /* Что уходит в браузер: ни ответа, ни верно/неверно открыто. */
-  const gotovaya = podgotovit(k, `/zadaniya/${k.task}`);
+  const gotovaya = podgotovit(k, `/zadaniya/${kod(k.task)}`);
   const json = JSON.stringify(gotovaya);
   if (/"(otvet|verno)":/.test(json)) fail(`№${k.task}: в данные страницы попал открытый ответ`);
   for (const g of gotovaya.kartochki) {

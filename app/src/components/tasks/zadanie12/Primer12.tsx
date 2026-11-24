@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { FigureZoom } from '@/components/ui';
 import { SHAPKA12 } from '@/content/zadanie12';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import type { Primer12 as Dannye } from '@/lib/ves12/trening/primer';
 import { ShagiResheniya } from '../steklo';
 
@@ -92,7 +92,7 @@ function zagruzit(nabor: string, versiya: string): Promise<Dannye | null> {
   const klyuch = `${nabor}:${versiya}`;
   let p = KESH.get(klyuch);
   if (p === undefined) {
-    p = fetch(`${ZADANIYA}/12/dannye/primer/${nabor}.json?v=${versiya}`).then((r) => {
+    p = fetch(`${razdelBase(12)}/dannye/primer/${nabor}.json?v=${versiya}`).then((r) => {
       if (!r.ok) throw new Error(`primer ${nabor}: ${r.status}`);
       return r.json() as Promise<Dannye | null>;
     });

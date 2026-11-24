@@ -5,10 +5,10 @@ import '@/components/variant/sectionStyles';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
 import '@/lib/sheet/probability-sheet.css';
-import '@/app/zadaniya/1/pechat/pechat1.css';
-import '@/app/zadaniya/2/pechat/pechat2.css';
-import '@/app/zadaniya/3/pechat/pechat3.css';
-import '@/app/zadaniya/9/pechat/pechat9.css';
+import '@/app/zadaniya/planimetriya/pechat/pechat1.css';
+import '@/app/zadaniya/vektory/pechat/pechat2.css';
+import '@/app/zadaniya/stereometriya/pechat/pechat3.css';
+import '@/app/zadaniya/proizvodnaya/pechat/pechat9.css';
 import '@/lib/variant/variant-sheet.css';
 
 export const metadata: Metadata = {

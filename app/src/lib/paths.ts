@@ -10,18 +10,50 @@
  *
  * Поэтому ссылку на страницу собираем через href(), а не руками.
  * Собранный сайт проверяет scripts/check-trailing-slash.mjs.
+ *
+ * Адрес раздела банка — по коду раздела (`/zadaniya/uravneniya/`), а не
+ * по номеру: номер ЕГЭ меняется со структурой экзамена, код — никогда
+ * (docs/ege-2027-struktura-shag-0.md, раздел 3). Код говорит структура
+ * (content/struktura.js). Номер хранения в адресе href() переводит в
+ * код сам: href(ZADANIYA, 7, 'teoriya') → /zadaniya/uravneniya/teoriya/.
+ * Прежние адреса по номеру — заглушки и 301 (content/pereezd).
  */
+
+import { RAZDELY } from '@/content/struktura';
 
 /**
  * Начало адресов банка заданий — без «/» на конце: к нему дописывают
- * хвост (`${ZADANIYA}/4/trenazher/`). Как ссылка не используется —
+ * хвост (`${razdelBase(4)}/trenazher/`). Как ссылка не используется —
  * ссылка на банк: tasksPage.href.
  */
 export const ZADANIYA = '/zadaniya';
 
+const KOD_PO_NOMERU: ReadonlyMap<string, string> = new Map(
+  RAZDELY.map((r) => [String(r.hranenie), r.kod]),
+);
+
+/** Код раздела по номеру хранения или коду: 7 → «uravneniya». */
+export function kodAdresa(x: string | number): string {
+  return KOD_PO_NOMERU.get(String(x)) ?? String(x);
+}
+
+/**
+ * Начало адресов раздела профиля без «/» на конце — к нему дописывают
+ * вкладку: razdelBase(7) → «/zadaniya/uravneniya». Принимает номер
+ * хранения или код.
+ */
+export function razdelBase(x: string | number): string {
+  return `${ZADANIYA}/${kodAdresa(x)}`;
+}
+
+/** Номер хранения раздела по коду в адресе: «uravneniya» → 7; не раздел — null. */
+export function nomerPoKodu(kod: string): number | null {
+  return RAZDELY.find((r) => r.kod === kod)?.hranenie ?? null;
+}
+
 /**
  * Ссылка на страницу из кусков пути: href(ZADANIYA, 4, 'trenazher') →
- * /zadaniya/4/trenazher/. Лишние и повторные «/» между кусками убираются,
+ * /zadaniya/veroyatnost/trenazher/. Лишние и повторные «/» между кусками убираются,
  * «/» в начале и в конце ставится. Строка запроса и якорь в последнем
  * куске остаются после косой черты: href('/zadaniya', '?part=2') →
  * /zadaniya/?part=2.
@@ -33,7 +65,14 @@ export function href(...parts: readonly (string | number)[]): string {
   const cut = joined.search(/[?#]/);
   const path = cut === -1 ? joined : joined.slice(0, cut);
   const rest = cut === -1 ? '' : joined.slice(cut);
-  const clean = `/${path.split('/').filter(Boolean).join('/')}`;
+  const chasti = path.split('/').filter(Boolean);
+  /* Раздел банка профиля — по коду: номер хранения после «zadaniya»
+     (но не «baza/zadaniya») переводится в код. */
+  const z = chasti.indexOf('zadaniya');
+  if (z !== -1 && chasti[z - 1] !== 'baza' && chasti[z + 1] !== undefined) {
+    chasti[z + 1] = kodAdresa(chasti[z + 1]!);
+  }
+  const clean = `/${chasti.join('/')}`;
   const last = clean.slice(clean.lastIndexOf('/') + 1);
   if (/\.[a-z0-9]{1,5}$/i.test(last)) {
     return clean + rest;

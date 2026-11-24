@@ -50,10 +50,10 @@ const BASE = `http://127.0.0.1:${server.address().port}`;
 const STRANITSY = [
   ['glavnaya', '/', true],
   ['tarify', '/tarify/', true],
-  ['z8-generator-zakryt', '/zadaniya/9/generator/', false],
-  ['z8-o-zadanii', '/zadaniya/9/', false],
-  ['z9-o-zadanii', '/zadaniya/10/', false],
-  ['z17-o-zadanii', '/zadaniya/18/', false],
+  ['z8-generator-zakryt', '/zadaniya/proizvodnaya/generator/', false],
+  ['z8-o-zadanii', '/zadaniya/proizvodnaya/', false],
+  ['z9-o-zadanii', '/zadaniya/prikladnye-zadachi/', false],
+  ['z17-o-zadanii', '/zadaniya/planimetriya-dokazatelstvo/', false],
   ['sobrat-variant', '/variant/', false],
   ['about', '/about/', false],
   ['sg-prodazhi', '/styleguide/prodazhi/', false],
@@ -115,15 +115,18 @@ try {
       console.log(sh.id, imya);
     }
 
-    /* Окно после пробной генерации: №10 (адрес /zadaniya/11/). */
-    await page.goto(`${BASE}/zadaniya/11/generator/`, { waitUntil: 'load' });
+    /* Окно после пробной генерации: №10 (адрес /zadaniya/tekstovye-zadachi/). */
+    await page.goto(`${BASE}/zadaniya/tekstovye-zadachi/generator/`, { waitUntil: 'load' });
     /* На телефоне кнопка в другой полосе — ищем по названию. */
     const go = page.getByRole('button', { name: /Сгенерировать|Перегенерировать/ }).first();
     try {
       await go.waitFor({ timeout: 15000 });
       await go.click();
       await page.waitForSelector('.gen-paper.is-live .gen-task', { timeout: 60000 });
-      await page.getByRole('button', { name: /Сгенерировать|Перегенерировать/ }).first().click();
+      await page
+        .getByRole('button', { name: /Сгенерировать|Перегенерировать/ })
+        .first()
+        .click();
       await page.waitForTimeout(900);
       await page.screenshot({
         path: path.join(DIR, `z10-okno-generacii-${sh.id}.jpg`),

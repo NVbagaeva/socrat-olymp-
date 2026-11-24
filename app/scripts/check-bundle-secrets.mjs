@@ -21,7 +21,7 @@
    банка: имена полей прототипа, начала первых шагов разборов и
    строковые параметры банка №11.
 
-   Витрина /styleguide/ и вычитка аналогов /zadaniya/11/proverka-
+   Витрина /styleguide/ и вычитка аналогов /zadaniya/tekstovye-zadachi/proverka-
    analogov/ — исключения: они служебные,
    помечена noindex и показывает ответы намеренно.
 
@@ -563,7 +563,7 @@ for (const file of files) {
   }
 
   /* Банк тренажёра №8: по страницам раздела целиком. */
-  if (rel.split(path.sep).slice(0, 2).join('/') === 'zadaniya/8') {
+  if (rel.split(path.sep).slice(0, 2).join('/') === 'zadaniya/vychisleniya') {
     for (const otvet of otvety8) {
       for (const [chto, re] of shablony(otvet)) {
         const m = re.exec(text);
@@ -581,7 +581,7 @@ for (const file of files) {
      целые («= 5», «= 10») совпадают с ответами банка случайно. */
   const put2 = rel.split(path.sep);
   if (
-    put2.slice(0, 2).join('/') === 'zadaniya/2' &&
+    put2.slice(0, 2).join('/') === 'zadaniya/vektory' &&
     !['opornye-zadachi', 'teoriya', 'index.html', 'index.txt'].includes(put2[2])
   ) {
     for (const otvet of otvety2) {
@@ -598,7 +598,7 @@ for (const file of files) {
      задач (образцы с ответами) и листов печати (они пусты до сборки
      на клиенте). */
   if (
-    put2.slice(0, 2).join('/') === 'zadaniya/9' &&
+    put2.slice(0, 2).join('/') === 'zadaniya/proizvodnaya' &&
     !['opornye-zadachi', 'teoriya'].includes(put2[2])
   ) {
     for (const otvet of otvety9) {

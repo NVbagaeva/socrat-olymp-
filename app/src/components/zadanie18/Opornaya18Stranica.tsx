@@ -9,12 +9,12 @@ import { ZADANIE18 } from '@/content/zadanie18';
 import { OPORNYE_18, OPORNYE_18_UI, opornaya18 } from '@/content/zadanie18/opornye';
 import { skhema18 } from '@/content/zadanie18/spisok';
 import { GRUPPY_18, type Podsvechennoe } from '@/content/zadanie18/tipy';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { trebuetsyaScenaOpornoy18 } from '@/lib/zadanie18/opornye';
 import { OtmetkaOpornoy18 } from './ProgressOpornyh18';
 import { ZhivoyChertezh18 } from './ZhivoyChertezh18';
 
-const BASE = `${ZADANIYA}/${ZADANIE18.slug}`;
+const BASE = `${razdelBase(ZADANIE18.slug)}`;
 const UI = OPORNYE_18_UI;
 
 type Chast = 'a' | 'b';

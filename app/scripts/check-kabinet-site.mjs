@@ -216,7 +216,7 @@ try {
   await page.getByTestId('homework').getByRole('link', { name: 'Вычисления к пятнице' }).click();
   await page.getByRole('link', { name: 'Решать' }).first().click();
   await page.waitForURL(/\/zadaniya\/8\/$/);
-  await go('/zadaniya/8/trenazher/');
+  await go('/zadaniya/vychisleniya/trenazher/');
   /* Тренажёр №8 начинается карточкой «Все типы вперемешку». */
   await page
     .getByRole('button', { name: /^Все типы вперемешку/ })
@@ -260,7 +260,7 @@ try {
     ),
     'пауза записана в запись тренажёра',
   );
-  await go('/zadaniya/8/trenazher/');
+  await go('/zadaniya/vychisleniya/trenazher/');
   await page.locator('.tsess__cover-title').first().waitFor();
   ok(true, 'тренажёр открылся на паузе — тренировка не сбросилась');
   await go('/kabinet/proba/');
@@ -283,7 +283,7 @@ try {
   );
 
   console.log('5б. «Завершить тренировку» в самом тренажёре');
-  await go('/zadaniya/8/trenazher/');
+  await go('/zadaniya/vychisleniya/trenazher/');
   /* Тренажёр №8 начинается карточкой «Все типы вперемешку». */
   await page
     .getByRole('button', { name: /^Все типы вперемешку/ })
@@ -365,7 +365,7 @@ try {
   console.log('8. Гость');
   /* Свой контекст: чистый браузер без кабинета. */
   const guest = await (await browser.newContext()).newPage();
-  await guest.goto(`${BASE}/zadaniya/8/trenazher/`, { waitUntil: 'load' });
+  await guest.goto(`${BASE}/zadaniya/vychisleniya/trenazher/`, { waitUntil: 'load' });
   await guest
     .getByRole('button', { name: /^Все типы вперемешку/ })
     .first()

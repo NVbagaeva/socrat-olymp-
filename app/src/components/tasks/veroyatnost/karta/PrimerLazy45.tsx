@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { KartaPrimer } from '../../karta';
 import { tekstyKarty45 } from '@/content/veroyatnost45';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
 import type { RazboryVida } from '@/lib/veroyatnost/pool';
 import type { Zadanie45 } from '@/lib/veroyatnost/trening/links';
@@ -53,7 +53,7 @@ export function PrimerLazy45({
         return;
       }
       started = true;
-      fetch(`${ZADANIYA}/${zadanie}/dannye/razbory/${kind}.json?v=${versiya}`)
+      fetch(`${razdelBase(zadanie)}/dannye/razbory/${kind}.json?v=${versiya}`)
         .then((r) => {
           if (!r.ok) throw new Error(String(r.status));
           return r.json() as Promise<RazboryVida>;

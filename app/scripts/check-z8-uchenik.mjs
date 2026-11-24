@@ -92,8 +92,8 @@ const server = http.createServer((req, res) => {
 });
 await new Promise((done) => server.listen(PORT, '127.0.0.1', done));
 const SITE = `http://127.0.0.1:${PORT}`;
-const TRENAZHER = `${SITE}/zadaniya/8/trenazher/`;
-const ABOUT = `${SITE}/zadaniya/8/`;
+const TRENAZHER = `${SITE}/zadaniya/vychisleniya/trenazher/`;
+const ABOUT = `${SITE}/zadaniya/vychisleniya/`;
 
 /* ── Ответ задачи по идентификатору — тем же генератором ────────── */
 
@@ -352,7 +352,7 @@ async function runGallery(dir) {
     await snapBlock('06-o-zadanii', '.kz-gruppy');
 
     /* Опорная задача: закладка и решение. */
-    await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/stepeni-korni/?zadacha=3`, {
+    await page.goto(`${SITE}/zadaniya/vychisleniya/opornye-zadachi/stepeni-korni/?zadacha=3`, {
       waitUntil: 'networkidle',
     });
     await page.waitForSelector('.ptask .zakladka');
@@ -645,7 +645,7 @@ try {
       hasTouch: true,
       isMobile: true,
     });
-    await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/stepeni-korni/?zadacha=3`, {
+    await page.goto(`${SITE}/zadaniya/vychisleniya/opornye-zadachi/stepeni-korni/?zadacha=3`, {
       waitUntil: 'networkidle',
     });
     await page.waitForFunction(() =>

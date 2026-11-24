@@ -564,12 +564,12 @@ const STEPENI: ChastEdinic = {
         },
         {
           tekst: `Задача про конденсатор в №${nomerRazdela('prikladnye-zadachi')}: сопротивление в мегаомах, ёмкость в микрофарадах, и $10^6\\cdot10^{-6}=1$ — степени сокращаются.`,
-          href: '/zadaniya/10/teoriya/#teoriya-pokazatelnye',
+          href: '/zadaniya/prikladnye-zadachi/teoriya/#teoriya-pokazatelnye',
           ssylka: `Теория №${nomerRazdela('prikladnye-zadachi')}: показательные зависимости`,
         },
         {
           tekst: `Показательные уравнения №${nomerRazdela('uravneniya')}: $\\left(\\dfrac1a\\right)^x=a^{-x}$ — так обе части приводят к одному основанию.`,
-          href: '/zadaniya/7/teoriya/#teoriya-pokazatelnye',
+          href: '/zadaniya/uravneniya/teoriya/#teoriya-pokazatelnye',
           ssylka: `Теория №${nomerRazdela('uravneniya')}: показательные уравнения`,
         },
       ],

@@ -16,6 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { requireSrc } from './load-ts.mjs';
 import { welcomeSeen } from './onboarding.mjs';
+import { kod } from './adres.mjs';
 
 const D = requireSrc('lib/karta/demo.ts');
 const C = requireSrc('lib/karta/katalog.ts');
@@ -191,7 +192,7 @@ async function uytiSKarty(page, no) {
     await vybratOstrov(page, no);
     await page.locator('.karta-panel.is-otkryta a:has-text("Опорные задачи")').click();
   }
-  await page.waitForURL(new RegExp(`/zadaniya/${no}/opornye-zadachi/$`));
+  await page.waitForURL(new RegExp(`/zadaniya/${kod(no)}/opornye-zadachi/$`));
   await page.waitForSelector(VIDIMAYA);
 }
 
@@ -367,7 +368,7 @@ export async function proverkiKartaNazad(deps, shots) {
       /* Другое задание — ссылкой со страницы задания. */
       await page.evaluate(() => {
         const a = document.createElement('a');
-        a.href = '/zadaniya/4/';
+        a.href = '/zadaniya/veroyatnost/';
         a.id = 'drugoe-zadanie';
         a.textContent = '№4';
         a.style.cssText =
@@ -376,7 +377,7 @@ export async function proverkiKartaNazad(deps, shots) {
       });
       await page.waitForTimeout(800);
       await page.click('#drugoe-zadanie');
-      await page.waitForURL(`${SITE}/zadaniya/4/`);
+      await page.waitForURL(`${SITE}/zadaniya/veroyatnost/`);
       await page.waitForSelector(VIDIMAYA);
       check(true, `${kto}, 1280: на другом задании (№4) кнопка есть`);
       const dlina1 = await page.evaluate(() => history.length);
@@ -456,7 +457,7 @@ export async function proverkiKartaNazad(deps, shots) {
       await page.waitForTimeout(300);
       await page.evaluate(() => {
         const a = document.createElement('a');
-        a.href = '/zadaniya/8/teoriya/';
+        a.href = '/zadaniya/vychisleniya/teoriya/';
         a.id = 'zadanie-s-glavnoy';
         a.textContent = '№8';
         a.style.cssText =
@@ -476,7 +477,9 @@ export async function proverkiKartaNazad(deps, shots) {
     {
       const { ctx, page } = await kontekst(deps, { w: 1280, h: 860 });
       await deps.login(page, ROLI[rol].email, ROLI[rol].parol);
-      await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/`, { waitUntil: 'networkidle' });
+      await page.goto(`${SITE}/zadaniya/vychisleniya/opornye-zadachi/`, {
+        waitUntil: 'networkidle',
+      });
       check(await bezKnopki(page), `${kto}: по прямой ссылке кнопки нет`);
       await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
       await page.locator('a[href^="/zadaniya/"]').first().click();

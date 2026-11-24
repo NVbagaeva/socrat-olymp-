@@ -39,6 +39,7 @@ import { APP, requireSrc } from './lib/load-ts.mjs';
 /* Номер ЕГЭ раздела на экране — по структуре экзамена; no в адресах — номер хранения. */
 const { nomerRazdela } = requireSrc('content/struktura.js');
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { kod } from './lib/adres.mjs';
 
 /* Баннер cookie и окно «Впервые здесь?» в этой проверке не нужны: окно
    закрывает страницу целиком. */
@@ -165,19 +166,22 @@ const SIZES = [
 
 /* Прежние адреса фигур: редирект в разметке (статический экспорт). */
 for (const [figura, glava] of Object.entries(FIGURA_GLAVA)) {
-  const file = (tail) => path.join(OUT, 'zadaniya', '3', figura, tail, 'index.html');
+  const file = (tail) => path.join(OUT, 'zadaniya', 'stereometriya', figura, tail, 'index.html');
   const html = fs.existsSync(file('')) ? fs.readFileSync(file(''), 'utf8') : '';
   check(
-    html.includes(`url=/zadaniya/3/teoriya/#teoriya-${glava}`),
-    `/zadaniya/3/${figura}/ не уводит в главу ${glava}`,
+    html.includes(`url=/zadaniya/stereometriya/teoriya/#teoriya-${glava}`),
+    `/zadaniya/stereometriya/${figura}/ не уводит в главу ${glava}`,
   );
   for (const [tail, kuda] of [
-    ['trenazher', '/zadaniya/3/trenazher/'],
-    ['opornye-zadachi', '/zadaniya/3/opornye-zadachi/'],
-    ['podgotovka', '/zadaniya/3/opornye-zadachi/'],
+    ['trenazher', '/zadaniya/stereometriya/trenazher/'],
+    ['opornye-zadachi', '/zadaniya/stereometriya/opornye-zadachi/'],
+    ['podgotovka', '/zadaniya/stereometriya/opornye-zadachi/'],
   ]) {
     const h = fs.existsSync(file(tail)) ? fs.readFileSync(file(tail), 'utf8') : '';
-    check(h.includes(`url=${kuda}`), `/zadaniya/3/${figura}/${tail}/ не уводит на ${kuda}`);
+    check(
+      h.includes(`url=${kuda}`),
+      `/zadaniya/stereometriya/${figura}/${tail}/ не уводит на ${kuda}`,
+    );
   }
 }
 
@@ -199,7 +203,7 @@ for (const size of SIZES) {
 
   for (const { no, glavy, vkladki } of ZADANIYA) {
     for (const [tail, label] of vkladki) {
-      const url = `/zadaniya/${no}/${tail}`;
+      const url = `/zadaniya/${kod(no)}/${tail}`;
       const where = (what) => `${size.name}, ${url}: ${what}`;
       await page.goto(BASE + url, { waitUntil: 'networkidle' });
 
@@ -370,7 +374,7 @@ for (const size of SIZES) {
        плашки, на компьютере плашки нет — из блока «Стереометрия в
        другой части». */
     const drugoe = no === '3' ? '15' : '3';
-    await page.goto(BASE + `/zadaniya/${no}/teoriya/`, { waitUntil: 'networkidle' });
+    await page.goto(BASE + `/zadaniya/${kod(no)}/teoriya/`, { waitUntil: 'networkidle' });
     if (!size.isMobile) {
       const drugaya = page.locator('.drugie-razdely a.razdel-karta');
       await drugaya.scrollIntoViewIfNeeded();
@@ -380,14 +384,14 @@ for (const size of SIZES) {
       await page.waitForSelector('.razdely-menu');
       await page.locator('.razdely-menu a.razdel-karta').click();
     }
-    await page.waitForURL(`**/zadaniya/${drugoe}/teoriya/`, { timeout: 5000 }).catch(() => {});
+    await page.waitForURL(`**/zadaniya/${kod(drugoe)}/teoriya/`, { timeout: 5000 }).catch(() => {});
     check(
-      new URL(page.url()).pathname === `/zadaniya/${drugoe}/teoriya/`,
+      new URL(page.url()).pathname === `/zadaniya/${kod(drugoe)}/teoriya/`,
       `${size.name}: из №${no} на «Теории» попали на ${new URL(page.url()).pathname}`,
     );
 
     /* Теория: все главы, номера, «Содержание». */
-    await page.goto(BASE + `/zadaniya/${no}/teoriya/`, { waitUntil: 'networkidle' });
+    await page.goto(BASE + `/zadaniya/${kod(no)}/teoriya/`, { waitUntil: 'networkidle' });
     const teoriya = await page.evaluate(
       (ids) => ({
         est: ids.filter((id) => document.getElementById(`teoriya-${id}`) !== null).length,
@@ -441,7 +445,7 @@ for (const size of SIZES) {
     }
   });
   const where = (what) => `${size.name}, живой чертёж: ${what}`;
-  await page.goto(BASE + '/zadaniya/3/teoriya/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/stereometriya/teoriya/', { waitUntil: 'networkidle' });
   const vid = page.locator('.z3d__vid').first();
   check((await vid.count()) === 1, where('нет на странице'));
   await vid.scrollIntoViewIfNeeded();
@@ -536,12 +540,14 @@ for (const size of SIZES) {
   /* №3: разобранный пример раскрывается на «О задании», в карточке
      типа; прежний адрес разбора ведёт туда с якорем типа. */
   for (const r of RAZBORY_3) {
-    const url = `/zadaniya/3/razbor/${r.tip}/`;
+    const url = `/zadaniya/stereometriya/razbor/${r.tip}/`;
     const where = (what) => `${size.name}, ${url}: ${what}`;
     await page.goto(BASE + url, { waitUntil: 'networkidle' });
-    await page.waitForURL(`**/zadaniya/3/#tip-${r.tip}`, { timeout: 10000 }).catch(() => {});
+    await page
+      .waitForURL(`**/zadaniya/stereometriya/#tip-${r.tip}`, { timeout: 10000 })
+      .catch(() => {});
     check(
-      page.url().endsWith(`/zadaniya/3/#tip-${r.tip}`),
+      page.url().endsWith(`/zadaniya/stereometriya/#tip-${r.tip}`),
       where(`переход не на карточку типа: ${page.url()}`),
     );
     const tip = page.locator(`#tip-${r.tip}`);
@@ -584,7 +590,7 @@ for (const size of SIZES) {
   }
 
   for (const [no, razbory] of [['15', RAZBORY_15]]) {
-    await page.goto(BASE + `/zadaniya/${no}/`, { waitUntil: 'networkidle' });
+    await page.goto(BASE + `/zadaniya/${kod(no)}/`, { waitUntil: 'networkidle' });
     const ssylki = await page
       .locator('.tipk__ssylka--primer')
       .evaluateAll((list) => list.map((a) => a.getAttribute('href')));
@@ -593,7 +599,7 @@ for (const size of SIZES) {
       `${size.name}, №${no}: карточек с разбором ${ssylki.length}, разборов ${razbory.length}`,
     );
     for (const r of razbory) {
-      const url = `/zadaniya/${no}/razbor/${r.tip}/`;
+      const url = `/zadaniya/${kod(no)}/razbor/${r.tip}/`;
       const where = (what) => `${size.name}, ${url}: ${what}`;
       check(ssylki.includes(url), where('нет карточки на «О задании»'));
       await page.goto(BASE + url, { waitUntil: 'networkidle' });

@@ -4,7 +4,7 @@
 
    Запуск: pnpm build && pnpm build:pdf-spravochnik-1
 
-   Печатная страница /zadaniya/1/pechat/spravochnik/ раскладывает лист
+   Печатная страница /zadaniya/planimetriya/pechat/spravochnik/ раскладывает лист
    в браузере (paginate.js, две колонки). Здесь та же страница
    открывается в Chromium из собранного сайта (out/), и после раскладки
    лист печатается в PDF — два файла, с примерами и без:
@@ -86,7 +86,7 @@ for (const f of FAYLY) {
   await page.addInitScript(() => {
     window.print = () => {};
   });
-  await page.goto(`${BASE}/zadaniya/1/pechat/spravochnik/${f.zapros}`, {
+  await page.goto(`${BASE}/zadaniya/planimetriya/pechat/spravochnik/${f.zapros}`, {
     waitUntil: 'networkidle',
   });
   await page.waitForFunction(() => window.sheetPagination !== undefined, null, {

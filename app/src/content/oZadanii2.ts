@@ -102,7 +102,7 @@ export interface Shag2 {
 }
 
 export interface Tip2 {
-  /** Якорь адреса: …/zadaniya/2/#dlina. */
+  /** Якорь адреса: …/zadaniya/vektory/#dlina. */
   id: string;
   no: string;
   /** Название типа — без формул: карточка читается с первого взгляда. */

@@ -1,7 +1,7 @@
 import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { PROIZVODNAYA } from '@/content/proizvodnaya';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
 
 /**
@@ -11,7 +11,7 @@ import { RazdelTabs } from '../RazdelTabs';
  * layout маршрута: при переходе между вкладками остаётся на месте.
  */
 export function ProizvodnayaShell({ children }: { children: React.ReactNode }) {
-  const base = `${ZADANIYA}/${PROIZVODNAYA.slug}`;
+  const base = `${razdelBase(PROIZVODNAYA.slug)}`;
 
   return (
     <AppShell active="tasks">

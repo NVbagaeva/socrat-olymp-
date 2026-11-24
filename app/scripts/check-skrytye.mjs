@@ -212,8 +212,8 @@ if (razdely.length === 0) {
   /* Скрывать нечего: страницы разделов собраны как обычно. */
   console.log('\n2. Скрытых разделов нет: страницы разделов собраны как обычно');
   for (const task of tasks.filter((t) => t.status === 'ready')) {
-    const file = path.join(OUT, 'zadaniya', task.slug, 'index.html');
-    if (!ok(fs.existsSync(file), `нет страницы раздела ${task.kod}: /zadaniya/${task.slug}/`))
+    const file = path.join(OUT, 'zadaniya', task.kod, 'index.html');
+    if (!ok(fs.existsSync(file), `нет страницы раздела ${task.kod}: /zadaniya/${task.kod}/`))
       continue;
     const html = fs.readFileSync(file, 'utf8');
     ok(/<main[\s>]/.test(html), `раздел ${task.kod}: страница собрана без содержимого`);
@@ -264,7 +264,7 @@ const nahodki = [];
     posmotreno += 1;
     const tekst = fs.readFileSync(file, 'utf8');
     for (const r of razdely) {
-      /* Ссылка: «/zadaniya/6/…» в href и в данных страницы. Не часть
+      /* Ссылка: «/zadaniya/sluchainye-velichiny/…» в href и в данных страницы. Не часть
          другого адреса («/images/zadaniya/6/», «/zadaniya/60/»). */
       const ssylka = new RegExp(
         `(?<![\\w/.-])/zadaniya/(${r.hranenie}|${r.kod})(?=[/"'?#\\\\]|$)[^"'\\\\\\s<)]*`,
@@ -441,7 +441,7 @@ async function apache({ vsem }) {
     const sosedi = [
       '/',
       '/zadaniya/',
-      ...tasks.filter((t) => t.status === 'ready').map((t) => `/zadaniya/${t.slug}/`),
+      ...tasks.filter((t) => t.status === 'ready').map((t) => `/zadaniya/${t.kod}/`),
     ];
     let zhivyh = 0;
     for (const adres of sosedi) {

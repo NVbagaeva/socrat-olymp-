@@ -23,6 +23,7 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 import { nomerRazdela } from '../src/content/struktura.js';
+import { kod } from './lib/adres.mjs';
 
 /* Заголовок окна после пробной генерации (content/generatorUi.ts). */
 const OKNO_TEKST = 'Лист готов — его можно скачать и распечатать';
@@ -94,7 +95,7 @@ const okno = async (page) =>
 {
   const { ctx, page } = await posetitel();
   for (const no of ['3', '13']) {
-    await page.goto(`${BASE}/zadaniya/${no}/generator/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/zadaniya/${kod(no)}/generator/`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
     check(
       (await page.locator('.gen-zamok').count()) === 1,
@@ -111,7 +112,7 @@ const okno = async (page) =>
       `№${no}: в заголовке карточки не номер ЕГЭ №${ege(no)}: «${zagolovok}»`,
     );
     for (const otkr of ['1', '2', '10', '11']) {
-      const ssylka = page.locator(`.gen-zamok a[href="/zadaniya/${otkr}/generator/"]`);
+      const ssylka = page.locator(`.gen-zamok a[href="/zadaniya/${kod(otkr)}/generator/"]`);
       check((await ssylka.count()) === 1, `№${no}: нет ссылки на открытый генератор №${otkr}`);
       if ((await ssylka.count()) === 1) {
         const tekst = (await ssylka.innerText()).trim();
@@ -129,7 +130,7 @@ const okno = async (page) =>
 {
   const { ctx, page } = await posetitel();
   for (const no of ['1', '10']) {
-    await page.goto(`${BASE}/zadaniya/${no}/generator/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/zadaniya/${kod(no)}/generator/`, { waitUntil: 'networkidle' });
     const go = page.locator('.gen-strip .gen-go');
     await go.waitFor();
     await go.click();
@@ -188,7 +189,7 @@ const okno = async (page) =>
 /* ── Ключ проверок открывает всё ─────────────────────────────── */
 {
   const { ctx, page } = await posetitel({ proverka: true });
-  await page.goto(`${BASE}/zadaniya/3/generator/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/stereometriya/generator/`, { waitUntil: 'networkidle' });
   await page.locator('section.gen').waitFor();
   check((await page.locator('.gen-zamok').count()) === 0, 'ключ проверок: №3 закрыт');
   const go = page.locator('.gen-strip .gen-go');

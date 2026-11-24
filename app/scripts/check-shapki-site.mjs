@@ -54,8 +54,8 @@ const RAZDELY = zadaniyaEge().map(({ kod }) => {
 
 /* ── Разметка ───────────────────────────────────────────────── */
 for (const r of RAZDELY) {
-  const where = `/zadaniya/${r.hranenie}/`;
-  const file = path.join(OUT, 'zadaniya', String(r.hranenie), 'index.html');
+  const where = `/zadaniya/${r.kod}/`;
+  const file = path.join(OUT, 'zadaniya', r.kod, 'index.html');
   check(fs.existsSync(file), `${where}: нет страницы`);
   if (!fs.existsSync(file)) continue;
   const html = fs.readFileSync(file, 'utf8');
@@ -119,9 +119,9 @@ const browser = await chromium.launch(
 {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   for (const r of RAZDELY) {
-    const where = `1440 /zadaniya/${r.hranenie}/`;
+    const where = `1440 /zadaniya/${r.kod}/`;
     zaderzhka = 1500;
-    await page.goto(`${BASE}/zadaniya/${r.hranenie}/`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${BASE}/zadaniya/${r.kod}/`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.shapka');
     const doKartinki = await page.$eval('.shapka', (e) => e.getBoundingClientRect().height);
     await page.waitForFunction(
@@ -195,8 +195,8 @@ const browser = await chromium.launch(
     return page.evaluate(() => window.scrollY);
   };
   for (const r of RAZDELY) {
-    const where = `390 /zadaniya/${r.hranenie}/`;
-    await page.goto(`${BASE}/zadaniya/${r.hranenie}/`, { waitUntil: 'load' });
+    const where = `390 /zadaniya/${r.kod}/`;
+    await page.goto(`${BASE}/zadaniya/${r.kod}/`, { waitUntil: 'load' });
     await page.waitForSelector('.zhk__poster');
     const t = await page.evaluate(() => {
       const r = (s) => document.querySelector(s)?.getBoundingClientRect();

@@ -22,7 +22,7 @@ export interface Razdel {
   /** Римский номер раздела, как в задачнике. */
   nomer: string;
   nazvanie: string;
-  /** Часть адреса: /zadaniya/3/{slug}. */
+  /** Часть адреса: /zadaniya/stereometriya/{slug}. */
   slug: string;
   prototipy: readonly Prototype[];
 }

@@ -511,7 +511,7 @@ console.log('6а. Разминка и статистика');
 {
   const ctx = await context();
   for (const url of [
-    '/zadaniya/8/',
+    '/zadaniya/vychisleniya/',
     '/baza/zadaniya/4/',
     '/baza/zadaniya/14/',
     '/baza/zadaniya/15/',
@@ -540,7 +540,7 @@ console.log('6а. Разминка и статистика');
     'статистика: пусто до первой тренировки',
   );
   await st0.close();
-  const p = await open(ctx, '/zadaniya/8/', '.us-razminka');
+  const p = await open(ctx, '/zadaniya/vychisleniya/', '.us-razminka');
   await p.locator('.us-razminka a', { hasText: '10 примеров' }).click();
   await p.locator('.us-igra__vopros').waitFor();
   for (let i = 0; i < 10; i += 1) {

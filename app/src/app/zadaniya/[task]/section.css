@@ -271,7 +271,9 @@ a.subtopic:focus-visible {
   outline: none;
   border-color: var(--color-primary);
   background: var(--color-surface-info);
-  box-shadow: var(--shadow-md), 0 0 0 3px var(--color-focus-ring);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 3px var(--color-focus-ring);
   transform: translateY(-2px);
 }
 a.subtopic:focus-visible .subtopic__go {

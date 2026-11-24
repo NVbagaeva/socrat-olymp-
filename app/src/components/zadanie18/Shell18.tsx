@@ -2,7 +2,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { RazdelTabs } from '@/components/tasks/RazdelTabs';
 import { ZADANIE18 } from '@/content/zadanie18';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { Perenos18 } from './Perenos18';
 
 /**
@@ -12,7 +12,7 @@ import { Perenos18 } from './Perenos18';
  * layout маршрута: при переходе между вкладками остаётся на месте.
  */
 export function Shell18({ children }: { children: React.ReactNode }) {
-  const base = `${ZADANIYA}/${ZADANIE18.slug}`;
+  const base = `${razdelBase(ZADANIE18.slug)}`;
   return (
     <AppShell active="tasks">
       <main className="app-main">

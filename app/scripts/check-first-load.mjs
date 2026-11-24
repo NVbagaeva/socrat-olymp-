@@ -50,9 +50,9 @@ const kb = (n) => Math.round(n / 1024);
    кнопка и код метки — отдельным куском, только пришедшим с карты) при
    запасе ~130 байт. */
 const BUDGET = [
-  { page: 'zadaniya/12/rational', htmlGz: 200 * 1024, scriptsGz: 206 * 1024 },
-  { page: 'zadaniya/12/quadratic', htmlGz: 260 * 1024, scriptsGz: 206 * 1024 },
-  { page: 'zadaniya/12/linear', htmlGz: 60 * 1024, scriptsGz: 206 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/rational', htmlGz: 200 * 1024, scriptsGz: 206 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/quadratic', htmlGz: 260 * 1024, scriptsGz: 206 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/linear', htmlGz: 60 * 1024, scriptsGz: 206 * 1024 },
 ];
 /* Признаки тяжёлого кода внутри скриптов первой загрузки. */
 const HEAVY = [
@@ -144,7 +144,7 @@ await page.route('**/_next/static/chunks/**', async (route) => {
   await new Promise((resolve) => setTimeout(resolve, 2500));
   await route.continue();
 });
-await page.goto(`${BASE}/zadaniya/12/rational/`, { waitUntil: 'commit' });
+await page.goto(`${BASE}/zadaniya/grafiki-funkciy/rational/`, { waitUntil: 'commit' });
 await page.waitForFunction(() => window.__tabTapInit === 1);
 const tab = page.getByRole('tab', { name: /Опорные задачи/ });
 await tab.tap();
@@ -157,7 +157,7 @@ const before = await page.evaluate(() => ({
 check(/Опорные задачи/.test(before.selected), 'до оживания: нажатая вкладка сразу выбрана');
 check(/Опорные задачи/.test(before.busy), 'до оживания: на нажатой вкладке ожидание');
 check(before.pending, 'до оживания: панель приглушена (метка на странице)');
-check(before.url === '/zadaniya/12/rational/', 'до оживания: адрес ещё прежний');
+check(before.url === '/zadaniya/grafiki-funkciy/rational/', 'до оживания: адрес ещё прежний');
 
 /* Страница ожила — вкладка открывается сама, второго тапа не было. */
 await page.waitForURL('**/opornye-zadachi/', { timeout: 30000 }).catch(() => {});
@@ -169,7 +169,7 @@ const after = await page.evaluate(() => ({
   pending: document.documentElement.hasAttribute('data-tabs-pending'),
 }));
 check(
-  after.url === '/zadaniya/12/rational/opornye-zadachi/',
+  after.url === '/zadaniya/grafiki-funkciy/rational/opornye-zadachi/',
   'после оживания: нажатие исполнилось, вкладка открыта сама',
 );
 check(after.cards > 0, 'после оживания: карточки навыков на экране');
@@ -188,7 +188,7 @@ await page2.route('**/_next/static/chunks/**', async (route) => {
   await new Promise((resolve) => setTimeout(resolve, 2500));
   await route.continue();
 });
-await page2.goto(`${BASE}/zadaniya/12/rational/`, { waitUntil: 'commit' });
+await page2.goto(`${BASE}/zadaniya/grafiki-funkciy/rational/`, { waitUntil: 'commit' });
 await page2.waitForFunction(() => window.__tabTapInit === 1);
 await page2.getByRole('tab', { name: /Теория/ }).tap();
 await page2.waitForFunction(

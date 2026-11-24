@@ -12,7 +12,7 @@ import {
 import { generate } from '@/lib/vychisleniya/generate';
 import { ru } from '@/lib/vychisleniya/numbers';
 import { prototypeById } from '@/lib/vychisleniya/prototypes';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
 import type { Shag } from '../steklo';
 import {
@@ -36,7 +36,7 @@ import { PrimerLazy8 } from './PrimerLazy8';
  * KaTeX на сборке; прогресс — из хранилища браузера (Gruppa8).
  */
 
-const BASE = `${ZADANIYA}/${VYCHISLENIYA.slug}`;
+const BASE = `${razdelBase(VYCHISLENIYA.slug)}`;
 
 /** Пример типа: задача генератора на постоянном seed, базовый уровень, если он есть. */
 function primer(prototype: string) {

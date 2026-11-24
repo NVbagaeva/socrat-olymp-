@@ -19,7 +19,7 @@
       "p08",
       "p09"
      ],
-     "trenazher": "/zadaniya/1/trenazher/?t=I"
+     "trenazher": "/zadaniya/planimetriya/trenazher/?t=I"
     },
     {
      "id": "II",
@@ -30,7 +30,7 @@
       "p12",
       "p13"
      ],
-     "trenazher": "/zadaniya/1/trenazher/?t=II"
+     "trenazher": "/zadaniya/planimetriya/trenazher/?t=II"
     },
     {
      "id": "III",
@@ -38,11 +38,12 @@
      "tipy": [
       "p14",
       "p15",
+      "p76",
       "p16",
       "p17",
       "p18"
      ],
-     "trenazher": "/zadaniya/1/trenazher/?t=III"
+     "trenazher": "/zadaniya/planimetriya/trenazher/?t=III"
     },
     {
      "id": "IV",
@@ -53,7 +54,7 @@
       "p21",
       "p22"
      ],
-     "trenazher": "/zadaniya/1/trenazher/?t=IV"
+     "trenazher": "/zadaniya/planimetriya/trenazher/?t=IV"
     },
     {
      "id": "V",
@@ -70,7 +71,7 @@
       "p31",
       "p32"
      ],
-     "trenazher": "/zadaniya/1/trenazher/?t=V"
+     "trenazher": "/zadaniya/planimetriya/trenazher/?t=V"
     },
     {
      "id": "VI",
@@ -85,7 +86,7 @@
       "p39",
       "p40"
      ],
-     "trenazher": "/zadaniya/1/trenazher/?t=VI"
+     "trenazher": "/zadaniya/planimetriya/trenazher/?t=VI"
     },
     {
      "id": "VII",
@@ -96,7 +97,7 @@
       "p43",
       "p44"
      ],
-     "trenazher": "/zadaniya/1/trenazher/?t=VII"
+     "trenazher": "/zadaniya/planimetriya/trenazher/?t=VII"
     },
     {
      "id": "VIII",
@@ -107,7 +108,7 @@
       "p47",
       "p48"
      ],
-     "trenazher": "/zadaniya/1/trenazher/?t=VIII"
+     "trenazher": "/zadaniya/planimetriya/trenazher/?t=VIII"
     },
     {
      "id": "IX",
@@ -115,7 +116,7 @@
      "tipy": [
       "p49"
      ],
-     "trenazher": "/zadaniya/1/trenazher/?t=IX"
+     "trenazher": "/zadaniya/planimetriya/trenazher/?t=IX"
     }
    ]
   },
@@ -137,7 +138,7 @@
       "A7",
       "A8"
      ],
-     "trenazher": "/zadaniya/2/trenazher/?tip=A1"
+     "trenazher": "/zadaniya/vektory/trenazher/?tip=A1"
     },
     {
      "id": "B",
@@ -153,7 +154,7 @@
       "B8",
       "B9"
      ],
-     "trenazher": "/zadaniya/2/trenazher/?tip=B1"
+     "trenazher": "/zadaniya/vektory/trenazher/?tip=B1"
     },
     {
      "id": "C",
@@ -162,7 +163,7 @@
       "C1",
       "C2"
      ],
-     "trenazher": "/zadaniya/2/trenazher/?tip=C1"
+     "trenazher": "/zadaniya/vektory/trenazher/?tip=C1"
     }
    ]
   },
@@ -180,7 +181,7 @@
       "P03-03",
       "P03-04"
      ],
-     "trenazher": "/zadaniya/3/trenazher/?tip=diagonali"
+     "trenazher": "/zadaniya/stereometriya/trenazher/?tip=diagonali"
     },
     {
      "id": "ugly",
@@ -195,7 +196,7 @@
       "P03-23",
       "P03-35"
      ],
-     "trenazher": "/zadaniya/3/trenazher/?tip=ugly"
+     "trenazher": "/zadaniya/stereometriya/trenazher/?tip=ugly"
     },
     {
      "id": "prizma-piramida",
@@ -215,7 +216,7 @@
       "P03-48",
       "P03-50"
      ],
-     "trenazher": "/zadaniya/3/trenazher/?tip=obem-prizmy"
+     "trenazher": "/zadaniya/stereometriya/trenazher/?tip=obem-prizmy"
     },
     {
      "id": "sostavnye",
@@ -248,7 +249,7 @@
       "P03-39",
       "P03-40"
      ],
-     "trenazher": "/zadaniya/3/trenazher/?tip=kubiki"
+     "trenazher": "/zadaniya/stereometriya/trenazher/?tip=kubiki"
     },
     {
      "id": "vrashcheniya",
@@ -267,7 +268,7 @@
       "P03-71",
       "P03-92"
      ],
-     "trenazher": "/zadaniya/3/trenazher/?tip=konus"
+     "trenazher": "/zadaniya/stereometriya/trenazher/?tip=konus"
     },
     {
      "id": "vo-skolko-raz",
@@ -285,7 +286,7 @@
       "P03-67",
       "P03-68"
      ],
-     "trenazher": "/zadaniya/3/trenazher/?tip=vo-skolko-raz"
+     "trenazher": "/zadaniya/stereometriya/trenazher/?tip=vo-skolko-raz"
     },
     {
      "id": "kombinacii",
@@ -310,7 +311,7 @@
       "P03-90",
       "P03-91"
      ],
-     "trenazher": "/zadaniya/3/trenazher/?tip=cilindr-komb"
+     "trenazher": "/zadaniya/stereometriya/trenazher/?tip=cilindr-komb"
     }
    ]
   },
@@ -325,7 +326,7 @@
      "tipy": [
       "klassicheskaya"
      ],
-     "trenazher": "/zadaniya/4/trenazher/klassicheskaya/"
+     "trenazher": "/zadaniya/veroyatnost/trenazher/klassicheskaya/"
     },
     {
      "id": "kubiki",
@@ -333,7 +334,7 @@
      "tipy": [
       "kubiki"
      ],
-     "trenazher": "/zadaniya/4/trenazher/kubiki/"
+     "trenazher": "/zadaniya/veroyatnost/trenazher/kubiki/"
     },
     {
      "id": "monety",
@@ -341,7 +342,7 @@
      "tipy": [
       "monety"
      ],
-     "trenazher": "/zadaniya/4/trenazher/monety/"
+     "trenazher": "/zadaniya/veroyatnost/trenazher/monety/"
     },
     {
      "id": "kruglyy-stol",
@@ -349,7 +350,7 @@
      "tipy": [
       "kruglyy-stol"
      ],
-     "trenazher": "/zadaniya/4/trenazher/kruglyy-stol/"
+     "trenazher": "/zadaniya/veroyatnost/trenazher/kruglyy-stol/"
     },
     {
      "id": "protivopolozhnye",
@@ -357,7 +358,7 @@
      "tipy": [
       "protivopolozhnye"
      ],
-     "trenazher": "/zadaniya/4/trenazher/protivopolozhnye/"
+     "trenazher": "/zadaniya/veroyatnost/trenazher/protivopolozhnye/"
     },
     {
      "id": "geometricheskoe",
@@ -365,7 +366,7 @@
      "tipy": [
       "geometricheskoe"
      ],
-     "trenazher": "/zadaniya/4/trenazher/geometricheskoe/"
+     "trenazher": "/zadaniya/veroyatnost/trenazher/geometricheskoe/"
     },
     {
      "id": "statisticheskoe",
@@ -373,7 +374,7 @@
      "tipy": [
       "statisticheskoe"
      ],
-     "trenazher": "/zadaniya/4/trenazher/statisticheskoe/"
+     "trenazher": "/zadaniya/veroyatnost/trenazher/statisticheskoe/"
     }
    ]
   },
@@ -388,7 +389,7 @@
      "tipy": [
       "nesovmestnye"
      ],
-     "trenazher": "/zadaniya/5/trenazher/nesovmestnye/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/nesovmestnye/"
     },
     {
      "id": "protivopolozhnoe",
@@ -396,7 +397,7 @@
      "tipy": [
       "protivopolozhnoe"
      ],
-     "trenazher": "/zadaniya/5/trenazher/protivopolozhnoe/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/protivopolozhnoe/"
     },
     {
      "id": "koordinatnaya",
@@ -404,7 +405,7 @@
      "tipy": [
       "koordinatnaya"
      ],
-     "trenazher": "/zadaniya/5/trenazher/koordinatnaya/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/koordinatnaya/"
     },
     {
      "id": "sovmestnye",
@@ -412,7 +413,7 @@
      "tipy": [
       "sovmestnye"
      ],
-     "trenazher": "/zadaniya/5/trenazher/sovmestnye/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/sovmestnye/"
     },
     {
      "id": "uslovnaya",
@@ -420,7 +421,7 @@
      "tipy": [
       "uslovnaya"
      ],
-     "trenazher": "/zadaniya/5/trenazher/uslovnaya/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/uslovnaya/"
     },
     {
      "id": "nezavisimye",
@@ -428,7 +429,7 @@
      "tipy": [
       "nezavisimye"
      ],
-     "trenazher": "/zadaniya/5/trenazher/nezavisimye/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/nezavisimye/"
     },
     {
      "id": "hotya-by",
@@ -436,7 +437,7 @@
      "tipy": [
       "hotya-by"
      ],
-     "trenazher": "/zadaniya/5/trenazher/hotya-by/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/hotya-by/"
     },
     {
      "id": "dva-predmeta",
@@ -444,7 +445,7 @@
      "tipy": [
       "dva-predmeta"
      ],
-     "trenazher": "/zadaniya/5/trenazher/dva-predmeta/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/dva-predmeta/"
     },
     {
      "id": "polnaya",
@@ -452,7 +453,7 @@
      "tipy": [
       "polnaya"
      ],
-     "trenazher": "/zadaniya/5/trenazher/polnaya/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/polnaya/"
     },
     {
      "id": "do-uspeha",
@@ -460,7 +461,7 @@
      "tipy": [
       "do-uspeha"
      ],
-     "trenazher": "/zadaniya/5/trenazher/do-uspeha/"
+     "trenazher": "/zadaniya/slozhnaya-veroyatnost/trenazher/do-uspeha/"
     }
    ]
   },
@@ -476,7 +477,7 @@
       "P01",
       "P02"
      ],
-     "trenazher": "/zadaniya/6/trenazher/?tipy=P01,P02"
+     "trenazher": "/zadaniya/sluchainye-velichiny/trenazher/?tipy=P01,P02"
     },
     {
      "id": "II",
@@ -484,7 +485,7 @@
      "tipy": [
       "P03"
      ],
-     "trenazher": "/zadaniya/6/trenazher/?tipy=P03"
+     "trenazher": "/zadaniya/sluchainye-velichiny/trenazher/?tipy=P03"
     },
     {
      "id": "III",
@@ -497,7 +498,7 @@
       "P08",
       "P09"
      ],
-     "trenazher": "/zadaniya/6/trenazher/?tipy=P04,P05,P06,P07,P08,P09"
+     "trenazher": "/zadaniya/sluchainye-velichiny/trenazher/?tipy=P04,P05,P06,P07,P08,P09"
     },
     {
      "id": "IV",
@@ -506,7 +507,7 @@
       "P10",
       "P11"
      ],
-     "trenazher": "/zadaniya/6/trenazher/?tipy=P10,P11"
+     "trenazher": "/zadaniya/sluchainye-velichiny/trenazher/?tipy=P10,P11"
     },
     {
      "id": "V",
@@ -517,7 +518,7 @@
       "P14",
       "P15"
      ],
-     "trenazher": "/zadaniya/6/trenazher/?tipy=P12,P13,P14,P15"
+     "trenazher": "/zadaniya/sluchainye-velichiny/trenazher/?tipy=P12,P13,P14,P15"
     }
    ]
   },
@@ -541,7 +542,7 @@
       "P09",
       "P10"
      ],
-     "trenazher": "/zadaniya/7/trenazher/?tipy=P01,P02,P03,P04,P05,P06,P07,P08,P09,P10"
+     "trenazher": "/zadaniya/uravneniya/trenazher/?tipy=P01,P02,P03,P04,P05,P06,P07,P08,P09,P10"
     },
     {
      "id": "II",
@@ -552,7 +553,7 @@
       "P13",
       "P14"
      ],
-     "trenazher": "/zadaniya/7/trenazher/?tipy=P11,P12,P13,P14"
+     "trenazher": "/zadaniya/uravneniya/trenazher/?tipy=P11,P12,P13,P14"
     },
     {
      "id": "III",
@@ -567,7 +568,7 @@
       "P31",
       "P32"
      ],
-     "trenazher": "/zadaniya/7/trenazher/?tipy=P15,P16,P17,P18,P19,P29,P31,P32"
+     "trenazher": "/zadaniya/uravneniya/trenazher/?tipy=P15,P16,P17,P18,P19,P29,P31,P32"
     },
     {
      "id": "IV",
@@ -584,7 +585,7 @@
       "P34",
       "P35"
      ],
-     "trenazher": "/zadaniya/7/trenazher/?tipy=P20,P21,P22,P23,P24,P25,P30,P33,P34,P35"
+     "trenazher": "/zadaniya/uravneniya/trenazher/?tipy=P20,P21,P22,P23,P24,P25,P30,P33,P34,P35"
     },
     {
      "id": "V",
@@ -594,7 +595,7 @@
       "P27",
       "P28"
      ],
-     "trenazher": "/zadaniya/7/trenazher/?tipy=P26,P27,P28"
+     "trenazher": "/zadaniya/uravneniya/trenazher/?tipy=P26,P27,P28"
     }
    ]
   },
@@ -611,7 +612,7 @@
       "8.C",
       "8.D"
      ],
-     "trenazher": "/zadaniya/8/trenazher/?tip=8.A"
+     "trenazher": "/zadaniya/vychisleniya/trenazher/?tip=8.A"
     },
     {
      "id": "korni",
@@ -622,7 +623,7 @@
       "8.F",
       "8.G"
      ],
-     "trenazher": "/zadaniya/8/trenazher/?tip=8.B"
+     "trenazher": "/zadaniya/vychisleniya/trenazher/?tip=8.B"
     },
     {
      "id": "logarifmy",
@@ -634,7 +635,7 @@
       "8.K",
       "8.L"
      ],
-     "trenazher": "/zadaniya/8/trenazher/?tip=8.H"
+     "trenazher": "/zadaniya/vychisleniya/trenazher/?tip=8.H"
     },
     {
      "id": "trigonometriya",
@@ -651,7 +652,7 @@
       "8.U",
       "8.V"
      ],
-     "trenazher": "/zadaniya/8/trenazher/?tip=8.M"
+     "trenazher": "/zadaniya/vychisleniya/trenazher/?tip=8.M"
     },
     {
      "id": "bukvennye",
@@ -662,7 +663,7 @@
       "8.Y",
       "8.Z"
      ],
-     "trenazher": "/zadaniya/8/trenazher/?tip=8.W"
+     "trenazher": "/zadaniya/vychisleniya/trenazher/?tip=8.W"
     }
    ]
   },
@@ -678,7 +679,7 @@
       "9.1.1",
       "9.1.2"
      ],
-     "trenazher": "/zadaniya/9/trenazher/?g=I"
+     "trenazher": "/zadaniya/proizvodnaya/trenazher/?g=I"
     },
     {
      "id": "II",
@@ -692,7 +693,7 @@
       "9.2.6",
       "9.2.7"
      ],
-     "trenazher": "/zadaniya/9/trenazher/?g=II"
+     "trenazher": "/zadaniya/proizvodnaya/trenazher/?g=II"
     },
     {
      "id": "III",
@@ -705,7 +706,7 @@
       "9.3.5",
       "9.3.6"
      ],
-     "trenazher": "/zadaniya/9/trenazher/?g=III"
+     "trenazher": "/zadaniya/proizvodnaya/trenazher/?g=III"
     },
     {
      "id": "IV",
@@ -722,7 +723,7 @@
       "9.4.9",
       "9.4.10"
      ],
-     "trenazher": "/zadaniya/9/trenazher/?g=IV"
+     "trenazher": "/zadaniya/proizvodnaya/trenazher/?g=IV"
     },
     {
      "id": "V",
@@ -735,7 +736,7 @@
       "9.5.5",
       "9.5.6"
      ],
-     "trenazher": "/zadaniya/9/trenazher/?g=V"
+     "trenazher": "/zadaniya/proizvodnaya/trenazher/?g=V"
     }
    ]
   },
@@ -759,7 +760,7 @@
       "P09",
       "P10"
      ],
-     "trenazher": "/zadaniya/10/trenazher/?tipy=P01,P02,P03,P04,P05,P06,P07,P08,P09,P10"
+     "trenazher": "/zadaniya/prikladnye-zadachi/trenazher/?tipy=P01,P02,P03,P04,P05,P06,P07,P08,P09,P10"
     },
     {
      "id": "II",
@@ -773,7 +774,7 @@
       "P16",
       "P17"
      ],
-     "trenazher": "/zadaniya/10/trenazher/?tipy=P11,P12,P13,P14,P15,P16,P17"
+     "trenazher": "/zadaniya/prikladnye-zadachi/trenazher/?tipy=P11,P12,P13,P14,P15,P16,P17"
     },
     {
      "id": "III",
@@ -787,7 +788,7 @@
       "P31",
       "P32"
      ],
-     "trenazher": "/zadaniya/10/trenazher/?tipy=P18,P19,P20,P21,P30,P31,P32"
+     "trenazher": "/zadaniya/prikladnye-zadachi/trenazher/?tipy=P18,P19,P20,P21,P30,P31,P32"
     },
     {
      "id": "IV",
@@ -798,7 +799,7 @@
       "P24",
       "P25"
      ],
-     "trenazher": "/zadaniya/10/trenazher/?tipy=P22,P23,P24,P25"
+     "trenazher": "/zadaniya/prikladnye-zadachi/trenazher/?tipy=P22,P23,P24,P25"
     },
     {
      "id": "V",
@@ -811,7 +812,7 @@
       "P33",
       "P34"
      ],
-     "trenazher": "/zadaniya/10/trenazher/?tipy=P26,P27,P28,P29,P33,P34"
+     "trenazher": "/zadaniya/prikladnye-zadachi/trenazher/?tipy=P26,P27,P28,P29,P33,P34"
     }
    ]
   },
@@ -832,7 +833,7 @@
       "PR-06",
       "PR-07"
      ],
-     "trenazher": "/zadaniya/11/trenazher/?t=PR"
+     "trenazher": "/zadaniya/tekstovye-zadachi/trenazher/?t=PR"
     },
     {
      "id": "SM",
@@ -848,7 +849,7 @@
       "SM-08",
       "SM-09"
      ],
-     "trenazher": "/zadaniya/11/trenazher/?t=SM"
+     "trenazher": "/zadaniya/tekstovye-zadachi/trenazher/?t=SM"
     },
     {
      "id": "DP",
@@ -868,7 +869,7 @@
       "DP-12",
       "DP-13"
      ],
-     "trenazher": "/zadaniya/11/trenazher/?t=DP"
+     "trenazher": "/zadaniya/tekstovye-zadachi/trenazher/?t=DP"
     },
     {
      "id": "PT",
@@ -879,7 +880,7 @@
       "PT-03",
       "PT-04"
      ],
-     "trenazher": "/zadaniya/11/trenazher/?t=PT"
+     "trenazher": "/zadaniya/tekstovye-zadachi/trenazher/?t=PT"
     },
     {
      "id": "VD",
@@ -893,7 +894,7 @@
       "VD-06",
       "VD-07"
      ],
-     "trenazher": "/zadaniya/11/trenazher/?t=VD"
+     "trenazher": "/zadaniya/tekstovye-zadachi/trenazher/?t=VD"
     },
     {
      "id": "OK",
@@ -903,7 +904,7 @@
       "OK-02",
       "OK-03"
      ],
-     "trenazher": "/zadaniya/11/trenazher/?t=OK"
+     "trenazher": "/zadaniya/tekstovye-zadachi/trenazher/?t=OK"
     },
     {
      "id": "RB",
@@ -917,7 +918,7 @@
       "RB-06",
       "RB-07"
      ],
-     "trenazher": "/zadaniya/11/trenazher/?t=RB"
+     "trenazher": "/zadaniya/tekstovye-zadachi/trenazher/?t=RB"
     },
     {
      "id": "PG",
@@ -925,7 +926,7 @@
      "tipy": [
       "PG-01"
      ],
-     "trenazher": "/zadaniya/11/trenazher/?t=PG"
+     "trenazher": "/zadaniya/tekstovye-zadachi/trenazher/?t=PG"
     }
    ]
   },
@@ -943,7 +944,7 @@
       "12.C",
       "12.D"
      ],
-     "trenazher": "/zadaniya/12/linear/trenazher/"
+     "trenazher": "/zadaniya/grafiki-funkciy/linear/trenazher/"
     },
     {
      "id": "quadratic",
@@ -959,7 +960,7 @@
       "12Q.H",
       "12Q.I"
      ],
-     "trenazher": "/zadaniya/12/quadratic/trenazher/"
+     "trenazher": "/zadaniya/grafiki-funkciy/quadratic/trenazher/"
     },
     {
      "id": "rational",
@@ -976,7 +977,7 @@
       "12R.I",
       "12R.J"
      ],
-     "trenazher": "/zadaniya/12/rational/trenazher/"
+     "trenazher": "/zadaniya/grafiki-funkciy/rational/trenazher/"
     },
     {
      "id": "irrational",
@@ -987,7 +988,7 @@
       "12S.C",
       "12S.D"
      ],
-     "trenazher": "/zadaniya/12/irrational/trenazher/"
+     "trenazher": "/zadaniya/grafiki-funkciy/irrational/trenazher/"
     },
     {
      "id": "exponential",
@@ -998,7 +999,7 @@
       "12E.C",
       "12E.D"
      ],
-     "trenazher": "/zadaniya/12/exponential/trenazher/"
+     "trenazher": "/zadaniya/grafiki-funkciy/exponential/trenazher/"
     },
     {
      "id": "logarithmic",
@@ -1010,7 +1011,7 @@
       "12L.D",
       "12L.E"
      ],
-     "trenazher": "/zadaniya/12/logarithmic/trenazher/"
+     "trenazher": "/zadaniya/grafiki-funkciy/logarithmic/trenazher/"
     },
     {
      "id": "trigonometric",
@@ -1023,7 +1024,7 @@
       "12T.E",
       "12T.F"
      ],
-     "trenazher": "/zadaniya/12/trigonometric/trenazher/"
+     "trenazher": "/zadaniya/grafiki-funkciy/trigonometric/trenazher/"
     }
    ]
   },
@@ -1056,7 +1057,7 @@
       "A-18",
       "A-19"
      ],
-     "trenazher": "/zadaniya/13/trenazher/?t=A"
+     "trenazher": "/zadaniya/ekonomika/trenazher/?t=A"
     },
     {
      "id": "B",
@@ -1082,7 +1083,7 @@
       "B-18",
       "B-19"
      ],
-     "trenazher": "/zadaniya/13/trenazher/?t=B"
+     "trenazher": "/zadaniya/ekonomika/trenazher/?t=B"
     },
     {
      "id": "C",
@@ -1104,7 +1105,7 @@
       "C-16",
       "C-17"
      ],
-     "trenazher": "/zadaniya/13/trenazher/?t=C"
+     "trenazher": "/zadaniya/ekonomika/trenazher/?t=C"
     },
     {
      "id": "D",
@@ -1124,7 +1125,7 @@
       "D-12",
       "D-13"
      ],
-     "trenazher": "/zadaniya/13/trenazher/?t=D"
+     "trenazher": "/zadaniya/ekonomika/trenazher/?t=D"
     }
    ]
   },
@@ -1293,7 +1294,7 @@
       "biss-sred",
       "ser-vys"
      ],
-     "trenazher": "/zadaniya/18/trenazher/?t=treugolnik"
+     "trenazher": "/zadaniya/planimetriya-dokazatelstvo/trenazher/?t=treugolnik"
     },
     {
      "id": "okruzhnost",
@@ -1311,7 +1312,7 @@
       "kv-gip",
       "vpis-lmn"
      ],
-     "trenazher": "/zadaniya/18/trenazher/?t=okruzhnost"
+     "trenazher": "/zadaniya/planimetriya-dokazatelstvo/trenazher/?t=okruzhnost"
     },
     {
      "id": "kasatelnye",
@@ -1327,7 +1328,7 @@
       "vnevpis",
       "kvadrat-per"
      ],
-     "trenazher": "/zadaniya/18/trenazher/?t=kasatelnye"
+     "trenazher": "/zadaniya/planimetriya-dokazatelstvo/trenazher/?t=kasatelnye"
     },
     {
      "id": "trapeciya",
@@ -1341,7 +1342,7 @@
       "ot-parallelogramm",
       "diag-trap"
      ],
-     "trenazher": "/zadaniya/18/trenazher/?t=trapeciya"
+     "trenazher": "/zadaniya/planimetriya-dokazatelstvo/trenazher/?t=trapeciya"
     },
     {
      "id": "otnosheniya",
@@ -1351,7 +1352,7 @@
       "ot-menelay",
       "ot-cheva"
      ],
-     "trenazher": "/zadaniya/18/trenazher/?t=otnosheniya"
+     "trenazher": "/zadaniya/planimetriya-dokazatelstvo/trenazher/?t=otnosheniya"
     },
     {
      "id": "ploshchadi",
@@ -1362,7 +1363,7 @@
       "pl-obshchaya-vysota",
       "pl-bissektrisa"
      ],
-     "trenazher": "/zadaniya/18/trenazher/?t=ploshchadi"
+     "trenazher": "/zadaniya/planimetriya-dokazatelstvo/trenazher/?t=ploshchadi"
     }
    ]
   },
@@ -1507,7 +1508,7 @@
       "P26",
       "P27"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P01,P02,P22,P23,P26,P27"
+     "trenazher": "/zadaniya/naibolshee-naimenshee/trenazher/?tipy=P01,P02,P22,P23,P26,P27"
     },
     {
      "id": "2",
@@ -1517,7 +1518,7 @@
       "P24",
       "P25"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P03,P24,P25"
+     "trenazher": "/zadaniya/naibolshee-naimenshee/trenazher/?tipy=P03,P24,P25"
     },
     {
      "id": "3",
@@ -1526,7 +1527,7 @@
       "P04",
       "P05"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P04,P05"
+     "trenazher": "/zadaniya/naibolshee-naimenshee/trenazher/?tipy=P04,P05"
     },
     {
      "id": "4",
@@ -1538,7 +1539,7 @@
       "P29",
       "P33"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P06,P07,P28,P29,P33"
+     "trenazher": "/zadaniya/naibolshee-naimenshee/trenazher/?tipy=P06,P07,P28,P29,P33"
     },
     {
      "id": "5",
@@ -1553,7 +1554,7 @@
       "P31",
       "P32"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P08,P09,P10,P11,P12,P30,P31,P32"
+     "trenazher": "/zadaniya/naibolshee-naimenshee/trenazher/?tipy=P08,P09,P10,P11,P12,P30,P31,P32"
     },
     {
      "id": "6",
@@ -1565,7 +1566,7 @@
       "P34",
       "P35"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P13,P14,P15,P34,P35"
+     "trenazher": "/zadaniya/naibolshee-naimenshee/trenazher/?tipy=P13,P14,P15,P34,P35"
     },
     {
      "id": "7",
@@ -1578,7 +1579,7 @@
       "P20",
       "P21"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P16,P17,P18,P19,P20,P21"
+     "trenazher": "/zadaniya/naibolshee-naimenshee/trenazher/?tipy=P16,P17,P18,P19,P20,P21"
     }
    ]
   }

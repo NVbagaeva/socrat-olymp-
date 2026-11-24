@@ -9,7 +9,7 @@
 
    Запуск: node scripts/check-mobile-overflow.mjs [--json файл] [префикс…]
    Ширины можно сузить: SHIRINY=375 node scripts/check-mobile-overflow.mjs.
-   Префиксы сужают обход: `node scripts/check-mobile-overflow.mjs /zadaniya/4/`. */
+   Префиксы сужают обход: `node scripts/check-mobile-overflow.mjs /zadaniya/veroyatnost/`. */
 
 import fs from 'node:fs';
 import http from 'node:http';
@@ -169,7 +169,9 @@ async function main() {
     throw new Error('Нет собранного экспорта: сначала pnpm build');
   }
   /* Справочник №1 для печати — только лист A4, экранного вида у него нет. */
-  let puti = vseStranitsy().filter((p) => !p.startsWith('/zadaniya/1/pechat/spravochnik/'));
+  let puti = vseStranitsy().filter(
+    (p) => !p.startsWith('/zadaniya/planimetriya/pechat/spravochnik/'),
+  );
   if (prefiksy.length > 0) puti = puti.filter((p) => prefiksy.some((x) => p.startsWith(x)));
 
   const srv = server();

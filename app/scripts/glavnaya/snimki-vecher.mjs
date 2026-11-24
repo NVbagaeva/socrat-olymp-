@@ -27,6 +27,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
+import { kod } from '../lib/adres.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const OUT = path.join(APP, 'out');
@@ -40,17 +41,18 @@ fs.mkdirSync(DIR, { recursive: true });
 /* ── Наборы и адреса. Зёрна фиксированы. ──────────────────────────── */
 
 const PLANIMETRIYA = 's=p01%3A1%2Cp05%3A1%2Cp13%3A1&seed=GLAVNAYA1';
-const SAMOSTOYATELNAYA = `/zadaniya/1/pechat/?m=v&i=m&ps=2&${PLANIMETRIYA}&v=3&vr=sr`;
+const SAMOSTOYATELNAYA = `/zadaniya/planimetriya/pechat/?m=v&i=m&ps=2&${PLANIMETRIYA}&v=3&vr=sr`;
 /* sp=B — место для решения в клетку, по длине задачи (lib/sheet/space.js). */
 const SAMOSTOYATELNAYA_KLETKA = `${SAMOSTOYATELNAYA}&sp=B`;
-const UCHITEL = `/zadaniya/1/pechat/otvety/?m=v&i=m&ps=2&${PLANIMETRIYA}&v=3&vr=sr`;
-const SYUZHET = '/zadaniya/11/pechat/?m=v&i=m&ps=2&s=DP-07%3A1%2CSM-04%3A1&v=1&seed=GLAVNAYA3';
+const UCHITEL = `/zadaniya/planimetriya/pechat/otvety/?m=v&i=m&ps=2&${PLANIMETRIYA}&v=3&vr=sr`;
+const SYUZHET =
+  '/zadaniya/tekstovye-zadachi/pechat/?m=v&i=m&ps=2&s=DP-07%3A1%2CSM-04%3A1&v=1&seed=GLAVNAYA3';
 const GRAFIK =
-  '/zadaniya/12/generator/pechat/?ps=2&s=12Q.A%3A1%2C12.A%3A1&seed=GLAVNAYA12&t=color&c=1';
+  '/zadaniya/grafiki-funkciy/generator/pechat/?ps=2&s=12Q.A%3A1%2C12.A%3A1&seed=GLAVNAYA12&t=color&c=1';
 
 /** Генератор задания: нажать «Сгенерировать», взять адрес листа, своё зерно. */
 async function adresGeneratora(page, no, seed) {
-  await page.goto(`${BASE}/zadaniya/${no}/generator/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/${kod(no)}/generator/`, { waitUntil: 'networkidle' });
   const go = page.locator('.gen-strip .gen-go');
   await go.waitFor({ timeout: 30000 });
   await go.click();
@@ -247,12 +249,12 @@ try {
   otkryto = '';
   await zadacha('zadacha-stereo', await adresGeneratora(page, '3', 'GLAVNAYA4'));
 
-  await otkryt('/zadaniya/19/teoriya/');
+  await otkryt('/zadaniya/parametr/teoriya/');
   await ekran('parametr', page.locator('#teoriya-m01'), 1100);
 
   /* ── Тренажёр: №10 «Текстовые задачи», подсказка вопросами ── */
   otkryto = '';
-  await otkryt('/zadaniya/11/trenazher/');
+  await otkryt('/zadaniya/tekstovye-zadachi/trenazher/');
   await page.getByText('Все типы вперемешку').first().click();
   await page.waitForTimeout(2500);
   await page
@@ -276,7 +278,7 @@ try {
 
   /* ── Карточки: лицевая сторона и оборот ── */
   otkryto = '';
-  await otkryt('/zadaniya/1/kartochki/');
+  await otkryt('/zadaniya/planimetriya/kartochki/');
   await page.getByRole('button', { name: 'Начать' }).first().click();
   await page.waitForTimeout(1500);
   const karta = page.locator('.kart-card--front').first();

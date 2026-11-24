@@ -57,35 +57,53 @@ const OUT = path.join(app, 'out');
 
 const TAIL = '&t=color&c=1&k=%D0%9F%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0';
 const SHEETS = [
-  ['№12 линейная', '/zadaniya/12/linear/pechat/', 's=12.A&n=10&l=lucky&seed=print-check'],
-  ['№12 парабола', '/zadaniya/12/quadratic/pechat/', 's=12Q.A&n=10&l=lucky&seed=print-check'],
-  ['№12 гипербола', '/zadaniya/12/rational/pechat/', 's=12R.A&n=10&l=lucky&seed=print-check'],
-  ['№4', '/zadaniya/4/pechat/', 's=p4-01&n=10&seed=print-check'],
-  ['№5', '/zadaniya/5/pechat/', 's=p5-01&n=10&seed=print-check'],
-  ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
-  ['№9', '/zadaniya/9/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
-  ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
+  [
+    '№12 линейная',
+    '/zadaniya/grafiki-funkciy/linear/pechat/',
+    's=12.A&n=10&l=lucky&seed=print-check',
+  ],
+  [
+    '№12 парабола',
+    '/zadaniya/grafiki-funkciy/quadratic/pechat/',
+    's=12Q.A&n=10&l=lucky&seed=print-check',
+  ],
+  [
+    '№12 гипербола',
+    '/zadaniya/grafiki-funkciy/rational/pechat/',
+    's=12R.A&n=10&l=lucky&seed=print-check',
+  ],
+  ['№4', '/zadaniya/veroyatnost/pechat/', 's=p4-01&n=10&seed=print-check'],
+  ['№5', '/zadaniya/slozhnaya-veroyatnost/pechat/', 's=p5-01&n=10&seed=print-check'],
+  ['№8', '/zadaniya/vychisleniya/pechat/', 's=S1&n=10&l=base&seed=print-check'],
+  ['№9', '/zadaniya/proizvodnaya/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
+  ['№2', '/zadaniya/vektory/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
   /* №1 и №3: чертежи планиметрии и стереометрии — правила крупных рисунков. */
   [
     '№1',
-    '/zadaniya/1/pechat/',
+    '/zadaniya/planimetriya/pechat/',
     'm=v&i=m&s=p01:1,p05:1,p13:1,p17:1,p24:1,p35:1,p41:1,p46:1,p49:1,p62:1&seed=print-check',
   ],
-  ['№3', '/zadaniya/3/pechat/parallelepiped/', 'n=6&seed=print-check'],
+  ['№3', '/zadaniya/stereometriya/pechat/parallelepiped/', 'n=6&seed=print-check'],
   /* №6, №7, №10 — на общем шаблоне (lib/sheetList.ts). У них t= — типы
      задач, поэтому свой хвост без темы (пятый элемент). */
-  ['№6', '/zadaniya/6/pechat/', 't=P01:2,P02:2,P03:2&i=m&v=1&e=0&st=v&seed=PRINT1', null, ''],
-  ['№7', '/zadaniya/7/pechat/', 't=P01:2,P02:2,P03:2&i=m&v=1&e=0&seed=PRINT1', null, ''],
+  [
+    '№6',
+    '/zadaniya/sluchainye-velichiny/pechat/',
+    't=P01:2,P02:2,P03:2&i=m&v=1&e=0&st=v&seed=PRINT1',
+    null,
+    '',
+  ],
+  ['№7', '/zadaniya/uravneniya/pechat/', 't=P01:2,P02:2,P03:2&i=m&v=1&e=0&seed=PRINT1', null, ''],
   [
     '№10',
-    '/zadaniya/10/pechat/',
+    '/zadaniya/prikladnye-zadachi/pechat/',
     'm=g&l=uchenik&t=P01:2,P02:2,P03:2&i=m&v=1&e=0&k=0&s=PRINT1',
     [['ученик', '']],
     '',
   ],
   [
     '№10',
-    '/zadaniya/10/pechat/',
+    '/zadaniya/prikladnye-zadachi/pechat/',
     'm=g&l=uchitel&t=P01:2,P02:2,P03:2&i=m&v=1&e=0&k=0&s=PRINT1',
     [['учитель', '']],
     '',
@@ -94,19 +112,24 @@ const SHEETS = [
      пустое место — у варианта, листа раздела и листа №6. */
   ['Место: клетка', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00.PB', [['ученик', '']]],
   ['Место: пустое', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00.P7', [['ученик', '']]],
-  ['Место: №8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check&sp=A', [['ученик', '']]],
+  [
+    'Место: №8',
+    '/zadaniya/vychisleniya/pechat/',
+    's=S1&n=10&l=base&seed=print-check&sp=A',
+    [['ученик', '']],
+  ],
   /* Общий генератор (ps=2): поле у листа ученика. «Всё одним PDF» — в
      test:variant (vseWithSpace): у его вариантов своя нумерация страниц. */
   [
     'Место: №9 из генератора',
-    '/zadaniya/9/pechat/',
+    '/zadaniya/proizvodnaya/pechat/',
     'ps=2&s=9.1.1:1,9.2.1:1,9.4.1:2&seed=print-check&sp=B',
     [['ученик', '']],
   ],
 
   [
     'Место: №6',
-    '/zadaniya/6/pechat/',
+    '/zadaniya/sluchainye-velichiny/pechat/',
     't=P01:2,P02:2,P03:2&i=m&v=1&e=0&st=v&seed=PRINT1&sp=B',
     [['ученик', '']],
     '',
@@ -114,60 +137,60 @@ const SHEETS = [
   /* №2 на общем генераторе: ключи позиций, QR-код, вид работы и дата. */
   [
     '№2 из генератора',
-    '/zadaniya/2/pechat/',
+    '/zadaniya/vektory/pechat/',
     'ps=2&s=A1:2,B3:2,B9:1,C1:1&seed=print-check&qr=1&d=2026-10-24',
   ],
   /* №12 на общем генераторе: подтема без подписей и все типы с «Запомни» и примером. */
   [
     '№12 из генератора',
-    '/zadaniya/12/quadratic/pechat/',
+    '/zadaniya/grafiki-funkciy/quadratic/pechat/',
     'ps=2&s=12Q.A:2,12Q.B:2,12Q.E:2&l=lucky&seed=print-check&qr=1&d=2026-10-24',
   ],
   [
     '№12 все типы',
-    '/zadaniya/12/generator/pechat/',
+    '/zadaniya/grafiki-funkciy/generator/pechat/',
     'ps=2&s=12.A:1,12Q.B:1,12R.A:1,12S.A:1,12E.A:1,12L.A:1,12T.A:1&seed=print-check&th=1&pr=1',
   ],
   /* №9 на общем генераторе: «Запомни», пример, рисунки учителя, QR-код, урок серии. */
   [
     '№9 из генератора',
-    '/zadaniya/9/pechat/',
+    '/zadaniya/proizvodnaya/pechat/',
     'ps=2&s=9.1.1:1,9.2.1:1,9.4.1:2,9.5.4:1&seed=print-check&tr=1&r=1&u=1&qr=1&d=2026-10-24',
   ],
   /* №8 на общем генераторе: ключи позиций, уровень, QR-код и дата. */
   [
     '№8 из генератора',
-    '/zadaniya/8/pechat/',
+    '/zadaniya/vychisleniya/pechat/',
     'ps=2&s=8.A:2,8.H:2,8.M:2,8.T:1,8.W:1&l=advanced&seed=print-check&qr=1&d=2026-10-24',
   ],
   /* №11 с «Дополнительно» общего генератора: рамка теории, примеры,
      QR-код, вид работы и дата в шапке. */
   [
     '№11 с «Дополнительно»',
-    '/zadaniya/11/pechat/',
+    '/zadaniya/tekstovye-zadachi/pechat/',
     'm=o&i=n&ps=2&s=VD-01:1,VD-02:2,VD-05:1&seed=print-check&tr=1&pr=2&qr=1&vr=dz&d=2026-10-24',
   ],
   /* №1 на общем генераторе: чертежи, рамка «Повторяем» с примером, QR. */
   [
     '№1 с «Дополнительно»',
-    '/zadaniya/1/pechat/',
+    '/zadaniya/planimetriya/pechat/',
     'm=v&i=m&ps=2&s=p01:1,p13:1,p24:1,p41:1&seed=print-check&tr=1&pr=1&qr=1',
   ],
   /* №3 на общем генераторе: чертежи-сценарии (I–III) и SVG тел вращения, QR. */
   [
     '№3 генератор',
-    '/zadaniya/3/pechat/',
+    '/zadaniya/stereometriya/pechat/',
     'i=m&s=P03-19:1,P03-26:1,P03-45:1,P03-55:1,P03-66:1,P03-72:1,P03-85:1&seed=print-check&qr=1&vr=dz&d=2026-10-24',
   ],
   /* №13: «Домашка» компактным листом и зачёт с полями для оформления. */
   [
     '№13',
-    '/zadaniya/13/pechat/',
+    '/zadaniya/ekonomika/pechat/',
     's=A:2,B:1,C:2,D:1&l=base&i=mix&h=ramka&f=compact&v=1&seed=print-check',
   ],
   [
     '№13 зачёт',
-    '/zadaniya/13/pechat/',
+    '/zadaniya/ekonomika/pechat/',
     's=A:5,B:5,C:5,D:5,T:10&l=all&i=mix&h=net&f=full&v=1&zc=1&seed=print-check',
   ],
   /* Генератор базы (lib/baza/sheetBazy.ts): №12 с чертежами условий,
@@ -193,11 +216,25 @@ const SHEETS = [
   ['Вариант', '/variant/pechat/', 'list=uchitel&kod=PR7T-407ZZ-00', [['учитель', '']]],
   ['Вариант', '/variant/pechat/', 'list=razbor&kod=PR7T-407ZZ-00', [['разбор', '']]],
   /* №13, «Для репетиторов»: лист урока 6 (опорные, банк, новые, «Определи тип») и карточки. */
-  ['№13 урок', '/zadaniya/13/pechat/', 's=&l=all&i=mix&h=net&f=compact&v=1&u=5&seed=print-check'],
-  ['№13 карточки', '/zadaniya/13/pechat/kartochki/', 'seed=print-check', [['карточки', '']]],
+  [
+    '№13 урок',
+    '/zadaniya/ekonomika/pechat/',
+    's=&l=all&i=mix&h=net&f=compact&v=1&u=5&seed=print-check',
+  ],
+  ['№13 карточки', '/zadaniya/ekonomika/pechat/kartochki/', 'seed=print-check', [['карточки', '']]],
   /* Справочник №1: один лист, с примерами и без; в две колонки. */
-  ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=1', [['с примерами', '']]],
-  ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=0', [['без примеров', '']]],
+  [
+    '№1 справочник',
+    '/zadaniya/planimetriya/pechat/spravochnik/',
+    'primery=1',
+    [['с примерами', '']],
+  ],
+  [
+    '№1 справочник',
+    '/zadaniya/planimetriya/pechat/spravochnik/',
+    'primery=0',
+    [['без примеров', '']],
+  ],
 ];
 
 /* Листы генератора — ученика и учителя; у справочника свои варианты. */
@@ -645,7 +682,7 @@ for (const [name, route, query, vidy, tail = TAIL] of SHEETS) {
 }
 
 /* Ключ ответов банка №2: лист без задач, только таблицы ответов. */
-for (const [name, route] of [['№2 ключ', '/zadaniya/2/pechat/klyuch/?t=print']]) {
+for (const [name, route] of [['№2 ключ', '/zadaniya/vektory/pechat/klyuch/?t=print']]) {
   const { page } = await openSheet(chrome, `${apache.url}${route}`);
   const syroy = syroyTex(await sheetText(page));
   check(syroy.length === 0, `${name}: сырой TeX на листе — ${syroy.join(', ')}`);

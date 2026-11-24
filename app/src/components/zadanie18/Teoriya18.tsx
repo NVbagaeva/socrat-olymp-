@@ -13,11 +13,11 @@ import {
 import { katex } from '@/lib/graph/katex';
 import { svgSkhemy } from '@/lib/skhemy/svg';
 import { VID_ISHODNYY } from '@/lib/skhemy/tipy';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { risunokTeorii18 } from '@/lib/zadanie18/teoriya';
 import '@/components/skhemy/skhemy.css';
 
-const BASE = `${ZADANIYA}/${ZADANIE18.slug}`;
+const BASE = `${razdelBase(ZADANIE18.slug)}`;
 /* Группа «g» — главное на чертеже теории: подсвечена всегда. */
 const SOST = { lit: new Set(['g']), shag: null, podpisi: true };
 
