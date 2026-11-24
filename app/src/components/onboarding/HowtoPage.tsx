@@ -8,6 +8,7 @@ import { HOWTO, type HowtoTabContent } from '@/content/kakPolzovatsya';
 import { howtoHref, type HowtoTab } from '@/content/onboarding';
 import { requestIntro, startTour } from '@/lib/onboarding';
 import { illustrationRamka } from '@/components/ui/illustrationRamka';
+import { assetUrl } from '@/lib/assetUrl';
 import './howto.css';
 
 /** Вкладка по умолчанию, когда в адресе её нет. */
@@ -59,13 +60,12 @@ export function HowtoView({ tab }: { tab: HowtoTab }) {
       </header>
 
       <div className="howto__top">
-        {/* Видео пока нет: спокойная заглушка, без кнопки воспроизведения. */}
         <section className="howto__video" aria-labelledby="howto-video">
-          <span className="badge badge--info">{HOWTO.videoSoon}</span>
-          <h2 className="howto__video-title" id="howto-video">
-            {content.video.title}
-          </h2>
-          <p className="howto__video-text">{content.video.text}</p>
+          <h2 className="howto__video-title" id="howto-video">Видео о сайте</h2>
+          <video className="howto__player" controls playsInline preload="metadata" aria-label="Видео о сайте Будет на ЕГЭ">
+            <source src={assetUrl('/video/budetege-tour-20261124.mp4')} type="video/mp4" />
+            Ваш браузер не поддерживает воспроизведение видео.
+          </video>
           <div className="howto__video-actions">
             {content.cta.tour !== undefined ? (
               <button type="button" className="btn btn--primary" onClick={() => startTour(tab, 0)}>

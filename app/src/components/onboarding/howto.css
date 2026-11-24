@@ -327,3 +327,11 @@
   gap: var(--space-3);
   margin-top: var(--space-4);
 }
+
+.howto__player {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  background: #0b1931;
+}

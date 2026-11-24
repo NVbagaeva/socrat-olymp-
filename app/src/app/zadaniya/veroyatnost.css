@@ -866,13 +866,11 @@
    убывает вместе с ним. Подписи так масштабировать нельзя: на
    телефоне они становились нечитаемыми, на мониторе — крупнее
    формулы решения. Поэтому кегль подписи задаётся в единицах
-   рисунка так, чтобы на экране выходил ровно токен:
-   токен × 760 / ширина плашки. Деление длины на длину в CSS
-   считается через tan(atan2()) — это единственный способ. На экране
-   подпись — --fs-caption: на ступень мельче формулы (--fs-body) и
-   выше нижнего предела читаемости при любой ширине. Браузер без
-   tan(atan2()) берёт строку выше — крупный кегль для сжатого
-   рисунка. Тренажёра это не касается — правила скоупятся плашкой.
+   рисунка ступенями по ширине контейнера (@container ниже), чтобы
+   на экране выходило около --fs-caption. Раньше кегль считался
+   через tan(atan2(760px, 100cqw)), но в Safari внутри SVG это не
+   работало и подписи пропадали. Тренажёра это не касается —
+   правила скоупятся плашкой.
 
    Гарнитура — та же, что у формулы: переменная курсивом
    математического шрифта KaTeX, цифры, скобки и знаки — прямым
@@ -894,50 +892,76 @@
 .vteor-shema .vizo-eyler__imya,
 .vteor-shema .vizo-eyler__chislo,
 .vteor-shema .pr-tochka__label {
-  font-size: var(--fs-h3);
-  font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
+  /* Кегль — в единицах рисунка (ширина 760) ступенями по ширине
+     контейнера: расчёт через cqw внутри SVG Safari не понимал, и
+     подписи пропадали. Ступени держат экранный кегль около токена. */
+  font-size: 19px;
 }
-/* Подпись под скобой — жирная и кеглем основного текста: итог
-   промежутка, а не пометка; подписи над лучами остаются мелкими. */
 .vteor-shema .pr-brace text {
-  font-size: calc(var(--fs-body) * tan(atan2(760px, 100cqw)));
+  font-size: 22px;
   font-weight: 700;
 }
-/* На узком чертеже (телефон) подписи лучей стоят слишком близко по
-   высоте для кегля --fs-caption и налезают друг на друга: там они
-   на ступень мельче, до нижнего предела 12px (--fs-label); подпись
-   под скобой — --fs-caption. */
+@container vteor-shema (max-width: 560px) {
+  .vteor-shema .pr-band-label,
+  .vteor-shema .pr-axis-name,
+  .vteor-shema .pr-tick text,
+  .vteor-shema .pr-sobytie__label,
+  .vteor-shema .vizo-eyler__imya,
+  .vteor-shema .vizo-eyler__chislo,
+  .vteor-shema .pr-tochka__label {
+    font-size: 24px;
+  }
+  .vteor-shema .pr-brace text {
+    font-size: 27px;
+  }
+}
 @container vteor-shema (max-width: 400px) {
   .vteor-shema .pr-band-label,
   .vteor-shema .pr-axis-name,
-  .vteor-shema .pr-tick text {
-    font-size: calc(var(--fs-label) * tan(atan2(760px, 100cqw)));
+  .vteor-shema .pr-tick text,
+  .vteor-shema .pr-sobytie__label,
+  .vteor-shema .vizo-eyler__imya,
+  .vteor-shema .vizo-eyler__chislo,
+  .vteor-shema .pr-tochka__label {
+    font-size: 36px;
   }
   .vteor-shema .pr-brace text {
-    font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
+    font-size: 40px;
   }
 }
 .vteor-shema .pr-tick text {
-  /* Подпись деления стоит на 26 единиц рисунка под осью; на
-     сжатом рисунке это меньше высоты цифры, и она упирается в
-     ось. Опускаем на ступень сетки — тоже в экранных пикселях. */
-  translate: 0 12px;
-  translate: 0 calc(var(--space-2) * tan(atan2(760px, 100cqw)));
+  /* Подпись деления стоит на 26 единиц рисунка под осью; на сжатом
+     рисунке крупная цифра упирается в ось — опускаем. Сдвиги, как и
+     кегль, — в единицах рисунка, ступенями по ширине. */
+  translate: 0 8px;
 }
 .vteor-shema .pr-brace {
-  /* Скоба стоит на 34 единицы под осью и на сжатом рисунке
-     упирается в подписи делений, которые на экране не сжимаются.
-     Опускаем её на столько, чтобы между подписью деления и скобой
-     осталась ступень сетки; на крупном рисунке сдвиг сходит
-     на нет. */
-  translate: 0 max(0px, calc(var(--space-3) * tan(atan2(760px, 100cqw)) - 8px));
+  translate: 0 6px;
 }
 .vteor-shema .pr-brace text {
-  /* Подпись скобы стоит на 28 единиц под ней; на сжатом рисунке
-     это меньше высоты буквы. Держим на экране высоту буквы и
-     ступень сетки: --fs-caption + --space-1. */
-  translate: 0
-    max(0px, calc((var(--fs-caption) + var(--space-1)) * tan(atan2(760px, 100cqw)) - 28px));
+  translate: 0 4px;
+}
+@container vteor-shema (max-width: 560px) {
+  .vteor-shema .pr-tick text {
+    translate: 0 12px;
+  }
+  .vteor-shema .pr-brace {
+    translate: 0 14px;
+  }
+  .vteor-shema .pr-brace text {
+    translate: 0 10px;
+  }
+}
+@container vteor-shema (max-width: 400px) {
+  .vteor-shema .pr-tick text {
+    translate: 0 16px;
+  }
+  .vteor-shema .pr-brace {
+    translate: 0 22px;
+  }
+  .vteor-shema .pr-brace text {
+    translate: 0 16px;
+  }
 }
 .vteor-shema .pr-axis-line,
 .vteor-shema .pr-tick line {
@@ -1628,8 +1652,8 @@
   max-width: 28ch;
   margin: 0;
   color: var(--color-primary);
-  font-size: clamp(18px, 1.25vw, 21px);
-  line-height: 1.45;
+  font-size: clamp(22px, 1.6vw, 27px);
+  line-height: 1.4;
   text-align: center;
   overflow-wrap: anywhere;
 }
