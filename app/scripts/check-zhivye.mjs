@@ -27,6 +27,7 @@ const T13 = requireSrc('content/zhivye13.ts');
 const P18 = requireSrc('lib/zhivye/parametr18.ts');
 const Z19 = requireSrc('lib/zadanie19/zhivye.ts');
 const T18 = requireSrc('content/zhivye18.ts');
+const T11 = requireSrc('content/zhivye11.ts');
 
 const failures = [];
 let checks = 0;
@@ -248,9 +249,40 @@ check(
   }
 }
 
+/* ── №11: экскурсии живых графиков ── */
+{
+  const nach = [
+    ['парабола', T11.KADRY_PARABOLY, { a: 2, c: 0 }],
+    ['тригонометрия', T11.KADRY_TRIG, { fn: 'cos', a: 2, b: 0 }],
+    ['логарифм', T11.KADRY_LOG, { baseIndex: 3, b: 0, kIndex: 1, mode: 'y', mirror: false }],
+    ['показательная', T11.KADRY_EXP, { baseIndex: 3, b: 0, kIndex: 1, mode: 'y' }],
+  ];
+  for (const [imya, kadry, s0] of nach) {
+    check(kadry.length >= 5, `№11 ${imya}: кадров ${kadry.length}`);
+    check(
+      JSON.stringify(kadry[0].s) === JSON.stringify(s0),
+      `№11 ${imya}: первый кадр — начальные значения ползунков`,
+    );
+    check(
+      kadry.every((k) => /\$/.test(k.tex)),
+      `№11 ${imya}: у каждого кадра пояснение с формулой`,
+    );
+  }
+  for (const k of [...T11.KADRY_LOG, ...T11.KADRY_EXP]) {
+    check(
+      k.s.baseIndex >= 0 && k.s.baseIndex <= 5 && k.s.kIndex >= 0 && k.s.kIndex <= 3,
+      '№11: индексы основания и k в пределах ползунков',
+    );
+  }
+  for (let u = 0; u <= 1; u += 0.01) {
+    const s = T11.smeshatTrig({ fn: 'cos', a: 1, b: 0 }, { fn: 'cos', a: -1, b: 0 }, u);
+    check(Math.abs(s.a) >= 0.1 - 1e-12, '№11: размах тригонометрии не проходит через 0');
+  }
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6, T13, T18], (k, val) =>
+  const vse = JSON.stringify([T8, T6, T13, T18, T11], (k, val) =>
     typeof val === 'function' ? String(val) : val,
   );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');
