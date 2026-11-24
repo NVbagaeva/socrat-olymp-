@@ -34,6 +34,8 @@ const O12 = requireSrc('lib/zhivye/otrezok12.ts');
 const T12 = requireSrc('content/zhivye12.ts');
 const K16 = requireSrc('lib/zhivye/kredit16.ts');
 const T16 = requireSrc('content/zhivye16.ts');
+const P1 = requireSrc('lib/zhivye/planimetriya1.ts');
+const T1 = requireSrc('content/zhivye1.ts');
 
 const failures = [];
 let checks = 0;
@@ -420,9 +422,61 @@ check(
   check(T16.KREDIT16.status.konecDif('10', '2').includes('$10$'), '№16: итог диф. подставляется');
 }
 
+/* ── №1: вписанный угол и сумма углов ── */
+{
+  for (let t = 0; t <= 3 + 1e-9; t += 0.005) {
+    const v = P1.vp(t);
+    check(
+      Math.abs(v.vpisannyy - v.centralnyy / 2) < 1e-6,
+      `№1 вписанный: половина центрального при t=${t.toFixed(3)}`,
+    );
+    if (t <= 2)
+      check(
+        Math.abs(v.vpisannyy - 40) < 1e-6,
+        `№1 вписанный: на первой части 40° (t=${t.toFixed(3)})`,
+      );
+    const arcA = v.a + 360;
+    check(v.c > v.b && v.c < arcA, `№1 вписанный: C на большой дуге (t=${t.toFixed(3)})`);
+  }
+  check(Math.abs(P1.vp(3).vpisannyy - 90) < 1e-6, '№1 вписанный: в конце 90°');
+  const [s1, s2, s3] = P1.OSTANOVKI_VP;
+  check(
+    P1.vp(s1).centr === 'na-storone' && P1.vp(s3).centr === 'na-storone',
+    '№1 вписанный: остановки — сторона через центр',
+  );
+  check(
+    P1.vp(s2).centr === 'vnutri' && P1.vp(0.1).centr === 'vne' && P1.vp(1.9).centr === 'vne',
+    '№1 вписанный: центр внутри и вне угла',
+  );
+  for (const tr of P1.TREUGOLNIKI) {
+    const { A, B, C, beta } = P1.vershiny(tr);
+    check(
+      Math.abs(P1.ugol(B, A, C) - tr.alfa) < 1e-6 &&
+        Math.abs(P1.ugol(A, C, B) - tr.gamma) < 1e-6 &&
+        Math.abs(P1.ugol(A, B, C) - beta) < 1e-6,
+      `№1 сумма ${tr.id}: углы треугольника совпадают`,
+    );
+    const k = P1.summa(tr, 3);
+    check(
+      Math.abs(k.klinA.ot - 180) < 1e-9 && Math.abs(k.klinA.do - k.klinB.ot) < 1e-9,
+      `№1 сумма ${tr.id}: угол A встал вплотную к B`,
+    );
+    check(
+      Math.abs(k.klinB.do - k.klinC.ot) < 1e-9 && Math.abs(k.klinC.do - 360) < 1e-9,
+      `№1 сумма ${tr.id}: угол C встал вплотную к B`,
+    );
+    check(
+      Math.hypot(k.klinA.v[0] - B[0], k.klinA.v[1] - B[1]) < 1e-9 &&
+        Math.hypot(k.klinC.v[0] - B[0], k.klinC.v[1] - B[1]) < 1e-9,
+      `№1 сумма ${tr.id}: углы приехали в B`,
+    );
+    check(T1.SUMMA1.vidy[tr.id] !== undefined, `№1 сумма ${tr.id}: есть название`);
+  }
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15, T12, T16], (k, val) =>
+  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15, T12, T16, T1], (k, val) =>
     typeof val === 'function' ? String(val) : val,
   );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');

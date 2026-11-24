@@ -1,0 +1,115 @@
+/* Живые сцены справочника №1 (планиметрия). Общее — ../zhivye.css. */
+.zv1-vybor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.zv1-vybor-zag {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.zv1-vybor .zv-seg {
+  flex-wrap: wrap;
+  border-radius: 18px;
+}
+.zv1-okr {
+  fill: rgba(255, 255, 255, 0.55);
+  stroke: #12306e;
+  stroke-width: 1.8;
+  filter: drop-shadow(0 6px 12px rgba(18, 48, 110, 0.14));
+}
+.zv1-duga {
+  fill: none;
+  stroke: var(--zv-zhar);
+  stroke-width: 5;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+.zv1-radius {
+  stroke: var(--zv-sin);
+  stroke-width: 2;
+}
+.zv1-storona {
+  stroke: #12306e;
+  stroke-width: 2.2;
+}
+.zv1-klin-o {
+  fill: rgba(31, 95, 208, 0.18);
+  stroke: var(--zv-sin);
+  stroke-width: 1.4;
+}
+.zv1-klin-c {
+  fill: rgba(240, 138, 36, 0.28);
+  stroke: var(--zv-zhar);
+  stroke-width: 1.6;
+}
+.zv1-klin-c.is-pryamoy {
+  fill: rgba(240, 138, 36, 0.45);
+}
+.zv1-tochka {
+  fill: #12306e;
+  stroke: #fff;
+  stroke-width: 2;
+}
+.zv1-tochka.is-c {
+  fill: var(--zv-zhar);
+  filter: drop-shadow(0 0 6px rgba(240, 138, 36, 0.7));
+}
+.zv1-tochka-o {
+  fill: var(--zv-sin);
+}
+.zv1-bukva {
+  font-size: 16px;
+  font-weight: 800;
+  font-style: italic;
+  fill: #12306e;
+}
+.zv1-treug {
+  fill: rgba(255, 255, 255, 0.6);
+  stroke: #12306e;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+.zv1-parallel {
+  stroke: var(--zv-sin);
+  stroke-width: 2;
+  stroke-dasharray: 8 5;
+}
+.zv1-ugol {
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.zv1-ugol.is-a {
+  fill: rgba(240, 138, 36, 0.75);
+}
+.zv1-ugol.is-b {
+  fill: rgba(31, 95, 208, 0.6);
+}
+.zv1-ugol.is-c {
+  fill: rgba(30, 150, 110, 0.7);
+}
+.zv1-ugol.is-sled {
+  fill: rgba(18, 48, 110, 0.08);
+  stroke: rgba(18, 48, 110, 0.35);
+  stroke-dasharray: 3 3;
+}
+.zv-podpis.is-zel text {
+  fill: #13724f;
+}
+.zv1-itog path {
+  fill: none;
+  stroke: #12306e;
+  stroke-width: 1.6;
+  stroke-dasharray: 4 4;
+}
+.zv1-itog text {
+  font-size: 16px;
+  font-weight: 800;
+  fill: #12306e;
+}

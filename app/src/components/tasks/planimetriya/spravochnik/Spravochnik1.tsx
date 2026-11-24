@@ -14,6 +14,7 @@ import { renderPlan } from '@/lib/planimetriya/render';
 import { Poisk1 } from './Poisk1';
 import { Nazad1 } from './Nazad1';
 import { SkachatIkonka1, SkachatPdf1 } from './SkachatPdf1';
+import { ZhivayaSumma1, ZhivoyVpisannyy1 } from '@/components/zhivye/planimetriya1/Zhivye1';
 import { TemaKartochka1 } from './TemaKartochka1';
 
 /** Заголовок темы для содержания: без TeX, «$30^\\circ$» → «30°». */
@@ -68,6 +69,9 @@ function Razdel({ r, trenazher }: { r: Razdel1; trenazher?: (proto: number) => s
           <TemaKartochka1 t={t} trenazher={trenazher} key={t.id} />
         ))}
       </ul>
+      {/* Живые сцены: в «Треугольнике» и «Окружности» — после карточек. */}
+      {r.id === 'treugolnik' ? <ZhivayaSumma1 /> : null}
+      {r.id === 'okruzhnost' ? <ZhivoyVpisannyy1 /> : null}
     </div>
   );
 }
