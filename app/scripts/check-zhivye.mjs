@@ -21,6 +21,8 @@ const T8 = requireSrc('content/zhivye8.ts');
 const K6 = requireSrc('lib/zhivye/krug6.ts');
 const TRIG = requireSrc('lib/zadanie7/trig.ts');
 const T6 = requireSrc('content/zhivye6.ts');
+const K13 = requireSrc('lib/zhivye/krug13.ts');
+const T13 = requireSrc('content/zhivye13.ts');
 
 const failures = [];
 let checks = 0;
@@ -148,9 +150,61 @@ for (const fn of ['sin', 'cos', 'tg']) {
   }
 }
 
+/* ── №13: угол и деление окружности ── */
+progon(K13.HOD_UGLA, '№13 угол');
+check(K13.UGOL_MAX === 13 / 3, '№13: путь до 13π/3');
+for (let k = 0; k <= 52; k += 1) {
+  const x = k / 12;
+  const ex = K13.tochno(x);
+  const tablichnyy = k % 2 === 0 || k % 3 === 0;
+  check(
+    (ex !== null) === tablichnyy,
+    `№13: точные значения на ${k}π/12 — ${tablichnyy ? 'есть' : 'нет'}`,
+  );
+}
+const ob = K13.oboroty(13 / 3);
+check(ob.n === 2 && Math.abs(ob.ostatok - 1 / 3) < 1e-9, '№13: 13π/3 = 4π + π/3');
+for (const m of K13.MAKETY) {
+  progon(K13.hodMaketa(m), `№13 деление ${m.id}`);
+  check(
+    T13.DELENIE13.makety[m.id].shagi.length === m.shagi.length,
+    `№13 ${m.id}: текст на каждый шаг`,
+  );
+  let prev = -1;
+  for (let i = 0; i <= (m.shagi.length - 1) * 20; i += 1) {
+    const d = K13.duga(m, i / 20);
+    check(d >= prev - 1e-12, `№13 ${m.id}: дуга не убывает`);
+    prev = d;
+  }
+  for (let i = 0; i < m.shagi.length; i += 1) {
+    check(
+      Math.abs(K13.duga(m, i) - K13.konecShaga(m, i)) < 1e-12,
+      `№13 ${m.id}: на шаге ${i} дуга до последней точки`,
+    );
+  }
+  const vse = K13.vidnyeTochki(m, m.shagi.length - 1);
+  const nado = m.fon.length + m.shagi.reduce((s, x) => s + x.tochki.length, 0);
+  check(vse.length === nado, `№13 ${m.id}: к концу видны все точки`);
+  for (const {
+    tochka: [a, b],
+  } of vse) {
+    const shag = 2 / m.delenie;
+    check(
+      Math.abs(a / b / shag - Math.round(a / b / shag)) < 1e-9,
+      `№13 ${m.id}: точка ${a}/${b}π на делении`,
+    );
+  }
+}
+check(
+  K13.ugolText(4, 6) === '2π/3' && K13.ugolText(2, 1) === '2π' && K13.ugolText(1, 2) === 'π/2',
+  '№13: подписи углов',
+);
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6], (k, val) => (typeof val === 'function' ? String(val) : val));
+  const vse = JSON.stringify([T8, T6, T13], (k, val) =>
+    typeof val === 'function' ? String(val) : val,
+  );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');
 }
 
