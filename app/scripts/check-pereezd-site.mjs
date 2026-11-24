@@ -12,6 +12,8 @@
        https://budetege.ru/<новый адрес>; новый адрес отвечает 200 и это
        не заглушка «Страница переехала»;
      — строка запроса переносится (?a=1);
+     — PDF в материалах (src/content/pereezd/starye-pdf.json): старое имя —
+       один 301 на новое, с версией ?v=… тоже; новое отдаётся как PDF;
      — адреса скрытого раздела по номеру (/zadaniya/6/…) — 404;
      — в браузере старый адрес с якорем открывает новый с тем же якорем;
      — заглушка прежнего адреса (index.txt, переход внутри сайта) есть в
@@ -31,6 +33,9 @@ if (!fs.existsSync(path.join(OUT, 'index.html'))) {
 }
 const STARYE = JSON.parse(
   fs.readFileSync(path.join(APP, 'src/content/pereezd/starye-adresa.json'), 'utf8'),
+);
+const STARYE_PDF = JSON.parse(
+  fs.readFileSync(path.join(APP, 'src/content/pereezd/starye-pdf.json'), 'utf8'),
 );
 const PORT = 8000 + Math.floor(Math.random() * 1000);
 const HOST = 'https://budetege.ru';
@@ -59,7 +64,12 @@ function request(url) {
           if (body.length < 4000) body += c;
         });
         res.on('end', () =>
-          resolve({ status: res.statusCode, location: res.headers.location, body }),
+          resolve({
+            status: res.statusCode,
+            location: res.headers.location,
+            type: res.headers['content-type'] ?? '',
+            body,
+          }),
         );
       },
     );
@@ -96,6 +106,23 @@ try {
       r.status === 301 && r.location === `${HOST}/zadaniya/uravneniya/trenazher/?a=1&b=2`,
       `строка запроса: ${r.status} ${r.location}`,
     );
+  }
+  /* 3а. PDF в материалах: старое имя — один 301 на новое (и с версией
+     ?v=…), новое отдаётся как PDF, старого файла в сборке нет. */
+  for (const [staryy, novyy] of Object.entries(STARYE_PDF)) {
+    for (const q of ['', '?v=1a2b3c4d']) {
+      const r = await request(staryy + q);
+      check(
+        r.status === 301 && r.location === HOST + novyy + q,
+        `${staryy}${q} → ${r.status} ${r.location ?? ''}, нужно 301 ${HOST}${novyy}${q}`,
+      );
+    }
+    const r = await request(novyy);
+    check(
+      r.status === 200 && r.type.startsWith('application/pdf'),
+      `${novyy} → ${r.status} ${r.type}`,
+    );
+    check(!fs.existsSync(path.join(OUT, staryy)), `в сборке остался старый файл ${staryy}`);
   }
   /* 4. Скрытый раздел по номеру — 404, без 301. */
   for (const a of [

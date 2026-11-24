@@ -10,7 +10,7 @@
    Лист — тот же, что собирает генератор (lib/zadanie13/gen/sheet.ts):
    пресет, постоянный seed, задачи считает движок. В этом файле ни
    одного условия и ни одного ответа нет. Листы ученика ложатся в
-   public/materials/zadanie-13, листы учителя — только в pdf-private
+   public/materials/ekonomika, листы учителя — только в pdf-private
    (lib/sheet/outputs.js). QR ведёт на онлайн-набор на budetege.ru.
 */
 
@@ -20,10 +20,12 @@ import { fileURLToPath } from 'node:url';
 
 import { requireSrc } from './lib/load-ts.mjs';
 import { buildSheet } from './lib/sheet-build.mjs';
+import { kod } from './lib/adres.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
-const SECTION = 'zadanie-13';
+/* Папка в public/materials — по коду раздела (lib/adres.mjs). */
+const SECTION = kod(13);
 const SITE = 'https://budetege.ru';
 
 const P = requireSrc('lib/zadanie13/gen/params.ts');

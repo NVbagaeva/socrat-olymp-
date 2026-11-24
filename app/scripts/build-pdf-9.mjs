@@ -31,10 +31,12 @@ import content from '../src/content/sheet9.js';
 import { requireSrc } from './lib/load-ts.mjs';
 import { buildSheet } from './lib/sheet-build.mjs';
 import { withPrintFigures } from '../src/lib/sheet/figureRules.js';
+import { kod } from './lib/adres.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
-const SECTION = 'zadanie-9';
+/* Папка в public/materials — по коду раздела (lib/adres.mjs). */
+const SECTION = kod(9);
 
 const S9 = requireSrc('lib/proizvodnaya/sheet9.ts');
 const { GRUPPY, prototypesOfGroup } = requireSrc('lib/proizvodnaya/skills.ts');

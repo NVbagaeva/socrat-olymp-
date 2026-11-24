@@ -5,6 +5,8 @@ import '@/lib/graph/families/trig.js';
 import { katex } from '@/lib/graph/katex';
 import { renderGraph } from '@/lib/graph/renderer.js';
 import { Tex } from '@/components/ui/Tex';
+import { EkskursiyaPanel, useEkskursiya } from '@/components/zhivye/Ekskursiya';
+import { KADRY_TRIG, smeshatTrig } from '@/content/zhivye11';
 
 type Fn = 'cos' | 'sin' | 'tg';
 
@@ -50,11 +52,25 @@ function formulaOf(fn: Fn, a: number, b: number): string {
  */
 export function TrigPlayground() {
   const id = useId();
-  const [fn, setFn] = useState<Fn>('cos');
-  const [aIndex, setAIndex] = useState(9);
-  const [bIndex, setBIndex] = useState(6);
-  const a = AS[aIndex] ?? 2;
-  const b = BS[bIndex] ?? 0;
+  const [fnR, setFn] = useState<Fn>('cos');
+  const [aIndexR, setAIndex] = useState(9);
+  const [bIndexR, setBIndex] = useState(6);
+  /* Экскурсия (components/zhivye/Ekskursiya): пока идёт показ, функция и
+     параметры — из кадров; тронул переключатель или ползунок — свои. */
+  const ek = useEkskursiya(KADRY_TRIG, smeshatTrig);
+  const blizhayshiy = (spisok: number[], v: number) =>
+    spisok.reduce((best, x, i) => (Math.abs(x - v) < Math.abs((spisok[best] ?? 0) - v) ? i : best), 0);
+  const vzyat = () =>
+    ek.vRuchnoy((x) => {
+      setFn(x.fn);
+      setAIndex(blizhayshiy(AS, x.a));
+      setBIndex(blizhayshiy(BS, x.b));
+    });
+  const fn = ek.s?.fn ?? fnR;
+  const a = ek.s === null ? (AS[aIndexR] ?? 2) : Math.round(ek.s.a * 100) / 100;
+  const b = ek.s === null ? (BS[bIndexR] ?? 0) : Math.round(ek.s.b * 100) / 100;
+  const aIndex = ek.s === null ? aIndexR : blizhayshiy(AS, a);
+  const bIndex = ek.s === null ? bIndexR : blizhayshiy(BS, b);
   const win = windowFor(fn, a, b);
 
   const svg = useMemo(() => {
@@ -114,6 +130,7 @@ export function TrigPlayground() {
       <p className="play__lead">
         <Tex text="Переключай функцию, двигай ползунки и смотри, как $a$ растягивает график, а $b$ поднимает и опускает его." />
       </p>
+      <EkskursiyaPanel panel={ek.panel} />
       <div className="play__body">
         <div className="play__stage">
           <p className="play__formula" dangerouslySetInnerHTML={{ __html: formulaHtml }} />
@@ -133,7 +150,10 @@ export function TrigPlayground() {
                     type="button"
                     className="play__preset"
                     aria-pressed={fn === name}
-                    onClick={() => setFn(name)}
+                    onClick={() => {
+                      vzyat();
+                      setFn(name);
+                    }}
                   >
                     <Tex text={`$${FN_TEX[name]} x$`} />
                   </button>
@@ -155,7 +175,11 @@ export function TrigPlayground() {
               step={1}
               value={aIndex}
               aria-valuetext={`a = ${plain(a)}`}
-              onChange={(event) => setAIndex(Number(event.target.value))}
+              onChange={(event) => {
+                const v = Number(event.target.value);
+                vzyat();
+                setAIndex(v);
+              }}
             />
             <p className="play__hint">
               <Tex text="Нуля на ползунке нет: при $a = 0$ функция постоянна. Отрицательное $a$ переворачивает график." />
@@ -175,7 +199,11 @@ export function TrigPlayground() {
               step={1}
               value={bIndex}
               aria-valuetext={`b = ${plain(b)}`}
-              onChange={(event) => setBIndex(Number(event.target.value))}
+              onChange={(event) => {
+                const v = Number(event.target.value);
+                vzyat();
+                setBIndex(v);
+              }}
             />
             <p className="play__hint">
               <Tex text="Весь график сдвигается вверх или вниз на $b$ вместе с пунктиром." />

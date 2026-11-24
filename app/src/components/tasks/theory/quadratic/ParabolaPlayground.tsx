@@ -1,7 +1,9 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
+import { EkskursiyaPanel, smeshatChisla, useEkskursiya } from '@/components/zhivye/Ekskursiya';
 import { playground } from '@/content/theoryQuadratic';
+import { KADRY_PARABOLY } from '@/content/zhivye11';
 import { katex } from '@/lib/graph/katex';
 import { renderGraph } from '@/lib/graph/renderer.js';
 import { playgroundScene } from '@/lib/scenes';
@@ -59,16 +61,26 @@ function clamp(value: number, min: number, max: number): number {
 export function ParabolaPlayground() {
   const [a, setA] = useState<number>(playground.a.initial);
   const [c, setC] = useState<number>(playground.c.initial);
+  /* Экскурсия (components/zhivye/Ekskursiya): пока идёт показ, параметры —
+     из кадров; тронул ползунок — снова свои. */
+  const ek = useEkskursiya(KADRY_PARABOLY, smeshatChisla);
+  const va = ek.s === null ? a : Math.round(ek.s.a * 100) / 100;
+  const vc = ek.s === null ? c : Math.round(ek.s.c * 100) / 100;
+  const vzyat = () =>
+    ek.vRuchnoy((x) => {
+      setA(Math.round(x.a * 100) / 100);
+      setC(Math.round(x.c * 100) / 100);
+    });
   const id = useId();
   const aId = `${id}-a`;
   const cId = `${id}-c`;
 
-  const svg = useMemo(() => renderGraph(playgroundScene(a, c)) as string, [a, c]);
+  const svg = useMemo(() => renderGraph(playgroundScene(va, vc)) as string, [va, vc]);
   const formulaHtml = useMemo(
-    () => katex.renderToString(formulaOf(a, c), { throwOnError: false, displayMode: false }),
-    [a, c],
+    () => katex.renderToString(formulaOf(va, vc), { throwOnError: false, displayMode: false }),
+    [va, vc],
   );
-  const words = describe(a, c);
+  const words = describe(va, vc);
 
   return (
     <section className="play" aria-labelledby={`${id}-title`}>
@@ -78,6 +90,7 @@ export function ParabolaPlayground() {
       <p className="play__lead">
         <Phrases parts={phrases(playground.lead)} />
       </p>
+      <EkskursiyaPanel panel={ek.panel} />
 
       <div className="play__body">
         <div className="play__stage">
@@ -87,8 +100,8 @@ export function ParabolaPlayground() {
           <div className="play__chart" dangerouslySetInnerHTML={{ __html: svg }} />
           <p className="play__describe" aria-live="polite">
             {words}
-            {a === 0 ? '. ' : ''}
-            {a === 0 ? <span className="play__zero"><Phrases parts={phrases(playground.zero)} /></span> : null}
+            {va === 0 ? '. ' : ''}
+            {va === 0 ? <span className="play__zero"><Phrases parts={phrases(playground.zero)} /></span> : null}
           </p>
         </div>
 
@@ -96,7 +109,7 @@ export function ParabolaPlayground() {
           <div className="play__field">
             <label className="play__label" htmlFor={aId}>
               <Phrases parts={phrases(playground.a.label)} />
-              <span className="play__value">a = {plain(a)}</span>
+              <span className="play__value">a = {plain(va)}</span>
             </label>
             <input
               className="play__range"
@@ -105,10 +118,14 @@ export function ParabolaPlayground() {
               min={playground.a.min}
               max={playground.a.max}
               step={playground.a.step}
-              value={clamp(a, playground.a.min, playground.a.max)}
+              value={clamp(va, playground.a.min, playground.a.max)}
               aria-label={playground.a.aria}
-              aria-valuetext={`a = ${plain(a)}`}
-              onChange={(event) => setA(Number(event.target.value))}
+              aria-valuetext={`a = ${plain(va)}`}
+              onChange={(event) => {
+                const v = Number(event.target.value);
+                vzyat();
+                setA(v);
+              }}
             />
             <div className="play__presets" role="group" aria-label={playground.presets.title}>
               <span className="play__presets-title">{playground.presets.title}</span>
@@ -121,8 +138,11 @@ export function ParabolaPlayground() {
                         type="button"
                         className="play__preset"
                         key={preset}
-                        aria-pressed={a === preset}
-                        onClick={() => setA(preset)}
+                        aria-pressed={va === preset}
+                        onClick={() => {
+                          vzyat();
+                          setA(preset);
+                        }}
                       >
                         {plain(preset).replace('-', '−')}
                       </button>
@@ -137,7 +157,7 @@ export function ParabolaPlayground() {
           <div className="play__field">
             <label className="play__label" htmlFor={cId}>
               <Phrases parts={phrases(playground.c.label)} />
-              <span className="play__value">c = {plain(c)}</span>
+              <span className="play__value">c = {plain(vc)}</span>
             </label>
             <input
               className="play__range"
@@ -146,10 +166,14 @@ export function ParabolaPlayground() {
               min={playground.c.min}
               max={playground.c.max}
               step={playground.c.step}
-              value={c}
+              value={vc}
               aria-label={playground.c.aria}
-              aria-valuetext={`c = ${plain(c)}`}
-              onChange={(event) => setC(Number(event.target.value))}
+              aria-valuetext={`c = ${plain(vc)}`}
+              onChange={(event) => {
+                const v = Number(event.target.value);
+                vzyat();
+                setC(v);
+              }}
             />
           </div>
         </div>

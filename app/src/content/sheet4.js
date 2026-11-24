@@ -127,10 +127,10 @@ export const podskazki = {
 
 /** Названия файлов сборника. */
 export const files = {
-  uchenik: 'zadanie-4-teoriya-veroyatnostey-uchenik',
-  uchenikChb: 'zadanie-4-teoriya-veroyatnostey-uchenik-chb',
-  uchitel: 'zadanie-4-teoriya-veroyatnostey-uchitel',
-  uchitelChb: 'zadanie-4-teoriya-veroyatnostey-uchitel-chb',
+  uchenik: 'teoriya-veroyatnostey-uchenik',
+  uchenikChb: 'teoriya-veroyatnostey-uchenik-chb',
+  uchitel: 'teoriya-veroyatnostey-uchitel',
+  uchitelChb: 'teoriya-veroyatnostey-uchitel-chb',
 };
 
 const content = { head, foot, subtitle, recap, examples, sections, otvety, podskazki, files };
