@@ -13,6 +13,7 @@
 
    Запуск: node scripts/check-zhivye.mjs */
 
+import fs from 'node:fs';
 import { requireSrc } from './lib/load-ts.mjs';
 
 const H = requireSrc('lib/zhivye/hod.ts');
@@ -23,6 +24,9 @@ const TRIG = requireSrc('lib/zadanie7/trig.ts');
 const T6 = requireSrc('content/zhivye6.ts');
 const K13 = requireSrc('lib/zhivye/krug13.ts');
 const T13 = requireSrc('content/zhivye13.ts');
+const P18 = requireSrc('lib/zhivye/parametr18.ts');
+const Z19 = requireSrc('lib/zadanie19/zhivye.ts');
+const T18 = requireSrc('content/zhivye18.ts');
 
 const failures = [];
 let checks = 0;
@@ -200,9 +204,53 @@ check(
   '№13: подписи углов',
 );
 
+/* ── №18: параметр ── */
+{
+  const idy = [
+    ...fs
+      .readFileSync(new URL('../src/lib/zadanie19/zhivye.ts', import.meta.url), 'utf8')
+      .matchAll(/^  '(m\d\d-r\d)':/gm),
+  ].map((m) => m[1]);
+  check(idy.length >= 20, `№18: описаний живых рисунков ${idy.length}`);
+  for (const id of idy) {
+    const z = Z19.zhivoy19(id);
+    check(z !== undefined, `№18 ${id}: описание есть`);
+    if (z === undefined) continue;
+    const o = P18.hodParametra(z);
+    progon(o, `№18 ${id}`);
+    for (const x of z.osobye) {
+      const u = P18.uIzA(z, x.a);
+      check(Math.abs(P18.aIzU(z, u) - x.a) < 1e-9, `№18 ${id}: особое ${x.tex} на шкале точно`);
+      check(P18.naSetke(z, x.a) === x.a, `№18 ${id}: особое ${x.tex} не сдвигается сеткой`);
+    }
+    const ln = P18.lenta(z);
+    if (z.resheniy === undefined) {
+      check(ln === null, `№18 ${id}: без числа решений ленты нет`);
+      continue;
+    }
+    check(
+      ln !== null && ln.kuski[0].ot === 0 && ln.kuski.at(-1).do === 1,
+      `№18 ${id}: лента от начала до конца`,
+    );
+    for (let i = 1; i < ln.kuski.length; i += 1) {
+      check(
+        ln.kuski[i].ot === ln.kuski[i - 1].do && ln.kuski[i].n !== ln.kuski[i - 1].n,
+        `№18 ${id}: куски ленты стык в стык и разные`,
+      );
+    }
+    for (const t of ln.tochki) {
+      const x = z.osobye.find((y) => Math.abs(P18.uIzA(z, y.a) - t.u) < 1e-12);
+      check(
+        x !== undefined && z.resheniy(x.a) === t.n,
+        `№18 ${id}: точка ленты — особое значение с верным числом решений`,
+      );
+    }
+  }
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6, T13], (k, val) =>
+  const vse = JSON.stringify([T8, T6, T13, T18], (k, val) =>
     typeof val === 'function' ? String(val) : val,
   );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');
