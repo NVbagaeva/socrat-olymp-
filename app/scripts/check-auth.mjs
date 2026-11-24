@@ -218,6 +218,7 @@ const ALLOWED = new Set([
   'zhurnal-chuzhoy@yandex.ru',
   /* Этап 4б: ученик тренажёра по банку. */
   'zhurnal-bank@yandex.ru',
+  'zhurnal-bank2@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -3214,14 +3215,17 @@ function sdkOutsideFirstLoad() {
    экране выбора тем кладёт тренажёр «В домашку»; в №11 разминки в ДЗ не
    идут (кнопка берёт только типы адаптера). */
 async function runZhurnalBanka(mock, errors) {
-  registerInMock(mock, 'zhurnal-bank@yandex.ru', 'zhurnal-parol-1', 'Банк Ученик', 'student', {
-    birth_year: 2000,
-  });
+  /* У каждой ширины свой ученик: тренировка синхронизируется с аккаунтом,
+     и второй вход продолжил бы начатую. */
+  const uchenik = { 375: 'zhurnal-bank@yandex.ru', 1280: 'zhurnal-bank2@yandex.ru' };
+  for (const email of Object.values(uchenik)) {
+    registerInMock(mock, email, 'zhurnal-parol-1', 'Банк Ученик', 'student', { birth_year: 2000 });
+  }
   for (const width of [375, 1280]) {
     mock.zhurnal.length = 0;
     const { context, page } = await newPage(mock, width, errors);
     await welcomeSeen(context);
-    await login(page, 'zhurnal-bank@yandex.ru', 'zhurnal-parol-1');
+    await login(page, uchenik[width], 'zhurnal-parol-1');
     await page.goto(`${SITE}/zadaniya/uravneniya/trenazher/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.trn-start');
     await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
