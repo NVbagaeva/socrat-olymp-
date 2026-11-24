@@ -15,7 +15,7 @@ import {
 } from '@/content/kakPolzovatsya';
 import { howtoHref, type HowtoTab } from '@/content/onboarding';
 import { requestIntro, startTour } from '@/lib/onboarding';
-import { Kartinka, kartinkaSrc, snimokPut, type HowtoFaily } from './howto/Kartinka';
+import { Kartinka, kartinkaPut, kartinkaSrc, snimokPut, type HowtoFaily } from './howto/Kartinka';
 import { PriPoyavlenii } from './howto/PriPoyavlenii';
 import { Put } from './howto/Put';
 import { Video } from './howto/Video';
@@ -84,8 +84,8 @@ export function HowtoView({ tab, faily }: { tab: HowtoTab; faily: HowtoFaily }) 
           <div className="shapka__media" data-ill="header">
             <div className="howto-krug">
               <ZhivayaKartinka
-                src560={faily['/images/kak-polzovatsya/shapka-560.webp']!}
-                src280={faily['/images/kak-polzovatsya/shapka-280.webp']!}
+                src560={faily[kartinkaPut('shapka', 560)]!}
+                src280={faily[kartinkaPut('shapka', 280)]!}
                 alt={HOWTO.shapka.alt}
                 label={HOWTO.shapka.alt}
                 podskazka={HOWTO.shapka.podskazka}
