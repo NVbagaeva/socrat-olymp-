@@ -9,13 +9,13 @@ export function ProtivopolozhnoeSobytiye4() {
       <article className="v5-sobytiya__card">
         <h3>Что такое противоположное событие</h3>
         <p>
-          <Tex text="Событие $\\overline A$ противоположно событию $A$, если $A$ не произошло. Ровно одно из двух обязательно случается: либо $A$, либо $\\overline A$. Вместе они покрывают все возможные исходы и не имеют общих исходов." />
+          <Tex text="Событие $\overline A$ противоположно событию $A$, если $A$ не произошло. Ровно одно из двух обязательно случается: либо $A$, либо $\overline A$. Вместе они покрывают все возможные исходы и не имеют общих исходов." />
         </p>
-        <div className="v5-sobytiya__formula"><Tex text="$P(A)+P(\\overline A)=1,\\qquad P(\\overline A)=1-P(A)$" /></div>
+        <div className="v5-sobytiya__formula"><Tex text="$P(A)+P(\overline A)=1,\qquad P(\overline A)=1-P(A)$" /></div>
       </article>
       <article className="v5-sobytiya__card">
         <h3>Пример: не выпала шестёрка</h3>
-        <p><Tex text="Бросают правильную игральную кость. Событие $A$ — выпала шестёрка; противоположное событие $\\overline A$ — выпало любое другое число." /></p>
+        <p><Tex text="Бросают правильную игральную кость. Событие $A$ — выпала шестёрка; противоположное событие $\overline A$ — выпало любое другое число." /></p>
         <figure className="v5-sobytiya__figure v4-protivopolozhnoe__figure">
           <svg viewBox="0 0 660 205" role="img" aria-label="Шесть равновозможных исходов броска кости: числа от 1 до 5 выделены как противоположное событие, шестёрка отмечена отдельно">
             {[1, 2, 3, 4, 5, 6].map((n, i) => {
@@ -33,14 +33,14 @@ export function ProtivopolozhnoeSobytiye4() {
           </svg>
         </figure>
         <ol className="v5-sobytiya__steps">
-          <li><Tex text="У события $A$ один благоприятный исход из шести, значит, $P(A)=\\dfrac16$." /></li>
-          <li><Tex text="Тогда $P(\\overline A)=1-\\dfrac16=\\dfrac56$." /></li>
+          <li><Tex text="У события $A$ один благоприятный исход из шести, значит, $P(A)=\dfrac16$." /></li>
+          <li><Tex text="Тогда $P(\overline A)=1-\dfrac16=\dfrac56$." /></li>
           <li><Tex text="Проверка: числа $1,2,3,4,5$ — пять из шести исходов." /></li>
         </ol>
       </article>
       <aside className="v5-sobytiya__warning">
         <strong>Подсказка.</strong>{' '}
-        <Tex text="Слова «хотя бы один» часто проще считать через противоположное событие «ни одного»: $P(\\text{хотя бы один})=1-P(\\text{ни одного})$." />
+        <Tex text="Слова «хотя бы один» часто проще считать через противоположное событие «ни одного»: $P(\text{хотя бы один})=1-P(\text{ни одного})$." />
       </aside>
     </section>
   );
