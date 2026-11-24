@@ -45,6 +45,7 @@ const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 /** Папки иллюстраций со своей таблицей версий (lib/illyustraciiUrl.ts). */
 const ILLYUSTRACII = [
   '/images/zadanie-11/gorod-',
+  '/images/zadanie-04/metod-',
   '/images/zadanie-05/metod-',
 ];
 
@@ -137,7 +138,7 @@ const nextConfig: NextConfig = {
     // считает серверная шапка (SectionHeader), в браузер таблица не идёт.
     // Так же — картинки карточек и задач глав методов №4
     // (public/images/zadanie-04/metody/, …/primery/): METODY4_ASSET_VERSIONS,
-    // адреса считают серверные GlavaMetoda4 и MetodyKartochki4.
+    // адреса считает серверная GlavaMetoda4.
     ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(
@@ -153,7 +154,7 @@ const nextConfig: NextConfig = {
     ),
     // Иллюстрации живых сцен и карточек методов: ILLYUSTRACII_ASSET_VERSIONS,
     // её подставляет только lib/illyustraciiUrl.ts (ленивая сцена №10 и
-    // серверная карточка метода №5) — первая загрузка других страниц не растёт.
+    // серверные карточки методов №4 и №5) — первая загрузка других страниц не растёт.
     ILLYUSTRACII_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(([file]) =>

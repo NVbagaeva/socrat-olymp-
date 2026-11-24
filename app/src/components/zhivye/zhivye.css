@@ -1,0 +1,481 @@
+/* Живые сцены (components/zhivye): общие стили — таймлайн, сцена, подписи,
+   управление, таблица и решение. Грузятся вместе со сценой, лениво.
+   Синий #1f5fd0 — основное, тёплый #f08a24 — то, на что смотреть.
+   Подписи не мельче 13 px, кнопки — от 44 px. */
+
+.zv-osnova {
+  --zv-sin: #1f5fd0;
+  --zv-sin-text: #1a4fb0;
+  --zv-zhar: #f08a24;
+  --zv-zhar-text: #b4501c;
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* ── Секундомер-таймлайн ── */
+.zv-chasy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-1) var(--space-3);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(234, 241, 255, 0.7));
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.zv-sekundomer {
+  flex: none;
+  width: 44px;
+  height: 48px;
+}
+.zv-sekundomer line {
+  stroke: rgba(26, 79, 176, 0.45);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+.zv-sekundomer-krug {
+  fill: rgba(255, 255, 255, 0.92);
+  stroke: rgba(31, 95, 208, 0.35);
+  stroke-width: 1.2;
+}
+.zv-sekundomer-knopka {
+  fill: #12306e;
+}
+.zv-sekundomer .zv-sekundomer-strelka {
+  stroke: var(--zv-zhar);
+  stroke-width: 1.8;
+}
+.zv-sekundomer-os {
+  fill: #12306e;
+}
+.zv-lenta {
+  --thumb: 24px;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-top: 32px;
+}
+.zv-puzyr {
+  position: absolute;
+  top: 0;
+  /* Пузырь не выходит за края дорожки. */
+  left: clamp(52px, calc(var(--p) * (100% - var(--thumb)) + var(--thumb) / 2), calc(100% - 52px));
+  transform: translateX(-50%);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #12306e;
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.zv-puzyr .katex {
+  color: #fff;
+}
+.zv-polzunok {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: pan-y;
+}
+.zv-polzunok::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--zv-sin), var(--zv-zhar)) 0 0 / calc(var(--p) * 100%) 100% no-repeat,
+    rgba(31, 95, 208, 0.12);
+  box-shadow: inset 0 1px 2px rgba(18, 48, 110, 0.12);
+}
+.zv-polzunok::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--zv-sin), var(--zv-zhar)) 0 0 / calc(var(--p) * 100%) 100% no-repeat,
+    rgba(31, 95, 208, 0.12);
+}
+.zv-polzunok::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+  margin-top: -8px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.35),
+    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.zv-polzunok::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.35),
+    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+}
+.zv-polzunok:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.zv-metki {
+  position: relative;
+  height: 18px;
+  margin: -8px calc(var(--thumb) / 2) 0;
+}
+.zv-metki span {
+  position: absolute;
+  left: calc(var(--k) * 100%);
+  transform: translateX(-50%);
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.zv-metki span:first-child {
+  transform: none;
+  left: calc(var(--thumb) / -2);
+}
+.zv-metki span.is-proydena {
+  color: var(--zv-sin-text);
+}
+/* t₁ и t₂ — тёплые точки на дорожке. */
+.zv-tochka-snimka {
+  position: absolute;
+  top: -27px;
+  left: calc(var(--k) * 100%);
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--zv-zhar);
+  pointer-events: none;
+}
+.zv-tochka-snimka.is-proydena {
+  background: var(--zv-zhar);
+}
+
+/* ── Сцена ── */
+.zv-scena {
+  position: relative;
+  min-height: 330px;
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 90% at 6% 8%, rgba(31, 95, 208, 0.14), transparent 70%),
+    radial-gradient(60% 90% at 96% 8%, rgba(240, 138, 36, 0.14), transparent 70%),
+    linear-gradient(180deg, #f6f9ff 0%, #eef3fc 70%, #e4ecf9 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    inset 0 -24px 40px -30px rgba(31, 95, 208, 0.35),
+    0 18px 36px -28px rgba(18, 48, 110, 0.45);
+}
+@container zv (min-width: 560px) {
+  .zv-scena {
+    min-height: 380px;
+  }
+}
+.zv-scena:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 3px;
+}
+.zv-svg {
+  display: block;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.zv-svg text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* График. */
+.zv-setka {
+  stroke: rgba(31, 95, 208, 0.1);
+  stroke-width: 1;
+}
+.zv-os {
+  fill: none;
+  stroke: #33405a;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.zv-os-podpis {
+  fill: #33405a;
+}
+/* Буква величины — курсивом, как в формулах KaTeX. */
+.z10-os-bukva {
+  font-family: KaTeX_Math, \'Times New Roman\', serif;
+  font-style: italic;
+  font-size: 15px;
+}
+.zv-svyaz {
+  stroke: rgba(31, 95, 208, 0.45);
+  stroke-width: 1.2;
+  stroke-dasharray: 2 4;
+}
+.zv-tochka {
+  fill: var(--zv-sin);
+  stroke: #fff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px rgba(31, 95, 208, 0.55));
+}
+.zv-tochka.is-vyshe {
+  fill: var(--zv-zhar);
+  filter: drop-shadow(0 0 7px rgba(240, 138, 36, 0.7));
+}
+
+/* ── Строка состояния и управление ── */
+.zv-status {
+  min-height: 3em;
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.zv-upr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.zv-pusk {
+  min-width: 156px;
+}
+.zv-ikonka {
+  width: 12px;
+  height: 14px;
+}
+.zv-ikonka.is-pusk {
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  background: currentColor;
+}
+.zv-ikonka.is-pauza {
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 4px 100% no-repeat,
+    linear-gradient(currentColor, currentColor) 100% 0 / 4px 100% no-repeat;
+}
+.zv-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(31, 95, 208, 0.08);
+  box-shadow: var(--glass-ring);
+}
+.zv-seg button {
+  min-width: 48px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--blue-700);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.zv-seg button.is-on {
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.2),
+    0 4px 10px -4px rgba(18, 48, 110, 0.35);
+}
+.zv-seg--akcent button.is-on {
+  color: var(--zv-zhar-text);
+  box-shadow:
+    0 0 0 1px rgba(240, 138, 36, 0.45),
+    0 4px 10px -4px rgba(180, 80, 28, 0.35);
+}
+.zv-seg button:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.zv-podskazka {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+@media (hover: none) {
+  .zv-podskazka {
+    display: none;
+  }
+}
+/* ── Таблица моментов и решение ── */
+.zv-niz {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@container zv (min-width: 680px) {
+  .zv-niz {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+}
+.zv-tablica {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  font-variant-numeric: tabular-nums;
+}
+.zv-tablica caption {
+  padding: 0 0 var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+.zv-tablica th,
+.zv-tablica td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(31, 95, 208, 0.1);
+  font-size: 15px;
+  text-align: right;
+  white-space: nowrap;
+}
+.zv-tablica th:first-child {
+  text-align: left;
+}
+.zv-tablica thead th {
+  background: rgba(234, 241, 255, 0.7);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 650;
+}
+.zv-tablica tbody th {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+.zv-tablica tbody tr.is-est th {
+  color: var(--color-text);
+}
+.zv-tablica tbody tr.is-est td {
+  animation: z10-my-poyavlenie 0.4s ease-out both;
+}
+.zv-tablica tr.is-akcent.is-est th,
+.zv-tablica tr.is-akcent.is-est td {
+  background: rgba(240, 138, 36, 0.08);
+  color: var(--zv-zhar-text);
+}
+.zv-seychas th,
+.zv-seychas td {
+  background: rgba(31, 95, 208, 0.06);
+  color: var(--zv-sin-text) !important;
+  font-weight: 700;
+}
+.zv-tablica tfoot td {
+  border-bottom: 0;
+  text-align: left;
+  font-weight: 650;
+  color: var(--zv-zhar-text);
+}
+.zv-tablica tfoot tr.is-est td {
+  background: #fff4e6;
+}
+@keyframes z10-my-poyavlenie {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+.zv-reshenie {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(253, 241, 234, 0.75));
+  box-shadow: var(--glass-ring-warm, var(--glass-ring)), var(--glass-hi);
+}
+.zv-reshenie:not(.is-vidno) {
+  display: none;
+}
+.zv-reshenie ol {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 1.4em;
+}
+.zv-reshenie li {
+  font-size: 16px;
+  line-height: 1.55;
+  animation: z10-my-poyavlenie 0.5s ease-out both;
+  animation-delay: calc(var(--i) * 0.4s + 0.2s);
+}
+
+.zv-chislo {
+  fill: #5a6b8c;
+}
+
+/* Подпись-таблетка в SVG. */
+.zv-podpis rect {
+  fill: rgba(255, 255, 255, 0.9);
+  stroke: #fff;
+  filter: drop-shadow(0 2px 4px rgba(18, 48, 110, 0.12));
+}
+.zv-podpis text {
+  fill: #33405a;
+}
+.zv-podpis.is-sin text {
+  fill: var(--zv-sin-text);
+}
+.zv-podpis.is-zhar text {
+  fill: var(--zv-zhar-text);
+}
+.zv-podpis.is-zhar rect {
+  fill: #fff4e6;
+  stroke: rgba(240, 138, 36, 0.5);
+}
+.zv-metki span.is-akcent {
+  color: var(--zv-zhar-text);
+}
+/* Буква величины — курсивом, как в формулах KaTeX. */
+.zv-bukva {
+  font-family: KaTeX_Math, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 15px;
+}
+
+/* Печать: один кадр без управления. */
+@media print {
+  .zv-chasy,
+  .zv-upr {
+    display: none;
+  }
+}
+
+/* «Уменьшить движение»: без каскадов. */
+@media (prefers-reduced-motion: reduce) {
+  .zv-reshenie li,
+  .zv-tablica tbody tr.is-est td {
+    animation: none;
+  }
+  .zv-seg button {
+    transition: none;
+  }
+}
+:root[data-motion-level='reduce'] .zv-reshenie li,
+:root[data-motion-level='reduce'] .zv-tablica tbody tr.is-est td {
+  animation: none;
+}

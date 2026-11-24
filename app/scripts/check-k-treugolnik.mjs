@@ -55,10 +55,16 @@ const WINDOW = 160;
 const EXEMPT = new Map([
   ['src/content/theoryPonyatie9.ts', 'понятие производной: приращения и предел секущей'],
   ['src/lib/proizvodnaya/stsenyPonyatiya.ts', 'понятие производной: сцены секущей'],
+  ['src/content/zhivye8.ts', 'понятие производной: живые сцены секущей, скорости, модуля'],
   [
-    'src/components/tasks/proizvodnaya/ZhivyeRisunki9.tsx',
-    'понятие производной: живые рисунки секущей',
+    'src/components/zhivye/proizvodnaya/Sekushchaya.tsx',
+    'понятие производной: живая сцена секущей',
   ],
+  [
+    'src/components/zhivye/proizvodnaya/Skorost.tsx',
+    'понятие производной: живая сцена скорости',
+  ],
+  ['src/components/zhivye/proizvodnaya/Modul.tsx', 'понятие производной: живая сцена модуля'],
   ['src/lib/proizvodnaya/selftest.ts', 'самопроверка секущей и предела'],
   ['src/lib/proizvodnaya/types.ts', 'описание рисунка секущей в теории'],
   ['src/lib/proizvodnaya/render.ts', 'подписи секущей в теории понятия производной'],
