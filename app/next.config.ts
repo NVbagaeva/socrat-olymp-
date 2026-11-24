@@ -128,6 +128,14 @@ const nextConfig: NextConfig = {
       process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' && process.env.NEXT_PUBLIC_UVEDOMLENIYA === '1'
         ? '1'
         : '0',
+    // Web push (PR 3г): кнопка «Включить на этом устройстве» и manifest;
+    // своим флагом, только вместе с уведомлениями (В-5).
+    UVEDOMLENIYA_PUSH_ON:
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' &&
+      process.env.NEXT_PUBLIC_UVEDOMLENIYA === '1' &&
+      process.env.NEXT_PUBLIC_UVEDOMLENIYA_PUSH === '1'
+        ? '1'
+        : '0',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
     // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,

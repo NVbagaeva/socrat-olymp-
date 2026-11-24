@@ -9,6 +9,7 @@ import { PodpisiChertezhey } from '@/components/PodpisiChertezhey';
 import { caveat, inter, interGreek, ptSerif } from '@/lib/fonts';
 import { MOTION_LEVEL_SCRIPT } from '@/lib/motion';
 import { ogStranicy, SITE_URL } from '@/lib/og';
+import { UVEDOMLENIYA_PUSH_ON } from '@/lib/uvedomleniya/config';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -26,6 +27,9 @@ export const metadata: Metadata = {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
+  /* Push (PR 3г): на iPhone push работает только у сайта, добавленного на
+     экран «Домой», — для этого нужен manifest. Без флага его нет. */
+  ...(UVEDOMLENIYA_PUSH_ON ? { manifest: '/manifest.webmanifest' } : {}),
 };
 
 export const viewport: Viewport = {

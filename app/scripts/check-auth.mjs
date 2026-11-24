@@ -107,6 +107,8 @@ const ZHURNAL_ON = process.env.NEXT_PUBLIC_ZHURNAL === '1';
 /* Сборка с новой выдачей ДЗ (NEXT_PUBLIC_DZ2=1). */
 const DZ2_ON = process.env.NEXT_PUBLIC_DZ2 === '1';
 const UVED_ON = process.env.NEXT_PUBLIC_UVEDOMLENIYA === '1';
+/* Сборка с push (NEXT_PUBLIC_UVEDOMLENIYA_PUSH=1, PR 3г). */
+const PUSH_ON = UVED_ON && process.env.NEXT_PUBLIC_UVEDOMLENIYA_PUSH === '1';
 const PROGRESS_ON =
   process.env.NEXT_PUBLIC_PROGRESS_UCHITEL === '1' &&
   process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1';
@@ -250,6 +252,9 @@ function makeMock() {
   const uved = []; // { id, user_id, event, homework_id, payload, visible_at, read }
   const uvedNastroyki = new Map(); // user_id → настройки
   const uvedFlag = { kanaly: [] };
+  /* Push (PR 3г): подписки, как push_subscriptions; ключ VAPID, как push_klyuch. */
+  const pushSubs = []; // { user_id, endpoint, p256dh, auth }
+  const pushState = { klyuch: 'BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4' };
   let uvedSeq = 0;
   const uvedDobavit = (user_id, event, homework_id, payload = {}) =>
     uved.push({
@@ -571,6 +576,28 @@ function makeMock() {
       const rpcName = table.startsWith('rpc/') ? table.slice(4) : '';
       if (ZHURNAL_RPC.includes(rpcName) && method === 'POST') {
         return zhurnalRead(rpcName, body, me);
+      }
+      /* Push (PR 3г): как функции базы — только своё, адрес только сервиса push. */
+      const PUSH_RPC = ['push_klyuch', 'push_podpisat', 'push_otpisat', 'moi_push'];
+      if (PUSH_RPC.includes(rpcName) && method === 'POST') {
+        const ok = (b) => ({ status: 200, body: b });
+        const pg = (message) => ({ status: 400, body: { code: '23514', message, details: null, hint: null } });
+        const vkl = uvedFlag.kanaly.includes('push');
+        if (rpcName === 'push_klyuch') return ok(vkl ? pushState.klyuch : null);
+        if (rpcName === 'moi_push') return ok(pushSubs.filter((x) => x.user_id === me.id).length);
+        if (rpcName === 'push_otpisat') {
+          const i = pushSubs.findIndex((x) => x.endpoint === body.p_endpoint && x.user_id === me.id);
+          if (i >= 0) pushSubs.splice(i, 1);
+          return ok(i >= 0);
+        }
+        if (!vkl) return pg('push_off');
+        if (!/^https:\/\/(fcm\.googleapis\.com|web\.push\.apple\.com|updates\.push\.services\.mozilla\.com)\//.test(body.p_endpoint ?? '')) {
+          return pg('bad_endpoint');
+        }
+        const old = pushSubs.find((x) => x.endpoint === body.p_endpoint);
+        if (old) Object.assign(old, { user_id: me.id, p256dh: body.p_p256dh, auth: body.p_auth });
+        else pushSubs.push({ user_id: me.id, endpoint: body.p_endpoint, p256dh: body.p_p256dh, auth: body.p_auth });
+        return ok(pushSubs.filter((x) => x.user_id === me.id).length);
       }
       /* Уведомления (PR 3б): только свои строки, как функции базы. */
       const UVED_RPC = [
@@ -1451,6 +1478,8 @@ function makeMock() {
     uvedNastroyki,
     uvedFlag,
     uvedDobavit,
+    pushSubs,
+    pushState,
     users,
     mailbox,
     kits,
@@ -4363,6 +4392,8 @@ async function runUvedomleniya() {
     await u.context.close();
   }
 
+  if (PUSH_ON) await runPushNaUstroystve(mock, anya, snap, errors);
+
   /* Без входа. */
   {
     const { context, page } = await newPage(mock, 375, errors);
@@ -4382,6 +4413,160 @@ async function runUvedomleniya() {
     errors.length === 0,
     `Уведомления: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`,
   );
+}
+
+/* ── Push на этом устройстве (PR 3г) ───────────────────────────── */
+
+/* Поддельные push API браузера: в Chromium без сервиса Google подписка
+   не создаётся, поэтому PushManager, Notification и service worker —
+   свои. Что проверяем — экран и запросы к базе, а не сам Chromium. */
+function pushBrauzer({ permission = 'default', otvet = 'granted', est = true } = {}) {
+  return ({ permission: perm0, otvet: otv, est: e }) => {
+    if (!e) {
+      try { delete window.PushManager; } catch {}
+      Object.defineProperty(window, 'PushManager', { value: undefined, configurable: true });
+      Object.defineProperty(window, 'Notification', { value: undefined, configurable: true });
+      return;
+    }
+    /* Подписка и разрешение переживают перезагрузку, как у браузера. */
+    const hran = JSON.parse(localStorage.getItem('__push') || 'null');
+    const st = { perm: hran?.perm ?? perm0, sub: null, reg: hran?.reg ?? false, registered: [] };
+    const sohr = () => localStorage.setItem('__push', JSON.stringify({ perm: st.perm, reg: st.reg, endpoint: st.sub?.endpoint ?? null }));
+    const sdelat = (endpoint) => ({
+      endpoint,
+      toJSON: () => ({ endpoint, keys: { p256dh: 'B' + 'x'.repeat(86), auth: 'y'.repeat(22) } }),
+      unsubscribe: async () => { st.sub = null; sohr(); return true; },
+    });
+    if (hran?.endpoint) st.sub = sdelat(hran.endpoint);
+    window.__push = st;
+    class FakeNotification {
+      static get permission() { return st.perm; }
+      static async requestPermission() { st.perm = otv; sohr(); return otv; }
+    }
+    Object.defineProperty(window, 'Notification', { value: FakeNotification, configurable: true });
+    Object.defineProperty(window, 'PushManager', { value: function PushManager() {}, configurable: true });
+    const pushManager = {
+      async getSubscription() { return st.sub; },
+      async subscribe(opts) {
+        const key = new Uint8Array(opts.applicationServerKey);
+        st.klyuchDlina = key.length;
+        st.sub = sdelat('https://fcm.googleapis.com/fcm/send/fake-' + Math.random().toString(36).slice(2));
+        sohr();
+        return st.sub;
+      },
+    };
+    const reg = { pushManager };
+    const sw = {
+      async register(url, o) { st.reg = true; st.registered.push([url, o?.scope]); sohr(); return reg; },
+      get ready() { return Promise.resolve(reg); },
+      async getRegistration() { return st.reg ? reg : undefined; },
+    };
+    Object.defineProperty(Navigator.prototype, 'serviceWorker', { get: () => sw, configurable: true });
+  };
+}
+
+async function runPushNaUstroystve(mock, anya, snap, errors) {
+  mock.uvedFlag.kanaly = ['pochta', 'push'];
+  for (const width of [375, 1280]) {
+    mock.pushSubs.length = 0;
+    const { context, page } = await newPage(mock, width, errors);
+    await context.addInitScript(pushBrauzer(), { permission: 'default', otvet: 'granted', est: true });
+    await welcomeSeen(context);
+    await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.uved-push[data-push="vykl"]');
+    check(await page.locator('input[aria-label="Новое ДЗ: Push"]').isVisible(), `Push ${width}: столбец «Push» в таблице`);
+    await snap(page, 'push-vykl', width);
+    await page.locator('.uved-push button:has-text("Включить на этом устройстве")').click();
+    await page.waitForSelector('.uved-push[data-push="vkl"]');
+    const reg = await page.evaluate(() => window.__push);
+    check(reg.registered.length === 1 && reg.registered[0][0] === '/sw.js' && reg.registered[0][1] === '/',
+      `Push ${width}: service worker /sw.js — только по кнопке`);
+    check(reg.klyuchDlina === 65, `Push ${width}: ключ VAPID передан браузеру (65 байт)`);
+    check(mock.pushSubs.length === 1 && mock.pushSubs[0].user_id === anya.id &&
+      mock.pushSubs[0].endpoint.startsWith('https://fcm.googleapis.com/') && mock.pushSubs[0].auth === 'y'.repeat(22),
+    `Push ${width}: подписка записана в базу на вошедшего`);
+    check((await page.locator('.uved-push').textContent()).includes('включён'), `Push ${width}: «включён»`);
+    await snap(page, 'push-vkl', width);
+    /* Перезагрузка: включено, подписка не задвоилась. */
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForSelector('.uved-push[data-push="vkl"]');
+    check(mock.pushSubs.length === 1, `Push ${width}: после перезагрузки одна подписка`);
+    await page.locator('.uved-push button:has-text("Выключить на этом устройстве")').click();
+    await page.waitForSelector('.uved-push[data-push="vykl"]');
+    check(mock.pushSubs.length === 0, `Push ${width}: выключение убрало подписку из базы`);
+    await context.close();
+  }
+
+  /* Браузер не разрешил — пояснение, подписки нет. */
+  {
+    const { context, page } = await newPage(mock, 375, errors);
+    await context.addInitScript(pushBrauzer(), { permission: 'default', otvet: 'denied', est: true });
+    await welcomeSeen(context);
+    await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.uved-push[data-push="vykl"]');
+    await page.locator('.uved-push button:has-text("Включить на этом устройстве")').click();
+    await page.waitForSelector('.uved-push[data-push="zapret"]');
+    check((await page.locator('.uved-push').textContent()).includes('запрещены в настройках браузера'),
+      'Push: отказ браузера — как разрешить');
+    check(mock.pushSubs.length === 0, 'Push: без разрешения подписки нет');
+    await snap(page, 'push-zapret', 375);
+    await context.close();
+  }
+
+  /* Ключа на сервере ещё нет — понятная ошибка. */
+  {
+    const klyuch = mock.pushState.klyuch;
+    mock.pushState.klyuch = null;
+    const { context, page } = await newPage(mock, 375, errors);
+    await context.addInitScript(pushBrauzer(), { permission: 'default', otvet: 'granted', est: true });
+    await welcomeSeen(context);
+    await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.uved-push[data-push="vykl"]');
+    await page.locator('.uved-push button:has-text("Включить на этом устройстве")').click();
+    await page.waitForSelector('.uved-push .field-message, .uved-push [role="alert"]');
+    check((await page.locator('.uved-push').textContent()).includes('ещё не готов'), 'Push: нет ключа — «ещё не готов»');
+    mock.pushState.klyuch = klyuch;
+    await context.close();
+  }
+
+  /* iPhone в Safari: инструкция «На экран „Домой“». */
+  {
+    const context = await browser.newContext({
+      viewport: { width: 375, height: 844 },
+      deviceScaleFactor: 1,
+      hasTouch: true,
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+    });
+    await installMock(context, mock);
+    await context.addInitScript(pushBrauzer(), { permission: 'default', otvet: 'granted', est: false });
+    const page = await context.newPage();
+    watchConsole(page, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.uved-push[data-push="ios"]');
+    check((await page.locator('.uved-push').textContent()).includes('На экран „Домой“'), 'Push: iPhone — инструкция');
+    check((await page.locator('.uved-push button').count()) === 0, 'Push: iPhone в Safari — без кнопки');
+    check((await page.locator('link[rel="manifest"]').getAttribute('href')) === '/manifest.webmanifest',
+      'Push: manifest для экрана «Домой» подключён');
+    await snap(page, 'push-ios', 375);
+    await context.close();
+  }
+
+  /* Push выключен флагом каналов — блока нет. */
+  {
+    mock.uvedFlag.kanaly = ['pochta'];
+    const { context, page } = await newPage(mock, 375, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.uved-tablica');
+    check((await page.locator('.uved-push').count()) === 0, 'Push: без "push" в каналах блока нет');
+    await context.close();
+  }
 }
 
 /* ── Вход включён, кнопки в шапке нет (пробный режим) ──────────── */

@@ -242,7 +242,7 @@ jobs:
       # Рассыльщик (docs/kabinet-uvedomleniya.md, PR 3в): письмо из
       # очереди уходит в Mailpit с «Отписаться» в заголовках, отписка по
       # ссылке через Caddy выключает письма, в журнал не попадает адрес.
-      - name: Рассыльщик — письмо и «Отписаться»
+      - name: Рассыльщик — письмо, «Отписаться», ключи push
         run: |
           psql_db() { sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -v ON_ERROR_STOP=1 -tAc "$1"; }
           uid=$(psql_db "select id from auth.users where email = 'seed1@example.test'")
@@ -268,6 +268,12 @@ jobs:
           test -z "$(psql_db "select digest from public.notify_prefs where user_id = '$uid'")"
           test "$(api "https://api.lite.test/otpiska?u=$uid&t=$t" -X POST -d 'List-Unsubscribe=One-Click')" = 200
           test "$(psql_db "select digest || ' ' || (kanaly -> 'dz_novoe' ->> 'pochta') from public.notify_prefs where user_id = '$uid'")" = 'off false'
+          # Push (PR 3г): ключи VAPID рассыльщик создал сам и положил в базу.
+          for _ in $(seq 1 20); do
+            [ "$(psql_db "select count(*) from vault.secrets where name in ('vapid_public', 'vapid_private')")" = 2 ] && break
+            sleep 3
+          done
+          test "$(psql_db "select length(decrypted_secret) from vault.decrypted_secrets where name = 'vapid_public'")" = 87
           psql_db "update public.kabinet_flags set value = 'false' where key = 'uvedomleniya'"
 
       - name: Копия базы и письмо о её сбое
