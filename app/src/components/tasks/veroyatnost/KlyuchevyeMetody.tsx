@@ -4,7 +4,7 @@ import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
 import { SHIRINY_KARTINOK_5, kartinkaMetoda5 } from '@/lib/veroyatnost/metody5-kartinki';
-import { assetUrl } from '@/lib/assetUrl';
+import { illyustraciyaUrl } from '@/lib/illyustraciiUrl';
 import { bank4Pool, bank5Pool, prep4Pool, prep5Pool } from '@/lib/veroyatnost/pool';
 import type { Metod } from '@/lib/veroyatnost/tipologiya';
 import { MetodyKartochki, type KartochkaMetoda } from './MetodyKartochki';
@@ -53,7 +53,8 @@ export interface KlyuchevyeMetodyProps {
 function Kartinka5({ id }: { id: string }) {
   const k = kartinkaMetoda5(id);
   if (k === undefined) return null;
-  const put = (w: number, ext: string) => assetUrl(`/images/zadanie-05/${k.imya}-${w}.${ext}`);
+  const put = (w: number, ext: string) =>
+    illyustraciyaUrl(`/images/zadanie-05/${k.imya}-${w}.${ext}`);
   return (
     <picture>
       <source
