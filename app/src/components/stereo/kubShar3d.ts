@@ -3,14 +3,21 @@
  * картинке public/images/zadaniya/3/kub-shar-*.webp (синие рёбра,
  * тёплая кромка справа и сверху, бесцветный шар внутри).
  *
- * Модуль тянет three.js, поэтому импортируется только динамически — по
- * первому касанию обложки (ObjomnayaOblozhka). На первую загрузку
+ * Модуль тянет three.js, поэтому импортируется только динамически —
+ * из живого чертежа шапки (components/tasks/shapka/zhivye/KubShar.tsx),
+ * который сам грузится после первой отрисовки. На первую загрузку
  * страницы он не влияет.
  */
 
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import type { Model3d } from '@/components/tasks/stsena';
+
+/** Живая модель: ракурс (азимут и подъём взгляда, градусы), размер, уборка. */
+export interface Model3d {
+  vid: (az: number, el: number) => void;
+  razmer: () => void;
+  ubrat: () => void;
+}
 
 /** Ребро куба и радиус вписанного шара. */
 const A = 1;

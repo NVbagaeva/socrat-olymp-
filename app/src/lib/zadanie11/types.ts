@@ -31,6 +31,16 @@ export type LifehackId =
 export interface Etap {
   title: string;
   lines: string[];
+  /** Поясняющая схема шага (обгон поездов): рисуется под строками. */
+  skhema?: Skhema11;
+}
+
+/** Схема-чертёж к шагу разбора: файл в public, подпись, размер. */
+export interface Skhema11 {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
 }
 
 /**

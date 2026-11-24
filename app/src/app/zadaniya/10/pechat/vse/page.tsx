@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { List10 } from '@/components/tasks/zadanie10/List10';
 import { zadanie10Title } from '@/content/zadanie10';
-import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
+import { kartinkiZadach10 } from '@/lib/zadanie10/kartinkiZadach10';
 import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
@@ -17,5 +17,5 @@ export const metadata: Metadata = {
 
 /** «Всё одним файлом» №10: лист ученика, затем лист учителя — те же задачи по тому же адресу. */
 export default function Pechat10Vse() {
-  return <List10 ill={kartinkiPrototipov()} vid="vse" />;
+  return <List10 ill={kartinkiZadach10()} vid="vse" />;
 }

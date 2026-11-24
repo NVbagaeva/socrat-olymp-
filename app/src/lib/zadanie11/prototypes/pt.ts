@@ -10,7 +10,7 @@ import { FAKT, KMCH_V_MS_POYASNENIE, kmchVMs, minutyVChasy, perevod } from '../.
 import { chtoSprashivayut, dvizhenie, etapy, num, slovo, str, vopros } from '../kit';
 import { d, div, fq, mul, q, sub, txt, val } from '../num';
 import { sk, zaglavnaya, SLOVA } from '../sklonenie';
-import type { Subtype } from '../types';
+import type { Etap, Skhema11, Subtype } from '../types';
 import { otvet } from './common';
 
 /* ── ПТ-01 Поезд через тоннель / мимо лесополосы ─────────────── */
@@ -143,6 +143,19 @@ const PT02: Subtype = {
   },
 };
 
+/** Схема обгона: начало и конец, смещение — сумма длин поездов. */
+const SKHEMA_OBGON: Skhema11 = {
+  src: '/images/zadanie11/pt-03-obgon.svg',
+  alt: 'Начало и конец обгона: пассажирский поезд длины x смещается относительно товарного на x плюс длина товарного',
+  width: 640,
+  height: 330,
+};
+
+/** Поставить схему в шаг с этим названием. */
+function sSkhemoy(e: Etap[], nazvanie: string, skhema: Skhema11): Etap[] {
+  return e.map((x) => (x.title.endsWith(nazvanie) ? { ...x, skhema } : x));
+}
+
 /* ── ПТ-03 Обгон в одном направлении ─────────────────────────── */
 
 const PT03: Subtype = {
@@ -166,37 +179,41 @@ const PT03: Subtype = {
     return {
       uslovie: `По двум параллельным железнодорожным путям в одном направлении следуют пассажирский и товарный поезда, скорости которых равны соответственно ${txt(v1)} км/ч и ${txt(v2)} км/ч. Длина товарного поезда равна ${txt(L)} метрам. Найдите длину пассажирского поезда, если время, за которое он прошёл мимо товарного поезда, равно ${sk(t, SLOVA.minutam)}. Ответ дайте в метрах.`,
       answer: ans,
-      etapy: etapy(
-        [
-          'Скорость сближения',
-          [`В одном направлении скорости вычитаются: $${d(v1)}-${d(v2)}=${d(v1 - v2)}$ км/ч.`],
-        ],
-        [
-          'Путь',
+      etapy: sSkhemoy(
+        etapy(
           [
-            minutyVChasy(t, true),
-            `За $${fq(q(t, 60))}$ ч ${a} сместился относительно ${bRod} на $${d(v1 - v2)}\\cdot${fq(q(t, 60))}=${fq(path, true)}$ км.`,
-            perevod(
-              FAKT.kmM,
-              'километры',
-              'метры',
-              'vniz',
-              `${fq(path, true)}\\cdot1000=${d(pathM)}\\text{ м}`,
-            ),
+            'Скорость сближения',
+            [`В одном направлении скорости вычитаются: $${d(v1)}-${d(v2)}=${d(v1 - v2)}$ км/ч.`],
           ],
-        ],
-        [
-          'Уравнение',
           [
-            `Длина ${aRod} поезда — $x$ м. Обгон начинается, когда голова ${aRod} у хвоста ${bRod}, и заканчивается, когда хвост ${aRod} у головы ${bRod} (см. рисунок).`,
-            `Значит, относительно ${bRod} ${a} прошёл свою длину и длину ${bRod} — сумму длин:`,
-            `$x+${d(L)}=${d(pathM)}$.`,
+            'Путь',
+            [
+              minutyVChasy(t, true),
+              `За $${fq(q(t, 60))}$ ч ${a} сместился относительно ${bRod} на $${d(v1 - v2)}\\cdot${fq(q(t, 60))}=${fq(path, true)}$ км.`,
+              perevod(
+                FAKT.kmM,
+                'километры',
+                'метры',
+                'vniz',
+                `${fq(path, true)}\\cdot1000=${d(pathM)}\\text{ м}`,
+              ),
+            ],
           ],
-        ],
-        [
-          'Ответ на вопрос задачи',
-          [`$x=${d(pathM)}-${d(L)}=${d(ans)}$ м — длина ${aRod} поезда.`, otvet(ans)],
-        ],
+          [
+            'Уравнение',
+            [
+              `Длина ${aRod} поезда — $x$ м. Обгон начинается, когда голова ${aRod} у хвоста ${bRod}, и заканчивается, когда хвост ${aRod} у головы ${bRod} (см. рисунок).`,
+              `Значит, относительно ${bRod} ${a} прошёл свою длину и длину ${bRod} — сумму длин:`,
+              `$x+${d(L)}=${d(pathM)}$.`,
+            ],
+          ],
+          [
+            'Ответ на вопрос задачи',
+            [`$x=${d(pathM)}-${d(L)}=${d(ans)}$ м — длина ${aRod} поезда.`, otvet(ans)],
+          ],
+        ),
+        'Уравнение',
+        SKHEMA_OBGON,
       ),
       tables: [
         dvizhenie(

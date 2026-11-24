@@ -2,6 +2,7 @@ import type { Shag } from '../steklo';
 import type { VoprosPodskazki } from '../trening';
 import type { Razbor11 } from '@/lib/zadanie11/trening/reshatel';
 import type { Tablitsa } from '@/lib/zadanie11/types';
+import { assetUrl } from '@/lib/assetUrl';
 import { Tablitsa11 } from './Tablitsa11';
 
 /**
@@ -43,7 +44,23 @@ export function shagi11(r: Razbor11): Shag[] {
       chtoHtml: e.stroki.map((html) => `<div class="z11-stroka">${html}</div>`).join(''),
       formulaHtml: '',
       ...(ton === undefined ? {} : { ton }),
-      ...(i === sTablitsey ? { risunok: <Tablitsy11 tables={r.tables} /> } : {}),
+      ...(i === sTablitsey
+        ? { risunok: <Tablitsy11 tables={r.tables} /> }
+        : e.skhema !== undefined
+          ? {
+              risunok: (
+                <img
+                  className="z11-skhema"
+                  src={assetUrl(e.skhema.src)}
+                  alt={e.skhema.alt}
+                  width={e.skhema.width}
+                  height={e.skhema.height}
+                  decoding="async"
+                  loading="lazy"
+                />
+              ),
+            }
+          : {}),
     };
   });
 }
