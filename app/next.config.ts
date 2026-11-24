@@ -46,7 +46,6 @@ const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 const ILLYUSTRACII = [
   '/images/zadanie-11/gorod-',
   '/images/zadanie-05/metod-',
-  '/images/zadanie-04/metod-',
 ];
 
 /** Картинки глав методов №4 — своей таблицей версий (METODY4_ASSET_VERSIONS). */
