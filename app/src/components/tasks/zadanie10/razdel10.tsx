@@ -1,6 +1,7 @@
 'use client';
 
 import { TRENAZHER10 } from '@/content/prikladnye10';
+import { klyuchKartinki10 } from '@/lib/zadanie10/kartinkiSyuzhetov';
 import type { ZadachaLite } from '@/lib/zadanie10/dannye';
 import { zadachaHref10 } from '@/lib/zadanie10/links';
 import { proverit10 } from '@/lib/zadanie10/trening/otvet10';
@@ -9,7 +10,7 @@ import { KLYUCH10 } from '@/lib/zadanie10/trening/session';
 import { ZAGRUZKA10 } from '@/lib/zadanie10/trening/zagruzka';
 import type { Solved } from '@/lib/zadanie10/types';
 import type { RazdelBanka } from '../trening/bank/types';
-import { Kartinka10, type IllInfo } from './Kartinka10';
+import type { IllInfo } from './Kartinka10';
 import { Most10 } from './Most10';
 import { schitaemSUmom10, shagiIzResheniya10, voprosyIzResheniya10 } from './shagi10';
 
@@ -24,14 +25,9 @@ function istochnikZadachi(z: ZadachaLite): string {
  * моста у задач про мост (движок lib/zadanie10/chertezh) и откуда
  * задача. Картинка больше не прячется в сворачиваемую строку.
  */
-function Pod10({ z, ill }: { z: ZadachaLite; ill: IllInfo | undefined }) {
+function Pod10({ z }: { z: ZadachaLite }) {
   return (
     <>
-      {ill === undefined ? null : (
-        <div className="trn-risunok z10-trn-kartinka">
-          <Kartinka10 ill={ill} />
-        </div>
-      )}
       {z.prototypeId === 'P01' ? (
         <div className="trn-risunok trn-risunok--shirokiy">
           <Most10 params={z.params} rezhim="uchenik" />
@@ -58,7 +54,20 @@ export function razdel10(kartinki: Record<string, IllInfo>): RazdelBanka<Zadacha
     zagruzka: ZAGRUZKA10,
     T: TRENAZHER10,
     proverit: proverit10,
-    pod: (z) => <Pod10 z={z} ill={kartinki[z.prototypeId]} />,
+    pod: (z) => <Pod10 z={z} />,
+    /* Картинка сюжета — справа от условия: аналога (kartinkiSyuzhetov.ts) или прототипа. */
+    kartinka: (z) => {
+      const ill: IllInfo | undefined = kartinki[klyuchKartinki10(z)];
+      return ill === undefined
+        ? undefined
+        : {
+            src: ill.webp,
+            ...(ill.webp280 === undefined ? {} : { src280: ill.webp280 }),
+            alt: ill.alt,
+            width: ill.width,
+            height: ill.height,
+          };
+    },
     shagi: shagiIzResheniya10,
     posle: schitaemSUmom10,
     voprosy: voprosyIzResheniya10,

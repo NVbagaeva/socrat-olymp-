@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import { KartinkaZadachi, type KartinkaProps } from '@/components/ui/KartinkaZadachi';
 import { useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { AnswerInput, FormatHint } from '../otvet/AnswerInput';
 import { Ikonka, Metka, ShagiResheniya, type PriznakDelimosti, type Shag } from '../steklo';
@@ -73,6 +74,8 @@ export interface EkranZadachiProps {
   labels: EkranZadachiLabels;
   /** Под условием: например, секундомер задачи. */
   pod?: ReactNode;
+  /** Картинка-иллюстрация сюжета: справа от условия (KartinkaZadachi). */
+  kartinka?: KartinkaProps;
   /** Чертёж задачи: над условием (стереометрия, планиметрия). */
   risunok?: ReactNode;
   /**
@@ -124,6 +127,7 @@ export function EkranZadachi({
   bezPodskazok = false,
   labels,
   pod,
+  kartinka,
   risunok,
   tekst = false,
   varianty = null,
@@ -175,10 +179,22 @@ export function EkranZadachi({
           {zakladka}
         </div>
         {risunok === undefined ? null : <div className="trn-risunok">{risunok}</div>}
-        <div
-          className={clsx('trn-uslovie', tekst && 'trn-uslovie--tekst')}
-          dangerouslySetInnerHTML={{ __html: uslovieHtml }}
-        />
+        {kartinka === undefined ? (
+          <div
+            className={clsx('trn-uslovie', tekst && 'trn-uslovie--tekst')}
+            dangerouslySetInnerHTML={{ __html: uslovieHtml }}
+          />
+        ) : (
+          /* Картинка справа, условие её обтекает: обёртка — обычный блок,
+             в колонке карточки float не работал бы. */
+          <div className="kz-ryad">
+            <KartinkaZadachi {...kartinka} />
+            <div
+              className={clsx('trn-uslovie', tekst && 'trn-uslovie--tekst')}
+              dangerouslySetInnerHTML={{ __html: uslovieHtml }}
+            />
+          </div>
+        )}
         {pod}
       </article>
 

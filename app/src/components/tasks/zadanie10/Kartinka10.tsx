@@ -8,6 +8,8 @@ export interface IllInfo {
   alt: string;
   width: number;
   height: number;
+  /** Копия 280 px — у картинок сюжетов (lib/kartinkiZadach.ts). */
+  webp280?: string;
 }
 
 /**

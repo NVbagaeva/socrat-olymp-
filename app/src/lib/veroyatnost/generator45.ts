@@ -10,6 +10,7 @@
  */
 
 import type { Navyk } from '@/components/tasks/veroyatnost/metody';
+import { FLAG_KARTINOK } from '../kartinkiZadach';
 import type { Syuzhet } from '@/components/tasks/veroyatnost/navyki';
 import { GENERATOR45_SOURCES, GENERATOR45_TEXTS, presets45 } from '@/content/generator45';
 import { GEN_UI } from '@/content/generatorUi';
@@ -60,6 +61,7 @@ export function config45(
       kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })),
       theory: false,
       examples: false,
+      flag: FLAG_KARTINOK,
     },
   };
 }

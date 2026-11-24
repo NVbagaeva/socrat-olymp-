@@ -7,7 +7,7 @@ import type { RoundItem } from '@/lib/veroyatnost/useRound';
 import { navykKind, zadachaId } from './metody';
 
 /** Иллюстрация задачи: путь и подпись, если файл есть. */
-type Illyustratsiya = { path: string; alt: string };
+type Illyustratsiya = { path: string; alt: string; path280?: string };
 
 /**
  * Задача подхода №4 и №5 в том виде, в каком её получает экран.
