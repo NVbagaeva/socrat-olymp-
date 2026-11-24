@@ -11,18 +11,21 @@ import { useEffect, useRef, useState, type ComponentType } from 'react';
  * `zagruzit` — функция с import() конкретной сцены: путь должен стоять в
  * коде буквально, чтобы сборщик выделил сцену в свой кусок.
  */
-export function ZhivayaLazy({
+export function ZhivayaLazy<P extends object = Record<string, never>>({
   zagruzit,
   zagruzka,
   vysota,
+  props,
 }: {
-  zagruzit: () => Promise<{ default: ComponentType }>;
+  zagruzit: () => Promise<{ default: ComponentType<P> }>;
+  /** Свойства сцены (например, id описания рисунка). */
+  props?: P;
   zagruzka: string;
   /** Высота заглушки, px: на телефоне и на компьютере. */
   vysota: { uzko: number; shiroko: number };
 }) {
   const yakor = useRef<HTMLDivElement>(null);
-  const [Scena, setScena] = useState<ComponentType | null>(null);
+  const [Scena, setScena] = useState<ComponentType<P> | null>(null);
 
   useEffect(() => {
     const el = yakor.current;
@@ -68,7 +71,7 @@ export function ZhivayaLazy({
           <span>{zagruzka}</span>
         </div>
       ) : (
-        <Scena />
+        <Scena {...((props ?? {}) as P)} />
       )}
     </div>
   );

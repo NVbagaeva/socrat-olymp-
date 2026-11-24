@@ -13,6 +13,7 @@
 
    Запуск: node scripts/check-zhivye.mjs */
 
+import fs from 'node:fs';
 import { requireSrc } from './lib/load-ts.mjs';
 
 const H = requireSrc('lib/zhivye/hod.ts');
@@ -21,6 +22,11 @@ const T8 = requireSrc('content/zhivye8.ts');
 const K6 = requireSrc('lib/zhivye/krug6.ts');
 const TRIG = requireSrc('lib/zadanie7/trig.ts');
 const T6 = requireSrc('content/zhivye6.ts');
+const K13 = requireSrc('lib/zhivye/krug13.ts');
+const T13 = requireSrc('content/zhivye13.ts');
+const P18 = requireSrc('lib/zhivye/parametr18.ts');
+const Z19 = requireSrc('lib/zadanie19/zhivye.ts');
+const T18 = requireSrc('content/zhivye18.ts');
 
 const failures = [];
 let checks = 0;
@@ -148,9 +154,105 @@ for (const fn of ['sin', 'cos', 'tg']) {
   }
 }
 
+/* ── №13: угол и деление окружности ── */
+progon(K13.HOD_UGLA, '№13 угол');
+check(K13.UGOL_MAX === 13 / 3, '№13: путь до 13π/3');
+for (let k = 0; k <= 52; k += 1) {
+  const x = k / 12;
+  const ex = K13.tochno(x);
+  const tablichnyy = k % 2 === 0 || k % 3 === 0;
+  check(
+    (ex !== null) === tablichnyy,
+    `№13: точные значения на ${k}π/12 — ${tablichnyy ? 'есть' : 'нет'}`,
+  );
+}
+const ob = K13.oboroty(13 / 3);
+check(ob.n === 2 && Math.abs(ob.ostatok - 1 / 3) < 1e-9, '№13: 13π/3 = 4π + π/3');
+for (const m of K13.MAKETY) {
+  progon(K13.hodMaketa(m), `№13 деление ${m.id}`);
+  check(
+    T13.DELENIE13.makety[m.id].shagi.length === m.shagi.length,
+    `№13 ${m.id}: текст на каждый шаг`,
+  );
+  let prev = -1;
+  for (let i = 0; i <= (m.shagi.length - 1) * 20; i += 1) {
+    const d = K13.duga(m, i / 20);
+    check(d >= prev - 1e-12, `№13 ${m.id}: дуга не убывает`);
+    prev = d;
+  }
+  for (let i = 0; i < m.shagi.length; i += 1) {
+    check(
+      Math.abs(K13.duga(m, i) - K13.konecShaga(m, i)) < 1e-12,
+      `№13 ${m.id}: на шаге ${i} дуга до последней точки`,
+    );
+  }
+  const vse = K13.vidnyeTochki(m, m.shagi.length - 1);
+  const nado = m.fon.length + m.shagi.reduce((s, x) => s + x.tochki.length, 0);
+  check(vse.length === nado, `№13 ${m.id}: к концу видны все точки`);
+  for (const {
+    tochka: [a, b],
+  } of vse) {
+    const shag = 2 / m.delenie;
+    check(
+      Math.abs(a / b / shag - Math.round(a / b / shag)) < 1e-9,
+      `№13 ${m.id}: точка ${a}/${b}π на делении`,
+    );
+  }
+}
+check(
+  K13.ugolText(4, 6) === '2π/3' && K13.ugolText(2, 1) === '2π' && K13.ugolText(1, 2) === 'π/2',
+  '№13: подписи углов',
+);
+
+/* ── №18: параметр ── */
+{
+  const idy = [
+    ...fs
+      .readFileSync(new URL('../src/lib/zadanie19/zhivye.ts', import.meta.url), 'utf8')
+      .matchAll(/^  '(m\d\d-r\d)':/gm),
+  ].map((m) => m[1]);
+  check(idy.length >= 20, `№18: описаний живых рисунков ${idy.length}`);
+  for (const id of idy) {
+    const z = Z19.zhivoy19(id);
+    check(z !== undefined, `№18 ${id}: описание есть`);
+    if (z === undefined) continue;
+    const o = P18.hodParametra(z);
+    progon(o, `№18 ${id}`);
+    for (const x of z.osobye) {
+      const u = P18.uIzA(z, x.a);
+      check(Math.abs(P18.aIzU(z, u) - x.a) < 1e-9, `№18 ${id}: особое ${x.tex} на шкале точно`);
+      check(P18.naSetke(z, x.a) === x.a, `№18 ${id}: особое ${x.tex} не сдвигается сеткой`);
+    }
+    const ln = P18.lenta(z);
+    if (z.resheniy === undefined) {
+      check(ln === null, `№18 ${id}: без числа решений ленты нет`);
+      continue;
+    }
+    check(
+      ln !== null && ln.kuski[0].ot === 0 && ln.kuski.at(-1).do === 1,
+      `№18 ${id}: лента от начала до конца`,
+    );
+    for (let i = 1; i < ln.kuski.length; i += 1) {
+      check(
+        ln.kuski[i].ot === ln.kuski[i - 1].do && ln.kuski[i].n !== ln.kuski[i - 1].n,
+        `№18 ${id}: куски ленты стык в стык и разные`,
+      );
+    }
+    for (const t of ln.tochki) {
+      const x = z.osobye.find((y) => Math.abs(P18.uIzA(z, y.a) - t.u) < 1e-12);
+      check(
+        x !== undefined && z.resheniy(x.a) === t.n,
+        `№18 ${id}: точка ленты — особое значение с верным числом решений`,
+      );
+    }
+  }
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6], (k, val) => (typeof val === 'function' ? String(val) : val));
+  const vse = JSON.stringify([T8, T6, T13, T18], (k, val) =>
+    typeof val === 'function' ? String(val) : val,
+  );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');
 }
 
