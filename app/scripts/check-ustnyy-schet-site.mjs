@@ -773,10 +773,10 @@ async function korniNaTekushiy(p) {
   ]) {
     const c = await context({ viewport: vp });
     const k = await open(c, '/ustnyy-schet/vieta-privedennoe/', '.us-kk');
-    const t1 = k.getByRole('slider', { name: 'Корень x₁' });
+    const t1 = k.getByRole('slider', { name: 'Первый корень' });
     await t1.focus();
     for (let i = 0; i < 5; i += 1) await k.keyboard.press('ArrowLeft');
-    const t2 = k.getByRole('slider', { name: 'Корень x₂' });
+    const t2 = k.getByRole('slider', { name: 'Второй корень' });
     await t2.focus();
     await k.keyboard.press('ArrowRight');
     const x1 = Number(await t1.getAttribute('aria-valuenow'));
