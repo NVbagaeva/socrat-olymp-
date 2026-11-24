@@ -47,6 +47,12 @@ const SHAPKI = [
   { papka: 'zadanie-05', imya: 'metod-dva-predmeta', widths: [240, 480], budget: 100 * 1024 },
   { papka: 'zadanie-05', imya: 'metod-polnaya', widths: [240, 480], budget: 100 * 1024 },
   { papka: 'zadanie-05', imya: 'metod-do-uspeha', widths: [240, 480], budget: 100 * 1024 },
+  /* Иллюстрации «Ключевых методов решения» №4 (те же правила, что у №5). */
+  { papka: 'zadanie-04', imya: 'metod-klassicheskaya', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-04', imya: 'metod-kubiki', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-04', imya: 'metod-monety', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-04', imya: 'metod-kruglyy-stol', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-04', imya: 'metod-protivopolozhnye', widths: [240, 480], budget: 100 * 1024 },
 ];
 
 /** Ширины для srcset: телефон 1x, планшет и компьютер 1x и 2x. */
