@@ -1,0 +1,62 @@
+/* Живая сцена «Как гасится кредит» (№16). Общее — ../zhivye.css.
+   Синее — долг, оранжевое — проценты. */
+.zv16-vybor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.zv16-vybor-zag {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.zv16-vybor .zv-seg {
+  flex-wrap: wrap;
+  border-radius: 18px;
+}
+.zv16-dolg {
+  fill: rgba(31, 95, 208, 0.78);
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.zv16-procenty {
+  fill: var(--zv-zhar);
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.is-full .zv16-procenty.is-rastet {
+  filter: drop-shadow(0 0 6px rgba(240, 138, 36, 0.7));
+}
+.zv16-rez {
+  stroke: #12306e;
+  stroke-width: 1.6;
+  stroke-dasharray: 5 4;
+}
+.zv16-mesto {
+  fill: rgba(18, 48, 110, 0.04);
+  stroke: rgba(18, 48, 110, 0.1);
+  stroke-dasharray: 4 4;
+}
+.zv16-stolbik.is-edet {
+  filter: drop-shadow(0 8px 14px rgba(18, 48, 110, 0.25));
+}
+.zv16-platezh {
+  font-size: 13px;
+  font-weight: 800;
+  fill: #12306e;
+}
+.zv16-podpis-osi {
+  font-size: 13px;
+  font-weight: 700;
+  fill: #12306e;
+}
+.zv16-edinica {
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--color-text-secondary, #5b6478);
+}

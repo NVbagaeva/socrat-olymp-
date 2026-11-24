@@ -32,6 +32,8 @@ const Z15 = requireSrc('lib/zhivye/znaki15.ts');
 const T15 = requireSrc('content/zhivye15.ts');
 const O12 = requireSrc('lib/zhivye/otrezok12.ts');
 const T12 = requireSrc('content/zhivye12.ts');
+const K16 = requireSrc('lib/zhivye/kredit16.ts');
+const T16 = requireSrc('content/zhivye16.ts');
 
 const failures = [];
 let checks = 0;
@@ -368,9 +370,59 @@ check(
   }
 }
 
+/* ── №16: как гасится кредит ── */
+{
+  const dif = K16.kredit('dif');
+  const ann = K16.kredit('ann');
+  check(
+    JSON.stringify(dif.gody.map((g) => g.platezh)) === '[2.8,2.6,2.4,2.2]',
+    '№16 диф.: платежи 2,8 2,6 2,4 2,2',
+  );
+  check(JSON.stringify(dif.gody.map((g) => g.ostatok)) === '[6,4,2,0]', '№16 диф.: долг 6 4 2 0');
+  check(
+    ann.gody.every((g) => g.platezh === 1464.1),
+    '№16 анн.: платежи равны 1464,1',
+  );
+  check(
+    JSON.stringify(ann.gody.map((g) => g.ostatok)) === '[3641,2541,1331,0]',
+    '№16 анн.: долг 3641 2541 1331 0',
+  );
+  check(
+    JSON.stringify(ann.gody.map((g) => g.osnovnoy)) === '[1000,1100,1210,1331]',
+    '№16 анн.: часть долга растёт ×1,1',
+  );
+  for (const k of [dif, ann]) {
+    for (const g of k.gody) {
+      check(Math.abs(g.posleProcentov - g.dolg * 1.1) < 1e-6, `№16 ${k.shema}: начислено 10 %`);
+      check(
+        Math.abs(g.platezh - g.procenty - g.osnovnoy) < 1e-6,
+        `№16 ${k.shema}: платёж = проценты + часть долга`,
+      );
+    }
+    const it = K16.itogo(k);
+    check(Math.abs(it.vsego - k.S - it.pereplata) < 1e-6, `№16 ${k.shema}: переплата = всего − S`);
+    let prev = Infinity;
+    for (let t = 0; t <= k.n; t += 0.01) {
+      const st = K16.sostoyanie(k, t);
+      check(st.dolg >= -1e-9 && st.dolg <= k.S * 1.1 + 1e-6, `№16 ${k.shema}: долг в пределах`);
+      check(st.gotovo >= 0 && st.gotovo <= k.n, `№16 ${k.shema}: столбиков не больше лет`);
+      if (Math.abs(t - Math.round(t)) < 1e-9) {
+        check(st.dolg <= prev + 1e-9, `№16 ${k.shema}: к концу года долг убывает`);
+        prev = st.dolg;
+      }
+    }
+    const o = K16.hodKredita(k);
+    check(
+      o.tMax === k.n && o.ostanovki.length === k.n - 1,
+      `№16 ${k.shema}: остановки на концах лет`,
+    );
+  }
+  check(T16.KREDIT16.status.konecDif('10', '2').includes('$10$'), '№16: итог диф. подставляется');
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15, T12], (k, val) =>
+  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15, T12, T16], (k, val) =>
     typeof val === 'function' ? String(val) : val,
   );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');

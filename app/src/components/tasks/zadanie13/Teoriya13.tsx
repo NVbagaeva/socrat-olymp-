@@ -18,6 +18,7 @@ import { TABLE_HEAD } from '@/lib/zadanie13/tablica';
 import { YAKOR_13 } from '@/lib/zadanie13/teoriya-yakorya';
 import { zadachaVarianta17 } from '@/lib/zadanie13/zadachaVarianta';
 import Link from 'next/link';
+import { ZhivoyKredit16 } from '@/components/zhivye/kredit16/Kredit16';
 import { DveShemy, LesenkaAnn, LesenkaDif } from './Risunki13';
 import { ZadachaVarianta13Telo } from './ZadachaVarianta13';
 import '../teoriya/teoriya-steklo.css';
@@ -362,6 +363,8 @@ export function Teoriya13({ vkladka }: { vkladka: string }) {
             {p.bloki.map((b, i) => (
               <BlokView b={b} key={i} />
             ))}
+            {/* Живая сцена «Как гасится кредит» — к рисунку двух схем. */}
+            {p.id === 'dve-shemy-risunok' ? <ZhivoyKredit16 /> : null}
           </section>
         ))}
       </div>,
