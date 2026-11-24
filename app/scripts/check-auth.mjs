@@ -3273,6 +3273,16 @@ async function runZhurnalBanka(mock, errors) {
     await knopka.waitFor();
     await knopka.click();
     await page.waitForSelector('.trn-vybor__ryadom .dz2-knopka__glavnaya[aria-pressed="true"]');
+    if (SHOTS !== null) {
+      for (const w of [375, 1280]) {
+        await page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
+        await knopka.scrollIntoViewIfNeeded();
+        await page.evaluate(() => document.fonts.ready);
+        await page.screenshot({ path: path.join(SHOTS, `dz2-trenazher7-${w}.png`),
+          style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+      }
+      await page.setViewportSize({ width: 1280, height: 900 });
+    }
     await page.goto(`${SITE}/zadaniya/tekstovye-zadachi/trenazher/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.trn-start');
     await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
