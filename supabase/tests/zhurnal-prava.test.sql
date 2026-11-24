@@ -7,10 +7,6 @@
 
 \set ON_ERROR_STOP on
 set client_min_messages = notice;
--- Дни журнала — по Москве (свёртка zhurnal_dni). current_date в запросах
--- ниже — тоже московская дата, иначе с 21:00 до 24:00 UTC проверка
--- «за последние 30 дней» теряла сегодняшние задачи.
-set timezone = 'Europe/Moscow';
 
 insert into public.legal_editions (version) values ('2026-11-11');
 
@@ -181,12 +177,13 @@ select pg_temp.fails($q$select public.zhurnal_push(jsonb_build_object('zadachi',
   (select jsonb_agg(pg_temp.z(gen_random_uuid()::text, 8, '8.A', 'right', 1000)) from generate_series(1, 51))))$q$,
   'too_big');
 
--- Вариант целиком.
--- Начат минуту назад: «час назад» после полуночи по Москве — уже вчера, раньше дня связи с учителем.
+-- Вариант целиком. Начат минуту назад, а не час: дни журнала — по
+-- Москве, и с 21:00 до 22:00 UTC «час назад» — уже вчера, раньше дня
+-- связи учителя с учеником.
 select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(jsonb_build_object(
   'id', :'v1', 'source', 'sobrat', 'set_code', 'ABC123', 'variant_no', 1, 'started_at', now() - interval '1 minute',
-  'finished_at', now(), 'primary_score', 10, 'max_score', 32, 'test_score', 58, 'active_ms', 3000000,
-  'total_ms', 3600000))));
+  'finished_at', now(), 'primary_score', 10, 'max_score', 32, 'test_score', 58, 'active_ms', 50000,
+  'total_ms', 60000))));
 select pg_temp.push(pg_temp.z('d1000000-0000-0000-0000-0000000000a1', 5, '5:P02', 'right', 40000,
   extra => jsonb_build_object('place', 'variant', 'place_ref', :'v1')));
 
@@ -206,6 +203,10 @@ select pg_temp.fails($q$select pg_temp.push(pg_temp.z(gen_random_uuid()::text, 8
 
 /* ── 3. Ученик видит только своё и без пометок учителя ────────── */
 
+/* Дни журнала считаются по Москве, current_date — по UTC: с 21:00 до
+   24:00 UTC сегодняшние попытки уже «завтрашние». Поэтому окно
+   запросов — по завтрашний день включительно. */
+
 select pg_temp.as_user(:'s1');
 select pg_temp.ok(pg_temp.n('select * from public.zhurnal_zadachi') = 5, 'ученик видит не 5 своих задач');
 select pg_temp.ok(pg_temp.n(format('select * from public.zhurnal_zadachi where user_id = %L', :'s3')) = 0,
@@ -214,18 +215,18 @@ select pg_temp.ok(pg_temp.n(format('select * from public.zhurnal_popytki where u
   'ученик видит чужие попытки');
 select pg_temp.ok(pg_temp.n(format('select * from public.zhurnal_dni where user_id = %L', :'s3')) = 0,
   'ученик видит чужую свёртку');
-select pg_temp.ok((public.moya_statistika(current_date - 30, current_date) ->> 'solved')::int = 5,
+select pg_temp.ok((public.moya_statistika(current_date - 30, current_date + 1) ->> 'solved')::int = 5,
   'своя статистика: не 5 решённых');
-select pg_temp.ok(public.moya_lenta(current_date - 30, current_date)::text not like '%bystro%',
+select pg_temp.ok(public.moya_lenta(current_date - 30, current_date + 1)::text not like '%bystro%',
   'ученику ушла пометка «очень быстро»');
 select pg_temp.ok(public.moy_variant(:'v1')::text not like '%bystro%', 'пометка в варианте ученика');
 select pg_temp.ok(jsonb_array_length(public.moy_variant(:'v1') -> 'zadachi') = 1, 'задачи варианта ученика');
 -- Ученик не вызывает функции учителя: ни о себе, ни о других.
-select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date)', :'s1'),
+select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date + 1)', :'s1'),
   'not_your_student');
-select pg_temp.fails(format('select public.uchitel_lenta(%L, current_date - 30, current_date)', :'s2'),
+select pg_temp.fails(format('select public.uchitel_lenta(%L, current_date - 30, current_date + 1)', :'s2'),
   'not_your_student');
-select pg_temp.fails(format('select public.uchitel_klass(%L, current_date - 30, current_date)', :'class_a'),
+select pg_temp.fails(format('select public.uchitel_klass(%L, current_date - 30, current_date + 1)', :'class_a'),
   'forbidden');
 
 /* ── 4. Учитель не видит чужих учеников ───────────────────────── */
@@ -237,33 +238,33 @@ select pg_temp.ok(pg_temp.n('select * from public.zhurnal_popytki') = 0, 'учи
 select pg_temp.ok(pg_temp.n('select * from public.zhurnal_dni') = 0, 'учитель читает свёртку напрямую');
 select pg_temp.ok(pg_temp.n('select * from public.varianty_resheniya') = 0, 'учитель читает варианты напрямую');
 -- Внутренние функции закрыты.
-select pg_temp.fails(format('select public.zhurnal_svodka(%L, current_date - 30, current_date, null, null)', :'s3'),
+select pg_temp.fails(format('select public.zhurnal_svodka(%L, current_date - 30, current_date + 1, null, null)', :'s3'),
   'permission denied');
-select pg_temp.fails(format('select public.zhurnal_lenta(%L, current_date - 30, current_date, null, null, null, true)',
+select pg_temp.fails(format('select public.zhurnal_lenta(%L, current_date - 30, current_date + 1, null, null, null, true)',
   :'s3'), 'permission denied');
 select pg_temp.fails(format('select public.zhurnal_variant(%L, %L, null, true)', :'s3', :'v1'), 'permission denied');
 select pg_temp.fails(format('select public.uchitel_dostup(%L)', :'s3'), 'permission denied');
 select pg_temp.fails('select public.zhurnal_svernut()', 'permission denied');
 -- Чужой ученик, чужой класс, ученик без учителя.
-select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date)', :'s3'),
+select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date + 1)', :'s3'),
   'not_your_student');
-select pg_temp.fails(format('select public.uchitel_lenta(%L, current_date - 30, current_date)', :'s3'),
+select pg_temp.fails(format('select public.uchitel_lenta(%L, current_date - 30, current_date + 1)', :'s3'),
   'not_your_student');
 select pg_temp.fails(format('select public.uchitel_zadacha(%L, %L)', :'s3', :'zc1'), 'not_your_student');
 -- Своего ученика с id задачи чужого — не найдено.
 select pg_temp.fails(format('select public.uchitel_zadacha(%L, %L)', :'s1', :'zc1'), 'not_found');
 select pg_temp.fails(format('select public.uchitel_variant(%L, %L)', :'s3', :'v1'), 'not_your_student');
-select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date)', :'s4'),
+select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date + 1)', :'s4'),
   'not_your_student');
-select pg_temp.fails(format('select public.uchitel_klass(%L, current_date - 30, current_date)', :'class_b'),
+select pg_temp.fails(format('select public.uchitel_klass(%L, current_date - 30, current_date + 1)', :'class_b'),
   'forbidden');
 
 -- Свои ученики видны.
-select pg_temp.ok((public.uchitel_uchenik(:'s1', current_date - 30, current_date) -> 'svodka' ->> 'solved')::int = 5,
+select pg_temp.ok((public.uchitel_uchenik(:'s1', current_date - 30, current_date + 1) -> 'svodka' ->> 'solved')::int = 5,
   'учитель не видит 5 задач своего ученика');
-select pg_temp.ok(jsonb_array_length(public.uchitel_lenta(:'s1', current_date - 30, current_date)) = 5,
+select pg_temp.ok(jsonb_array_length(public.uchitel_lenta(:'s1', current_date - 30, current_date + 1)) = 5,
   'лента своего ученика');
-select pg_temp.ok(jsonb_array_length(public.uchitel_lenta(:'s1', current_date - 30, current_date, 5)) = 2,
+select pg_temp.ok(jsonb_array_length(public.uchitel_lenta(:'s1', current_date - 30, current_date + 1, 5)) = 2,
   'фильтр ленты по разделу');
 select pg_temp.ok((public.uchitel_zadacha(:'s1', :'za2') ->> 'bystro')::boolean,
   'верно за 3 с на повышенной сложности — без пометки «очень быстро»');
@@ -273,23 +274,23 @@ select pg_temp.ok(jsonb_array_length(public.uchitel_zadacha(:'s1', :'za1') -> 'p
   'учитель не видит попытки задачи');
 select pg_temp.ok((public.uchitel_variant(:'s1', :'v1') ->> 'test_score')::int = 58, 'вариант ученика');
 select pg_temp.ok((select count(*) = 2 from jsonb_array_elements(
-    public.uchitel_klass(:'class_a', current_date - 30, current_date) -> 'ucheniki')), 'в классе не 2 ученика');
-select pg_temp.ok(public.uchitel_klass(:'class_a', current_date - 30, current_date)::text not like
+    public.uchitel_klass(:'class_a', current_date - 30, current_date + 1) -> 'ucheniki')), 'в классе не 2 ученика');
+select pg_temp.ok(public.uchitel_klass(:'class_a', current_date - 30, current_date + 1)::text not like
   '%' || :'s3' || '%', 'в карте класса чужой ученик');
 
 -- Второй учитель не видит учеников первого.
 select pg_temp.as_user(:'t2');
-select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date)', :'s1'),
+select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date + 1)', :'s1'),
   'not_your_student');
 select pg_temp.fails(format('select public.uchitel_zadacha(%L, %L)', :'s1', :'za1'), 'not_your_student');
-select pg_temp.ok((public.uchitel_uchenik(:'s3', current_date - 30, current_date) -> 'svodka' ->> 'solved')::int = 1,
+select pg_temp.ok((public.uchitel_uchenik(:'s3', current_date - 30, current_date + 1) -> 'svodka' ->> 'solved')::int = 1,
   'второй учитель не видит своего ученика');
 
 -- Аноним не вызывает ничего.
 reset role;
 set role anon;
 select pg_temp.fails($q$select public.zhurnal_push('{}')$q$, 'permission denied');
-select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date)', :'s1'),
+select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date + 1)', :'s1'),
   'permission denied');
 select pg_temp.fails('select * from public.zhurnal_zadachi', 'permission denied');
 reset role;
@@ -305,11 +306,11 @@ select pg_temp.as_user(:'s2');
 select pg_temp.push(pg_temp.z('d4000000-0000-0000-0000-000000000002', 8, '8.A', 'right', 20000,
   interval '3 days'));
 select pg_temp.as_user(:'t1');
-select pg_temp.ok(jsonb_array_length(public.uchitel_lenta(:'s2', current_date - 30, current_date)) = 1,
+select pg_temp.ok(jsonb_array_length(public.uchitel_lenta(:'s2', current_date - 30, current_date + 1)) = 1,
   'учитель видит задачу, решённую до связи');
 select pg_temp.fails(format('select public.uchitel_zadacha(%L, %L)', :'s2', 'd4000000-0000-0000-0000-000000000002'),
   'not_found');
-select pg_temp.ok((public.uchitel_uchenik(:'s2', current_date - 30, current_date) -> 'svodka' ->> 'solved')::int = 1,
+select pg_temp.ok((public.uchitel_uchenik(:'s2', current_date - 30, current_date + 1) -> 'svodka' ->> 'solved')::int = 1,
   'сводка учитывает дни до связи');
 
 -- Связь закончилась — ничего не видно.
@@ -317,12 +318,12 @@ reset role;
 update public.tutor_students set ended_at = now() where tutor_id = :'t1' and user_id = :'s1';
 set role authenticated;
 select pg_temp.as_user(:'t1');
-select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date)', :'s1'),
+select pg_temp.fails(format('select public.uchitel_uchenik(%L, current_date - 30, current_date + 1)', :'s1'),
   'not_your_student');
 select pg_temp.fails(format('select public.uchitel_zadacha(%L, %L)', :'s1', :'za1'), 'not_your_student');
-select pg_temp.ok(public.uchitel_klass(:'class_a', current_date - 30, current_date)::text not like
+select pg_temp.ok(public.uchitel_klass(:'class_a', current_date - 30, current_date + 1)::text not like
   '%' || :'za1' || '%', 'карта класса после конца связи');
-select pg_temp.ok((public.uchitel_klass(:'class_a', current_date - 30, current_date) ->> 'skryto')::int = 1,
+select pg_temp.ok((public.uchitel_klass(:'class_a', current_date - 30, current_date + 1) ->> 'skryto')::int = 1,
   'ушедший ученик не посчитан скрытым');
 
 -- Вернулся — связь начинается заново, прежние записи закрыты.

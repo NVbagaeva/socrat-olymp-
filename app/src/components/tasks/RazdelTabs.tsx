@@ -37,6 +37,11 @@ export interface RazdelTabsProps {
   before?: ReactNode;
   /** Модификатор строки ленты, общий для обеих копий (TabsRow). */
   className?: string;
+  /**
+   * Плашка «Это же в базе» уже стоит в шапке раздела (SectionHeader):
+   * над лентой её не повторять.
+   */
+  bezPary?: boolean;
 }
 
 /**
@@ -91,6 +96,7 @@ export function RazdelTabs({
   tutorsTail,
   before,
   className,
+  bezPary = false,
 }: RazdelTabsProps) {
   const tabs = sKartochkami(base, svoi);
   const pathname = usePathname();
@@ -150,7 +156,7 @@ export function RazdelTabs({
   /* Плашка ленты — одна и та же обёртка в обоих случаях: и когда
      меню материалов есть, и когда его нет. Иначе оформление плашки
      пришлось бы описывать дважды. */
-  const para = paraUrovnya(base);
+  const para = bezPary ? null : paraUrovnya(base);
   if (tutors === undefined) {
     return (
       <>

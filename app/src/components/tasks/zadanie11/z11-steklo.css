@@ -85,8 +85,10 @@
   min-height: 44px;
 }
 
-/* Картинка к задаче — как есть, во всю ширину колонки, без обрезки. */
-.z11-kartinka {
+/* Картинка к задаче — как есть, во всю ширину колонки, без обрезки.
+   Схема шага (обгон поездов) — так же, не шире своего размера. */
+.z11-kartinka,
+.z11-skhema {
   display: block;
   max-width: 100%;
   height: auto;
@@ -164,270 +166,49 @@
   }
 }
 
-/* ── «Встречное движение»: живая иллюстрация на «О задании» ── */
+/* ── «Встречное движение»: оболочка на «О задании» ──
+   Сама сцена и её стили грузятся лениво (vstrecha/vstrecha.css);
+   здесь — карточка, заголовок и заглушка той же высоты. */
 .z11-vst {
+  container: z11-vst / inline-size;
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-4);
   padding: var(--space-5);
   border-radius: 22px;
-  overflow: hidden;
+  /* Мягкий голубой и тёплый свет, как у шапок разделов. */
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(31, 95, 208, 0.1), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(240, 138, 36, 0.1), transparent 60%),
+    var(--glass-bg-strong);
 }
 .z11-vst__text {
   display: grid;
   gap: var(--space-1);
+  max-width: 72ch;
 }
 .z11-vst__lead {
   margin: 0;
   color: var(--color-text-secondary);
   line-height: 1.5;
 }
-.z11-vst__svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(234, 241, 255, 0.9), rgba(255, 255, 255, 0.4));
-  box-shadow: var(--glass-ring, inset 0 0 0 1px rgba(31, 95, 208, 0.12));
-  overflow: visible;
+.z11-vst__zaglushka {
+  display: grid;
+  place-items: center;
+  min-height: 560px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(234, 241, 255, 0.6));
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
 }
-.z11-vst__zemlya {
-  stroke: rgba(31, 95, 208, 0.14);
-  stroke-width: 2;
-}
-.z11-vst__doroga {
-  stroke-width: 6;
-  stroke-linecap: round;
-  opacity: 0.22;
-}
-/* Пройденная часть дороги: закрашивается в обе стороны к точке встречи. */
-.z11-vst__proyden {
-  stroke: #1f5fd0;
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-dasharray: 0 1000;
-  opacity: 0.55;
-}
-.z11-vst__svg.is-idyot .z11-vst__proyden {
-  animation: z11-vst-proyden var(--sek) linear forwards;
-}
-@keyframes z11-vst-proyden {
-  to {
-    stroke-dasharray: 1000 0;
+@container z11-vst (min-width: 900px) {
+  .z11-vst__zaglushka {
+    min-height: 520px;
   }
 }
-
-/* Города: стекло в тоне стороны, лёгкая тень. */
-.z11-vst__gorod rect {
-  fill: rgba(255, 255, 255, 0.85);
-  stroke: #1f5fd0;
-  stroke-width: 1.5;
-}
-.z11-vst__gorod--terra rect {
-  stroke: #c4553a;
-}
-.z11-vst__gorod .z11-vst__okna rect {
-  fill: rgba(31, 95, 208, 0.28);
-  stroke: none;
-}
-.z11-vst__gorod--terra .z11-vst__okna rect {
-  fill: rgba(196, 85, 58, 0.28);
-}
-.z11-vst__gorod .z11-vst__shpil {
-  fill: #1f5fd0;
-  stroke: none;
-}
-.z11-vst__gorod--terra .z11-vst__shpil {
-  fill: #c4553a;
-}
-.z11-vst__bukva {
-  fill: #1f4fb0;
-  font-size: 18px;
-  font-weight: 700;
-  font-family: inherit;
-}
-.z11-vst__gorod--terra .z11-vst__bukva {
-  fill: #a8452c;
-}
-
-/* Путники: силуэт линиями, тень под ногами, шаг — качание ног и рук. */
-.z11-vst__putnik {
-  --ton: #1f5fd0;
-  --ton-soft: rgba(31, 95, 208, 0.18);
-  transform: translateX(var(--x));
-  transition: transform var(--sek) linear;
-}
-.z11-vst__putnik--terra {
-  --ton: #c4553a;
-  --ton-soft: rgba(196, 85, 58, 0.18);
-  transform: translateX(var(--x)) scale(-1, 1);
-}
-.z11-vst__putnik--sin.is-idyot {
-  transform: translateX(var(--cel));
-}
-.z11-vst__putnik--terra.is-idyot {
-  transform: translateX(var(--cel)) scale(-1, 1);
-}
-.z11-vst__golova {
-  fill: var(--ton);
-}
-.z11-vst__telo,
-.z11-vst__noga,
-.z11-vst__ruka {
-  fill: none;
-  stroke: var(--ton);
-  stroke-width: 4.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.z11-vst__ryukzak {
-  fill: var(--ton-soft);
-  stroke: var(--ton);
-  stroke-width: 1.5;
-}
-.z11-vst__ten {
-  fill: rgba(20, 40, 90, 0.12);
-  transform: scaleY(0.28);
-  transform-origin: 0 166px;
-}
-.z11-vst__noga,
-.z11-vst__ruka {
-  transform-box: fill-box;
-}
-.z11-vst__noga {
-  transform-origin: 50% 0;
-}
-.z11-vst__ruka {
-  transform-origin: 50% 0;
-}
-.z11-vst__putnik.is-idyot .z11-vst__noga--l,
-.z11-vst__putnik.is-idyot .z11-vst__ruka--r {
-  animation: z11-vst-shag 0.72s ease-in-out infinite;
-}
-.z11-vst__putnik.is-idyot .z11-vst__noga--r,
-.z11-vst__putnik.is-idyot .z11-vst__ruka--l {
-  animation: z11-vst-shag 0.72s ease-in-out -0.36s infinite;
-}
-.z11-vst__putnik.is-idyot .z11-vst__telo,
-.z11-vst__putnik.is-idyot .z11-vst__golova,
-.z11-vst__putnik.is-idyot .z11-vst__ryukzak {
-  animation: z11-vst-kach 0.72s ease-in-out infinite;
-}
-.z11-vst__putnik.is-idyot .z11-vst__golova {
-  animation-delay: -0.08s;
-}
-.z11-vst__putnik.is-idyot .z11-vst__ryukzak {
-  animation-delay: -0.18s;
-}
-@keyframes z11-vst-shag {
-  0%, 100% {
-    transform: rotate(-18deg);
-  }
-  50% {
-    transform: rotate(18deg);
-  }
-}
-@keyframes z11-vst-kach {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-1.5px);
-  }
-}
-/* Пришли: стоят, руки опущены. */
-.z11-vst__svg.is-vstretilis .z11-vst__noga,
-.z11-vst__svg.is-vstretilis .z11-vst__ruka,
-.z11-vst__svg.is-vstretilis .z11-vst__telo,
-.z11-vst__svg.is-vstretilis .z11-vst__golova,
-.z11-vst__svg.is-vstretilis .z11-vst__ryukzak {
-  animation: none;
-}
-
-/* Подписи пройденных отрезков — после встречи. */
-.z11-vst__otrezki {
-  opacity: 0;
-  transition: opacity 0.5s ease 0.3s;
-}
-.z11-vst__svg.is-vstretilis .z11-vst__otrezki {
-  opacity: 1;
-}
-.z11-vst__otrezok {
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  fill: #1f4fb0;
-}
-.z11-vst__otrezok--terra {
-  fill: #a8452c;
-}
-
-/* Точка встречи: флажок и вспышка появляются, когда путники дошли. */
-.z11-vst__flazhok {
-  fill: #ffb547;
-}
-.z11-vst__flazhok-drevko {
-  fill: #ffb547;
-  stroke: #c7781a;
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-}
-.z11-vst__tochka {
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-.z11-vst__vspyshka {
-  transform: scale(0.2);
-  transform-origin: center;
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.z11-vst__svg.is-vstretilis .z11-vst__tochka {
-  opacity: 1;
-}
-.z11-vst__svg.is-vstretilis .z11-vst__vspyshka {
-  transform: scale(1);
-}
-
-.z11-vst__niz {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3) var(--space-4);
-}
-.z11-vst__niz .stk-btn {
-  min-height: 44px;
-}
-.z11-vst__itog {
-  flex: 1 1 240px;
-  margin: 0;
-  min-height: 1.5em;
-  color: var(--color-text);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-.z11-vst__itog.is-vidno {
-  opacity: 1;
-}
-
 @media (max-width: 480px) {
   .z11-vst {
-    padding: var(--space-4);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .z11-vst__putnik,
-  .z11-vst__tochka,
-  .z11-vst__vspyshka,
-  .z11-vst__otrezki,
-  .z11-vst__itog {
-    transition: none;
-  }
-  .z11-vst__putnik.is-idyot *,
-  .z11-vst__svg.is-idyot .z11-vst__proyden {
-    animation: none;
-  }
-  .z11-vst__svg.is-idyot .z11-vst__proyden {
-    stroke-dasharray: 1000 0;
+    padding: var(--space-4) var(--space-3);
   }
 }
 

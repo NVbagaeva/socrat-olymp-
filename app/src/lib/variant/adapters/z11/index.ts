@@ -12,6 +12,7 @@
  */
 
 import { typesetKrupno } from '@/lib/tex';
+import { kartinka11 } from '@/lib/zadanie11/kartinki';
 import { dataUrl } from '@/lib/dataUrl';
 import { generateBez, paramsKey, pohozhaNa, type Pohozha } from '@/lib/zadanie11/gen/core';
 import { kodNaSayte } from '@/lib/zadanie11/kod';
@@ -78,6 +79,19 @@ function fromBank(b: UslovieBanka): C11 | null {
   };
 }
 
+/** Картинка сюжета для онлайн-варианта: аналогу — по его ключу, остальным — по подтипу. */
+function kartinkaVarianta11(c: C11): { kartinka?: { src: string; alt: string; src280: string } } {
+  const k =
+    c.iz.vid === 'new'
+      ? kartinka11(c.prototypeId, c.iz.params)
+      : c.iz.b.analog !== undefined
+        ? c.iz.b.analog.ks === undefined
+          ? undefined
+          : kartinka11(c.prototypeId, undefined, c.iz.b.analog.ks)
+        : kartinka11(c.prototypeId, c.iz.b.params);
+  return k === undefined ? {} : { kartinka: { src: k.src, alt: k.alt, src280: k.src280 } };
+}
+
 export function build(c: C11, solved: Solved): VariantTask {
   const id = c.prototypeId;
   const kod = kodNaSayte(id);
@@ -112,6 +126,7 @@ export function build(c: C11, solved: Solved): VariantTask {
     source: { kind: c.source, label },
     difficulty: stars(id),
     statement: typesetKrupno(tekst ?? s.uslovie),
+    ...kartinkaVarianta11(c),
     figure: null,
     figureTeacher: null,
     answer: otvetVybor === null ? answerText(s.answer) : otvetVybor.replace(/\$/g, ''),

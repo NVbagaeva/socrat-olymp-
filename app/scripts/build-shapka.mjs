@@ -28,8 +28,15 @@ import { EDGE_BIAS, LEAK_SHARE, compareAlpha, encodeWithinBudget, kb } from './l
 
 const ROOT = path.join(import.meta.dirname, '..');
 
-/** Шапки: исходник в assets, файлы в public/images. */
-const SHAPKI = [{ papka: 'zadanie-01', imya: 'shapka-planimetriya' }];
+/**
+ * Шапки: исходник в assets, файлы в public/images. У небольших картинок
+ * (города сцены «Встречное движение» №10) — свои ширины и бюджеты.
+ */
+const SHAPKI = [
+  { papka: 'zadanie-01', imya: 'shapka-planimetriya' },
+  { papka: 'zadanie-11', imya: 'gorod-a', widths: [160, 320], budget: 36 * 1024 },
+  { papka: 'zadanie-11', imya: 'gorod-b', widths: [160, 320], budget: 36 * 1024 },
+];
 
 /** Ширины для srcset: телефон 1x, планшет и компьютер 1x и 2x. */
 const WIDTHS = [480, 768, 1200, 1536];
@@ -95,7 +102,7 @@ async function kadr(source) {
 
 let failed = false;
 
-for (const { papka, imya } of SHAPKI) {
+for (const { papka, imya, widths = WIDTHS, budget } of SHAPKI) {
   const source = path.join(ROOT, 'assets', papka, `${imya}.png`);
   const out = path.join(ROOT, 'public', 'images', papka);
   await mkdir(out, { recursive: true });
@@ -116,13 +123,13 @@ for (const { papka, imya } of SHAPKI) {
   );
   const total = { webp: 0, png: 0 };
 
-  for (const width of WIDTHS) {
+  for (const width of widths) {
     /* Уменьшенный кадр без потерь — эталон, с которым сравниваем. */
     const frame = await sharp(k.buffer).resize({ width }).png().toBuffer();
 
     const webp = await encodeWithinBudget(frame, {
       ext: 'webp',
-      budget: BUDGET[width],
+      budget: budget ?? BUDGET[width],
       start: 85,
       floor: 45,
     });
@@ -151,7 +158,7 @@ for (const { papka, imya } of SHAPKI) {
           `  контур: смещение ${check.bias >= 0 ? '+' : ''}${check.bias.toFixed(2)},` +
           ` протекло ${check.leaked}` +
           (clean ? ' — каймы нет' : ' — ✗ КАЙМА') +
-          (over ? `  ✗ больше бюджета ${kb(BUDGET[width])}` : ''),
+          (over ? `  ✗ больше бюджета ${kb(budget ?? BUDGET[width])}` : ''),
       );
       if (!clean || over) failed = true;
     }

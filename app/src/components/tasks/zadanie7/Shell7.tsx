@@ -1,53 +1,24 @@
 import { AppShell } from '@/components/layout/AppShell';
-import { RisunokRazdela, StsenaShapka, tabletkiRazdela } from '@/components/tasks/stsena';
-import { tasksPage } from '@/content/tasks';
-import { STSENA } from '@/content/stsena';
-import { SHAPKA7 } from '@/content/uravneniya7';
+import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { ZADANIE7 } from '@/content/zadanie7';
 import { ZADANIYA } from '@/lib/paths';
-import { PROTOTYPES } from '@/lib/zadanie7/prototypes';
-import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
 import { RazdelTabs } from '../RazdelTabs';
 import './shell7.css';
 
 /**
- * Оболочка задания №7: шапка «Стеклянная сцена» и липкая лента вкладок
- * (RazdelTabs). Вызывается из layout маршрута — при переходе между
- * вкладками остаётся на месте, как у №10 и №11.
- *
- * Обложка: своя картинка, пока её нет — мотив раздела, нарисованный
- * кодом. Балл и время в таблетках — из тех же `SHAPKA7.fakty`, что
- * показывает вкладка «О задании».
+ * Оболочка раздела «Уравнения»: общая шапка раздела (SectionHeader) и
+ * липкая лента вкладок (RazdelTabs). Номер, заголовок, чипы, картинка и
+ * кольцо прогресса — в шапке, одинаковой у всех разделов. Вызывается из
+ * layout маршрута: при переходе между вкладками остаётся на месте.
  */
 export function Shell7({ children }: { children: React.ReactNode }) {
   const base = `${ZADANIYA}/${ZADANIE7.slug}`;
-  const no = String(Number(ZADANIE7.no));
   return (
     <AppShell active="tasks">
       <main className="app-main">
         <div className="z7-shell">
-          <StsenaShapka
-            className="stsena--uravneniya"
-            crumbs={[
-              { label: 'Главная', href: '/' },
-              { label: 'Банк заданий', href: tasksPage.href },
-              { label: `№${no}` },
-            ]}
-            title={ZADANIE7.title}
-            lead={ZADANIE7.lead}
-            tabletki={tabletkiRazdela({
-              chast: ZADANIE7.badge,
-              fakty: SHAPKA7.fakty(PROTOTYPES.length),
-            })}
-            media={
-              ZADANIE7.art ? (
-                <IllyustratsiyaShapki art={ZADANIE7.art} />
-              ) : (
-                <RisunokRazdela no={ZADANIE7.slug} label={`${STSENA.oblozhka}: ${ZADANIE7.title}`} />
-              )
-            }
-          />
-          <RazdelTabs base={base} tabs={ZADANIE7.tabs} className="topic-tabs-row--stsena" />
+          <SectionHeader kod="uravneniya" />
+          <RazdelTabs base={base} tabs={ZADANIE7.tabs} className="topic-tabs-row--stsena" bezPary />
           <div className="section-panel">{children}</div>
         </div>
       </main>

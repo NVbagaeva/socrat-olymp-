@@ -54,7 +54,12 @@ for (const n of PREZHNIE) {
 /* Подтипы — как их видит код варианта на сайте. */
 const { SUBTYPE_IDS } = requireSrc('lib/variant/sections');
 
-const otpechatok = (task) =>
+/* Картинка-иллюстрация сюжета (VariantTask.kartinka) в отпечаток не
+   входит: это оформление карточки онлайн-варианта, на лист ЕГЭ она не
+   идёт, а её адрес несёт версию файла (?v=) и меняется при каждой
+   перерисовке. Задача — условие, рисунки, решения, подсказки, пометки —
+   сверяется по-прежнему байт в байт. */
+const otpechatok = ({ kartinka: _kartinka, ...task }) =>
   crypto.createHash('sha256').update(JSON.stringify(task)).digest('hex').slice(0, 16);
 
 function sobrat(code) {

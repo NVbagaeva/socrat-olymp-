@@ -14,8 +14,8 @@
      — у №3 и №15 лента из одних вкладок (у №3 ещё «Карточки» после
        «Тренажёра»), каждая открывается по своему адресу и подсвечена,
        лента прилипает при прокрутке;
-     — у №15 плашка «Задание №… ▾» стоит в липкой строке; у №3 (шапка
-       «Стеклянная сцена») переключатель «№3 Стереометрия ▾» стоит над
+     — у №15 плашка «Задание №… ▾» стоит в липкой строке; у №3 (общая
+       шапка раздела) переключатель «№3 Стереометрия ▾» стоит над
        шапкой только на телефоне, на компьютере вместо него крошки, а
        кнопки «Стереометрия: №3 и №15» нет. Плашка нажимается (≥ 44 px),
        открывает меню «Все разделы стереометрии»: два задания, текущее
@@ -153,7 +153,7 @@ const vkladki = (no) =>
     ? [...VKLADKI_15.slice(0, 4), ['kartochki/', 'Карточки'], ...VKLADKI_15.slice(4)]
     : VKLADKI_15;
 /** Плашка «раздел ▾» у обоих номеров стоит над шапкой, не в ленте. */
-const PLASHKA = () => '.stsena-pereklyuchatel .razdely-plashka';
+const PLASHKA = () => '.shapka-pereklyuchatel .razdely-plashka';
 const ZADANIYA = [
   { no: '3', glavy: GLAVY_3, vkladki: vkladki('3') },
   { no: '15', glavy: GLAVY_15, vkladki: vkladki('15') },
@@ -234,10 +234,11 @@ for (const size of SIZES) {
       check(stuck, where('лента вкладок не прилипла'));
       await page.evaluate(() => window.scrollTo(0, 0));
 
-      /* Шапка «Стеклянная сцена»: на компьютере крошки и ни плашки,
-         ни кнопки «Стереометрия: №3 и №15»; на телефоне — переключатель
-         над шапкой. Обложка у №3 — картинка с кнопкой «Можно вращать»,
-         у №15 — мотив раздела, нарисованный кодом. */
+      /* Общая шапка раздела (SectionHeader): на компьютере крошки и ни
+         плашки, ни кнопки «Стереометрия: №3 и №15»; на телефоне —
+         переключатель над шапкой. Заголовок «Задание №N. Стереометрия»
+         по ЕГЭ-2027, чипы уровня, части, балла и времени, картинка в
+         кольце прогресса, у гостя — приглашение войти. */
       {
         const stsena = await page.evaluate(() => {
           const vid = (sel) => {
@@ -245,21 +246,21 @@ for (const size of SIZES) {
             return node !== null && node.getBoundingClientRect().height > 0;
           };
           return {
-            shapka: vid('.stsena'),
-            crumbs: vid('.stsena-crumbs'),
+            shapka: vid('.shapka'),
+            crumbs: vid('.shapka-crumbs'),
             vse: document.querySelector('.razdely-vse') !== null,
             plashkaVLente: document.querySelector('.topic-tabs-row .razdely-plashka') !== null,
-            pereklyuchatel: vid('.stsena-pereklyuchatel .razdely-plashka'),
-            oblozhka: vid('.oblozhka__poster img'),
-            risunok: vid('.rsz__holst'),
-            knopka: document.querySelector('.oblozhka__knopka')?.textContent?.trim() ?? '',
-            progress: document.querySelector('.stsena__progress-text')?.textContent ?? '',
-            tabletki: Array.from(document.querySelectorAll('.stsena__tabletka')).map(
+            pereklyuchatel: vid('.shapka-pereklyuchatel .razdely-plashka'),
+            kartinka: vid('.zhk__poster img'),
+            koltso: vid('.koltso__svg'),
+            gost: document.querySelector('.koltso__tekst--gost')?.textContent?.trim() ?? '',
+            title: document.querySelector('.shapka__title-polno')?.textContent ?? '',
+            chipy: Array.from(document.querySelectorAll('.shapka__chip')).map(
               (t) => t.textContent?.trim() ?? '',
             ),
           };
         });
-        check(stsena.shapka, where('нет шапки «Стеклянная сцена»'));
+        check(stsena.shapka, where('нет шапки раздела'));
         check(!stsena.vse, where('осталась кнопка «Стереометрия: №3 и №15»'));
         check(!stsena.plashkaVLente, where('плашка задания осталась в ленте'));
         check(stsena.crumbs === !size.isMobile, where('крошки: видны не там'));
@@ -267,26 +268,22 @@ for (const size of SIZES) {
           stsena.pereklyuchatel === size.isMobile,
           where('переключатель раздела: виден не там'),
         );
-        if (no === '3') {
-          check(stsena.oblozhka, where('нет обложки-куба'));
-          check(stsena.knopka === 'Можно вращать', where(`кнопка обложки «${stsena.knopka}»`));
-          check(
-            stsena.progress === 'Пока ничего не решено',
-            where(`прогресс гостя «${stsena.progress}»`),
-          );
-          check(
-            stsena.tabletki.join('|') === 'Часть 1|1 балл|≈ 3 минуты',
-            where(`таблетки: ${stsena.tabletki.join(', ')}`),
-          );
-        } else {
-          /* У №15 обложка нарисована кодом, балла и времени в данных
-             раздела нет — остаётся одна таблетка части. */
-          check(stsena.risunok, where('нет нарисованной обложки'));
-          check(
-            stsena.tabletki.join('|') === 'Часть 2',
-            where(`таблетки: ${stsena.tabletki.join(', ')}`),
-          );
-        }
+        check(stsena.kartinka && stsena.koltso, where('нет картинки в кольце прогресса'));
+        check(
+          stsena.gost === 'Войдите — прогресс будет сохраняться',
+          where(`подпись кольца у гостя «${stsena.gost}»`),
+        );
+        check(
+          stsena.title === `Задание №${nomerRazdela(Number(no))}. Стереометрия`,
+          where(`заголовок «${stsena.title}»`),
+        );
+        check(
+          stsena.chipy.join('|') ===
+            (no === '3'
+              ? 'Профиль|Часть 1|1 балл|≈ 3 минуты'
+              : 'Профиль|Часть 2|3 балла|≈ 25 минут'),
+          where(`чипы: ${stsena.chipy.join(', ')}`),
+        );
         if (!size.isMobile) {
           continue;
         }

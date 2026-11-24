@@ -333,9 +333,9 @@ const ODOBRENO = {
   'app/src/components/tasks/veroyatnost/teoriya/KakIzobrazhatSobytiya.tsx':
     '9b85c72ca8dd7eade200454766cccc15a5b31a83ef2160a8e0ba20025501f409',
   'app/src/components/tasks/veroyatnost/teoriya/ProtivopolozhnoeSobytiye4.tsx':
-    'f19f54b03e2eeb5fac4cfea5517681d1134bddce0dc6e21b55aa643d16b634d0',
+    '907dbcd064a3de13df1e084cce118d768db30e5ba7fc1aa97b26999bc6bf43ca',
   'app/src/components/tasks/veroyatnost/teoriya/Sobytiya5.tsx':
-    '9c6a30cad1d2967620c601730688e0d7fe94411d7006fde08846e9e1db35f90f',
+    'c4e1e698a7171c555ae3a7deb27e17c82670895ce0bccdff490fd29f7816003d',
   'app/src/components/tasks/veroyatnost/teoriya/index.tsx':
     'bc9a702586381afad4fb9aa3d994c8b7dd95e011057cce7efb9f84af5c92c2c8',
   'app/src/content/veroyatnost-teoriya.ts':
@@ -509,6 +509,26 @@ const ODOBRENO = {
     'dcc512fbd36ac5ea5e77130ddf6a56bad1aad00debfead66140807f056e30f18',
   'app/src/lib/planimetriya/stseny/chasti.ts':
     'b2db181af3ddde18f99d009f9e323ede50f0f7681bd870af5fd31cad007231c9',
+  /* №11, одобрено владельцем 23.11.2026: оформление решений — деление
+     с чертой справа, подбор корня из дискриминанта, НОК с пояснением,
+     совместная производительность, «большее − меньшее = разница» со
+     стрелкой в таблице, схема обгона в шаге ПТ-03. */
+  'app/src/lib/zadanie11/kit.ts':
+    'e987db3499eb42618f41544fd2bc95243e067d16593b1aaff49ebb9205a10fae',
+  'app/src/lib/zadanie11/prototypes/dp.ts':
+    '5cfd49d062554228747bdab429a65e93ca5c5a000839bb858189cf3fd38b70d8',
+  'app/src/lib/zadanie11/prototypes/ezhemesyachnye.ts':
+    'e06c939a39575bfa38766e377d0c908dc2a84de47c93400dab7f0f2fef20bfc1',
+  'app/src/lib/zadanie11/prototypes/ok.ts':
+    '4a2a1750dd3d10b9d97bc65a3ee7d900e6fe85ab10dc08060e7244f79d94a442',
+  'app/src/lib/zadanie11/prototypes/pt.ts':
+    'bddeeaa40f1b7e66f3a7276ed3861575b063de7fa4f90d244ba080d97b2c2417',
+  'app/src/lib/zadanie11/prototypes/rb.ts':
+    '19f78830c04813e6749d6ec40a286182a703cce1f16f0243177bf116d4daf258',
+  'app/src/lib/zadanie11/prototypes/vd.ts':
+    'f790fc3f3bd178d23f56bae28d83a187089d76a5f7722b89ff66d24ac284470d',
+  'app/src/lib/zadanie11/types.ts':
+    '9fb2ff443383f90461d50b22c9d125fdf9f2a9bb88e3982aea462e49f9064349',
 };
 
 /** Какие картинки реестра принадлежат разделу. */

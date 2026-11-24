@@ -4,7 +4,6 @@ import { clsx } from 'clsx';
 import { useMemo, useState } from 'react';
 import { useSessionReport } from '../../session/useSessionReport';
 import { Ikonka, Metka } from '../../steklo';
-import { assetUrl } from '@/lib/assetUrl';
 import type { TaskMark } from '@/lib/trainerSession/types';
 import { openText, sealMetod } from '@/lib/veroyatnost/secret';
 import type { Zadanie45 } from '@/lib/veroyatnost/trening/links';
@@ -14,6 +13,7 @@ import { MetodKartinka } from '../MetodKartinka';
 import { navykiZadaniya } from '../metody';
 import type { SessiyaPayload } from '../sessiyaPayload';
 import type { Ui45 } from './ui45';
+import { KartinkaZadachi } from '@/components/ui/KartinkaZadachi';
 
 export interface EkranUznay45Props {
   zadanie: Zadanie45;
@@ -135,20 +135,24 @@ export function EkranUznay45({
             {index + 1} {T.ekran.iz} {tasks.length}
           </span>
         </div>
-        {kartinka === undefined ? null : (
-          <div className="trn-risunok">
-            <img
-              className="z45-kartinka"
-              src={assetUrl(kartinka.path)}
+        {kartinka === undefined ? (
+          <div
+            className="trn-uslovie trn-uslovie--tekst"
+            dangerouslySetInnerHTML={{ __html: task.uslovie }}
+          />
+        ) : (
+          <div className="kz-ryad">
+            <KartinkaZadachi
+              src={kartinka.path}
+              {...(kartinka.path280 === undefined ? {} : { src280: kartinka.path280 })}
               alt={kartinka.alt}
-              decoding="async"
+            />
+            <div
+              className="trn-uslovie trn-uslovie--tekst"
+              dangerouslySetInnerHTML={{ __html: task.uslovie }}
             />
           </div>
         )}
-        <div
-          className="trn-uslovie trn-uslovie--tekst"
-          dangerouslySetInnerHTML={{ __html: task.uslovie }}
-        />
       </article>
 
       <div className="trn-otvetnaya stk-glass">
