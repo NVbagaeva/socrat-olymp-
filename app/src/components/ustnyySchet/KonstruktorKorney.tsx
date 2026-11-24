@@ -11,16 +11,16 @@ const T = USTNYY.konstruktor;
 const MIN = -10;
 const MAX = 10;
 
-/* Числовая прямая: viewBox 640 × 84. */
-const LW = 640;
+/* Числовая прямая: ширина viewBox — ширина на экране в px (точки и
+   подписи одного размера на телефоне и компьютере), высота 84. */
 const LH = 84;
 const LPOLE = 28;
 const LY = 40;
-const lx = (x: number) => LPOLE + ((x - MIN) / (MAX - MIN)) * (LW - 2 * LPOLE);
+const lxPri = (lw: number) => (x: number) => LPOLE + ((x - MIN) / (MAX - MIN)) * (lw - 2 * LPOLE);
 
 /* Парабола: viewBox 640 × 300, ось x — та же шкала. */
 const PW = 640;
-const PH = 300;
+const PH = 260;
 const PVERH = 16;
 const PNIZ = 24;
 
@@ -88,17 +88,19 @@ interface TochkaProps {
   label: string;
   onX: (x: number) => void;
   svg: React.RefObject<SVGSVGElement | null>;
+  lw: number;
 }
 
 /** Стеклянная точка на прямой: тянется мышью и пальцем, ходит стрелками. */
-function Tochka({ x, nomer, label, onX, svg }: TochkaProps) {
+function Tochka({ x, nomer, label, onX, svg, lw }: TochkaProps) {
+  const lx = lxPri(lw);
   const tyanem = useRef(false);
   const izKursora = (clientX: number) => {
     const el = svg.current;
     if (el === null) return;
     const r = el.getBoundingClientRect();
-    const u = ((clientX - r.left) / r.width) * LW;
-    onX(klamp(MIN + ((u - LPOLE) / (LW - 2 * LPOLE)) * (MAX - MIN)));
+    const u = ((clientX - r.left) / r.width) * lw;
+    onX(klamp(MIN + ((u - LPOLE) / (lw - 2 * LPOLE)) * (MAX - MIN)));
   };
   return (
     <g
@@ -154,8 +156,8 @@ function Tochka({ x, nomer, label, onX, svg }: TochkaProps) {
 }
 
 /**
- * «Конструктор корней» на странице приёма «Виет: приведённое
- * уравнение»: корни x₁ и x₂ на числовой прямой, вживую — уравнение
+ * «Конструктор корней» на странице приёма «Обратная теорема Виета»:
+ * корни x₁ и x₂ на числовой прямой, вживую — уравнение
  * x² − (x₁ + x₂)x + x₁x₂ = 0 и его парабола, которая пересекает ось
  * ровно в выбранных точках.
  */
@@ -163,6 +165,17 @@ export function KonstruktorKorney() {
   const [x1, setX1] = useState(2);
   const [x2, setX2] = useState(5);
   const lineSvg = useRef<SVGSVGElement>(null);
+  const [lw, setLw] = useState(640);
+  useEffect(() => {
+    const el = lineSvg.current;
+    if (el === null || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(([e]) => {
+      if (e !== undefined && e.contentRect.width > 0) setLw(Math.round(e.contentRect.width));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const lx = lxPri(lw);
   const reduce = useDvizhenie() === 'reduce';
   const cel = useMemo(() => [x1, x2] as const, [x1, x2]);
   const [a, b] = usePlavno(cel, reduce);
@@ -188,7 +201,7 @@ export function KonstruktorKorney() {
     const pts: string[] = [];
     for (let i = 0; i <= 240; i += 1) {
       const x = MIN - 0.5 + (i / 240) * (MAX - MIN + 1);
-      const y = Math.max(ymin - 50, Math.min(ymax + 50, yy(x)));
+      const y = Math.max(ymin - 2, Math.min(ymax + 2, yy(x)));
       pts.push(`${px(x).toFixed(2)},${py(y).toFixed(2)}`);
     }
     return `M${pts.join('L')}`;
@@ -202,11 +215,11 @@ export function KonstruktorKorney() {
       <svg
         ref={lineSvg}
         className="us-kk__pryamaya"
-        viewBox={`0 0 ${LW} ${LH}`}
+        viewBox={`0 0 ${lw} ${LH}`}
         role="group"
         aria-label="Числовая прямая от −10 до 10"
       >
-        <line className="us-kk__os" x1={LPOLE - 12} y1={LY} x2={LW - LPOLE + 12} y2={LY} />
+        <line className="us-kk__os" x1={LPOLE - 12} y1={LY} x2={lw - LPOLE + 12} y2={LY} />
         {metki.map((t) => (
           <g key={t}>
             <line
@@ -223,8 +236,8 @@ export function KonstruktorKorney() {
             )}
           </g>
         ))}
-        <Tochka x={x1} nomer={1} label={T.x1} onX={setX1} svg={lineSvg} />
-        <Tochka x={x2} nomer={2} label={T.x2} onX={setX2} svg={lineSvg} />
+        <Tochka x={x1} nomer={1} label={T.x1} onX={setX1} svg={lineSvg} lw={lw} />
+        <Tochka x={x2} nomer={2} label={T.x2} onX={setX2} svg={lineSvg} lw={lw} />
       </svg>
 
       <div className="us-kk__formuly" aria-live="polite">

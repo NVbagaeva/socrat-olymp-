@@ -1422,7 +1422,7 @@
   animation: none;
 }
 
-/* ── Конструктор корней (страница «Виет: приведённое уравнение») ─ */
+/* ── Конструктор корней (страница «Обратная теорема Виета») ─ */
 .us-kk {
   display: grid;
   gap: var(--space-4);
@@ -1437,12 +1437,15 @@
   display: block;
   width: 100%;
   height: auto;
-  overflow: visible;
-  touch-action: none;
   user-select: none;
 }
+.us-kk__pryamaya {
+  overflow: visible;
+  touch-action: none;
+}
+/* График — своё окно: ветви параболы обрезаются его краем. */
 .us-kk__grafik {
-  max-height: 300px;
+  overflow: hidden;
   border-radius: var(--radius-lg);
   background: var(--color-surface);
 }

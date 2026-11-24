@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 
 /**
  * «Конструктор корней» с отложенной загрузкой: KaTeX и интерактив
- * приходят отдельным куском, только на странице приёма Виета.
+ * приходят отдельным куском, только на странице приёма «Обратная теорема Виета».
  */
 export const KonstruktorKorneyLazy = dynamic(
   () => import('./KonstruktorKorney').then((m) => m.KonstruktorKorney),

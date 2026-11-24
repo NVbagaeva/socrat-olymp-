@@ -1,5 +1,5 @@
 /**
- * Квадратные уравнения по теореме Виета: приведённое, «сначала
+ * Квадратные уравнения: корни по обратной теореме Виета — приведённое, «сначала
  * раздели на a», сумма коэффициентов и метод переброски.
  *
  * Данные примера — коэффициенты [a, b, c] (целые). У примера два
@@ -153,7 +153,7 @@ export function praviloZnakov(C: number): 'odin' | 'raznye' {
   return C > 0 ? 'odin' : 'raznye';
 }
 
-/** Шаги Виета для приведённого y² + By + C = 0 с целыми корнями r1 ≤ r2. */
+/** Шаги обратной теоремы Виета для приведённого y² + By + C = 0 с целыми корнями r1 ≤ r2. */
 function shagiPrivedennogo(B: number, C: number, r1: string, r2: string, v: string): Shag[] {
   const S = String(-B);
   const P = String(C);
@@ -261,7 +261,10 @@ export const vietaPrivedennoe: Priyom = {
     const [a, b, c] = koef(p);
     const [x1, x2] = korni(a, b, c);
     return [
-      { tekst: 'Уравнение приведённое: $a = 1$.', cep: [] },
+      {
+        tekst: 'Уравнение приведённое: $a = 1$ — корни ищем по обратной теореме Виета.',
+        cep: [],
+      },
       ...shagiPrivedennogo(b, c, x1, x2, 'x'),
       ...proverka(a, b, c, x1, x2),
       ...egeShag(p, x1, x2),
