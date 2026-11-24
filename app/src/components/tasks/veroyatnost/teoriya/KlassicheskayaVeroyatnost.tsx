@@ -8,7 +8,6 @@ import { YAKOR_4 } from '@/lib/veroyatnost/teoriya-yakorya';
 import { HintIcon } from '../../prep/PrepIcons';
 import { KostIcon, TreugolnikIcon, ZakladkaIcon } from './IkonkiTeorii';
 import { ProverPonimanie } from './ProverPonimanie';
-import { illustrationRamka } from '@/components/ui/Illustration';
 
 /**
  * Раздел теории «Классическая вероятность» — второй раздел вкладки.
@@ -109,7 +108,7 @@ export function KlassicheskayaVeroyatnost() {
           <Zagolovok znak={<ZakladkaIcon />}>{primer.title}</Zagolovok>
           <p className="vklass__text">{primer.usloviye}</p>
 
-          <div {...illustrationRamka('section', 'vklass-primer')}>
+          <div className="vklass-primer">
             <Image
               className="vklass-primer__foto"
               src={primer.kartinka.src}
@@ -147,7 +146,7 @@ export function KlassicheskayaVeroyatnost() {
           <p className="vklass__text">
             <b>{ravnovozmozhnye.primerLabel}</b> {ravnovozmozhnye.primer}
           </p>
-          <figure {...illustrationRamka('section', 'vklass-kosti')}>
+          <figure className="vklass-kosti">
             <Image
               className="vklass-kosti__foto"
               src={ravnovozmozhnye.kartinka.src}

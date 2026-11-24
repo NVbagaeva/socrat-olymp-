@@ -9,7 +9,6 @@ import { HintIcon } from '../../prep/PrepIcons';
 import { Tex } from '../Tex';
 import { KrugiIcon, ZakladkaIcon, ZvenoIcon } from './IkonkiTeorii';
 import { ProverSebya } from './ProverSebya';
-import { illustrationRamka } from '@/components/ui/Illustration';
 
 /**
  * Раздел теории «Виды событий» — первый раздел вкладки.
@@ -53,7 +52,7 @@ export function VidySobytiy() {
               </p>
 
               {'kartinka' in karta ? (
-                <figure {...illustrationRamka('section', 'vvid__figura')}>
+                <figure className="vvid__figura">
                   <Image
                     className="vvid__foto"
                     src={karta.kartinka.src}
@@ -95,7 +94,7 @@ export function VidySobytiy() {
           <section className="z4-karta vusloviya">
             <h4 className="vusloviya__title">{usloviya.title}</h4>
             <p className="z4-karta__text">{usloviya.text}</p>
-            <figure {...illustrationRamka('section', 'vusloviya__figura')}>
+            <figure className="vusloviya__figura">
               <Image
                 className="vusloviya__foto"
                 src={usloviya.kartinka.src}
@@ -182,7 +181,7 @@ export function VidySobytiy() {
                   <b>{primerLabel}</b> <Tex text={karta.primer} />
                 </p>
               </div>
-              <figure {...illustrationRamka('section', 'vsvyaz__figura')}>
+              <figure className="vsvyaz__figura">
                 <Image
                   className="vsvyaz__foto"
                   src={karta.kartinka.src}

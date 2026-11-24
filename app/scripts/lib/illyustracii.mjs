@@ -241,15 +241,27 @@ export async function obojti(browser, base, urls, shirina, fn, { vkladok = 6, on
   const context = await browser.newContext({ viewport: { width: shirina, height: 900 } });
   const ochered = [...urls];
   async function rabotnik() {
-    const page = await context.newPage();
+    let page = await context.newPage();
     for (;;) {
       const url = ochered.shift();
       if (url === undefined) break;
+      /* Зависшая страница — ошибка с адресом, а не вечное ожидание. */
+      let tajmer;
       try {
-        const kartinki = await zamerit(page, base + url);
+        const kartinki = await Promise.race([
+          zamerit(page, base + url),
+          new Promise((_, reject) => {
+            tajmer = setTimeout(() => reject(new Error('не открылась за 90 с')), 90000);
+          }),
+        ]);
         if (kartinki !== null) fn(url, kartinki);
       } catch (e) {
         onError?.(url, e);
+        /* Вкладку зависшей страницы — заменить свежей. */
+        await page.close().catch(() => {});
+        page = await context.newPage();
+      } finally {
+        clearTimeout(tajmer);
       }
     }
     await page.close();
