@@ -2,7 +2,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { RazdelTabs } from '@/components/tasks/RazdelTabs';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { STEREO, vkladkiStereo, type StereoNo } from '@/content/stereo/zadaniya';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { StereoDrugie, StereoNav } from './StereoNav';
 import './stereo.css';
 import './metodika.css';
@@ -15,7 +15,7 @@ import './metodika.css';
  */
 export function ShellStereo({ no, children }: { no: StereoNo; children: React.ReactNode }) {
   const z = STEREO[no];
-  const base = `${ZADANIYA}/${z.slug}`;
+  const base = `${razdelBase(z.slug)}`;
   return (
     <AppShell active="tasks">
       <main className="app-main">

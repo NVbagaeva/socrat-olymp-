@@ -2,7 +2,7 @@
 /* scripts/audit-illyustracii.mjs — аудит размеров картинок-иллюстраций.
 
    Запуск (после pnpm build):
-     node scripts/audit-illyustracii.mjs [--json файл] [--md файл] [--only /zadaniya/1/]
+     node scripts/audit-illyustracii.mjs [--json файл] [--md файл] [--only /zadaniya/planimetriya/]
 
    Проходит все страницы проверки (lib/illyustracii.mjs → spisokStranic)
    на 1440 и 375 px и пишет таблицу: страница — экран — файл — вариант —

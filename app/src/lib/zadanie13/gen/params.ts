@@ -265,7 +265,7 @@ function parsePoKlyucham13(q: { get(name: string): string | null }): GenParams13
   };
 }
 
-export const BASE_13 = '/zadaniya/13';
+export const BASE_13 = '/zadaniya/ekonomika';
 
 /** Адреса листов и онлайн-набора по параметрам. */
 export function listHref13(p: GenParams13, vid: 'uchenik' | 'uchitel' | 'vse'): string {

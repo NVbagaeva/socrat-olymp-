@@ -30,6 +30,7 @@ import { renderFigura } from '../proizvodnaya/render';
 import { chertezhMosta } from '../zadanie10/chertezh/most';
 
 import { parseAnswer } from '../answer';
+import { razdelBase } from '../paths';
 import { plain, typesetKrupno } from '../tex';
 import { chertezhTemy } from '../planimetriya/spravochnik-chertezhi';
 import { renderPlan } from '../planimetriya/render';
@@ -220,15 +221,15 @@ export function narisovat(id: string, f: FiguraKartochki): string[] {
 }
 
 /**
- * `base` — адрес раздела («/zadaniya/5»). У колоды со страницами теории
- * (`stranitsa`, №18) — адрес страницы; иначе фрагмент вкладки «Теория».
- * Фрагмент в теории другого номера — в соседнем разделе: /zadaniya/4/teoriya/#….
+ * `base` — адрес раздела («/zadaniya/slozhnaya-veroyatnost»). У колоды со
+ * страницами теории (`stranitsa`, №18) — адрес страницы; иначе фрагмент
+ * вкладки «Теория». Фрагмент в теории другого номера хранения — в соседнем
+ * разделе, по его коду: /zadaniya/veroyatnost/teoriya/#….
  */
 function adresTeorii(k: Kartochka, koloda: Koloda, base: string): string | undefined {
   if (k.source === DOBAVLENO) return undefined;
   if (koloda.stranitsa !== undefined) return `${base}/${koloda.stranitsa(k.source)}`;
-  const razdel =
-    k.teoriyaNomera === undefined ? base : base.replace(/\/[^/]+$/, `/${k.teoriyaNomera}`);
+  const razdel = k.teoriyaNomera === undefined ? base : razdelBase(k.teoriyaNomera);
   return `${razdel}/${koloda.teoriya}#${k.source}`;
 }
 

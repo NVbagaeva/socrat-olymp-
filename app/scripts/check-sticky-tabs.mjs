@@ -81,57 +81,57 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = 'http://127.0.0.1:' + server.address().port;
 
-/* Адреса можно сузить префиксами: node scripts/check-sticky-tabs.mjs /zadaniya/11/ */
+/* Адреса можно сузить префиксами: node scripts/check-sticky-tabs.mjs /zadaniya/tekstovye-zadachi/ */
 const ONLY = process.argv.slice(2).filter((arg) => arg.startsWith('/'));
 const ALL_PAGES = [
-  '/zadaniya/11/',
-  '/zadaniya/11/teoriya/',
-  '/zadaniya/11/opornye-zadachi/',
-  '/zadaniya/11/opornye-zadachi/massa-veshchestva/',
-  '/zadaniya/11/trenazher/',
-  '/zadaniya/11/generator/',
-  '/zadaniya/11/dlya-repetitorov/',
-  '/zadaniya/1/',
-  '/zadaniya/2/teoriya/',
-  '/zadaniya/4/',
-  '/zadaniya/5/teoriya/',
-  '/zadaniya/8/',
-  '/zadaniya/9/',
-  '/zadaniya/13/',
-  '/zadaniya/13/teoriya/',
-  '/zadaniya/13/opornye-zadachi/',
-  '/zadaniya/13/opornye-zadachi/tablitsa-dif/',
-  '/zadaniya/13/trenazher/',
-  '/zadaniya/16/',
-  '/zadaniya/16/teoriya/',
-  '/zadaniya/16/opornye-zadachi/',
-  '/zadaniya/15/',
+  '/zadaniya/tekstovye-zadachi/',
+  '/zadaniya/tekstovye-zadachi/teoriya/',
+  '/zadaniya/tekstovye-zadachi/opornye-zadachi/',
+  '/zadaniya/tekstovye-zadachi/opornye-zadachi/massa-veshchestva/',
+  '/zadaniya/tekstovye-zadachi/trenazher/',
+  '/zadaniya/tekstovye-zadachi/generator/',
+  '/zadaniya/tekstovye-zadachi/dlya-repetitorov/',
+  '/zadaniya/planimetriya/',
+  '/zadaniya/vektory/teoriya/',
+  '/zadaniya/veroyatnost/',
+  '/zadaniya/slozhnaya-veroyatnost/teoriya/',
+  '/zadaniya/vychisleniya/',
+  '/zadaniya/proizvodnaya/',
+  '/zadaniya/ekonomika/',
+  '/zadaniya/ekonomika/teoriya/',
+  '/zadaniya/ekonomika/opornye-zadachi/',
+  '/zadaniya/ekonomika/opornye-zadachi/tablitsa-dif/',
+  '/zadaniya/ekonomika/trenazher/',
+  '/zadaniya/neravenstvo/',
+  '/zadaniya/neravenstvo/teoriya/',
+  '/zadaniya/neravenstvo/opornye-zadachi/',
+  '/zadaniya/stereometriya-dokazatelstvo/',
   /* №12: страница раздела — общая лента (RazdelTabs), как у №9–11;
      подтемы — над лентой в той же строке плашка разделов (TopicTabs). */
-  '/zadaniya/12/',
-  '/zadaniya/12/trenazher/',
-  '/zadaniya/12/zachyot/',
-  '/zadaniya/12/irrational/',
-  '/zadaniya/12/exponential/',
-  '/zadaniya/12/logarithmic/',
-  '/zadaniya/12/trigonometric/',
-  '/zadaniya/12/quadratic/opornye-zadachi/',
-  '/zadaniya/10/',
-  '/zadaniya/10/teoriya/',
-  '/zadaniya/10/opornye-zadachi/',
-  '/zadaniya/10/trenazher/',
-  '/zadaniya/10/generator/',
-  '/zadaniya/10/dlya-repetitorov/',
-  '/zadaniya/6/',
-  '/zadaniya/6/teoriya/',
-  '/zadaniya/6/opornye-zadachi/',
-  '/zadaniya/6/trenazher/',
-  '/zadaniya/6/generator/',
-  '/zadaniya/7/',
-  '/zadaniya/7/teoriya/',
-  '/zadaniya/7/opornye-zadachi/',
-  '/zadaniya/7/trenazher/',
-  '/zadaniya/7/generator/',
+  '/zadaniya/grafiki-funkciy/',
+  '/zadaniya/grafiki-funkciy/trenazher/',
+  '/zadaniya/grafiki-funkciy/zachyot/',
+  '/zadaniya/grafiki-funkciy/irrational/',
+  '/zadaniya/grafiki-funkciy/exponential/',
+  '/zadaniya/grafiki-funkciy/logarithmic/',
+  '/zadaniya/grafiki-funkciy/trigonometric/',
+  '/zadaniya/grafiki-funkciy/quadratic/opornye-zadachi/',
+  '/zadaniya/prikladnye-zadachi/',
+  '/zadaniya/prikladnye-zadachi/teoriya/',
+  '/zadaniya/prikladnye-zadachi/opornye-zadachi/',
+  '/zadaniya/prikladnye-zadachi/trenazher/',
+  '/zadaniya/prikladnye-zadachi/generator/',
+  '/zadaniya/prikladnye-zadachi/dlya-repetitorov/',
+  '/zadaniya/sluchainye-velichiny/',
+  '/zadaniya/sluchainye-velichiny/teoriya/',
+  '/zadaniya/sluchainye-velichiny/opornye-zadachi/',
+  '/zadaniya/sluchainye-velichiny/trenazher/',
+  '/zadaniya/sluchainye-velichiny/generator/',
+  '/zadaniya/uravneniya/',
+  '/zadaniya/uravneniya/teoriya/',
+  '/zadaniya/uravneniya/opornye-zadachi/',
+  '/zadaniya/uravneniya/trenazher/',
+  '/zadaniya/uravneniya/generator/',
 ];
 const PAGES =
   ONLY.length === 0 ? ALL_PAGES : ALL_PAGES.filter((url) => ONLY.some((p) => url.startsWith(p)));
@@ -147,9 +147,21 @@ const PANEL_CLICKS = [
      по банку (№11, №7, №6) короткий — прокрутить его под ленту нельзя, —
      а «Теория» №11 самая тяжёлая на сайте (4 МБ разметки), и в WebKit на
      медленной машине она не успевает ожить за отведённое время. */
-  { url: '/zadaniya/11/generator/', tab: 'Опорные задачи', path: '/zadaniya/11/opornye-zadachi/' },
-  { url: '/zadaniya/10/teoriya/', tab: 'Опорные задачи', path: '/zadaniya/10/opornye-zadachi/' },
-  { url: '/zadaniya/12/irrational/', tab: 'Теория', path: '/zadaniya/12/irrational/' },
+  {
+    url: '/zadaniya/tekstovye-zadachi/generator/',
+    tab: 'Опорные задачи',
+    path: '/zadaniya/tekstovye-zadachi/opornye-zadachi/',
+  },
+  {
+    url: '/zadaniya/prikladnye-zadachi/teoriya/',
+    tab: 'Опорные задачи',
+    path: '/zadaniya/prikladnye-zadachi/opornye-zadachi/',
+  },
+  {
+    url: '/zadaniya/grafiki-funkciy/irrational/',
+    tab: 'Теория',
+    path: '/zadaniya/grafiki-funkciy/irrational/',
+  },
 ];
 
 const failures = [];
@@ -459,7 +471,7 @@ async function vid(browser, engine, size) {
       reduce ? { reducedMotion: 'reduce' } : {},
     );
     const page = await context.newPage();
-    await page.goto(BASE + '/zadaniya/11/generator/', { waitUntil: 'networkidle' });
+    await page.goto(BASE + '/zadaniya/tekstovye-zadachi/generator/', { waitUntil: 'networkidle' });
     const where = `${engine}, ${size.name}, вид панели${reduce ? ' (уменьшить движение)' : ''}`;
     const v = await page.evaluate(() => {
       const panel = document.querySelector('.topic-tabs-row--panel');
@@ -524,7 +536,7 @@ async function vid(browser, engine, size) {
 async function fokus(browser, engine, size) {
   const context = await newContext(browser, size, engine);
   const page = await context.newPage();
-  await page.goto(BASE + '/zadaniya/11/generator/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/tekstovye-zadachi/generator/', { waitUntil: 'networkidle' });
   const where = `${engine}, ${size.name}, фокус`;
   await page.evaluate(() => {
     document
@@ -629,7 +641,7 @@ async function perehod(browser, engine, size) {
 async function soderzhanie(browser, engine, size) {
   const context = await newContext(browser, size, engine);
   const page = await context.newPage();
-  await page.goto(BASE + '/zadaniya/11/teoriya/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/tekstovye-zadachi/teoriya/', { waitUntil: 'networkidle' });
   const phone = size.name === 'телефон';
   /* Обработчики вешает React при гидратации. Тяжёлая страница в
      WebKit гидратируется позже networkidle, и ранний клик теряется:

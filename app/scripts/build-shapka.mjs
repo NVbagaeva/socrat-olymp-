@@ -36,6 +36,17 @@ const SHAPKI = [
   { papka: 'zadanie-01', imya: 'shapka-planimetriya' },
   { papka: 'zadanie-11', imya: 'gorod-a', widths: [160, 320], budget: 36 * 1024 },
   { papka: 'zadanie-11', imya: 'gorod-b', widths: [160, 320], budget: 36 * 1024 },
+  /* Иллюстрации «Ключевых методов решения» №5 (lib/veroyatnost/metody5-kartinki.ts). */
+  { papka: 'zadanie-05', imya: 'metod-nesovmestnye', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-05', imya: 'metod-protivopolozhnoe', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-05', imya: 'metod-koordinatnaya', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-05', imya: 'metod-sovmestnye', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-05', imya: 'metod-uslovnaya', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-05', imya: 'metod-nezavisimye', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-05', imya: 'metod-hotya-by', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-05', imya: 'metod-dva-predmeta', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-05', imya: 'metod-polnaya', widths: [240, 480], budget: 100 * 1024 },
+  { papka: 'zadanie-05', imya: 'metod-do-uspeha', widths: [240, 480], budget: 100 * 1024 },
 ];
 
 /** Ширины для srcset: телефон 1x, планшет и компьютер 1x и 2x. */

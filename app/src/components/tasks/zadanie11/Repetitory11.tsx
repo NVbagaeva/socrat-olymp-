@@ -37,7 +37,7 @@ function seed(): string {
  * пять маршрутов уроков (опорные → банк → новые) с листом на урок,
  * методические заметки по каждому разделу и «Быстрый лист».
  * Лист маршрута собирается тем же движком, что генератор: адрес
- * печати /zadaniya/11/pechat/?m=r&r=N.
+ * печати /zadaniya/tekstovye-zadachi/pechat/?m=r&r=N.
  */
 export function Repetitory11({
   razdely,

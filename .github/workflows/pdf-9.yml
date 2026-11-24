@@ -26,7 +26,7 @@ on:
       - 'app/src/lib/proizvodnaya/**'
       - 'app/src/content/sheet9.js'
       - 'app/scripts/build-pdf-9.mjs'
-      - 'app/src/app/zadaniya/9/pechat/pechat9.css'
+      - 'app/src/app/zadaniya/proizvodnaya/pechat/pechat9.css'
       - 'app/scripts/lib/sheet-render.mjs'
       - '.github/workflows/pdf-9.yml'
   workflow_dispatch:

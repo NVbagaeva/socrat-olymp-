@@ -106,7 +106,7 @@ async function openRazdel(page, mobile) {
     .first();
   await card.scrollIntoViewIfNeeded();
   await (mobile ? card.tap() : card.click());
-  await page.waitForURL('**/zadaniya/12/');
+  await page.waitForURL('**/zadaniya/grafiki-funkciy/');
   await page.waitForLoadState('networkidle');
 }
 
@@ -145,7 +145,7 @@ for (const [width, height, mobile] of [
     .locator('.topic-tabs .tabs--lenta a', { hasText: 'Зачётная работа' })
     .first();
   await (mobile ? zachyot.tap() : zachyot.click());
-  await page.waitForURL('**/zadaniya/12/zachyot/**');
+  await page.waitForURL('**/zadaniya/grafiki-funkciy/zachyot/**');
   await page.waitForSelector('.steps');
   check(
     (await page.locator('.tabs--lenta').count()) > 0,
@@ -153,7 +153,7 @@ for (const [width, height, mobile] of [
   );
 
   if (!mobile) {
-    await page.goto(BASE + '/zadaniya/12/linear/', { waitUntil: 'networkidle' });
+    await page.goto(BASE + '/zadaniya/grafiki-funkciy/linear/', { waitUntil: 'networkidle' });
     const plashka = page.locator('.razdely-plashka');
     if ((await plashka.count()) > 0) {
       await plashka.first().click();
@@ -200,7 +200,7 @@ for (const [width, height, mobile] of [
   const where = (text) => `${width}: ${text}`;
 
   /* Типовой сценарий: «Весь №12, как на ЕГЭ» → «Собрать работу». */
-  await page.goto(BASE + '/zadaniya/12/zachyot/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/grafiki-funkciy/zachyot/', { waitUntil: 'networkidle' });
   await shot(page, `zachyot-shag1-${width}`, true);
   clicks = 0;
   await press(page.locator('[data-template=ege]'));
@@ -305,7 +305,7 @@ for (const [width, height, mobile] of [
   await page.locator('[data-template=ege]').click();
   await mainButton(page, mobile).click();
   await page.waitForSelector('[data-testid=zachyot-out]', { timeout: 60000 });
-  await page.goto(BASE + '/zadaniya/12/zachyot/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/grafiki-funkciy/zachyot/', { waitUntil: 'networkidle' });
   await page.locator('[data-template=own]').click();
   check(
     (await page.locator('[data-template=last]').count()) === 1,
@@ -328,7 +328,8 @@ for (const [width, height, mobile] of [
   const where = (text) => `${width}: ${text}`;
   /* Прямая, парабола и показательная по 2, ФИПИ + аналоги, 2 варианта. */
   await page.goto(
-    BASE + '/zadaniya/12/zachyot/?c=linear:2,quadratic:2,exponential:2&v=2&src=all&u=Иванова А. Б.',
+    BASE +
+      '/zadaniya/grafiki-funkciy/zachyot/?c=linear:2,quadratic:2,exponential:2&v=2&src=all&u=Иванова А. Б.',
     { waitUntil: 'networkidle' },
   );
   await page.locator('.zs-sum [data-testid=zachyot-main]').click();
@@ -410,7 +411,7 @@ for (const [width, height, mobile] of [
 {
   const ctx = await context(1440, 900, false);
   const page = await ctx.newPage();
-  await page.goto(BASE + '/zadaniya/12/generator/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/grafiki-funkciy/generator/', { waitUntil: 'networkidle' });
   await shot(page, 'generator-1440', true);
   /* Общий генератор: «Сгенерировать» по пресету «По задаче на тип», в
      «Дополнительно» — рамка «Запомни» и один пример, затем «Скачать PDF». */

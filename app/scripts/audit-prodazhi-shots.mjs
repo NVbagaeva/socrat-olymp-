@@ -74,25 +74,25 @@ const SHIRINY = [
 const STRANITSY = [
   ['01-glavnaya', '/', true],
   ['02-bank', '/zadaniya/', true],
-  ['03-z9-o-zadanii', '/zadaniya/9/', true],
-  ['04-z9-teoriya', '/zadaniya/9/teoriya/', false],
-  ['05-z9-opornye', '/zadaniya/9/opornye-zadachi/', false],
-  ['06-z9-trenazher', '/zadaniya/9/trenazher/', false],
-  ['07-z9-generator', '/zadaniya/9/generator/', false],
-  ['08-z11-o-zadanii', '/zadaniya/11/', true],
-  ['09-z11-teoriya', '/zadaniya/11/teoriya/', false],
-  ['10-z11-trenazher', '/zadaniya/11/trenazher/', false],
-  ['11-z11-generator', '/zadaniya/11/generator/', false],
-  ['12-z18-o-zadanii', '/zadaniya/18/', true],
-  ['13-z18-teoriya', '/zadaniya/18/teoriya/', false],
-  ['14-z18-generator', '/zadaniya/18/generator/', false],
+  ['03-z9-o-zadanii', '/zadaniya/proizvodnaya/', true],
+  ['04-z9-teoriya', '/zadaniya/proizvodnaya/teoriya/', false],
+  ['05-z9-opornye', '/zadaniya/proizvodnaya/opornye-zadachi/', false],
+  ['06-z9-trenazher', '/zadaniya/proizvodnaya/trenazher/', false],
+  ['07-z9-generator', '/zadaniya/proizvodnaya/generator/', false],
+  ['08-z11-o-zadanii', '/zadaniya/tekstovye-zadachi/', true],
+  ['09-z11-teoriya', '/zadaniya/tekstovye-zadachi/teoriya/', false],
+  ['10-z11-trenazher', '/zadaniya/tekstovye-zadachi/trenazher/', false],
+  ['11-z11-generator', '/zadaniya/tekstovye-zadachi/generator/', false],
+  ['12-z18-o-zadanii', '/zadaniya/planimetriya-dokazatelstvo/', true],
+  ['13-z18-teoriya', '/zadaniya/planimetriya-dokazatelstvo/teoriya/', false],
+  ['14-z18-generator', '/zadaniya/planimetriya-dokazatelstvo/generator/', false],
   ['15-sobrat-variant', '/variant/', true],
   ['16-povyshennye', '/povyshennye/', true],
   ['17-tarify', '/tarify/', true],
   ['18-about', '/about/', true],
   ['19-voyti', '/voyti/', false],
   ['20-kak-polzovatsya', '/kak-polzovatsya/', true],
-  ['21-z18-dlya-repetitorov', '/zadaniya/18/dlya-repetitorov/', false],
+  ['21-z18-dlya-repetitorov', '/zadaniya/planimetriya-dokazatelstvo/dlya-repetitorov/', false],
   ['22-styleguide-tarify', '/styleguide/tarify/', true],
 ];
 
@@ -165,7 +165,7 @@ try {
     if (!FILTR || FILTR === 'extra') {
       /* Пробная генерация: №11 открыт, генерируем дважды. */
       try {
-        await page.goto(BASE + '/zadaniya/11/generator/', { waitUntil: 'load' });
+        await page.goto(BASE + '/zadaniya/tekstovye-zadachi/generator/', { waitUntil: 'load' });
         await page.waitForTimeout(1500);
         const btn = page.getByRole('button', { name: /Сгенерировать/ }).first();
         await btn.click({ timeout: 5000 });
@@ -203,7 +203,7 @@ try {
         }
         /* Нижняя часть экрана раздела: нижнее меню. */
         try {
-          await page.goto(BASE + '/zadaniya/9/', { waitUntil: 'load' });
+          await page.goto(BASE + '/zadaniya/proizvodnaya/', { waitUntil: 'load' });
           await page.waitForTimeout(800);
           await page.evaluate(() => window.scrollTo(0, 900));
           await page.waitForTimeout(800);

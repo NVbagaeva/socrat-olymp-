@@ -14,7 +14,7 @@
  */
 
 import { levelInfo, type Level } from '@/lib/level';
-import { href, ZADANIYA } from '@/lib/paths';
+import { href, kodAdresa, ZADANIYA } from '@/lib/paths';
 import { bazaTasks } from './baza/tasks';
 import {
   RAZDELY,
@@ -160,10 +160,12 @@ export function taskHasPage(task: ExamTask): boolean {
 
 /** Начало адресов раздела задания без «/» на конце: к нему дописывают вкладку. */
 export function taskBase(task: ExamTask): string {
-  return `${levelInfo(task.level ?? 'profile').bankBase}/${task.slug}`;
+  /* Профиль — по коду раздела (lib/paths.ts), база — по номеру. */
+  const level = task.level ?? 'profile';
+  return `${levelInfo(level).bankBase}/${level === 'profile' ? kodAdresa(task.slug) : task.slug}`;
 }
 
-/** Адрес страницы задания (ссылка): /zadaniya/4/. */
+/** Адрес страницы задания (ссылка): /zadaniya/veroyatnost/. */
 export function taskHref(task: ExamTask): string {
   return href(taskBase(task));
 }
@@ -341,7 +343,7 @@ function sobrat(kod: RazdelKod): ProfilTask {
     kod,
     hranenie,
     no: nomerDvumya(kod),
-    /* Адрес раздела пока по номеру хранения: /zadaniya/7/. */
+    /* Адрес раздела пока по номеру хранения: /zadaniya/uravneniya/. */
     slug: String(hranenie),
     part: chastRazdela(kod),
   };

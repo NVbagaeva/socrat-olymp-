@@ -23,7 +23,18 @@ const OUT = path.join(APP, 'out');
 const DIR = path.join(APP, '..', 'docs', 'stereometry-snimki', 'metodika-1-dizayn');
 fs.mkdirSync(DIR, { recursive: true });
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.json': 'application/json', '.txt': 'text/plain' };
+const TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.jpg': 'image/jpeg',
+  '.woff2': 'font/woff2',
+  '.json': 'application/json',
+  '.txt': 'text/plain',
+};
 const server = http.createServer((req, res) => {
   const url = decodeURIComponent((req.url ?? '/').split('?')[0]);
   let file = path.join(OUT, url);
@@ -41,7 +52,9 @@ const BASE = `http://127.0.0.1:${server.address().port}`;
 const executablePath = process.env.PW_CHROMIUM ?? process.env.CHROMIUM_PATH;
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 
-const ids = requireSrc('lib/stereo/opornye3/blok2.ts').zadachiBloka2().map((z) => z.id);
+const ids = requireSrc('lib/stereo/opornye3/blok2.ts')
+  .zadachiBloka2()
+  .map((z) => z.id);
 
 async function k(p, selector, nth = 0) {
   await p.evaluate(
@@ -55,13 +68,17 @@ async function k(p, selector, nth = 0) {
   await p.waitForTimeout(400);
 }
 
-for (const [tag, viewport] of [['desktop', { width: 1440, height: 1600 }], ['phone', { width: 390, height: 1400 }]]) {
+for (const [tag, viewport] of [
+  ['desktop', { width: 1440, height: 1600 }],
+  ['phone', { width: 390, height: 1400 }],
+]) {
   const ctx = await browser.newContext({ viewport, deviceScaleFactor: 2 });
   await welcomeSeen(ctx);
-  const shot = (p, name) => p.screenshot({ path: path.join(DIR, `${tag}-${name}.jpg`), type: 'jpeg', quality: 84 });
+  const shot = (p, name) =>
+    p.screenshot({ path: path.join(DIR, `${tag}-${name}.jpg`), type: 'jpeg', quality: 84 });
 
   const t = await ctx.newPage();
-  await t.goto(`${BASE}/zadaniya/3/teoriya/#teoriya-treugolnik`, { waitUntil: 'load' });
+  await t.goto(`${BASE}/zadaniya/stereometriya/teoriya/#teoriya-treugolnik`, { waitUntil: 'load' });
   await t.waitForTimeout(800);
   await k(t, '#teoriya-treugolnik');
   await shot(t, '1-nachalo-glavy');
@@ -71,7 +88,9 @@ for (const [tag, viewport] of [['desktop', { width: 1440, height: 1600 }], ['pho
   await shot(t, '3-lovushka');
 
   const z = await ctx.newPage();
-  await z.goto(`${BASE}/zadaniya/3/opornye-zadachi/prostranstvo-treugolnik/`, { waitUntil: 'load' });
+  await z.goto(`${BASE}/zadaniya/stereometriya/opornye-zadachi/prostranstvo-treugolnik/`, {
+    waitUntil: 'load',
+  });
   await z.waitForTimeout(600);
   /* Первая задача — «нажми»: выбираем цель на чертеже. */
   await z.locator('.o3-var__btn').first().click();
@@ -85,9 +104,14 @@ for (const [tag, viewport] of [['desktop', { width: 1440, height: 1600 }], ['pho
   await shot(z, '5-podskazka');
 
   /* Итог блока: все задачи закрыты (две — с ошибкой). */
-  const outcomes = Object.fromEntries(ids.map((id, i) => [id, i === 2 || i === 6 ? 'wrong' : 'right']));
+  const outcomes = Object.fromEntries(
+    ids.map((id, i) => [id, i === 2 || i === 6 ? 'wrong' : 'right']),
+  );
   await z.evaluate((o) => {
-    localStorage.setItem('budetege:zadanie-3:opornye:v1', JSON.stringify({ kinds: {}, mistakes: [], outcomes: o }));
+    localStorage.setItem(
+      'budetege:zadanie-3:opornye:v1',
+      JSON.stringify({ kinds: {}, mistakes: [], outcomes: o }),
+    );
   }, outcomes);
   await z.reload({ waitUntil: 'load' });
   await z.waitForTimeout(600);
@@ -96,7 +120,7 @@ for (const [tag, viewport] of [['desktop', { width: 1440, height: 1600 }], ['pho
 
   /* Список блоков: блок 2 пройден (прогресс из итога). */
   const b = await ctx.newPage();
-  await b.goto(`${BASE}/zadaniya/3/opornye-zadachi/`, { waitUntil: 'load' });
+  await b.goto(`${BASE}/zadaniya/stereometriya/opornye-zadachi/`, { waitUntil: 'load' });
   await b.waitForTimeout(600);
   await k(b, '.o3-prep');
   await shot(b, '7-bloki');

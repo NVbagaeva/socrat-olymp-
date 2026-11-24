@@ -1,0 +1,60 @@
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import type { Metadata } from 'next';
+import { VDomashkuOpornye8 } from '@/components/dz2/knopki';
+import { notFound } from 'next/navigation';
+import { Podgotovka8Screen } from '@/components/tasks/vychisleniya/Podgotovka8Screen';
+import { IssueHomeworkBlock8 } from '@/components/dz/Razdel8Dz';
+import { prepBlockBySlug } from '@/lib/vychisleniya/prep/blocks';
+import { Podgotovka8Shell } from '@/components/tasks/vychisleniya/Podgotovka8Shell';
+import { OPORNYE } from '@/content/opornye';
+import { vychisleniyaTitle } from '@/content/vychisleniya';
+import { PREP_BLOCKS } from '@/lib/vychisleniya/prep/blocks';
+import { prepPool } from '@/lib/vychisleniya/prep/pool';
+import { razdelBase } from '@/lib/paths';
+
+/* Статический экспорт: адреса блоков известны до сборки. */
+export function generateStaticParams() {
+  return PREP_BLOCKS.map((block) => ({ blok: block.slug }));
+}
+export const dynamicParams = false;
+
+type Params = Promise<{ blok: string }>;
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { blok } = await params;
+  const block = PREP_BLOCKS.find((item) => item.slug === blok);
+  return { title: vychisleniyaTitle(block === undefined ? OPORNYE.title : block.nazvanie) };
+}
+
+/**
+ * Блок подготовки: десять микро-задач в закрытом виде. Пул собран на
+ * сборке — в разметку уходят условия, отпечатки и закрытые разборы.
+ */
+export default async function Podgotovka8BlockPage({ params }: { params: Params }) {
+  const { blok } = await params;
+  const block = prepPool().find((item) => item.slug === blok);
+  if (block === undefined) {
+    notFound();
+  }
+  const base = `${razdelBase(8)}`;
+  return (
+    <Podgotovka8Shell base={base} active={block.slug}>
+      <ErrorBoundary what="задачи">
+        <Podgotovka8Screen
+          blockId={block.id}
+          slug={block.slug}
+          title={block.nazvanie}
+          tasks={block.zadachi}
+          formulyHtml={block.formulyHtml}
+          listHref={`${base}/${OPORNYE.tail}`}
+        />
+      </ErrorBoundary>
+      {/* Учителю: блок целиком — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). */}
+      <div className="dz2-ryad">
+        <VDomashkuOpornye8 blockId={block.id} title={block.nazvanie} tasks={block.zadachi} />
+      </div>
+      {/* Репетитору со входом: типы этого блока — домашним заданием. */}
+      <IssueHomeworkBlock8 group={prepBlockBySlug(block.slug)?.group ?? ''} />
+    </Podgotovka8Shell>
+  );
+}

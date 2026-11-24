@@ -303,12 +303,12 @@ if (!TOLKO_TELEFON) {
     check(goroda[3].includes('karta-gorod--pusto'), 'окошко: тригонометрия — пустой кружок');
     const logHref = await page.locator('.karta-gorod--tekushchaya a').getAttribute('href');
     check(
-      logHref === '/zadaniya/8/trenazher/?tip=8.H',
+      logHref === '/zadaniya/vychisleniya/trenazher/?tip=8.H',
       `окошко: «Логарифмы» → тренажёр с темой (${logHref})`,
     );
     check(
       (await page.locator('.karta-okoshko a.karta-okoshko__nazvanie').getAttribute('href')) ===
-        '/zadaniya/8/',
+        '/zadaniya/vychisleniya/',
       'окошко: стрелка → «О задании»',
     );
     const panel = page.locator('.karta-panel.is-otkryta');
@@ -338,12 +338,12 @@ if (!TOLKO_TELEFON) {
     );
     check(
       (await panel.locator('a.karta-knopka--glavnaya').getAttribute('href')) ===
-        '/zadaniya/8/trenazher/?tip=8.H',
+        '/zadaniya/vychisleniya/trenazher/?tip=8.H',
       'панель: «Продолжить тренировку» — с логарифмами',
     );
     check(
       (await panel.locator('a:has-text("Опорные задачи")').getAttribute('href')) ===
-        '/zadaniya/8/opornye-zadachi/',
+        '/zadaniya/vychisleniya/opornye-zadachi/',
       'панель: «Опорные задачи»',
     );
     const zakladka = panel.locator('.karta-panel__zakladka');
@@ -438,7 +438,7 @@ if (!TOLKO_TELEFON) {
   {
     const { page, ctx } = await otkryt(browser, {
       width: 1280,
-      url: '/zadaniya/8/trenazher/?tip=8.H',
+      url: '/zadaniya/vychisleniya/trenazher/?tip=8.H',
       bezKarty: true,
     });
     await page.waitForSelector('.trn-zadacha[data-task]');
@@ -580,7 +580,7 @@ if (VIDEO && !TOLKO_TELEFON) {
     check(
       (await page
         .locator('.karta-ps__uzel[data-no="8"] .karta-gorod--tekushchaya a')
-        .getAttribute('href')) === '/zadaniya/8/trenazher/?tip=8.H',
+        .getAttribute('href')) === '/zadaniya/vychisleniya/trenazher/?tip=8.H',
       'телефон: раздел раскрывается на месте, тема → тренажёр',
     );
     await page.locator('.karta-ps__knopka[data-cel="oblast:8"]').tap();
@@ -724,7 +724,7 @@ if (VIDEO && !TOLKO_TELEFON) {
   /* Касание по теме ведёт в тренажёр. */
   check(
     (await page.locator('.karta-gorod--tekushchaya a').getAttribute('href')) ===
-      '/zadaniya/8/trenazher/?tip=8.H',
+      '/zadaniya/vychisleniya/trenazher/?tip=8.H',
     'планшет: тема → тренажёр',
   );
   /* Вода над материками: карта на телефоне стоит посередине холста. */

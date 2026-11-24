@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { GLAVY_15, GLAVY_3 } from '@/content/stereo/glavy';
 import { RAZBOR_STEREO, TIPY_15, TIPY_3 } from '@/content/stereo/tipy';
 import { STEREO, type StereoNo } from '@/content/stereo/zadaniya';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { razbor3, RAZBORY_3, type RazborStereo as Razbor } from '@/lib/stereo/razbory3';
 import { razbor15, RAZBORY_15 } from '@/lib/stereo/razbory15';
 import { RazborStereo } from './RazborStereo';
@@ -52,7 +52,7 @@ export function RazborStranitsa({ no, tip }: { no: StereoNo; tip: string }) {
     notFound();
   }
   const glava = d.glavy.find((g) => g.id === t.glava);
-  const base = `${ZADANIYA}/${STEREO[no].slug}`;
+  const base = `${razdelBase(STEREO[no].slug)}`;
   return (
     <>
       <p className="stereo-razbor__back">

@@ -80,11 +80,11 @@ const ONLY = process.argv.slice(2).filter((arg) => arg.startsWith('/'));
 const ALL_PAGES = [
   '/',
   '/zadaniya/',
-  '/zadaniya/13/',
-  '/zadaniya/13/teoriya/',
-  '/zadaniya/13/trenazher/',
-  '/zadaniya/13/generator/',
-  '/zadaniya/11/generator/',
+  '/zadaniya/ekonomika/',
+  '/zadaniya/ekonomika/teoriya/',
+  '/zadaniya/ekonomika/trenazher/',
+  '/zadaniya/ekonomika/generator/',
+  '/zadaniya/tekstovye-zadachi/generator/',
   '/variant/',
 ];
 const PAGES =
@@ -105,7 +105,11 @@ const SIZES = [
   { w: 1440, h: 900, touch: false },
 ];
 /* Вкладки раздела для перехода по ленте. */
-const VKLADKI = ['/zadaniya/13/trenazher/', '/zadaniya/13/generator/', '/zadaniya/13/teoriya/'];
+const VKLADKI = [
+  '/zadaniya/ekonomika/trenazher/',
+  '/zadaniya/ekonomika/generator/',
+  '/zadaniya/ekonomika/teoriya/',
+];
 
 const failures = [];
 let checks = 0;
@@ -313,7 +317,7 @@ async function proverit(engine, browserType) {
     }
 
     /* Переход по ленте вкладок раздела. */
-    await otkryt(page, '/zadaniya/13/');
+    await otkryt(page, '/zadaniya/ekonomika/');
     for (const url of VKLADKI) {
       const tab = page.locator(`.topic-tabs-row:not([inert]) a[href="${url}"]`).first();
       if ((await tab.count()) === 0) continue;
@@ -339,7 +343,7 @@ async function proverit(engine, browserType) {
 
     /* Клавиатура: поле ввода тренажёра на сенсорном экране. */
     if (size.touch) {
-      await otkryt(page, '/zadaniya/13/trenazher/');
+      await otkryt(page, '/zadaniya/ekonomika/trenazher/');
       const go = page.getByRole('button', { name: /Начать/ }).first();
       if ((await go.count()) > 0) {
         await go.click().catch(() => {});
@@ -377,7 +381,7 @@ async function proverit(engine, browserType) {
     const size = { w, h, touch: true };
     const context = await newContext(browser, engine, size);
     const page = await context.newPage();
-    for (const url of ['/', '/zadaniya/13/', '/zadaniya/13/generator/'].filter((u) =>
+    for (const url of ['/', '/zadaniya/ekonomika/', '/zadaniya/ekonomika/generator/'].filter((u) =>
       PAGES.includes(u),
     )) {
       await otkryt(page, url);

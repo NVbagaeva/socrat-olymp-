@@ -25,7 +25,7 @@ import { podtemaVkladki, razdelyZadaniya } from './razdely/razdely12';
 import { TopicTabs } from './TopicTabs';
 
 import { assetUrl } from '@/lib/assetUrl';
-import { href, ZADANIYA } from '@/lib/paths';
+import { href, razdelBase, ZADANIYA } from '@/lib/paths';
 
 /* Рисунок «Что нужно уметь» с подписями у своих графиков (KaTeX): у
    линейной и квадратичной на рисунке две подписи формул. У гиперболы
@@ -75,7 +75,7 @@ export function FunctionTopicPage({
   trail = [],
 }: FunctionTopicPageProps) {
   const { topic } = section;
-  const base = `${ZADANIYA}/${section.slug}/${subtopic.id}`;
+  const base = `${razdelBase(section.slug)}/${subtopic.id}`;
   /* Вкладка ведёт по адресу только тогда, когда за ней есть материал
      этой подтемы: у опорных задач — список навыков, у тренажёра
      и генератора — наборы прототипов в данных движка. Иначе вкладка
@@ -179,7 +179,9 @@ export function FunctionTopicPage({
             about={about}
             scene={aboutScene(subtopic.id)}
             base={base}
-            {...(ABOUT_FIGURE[subtopic.id] === undefined ? {} : { figure: ABOUT_FIGURE[subtopic.id] })}
+            {...(ABOUT_FIGURE[subtopic.id] === undefined
+              ? {}
+              : { figure: ABOUT_FIGURE[subtopic.id] })}
           />
         }
         theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
@@ -214,7 +216,9 @@ export function FunctionTopicPage({
           ))
         }
         trainerHref={hasTrainer ? `${base}/trenazher/` : null}
-        generator={hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} icon={icon} /> : undefined}
+        generator={
+          hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} icon={icon} /> : undefined
+        }
         tutors={tutors}
         tutorsEmpty={PODTEMA_SKORO.tutors}
         razdely={razdely}

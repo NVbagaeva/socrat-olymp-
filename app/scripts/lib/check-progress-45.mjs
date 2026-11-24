@@ -26,6 +26,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { requireSrc, APP } from './load-ts.mjs';
+import { kod } from './adres.mjs';
 
 export function proveritProgress45(Z) {
   const failures = [];
@@ -53,7 +54,7 @@ export function proveritProgress45(Z) {
       addEventListener() {},
       removeEventListener() {},
       dispatchEvent() {},
-      location: { search: '', pathname: `/zadaniya/${Z}/trenazher/` },
+      location: { search: '', pathname: `/zadaniya/${kod(Z)}/trenazher/` },
     };
     globalThis.localStorage = storage;
   };

@@ -19,7 +19,9 @@ import { fileURLToPath } from 'node:url';
 
 const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(app, 'out');
-const KORNI = ['zadaniya/4', 'zadaniya/5'].map((p) => path.join(OUT, p));
+const KORNI = ['zadaniya/veroyatnost', 'zadaniya/slozhnaya-veroyatnost'].map((p) =>
+  path.join(OUT, p),
+);
 
 /* Слова и их латинские написания — латиницей источник попадает в
    данные как служебный ключ или имя файла. */
@@ -69,4 +71,6 @@ if (oshibki.length > 0) {
   oshibki.slice(0, 30).forEach((o) => console.error(`  ${o}`));
   process.exit(1);
 }
-console.log(`Источники скрыты: проверено файлов №4 и №5 — ${spisok.length}, запретных слов и номеров сборника нет.`);
+console.log(
+  `Источники скрыты: проверено файлов №4 и №5 — ${spisok.length}, запретных слов и номеров сборника нет.`,
+);

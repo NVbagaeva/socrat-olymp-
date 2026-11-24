@@ -158,7 +158,7 @@ console.log('1–3. Фильтры из ссылки, числа на чипах
 {
   const ctx = await context(DESKTOP, PROGRESS_Q);
   const q = 't=12Q.B,12Q.E&ur=2&n=5&rezh=bez&por=prostye&moi=oshibki&s=t,ur,moi';
-  const url = `/zadaniya/12/quadratic/trenazher/?${q}`;
+  const url = `/zadaniya/grafiki-funkciy/quadratic/trenazher/?${q}`;
   const p = await page(ctx, url);
   const card = p.locator('.flt-card');
   await p.waitForFunction(() =>
@@ -251,7 +251,7 @@ console.log('1–3. Фильтры из ссылки, числа на чипах
 console.log('4. Пустой результат');
 {
   const ctx = await context(DESKTOP);
-  const p = await page(ctx, '/zadaniya/12/quadratic/trenazher/?t=12Q.A&moi=oshibki');
+  const p = await page(ctx, '/zadaniya/grafiki-funkciy/quadratic/trenazher/?t=12Q.A&moi=oshibki');
   await p.locator('.flt-empty').waitFor({ state: 'visible' });
   check((await naydenoNaStranice(p)) === 0, 'найдено 0 — сообщение «Таких задач нет»');
   check(
@@ -302,7 +302,7 @@ async function dat(p, task) {
 }
 {
   const ctx = await context(DESKTOP);
-  const p = await page(ctx, '/zadaniya/12/linear/trenazher/');
+  const p = await page(ctx, '/zadaniya/grafiki-funkciy/linear/trenazher/');
   await p
     .getByRole('button', { name: /^Начать тренировку/ })
     .first()
@@ -391,7 +391,7 @@ console.log('6. Старая тренировка прежнего экрана'
   const p0 = await ctx.newPage();
   await p0.goto(`${BASE}/zadaniya/`, { waitUntil: 'load' });
   await p0.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY('12:linear'), raw]);
-  await p0.goto(`${BASE}/zadaniya/12/linear/trenazher/`, { waitUntil: 'load' });
+  await p0.goto(`${BASE}/zadaniya/grafiki-funkciy/linear/trenazher/`, { waitUntil: 'load' });
   await p0.locator('.tsess__bar').waitFor({ state: 'visible', timeout: 30_000 });
   await p0.locator('.tsess__body .ptask__question').waitFor({ state: 'visible' });
   check(
@@ -416,7 +416,10 @@ console.log('6. Старая тренировка прежнего экрана'
 console.log('7. Телефон: прокрутки вбок нет');
 for (const width of [320, 375, 390]) {
   const ctx = await context({ width, height: 800 }, PROGRESS_Q);
-  for (const url of ['/zadaniya/12/quadratic/trenazher/', '/zadaniya/12/trenazher/']) {
+  for (const url of [
+    '/zadaniya/grafiki-funkciy/quadratic/trenazher/',
+    '/zadaniya/grafiki-funkciy/trenazher/',
+  ]) {
     const p = await page(ctx, url);
     const tag = `${width} px ${url}`;
     check(await bezProkrutki(p), `${tag}: фильтры`);
@@ -459,7 +462,7 @@ for (const width of [320, 375, 390]) {
     if (width === 390 && url.includes('quadratic')) await snimok(p, 'phone-5-itogi', true);
     await p.close();
   }
-  const pe = await page(ctx, '/zadaniya/12/quadratic/trenazher/?t=12Q.A&moi=oshibki');
+  const pe = await page(ctx, '/zadaniya/grafiki-funkciy/quadratic/trenazher/?t=12Q.A&moi=oshibki');
   await pe.locator('.flt-empty').waitFor({ state: 'visible' });
   check(await bezProkrutki(pe), `${width} px: пусто`);
   if (width === 390) await snimok(pe, 'phone-3-pusto');
@@ -470,10 +473,10 @@ for (const width of [320, 375, 390]) {
 
 console.log('8. Партия 1: №1, №13 — фильтры, тренировка, подсказка');
 const PARTIYA_1 = [
-  { no: '1', url: '/zadaniya/1/trenazher/' },
-  { no: '13', url: '/zadaniya/13/trenazher/' },
-  { no: '13-oformlenie', url: '/zadaniya/13/trenazher/?d=oformlenie.oformlenie' },
-  { no: '13-tip', url: '/zadaniya/13/trenazher/?d=zadanie.tip' },
+  { no: '1', url: '/zadaniya/planimetriya/trenazher/' },
+  { no: '13', url: '/zadaniya/ekonomika/trenazher/' },
+  { no: '13-oformlenie', url: '/zadaniya/ekonomika/trenazher/?d=oformlenie.oformlenie' },
+  { no: '13-tip', url: '/zadaniya/ekonomika/trenazher/?d=zadanie.tip' },
 ];
 for (const [tag, viewport] of [
   ['desktop', DESKTOP],
@@ -546,7 +549,7 @@ for (const [tag, viewport] of [
 
 if (SNIMKI !== null) {
   const ctx = await context(DESKTOP, PROGRESS_Q);
-  const p = await page(ctx, '/zadaniya/12/quadratic/trenazher/?n=5');
+  const p = await page(ctx, '/zadaniya/grafiki-funkciy/quadratic/trenazher/?n=5');
   await p
     .getByRole('button', { name: /^Начать тренировку/ })
     .first()
@@ -577,7 +580,7 @@ if (SNIMKI !== null) {
   await snimok(p, 'desktop-5-itogi', true);
   const all = await page(
     ctx,
-    '/zadaniya/12/trenazher/?t=12Q.A,12Q.B,12Q.C,12Q.D,12Q.E,12Q.F,12Q.G,12Q.H,12Q.I,12R.A',
+    '/zadaniya/grafiki-funkciy/trenazher/?t=12Q.A,12Q.B,12Q.C,12Q.D,12Q.E,12Q.F,12Q.G,12Q.H,12Q.I,12R.A',
   );
   await snimok(all, 'desktop-6-vse-tipy');
   await ctx.close();

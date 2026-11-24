@@ -49,4 +49,4 @@
 «новые» задачи: в режимах «Банк + новые» и «Только новые» они идут
 первыми, генератор — когда пул кончился. В браузер уходят без ответа.
 Проверки — `lib/zadanie11/analogi-selftest.ts`; вычитка —
-`/zadaniya/11/proverka-analogov/` (служебная, noindex).
+`/zadaniya/tekstovye-zadachi/proverka-analogov/` (служебная, noindex).

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* scripts/check-illyustracii.mjs — ни одна картинка не крупнее нормы.
 
-   Запуск (после pnpm build):  pnpm test:illyustracii [--only /zadaniya/1/]
+   Запуск (после pnpm build):  pnpm test:illyustracii [--only /zadaniya/planimetriya/]
 
    Проходит все страницы сайта из lib/illyustracii.mjs (главная, «Об
    авторе», «Как пользоваться», тарифы, кабинеты, все вкладки разделов)
@@ -35,7 +35,7 @@ let kartinok = 0;
 
 const prohody = [
   ...EKRANY.map((shirina) => ({ shirina, urls })),
-  { shirina: 2560, urls: urls.filter((u) => u === '/' || u === '/zadaniya/1/') },
+  { shirina: 2560, urls: urls.filter((u) => u === '/' || u === '/zadaniya/planimetriya/') },
 ];
 for (const { shirina, urls: spisok } of prohody) {
   await obojti(

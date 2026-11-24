@@ -3,7 +3,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { findSection } from '@/content/sections';
 import { VKLADKI_12 } from '@/content/vkladki';
-import { href, ZADANIYA } from '@/lib/paths';
+import { href, razdelBase, ZADANIYA } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
 
 /**
@@ -17,7 +17,7 @@ export function Shell12({ children }: { children: React.ReactNode }) {
   if (section === undefined) {
     throw new Error('Нет раздела 12 в content/sections.ts');
   }
-  const base = `${ZADANIYA}/${section.slug}`;
+  const base = `${razdelBase(section.slug)}`;
 
   /* Первая открытая подтема — единственный осмысленный переход.
      «Продолжить с места, где остановился» не делаем: хранилища

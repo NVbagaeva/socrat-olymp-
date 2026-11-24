@@ -42,6 +42,8 @@ const ofertaPage =
 
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
+/** Папки иллюстраций со своей таблицей версий (lib/illyustraciiUrl.ts). */
+const ILLYUSTRACII = ['/images/zadanie-11/gorod-', '/images/zadanie-05/metod-'];
 
 const nextConfig: NextConfig = {
   ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
@@ -110,7 +112,9 @@ const nextConfig: NextConfig = {
     PROGRESS_UCHENIK_ON: process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1' ? '1' : '0',
     // Новая выдача ДЗ (docs/kabinet-dz2.md): «1» или «0» всегда; только при входе.
     DZ2_ON:
-      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' && process.env.NEXT_PUBLIC_DZ2 === '1' ? '1' : '0',
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' && process.env.NEXT_PUBLIC_DZ2 === '1'
+        ? '1'
+        : '0',
     DZ2_RAZDELY: process.env.NEXT_PUBLIC_DZ2_RAZDELY || '5,8',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
@@ -127,7 +131,18 @@ const nextConfig: NextConfig = {
             !file.startsWith('/intro/') &&
             !file.startsWith('/data/') &&
             !file.startsWith('/images/zadachi/') &&
-            !file.startsWith('/images/shapki/'),
+            !file.startsWith('/images/shapki/') &&
+            !ILLYUSTRACII.some((prefix) => file.startsWith(prefix)),
+        ),
+      ),
+    ),
+    // Иллюстрации живых сцен и карточек методов: ILLYUSTRACII_ASSET_VERSIONS,
+    // её подставляет только lib/illyustraciiUrl.ts (ленивая сцена №10 и
+    // серверная карточка метода №5) — первая загрузка других страниц не растёт.
+    ILLYUSTRACII_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) =>
+          ILLYUSTRACII.some((prefix) => file.startsWith(prefix)),
         ),
       ),
     ),

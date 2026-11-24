@@ -2,7 +2,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { SectionHeader } from '@/components/tasks/shapka/SectionHeader';
 import { VYCHISLENIYA } from '@/content/vychisleniya';
 import { RazdelTabs } from '../RazdelTabs';
-import { ZADANIYA } from '@/lib/paths';
+import { razdelBase } from '@/lib/paths';
 import { HomeworkBanner8 } from '@/components/dz/Razdel8Dz';
 
 /**
@@ -13,7 +13,7 @@ import { HomeworkBanner8 } from '@/components/dz/Razdel8Dz';
  * Панель содержания — своя, под лентой.
  */
 export function VychisleniyaShell({ children }: { children: React.ReactNode }) {
-  const base = `${ZADANIYA}/${VYCHISLENIYA.slug}`;
+  const base = `${razdelBase(VYCHISLENIYA.slug)}`;
 
   return (
     <AppShell active="tasks">

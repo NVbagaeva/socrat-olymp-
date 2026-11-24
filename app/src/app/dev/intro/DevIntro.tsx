@@ -54,7 +54,7 @@ function readParams(search: string): Params {
     manual: q.has('manual'),
     fps: q.get('fps') === '1',
     closed: q.has('closed'),
-    bg: q.get('bg') ?? '/zadaniya/12/',
+    bg: q.get('bg') ?? '/zadaniya/grafiki-funkciy/',
   };
 }
 

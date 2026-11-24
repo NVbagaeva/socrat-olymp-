@@ -10,7 +10,7 @@ import { bazaTask, type BazaParams } from './stranitsa';
 import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
-import '@/app/zadaniya/[task]/[type]/pechat/pechat.css';
+import '@/app/zadaniya/grafiki-funkciy/[type]/pechat/pechat.css';
 import './generatorBazy.css';
 import './pechatBazy.css';
 
