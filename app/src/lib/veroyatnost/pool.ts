@@ -503,6 +503,12 @@ function kartinkaOpornoy(zadacha: PrepZadacha): IllyustratsiyaPool | undefined {
   if (prototipa !== undefined) {
     return illyustratsiyaVarianta(prototipa, 1);
   }
+  /* Новая картинка сюжета важнее прежней «не по условию». */
+  const syuzhet = SYUZHET_KARTINKI_45[zadacha.id];
+  if (syuzhet !== undefined) {
+    const k = kartinkaSyuzheta(zadanieIllyustratsii(zadacha.id), syuzhet);
+    if (k !== undefined) return { path: k.src, alt: k.alt, path280: k.src280 };
+  }
   if (zadacha.id in KARTINKA_NE_PO_USLOVIYU) {
     return undefined;
   }

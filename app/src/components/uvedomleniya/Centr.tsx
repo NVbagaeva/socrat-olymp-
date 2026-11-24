@@ -28,6 +28,8 @@ import {
   type Uvedomlenie,
 } from '@/lib/uvedomleniya/model';
 import { OBNOVIT } from '@/lib/uvedomleniya/sobytiya';
+import { UVEDOMLENIYA_PUSH_ON } from '@/lib/uvedomleniya/config';
+import type { PushSostoyanie } from '@/lib/uvedomleniya/model';
 import './uvedomleniya.css';
 
 const PORCIYA = 30;
@@ -308,6 +310,8 @@ function Nastroyki({ uchitel }: { uchitel: boolean }) {
         )}
       </fieldset>
 
+      {UVEDOMLENIYA_PUSH_ON && kanaly.includes('push') ? <PushBlok /> : null}
+
       <fieldset>
         <legend>{t.tihieZag}</legend>
         <p className="t-caption">{t.tihieLead}</p>
@@ -386,5 +390,79 @@ function Nastroyki({ uchitel }: { uchitel: boolean }) {
       )}
       {error === null ? null : <FieldMessage tone="error">{error}</FieldMessage>}
     </form>
+  );
+}
+
+/**
+ * Push на этом устройстве (PR 3г): состояние браузера и кнопка. Подписка
+ * — у браузера, поэтому блок про «это устройство», а события выбираются
+ * в таблице выше (столбец «Push»).
+ */
+function PushBlok() {
+  const t = UVED.nastroyki;
+  const [st, setSt] = useState<PushSostoyanie | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      try {
+        const s = await (await import('@/lib/uvedomleniya/push')).sostoyanie();
+        if (alive) setSt(s);
+      } catch {
+        if (alive) setSt('net');
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  async function nazhat(vkl: boolean) {
+    setError(null);
+    setBusy(true);
+    const push = await import('@/lib/uvedomleniya/push');
+    try {
+      if (vkl) await push.vklyuchit();
+      else await push.vyklyuchit();
+    } catch (e) {
+      const kod = e instanceof push.PushError ? e.kod : 'svyaz';
+      setError(t.pushOshibka[kod] ?? t.pushOshibka.svyaz ?? null);
+    }
+    setSt(await push.sostoyanie().catch(() => 'net' as const));
+    setBusy(false);
+  }
+
+  return (
+    <fieldset className="uved-push" data-push={st ?? 'zagruzka'}>
+      <legend>{t.pushZag}</legend>
+      <p className="t-caption">{t.pushLead}</p>
+      {st === null ? <p className="auth-form__muted">…</p> : null}
+      {st === 'ios' ? <p className="uved-zametka">{t.pushIos}</p> : null}
+      {st === 'net' ? <p className="uved-zametka">{t.pushNet}</p> : null}
+      {st === 'zapret' ? <p className="uved-zametka">{t.pushZapret}</p> : null}
+      {st === 'vkl' ? (
+        <>
+          <p className="uved-uspeh" role="status">
+            {t.pushVkl}
+          </p>
+          <div className="uved-ryad">
+            <Button type="button" variant="secondary" disabled={busy} onClick={() => void nazhat(false)}>
+              {t.pushVyklyuchit}
+            </Button>
+          </div>
+        </>
+      ) : null}
+      {st === 'vykl' ? (
+        <div className="uved-ryad">
+          <Button type="button" disabled={busy} onClick={() => void nazhat(true)}>
+            {t.pushVklyuchit}
+          </Button>
+        </div>
+      ) : null}
+      {st === 'vkl' || st === 'vykl' ? <p className="t-caption">{t.pushTablica}</p> : null}
+      {error === null ? null : <FieldMessage tone="error">{error}</FieldMessage>}
+    </fieldset>
   );
 }

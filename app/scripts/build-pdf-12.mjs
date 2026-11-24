@@ -121,6 +121,11 @@ function spec(blocks, options) {
     title: content.title,
     recap: content.recap,
     blocks,
+    /* Сборник — компактный, по три задачи на странице: рисунок справа от
+       условия, обычного размера (sheet.js, figures: 'normal'). Крупный
+       печатный профиль (клетка 7 мм, рисунок под условием) утроил бы
+       сборник — 141 страница вместо 49; решение владельца — компактно. */
+    figures: 'normal',
     withAnswerLine: options.withAnswerLine,
     extraItems: options.extraItems || [],
     foot: content.foot,

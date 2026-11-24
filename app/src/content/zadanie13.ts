@@ -4,6 +4,7 @@
  * Раздел собирается по плану docs/13-economics/02-design.md.
  */
 
+import { TUTORS_LABEL } from './vkladki';
 import { ballText } from './variantOnline/bally';
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
@@ -54,7 +55,7 @@ export const ZADANIE13 = {
       ? [{ id: 'optimizaciya', label: 'На оптимизацию', tail: OPTIMIZACIYA13_TAIL, icon: 'stats' }]
       : []),
     { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
-    { id: 'repetitory', label: 'Для репетиторов', tail: 'dlya-repetitorov/', icon: 'materials' },
+    { id: 'repetitory', label: TUTORS_LABEL, tail: 'dlya-repetitorov/', icon: 'materials' },
   ] as readonly RazdelTab[],
 } as const;
 

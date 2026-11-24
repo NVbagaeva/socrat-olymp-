@@ -128,20 +128,36 @@
   font-weight: 500;
 }
 
-/* ── Переключатель уровня «Профиль | База» в публичной шапке ──
+/* ── Переключатель уровня «Профиль | База» в шапке ──
    Правила стоят здесь, а не в styles/site.css: тот лежит в слое, а
-   стили переключателя — вне слоёв и перебили бы его.
-   Стоит после логотипа. На 1024–1279 px меню и так помещается впритык,
-   поэтому там переключатель компактный, промежутки уже, а на
-   1024–1139 px название рядом со знаком уходит (как у телефона с
-   кнопкой «Войти»): знак остаётся, название читает скринридер.
-   На планшете (768–1023 px) меню в бургере, и переключателю места
-   хватает; на телефоне он уходит в бургер-меню. С кнопкой «Войти»
-   в шапке места в строке на него нет до 1440 px — там он тоже в меню
-   уровня на главной и в бургере. */
-@media (max-width: 767.98px) {
-  .site-head__in .site-head__level {
+   стили переключателя — вне слоёв и перебили бы его. В шапке — на всех
+   ширинах (в кабинете на компьютере — в сайдбаре, site.css); на
+   1024–1279 px и на телефоне — компактный. */
+.site-head__level {
+  flex: none;
+}
+/* Кабинет на компьютере: переключатель в сайдбаре. */
+@media (min-width: 1024px) {
+  .site-head--kabinet .site-head__level {
     display: none;
+  }
+}
+/* Телефон: область нажатия сегмента — 44px по высоте вместе с полем. */
+@media (max-width: 767.98px) {
+  .site-head__level .level-switch__seg {
+    min-height: 38px;
+  }
+}
+/* Узкий телефон: знак, переключатель, «Войти» и бургер — в одну строку. */
+@media (max-width: 399.98px) {
+  .site-head__level .level-switch__seg {
+    padding: 0 10px;
+    font-size: 14px;
+  }
+}
+@media (max-width: 359.98px) {
+  .site-head__level .level-switch__seg {
+    padding: 0 6px;
   }
 }
 @media (min-width: 768px) {
@@ -149,47 +165,16 @@
     display: none;
   }
 }
-@media (min-width: 1024px) and (max-width: 1279.98px) {
-  .site-head__in {
-    gap: var(--space-4);
-  }
+@media (min-width: 768px) and (max-width: 1279.98px) {
   .site-head__level .level-switch__seg {
-    min-height: 28px;
+    min-height: 32px;
     padding: 0 var(--space-2);
     font-size: 14px;
   }
-  .site-head__in .site-nav {
-    gap: 14px;
-    margin-left: 0;
-  }
 }
-@media (min-width: 1024px) and (max-width: 1139.98px) {
-  .site-head__in:has(.site-head__level) .logo {
-    gap: 0;
-    font-size: 0;
-  }
-}
-@media (min-width: 1024px) and (max-width: 1439.98px) {
-  .site-head__in:has(.auth-widget__login) .site-head__level.level-switch {
-    display: none;
-  }
-}
-/* От 1440 px с кнопкой «Войти» в строке всё: знак с названием,
-   переключатель, шесть пунктов меню, «Войти» и «Начать бесплатно».
-   С обычными промежутками строке не хватало ~30 px, и сжимался только
-   логотип: название вылезало из своей коробки и упиралось в
-   переключатель (docs/audit-prodazhi.md, E3). Логотип не сжимается,
-   промежутки — на ступень плотнее; запас ~20 px. */
 @media (min-width: 1440px) {
   .site-head__in > .logo {
     flex: none;
-  }
-  .site-head__in:has(.site-head__level) {
-    gap: var(--space-6);
-  }
-  .site-head__in:has(.site-head__level) .site-nav {
-    gap: 20px;
-    margin-left: var(--space-4);
   }
 }
 .site-menu__level {

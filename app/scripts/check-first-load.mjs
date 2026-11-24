@@ -70,6 +70,9 @@ const BUDGET = [
   { page: 'zadaniya/grafiki-funkciy/rational', htmlGz: 200 * 1024, scriptsGz: 207 * 1024 },
   { page: 'zadaniya/grafiki-funkciy/quadratic', htmlGz: 260 * 1024, scriptsGz: 207 * 1024 },
   { page: 'zadaniya/grafiki-funkciy/linear', htmlGz: 62 * 1024, scriptsGz: 207 * 1024 },
+  /* «Как пользоваться сайтом»: мини-задача (KaTeX, тренажёр), демо
+     генератора и окно со снимком — отдельными кусками, при появлении. */
+  { page: 'kak-polzovatsya', htmlGz: 40 * 1024, scriptsGz: 207 * 1024 },
 ];
 /* Признаки тяжёлого кода внутри скриптов первой загрузки. */
 const HEAVY = [

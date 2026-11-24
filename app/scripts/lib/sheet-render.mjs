@@ -147,6 +147,17 @@ function katexAssets() {
     return 'src:url(data:font/woff2;base64,' + data + ') format("woff2")';
   });
 
+  /* Знак «−» (U+2212) курсивом. В курсивах KaTeX (Math-Italic,
+     Main-Italic) его нет, и курсивная подпись чертежа вроде «y = −2»
+     брала системный шрифт — в PDF попадал чужой шрифт (Liberation).
+     Минус наклона не имеет: курсивному «−» отдаём прямой из Main. */
+  const main = path.join(dist, 'fonts', 'KaTeX_Main-Regular.woff2');
+  if (fs.existsSync(main)) {
+    css += '\n@font-face{font-family:KaTeX_Main;font-style:italic;font-weight:normal;' +
+      'unicode-range:U+2212;src:url(data:font/woff2;base64,' +
+      fs.readFileSync(main).toString('base64') + ') format("woff2")}';
+  }
+
   return { js, css };
 }
 
