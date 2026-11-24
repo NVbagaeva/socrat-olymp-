@@ -544,6 +544,15 @@ const stranitsyDlyaBrauzera = fayly(OUT, ['index.html'])
   .filter((adres) => adres.split('/').filter(Boolean).length <= 2)
   .filter((adres) => !/^(404|styleguide)\//.test(adres))
   .filter((adres) => !razdely.some((r) => vRazdele(adres, r)))
+  /* Заглушки «Страница переехала» (прежние адреса /zadaniya/7/) сразу
+     уводят на новый адрес: своего содержимого нет, а новая страница в
+     списке есть. В WebKit ожидание на них тянулось до таймаута. */
+  .filter(
+    (adres) =>
+      !/<meta\s+http-equiv="refresh"/i.test(
+        fs.readFileSync(path.join(OUT, adres, 'index.html'), 'utf8'),
+      ),
+  )
   .sort();
 for (const b of spisok) {
   for (const r of razdely) {
