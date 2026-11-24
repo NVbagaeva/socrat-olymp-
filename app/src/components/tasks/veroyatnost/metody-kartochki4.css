@@ -1,4 +1,4 @@
-/* Карточки ключевых методов задания №4: ссылка на главу теории и
+/* Карточки ключевых методов заданий №4 и №5 (MetodyKartochki4/5): ссылка на главу теории и
    стеклянная картинка в правом верхнем углу (96 px, на телефоне 64 px).
    Номер и заголовок — слева, текст под картинку не заходит. */
 
@@ -26,6 +26,27 @@
   /* Длинное слово рядом с картинкой переносится по слогам, а не по букве. */
   overflow-wrap: normal;
   hyphens: auto;
+}
+/* Формула метода (у №5) — своей строкой под описанием. */
+.m4k.has-formula {
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'no title'
+    'sut sut'
+    'formula formula'
+    'chitat chitat';
+}
+.m4k.has-kartinka.has-formula {
+  grid-template-areas:
+    'no title kartinka'
+    'sut sut kartinka'
+    'formula formula formula'
+    'chitat chitat chitat';
+}
+.m4k .m4k__formula {
+  grid-area: formula;
+  align-self: start;
+  margin-top: var(--space-2);
 }
 /* Поверх .vmetod__sut (grid-column: 2): описание — во всю ширину
    под номером и заголовком, слева от картинки. */

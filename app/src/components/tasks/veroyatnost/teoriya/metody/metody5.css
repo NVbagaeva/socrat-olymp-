@@ -1,0 +1,298 @@
+/* Интерактивы глав ключевых методов задания №5 (Interaktivy5.tsx).
+   Общая рамка, фишки, итог и таблица — из metody4.css (.m4i-*);
+   здесь только то, чего у №4 нет. Стекло и оранжевый акцент — те же. */
+
+.m5i-ryad {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+}
+.m5i-ryad__podpis {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.m5i-polzunok {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 14rem) 3.5rem;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 34rem;
+}
+.m5i-polzunok input {
+  width: 100%;
+  accent-color: #e98a32;
+}
+@media (max-width: 479px) {
+  .m5i-polzunok {
+    grid-template-columns: minmax(0, 1fr) 3.5rem;
+  }
+  .m5i-polzunok .m5i-ryad__podpis {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── Полоса исходов (главы 1 и 4) ─────────────────────────────────── */
+
+.m5i-polosa__ryad {
+  display: grid;
+  grid-template-columns: repeat(20, minmax(0, 1fr));
+  gap: 3px;
+  width: 100%;
+  max-width: 640px;
+}
+@media (max-width: 559px) {
+  .m5i-polosa__ryad {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+}
+.m5i-kletka {
+  aspect-ratio: 1;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(120, 165, 230, 0.45);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.m5i-kletka--1 {
+  background: #ffd29e;
+  box-shadow:
+    inset 0 0 0 1px #e98a32,
+    0 0 10px rgba(245, 150, 50, 0.4);
+}
+.m5i-kletka--2 {
+  background: #a9caf5;
+  box-shadow:
+    inset 0 0 0 1px #4f86d1,
+    0 0 10px rgba(60, 120, 210, 0.35);
+}
+.m5i-kletka--3 {
+  background: linear-gradient(135deg, #ffd29e 0 50%, #a9caf5 50% 100%);
+  box-shadow:
+    inset 0 0 0 2px #8a4a05,
+    0 0 10px rgba(245, 150, 50, 0.4);
+}
+.m5i-kletka:focus-visible,
+.m5i-mishen:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── Числовая прямая (глава 3) ────────────────────────────────────── */
+
+.m5i-pryamaya__svg {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+}
+.m5i-pryamaya__os,
+.m5i-pryamaya__shtrih {
+  stroke: #5f92d6;
+  stroke-width: 2;
+}
+.m5i-pryamaya__luch {
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.m5i-pryamaya__luch--a {
+  stroke: #a9caf5;
+}
+.m5i-pryamaya__luch--b {
+  stroke: #5f92d6;
+}
+.m5i-pryamaya__otrezok {
+  fill: #f7a64a;
+  filter: drop-shadow(0 0 6px rgba(245, 150, 50, 0.5));
+}
+.m5i-pryamaya__chislo,
+.m5i-pryamaya__bukva {
+  fill: var(--color-text-secondary);
+  font-size: 13px;
+  text-anchor: middle;
+}
+.m5i-pryamaya__bukva {
+  fill: #8a4a05;
+  font-family: KaTeX_Math, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 16px;
+}
+
+/* ── Таблица костей при условии (глава 5) ─────────────────────────── */
+
+.m4i-tablica td.m5i-vycherknuta {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(120, 165, 230, 0.2);
+  color: var(--color-text-tertiary, #9aa5b5);
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+/* ── Мишени (глава 6) ─────────────────────────────────────────────── */
+
+.m5i-misheni {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+.m5i-mishen {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-lg, 12px);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+.m5i-mishen__krug {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, #d6e7ff 0 6px, #8db6ec 6px 12px);
+  box-shadow: 0 3px 6px rgba(40, 90, 170, 0.25);
+}
+.m5i-mishen.is-da .m5i-mishen__krug {
+  background:
+    radial-gradient(circle, #f7a64a 0 6px, transparent 7px),
+    repeating-radial-gradient(circle, #ffe1b8 0 6px, #f7a64a 6px 12px);
+  box-shadow: 0 0 14px rgba(245, 150, 50, 0.55);
+}
+
+/* ── Светильники (глава 7) ────────────────────────────────────────── */
+
+.m5i-lampy__ryad {
+  display: flex;
+  gap: var(--space-3);
+}
+.m5i-lampa {
+  width: 30px;
+  height: 40px;
+  border-radius: 50% 50% 40% 40%;
+  background: radial-gradient(circle at 40% 35%, #fff 0 10%, #ffe1b8 35%, #f7a64a 100%);
+  box-shadow: 0 0 14px rgba(245, 150, 50, 0.5);
+}
+
+/* ── Два предмета (глава 8) ───────────────────────────────────────── */
+
+.m5i-para__schet {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+}
+.m5i-schetchik {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.m5i-schetchik .m4i-chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.m5i-para__nabor {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 420px;
+}
+.m5i-shar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff 0 12%, #e9eef5 40%, #b9c4d3 100%);
+}
+.m5i-shar--a {
+  background: radial-gradient(circle at 32% 28%, #fff 0 12%, #d6e7ff 30%, #5f92d6 100%);
+}
+.m5i-shar--b {
+  background: radial-gradient(circle at 32% 28%, #fff 0 12%, #ffe1b8 30%, #d9781c 100%);
+}
+.m5i-para__poryadki {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-5);
+}
+.m5i-para__poryadki > span {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+}
+.m5i-drob {
+  display: inline-grid;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 0.9em;
+  line-height: 1.15;
+}
+.m5i-drob__ch {
+  border-bottom: 1px solid currentColor;
+  padding: 0 0.2em;
+}
+
+/* ── Дерево полной вероятности (глава 9) ──────────────────────────── */
+
+.m5i-derevo__svg {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+}
+.m5i-vetka {
+  stroke: #a9caf5;
+  stroke-linecap: round;
+  transition: stroke-width 160ms ease;
+}
+.m5i-vetka--a {
+  stroke: #f7a64a;
+}
+.m5i-uzel {
+  fill: #d6e7ff;
+  stroke: #5f92d6;
+  stroke-width: 1.5;
+}
+.m5i-uzel--a {
+  fill: #ffd29e;
+  stroke: #e98a32;
+}
+.m5i-derevo__tekst {
+  fill: var(--color-text-secondary);
+  font-size: 13px;
+  text-anchor: middle;
+}
+.m5i-derevo__tekst--a {
+  fill: #8a4a05;
+  font-family: KaTeX_Math, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 15px;
+}
+
+/* ── До первой удачи (глава 10) ───────────────────────────────────── */
+
+.m5i-uspeh__tablica td,
+.m5i-uspeh__tablica th {
+  width: auto;
+  padding: 0 var(--space-3);
+}
+.m5i-uspeh__tablica tr.is-da td,
+.m5i-uspeh__tablica tr.is-da th {
+  background: #ffd29e;
+  color: #6b3800;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m5i-kletka,
+  .m5i-vetka {
+    transition: none;
+  }
+}

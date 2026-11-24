@@ -43,13 +43,18 @@ const ofertaPage =
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 /** Папки иллюстраций со своей таблицей версий (lib/illyustraciiUrl.ts). */
-const ILLYUSTRACII = [
-  '/images/zadanie-11/gorod-',
-  '/images/zadanie-05/metod-',
-];
+const ILLYUSTRACII = ['/images/zadanie-11/gorod-'];
 
-/** Картинки глав методов №4 — своей таблицей версий (METODY4_ASSET_VERSIONS). */
-const METODY4 = ['/images/zadanie-04/metody/', '/images/zadanie-04/primery/'];
+/**
+ * Картинки глав методов №4 и №5 — своей таблицей версий
+ * (METODY4_ASSET_VERSIONS; имя осталось от №4).
+ */
+const METODY4 = [
+  '/images/zadanie-04/metody/',
+  '/images/zadanie-04/primery/',
+  '/images/zadanie-05/metody/',
+  '/images/zadanie-05/primery/',
+];
 
 const nextConfig: NextConfig = {
   ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
@@ -130,9 +135,9 @@ const nextConfig: NextConfig = {
     // DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts. И картинки
     // шапок разделов (public/images/shapki/): SHAPKI_ASSET_VERSIONS, адреса
     // считает серверная шапка (SectionHeader), в браузер таблица не идёт.
-    // Так же — картинки карточек и задач глав методов №4
-    // (public/images/zadanie-04/metody/, …/primery/): METODY4_ASSET_VERSIONS,
-    // адреса считают серверные GlavaMetoda4 и MetodyKartochki4.
+    // Так же — картинки карточек и задач глав методов №4 и №5
+    // (public/images/zadanie-0N/metody/, …/primery/): METODY4_ASSET_VERSIONS,
+    // адреса считают серверные GlavaMetoda4/5 и MetodyKartochki4/5.
     ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(
@@ -147,8 +152,8 @@ const nextConfig: NextConfig = {
       ),
     ),
     // Иллюстрации живых сцен и карточек методов: ILLYUSTRACII_ASSET_VERSIONS,
-    // её подставляет только lib/illyustraciiUrl.ts (ленивая сцена №10 и
-    // серверная карточка метода №5) — первая загрузка других страниц не растёт.
+    // её подставляет только lib/illyustraciiUrl.ts (ленивая сцена №10) —
+    // первая загрузка других страниц не растёт.
     ILLYUSTRACII_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(([file]) =>

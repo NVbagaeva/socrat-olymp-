@@ -5,10 +5,7 @@ import { withVersion } from './assetUrl';
  * (process.env.ILLYUSTRACII_ASSET_VERSIONS, считает next.config.ts):
  *
  *   /images/zadanie-11/gorod-    — города сцены «Два путника» №10
- *                                  (zadanie11/vstrecha/Scena — ленивый кусок);
- *   /images/zadanie-0N/metod-    — картинки карточек «Ключевые методы
- *                                  решения» №4 и №5 (серверная KlyuchevyeMetody,
- *                                  список — lib/veroyatnost/metody-kartinki.ts).
+ *                                  (zadanie11/vstrecha/Scena — ленивый кусок).
  *
  * Общая таблица ASSET_VERSIONS входит в первую загрузку каждой страницы
  * (порог — scripts/check-first-load.mjs), поэтому эти файлы в ней не
