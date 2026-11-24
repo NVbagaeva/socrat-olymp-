@@ -58,13 +58,16 @@ const kb = (n) => Math.round(n / 1024);
    раздела по таблице структуры, этот код лежит в общих кусках (layout
    и ещё два) — +0,47 КБ gz в сборке со входом; вместе с картинками
    сюжетов — 206,41 КБ.
+   208 КБ: общий загрузчик ленивых сцен (LenivoeMesto, ждёт, пока верх
+   блока не на экране) и ещё свежий main (#500, #505) — сборка CI поверх
+   main даёт 207 КБ с небольшим; локально без свежего main — 206 КБ.
    HTML «Линейной функции» — 62 КБ: адреса разделов по коду
    (/zadaniya/grafiki-funkciy/ вместо /zadaniya/12/, 262 ссылки на
    странице) добавили 0,47 КБ gz — 60,35 КБ при прежнем пороге 60. */
 const BUDGET = [
-  { page: 'zadaniya/grafiki-funkciy/rational', htmlGz: 200 * 1024, scriptsGz: 207 * 1024 },
-  { page: 'zadaniya/grafiki-funkciy/quadratic', htmlGz: 260 * 1024, scriptsGz: 207 * 1024 },
-  { page: 'zadaniya/grafiki-funkciy/linear', htmlGz: 62 * 1024, scriptsGz: 207 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/rational', htmlGz: 200 * 1024, scriptsGz: 208 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/quadratic', htmlGz: 260 * 1024, scriptsGz: 208 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/linear', htmlGz: 62 * 1024, scriptsGz: 208 * 1024 },
 ];
 /* Признаки тяжёлого кода внутри скриптов первой загрузки. */
 const HEAVY = [
