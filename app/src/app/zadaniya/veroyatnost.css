@@ -303,10 +303,18 @@
     height: 112px;
   }
 }
+/* Без анимации картинка не приподнимается вовсе: ни плавно, ни скачком. */
 @media (prefers-reduced-motion: reduce) {
-  .vmetod__kartinka img {
+  .vmetod__kartinka img,
+  .vmetod:hover .vmetod__kartinka img {
     transition: none;
+    transform: none;
   }
+}
+:root[data-motion-level='reduce'] .vmetod__kartinka img,
+:root[data-motion-level='reduce'] .vmetod:hover .vmetod__kartinka img {
+  transition: none;
+  transform: none;
 }
 
 .vmetod:hover {

@@ -58,16 +58,22 @@ export function strukturaObrazca(tekst) {
   return struktura.STRUKTURY[id] ?? struktura.STRUKTURY['2027-20'];
 }
 
+/* PDF в материалах переехали в папки по коду: новое имя → прежнее. */
+const PDF_PO_NOMERU = Object.entries(require('../src/content/pereezd/starye-pdf.json')).map(
+  ([staryy, novyy]) => [novyy, staryy],
+);
+
 const NOMER_PO_KODU = new Map(struktura.RAZDELY.map((r) => [r.kod, r.hranenie]));
 const nomer = (x) => String(NOMER_PO_KODU.get(x) ?? x);
 
 /**
  * Адреса разделов банка — в одной записи, по номеру хранения: переезд на
  * коды раздела (lib/paths.ts) меняет запись адреса, а не содержание.
- * Подключение lib/paths — не содержание.
+ * Подключение lib/paths — не содержание. PDF в материалах — по прежним
+ * именам (src/content/pereezd/starye-pdf.json).
  */
 function adresaPoNomeru(tekst) {
-  return tekst
+  return PDF_PO_NOMERU.reduce((t, [novyy, staryy]) => t.split(novyy).join(staryy), tekst)
     .replace(/^import[^;]*from\s*['"]@\/lib\/paths['"];?\s*$/gm, '')
     .replace(/\$\{razdelBase\(\s*['"]?([\w-]+)['"]?\s*\)\}/g, (_, x) => `\${ZADANIYA}/${nomer(x)}`)
     .replace(/(^|[^\w/-])\/zadaniya\/([a-z][a-z0-9-]*)(?=[/'"`#?])/g, (m, pre, kod) =>

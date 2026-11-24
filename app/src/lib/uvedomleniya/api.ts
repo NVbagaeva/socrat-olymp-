@@ -35,3 +35,9 @@ export const uvedomleniyaProchitat = (ids?: number[]) =>
 export const moiNastroyki = () => rpc<Nastroyki>('moi_nastroyki_uvedomleniy', {});
 export const sohranitNastroyki = (p: Partial<Nastroyki>) =>
   rpc<Nastroyki>('sohranit_nastroyki_uvedomleniy', { p });
+
+/* Push (PR 3г). */
+export const pushKlyuch = () => rpc<string | null>('push_klyuch', {});
+export const pushPodpisat = (endpoint: string, p256dh: string, auth: string) =>
+  rpc<number>('push_podpisat', { p_endpoint: endpoint, p_p256dh: p256dh, p_auth: auth });
+export const pushOtpisat = (endpoint: string) => rpc<boolean>('push_otpisat', { p_endpoint: endpoint });

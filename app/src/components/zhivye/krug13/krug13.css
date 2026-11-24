@@ -1,0 +1,172 @@
+/* Живые сцены тригонометрической окружности (№13). Общее — ../zhivye.css. */
+.zv13-ryad {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr);
+}
+@container zv (min-width: 640px) {
+  .zv13-ryad {
+    grid-template-columns: minmax(0, 1.4fr) minmax(200px, 1fr);
+    align-items: center;
+  }
+}
+.zv13-svg {
+  touch-action: none;
+}
+.zv13-okruzhnost {
+  fill: rgba(255, 255, 255, 0.55);
+  stroke: #12306e;
+  stroke-width: 1.8;
+  filter: drop-shadow(0 6px 12px rgba(18, 48, 110, 0.14));
+}
+.zv13-os-podpis {
+  font-family: KaTeX_Main, 'Times New Roman', serif;
+  font-size: 15px !important;
+}
+.zv13-os-podpis.is-zhar {
+  fill: var(--zv-zhar-text);
+}
+.zv13-os-podpis.is-sin {
+  fill: var(--zv-sin-text);
+}
+.zv13-spiral {
+  fill: none;
+  stroke: rgba(240, 138, 36, 0.75);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(240, 138, 36, 0.45));
+}
+.zv13-proekciya {
+  stroke: rgba(18, 48, 110, 0.4);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+}
+.zv13-cos {
+  stroke: var(--zv-zhar);
+  stroke-width: 6;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+.zv13-sin {
+  stroke: var(--zv-sin);
+  stroke-width: 6;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+.zv13-radius {
+  stroke: #12306e;
+  stroke-width: 2;
+}
+.zv13-ruchka {
+  fill: rgba(31, 95, 208, 0.14);
+  cursor: grab;
+}
+.zv13-tochka {
+  fill: var(--zv-sin);
+  stroke: #fff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px rgba(31, 95, 208, 0.6));
+  pointer-events: none;
+}
+/* Значения справа. */
+.zv13-dannye {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+.zv13-dannye > div {
+  padding: var(--space-2) var(--space-3);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.zv13-dannye > div.is-zhar {
+  background: #fff4e6;
+}
+.zv13-dannye > div.is-sin {
+  background: rgba(31, 95, 208, 0.07);
+}
+.zv13-dannye dt {
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
+}
+.zv13-dannye dd {
+  margin: 0;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.zv13-gradusy {
+  color: var(--color-text-secondary);
+  font-size: 14px !important;
+}
+.zv13-oboroty {
+  font-weight: 750;
+}
+.zv13-oboroty.is-akcent {
+  color: var(--zv-zhar-text);
+}
+/* Деление. */
+.zv13-delenie {
+  stroke: rgba(18, 48, 110, 0.45);
+  stroke-width: 1.4;
+}
+.zv13-duga {
+  fill: none;
+  stroke: var(--zv-zhar);
+  stroke-width: 6;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(240, 138, 36, 0.55));
+}
+.zv13-konec-dugi {
+  fill: #fff;
+  stroke: var(--zv-zhar);
+  stroke-width: 2.5;
+}
+.zv13-start {
+  fill: #12306e;
+}
+.zv13-tochka-del circle {
+  fill: var(--zv-sin);
+  stroke: #fff;
+  stroke-width: 2;
+}
+.zv13-tochka-del text {
+  fill: var(--zv-sin-text);
+}
+.zv13-tochka-del.is-novaya circle {
+  fill: var(--zv-zhar);
+  filter: drop-shadow(0 0 7px rgba(240, 138, 36, 0.8));
+}
+.zv13-tochka-del.is-novaya text {
+  fill: var(--zv-zhar-text);
+  font-weight: 750;
+}
+.zv13-tochki-zag {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+.zv13-tochki ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.zv13-tochki li {
+  min-width: 44px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(31, 95, 208, 0.07);
+  color: var(--zv-sin-text);
+  font-weight: 650;
+  text-align: center;
+}
+.zv13-tochki li.is-novaya {
+  background: #fff4e6;
+  color: var(--zv-zhar-text);
+  box-shadow: 0 0 0 1px rgba(240, 138, 36, 0.4);
+}

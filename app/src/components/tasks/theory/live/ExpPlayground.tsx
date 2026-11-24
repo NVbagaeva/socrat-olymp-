@@ -5,6 +5,8 @@ import '@/lib/graph/families/expo.js';
 import { katex } from '@/lib/graph/katex';
 import { renderGraph } from '@/lib/graph/renderer.js';
 import { Tex } from '@/components/ui/Tex';
+import { EkskursiyaPanel, useEkskursiya } from '@/components/zhivye/Ekskursiya';
+import { KADRY_EXP, smeshatStepen } from '@/content/zhivye11';
 
 /* Основания на ползунке: только допустимые, a > 0 и a ≠ 1. */
 const BASES = [
@@ -60,10 +62,24 @@ function formulaOf(baseTex: string, k: number, b: number, mode: Mode): string {
  */
 export function ExpPlayground() {
   const id = useId();
-  const [baseIndex, setBaseIndex] = useState(3);
-  const [b, setB] = useState(0);
-  const [kIndex, setKIndex] = useState(1);
-  const [mode, setMode] = useState<Mode>('y');
+  const [baseIndexR, setBaseIndex] = useState(3);
+  const [bR, setB] = useState(0);
+  const [kIndexR, setKIndex] = useState(1);
+  const [modeR, setMode] = useState<Mode>('y');
+  /* Экскурсия (components/zhivye/Ekskursiya): пока идёт показ, параметры —
+     из кадров; тронул ползунок или переключатель — свои. */
+  const ek = useEkskursiya(KADRY_EXP, smeshatStepen);
+  const vzyat = () =>
+    ek.vRuchnoy((x) => {
+      setBaseIndex(x.baseIndex);
+      setB(Math.round(x.b));
+      setKIndex(x.kIndex);
+      setMode(x.mode);
+    });
+  const baseIndex = ek.s === null ? baseIndexR : ek.s.baseIndex;
+  const b = ek.s === null ? bR : Math.round(ek.s.b);
+  const kIndex = ek.s === null ? kIndexR : ek.s.kIndex;
+  const mode: Mode = ek.s === null ? modeR : ek.s.mode;
   const base = BASES[baseIndex] ?? BASES[3]!;
   const k = KS[kIndex] ?? 1;
   const c = mode === 'x' ? b : 0;
@@ -111,6 +127,7 @@ export function ExpPlayground() {
       <p className="play__lead">
         <Tex text="Двигай ползунки и смотри, что происходит с графиком, асимптотой и оранжевой точкой — там показатель равен нулю." />
       </p>
+      <EkskursiyaPanel panel={ek.panel} />
       <div className="play__body">
         <div className="play__stage">
           <p className="play__formula" dangerouslySetInnerHTML={{ __html: formulaHtml }} />
@@ -134,7 +151,11 @@ export function ExpPlayground() {
               step={1}
               value={baseIndex}
               aria-valuetext={`a = ${base.text}`}
-              onChange={(event) => setBaseIndex(Number(event.target.value))}
+              onChange={(event) => {
+                const v = Number(event.target.value);
+                vzyat();
+                setBaseIndex(v);
+              }}
             />
             <p className="play__hint">
               <Tex text="Единицы на ползунке нет: при $a = 1$ получилась бы прямая $y = 1$." />
@@ -150,7 +171,10 @@ export function ExpPlayground() {
                   type="button"
                   className="play__preset"
                   aria-pressed={mode === 'y'}
-                  onClick={() => setMode('y')}
+                  onClick={() => {
+                    vzyat();
+                    setMode('y');
+                  }}
                 >
                   вверх-вниз
                 </button>
@@ -158,7 +182,10 @@ export function ExpPlayground() {
                   type="button"
                   className="play__preset"
                   aria-pressed={mode === 'x'}
-                  onClick={() => setMode('x')}
+                  onClick={() => {
+                    vzyat();
+                    setMode('x');
+                  }}
                 >
                   влево-вправо
                 </button>
@@ -177,7 +204,11 @@ export function ExpPlayground() {
               step={1}
               value={b}
               aria-valuetext={`b = ${plain(b)}`}
-              onChange={(event) => setB(Number(event.target.value))}
+              onChange={(event) => {
+                const v = Number(event.target.value);
+                vzyat();
+                setB(v);
+              }}
             />
             <p className="play__hint">
               <Tex
@@ -203,7 +234,11 @@ export function ExpPlayground() {
               step={1}
               value={kIndex}
               aria-valuetext={`k = ${plain(k)}`}
-              onChange={(event) => setKIndex(Number(event.target.value))}
+              onChange={(event) => {
+                const v = Number(event.target.value);
+                vzyat();
+                setKIndex(v);
+              }}
             />
           </div>
         </div>

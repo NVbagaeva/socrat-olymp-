@@ -22,10 +22,12 @@ import { fileURLToPath } from 'node:url';
 
 import { buildSheet } from './lib/sheet-build.mjs';
 import { collectBlocks, content, sheetSpec, tasksOf } from './lib/sheet4-baza-tasks.mjs';
+import { kod } from './lib/adres.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
-const SECTION = 'zadanie-4';
+/* Папка в public/materials — по коду раздела (lib/adres.mjs). */
+const SECTION = kod(4);
 
 /* Стили базы сверх шаблона: место под запись решения в карточке. */
 function bazaCss() {

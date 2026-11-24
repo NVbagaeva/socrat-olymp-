@@ -7,7 +7,7 @@
    состав, нумерация, ответы, формулы, шрифты, цвета, ссылки.
    Ненулевой код возврата валит сборку.
 
-   Проверки идут по готовым файлам в app/public/materials/zadanie-12
+   Проверки идут по готовым файлам в app/public/materials/grafiki-funkciy
    и по промежуточному HTML в app/.pdf-build: PDF отвечает за шрифты,
    цвета и ссылки, HTML — за состав и нумерацию.
 */
@@ -20,9 +20,11 @@ import generator from '../src/lib/graph/generate.js';
 import content from '../src/content/sheet12.js';
 import outputs from '../src/lib/sheet/outputs.js';
 import { checkNoAnswersTracked, checkPdfFile } from './lib/sheet-check.mjs';
+import { kod } from './lib/adres.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SECTION = 'zadanie-12';
+/* Папка в public/materials — по коду раздела (lib/adres.mjs). */
+const SECTION = kod(12);
 const BUILD = path.join(APP, '.pdf-build');
 
 /* Файл с ответами лежит вне репозитория — путь спрашиваем там же,

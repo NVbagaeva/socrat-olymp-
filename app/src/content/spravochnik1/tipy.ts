@@ -196,7 +196,7 @@ export const SPRAVOCHNIK_1 = {
   gdeNaEgeTitle: (n: number, nazvanie: string) => `Прототип ${n}: ${nazvanie}`,
   /** PDF: кнопка на странице, переключатель примеров, лист. */
   pdf: {
-    /** Главная кнопка: скачивает готовый PDF (public/materials/zadanie-1). */
+    /** Главная кнопка: скачивает готовый PDF (public/materials/planimetriya). */
     skachat: 'Скачать справочник',
     skachatAria: 'Скачать справочник по планиметрии в PDF',
     /** Подпись под кнопкой: «PDF · A4 · 50 страниц». */

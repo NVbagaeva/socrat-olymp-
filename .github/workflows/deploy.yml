@@ -85,6 +85,7 @@ jobs:
           NEXT_PUBLIC_DZ2: ${{ vars.NEXT_PUBLIC_DZ2 }}
           NEXT_PUBLIC_DZ2_RAZDELY: ${{ vars.NEXT_PUBLIC_DZ2_RAZDELY }}
           NEXT_PUBLIC_UVEDOMLENIYA: ${{ vars.NEXT_PUBLIC_UVEDOMLENIYA }}
+          NEXT_PUBLIC_UVEDOMLENIYA_PUSH: ${{ vars.NEXT_PUBLIC_UVEDOMLENIYA_PUSH }}
         run: pnpm build
 
       - name: Проверить, что экспорт не пустой

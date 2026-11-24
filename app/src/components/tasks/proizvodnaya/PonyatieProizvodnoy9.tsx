@@ -14,7 +14,11 @@ import { href } from '@/lib/paths';
 import { YAKOR_9 } from '@/lib/proizvodnaya/teoriya-yakorya';
 import { stsenaSvg, type StsenaId } from '@/lib/proizvodnaya/stseny';
 import { FiguraSvg9 } from './FiguraSvg9';
-import { ZhivayaSekushchaya, ZhivayaSkorost, ZhivoyModul } from './ZhivyeRisunki9';
+import {
+  ZhivayaSekushchaya8,
+  ZhivayaSkorost8,
+  ZhivoyModul8,
+} from '@/components/zhivye/proizvodnaya/Kartochki';
 
 /**
  * Блок теории №9 «Понятие производной» — первый в «Теории». Логика —
@@ -67,7 +71,7 @@ export function PonyatieProizvodnoy9() {
       <Podrazdel id={T.razdely.zadachi.id} no="I." title={T.razdely.zadachi.title}>
         <RamkaZadacha no={1} title={T.skorost.title}>
           <Abzacy paras={T.skorost.uslovie} />
-          <ZhivayaSkorost />
+          <ZhivayaSkorost8 />
           <Abzacy paras={T.skorost.hod} />
           <RamkaFormula
             formula={T.skorost.formula}
@@ -95,7 +99,7 @@ export function PonyatieProizvodnoy9() {
             podpis={T.kasatelnaya.formulaPodpis}
             id={Y('kasatelnayaK')}
           />
-          <ZhivayaSekushchaya />
+          <ZhivayaSekushchaya8 />
           <p className="ramka__p z9-ssylka">
             <Tex text={T.kasatelnaya.ssylka.text} />{' '}
             <a href={`#${T.kasatelnaya.ssylka.anchor}`}>{T.kasatelnaya.ssylka.link}</a>.
@@ -154,7 +158,7 @@ export function PonyatieProizvodnoy9() {
         >
           <Risunok id="ponyatie-galochka" label="График модуля: излом в нуле" />
         </RamkaPrimer>
-        <ZhivoyModul />
+        <ZhivoyModul8 />
         <RamkaVazhno id={Y('odnostoronnie')}>
           <Abzacy paras={T.net.odnostoronnie} />
         </RamkaVazhno>

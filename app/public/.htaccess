@@ -17,6 +17,16 @@
   </FilesMatch>
 </IfModule>
 
+# Service worker push (docs/kabinet-uvedomleniya.md, PR 3г) и manifest:
+# имя постоянное, поэтому тоже перепроверять всегда — иначе исправление
+# в sw.js доходило бы до браузеров через сутки.
+<IfModule mod_headers.c>
+  <FilesMatch "^(sw\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+AddType application/manifest+json .webmanifest
+
 # ── Скрытые разделы: посетителю — 404 ───────────────────────────────
 #
 # Раздел, которого нет в действующей структуре экзамена
@@ -178,6 +188,24 @@ ErrorDocument 404 /ne-naydeno/index.html
   RewriteRule ^zadaniya/21((?:/[^/.]+)*)/podgotovka(/[^/.]+)?(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/naibolshee-naimenshee$1/opornye-zadachi$2/ [R=301,L]
   RewriteRule ^zadaniya/21((?:/[^/.]+)*)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/naibolshee-naimenshee$1/ [R=301,L]
   RewriteRule ^zadaniya/21/(.+\.[A-Za-z0-9]+)$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/naibolshee-naimenshee/$1 [R=301,L]
+  # PDF в материалах: папка и имя — по коду раздела, без номера.
+  RewriteRule ^materials/zadanie-1/spravochnik-po-planimetrii-bez-primerov\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/planimetriya/spravochnik-po-planimetrii-bez-primerov.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-1/spravochnik-po-planimetrii\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/planimetriya/spravochnik-po-planimetrii.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-4/Zadanie_4_baza_uchenik\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/veroyatnost/teoriya-veroyatnostey-baza-uchenik.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik-chb\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/veroyatnost/teoriya-veroyatnostey-uchenik-chb.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/veroyatnost/teoriya-veroyatnostey-uchenik.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik-chb\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/slozhnaya-veroyatnost/veroyatnosti-sobytiy-uchenik-chb.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/slozhnaya-veroyatnost/veroyatnosti-sobytiy-uchenik.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-8/zadanie-8-vychisleniya-uchenik-chb\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/vychisleniya/vychisleniya-uchenik-chb.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-8/zadanie-8-vychisleniya-uchenik\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/vychisleniya/vychisleniya-uchenik.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-9/zadanie-9-proizvodnaya-uchenik-chb\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/proizvodnaya/proizvodnaya-uchenik-chb.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-9/zadanie-9-proizvodnaya-uchenik\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/proizvodnaya/proizvodnaya-uchenik.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-12/obrazec-chb\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/grafiki-funkciy/obrazec-chb.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-12/obrazec-cvet\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/grafiki-funkciy/obrazec-cvet.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik-chb\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/grafiki-funkciy/lineynaya-funkciya-uchenik-chb.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/grafiki-funkciy/lineynaya-funkciya-uchenik.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-13/domashka-uchenik\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/ekonomika/domashka-uchenik.pdf [R=301,L]
+  RewriteRule ^materials/zadanie-13/zachet-uchenik\.pdf$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/materials/ekonomika/zachet-uchenik.pdf [R=301,L]
   # <<< pereezd-kody
 
   # «Подготовительные задачи» → «Опорные задачи» (content/opornye.ts):

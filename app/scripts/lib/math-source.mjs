@@ -35,6 +35,13 @@ const NOT_TEXT_KEYS = new Set([
   'podpisH', 'podpisPromezhutok', 'podpisCel', 'podpisOtvet',
 ]);
 
+/* Ключ с обычным текстом: подписи внутри SVG (svgЧтото — KaTeX туда не
+   набрать) и тексты для экранного диктора (ariaЧтото — aria-label,
+   aria-valuetext) в текстах живых сцен (content/zhivye*.ts). */
+function neTekst(key) {
+  return NOT_TEXT_KEYS.has(key) || /^(svg|aria)[A-Z]/.test(key);
+}
+
 /* Словари, значения которых — подписи для экранного диктора (aria-label):
    там только обычный текст. Ключи у них — имена точек. */
 const ARIA_MAPS = new Set(['imenaRuchek']);
@@ -129,7 +136,7 @@ export function codeTexts(file) {
     if (/\\[a-zA-Z]{2,}/.test(text) && !/\$/.test(text)) { return; }
     if (inMetadata(node)) { return; }
     const key = keyOf(node);
-    if (key !== null && NOT_TEXT_KEYS.has(key)) { return; }
+    if (key !== null && neTekst(key)) { return; }
     if (inAriaMap(node)) { return; }
     const callee = calleeOf(node);
     if (callee !== null && TEX_CALLS.test(callee)) { return; }
@@ -188,7 +195,7 @@ export function jsonTexts(file) {
       const key = m[1];
       let text;
       try { text = JSON.parse('"' + m[2] + '"'); } catch { text = m[2]; }
-      if (!NOT_TEXT_KEYS.has(key) && /[А-Яа-яЁё]/.test(text)) {
+      if (!neTekst(key) && /[А-Яа-яЁё]/.test(text)) {
         out.push({ text, line: index + 1, key });
       }
       m = re.exec(line);

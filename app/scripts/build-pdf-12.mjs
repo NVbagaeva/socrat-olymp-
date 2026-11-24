@@ -32,6 +32,7 @@ import { conditionSvg } from '../src/lib/sheet/figures12.js';
 import { withPrintFigures } from '../src/lib/sheet/figureRules.js';
 import content from '../src/content/sheet12.js';
 import { buildSheet } from './lib/sheet-build.mjs';
+import { kod } from './lib/adres.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
@@ -40,7 +41,8 @@ const DATA = path.join(APP, 'src', 'lib', 'graph', 'data');
    сборка scripts/lib/sheet-build.mjs: файл для ученика идёт в public
    и отдаётся сайтом, файл для учителя — в папку вне репозитория
    и уезжает архивом из CI. Промежуточный HTML — в служебной папке. */
-const SECTION = 'zadanie-12';
+/* Папка в public/materials — по коду раздела (lib/adres.mjs). */
+const SECTION = kod(12);
 
 /* ══════════════════════════════════════════════════════════
    Банк
@@ -119,6 +121,11 @@ function spec(blocks, options) {
     title: content.title,
     recap: content.recap,
     blocks,
+    /* Сборник — компактный, по три задачи на странице: рисунок справа от
+       условия, обычного размера (sheet.js, figures: 'normal'). Крупный
+       печатный профиль (клетка 7 мм, рисунок под условием) утроил бы
+       сборник — 141 страница вместо 49; решение владельца — компактно. */
+    figures: 'normal',
     withAnswerLine: options.withAnswerLine,
     extraItems: options.extraItems || [],
     foot: content.foot,
