@@ -18,6 +18,9 @@ import { requireSrc } from './lib/load-ts.mjs';
 const H = requireSrc('lib/zhivye/hod.ts');
 const P = requireSrc('lib/zhivye/proizvodnaya8.ts');
 const T8 = requireSrc('content/zhivye8.ts');
+const K6 = requireSrc('lib/zhivye/krug6.ts');
+const TRIG = requireSrc('lib/zadanie7/trig.ts');
+const T6 = requireSrc('content/zhivye6.ts');
 
 const failures = [];
 let checks = 0;
@@ -107,9 +110,47 @@ check(
   'модуль: сначала справа, потом слева',
 );
 
+/* ── №6: тригонометрический круг ── */
+for (const fn of ['sin', 'cos', 'tg']) {
+  for (const kod of TRIG.ZNACHENIYA[fn]) {
+    const a = TRIG.znachenie(kod);
+    for (const v of ['minPol', 'maxOtr']) {
+      const k = K6.korni(fn, kod, v);
+      const gde = `№6 ${fn} = ${kod}, ${v}`;
+      check(k.length >= 2, `${gde}: корни есть`);
+      for (const r of k) {
+        const x = r.t.n / r.t.m;
+        check(x >= -2 - 1e-9 && x <= 2 + 1e-9, `${gde}: корень ${x}π в [−2π; 2π]`);
+        check(Math.abs(K6.f(fn, x) - a) < 1e-9, `${gde}: f(${x}π) = a`);
+      }
+      const n = k.filter((r) => r.nuzhnyy);
+      check(n.length === 1, `${gde}: нужный корень один`);
+      const xs = k.map((r) => r.t.n / r.t.m);
+      const nx = n[0] ? n[0].t.n / n[0].t.m : NaN;
+      check(
+        v === 'minPol'
+          ? nx === Math.min(...xs.filter((x) => x > 0))
+          : nx === Math.max(...xs.filter((x) => x < 0)),
+        `${gde}: нужный корень верный`,
+      );
+      /* Все корни на шкале найдены: численно f(x) = a только в них. */
+      for (let i = 0; i <= 4000; i += 1) {
+        const x = -2 + i / 1000;
+        if (Math.abs(K6.f(fn, x) - a) < 1e-4) {
+          check(
+            xs.some((r) => Math.abs(r - x) < 0.01),
+            `${gde}: f = a при x = ${x.toFixed(3)}π — в списке корней`,
+          );
+        }
+      }
+      if (fn === 'sin' && kod === '1/2' && v === 'minPol') progon(K6.hodKruga(k), '№6 круг');
+    }
+  }
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify(T8, (k, val) => (typeof val === 'function' ? String(val) : val));
+  const vse = JSON.stringify([T8, T6], (k, val) => (typeof val === 'function' ? String(val) : val));
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');
 }
 
