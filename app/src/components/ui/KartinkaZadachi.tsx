@@ -10,6 +10,10 @@ import './kartinka-zadachi.css';
  * Размеры заданы заранее, загрузка ленивая — вёрстка не прыгает.
  * Чертежи и графики задач она не заменяет: те выводятся как раньше.
  * На чёрно-белой печати не выводится.
+ *
+ * Классы — kartinka-zadachi (figure) и kartinka-zadachi-ryad (обёртка
+ * «картинка + условие»). Не kz: имя kz и префикс kz- принадлежат карте
+ * «О задании» (tasks/karta/karta.css), и общий класс ронял её вправо.
  */
 export interface KartinkaProps {
   src: string;
@@ -33,7 +37,7 @@ export function KartinkaZadachi({
   const s = assetUrl(src);
   const srcSet = src280 === undefined ? undefined : `${assetUrl(src280)} 280w, ${s} 560w`;
   return (
-    <figure className={clsx('kz', className)}>
+    <figure className={clsx('kartinka-zadachi', className)}>
       <img
         src={s}
         srcSet={srcSet}

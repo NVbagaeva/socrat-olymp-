@@ -254,7 +254,7 @@ export function OpornayaZadacha({
         {kartinka === undefined ? (
           <div className="op-zad__uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
         ) : (
-          <div className="kz-ryad">
+          <div className="kartinka-zadachi-ryad">
             <KartinkaZadachi {...kartinka} />
             <div className="op-zad__uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
           </div>

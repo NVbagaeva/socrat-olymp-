@@ -1,6 +1,5 @@
 import { TabScrollOnMount } from '../../TabScroll';
 import type { GruppaVybora } from '../../trening';
-import { GRUPPY4_TON } from '@/content/veroyatnost4';
 import { typesetText } from '@/lib/tex';
 import {
   bank4Pool,
@@ -13,15 +12,8 @@ import { katalog45 } from '@/lib/veroyatnost/trening/katalog';
 import { trenazherHref45, type Zadanie45 } from '@/lib/veroyatnost/trening/links';
 import { MetodKartinka } from '../MetodKartinka';
 import { navykKind, navykiZadaniya } from '../metody';
+import { tonMetoda } from '../tonMetoda';
 import { Trenazher45, type Trenazher45Props } from './Trenazher45';
-import type { Ton } from '../../steklo';
-
-const TONY: Ton[] = ['blue', 'navy', 'orange', 'terra', 'green'];
-
-/** Тон группы (метода): у №4 — из текстов раздела, у №5 — по кругу. */
-export function tonMetoda(zadanie: Zadanie45, metod: string, i: number): Ton {
-  return (zadanie === 4 ? GRUPPY4_TON[metod] : undefined) ?? TONY[i % TONY.length] ?? 'blue';
-}
 
 /**
  * Группы выбора тем №4 и №5: метод — группа (значок — его объёмная

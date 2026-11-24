@@ -7,7 +7,7 @@ import { GruppaProgress45 } from './GruppaProgress45';
 import { PrimerLazy45 } from './PrimerLazy45';
 import { MetodKartinka } from '../MetodKartinka';
 import { navykKind, navykiZadaniya } from '../metody';
-import { tonMetoda } from '../trening/Trenazher45Tab';
+import { tonMetoda } from '../tonMetoda';
 import type { tekstyKarty45 } from '@/content/veroyatnost45';
 import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';

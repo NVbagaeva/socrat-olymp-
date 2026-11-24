@@ -187,7 +187,7 @@ export function EkranZadachi({
         ) : (
           /* Картинка справа, условие её обтекает: обёртка — обычный блок,
              в колонке карточки float не работал бы. */
-          <div className="kz-ryad">
+          <div className="kartinka-zadachi-ryad">
             <KartinkaZadachi {...kartinka} />
             <div
               className={clsx('trn-uslovie', tekst && 'trn-uslovie--tekst')}

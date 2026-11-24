@@ -1,11 +1,14 @@
-/* Картинка-иллюстрация сюжета задачи (KartinkaZadachi.tsx). */
-.kz {
+/* Картинка-иллюстрация сюжета задачи (KartinkaZadachi.tsx).
+   Имена — только kartinka-zadachi и kartinka-zadachi-ryad. Имя kz и
+   префикс kz- заняты картой «О задании» (tasks/karta/karta.css): общий
+   класс kz однажды уже уронил «О задании» №4/№5 к правому краю. */
+.kartinka-zadachi {
   float: right;
   width: 170px;
   margin: 0 0 var(--space-2, 8px) var(--space-4, 16px);
   shape-outside: margin-box;
 }
-.kz img {
+.kartinka-zadachi img {
   display: block;
   width: 100%;
   height: auto;
@@ -14,7 +17,7 @@
 }
 /* Телефон: над условием, по центру, поменьше — текст на всю ширину. */
 @media (max-width: 480px) {
-  .kz {
+  .kartinka-zadachi {
     float: none;
     width: 120px;
     margin: 0 auto var(--space-2, 8px);
@@ -22,12 +25,12 @@
 }
 /* Картинка и условие: обычный блок, условие обтекает картинку, всё
    ниже (поле ответа, чертёж) начинается под обоими. */
-.kz-ryad {
+.kartinka-zadachi-ryad {
   display: flow-root;
 }
 
 @media print and (monochrome) {
-  .kz {
+  .kartinka-zadachi {
     display: none;
   }
 }
