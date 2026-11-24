@@ -651,7 +651,8 @@ if (puti === undefined) {
   const plohie = [];
   for (const stroka of neodobreno) {
     const [status, file] = stroka.split('\t');
-    const opisanie = /\.md$/.test(file);
+    /* Описания (README) и данные (JSON) — текстом. */
+    const opisanie = /\.(md|json)$/.test(file);
     if (status !== 'M' || !(opisanie || /\.(ts|tsx|js|mjs)$/.test(file))) {
       plohie.push(stroka);
       continue;
@@ -663,7 +664,7 @@ if (puti === undefined) {
         maxBuffer: 256 * 1024 * 1024,
       });
       const novyy = fs.readFileSync(path.join(REPO, file), 'utf8');
-      /* Описание (README) — текстом: та же запись после приведения адресов. */
+      /* Описание и данные — текстом: та же запись после приведения адресов. */
       const { ravno, gde } = opisanie
         ? { ravno: toZheTekst(staryy, novyy), gde: 'текст описания изменён' }
         : toZheSoderzhanie(staryy, novyy, file, STRUKTURA_OBRAZCA);
