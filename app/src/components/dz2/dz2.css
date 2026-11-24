@@ -181,3 +181,352 @@
   color: var(--color-primary);
   font-size: 0.875rem;
 }
+
+/* ── Ученик (PR 2в): «Мои домашки» и решение. Синий — ход, оранжевый — акцент. ── */
+.dz2-u-polosa {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-track);
+  overflow: hidden;
+}
+.dz2-u-polosa > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+}
+.dz2-u-mini {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.dz2-u-mini__stroka {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+  align-content: center;
+}
+.dz2-u-mini__stroka a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.dz2-u-shapka {
+  display: grid;
+  gap: var(--space-2);
+}
+.dz2-u-shapka__nazvanie {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.dz2-u-pravila {
+  color: var(--color-text-secondary);
+}
+.dz2-u-zametka {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface-info);
+  overflow-wrap: anywhere;
+}
+.dz2-u-zametka p {
+  margin: 0;
+}
+.dz2-u-zametka--vazhno {
+  border-left-color: var(--color-accent);
+  background: var(--color-accent-soft-surface);
+}
+.dz2-u-zametka__zag {
+  margin: 0 0 var(--space-1);
+  font-weight: 600;
+}
+.dz2-u-banner {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface-soft);
+}
+.dz2-u-banner--ok {
+  background: var(--color-success-soft);
+}
+.dz2-u-banner--warn {
+  background: var(--color-warning-soft);
+}
+.dz2-u-elementy {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.dz2-u-element__karta {
+  padding: 0;
+  overflow: hidden;
+}
+.dz2-u-element__verh {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.dz2-u-element__verh:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+.dz2-u-element__nomer {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-brand);
+  font-weight: 700;
+}
+.dz2-u-element.is-gotovo .dz2-u-element__nomer {
+  background: var(--color-success);
+}
+.dz2-u-element__tekst {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+.dz2-u-element__gotovo {
+  flex: none;
+}
+.dz2-u-element__telo {
+  padding: 0 var(--space-4) var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.dz2-u-ssylka {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+}
+.dz2-u-ssylka p {
+  margin: 0;
+}
+.dz2-u-zadachi {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+}
+.dz2-u-lenta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.dz2-u-lenta__nomer {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dz2-u-lenta__nomer.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.dz2-u-lenta__nomer.is-wrong,
+.dz2-u-lenta__nomer.is-revealed {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+}
+.dz2-u-lenta__nomer.is-probuet {
+  border-color: var(--color-accent);
+}
+.dz2-u-lenta__nomer.is-tekushchaya {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+.dz2-u-zadacha {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.dz2-u-zadacha__nomer {
+  margin: 0;
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+.dz2-u-zadacha__uslovie {
+  overflow-x: auto;
+  overflow-wrap: anywhere;
+}
+.dz2-u-zadacha__uslovie p {
+  margin: 0;
+}
+.dz2-u-zadacha__risunok {
+  max-width: min(100%, 420px);
+  height: auto;
+  border-radius: var(--radius-md, 12px);
+}
+.dz2-u-otvet {
+  display: grid;
+  gap: var(--space-2);
+}
+.dz2-u-otvet__label {
+  margin: 0;
+  font-weight: 600;
+}
+.dz2-u-verdikt {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md, 12px);
+  font-weight: 600;
+}
+.dz2-u-verdikt--da {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.dz2-u-verdikt--net {
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.dz2-u-otvety {
+  margin: 0;
+}
+.dz2-u-otvety__otvet {
+  display: inline-block;
+  margin-right: var(--space-2);
+  padding: 0 var(--space-2);
+  border-radius: 6px;
+}
+.dz2-u-otvety__otvet.is-da {
+  background: var(--color-success-soft);
+}
+.dz2-u-otvety__otvet.is-net {
+  background: var(--color-error-soft);
+  text-decoration: line-through;
+}
+.dz2-u-podskazka,
+.dz2-u-reshenie {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md, 12px);
+  overflow-x: auto;
+}
+.dz2-u-podskazka {
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-accent-soft-surface);
+}
+.dz2-u-reshenie {
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-surface-info);
+}
+.dz2-u-reshenie > p,
+.dz2-u-podskazka > p {
+  margin: 0 0 var(--space-2);
+}
+.dz2-u-razbor {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+}
+.dz2-u-razbor__formula {
+  margin-top: var(--space-1);
+  overflow-x: auto;
+}
+/* Разбор задачи тренажёра — та же вёрстка, что у «Собрать вариант». */
+.dz2-u-razbor .var-razbor {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dz2-u-razbor .var-razbor__h {
+  margin: var(--space-2) 0;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.dz2-u-razbor .var-razbor__q {
+  margin: 0;
+  font-weight: 600;
+}
+.dz2-u-razbor .var-razbor__n {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5em;
+  height: 1.5em;
+  margin-right: var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  font-size: 0.75rem;
+}
+.dz2-u-razbor .var-razbor__a,
+.dz2-u-razbor .var-razbor__why,
+.dz2-u-razbor .var-razbor__line {
+  margin: var(--space-1) 0 0 1.75em;
+}
+.dz2-u-razbor .var-razbor__why {
+  color: var(--color-text-secondary);
+}
+.dz2-u-razbor:has(.var-razbor) {
+  list-style: none;
+  padding-left: 0;
+}
+.dz2-u-sdat {
+  /* У ученика — в конце ДЗ, не прилипает: на телефоне внизу меню сайта. */
+  position: static;
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+.dz2-u-sdat p {
+  margin: 0;
+}
+.dz2-plashka {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-accent-soft-surface);
+}
+.dz2-plashka a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.dz2-u {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+.dz2-u .t-caption {
+  margin: 0;
+}
+.dz2-u-zag {
+  display: grid;
+  gap: var(--space-2);
+}
+.dz2-u-zag h1 {
+  margin: 0;
+}
+.dz2-u-kartochka {
+  display: grid;
+  gap: var(--space-3);
+}
+.dz2-u-kartochka .kab-actions {
+  margin: 0;
+}
+.dz2-u-zadacha__risunok {
+  max-height: 240px;
+  width: auto;
+  object-fit: contain;
+}
