@@ -39,6 +39,20 @@ export const NORMY = {
 };
 export const NORMA_BEZ = 360;
 
+/**
+ * Вариант по классу обёртки — для картинок, разметку которых не трогают
+ * атрибутом data-ill: теория №4/№5 (содержание раздела под сторожем
+ * check-redesign, норма — в app/zadaniya/veroyatnost.css) и карточка
+ * задания (первая загрузка, норма — в styles/components.css).
+ */
+export const VARIANT_PO_KLASSU = [
+  ['.task-card__ill, .vteor-sluchay__figura', 'inline'],
+  [
+    '.vizo-eylerblok__figura, .vklass-primer, .vklass-kosti, .vvid__figura, .vusloviya__figura, .vsvyaz__figura',
+    'section',
+  ],
+];
+
 export function normaDlya(variant, shirina) {
   const tel = shirina < TELEFON_DO;
   if (variant !== null && NORMY[variant] !== undefined) return NORMY[variant][tel ? 'tel' : 'komp'];
@@ -191,7 +205,7 @@ export async function zamerit(page, url) {
       );
     await Promise.race([Promise.all(zhdat), new Promise((r) => setTimeout(r, 4000))]);
   });
-  return page.evaluate(() => {
+  return page.evaluate((poKlassu) => {
     const KARTINKA = /\.(png|webp|jpe?g|avif|gif|svg)(\?|#|$)/i;
     const RASTR = /\.(png|webp|jpe?g|avif|gif)(\?|#|$)/i;
     /* Скрытый раздел и 404 — страницы нет, мерить нечего. */
@@ -210,7 +224,10 @@ export async function zamerit(page, url) {
       if (cs.visibility === 'hidden' || Number(cs.opacity) === 0) continue;
       /* Скрытый предок (display:none) — rect нулевой, отсеян выше. */
       const holder = img.closest('[data-ill]');
-      const variant = holder?.getAttribute('data-ill') ?? null;
+      const variant =
+        holder?.getAttribute('data-ill') ??
+        poKlassu.find(([sel]) => img.closest(sel) !== null)?.[1] ??
+        null;
       let file = src;
       try {
         file = new URL(src).pathname;
@@ -230,7 +247,7 @@ export async function zamerit(page, url) {
       });
     }
     return out;
-  });
+  }, VARIANT_PO_KLASSU);
 }
 
 /**
