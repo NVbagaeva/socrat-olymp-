@@ -1,0 +1,575 @@
+/* «Распад изотопа» — стили сцены (грузятся вместе с ней, лениво).
+   Оболочка карточки — app/zadaniya/10/zadanie10.css. Живые ядра и
+   масса — синий #1f5fd0, ответ и целевая масса — тёплый #f08a24.
+   Общее с «Мячом» (таймлайн, кнопки, таблица) — те же правила.
+   Подписи не мельче 13 px, кнопки — от 44 px. */
+
+.z10-rs__osnova {
+  --rs-sin: #1f5fd0;
+  --rs-sin-text: #1a4fb0;
+  --rs-zhar: #f08a24;
+  --rs-zhar-text: #b4501c;
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* ── Секундомер-таймлайн ── */
+.z10-rs__chasy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-1) var(--space-3);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(234, 241, 255, 0.7));
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.z10-rs__sekundomer {
+  flex: none;
+  width: 44px;
+  height: 48px;
+}
+.z10-rs__sekundomer line {
+  stroke: rgba(26, 79, 176, 0.45);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+.z10-rs__sekundomer-krug {
+  fill: rgba(255, 255, 255, 0.92);
+  stroke: rgba(31, 95, 208, 0.35);
+  stroke-width: 1.2;
+}
+.z10-rs__sekundomer-knopka {
+  fill: #12306e;
+}
+.z10-rs__sekundomer .z10-rs__sekundomer-strelka {
+  stroke: var(--rs-zhar);
+  stroke-width: 1.8;
+}
+.z10-rs__sekundomer-os {
+  fill: #12306e;
+}
+.z10-rs__lenta {
+  --thumb: 24px;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-top: 32px;
+}
+.z10-rs__puzyr {
+  position: absolute;
+  top: 0;
+  /* Пузырь не выходит за края дорожки. */
+  left: clamp(52px, calc(var(--p) * (100% - var(--thumb)) + var(--thumb) / 2), calc(100% - 52px));
+  transform: translateX(-50%);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #12306e;
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.z10-rs__puzyr .katex {
+  color: #fff;
+}
+.z10-rs__polzunok {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: pan-y;
+}
+.z10-rs__polzunok::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--rs-sin), var(--rs-zhar)) 0 0 / calc(var(--p) * 100%) 100% no-repeat,
+    rgba(31, 95, 208, 0.12);
+  box-shadow: inset 0 1px 2px rgba(18, 48, 110, 0.12);
+}
+.z10-rs__polzunok::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--rs-sin), var(--rs-zhar)) 0 0 / calc(var(--p) * 100%) 100% no-repeat,
+    rgba(31, 95, 208, 0.12);
+}
+.z10-rs__polzunok::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+  margin-top: -8px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.35),
+    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.z10-rs__polzunok::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.35),
+    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+}
+.z10-rs__polzunok:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.z10-rs__metki {
+  position: relative;
+  height: 18px;
+  margin: -8px calc(var(--thumb) / 2) 0;
+}
+.z10-rs__metki span {
+  position: absolute;
+  left: calc(var(--k) * 100%);
+  transform: translateX(-50%);
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.z10-rs__metki span:first-child {
+  transform: none;
+  left: calc(var(--thumb) / -2);
+}
+.z10-rs__metki span.is-proydena {
+  color: var(--rs-sin-text);
+}
+/* t₁ и t₂ — тёплые точки на дорожке. */
+
+/* ── Сцена ── */
+.z10-rs__scena {
+  position: relative;
+  min-height: 330px;
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 90% at 6% 8%, rgba(31, 95, 208, 0.14), transparent 70%),
+    radial-gradient(60% 90% at 96% 8%, rgba(240, 138, 36, 0.14), transparent 70%),
+    linear-gradient(180deg, #f6f9ff 0%, #eef3fc 70%, #e4ecf9 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    inset 0 -24px 40px -30px rgba(31, 95, 208, 0.35),
+    0 18px 36px -28px rgba(18, 48, 110, 0.45);
+}
+@container z10-rs (min-width: 560px) {
+  .z10-rs__scena {
+    min-height: 380px;
+  }
+}
+.z10-rs__scena:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 3px;
+}
+.z10-rs__svg {
+  display: block;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.z10-rs__svg text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* График. */
+.z10-rs__setka {
+  stroke: rgba(31, 95, 208, 0.1);
+  stroke-width: 1;
+}
+.z10-rs__os {
+  fill: none;
+  stroke: #33405a;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z10-rs__os-podpis {
+  fill: #33405a;
+}
+/* Буква величины — курсивом, как в формулах KaTeX. */
+.z10-os-bukva {
+  font-family: KaTeX_Math, \'Times New Roman\', serif;
+  font-style: italic;
+  font-size: 15px;
+}
+.z10-rs__krivaya-ten {
+  fill: none;
+  stroke: rgba(31, 95, 208, 0.22);
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+}
+.z10-rs__krivaya {
+  fill: none;
+  stroke: var(--rs-sin);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(31, 95, 208, 0.35));
+}
+.z10-rs__cel-liniya {
+  stroke: var(--rs-zhar);
+  stroke-width: 1.6;
+  stroke-dasharray: 7 5;
+}
+.z10-rs__legenda rect {
+  fill: rgba(255, 255, 255, 0.88);
+  stroke: rgba(240, 138, 36, 0.35);
+}
+.z10-rs__legenda line {
+  stroke: var(--rs-zhar);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+.z10-rs__legenda text {
+  fill: var(--rs-zhar-text);
+}
+.z10-rs__podpis rect {
+  fill: rgba(255, 255, 255, 0.9);
+  stroke: #fff;
+  filter: drop-shadow(0 2px 4px rgba(18, 48, 110, 0.12));
+}
+.z10-rs__podpis text {
+  fill: var(--rs-zhar-text);
+}
+.z10-rs__svyaz {
+  stroke: rgba(31, 95, 208, 0.45);
+  stroke-width: 1.2;
+  stroke-dasharray: 2 4;
+}
+.z10-rs__tochka {
+  fill: var(--rs-sin);
+  stroke: #fff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px rgba(31, 95, 208, 0.55));
+}
+.z10-rs__tochka.is-vyshe {
+  fill: var(--rs-zhar);
+  filter: drop-shadow(0 0 7px rgba(240, 138, 36, 0.7));
+}
+
+/* ── Строка состояния и управление ── */
+.z10-rs__status {
+  min-height: 3em;
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.z10-rs__upr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.z10-rs__pusk {
+  min-width: 156px;
+}
+.z10-rs__ikonka {
+  width: 12px;
+  height: 14px;
+}
+.z10-rs__ikonka.is-pusk {
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  background: currentColor;
+}
+.z10-rs__ikonka.is-pauza {
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 4px 100% no-repeat,
+    linear-gradient(currentColor, currentColor) 100% 0 / 4px 100% no-repeat;
+}
+.z10-rs__seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(31, 95, 208, 0.08);
+  box-shadow: var(--glass-ring);
+}
+.z10-rs__seg button {
+  min-width: 48px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--blue-700);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.z10-rs__seg button.is-on {
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(31, 95, 208, 0.2),
+    0 4px 10px -4px rgba(18, 48, 110, 0.35);
+}
+.z10-rs__seg--cel button.is-on {
+  color: var(--rs-zhar-text);
+  box-shadow:
+    0 0 0 1px rgba(240, 138, 36, 0.45),
+    0 4px 10px -4px rgba(180, 80, 28, 0.35);
+}
+.z10-rs__seg button:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z10-rs__podskazka {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+@media (hover: none) {
+  .z10-rs__podskazka {
+    display: none;
+  }
+}
+.z10-rs__cel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.z10-rs__cel-zag {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--color-text-secondary);
+}
+.z10-rs__cel-lead {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+/* ── Таблица моментов и решение ── */
+.z10-rs__niz {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@container z10-rs (min-width: 680px) {
+  .z10-rs__niz {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+}
+.z10-rs__tablica {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  font-variant-numeric: tabular-nums;
+}
+.z10-rs__tablica caption {
+  padding: 0 0 var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+.z10-rs__tablica th,
+.z10-rs__tablica td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(31, 95, 208, 0.1);
+  font-size: 15px;
+  text-align: right;
+  white-space: nowrap;
+}
+.z10-rs__tablica th:first-child {
+  text-align: left;
+}
+.z10-rs__tablica thead th {
+  background: rgba(234, 241, 255, 0.7);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 650;
+}
+.z10-rs__tablica tbody th {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+.z10-rs__tablica tbody tr.is-est th {
+  color: var(--color-text);
+}
+.z10-rs__tablica tbody tr.is-est td {
+  animation: z10-rs-poyavlenie 0.4s ease-out both;
+}
+.z10-rs__tablica tr.is-otvet.is-est th,
+.z10-rs__tablica tr.is-otvet.is-est td {
+  background: rgba(240, 138, 36, 0.08);
+  color: var(--rs-zhar-text);
+}
+.z10-rs__seychas th,
+.z10-rs__seychas td {
+  background: rgba(31, 95, 208, 0.06);
+  color: var(--rs-sin-text) !important;
+  font-weight: 700;
+}
+.z10-rs__tablica tfoot td {
+  border-bottom: 0;
+  text-align: left;
+  font-weight: 650;
+  color: var(--rs-zhar-text);
+}
+.z10-rs__tablica tfoot tr.is-est td {
+  background: #fff4e6;
+}
+@keyframes z10-rs-poyavlenie {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+.z10-rs__reshenie {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(253, 241, 234, 0.75));
+  box-shadow: var(--glass-ring-warm, var(--glass-ring)), var(--glass-hi);
+}
+.z10-rs__reshenie:not(.is-vidno) {
+  display: none;
+}
+.z10-rs__reshenie ol {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 1.4em;
+}
+.z10-rs__reshenie li {
+  font-size: 16px;
+  line-height: 1.55;
+  animation: z10-rs-poyavlenie 0.5s ease-out both;
+  animation-delay: calc(var(--i) * 0.4s + 0.2s);
+}
+
+/* Печать: один кадр без управления. */
+@media print {
+  .z10-rs__chasy,
+  .z10-rs__upr,
+  .z10-rs__cel {
+    display: none;
+  }
+}
+
+/* ── Особенное для распада ── */
+.z10-rs__metki span.is-otvet {
+  color: var(--rs-zhar-text);
+}
+.z10-rs__panel {
+  fill: rgba(255, 255, 255, 0.45);
+  stroke: rgba(255, 255, 255, 0.9);
+}
+.z10-rs__probirka-telo {
+  stroke: rgba(255, 255, 255, 0.95);
+  stroke-width: 1.2;
+  filter: drop-shadow(0 8px 12px rgba(18, 48, 110, 0.18));
+}
+.z10-rs__probirka-blik {
+  fill: rgba(255, 255, 255, 0.85);
+}
+.z10-rs__probirka-kryshka {
+  fill: rgba(31, 95, 208, 0.22);
+  stroke: rgba(255, 255, 255, 0.9);
+}
+.z10-rs__yadro.is-zhivo {
+  fill: #3b78e0;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 0.8;
+  filter: drop-shadow(0 0 3px rgba(59, 120, 224, 0.7));
+}
+.z10-rs__yadro.is-raspalos {
+  fill: #b8c2d6;
+  opacity: 0.75;
+}
+.z10-rs__vspyshka {
+  fill: rgba(255, 210, 122, 0.35);
+  stroke: #f08a24;
+  stroke-width: 1.2;
+}
+.z10-rs__yadro-podpis {
+  fill: var(--rs-sin-text);
+}
+.z10-rs__stolbik-fon {
+  fill: rgba(31, 95, 208, 0.1);
+  stroke: rgba(255, 255, 255, 0.95);
+}
+.z10-rs__stolbik {
+  filter: drop-shadow(0 0 5px rgba(31, 95, 208, 0.45));
+}
+.z10-rs__stupen path {
+  fill: none;
+  stroke: rgba(31, 95, 208, 0.45);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+}
+.z10-rs__stupen circle {
+  fill: #fff;
+  stroke: var(--rs-sin);
+  stroke-width: 2.2;
+}
+.z10-rs__stupen.is-otvet path {
+  stroke: rgba(240, 138, 36, 0.7);
+}
+.z10-rs__stupen.is-otvet circle {
+  stroke: var(--rs-zhar);
+  fill: #fff4e6;
+}
+.z10-rs__dva {
+  fill: var(--rs-sin-text);
+}
+.z10-rs__otvet line {
+  stroke: var(--rs-zhar);
+  stroke-width: 1.6;
+  stroke-dasharray: 4 3;
+}
+.z10-rs__podpis.is-otvet rect {
+  fill: #fff4e6;
+  stroke: rgba(240, 138, 36, 0.5);
+}
+.z10-rs__tablica tbody th {
+  font-variant-numeric: tabular-nums;
+}
+
+/* «Уменьшить движение»: без каскадов и вспышек (вспышки не рисует и сама сцена). */
+@media (prefers-reduced-motion: reduce) {
+  .z10-rs__reshenie li,
+  .z10-rs__tablica tbody tr.is-est td {
+    animation: none;
+  }
+  .z10-rs__seg button {
+    transition: none;
+  }
+}
+:root[data-motion-level='reduce'] .z10-rs__reshenie li,
+:root[data-motion-level='reduce'] .z10-rs__tablica tbody tr.is-est td {
+  animation: none;
+}

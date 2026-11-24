@@ -1,0 +1,181 @@
+/* Живые чертежи шапок с графиками и плитами: №8, №9, №10, №11, №12, №16.
+   Общие классы чертежей (zhv__*) — в shapka.css; здесь только своё. */
+
+.zhv .zhg__zalivka {
+  fill: rgb(150 190 245 / 0.28);
+  stroke: none;
+}
+.zhv .zhg__rost {
+  stroke: var(--blue-600);
+  stroke-width: 3;
+}
+.zhv .zhg__spad {
+  stroke: #9a6fe0;
+  stroke-width: 3;
+}
+.zhv .zhg__svet {
+  fill: none;
+  stroke: #ffb066;
+  stroke-width: 8;
+  stroke-linecap: round;
+  opacity: 0.45;
+  filter: blur(3px);
+}
+.zhv .zhg__znak circle {
+  fill: #fff;
+  stroke: var(--blue-600);
+  stroke-width: 2;
+}
+.zhv .zhg__znak text {
+  fill: var(--blue-700);
+  font-size: 15px;
+  font-weight: 700;
+}
+.zhv .zhg__znak--minus circle {
+  stroke: #9a6fe0;
+}
+.zhv .zhg__znak--minus text {
+  fill: #6f45c2;
+}
+.zhv .zhg__znak--nol circle {
+  stroke: #f08a2c;
+}
+.zhv .zhg__znak--nol text {
+  fill: #c2621a;
+}
+.zhg__tag {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #fff3e6;
+  color: #b3581a;
+  font-size: 12px;
+  font-weight: 600;
+}
+.zhg__tag--rost {
+  background: var(--blue-50);
+  color: var(--blue-700);
+}
+.zhg__tag--spad {
+  background: #f1eafd;
+  color: #6f45c2;
+}
+
+/* Мяч и следы траектории (№9). */
+.zhv .zhg__myach {
+  fill: url(#zhg-myach);
+  stroke: var(--blue-600);
+  stroke-width: 1.2;
+}
+.zhv .zhg__sled {
+  fill: rgb(190 215 250 / 0.55);
+  stroke: rgb(61 121 224 / 0.45);
+  stroke-width: 1;
+}
+.zhv .zhg__traektoriya {
+  fill: none;
+  stroke: #f08a2c;
+  stroke-width: 2.4;
+  stroke-dasharray: 2 5;
+  stroke-linecap: round;
+}
+
+/* Флажок и бусина (№12). */
+.zhv .zhg__flag {
+  fill: #f08a2c;
+  stroke: #d66d18;
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+.zhv .zhg__busina {
+  fill: url(#zhg-busina);
+  stroke: var(--blue-700);
+  stroke-width: 1.5;
+}
+.zhv .zhg__vybor {
+  stroke: #f08a2c;
+  stroke-width: 4;
+  stroke-linecap: round;
+  fill: none;
+}
+.zhv .zhg__tusk {
+  opacity: 0.45;
+}
+
+/* Дорога и машины (№10). */
+.zhv .zhg__doroga {
+  fill: none;
+  stroke: rgb(170 200 245 / 0.75);
+  stroke-width: 26;
+  stroke-linecap: round;
+}
+.zhv .zhg__doroga-kray {
+  fill: none;
+  stroke: rgb(61 121 224 / 0.6);
+  stroke-width: 29;
+  stroke-linecap: round;
+}
+.zhv .zhg__razmetka {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.6;
+  stroke-dasharray: 6 6;
+}
+.zhv .zhg__vstrecha {
+  fill: rgb(255 176 102 / 0.25);
+  stroke: #f08a2c;
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
+}
+.zhv .zhg__vstrecha.is-est {
+  fill: rgb(255 176 102 / 0.55);
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 6px rgb(255 160 80 / 0.9));
+}
+
+/* Столбики и монеты (№16). */
+.zhv .zhg__stolbik-pered {
+  fill: rgb(200 222 252 / 0.75);
+  stroke: var(--blue-600);
+  stroke-width: 1.2;
+}
+.zhv .zhg__stolbik-bok {
+  fill: rgb(130 175 240 / 0.7);
+  stroke: var(--blue-600);
+  stroke-width: 1.2;
+}
+.zhv .zhg__stolbik-verh {
+  fill: rgb(240 248 255 / 0.9);
+  stroke: var(--blue-600);
+  stroke-width: 1.2;
+}
+.zhv .zhg__stolbik--posl .zhg__stolbik-bok {
+  fill: rgb(255 190 120 / 0.75);
+  stroke: #e07a2f;
+}
+.zhv .zhg__stolbik--posl .zhg__stolbik-pered,
+.zhv .zhg__stolbik--posl .zhg__stolbik-verh {
+  stroke: #e07a2f;
+}
+.zhv .zhg__moneta {
+  fill: url(#zhg-zoloto);
+  stroke: #b8860b;
+  stroke-width: 1;
+}
+.zhv .zhg__moneta-verh {
+  fill: #ffe08a;
+  stroke: #b8860b;
+  stroke-width: 1;
+}
+.zhv .zhg__strelka {
+  fill: none;
+  stroke: rgb(61 121 224 / 0.7);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .zhv .zhg__anim {
+    transition:
+      transform 250ms ease,
+      opacity 250ms ease;
+  }
+}

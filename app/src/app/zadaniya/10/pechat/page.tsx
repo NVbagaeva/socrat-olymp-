@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { List10 } from '@/components/tasks/zadanie10/List10';
 import { zadanie10Title } from '@/content/zadanie10';
-import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
+import { kartinkiZadach10 } from '@/lib/zadanie10/kartinkiZadach10';
 import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
@@ -22,5 +22,5 @@ export const metadata: Metadata = {
  * же задачи.
  */
 export default function Pechat10() {
-  return <List10 ill={kartinkiPrototipov()} />;
+  return <List10 ill={kartinkiZadach10()} />;
 }

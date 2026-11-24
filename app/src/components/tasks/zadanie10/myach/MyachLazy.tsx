@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ComponentType } from 'react';
-import { MYACH10 } from '@/content/teoriya10';
+import { MYACH10 } from '@/content/zhivye10';
 
 /**
  * Ленивая загрузка сцены «Мяч выше отметки»: код сцены, её стили и

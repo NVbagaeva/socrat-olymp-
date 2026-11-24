@@ -12,7 +12,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
 } from 'react';
-import { MYACH10 } from '@/content/teoriya10';
+import { MYACH10 } from '@/content/zhivye10';
 import { motionLevel, type MotionLevel } from '@/lib/motion';
 import { typeset } from '@/lib/tex';
 import {
@@ -878,10 +878,10 @@ function ScenaSvg({
         d={`M${r.gx0} ${r.yZemlya} V${yH(r, H_SHKALY) - 8} m-4 6 l4 -6 l4 6`}
       />
       <text className="z10-my__os-podpis" x={r.gx1 + 2} y={r.yZemlya - 12} textAnchor="end">
-        t, с
+        <tspan className="z10-os-bukva">t</tspan>, с
       </text>
       <text className="z10-my__os-podpis" x={r.gx0 + 8} y={yH(r, H_SHKALY) - 2}>
-        h, м
+        <tspan className="z10-os-bukva">h</tspan>, м
       </text>
 
       {/* Отметка H — через обе части, легенда в правом верхнем углу графика. */}
