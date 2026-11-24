@@ -8,7 +8,10 @@
  *   2. rpc notify_zabrat — пачка писем к отправке (база ещё раз
  *      проверяет, нужно ли письмо: настройки, сдано ли ДЗ);
  *   3. каждое письмо — через SMTP, итог — rpc notify_itog: sent; povtor
- *      (4xx, обрыв связи) — повтор через 1, 5, 30 мин, 2 ч; failed (5xx).
+ *      (4xx, обрыв связи) — повтор через 1, 5, 30 мин, 2 ч; failed (5xx);
+ *   4. push (PR 3г): rpc notify_zabrat_push, каждой подписке — web push
+ *      (webpush.mjs), ответ сервиса — push_rezultat, итог — notify_itog.
+ *      Ключи VAPID создаются при первом проходе и хранятся в базе.
  *
  * Порт 8090 (только внутри сети, снаружи — через Caddy):
  *   GET  /otpiska?u=&t= — страница с кнопкой «Отписаться»;
@@ -23,6 +26,7 @@ import http from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { otpravit, SmtpError } from './smtp.mjs';
 import { ekran, pismo, SAYT, ADRESA } from './pisma.mjs';
+import { otpravitPush, vapidKlyuchi } from './webpush.mjs';
 
 export function nastroyki(env = process.env) {
   const port = Number(env.SMTP_PORT || 465);
@@ -107,21 +111,102 @@ export async function otpravitOdno(cfg, u, smtp = otpravit) {
   return rez;
 }
 
-/** Один проход: тик и все письма, которые пора отправить. */
-export async function prohod(cfg, smtp = otpravit) {
-  const itog = { tick: null, sent: 0, povtor: 0, failed: 0 };
+/** Один проход: тик, письма и push, которые пора отправить. */
+export async function prohod(cfg, smtp = otpravit, fetchPush = fetch) {
+  const itog = { tick: null, sent: 0, povtor: 0, failed: 0, push: null };
   itog.tick = await rpc(cfg, 'notify_tick_pochta', {});
-  if (!pochtaEst(cfg)) return itog;
+  if (pochtaEst(cfg)) {
+    for (let krug = 0; krug < 50; krug++) {
+      const pachka = (await rpc(cfg, 'notify_zabrat', { p_limit: cfg.pachka })) ?? [];
+      for (const u of pachka) {
+        if (u.channel !== 'pochta') continue;
+        const rez = await otpravitOdno(cfg, u, smtp);
+        itog[rez] += 1;
+        if (cfg.pauzaMs > 0) await spat(cfg.pauzaMs);
+      }
+      if (pachka.length < cfg.pachka) break;
+    }
+  }
+  itog.push = await prohodPush(cfg, fetchPush);
+  return itog;
+}
+
+/* ── Push (PR 3г) ───────────────────────────────────────────────── */
+
+/**
+ * Ключи VAPID: из базы; нет — создать и сохранить (если два рассыльщика
+ * создали разом, база оставит первые и вернёт их обоим).
+ */
+export async function klyuchiVapid(cfg) {
+  if (cfg.vapid) return cfg.vapid;
+  let k = await rpc(cfg, 'push_vapid', {});
+  if (k === null) {
+    const novye = vapidKlyuchi();
+    k = await rpc(cfg, 'push_vapid_sohranit', { p_public: novye.public, p_private: novye.private });
+    log('ключи VAPID созданы');
+  }
+  cfg.vapid = k;
+  return k;
+}
+
+const UCHITELYU = new Set(['dz_sdano', 'dz_ne_sdali']);
+const VAZHNOE = new Set(['dz_srok', 'dz_vozvrat']);
+
+/**
+ * Что уходит в push (В-5): тип события, ссылка на сайт и признаки для
+ * заголовка («за 3 часа», «можно с опозданием»). Без названия ДЗ и имён.
+ */
+export function soderzhaniePush(u) {
+  const id = u.homework_id === undefined || u.homework_id === null ? null : encodeURIComponent(u.homework_id);
+  const put =
+    id === null ? '/kabinet/uvedomleniya/' : `${UCHITELYU.has(u.event) ? ADRESA.itogi : ADRESA.reshat}?id=${id}`;
+  const s = { t: u.event, u: put };
+  if (u.za === 3 || u.za === 24) s.za = u.za;
+  if (u.pozdno === true) s.pozdno = true;
+  return s;
+}
+
+/** Одна строка очереди push: всем подпискам человека, итог — в базу. */
+export async function otpravitPushOdno(cfg, u, fetchPush = fetch) {
+  const soderzhanie = soderzhaniePush(u);
+  const vazhnoe = VAZHNOE.has(u.event) || (u.event === 'dz_napominanie' && u.za === 3);
+  const itogi = [];
+  for (const sub of u.subs ?? []) {
+    const r = await otpravitPush(sub, soderzhanie, {
+      vapid: cfg.vapid,
+      sub: cfg.sayt,
+      ttl: u.ttl,
+      urgency: vazhnoe ? 'high' : 'normal',
+      proverkaAdresa: cfg.proverkaAdresaPush,
+    }, fetchPush);
+    await rpc(cfg, 'push_rezultat', { p_endpoint: sub.endpoint, p_ok: r.rez === 'ok', p_gone: r.rez === 'gone' });
+    itogi.push(r);
+  }
+  // Дошло хоть на одно устройство — отправлено; иначе повтор, если сбой
+  // временный; иначе — не отправлено (подписок не осталось или отказ).
+  const rez = itogi.some((r) => r.rez === 'ok')
+    ? 'sent'
+    : itogi.some((r) => r.rez === 'povtor')
+      ? 'povtor'
+      : 'failed';
+  const detail = bezAdresov(itogi.map((r) => r.detail).join('; ') || 'нет подписок');
+  await rpc(cfg, 'notify_itog', { p_id: u.id, p_rezultat: rez, p_detail: detail });
+  return rez;
+}
+
+export async function prohodPush(cfg, fetchPush = fetch) {
+  const itog = { sent: 0, povtor: 0, failed: 0 };
+  let klyuchi = null;
   for (let krug = 0; krug < 50; krug++) {
-    const pachka = (await rpc(cfg, 'notify_zabrat', { p_limit: cfg.pachka })) ?? [];
+    const pachka = (await rpc(cfg, 'notify_zabrat_push', { p_limit: cfg.pachka })) ?? [];
+    if (pachka.length > 0 && klyuchi === null) klyuchi = await klyuchiVapid(cfg);
     for (const u of pachka) {
-      if (u.channel !== 'pochta') continue;
-      const rez = await otpravitOdno(cfg, u, smtp);
-      itog[rez] += 1;
-      if (cfg.pauzaMs > 0) await spat(cfg.pauzaMs);
+      itog[await otpravitPushOdno(cfg, u, fetchPush)] += 1;
     }
     if (pachka.length < cfg.pachka) break;
   }
+  // Ключи нужны сайту ещё до первой подписки: создаются при первом проходе.
+  if (klyuchi === null && !cfg.vapid) await klyuchiVapid(cfg);
   return itog;
 }
 
@@ -236,6 +321,10 @@ export function zapustit(cfg = nastroyki()) {
       proshlayaOshibka = null;
       if (it.sent + it.povtor + it.failed > 0) {
         log(`писем: отправлено ${it.sent}, повтор ${it.povtor}, не ушло ${it.failed}`);
+      }
+      const p = it.push;
+      if (p && p.sent + p.povtor + p.failed > 0) {
+        log(`push: отправлено ${p.sent}, повтор ${p.povtor}, не ушло ${p.failed}`);
       }
     } catch (e) {
       if (e.message !== proshlayaOshibka) log('проход не удался:', e.message);

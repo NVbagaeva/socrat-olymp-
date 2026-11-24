@@ -188,3 +188,50 @@ export function zapros(n: Nastroyki): Partial<Nastroyki> {
     digest: n.digest,
   };
 }
+
+/* ── Push на этом устройстве (PR 3г) ─────────────────────────────── */
+
+/** Что умеет браузер — собирает lib/uvedomleniya/push.ts. */
+export interface PushVozmozhnosti {
+  sw: boolean;
+  pushManager: boolean;
+  notification: boolean;
+  /** iPhone или iPad (в том числе iPad, который называет себя Mac). */
+  ios: boolean;
+  /** Сайт открыт с экрана «Домой». */
+  standalone: boolean;
+  permission: 'default' | 'granted' | 'denied';
+}
+
+export type PushSostoyanie =
+  /** iPhone в Safari: push только с экрана «Домой» (iOS 16.4+). */
+  | 'ios'
+  /** Браузер не умеет push. */
+  | 'net'
+  /** Уведомления сайту запрещены в браузере. */
+  | 'zapret'
+  | 'vykl'
+  | 'vkl';
+
+export function pushSostoyanie(v: PushVozmozhnosti, podpiska: boolean): PushSostoyanie {
+  const umeet = v.sw && v.pushManager && v.notification;
+  if (v.ios && !v.standalone && !umeet) return 'ios';
+  if (!umeet) return 'net';
+  if (v.permission === 'denied') return 'zapret';
+  return podpiska && v.permission === 'granted' ? 'vkl' : 'vykl';
+}
+
+/** iPhone, iPod, iPad — и iPad с «настольным» Safari (Macintosh + касания). */
+export function etoIos(ua: string, maxTouchPoints: number): boolean {
+  return /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && maxTouchPoints > 1);
+}
+
+/** Открытый ключ VAPID (base64url) → байты для applicationServerKey. */
+export function klyuchVBayty(b64u: string): Uint8Array<ArrayBuffer> {
+  const b64 = b64u.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
+  const s = atob(pad);
+  const out = new Uint8Array(new ArrayBuffer(s.length));
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out;
+}
