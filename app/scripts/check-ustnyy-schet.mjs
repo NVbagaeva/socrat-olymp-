@@ -17,6 +17,11 @@
    нули), формулы очков рейтинга, примеры из теории
    (content/ustnyySchet.ts) считаются и совпадают с подписанным ответом,
    форматы рейтинга держат свои диапазоны (formatyCases.json).
+   Квадратные уравнения (Виет): по каждому приёму, уровню и режиму
+   (оба корня, «Как в ЕГЭ» — меньший, больший) — 500 уравнений: корни
+   точно удовлетворяют уравнению, конечные дроби, коэффициенты целые,
+   запись стандартная, правило знаков в разборе — как на деле; ответ
+   двумя полями принимается в любом порядке.
 
    Ненулевой код возврата — расхождение, оно печатается. */
 
@@ -209,7 +214,60 @@ const digitsSum = (n) =>
     .reduce((s, c) => s + Number(c), 0);
 const pair = (p) => [N(p.d[0]), N(p.d[1])];
 
+/** Корни ax² + bx + c = 0 своим счётом: дроби [num, den], по возрастанию. */
+function vietaKorni(p) {
+  const [a, b, c] = p.d.map((x) => BigInt(x));
+  const D = b * b - 4n * a * c;
+  if (D < 0n) return null;
+  const s = isqrt(D);
+  if (s * s !== D) return null;
+  const r1 = R(-b - s, 2n * a);
+  const r2 = R(-b + s, 2n * a);
+  return r1[0] * r2[1] <= r2[0] * r1[1] ? [r1, r2] : [r2, r1];
+}
+const vietaCelye = (p) => {
+  const k = vietaKorni(p);
+  return k === null ? null : k.every((r) => r[1] === 1n) ? k.map((r) => Number(r[0])) : null;
+};
+const VIETA_IDS = [
+  'vieta-privedennoe',
+  'vieta-delim-na-a',
+  'vieta-summa-koefficientov',
+  'vieta-perebroska',
+];
+
 const PODHODIT = {
+  'vieta-privedennoe': (p, u) => {
+    const k = vietaCelye(p);
+    if (p.d[0] !== '1' || k === null) return false;
+    const [x, y] = k;
+    const m = Math.max(Math.abs(x), Math.abs(y));
+    if (u === 1) return x !== y && x >= 1 && y <= 10;
+    if (u === 2) return x * y < 0 && m <= 15;
+    return m <= 25 && x !== 0 && y !== 0;
+  },
+  'vieta-delim-na-a': (p, u) => {
+    const [a, b, c] = p.d.map(N);
+    const k = vietaCelye(p);
+    if (k === null || ![2, 3, 4, 5, -1, -2].includes(a) || b % a !== 0 || c % a !== 0) return false;
+    if (u === 1) return a > 0 && k[0] >= 1 && k[1] <= 9;
+    return k.every((x) => x !== 0 && Math.abs(x) <= 15);
+  },
+  'vieta-summa-koefficientov': (p, u) => {
+    const [a, b, c] = p.d.map(N);
+    const plus = a + b + c === 0;
+    const minus = a - b + c === 0;
+    if (!between(a, 2, 9) || (!plus && !minus) || vietaKorni(p) === null) return false;
+    return u === 3 || plus;
+  },
+  'vieta-perebroska': (p, u) => {
+    const a = N(p.d[0]);
+    const k = vietaKorni(p);
+    if (![2, 4, 5].includes(a) || k === null) return false;
+    /* y = ax — целые: уравнение y² + by + ac = 0 решается подбором. */
+    if (!k.every((r) => (r[0] * BigInt(a)) % r[1] === 0n)) return false;
+    return u !== 1 || a === 2;
+  },
   'kvadraty-11-30': (p, u) => {
     const n = N(p.d[0]);
     return u === 1 ? between(n, 11, 20) : u === 2 ? between(n, 21, 30) : between(n, 11, 30);
@@ -456,7 +514,10 @@ function proverkaPrimera(p, what) {
   }
   check(shagi.length > 0, `${what}: пустой разбор`);
   for (const [i, s] of shagi.entries()) {
-    check(s.cep.length >= 2, `${what}: шаг ${i + 1} — цепочка короче двух звеньев`);
+    check(
+      s.cep.length >= 2 || (s.cep.length === 0 && s.tekst !== undefined),
+      `${what}: шаг ${i + 1} — цепочка короче двух звеньев`,
+    );
     let first = null;
     for (const z of s.cep) {
       let zz;
@@ -486,7 +547,12 @@ function proverkaPrimera(p, what) {
   }
   const last = shagi[shagi.length - 1].cep;
   const lastV = zv(last[last.length - 1]);
-  check(lastV === p.otvet, `${what}: разбор кончается на ${lastV}, а ответ ${p.otvet}`);
+  if (p.otvety !== undefined) {
+    /* Оба корня: разбор кончается проверкой подстановкой «… = 0». */
+    check(lastV === '0', `${what}: разбор уравнения кончается на ${lastV}, а не проверкой`);
+  } else {
+    check(lastV === p.otvet, `${what}: разбор кончается на ${lastV}, а ответ ${p.otvet}`);
+  }
 }
 
 const VYKL = [
@@ -529,7 +595,8 @@ for (const pr of VSE) {
               pr.id === 'okolo-100' ||
               pr.id === 'kvadrat-okolo-kruglyh' ||
               pr.id === 'kvadrat-okolo-50' ||
-              pr.id === 'gruppirovka-slagaemyh',
+              pr.id === 'gruppirovka-slagaemyh' ||
+              VIETA_IDS.includes(pr.id),
             `${what}: отрицательные при выключенных`,
           );
         proverkaPrimera(p, what);
@@ -565,6 +632,7 @@ for (const d of [
   'kvadraty',
   'tablica',
   'doli',
+  'uravneniya',
 ]) {
   const gen = sozdatGenerator(
     { tip: 'deystviya', ids: [d] },
@@ -641,11 +709,13 @@ const varianty = (otvet) => {
   for (let i = 0; i < 500; i += 1) {
     const s0 = sessiya.nachat(gen, { tip: 'svobodnyy' }, 0);
     const p = s0.tekushiy;
-    for (const v of varianty(p.otvet)) {
-      const r = sessiya.otvetit(s0, v, 1000);
+    const [k1 = '', k2 = k1] = p.otvety ?? [];
+    const pole = (v) => (p.otvety === undefined ? v : [v, k2]);
+    for (const v of varianty(p.otvety === undefined ? p.otvet : k1)) {
+      const r = sessiya.otvetit(s0, pole(v), 1000);
       check(r.kind === 'hod' && r.hod.verno, `ввод «${v}» на ответ ${p.otvet} не засчитан`);
     }
-    const r = sessiya.otvetit(s0, `${p.otvet}1`, 1000);
+    const r = sessiya.otvetit(s0, pole(`${p.otvet}1`), 1000);
     check(r.kind === 'hod' && !r.hod.verno, `ввод «${p.otvet}1» засчитан как верный`);
     check(sessiya.otvetit(s0, 'абв', 1000).kind === 'format', 'буквы — не попытка');
     check(sessiya.otvetit(s0, '', 1000).kind === 'format', 'пусто — не попытка');
@@ -913,6 +983,172 @@ const varianty = (otvet) => {
   check(
     razminkaBazy('14') === 'baza-14' && razminkaBazy('5') === null,
     'разминка базы — по номеру задания',
+  );
+}
+
+/* ── Квадратные уравнения: Виет ──────────────────────────────── */
+{
+  const rStr = (r) => rstr(r);
+  /** Значение a·x² + b·x + c в точке x (дроби). */
+  const f = ([a, b, c], x) => radd(radd(rmul(R(a), rmul(x, x)), rmul(R(b), x)), R(c));
+  const REZHIMY = [undefined, 'men', 'bol'];
+  for (const id of VIETA_IDS) {
+    const pr = VSE.find((x) => x.id === id);
+    check(pr !== undefined && pr.gruppa === 'uravneniya', `Виет: нет приёма ${id}`);
+    if (pr === undefined) continue;
+    for (const u of [1, 2, 3]) {
+      for (const ege of REZHIMY) {
+        for (const desyatichnye of [true, false]) {
+          const nast = { uroven: u, desyatichnye, otricatelnye: true, predel: null };
+          if (ege !== undefined) nast.ege = ege;
+          const gen = sozdatGenerator({ tip: 'priyomy', ids: [id] }, nast, {
+            seed: `vieta-${id}-${u}-${ege}-${desyatichnye}`,
+          });
+          const w0 = `Виет ${id} ур.${u} ${ege ?? 'оба'}${desyatichnye ? '' : ' без дес.'}`;
+          const seen = new Set();
+          let krug = 0;
+          for (let i = 0; i < 500; i += 1) {
+            const p = gen.next();
+            check(p !== null, `${w0}: генератор пуст`);
+            if (p === null) break;
+            if (gen.krugi !== krug) {
+              krug = gen.krugi;
+              seen.clear();
+            }
+            const what = `${w0} #${i} «${p.text}»`;
+            check(!seen.has(p.key), `${what}: повтор в серии`);
+            seen.add(p.key);
+            /* Коэффициенты: целые, a ≠ 0. */
+            check(p.d.length === 3 && p.d.every((x) => /^-?\d+$/.test(x)), `${what}: коэффициенты`);
+            const [a, b, c] = p.d.map((x) => BigInt(x));
+            check(a !== 0n, `${what}: a = 0`);
+            /* Запись: стандартный вид. */
+            check(
+              !/\+ -|- -|(^|[^\d])1x|\+ 0(?!\d)|- 0(?!\d)/.test(p.tex) && p.tex.endsWith('= 0'),
+              `${what}: запись «${p.tex}» не в стандартном виде`,
+            );
+            /* Корни: свой счёт по дискриминанту, точно. */
+            const k = vietaKorni(p);
+            check(k !== null, `${what}: нет рациональных корней`);
+            if (k === null) continue;
+            const ks = k.map(rStr);
+            check(
+              ks.every((x) => x !== null),
+              `${what}: корень — бесконечная дробь`,
+            );
+            for (const r of k) {
+              const v = f([a, b, c], r);
+              check(v[0] === 0n, `${what}: корень ${rStr(r)} не обращает уравнение в 0`);
+            }
+            if (ege === undefined) {
+              check(
+                p.otvety !== undefined && p.otvety.join('|') === ks.join('|'),
+                `${what}: корни движка ${p.otvety?.join(', ')}, а своим счётом ${ks.join(', ')}`,
+              );
+              check(p.otvet === ks[0], `${what}: otvet не меньший корень`);
+            } else {
+              check(p.otvety === undefined, `${what}: в режиме ЕГЭ два поля`);
+              check(
+                p.otvet === (ege === 'men' ? ks[0] : ks[1]),
+                `${what}: в ответе ${p.otvet}, а ${ege === 'men' ? 'меньший' : 'больший'} — ${ege === 'men' ? ks[0] : ks[1]}`,
+              );
+            }
+            if (!desyatichnye)
+              check(
+                ks.every((x) => !x.includes('.')),
+                `${what}: дробный корень без десятичных`,
+              );
+            check(PODHODIT[id](p, u), `${what}: не подходит под приём и уровень`);
+            /* Разбор: цепочки и правило знаков. */
+            proverkaPrimera(p, what);
+            const shagi = pr.razbor(p);
+            const znak = shagi.find((s) => /одного знака|знаки разные/.test(s.tekst ?? ''));
+            if (id !== 'vieta-summa-koefficientov') {
+              check(znak !== undefined, `${what}: в разборе нет правила знаков`);
+              if (znak !== undefined) {
+                const odin = k[0][0] * k[1][0] > 0n;
+                check(
+                  /одного знака/.test(znak.tekst) === odin,
+                  `${what}: правило знаков «${znak.tekst}», а корни ${ks.join(', ')}`,
+                );
+                const big = Math.abs(Number(ks[0])) > Math.abs(Number(ks[1])) ? ks[0] : ks[1];
+                const ozhid = odin ? k[0][0] > 0n : !big.startsWith('-');
+                check(
+                  /положительн/.test(znak.tekst) === ozhid,
+                  `${what}: знак в правиле «${znak.tekst}», а корни ${ks.join(', ')}`,
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* Ответ двумя полями. */
+  const pr = VSE.find((x) => x.id === 'vieta-privedennoe');
+  const st = (p) => ({ ...sessiya.nachat({ next: () => p, krugi: 0 }, { tip: 'svobodnyy' }, 0) });
+  const p1 = pr.iz(['1', '-7', '12'], 1);
+  const otv = (p, v) => sessiya.otvetit(st(p), v, 500);
+  check(otv(p1, ['3', '4']).hod?.verno === true, 'Виет: 3 и 4 — верно');
+  check(otv(p1, ['4', '3']).hod?.verno === true, 'Виет: 4 и 3 — тоже верно (любой порядок)');
+  check(otv(p1, ['3', '5']).hod?.verno === false, 'Виет: неверный корень отклонён');
+  check(
+    otv(p1, ['3', '3']).hod?.verno === false,
+    'Виет: один корень дважды при двух разных — неверно',
+  );
+  check(otv(p1, ['3', '']).kind === 'format', 'Виет: пустое поле — не попытка');
+  check(otv(p1, '3').kind === 'format', 'Виет: одно число на два корня — не попытка');
+  const p2 = VSE.find((x) => x.id === 'vieta-perebroska').iz(['2', '-9', '7'], 1);
+  check(p2.otvety.join('|') === '1|3.5', `Виет: корни 2x²−9x+7 — ${p2.otvety}`);
+  for (const v of [
+    ['3,5', '1'],
+    ['3.5', '1'],
+    ['1', '3,50'],
+    ['01', '3.5'],
+  ]) {
+    check(otv(p2, v).hod?.verno === true, `Виет: ввод ${v.join(' и ')} на корни 1 и 3,5`);
+  }
+  /* «7/2» — запись дробью, normalizeAnswer её не принимает как ответ: не попытка. */
+  check(otv(p2, ['7/2', '1']).kind === 'format', 'Виет: «7/2» — не попытка, нужна десятичная');
+  const p3 = pr.iz(['1', '10', '25'], 3);
+  check(p3.otvety.join('|') === '-5|-5', `Виет: равные корни ${p3.otvety}`);
+  check(otv(p3, ['-5', '-5']).hod?.verno === true, 'Виет: равные корни — одно число в обоих полях');
+  check(otv(p3, ['-5', '5']).hod?.verno === false, 'Виет: равные корни, второе неверное');
+  const p4 = pr.iz(['1', '-7', '12'], 1, 'men');
+  check(otv(p4, '3').hod?.verno === true && otv(p4, '4').hod?.verno === false, 'Виет ЕГЭ: меньший');
+  const p5 = pr.iz(['1', '-7', '12'], 1, 'bol');
+  check(otv(p5, '4').hod?.verno === true && otv(p5, '3').hod?.verno === false, 'Виет ЕГЭ: больший');
+  /* Старые приёмы: один ответ, массив — не попытка. */
+  const t = VSE.find((x) => x.id === 'tablica').iz(['7', '8'], 1);
+  check(
+    otv(t, '56').hod?.verno === true && otv(t, ['56', '56']).kind === 'format',
+    'один ответ — как раньше',
+  );
+  check(t.otvety === undefined, 'у таблицы нет otvety');
+  /* Старая запись статистики (без vvody и новых приёмов) читается. */
+  const old = model.parseStat({
+    v: 1,
+    sessii: [
+      {
+        id: 'a',
+        at: 1,
+        nabor: 'p:na-11',
+        rezhim: 'svobodnyy',
+        uroven: 1,
+        verno: 3,
+        vsego: 4,
+        ms: 9000,
+        seriya: 2,
+        po: { 'na-11': [4, 3, 6000] },
+      },
+    ],
+    rekordy: {},
+    tablica: {},
+  });
+  check(
+    old.sessii.length === 1 && old.sessii[0].po['na-11'][1] === 3,
+    'старая статистика читается',
   );
 }
 

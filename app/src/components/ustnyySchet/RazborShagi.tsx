@@ -24,7 +24,9 @@ export function RazborShagi({ shagi, vse = false }: RazborShagiProps) {
             {s.tekst !== null && (
               <p className="us-razbor__tekst" dangerouslySetInnerHTML={{ __html: s.tekst }} />
             )}
-            <p className="us-razbor__cep" dangerouslySetInnerHTML={{ __html: s.cep }} />
+            {s.cep !== '' && (
+              <p className="us-razbor__cep" dangerouslySetInnerHTML={{ __html: s.cep }} />
+            )}
           </li>
         ))}
       </ol>

@@ -8,6 +8,7 @@
  *   f=tablica-1m        зачётный формат (режим и настройки — его)
  *   r=svobodnyy | s20 | v60          режим
  *   u=2  dec=0  otr=0  lim=100       уровень и выключатели
+ *   ege=men | bol                    уравнения «Как в ЕГЭ»: в ответ меньший или больший корень
  *   k=7x8,6x9                        работа над ошибками таблицы: эти клетки
  *   go=1                             сразу начать, без настроек
  */
@@ -71,6 +72,7 @@ export function zaprosStr(z: Partial<Zapros>): string {
     if (!z.nast.desyatichnye) q.set('dec', '0');
     if (!z.nast.otricatelnye) q.set('otr', '0');
     if (z.nast.predel !== null) q.set('lim', String(z.nast.predel));
+    if (z.nast.ege !== undefined) q.set('ege', z.nast.ege);
   }
   if (z.go === true) q.set('go', '1');
   return q.toString();
@@ -166,11 +168,13 @@ export function prochitat(q: URLSearchParams): Zapros {
   }
   const u = Number(q.get('u'));
   const lim = Number(q.get('lim'));
+  const ege = q.get('ege');
   const nast: Nastroyki = {
     uroven: (u === 2 || u === 3 ? u : 1) as Uroven,
     desyatichnye: q.get('dec') !== '0',
     otricatelnye: q.get('otr') !== '0',
     predel: lim === 100 || lim === 1000 ? lim : null,
+    ...(ege === 'men' || ege === 'bol' ? { ege } : {}),
   };
   return { nabor, rezhim: rezhimIz(q.get('r')) ?? ZAPROS_PO_UMOLCHANIYU.rezhim, nast, go };
 }

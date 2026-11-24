@@ -11,6 +11,7 @@
  * Обращение к ученику — на «ты» (docs/razdel-pravila.md).
  */
 
+import { nomerRazdela } from '@/content/struktura';
 import type { ReytingFormatId } from '@/lib/ustnyySchet/formaty';
 import type { Deystvie, GruppaId, PriyomId, Uroven } from '@/lib/ustnyySchet/types';
 
@@ -397,6 +398,79 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
     ],
   },
 
+  /* ── Квадратные уравнения: теорема Виета ──────────────────── */
+  /* Подписанный ответ — меньший корень (Primer.otvet), оба корня
+     сверяет проверка. */
+  'vieta-privedennoe': {
+    nazvanie: 'Виет: приведённое уравнение',
+    kratko: '$x^2 + bx + c = 0$: два числа с суммой $-b$ и произведением $c$',
+    pravilo: '$x^2 + bx + c = 0 \\iff x_1 + x_2 = -b,\\ x_1 x_2 = c$',
+    pochemu:
+      'Если $x_1$ и $x_2$ — корни, то $x^2 + bx + c = (x - x_1)(x - x_2) = x^2 - (x_1 + x_2)x + x_1 x_2$: сравни коэффициенты. Знак $c$ сразу говорит, одного ли знака корни.',
+    urovni: [
+      'оба корня натуральные, от 1 до 10',
+      'корни разных знаков, до 15 по модулю',
+      'оба отрицательные или до 25 по модулю, иногда равные',
+    ],
+    primery: [
+      { d: ['1', '-7', '12'], uroven: 1, otvet: '3' },
+      { d: ['1', '2', '-15'], uroven: 2, otvet: '-5' },
+      { d: ['1', '10', '25'], uroven: 3, otvet: '-5' },
+    ],
+  },
+  'vieta-delim-na-a': {
+    nazvanie: 'Сначала раздели на a',
+    kratko: 'Все коэффициенты делятся на $a$ — делим и решаем приведённое',
+    pravilo: '$ax^2 + bx + c = 0 \\iff x^2 + \\frac{b}{a}x + \\frac{c}{a} = 0$',
+    pochemu:
+      'Деление обеих частей на $a \\ne 0$ корней не меняет, а уравнение становится приведённым — дальше работает Виет.',
+    urovni: [
+      '$a$ от 2 до 5, корни от 1 до 9',
+      '$a$ бывает отрицательным, корни до 10 по модулю',
+      'корни до 15 по модулю, иногда равные',
+    ],
+    primery: [
+      { d: ['2', '-14', '24'], uroven: 1, otvet: '3' },
+      { d: ['-1', '2', '15'], uroven: 2, otvet: '-3' },
+      { d: ['3', '9', '-30'], uroven: 2, otvet: '-5' },
+    ],
+  },
+  'vieta-summa-koefficientov': {
+    nazvanie: 'Если a + b + c = 0',
+    kratko: 'Один корень — $1$ или $-1$, второй — $\\frac{c}{a}$ со знаком',
+    pravilo:
+      '$a + b + c = 0 \\Rightarrow x_1 = 1,\\ x_2 = \\frac{c}{a};\\quad a - b + c = 0 \\Rightarrow x_1 = -1,\\ x_2 = -\\frac{c}{a}$',
+    pochemu:
+      'При $x = 1$ левая часть равна $a + b + c$, при $x = -1$ — $a - b + c$. Если это ноль — корень найден, а второй даёт произведение $x_1 x_2 = \\frac{c}{a}$.',
+    urovni: [
+      '$a + b + c = 0$, второй корень — целый',
+      'второй корень — десятичная дробь: $0{,}5$, $1{,}5$, $0{,}25$',
+      'вперемешку $a + b + c = 0$ и $a - b + c = 0$',
+    ],
+    primery: [
+      { d: ['2', '-5', '3'], uroven: 2, otvet: '1' },
+      { d: ['5', '-7', '2'], uroven: 2, otvet: '0.4' },
+      { d: ['4', '9', '5'], uroven: 3, otvet: '-1.25' },
+    ],
+  },
+  'vieta-perebroska': {
+    nazvanie: 'Метод переброски',
+    kratko: '$a$ переходит к свободному члену, корни потом делим на $a$',
+    pravilo: '$ax^2 + bx + c = 0 \\;\\to\\; y^2 + by + ac = 0,\\quad x = \\frac{y}{a}$',
+    pochemu:
+      'Умножь уравнение на $a$: $(ax)^2 + b\\,(ax) + ac = 0$. Это приведённое уравнение для $y = ax$ — его корни подбираются по Виету, а $x = y : a$.',
+    urovni: [
+      '$a = 2$, корни положительные',
+      '$a$ — 2, 4 или 5, знаки любые',
+      'корни $y$ до 30 по модулю',
+    ],
+    primery: [
+      { d: ['2', '-5', '2'], uroven: 1, otvet: '0.5' },
+      { d: ['5', '-11', '2'], uroven: 2, otvet: '0.2' },
+      { d: ['4', '4', '-3'], uroven: 2, otvet: '-1.5' },
+    ],
+  },
+
   tablica: {
     nazvanie: 'Таблица умножения',
     kratko: 'Строки ×2…×9, обратная таблица, сетка освоенности',
@@ -411,7 +485,7 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
   },
 };
 
-const gruppy: Record<GruppaId, { nazvanie: string; lead: string }> = {
+const gruppy: Record<GruppaId, { nazvanie: string; lead: string; novoe?: boolean }> = {
   kvadraty: {
     nazvanie: 'Квадраты',
     lead: 'Наизусть и пятью приёмами — для чисел, которые встречаются в задачах чаще всего.',
@@ -432,6 +506,11 @@ const gruppy: Record<GruppaId, { nazvanie: string; lead: string }> = {
     nazvanie: 'Дроби и проценты',
     lead: 'Для базового ЕГЭ: доли, проценты, степени и корни.',
   },
+  uravneniya: {
+    nazvanie: 'Квадратные уравнения',
+    lead: `Корни в уме по теореме Виета — без дискриминанта. Пригодится в задании №${nomerRazdela('uravneniya')}.`,
+    novoe: true,
+  },
 };
 
 const deystviya: Record<Deystvie, string> = {
@@ -442,6 +521,7 @@ const deystviya: Record<Deystvie, string> = {
   kvadraty: 'Квадраты',
   tablica: 'Таблица',
   doli: 'Дроби и проценты',
+  uravneniya: 'Уравнения',
 };
 
 const formaty: Record<ReytingFormatId, { nazvanie: string; kratko: string }> = {
@@ -532,6 +612,10 @@ export const USTNYY = {
     start: 'Начать',
     vyberiPriyom: 'Выбери хотя бы один приём',
     vyberiDeystvie: 'Выбери хотя бы одно действие',
+    ege: 'Как в ЕГЭ: в ответ один корень',
+    egeLead: 'В задании ЕГЭ просят записать один корень. Выключено — вписываешь оба.',
+    egeMen: 'Меньший корень',
+    egeBol: 'Больший корень',
   },
 
   /* Экран тренировки */
@@ -557,6 +641,28 @@ export const USTNYY = {
     nedostupno:
       'Таких примеров при этих настройках нет. Измени набор или включи десятичные и отрицательные.',
     nazad: 'К настройкам',
+    koren1: 'x₁',
+    koren2: 'x₂',
+    korenPole: (n: number) => `Корень ${n}`,
+    korniPodpis: 'Корни в любом порядке. Если корень один — впиши его в оба поля.',
+    egeMen: 'В ответ запиши меньший корень.',
+    egeBol: 'В ответ запиши больший корень.',
+    nevernoKorni: (otvet: string) => `Неверно, корни ${otvet}`,
+  },
+
+  /* Конструктор корней на странице «Виет: приведённое уравнение» */
+  konstruktor: {
+    zag: 'Конструктор корней',
+    lead: 'Двигай корни на прямой — мышью, пальцем или стрелками. Уравнение и парабола перестраиваются сами.',
+    x1: 'Корень x₁',
+    x2: 'Корень x₂',
+    summa: 'сумма корней',
+    proizvedenie: 'произведение корней',
+    odin: '$c > 0$ — корни одного знака',
+    raznye: '$c < 0$ — разных знаков',
+    nol: '$c = 0$ — один из корней ноль',
+    ravnye: '$x_1 = x_2$ — один корень',
+    grafik: (x1: string, x2: string) => `Парабола пересекает ось x в точках ${x1} и ${x2}`,
   },
 
   /* Итоги */

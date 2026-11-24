@@ -5,6 +5,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Breadcrumbs } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
 import { KartochkiKvadratov } from '@/components/ustnyySchet/KartochkiKvadratov';
+import { KonstruktorKorneyLazy } from '@/components/ustnyySchet/KonstruktorKorneyLazy';
 import { RazborShagi } from '@/components/ustnyySchet/RazborShagi';
 import { SvodkaPriyoma } from '@/components/ustnyySchet/VitrinaKlient';
 import '@/components/ustnyySchet/ustnyy.css';
@@ -16,6 +17,7 @@ import { plain } from '@/lib/tex';
 import { UROVNI, type PriyomId } from '@/lib/ustnyySchet/types';
 import { shagHtml, voprosHtml } from '@/lib/ustnyySchet/vyvod';
 import { trenirovkaHref } from '@/lib/ustnyySchet/zapros';
+import { kartinkaUs } from '@/lib/ustnyySchet/kartinki';
 
 interface Params {
   params: Promise<{ priyom: string }>;
@@ -52,6 +54,7 @@ export default async function PriyomPage({ params }: Params) {
   });
   const drugie = gruppa === null ? [] : priyomyGruppy(gruppa).filter((x) => x.id !== id);
   const nabor = { tip: 'priyomy' as const, ids: [id as PriyomId] };
+  const vieta = gruppa === 'uravneniya' ? kartinkaUs('vieta') : null;
 
   return (
     <AppShell active="ustnyy">
@@ -63,10 +66,31 @@ export default async function PriyomPage({ params }: Params) {
             { label: t.nazvanie },
           ]}
         />
-        <header className="us-priyom__shapka">
-          {gruppa !== null && <p className="us-priyom__gruppa">{USTNYY.gruppy[gruppa].nazvanie}</p>}
-          <h1 className="t-h1">{t.nazvanie}</h1>
-          <SvodkaPriyoma id={id} />
+        <header
+          className={
+            vieta === null ? 'us-priyom__shapka' : 'us-priyom__shapka us-priyom__shapka--kartinka'
+          }
+        >
+          <div className="us-priyom__shapka-tekst">
+            {gruppa !== null && (
+              <p className="us-priyom__gruppa">{USTNYY.gruppy[gruppa].nazvanie}</p>
+            )}
+            <h1 className="t-h1">{t.nazvanie}</h1>
+            <SvodkaPriyoma id={id} />
+          </div>
+          {vieta !== null && (
+            <img
+              className="us-priyom__kartinka"
+              src={vieta.src}
+              srcSet={vieta.srcSet}
+              sizes="(max-width: 640px) 120px, 180px"
+              width={vieta.width}
+              height={vieta.height}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          )}
         </header>
 
         <section className="us-pravilo" aria-labelledby="us-pravilo">
@@ -88,6 +112,16 @@ export default async function PriyomPage({ params }: Params) {
             </h2>
             <p className="us-blok__lead">{S.kartochkiLead}</p>
             <KartochkiKvadratov />
+          </section>
+        )}
+
+        {id === 'vieta-privedennoe' && (
+          <section className="us-blok" aria-labelledby="us-konstruktor">
+            <h2 id="us-konstruktor" className="t-h2">
+              {USTNYY.konstruktor.zag}
+            </h2>
+            <p className="us-blok__lead">{tipograf(USTNYY.konstruktor.lead)}</p>
+            <KonstruktorKorneyLazy />
           </section>
         )}
 

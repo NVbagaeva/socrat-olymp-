@@ -26,8 +26,10 @@ export const PAUZA_OSHIBKI_MS = 1500;
 
 export interface Hod {
   primer: Primer;
-  /** Что ввёл ученик, нормальной записью. */
+  /** Что ввёл ученик, нормальной записью; у примера с корнями — через «;». */
   vvod: string;
+  /** Пример с несколькими ответами (корни): что ввёл ученик в каждое поле. */
+  vvody?: readonly string[];
   verno: boolean;
   /** Время на пример: от показа до ответа, мс. */
   ms: number;
@@ -69,17 +71,44 @@ export function limitMs(r: Rezhim): number | null {
 export type Otvet =
   { kind: 'format' } | { kind: 'hod'; hod: Hod; s: Sostoyanie } | { kind: 'pozdno'; s: Sostoyanie };
 
+/**
+ * Сверить ввод с ответом примера. У примера с корнями (otvety) ввод —
+ * по полю на корень, порядок не важен: сравниваются отсортированные
+ * нормальные записи. null — неверная запись (не попытка).
+ */
+export function sverit(
+  p: Primer,
+  vvod: string | readonly string[],
+): { vvod: string; vvody?: string[]; verno: boolean } | null {
+  if (p.otvety !== undefined) {
+    const list = typeof vvod === 'string' ? [vvod] : vvod;
+    if (list.length !== p.otvety.length) return null;
+    const vals: string[] = [];
+    for (const x of list) {
+      const n = normalizeAnswer(x);
+      if (!n.ok) return null;
+      vals.push(n.value);
+    }
+    const a = [...vals].sort();
+    const b = [...p.otvety].sort();
+    return { vvod: vals.join(';'), vvody: vals, verno: a.every((x, i) => x === b[i]) };
+  }
+  if (typeof vvod !== 'string') return null;
+  const n = normalizeAnswer(vvod);
+  if (!n.ok) return null;
+  return { vvod: n.value, verno: n.value === p.otvet };
+}
+
 /** Принять ответ. Неверная запись (буквы, пусто) — не попытка. */
-export function otvetit(s: Sostoyanie, vvod: string, t: number): Otvet {
+export function otvetit(s: Sostoyanie, vvod: string | readonly string[], t: number): Otvet {
   if (s.konec || s.tekushiy === null) return { kind: 'pozdno', s };
   const lim = limitMs(s.rezhim);
   if (lim !== null && t > lim) return { kind: 'pozdno', s: { ...s, konec: true } };
-  const n = normalizeAnswer(vvod);
-  if (!n.ok) return { kind: 'format' };
+  const r = sverit(s.tekushiy, vvod);
+  if (r === null) return { kind: 'format' };
   const hod: Hod = {
     primer: s.tekushiy,
-    vvod: n.value,
-    verno: n.value === s.tekushiy.otvet,
+    ...r,
     ms: Math.max(0, t - s.pokazanV),
   };
   const hody = [...s.hody, hod];
