@@ -198,6 +198,8 @@
 /* Частые вопросы: строки с плюсом. */
 .howto__faq {
   display: grid;
+  /* Раскрытый ответ не растягивает соседа по строке. */
+  align-items: start;
   gap: 0 var(--space-6);
   border-radius: var(--radius-xl);
   background: var(--color-surface);
@@ -236,10 +238,17 @@
 .howto__q.open .solution-details-toggle::after {
   content: '−';
 }
+/* Отступ под ответом — у абзаца, а не у обёртки: свёрнутая обёртка
+   сжимается до своих отступов, и в нижнем из них проглядывала верхушка
+   текста ответа. Абзац внутри обрезается целиком. */
 .howto__q .solution-details-body > div {
-  padding: 0 0 var(--space-3);
+  padding: 0;
   color: var(--color-text-secondary);
   line-height: 1.5;
+}
+.howto__q .solution-details-body p {
+  margin: 0;
+  padding-bottom: var(--space-3);
 }
 
 /* Плашка внизу: главная кнопка — приглушённый терракотовый акцент. */
