@@ -3,7 +3,7 @@ import { OPORNYE } from '@/content/opornye';
 import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
-import { SHIRINY_KARTINOK_5, kartinkaMetoda5 } from '@/lib/veroyatnost/metody5-kartinki';
+import { SHIRINY_KARTINOK, kartinkaMetoda } from '@/lib/veroyatnost/metody-kartinki';
 import { illyustraciyaUrl } from '@/lib/illyustraciiUrl';
 import { bank4Pool, bank5Pool, prep4Pool, prep5Pool } from '@/lib/veroyatnost/pool';
 import type { Metod } from '@/lib/veroyatnost/tipologiya';
@@ -47,23 +47,22 @@ export interface KlyuchevyeMetodyProps {
 }
 
 /**
- * Иллюстрация метода №5: WebP двух ширин и запасной PNG. Картинка
+ * Иллюстрация метода: WebP двух ширин и запасной PNG. Картинка
  * декоративная (alt пустой): название метода рядом, текстом.
  */
-function Kartinka5({ id }: { id: string }) {
-  const k = kartinkaMetoda5(id);
+function KartinkaMetodaImg({ zadanie, id }: { zadanie: Zadanie; id: string }) {
+  const k = kartinkaMetoda(zadanie, id);
   if (k === undefined) return null;
-  const put = (w: number, ext: string) =>
-    illyustraciyaUrl(`/images/zadanie-05/${k.imya}-${w}.${ext}`);
+  const put = (w: number, ext: string) => illyustraciyaUrl(`${k.put}-${w}.${ext}`);
   return (
     <picture>
       <source
         type="image/webp"
-        srcSet={SHIRINY_KARTINOK_5.map((w) => `${put(w, 'webp')} ${w}w`).join(', ')}
+        srcSet={SHIRINY_KARTINOK.map((w) => `${put(w, 'webp')} ${w}w`).join(', ')}
         sizes="220px"
       />
       <img
-        src={put(SHIRINY_KARTINOK_5[1], 'png')}
+        src={put(SHIRINY_KARTINOK[1], 'png')}
         width={k.width}
         height={k.height}
         alt=""
@@ -90,8 +89,8 @@ function kartochki(zadanie: Zadanie): KartochkaMetoda[] {
       nazvanie: m.nazvanie,
       opisanie: m.opisanie,
       formula: m.formula === undefined ? null : <Tex text={`$${m.formula}$`} />,
-      ...(zadanie === 5 && kartinkaMetoda5(m.id) !== undefined
-        ? { kartinka: <Kartinka5 id={m.id} /> }
+      ...(kartinkaMetoda(zadanie, m.id) !== undefined
+        ? { kartinka: <KartinkaMetodaImg zadanie={zadanie} id={m.id} /> }
         : {}),
       /* Тренировка у метода вероятности одна: тренажёр с выбранным
        методом. Подвал окна с одной тренировкой выглядит как раньше. */
