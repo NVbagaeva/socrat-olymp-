@@ -6,8 +6,9 @@ import { withVersion } from './assetUrl';
  *
  *   /images/zadanie-11/gorod-    — города сцены «Два путника» №10
  *                                  (zadanie11/vstrecha/Scena — ленивый кусок);
- *   /images/zadanie-05/metod-    — картинки карточек «Ключевые методы
- *                                  решения» №5 (серверная KlyuchevyeMetody).
+ *   /images/zadanie-0N/metod-    — картинки карточек «Ключевые методы
+ *                                  решения» №4 и №5 (серверная KlyuchevyeMetody,
+ *                                  список — lib/veroyatnost/metody-kartinki.ts).
  *
  * Общая таблица ASSET_VERSIONS входит в первую загрузку каждой страницы
  * (порог — scripts/check-first-load.mjs), поэтому эти файлы в ней не

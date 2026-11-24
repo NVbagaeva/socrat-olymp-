@@ -43,7 +43,11 @@ const ofertaPage =
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 /** Папки иллюстраций со своей таблицей версий (lib/illyustraciiUrl.ts). */
-const ILLYUSTRACII = ['/images/zadanie-11/gorod-', '/images/zadanie-05/metod-'];
+const ILLYUSTRACII = [
+  '/images/zadanie-11/gorod-',
+  '/images/zadanie-05/metod-',
+  '/images/zadanie-04/metod-',
+];
 
 const nextConfig: NextConfig = {
   ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
