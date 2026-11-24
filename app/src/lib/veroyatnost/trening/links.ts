@@ -6,7 +6,8 @@
 
 import { OPORNYE } from '@/content/opornye';
 import { veroyatnostBySlug } from '@/content/veroyatnost';
-import { TEORIYA_TAIL, ZADANIYA, glavaMetoda, href, teoriyaYakor } from '@/lib/paths';
+import { ZADANIYA, href } from '@/lib/paths';
+import { TEORIYA_TAIL, glavaMetoda, teoriyaYakor } from '@/lib/paths-teoriya';
 
 export type Zadanie45 = 4 | 5;
 

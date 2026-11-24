@@ -14,7 +14,8 @@ import {
 } from '@/content/veroyatnost4-metody-teoriya';
 import { withVersion } from '@/lib/assetUrl';
 import { katex } from '@/lib/graph/katex';
-import { TEORIYA_TAIL, ZADANIYA, glavaMetoda, href, teoriyaYakor } from '@/lib/paths';
+import { ZADANIYA, href } from '@/lib/paths';
+import { TEORIYA_TAIL, glavaMetoda, teoriyaYakor } from '@/lib/paths-teoriya';
 import { PODGOTOVKA_4 } from '@/lib/veroyatnost/index';
 import {
   USLOVIYA_KOSTEY,

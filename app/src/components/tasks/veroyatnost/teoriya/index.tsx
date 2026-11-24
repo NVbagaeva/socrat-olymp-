@@ -6,7 +6,7 @@ import { KoordinatnayaPryamaya } from './KoordinatnayaPryamaya';
 import { VidySobytiy } from './VidySobytiy';
 import { NezavisimyeSobytiya5, SovmestnyeSobytiya5 } from './Sobytiya5';
 import { GlavaMetoda4 } from './metody/GlavaMetoda4';
-import { glavaMetoda } from '@/lib/paths';
+import { glavaMetoda } from '@/lib/paths-teoriya';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 
 /**

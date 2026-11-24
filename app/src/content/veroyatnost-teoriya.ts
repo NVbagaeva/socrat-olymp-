@@ -1,5 +1,5 @@
 import { assetUrl } from '@/lib/assetUrl';
-import { glavaMetoda, teoriyaYakor } from '@/lib/paths';
+import { glavaMetoda, teoriyaYakor } from '@/lib/paths-teoriya';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 import { PODPUNKTY_GLAVY } from './veroyatnost4-metody-teoriya';
 

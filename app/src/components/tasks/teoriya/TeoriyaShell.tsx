@@ -6,7 +6,7 @@ import { EmptyState, HandNote, Modal } from '@/components/ui';
 import { TopicContents, ZamokIkonka } from '@/components/tasks/TopicContents';
 import { scrollToSection, useActiveSection } from '@/components/tasks/useActiveSection';
 import { markSectionRead } from '@/lib/theoryRead';
-import { teoriyaYakor } from '@/lib/paths';
+import { teoriyaYakor } from '@/lib/paths-teoriya';
 import { SODERZHANIE, TEORIYA_DEKOR, type TeoriyaRazdel } from '@/content/veroyatnost-teoriya';
 
 export interface TeoriyaDekor {
