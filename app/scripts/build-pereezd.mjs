@@ -16,6 +16,11 @@
      /zadaniya/N/…/            → /zadaniya/<код>/…/
      /zadaniya/N/файл.ext      → /zadaniya/<код>/файл.ext
 
+   PDF в материалах — по одному правилу на файл, из
+   src/content/pereezd/starye-pdf.json:
+
+     /materials/zadanie-N/старое-имя.pdf → /materials/<код>/новое-имя.pdf
+
    Скрытого раздела в таблице нет — ему 404 (build-skrytye.mjs). Раздел
    без своей страницы (оптимизация, №17 хранения) уходит целиком туда,
    куда вела его заглушка. Проверка повторяет логику check-links.mjs:
@@ -34,6 +39,9 @@ const HOST = '%{ENV:SITE_SCHEME}://%{HTTP_HOST}';
 const { RAZDELY } = await import(path.join(APP, 'src/content/struktura.js'));
 const STARYE = JSON.parse(
   fs.readFileSync(path.join(APP, 'src/content/pereezd/starye-adresa.json'), 'utf8'),
+);
+const STARYE_PDF = JSON.parse(
+  fs.readFileSync(path.join(APP, 'src/content/pereezd/starye-pdf.json'), 'utf8'),
 );
 const kodPo = new Map(RAZDELY.map((r) => [String(r.hranenie), r.kod]));
 
@@ -62,6 +70,11 @@ export function blokPravil() {
       `  RewriteRule ^zadaniya/${n}((?:/[^/.]+)*)(/|/index\\.html)?$ ${HOST}/zadaniya/${kod}$1/ [R=301,L]`,
       `  RewriteRule ^zadaniya/${n}/(.+\\.[A-Za-z0-9]+)$ ${HOST}/zadaniya/${kod}/$1 [R=301,L]`,
     );
+  }
+  out.push('  # PDF в материалах: папка и имя — по коду раздела, без номера.');
+  for (const [staryy, novyy] of Object.entries(STARYE_PDF)) {
+    const re = staryy.slice(1).replace(/[.]/g, (c) => `\\${c}`);
+    out.push(`  RewriteRule ^${re}$ ${HOST}${novyy} [R=301,L]`);
   }
   return out;
 }
@@ -101,6 +114,14 @@ export function proverit(text) {
       if (got !== novyy) oshibki.push(`${v} → ${got ?? '—'}, нужно ${novyy}`);
     }
   }
+  for (const [staryy, novyy] of Object.entries(STARYE_PDF)) {
+    const got = kuda(rules, staryy);
+    if (got !== novyy) oshibki.push(`${staryy} → ${got ?? '—'}, нужно ${novyy}`);
+    if (!fs.existsSync(path.join(APP, 'public', novyy)))
+      oshibki.push(`${novyy}: нет файла в public`);
+    if (fs.existsSync(path.join(APP, 'public', staryy)))
+      oshibki.push(`${staryy}: старый файл остался в public`);
+  }
   /* ?… Apache сохраняет сам, проверять нечего; файл — на файл. */
   const fayl = kuda(rules, '/zadaniya/1/dannye/primer.json');
   if (fayl !== '/zadaniya/planimetriya/dannye/primer.json') oshibki.push(`файл → ${fayl}`);
@@ -124,6 +145,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.exit(1);
   }
   console.log(
-    `Переезд адресов: ${Object.keys(STARYE).length} прежних адресов (×3 написания) уходят ровно туда, куда записано.`,
+    `Переезд адресов: ${Object.keys(STARYE).length} прежних адресов (×3 написания) и ${Object.keys(STARYE_PDF).length} PDF уходят ровно туда, куда записано.`,
   );
 }

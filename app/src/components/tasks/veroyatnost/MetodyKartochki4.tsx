@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { kartinkaMetoda, kartinkaUrl } from './teoriya/metody/GlavaMetoda4';
 import { GLAVA_METODA, glavaPoMetodu } from '@/content/veroyatnost4-metody-teoriya';
+import { kartinkaMetoda } from '@/lib/veroyatnost/metody-kartinki';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 import { teoriyaMetodaHref45 } from '@/lib/veroyatnost/trening/links';
+import { KartinkaMetodaImg } from './KartinkaMetodaImg';
 import './metody-kartochki4.css';
 
 /**
@@ -10,37 +11,32 @@ import './metody-kartochki4.css';
  * на главу метода во вкладке «Теория» (адрес — teoriyaMetodaHref45,
  * якорь из lib/paths.ts); в главе — тренажёр и опорные задачи метода.
  *
- * Стеклянная картинка метода стоит в правом верхнем углу: 96 px на
- * компьютере, 64 px на телефоне. Нет файла картинки — карточка без неё.
+ * Раскладка — как у карточек №5: сверху стеклянная плашка с картинкой
+ * во всю ширину (общие .vmetod--kartinka и .vmetod__kartinka из
+ * app/zadaniya/veroyatnost.css), ниже номер и название, описание и
+ * «Читать теорию →» внизу. Нет картинки метода — карточка без плашки.
  */
 export function MetodyKartochki4() {
   return (
-    <ul className="vmetody__grid m4k-grid">
+    <ul className="vmetody__grid">
       {KLYUCHEVYE_4.map((m) => {
         const glava = glavaPoMetodu(m.id);
-        const kartinka = glava === undefined ? null : kartinkaMetoda(glava.kartinka);
+        const estKartinka = kartinkaMetoda(4, m.id) !== undefined;
         return (
           <li key={m.id}>
             <Link
-              className={kartinka === null ? 'vmetod m4k' : 'vmetod m4k has-kartinka'}
+              className={estKartinka ? 'vmetod vmetod--kartinka m4k' : 'vmetod m4k'}
               href={teoriyaMetodaHref45(4, m.id)}
             >
-              <span className="vmetod__no m4k__no" aria-hidden="true">
+              {estKartinka ? (
+                <span className="vmetod__kartinka">
+                  <KartinkaMetodaImg zadanie={4} id={m.id} alt={glava?.kartinkaAlt ?? ''} />
+                </span>
+              ) : null}
+              <span className="vmetod__no" aria-hidden="true">
                 {m.nomer}
               </span>
               <span className="vmetod__title m4k__title">{m.nazvanie}</span>
-              {kartinka === null || glava === undefined ? null : (
-                <img
-                  className="m4k__kartinka"
-                  src={kartinkaUrl(kartinka.s1)}
-                  srcSet={`${kartinkaUrl(kartinka.s1)} 120w, ${kartinkaUrl(kartinka.s2)} 240w`}
-                  sizes="(max-width: 767px) 64px, 96px"
-                  width={96}
-                  height={96}
-                  alt={glava.kartinkaAlt}
-                  decoding="async"
-                />
-              )}
               <span className="vmetod__sut m4k__sut">{m.opisanie}</span>
               <span className="m4k__chitat">{GLAVA_METODA.chitat}</span>
             </Link>

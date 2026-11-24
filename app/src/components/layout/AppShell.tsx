@@ -1,12 +1,5 @@
 import Image from 'next/image';
-import {
-  BottomNavigation,
-  HandNote,
-  Sidebar,
-  Topbar,
-  type NavGroup,
-  type NavItem,
-} from '@/components/ui';
+import { BottomNavigation, HandNote, Sidebar, type NavGroup, type NavItem } from '@/components/ui';
 import {
   appNavMorePage,
   appNavPrimary,
@@ -14,28 +7,18 @@ import {
   notificationsPage,
   notificationsReady,
   sidebarExtras,
-  topNav,
 } from '@/content/appNav';
 import { taskHasPage, taskHref, taskParts, tasksOf, type ExamTask } from '@/content/tasks';
 import { LevelSwitch } from '@/components/level/LevelSwitch';
 import { levelInfo, type Level } from '@/lib/level';
-import { AuthWidget } from '@/components/auth/AuthWidget';
-import { TemaSwitch } from '@/components/tema/TemaSwitch';
 
 import { assetUrl } from '@/lib/assetUrl';
-import { SiteMenu } from './SiteMenu';
+import { NavIcon } from '@/components/ui/NavIcons';
+import { Shapka } from './Shapka';
 import { levelNav, withActive } from './navUrovnya';
-import { NavSpisok } from './NavSpisok';
-import { isNavGroup, site } from '@/content/site';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
   active?: string;
-  /**
-   * Поле поиска в шапке. По умолчанию выключено: поиск по сайту ещё не
-   * подключён, а поле, которое ничего не ищет, — обещание в никуда.
-   * Поиск по заданиям есть на странице банка.
-   */
-  search?: boolean;
   /**
    * Уровень экзамена: чьи задания в сайдбаре и куда ведут «Задания» и
    * «Собрать вариант». Не задан — профиль; страницы /baza/… передают 'base'.
@@ -85,25 +68,12 @@ function taskGroups(level: Level): NavGroup[] {
  * каждой из них. Ниже 768px сайдбар прячется и его место занимает
  * нижняя панель — пункты у неё те же, что в шапке.
  */
-/* «Варианты» в шапке кабинета — тот же выпадающий список, что в шапке
-   сайта (content/site.ts): «Собрать вариант», «Повышенные» и
-   «Ежемесячные» не стоят тремя отдельными пунктами. */
-const VARIANTY = site.nav.find(isNavGroup);
-const V_SPISKE = new Set(['variant', 'povyshennye', 'ezhemesyachnye']);
-
-export function AppShell({ active, search = false, level = 'profile', children }: AppShellProps) {
+export function AppShell({ active, level = 'profile', children }: AppShellProps) {
   const bottomItems = withActive(
     levelNav([...appNavPrimary, appNavMorePage], level),
     bottomNavActive(active),
   );
   const tasks = tasksOf(level);
-  const vse = withActive(levelNav(topNav, level), active);
-  const verhnee =
-    VARIANTY === undefined
-      ? vse
-      : vse.filter((item) => item.id === 'variant' || !V_SPISKE.has(item.id));
-  const tekushchiy = vse.find((item) => item.active === true && V_SPISKE.has(item.id))?.href;
-
   return (
     <div className="shell shell--responsive app-shell">
       <Sidebar
@@ -137,37 +107,19 @@ export function AppShell({ active, search = false, level = 'profile', children }
       />
 
       <div className="app-col">
-        <Topbar
-          lead={<LevelSwitch className="topbar__level" />}
-          nav={verhnee}
-          {...(VARIANTY === undefined
-            ? {}
-            : {
-                navSlot: {
-                  id: 'variant',
-                  node: (
-                    <NavSpisok
-                      group={VARIANTY}
-                      {...(tekushchiy === undefined ? {} : { currentHref: tekushchiy })}
-                    />
-                  ),
-                },
-              })}
-          search={search}
-          searchPlaceholder="Поиск по заданиям, темам, формулам…"
-          notificationsHref={notificationsPage.href}
-          bell={notificationsReady}
-          /* Аккаунт — настоящий: «Войти» или кружок с инициалами.
-             Выдуманного пользователя в шапке больше нет. */
-          userSlot={
-            <>
-              <TemaSwitch />
-              <AuthWidget variant="app" />
-              {/* Три полоски — то же меню сайта, что в шапке главной: на
-                  узком экране (ниже 1024px) оно не пропадает при переходе
-                  в банк заданий и разделы. */}
-              <SiteMenu />
-            </>
+        {/* Шапка — та же, что у страниц сайта: одно верхнее меню на весь
+            сайт (VerhneeMenu). Логотип и «Профиль / База» на компьютере —
+            в сайдбаре, на телефоне — в шапке. */}
+        <Shapka
+          kabinet
+          current={active}
+          level={level}
+          bell={
+            notificationsReady ? (
+              <a className="bell" href={notificationsPage.href} aria-label="Уведомления">
+                <NavIcon name="notifications" />
+              </a>
+            ) : null
           }
         />
         {children}

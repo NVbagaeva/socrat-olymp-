@@ -111,8 +111,12 @@ PR 4 сделан раньше PR 3: адреса по коду раздела (
 - **Проверки**: `pnpm test:pereezd` (правила совпадают с таблицей, без сборки) и `pnpm test:pereezd-site`
   (настоящий Apache над `out/`: 724 адреса × 3 написания — ровно один 301 на `https://budetege.ru/…`, новый адрес
   живой и не заглушка, `?…` и `#…` переносятся, `/zadaniya/6/…` — 404).
-- **Не сделано в этом PR**: имена PDF в `public/materials/` (раздел 5 плана) — они не под `/zadaniya/`, адреса не
-  менялись.
+- **PDF в `public/materials/`** — следующим PR: папка — код раздела, номер из имени убран
+  (`materials/zadanie-8/zadanie-8-vychisleniya-uchenik.pdf` → `materials/vychisleniya/vychisleniya-uchenik.pdf`,
+  `zadanie-4/Zadanie_4_baza_uchenik.pdf` → `veroyatnost/teoriya-veroyatnostey-baza-uchenik.pdf`). Таблица —
+  `src/content/pereezd/starye-pdf.json` (17 файлов); 301 со старых имён пишет тот же `pnpm build:pereezd`,
+  проверяют `pnpm test:pereezd` и `pnpm test:pereezd-site`. Сборщики PDF берут папку из кода раздела
+  (`kod(N)` из `scripts/lib/adres.mjs`). Содержимое PDF не менялось: номер на обложке — раздел 6.5.
 
 Что появилось в main и в соседних PR после шага 0:
 

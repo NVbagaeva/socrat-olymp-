@@ -205,44 +205,6 @@
   font-size: 14px;
   color: var(--color-text-secondary);
 }
-.z14-zhivoy__svg {
-  width: 100%;
-  max-width: 320px;
-  touch-action: none;
-  cursor: grab;
-  outline-offset: 4px;
-}
-.z14-zhivoy__os {
-  font-family: KaTeX_Main, serif;
-  font-size: 15px;
-  fill: var(--graph-axis, #101728);
-}
-.z14-zhivoy__duga {
-  fill: none;
-  stroke: var(--graph-accent, #e07a2f);
-  stroke-width: 3;
-}
-.z14-zhivoy__ruchka {
-  fill: var(--graph-accent, #e07a2f);
-  opacity: 0.18;
-}
-.z14-zhivoy__dannye {
-  display: grid;
-  gap: var(--space-1);
-  width: 100%;
-}
-.z14-zhivoy__dannye div {
-  display: flex;
-  gap: var(--space-3);
-  justify-content: space-between;
-}
-.z14-zhivoy__dannye dt {
-  color: var(--color-text-secondary);
-}
-.z14-zhivoy__dannye dd {
-  margin: 0;
-}
-
 /* ── Опорные задачи ──────────────────────────────────────────── */
 
 .z14-op-spisok__lead {
@@ -552,9 +514,6 @@
 .z14-inter > * {
   min-width: 0;
   max-width: 100%;
-}
-.z14-zhivoy__svg {
-  justify-self: center;
 }
 
 /* ── Баннер «грустный котик» (KotikBanner14) ─────────────────────

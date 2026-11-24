@@ -104,7 +104,7 @@ sync_files() {
   rm -rf "$stage"
   mkdir -p "$stage/templates" "$stage/migrations" "$stage/catalog"
   cp -R "$LITE_SRC/compose.yml" "$LITE_SRC/compose.ci.yml" "$LITE_SRC/Caddyfile" \
-    "$LITE_SRC/db" "$LITE_SRC/bin" "$LITE_SRC/server" "$stage/"
+    "$LITE_SRC/db" "$LITE_SRC/bin" "$LITE_SRC/server" "$LITE_SRC/notifier" "$stage/"
   cp "$REPO_ROOT"/supabase/templates/*.html "$stage/templates/"
   local n=0 path
   while IFS= read -r path; do

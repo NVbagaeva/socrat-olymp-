@@ -15,6 +15,7 @@ name: Lite server
 #   проверка восстановления в пустую базу и восстановление на «сервер»;
 #   проверка здоровья снаружи и изнутри, таймеры systemd;
 #   SSH-туннель к базе: только порт 5432, без оболочки;
+#   рассыльщик уведомлений: письмо в Mailpit и «Отписаться»;
 #   shellcheck всех скриптов.
 #
 # Секреты создаются на машине CI и живут до конца запуска.
@@ -51,6 +52,10 @@ jobs:
           node app/scripts/check-infra-secrets.mjs --self-test
           node app/scripts/check-infra-secrets.mjs
 
+      # Письма, SMTP, цикл и «Отписаться» — с поддельными SMTP и PostgREST.
+      - name: Рассыльщик без базы и почты
+        run: node infra/lite/notifier/check.mjs
+
       - name: Проверить скрипты
         run: |
           command -v shellcheck >/dev/null || sudo apt-get install -y -q shellcheck
@@ -75,6 +80,8 @@ jobs:
       MAIL_SMTP_HOST: 127.0.0.1
       MAIL_SMTP_PORT: '1025'
       MAIL_NO_AUTH: '1'
+      # Рассыльщик в CI проходит очередь каждые 3 секунды, а не раз в минуту.
+      NOTIFIER_INTERVAL_MS: '3000'
       S3_ENDPOINT: http://127.0.0.1:9000
       S3_REGION: us-east-1
       S3_BUCKET: budetege-backups
@@ -231,6 +238,37 @@ jobs:
           test "$code" = 200
           ! sudo grep -F "SERVICE_ROLE_KEY='$(cat "$SITE_KEY_OUT/NEXT_PUBLIC_SUPABASE_ANON_KEY")'" /opt/budetege-api/.env.generated
           rm -rf "$SITE_KEY_OUT"
+
+      # Рассыльщик (docs/kabinet-uvedomleniya.md, PR 3в): письмо из
+      # очереди уходит в Mailpit с «Отписаться» в заголовках, отписка по
+      # ссылке через Caddy выключает письма, в журнал не попадает адрес.
+      - name: Рассыльщик — письмо и «Отписаться»
+        run: |
+          psql_db() { sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -v ON_ERROR_STOP=1 -tAc "$1"; }
+          uid=$(psql_db "select id from auth.users where email = 'seed1@example.test'")
+          test -n "$uid"
+          psql_db "insert into public.kabinet_flags (key, value) values ('uvedomleniya', 'true'), ('uvedomleniya_kanaly', '[\"pochta\"]') on conflict (key) do update set value = excluded.value"
+          psql_db "insert into public.notify_outbox (user_id, channel, event, dedupe_key, send_after) values ('$uid', 'pochta', 'dz_novoe', 'ci:notifier', now())"
+          st=''
+          for _ in $(seq 1 40); do
+            st=$(psql_db "select status from public.notify_outbox where dedupe_key = 'ci:notifier'")
+            [ "$st" = sent ] && break
+            sleep 3
+          done
+          test "$st" = sent
+          id=$(curl -s --get --data-urlencode 'query=to:seed1@example.test subject:"Новое ДЗ"' http://127.0.0.1:8025/api/v1/search | jq -er '.messages[0].ID')
+          curl -s "http://127.0.0.1:8025/api/v1/message/$id/headers" | jq -e '(."List-Unsubscribe"[0] | startswith("<https://api.lite.test/otpiska?u=")) and ."List-Unsubscribe-Post"[0] == "List-Unsubscribe=One-Click"'
+          test "$(psql_db "select result from public.notify_log where outbox_id = (select id from public.notify_outbox where dedupe_key = 'ci:notifier')")" = sent
+          ! psql_db "select detail from public.notify_log" | grep -i 'example.test'
+          # «Отписаться»: чужая подпись — 400; GET ничего не меняет; POST выключает письма.
+          t=$(psql_db "select public.notify_podpis('$uid')")
+          api() { curl -s -k -o /dev/null -w '%{http_code}' "$@"; }
+          test "$(api "https://api.lite.test/otpiska?u=$uid&t=00000000000000000000000000000000" -X POST)" = 400
+          test "$(api "https://api.lite.test/otpiska?u=$uid&t=$t")" = 200
+          test -z "$(psql_db "select digest from public.notify_prefs where user_id = '$uid'")"
+          test "$(api "https://api.lite.test/otpiska?u=$uid&t=$t" -X POST -d 'List-Unsubscribe=One-Click')" = 200
+          test "$(psql_db "select digest || ' ' || (kanaly -> 'dz_novoe' ->> 'pochta') from public.notify_prefs where user_id = '$uid'")" = 'off false'
+          psql_db "update public.kabinet_flags set value = 'false' where key = 'uvedomleniya'"
 
       - name: Копия базы и письмо о её сбое
         run: |

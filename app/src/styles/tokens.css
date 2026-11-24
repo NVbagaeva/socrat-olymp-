@@ -581,10 +581,9 @@
   --flow-block: var(--space-6);
   --flow-section: var(--space-10);
 
-  --h-site-head: 72px;
-  /* Шапка после начала прокрутки (site.css, .site-head[data-compact]):
-     ниже, место под ней в потоке остаётся --h-site-head. */
-  --h-site-head-compact: 60px;
+  /* Шапка — одна на весь сайт и в кабинете (verh-menu.css), на
+     прокрутке не сжимается. */
+  --h-site-head: 64px;
   --h-control-sm: 36px;
   --h-control: 44px;
   --h-control-lg: 52px;

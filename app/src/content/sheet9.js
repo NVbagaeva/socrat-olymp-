@@ -113,10 +113,10 @@ export const ekran = {
 
 /** Названия файлов сборника — для сборки PDF. */
 export const files = {
-  uchenik: 'zadanie-9-proizvodnaya-uchenik',
-  uchenikChb: 'zadanie-9-proizvodnaya-uchenik-chb',
-  uchitel: 'zadanie-9-proizvodnaya-uchitel',
-  uchitelChb: 'zadanie-9-proizvodnaya-uchitel-chb',
+  uchenik: 'proizvodnaya-uchenik',
+  uchenikChb: 'proizvodnaya-uchenik-chb',
+  uchitel: 'proizvodnaya-uchitel',
+  uchitelChb: 'proizvodnaya-uchitel-chb',
 };
 
 /** Лист учителя в «Всё одним файлом» генератора: к подзаголовку. */

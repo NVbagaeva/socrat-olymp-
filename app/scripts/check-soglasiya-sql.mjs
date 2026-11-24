@@ -282,6 +282,22 @@ const SUITES = [
     ],
   },
   {
+    /* Уведомления, почта (PR 3в): рассыльщик забирает пачку,
+       перепроверяет и отменяет ненужное, повторы и «не отправлено»,
+       зависшие возвращаются, «Отписаться» по подписи без входа, сводка
+       учителю в 19:00 без дублей; функции — только сервер. */
+    name: 'Уведомления: почта',
+    db: 'uvedomleniya_pochta',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['uvedomleniya-pochta.test.sql', path.join(SUPA, 'tests', 'uvedomleniya-pochta.test.sql')],
+    ],
+  },
+  {
     /* Регистрация только с почтой российских почтовых сервисов: хук,
        триггер, смена почты, ручной список, старые пользователи
        (supabase/tests/domeny.test.sql). Без добавленного x.ru. */
