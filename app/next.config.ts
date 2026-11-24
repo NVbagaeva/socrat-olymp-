@@ -46,8 +46,10 @@ const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 const ILLYUSTRACII = [
   '/images/zadanie-11/gorod-',
   '/images/zadanie-05/metod-',
-  '/images/zadanie-04/metod-',
 ];
+
+/** Картинки глав методов №4 — своей таблицей версий (METODY4_ASSET_VERSIONS). */
+const METODY4 = ['/images/zadanie-04/metody/', '/images/zadanie-04/primery/'];
 
 const nextConfig: NextConfig = {
   ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
@@ -120,6 +122,11 @@ const nextConfig: NextConfig = {
         ? '1'
         : '0',
     DZ2_RAZDELY: process.env.NEXT_PUBLIC_DZ2_RAZDELY || '5,8',
+    // Уведомления (docs/kabinet-uvedomleniya.md): колокольчик и настройки; только при входе.
+    UVEDOMLENIYA_ON:
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' && process.env.NEXT_PUBLIC_UVEDOMLENIYA === '1'
+        ? '1'
+        : '0',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
     // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,
@@ -128,6 +135,9 @@ const nextConfig: NextConfig = {
     // DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts. И картинки
     // шапок разделов (public/images/shapki/): SHAPKI_ASSET_VERSIONS, адреса
     // считает серверная шапка (SectionHeader), в браузер таблица не идёт.
+    // Так же — картинки карточек и задач глав методов №4
+    // (public/images/zadanie-04/metody/, …/primery/): METODY4_ASSET_VERSIONS,
+    // адреса считают серверные GlavaMetoda4 и MetodyKartochki4.
     ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(
@@ -136,6 +146,7 @@ const nextConfig: NextConfig = {
             !file.startsWith('/data/') &&
             !file.startsWith('/images/zadachi/') &&
             !file.startsWith('/images/shapki/') &&
+            !METODY4.some((dir) => file.startsWith(dir)) &&
             !ILLYUSTRACII.some((prefix) => file.startsWith(prefix)),
         ),
       ),
@@ -153,6 +164,11 @@ const nextConfig: NextConfig = {
     SHAPKI_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/shapki/')),
+      ),
+    ),
+    METODY4_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) => METODY4.some((dir) => file.startsWith(dir))),
       ),
     ),
     INTRO_ASSET_VERSIONS: JSON.stringify(

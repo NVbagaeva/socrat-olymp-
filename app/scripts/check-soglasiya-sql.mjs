@@ -265,6 +265,23 @@ const SUITES = [
     ],
   },
   {
+    /* Уведомления (docs/kabinet-uvedomleniya.md): события ДЗ →
+       колокольчик и очередь отправки, напоминания за 24 и 3 ч только
+       несдавшим и без дублей, перенос дедлайна, закрытое ДЗ, «срок» и «не
+       сдали», тихие часы в поясе получателя, настройки, флаги; чужое не
+       читается, очередь не видна, notify_tick — только сервер. */
+    name: 'Уведомления',
+    db: 'uvedomleniya',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['uvedomleniya.test.sql', path.join(SUPA, 'tests', 'uvedomleniya.test.sql')],
+    ],
+  },
+  {
     /* Регистрация только с почтой российских почтовых сервисов: хук,
        триггер, смена почты, ручной список, старые пользователи
        (supabase/tests/domeny.test.sql). Без добавленного x.ru. */
@@ -326,5 +343,5 @@ for (const suite of SUITES) {
 stop();
 if (failed) process.exit(1);
 console.log(
-  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8, журнал, новая выдача ДЗ, почтовые домены и устный счёт в базе: все проверки прошли.',
+  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8, журнал, новая выдача ДЗ, уведомления, почтовые домены и устный счёт в базе: все проверки прошли.',
 );

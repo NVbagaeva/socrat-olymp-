@@ -1,0 +1,660 @@
+/* Главы ключевых методов задания №4 во вкладке «Теория». Префиксы:
+   m4g- — глава, m4i- — интерактивы. Рамки раскрашены токенами
+   «Справочника по планиметрии» (--color-spr-*): у каждой роли свой цвет,
+   а форма — плашка с названием на верхней кромке. */
+
+.m4g {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+.m4g-blok {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  scroll-margin-top: 96px;
+}
+.m4g-h {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.m4g-p {
+  margin: 0;
+  line-height: var(--lh-body);
+}
+.m4g-p--sub {
+  color: var(--color-text-secondary);
+}
+.m4g-slova {
+  list-style: disc;
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: var(--lh-body);
+}
+.m4g-formula {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: var(--space-1) 0;
+}
+.m4g-formula .katex-display {
+  margin: var(--space-2) 0;
+}
+.m4g-podpis {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-small, 0.9375rem);
+  line-height: 1.5;
+}
+
+/* ── Рамки ─────────────────────────────────────────────────────────── */
+
+.m4g-ramka {
+  --m4-cvet: var(--color-spr-def);
+  --m4-fon: var(--color-spr-def-soft);
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  margin-top: var(--space-3);
+  padding: var(--space-6) var(--space-5) var(--space-4);
+  border: 1px solid var(--m4-cvet);
+  border-radius: var(--radius-lg);
+  background: var(--m4-fon);
+  color: var(--color-text);
+}
+.m4g-ramka--formula {
+  --m4-cvet: var(--color-spr-teo);
+  --m4-fon: var(--color-spr-teo-soft);
+}
+.m4g-ramka--algoritm {
+  --m4-cvet: var(--color-spr-svo);
+  --m4-fon: var(--color-spr-svo-soft);
+}
+.m4g-ramka--primer {
+  --m4-cvet: var(--color-spr-primer);
+  --m4-fon: var(--color-surface);
+  border-style: dashed;
+}
+.m4g-ramka--oshibka {
+  --m4-cvet: var(--color-spr-vaz);
+  --m4-fon: var(--color-spr-vaz-soft);
+}
+.m4g-ramka--layfhak {
+  --m4-cvet: var(--color-spr-priem);
+  --m4-fon: var(--color-spr-priem-soft);
+}
+.m4g-ramka__label {
+  position: absolute;
+  top: calc(-1 * var(--space-3));
+  left: var(--space-3);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--m4-cvet);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.m4g-ramka__title {
+  margin: 0;
+  color: var(--m4-cvet);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1.35;
+}
+.m4g-ramka .m4g-formula {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.m4g-ramka--primer .m4g-formula {
+  background: var(--color-surface-soft);
+}
+
+/* Пример под правилом: у правила всегда есть разобранный случай. */
+.m4g-ramka__primer {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--m4-cvet, var(--color-spr-primer));
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--color-surface);
+  line-height: var(--lh-body);
+}
+.m4g-blok > .m4g-ramka__primer {
+  --m4-cvet: var(--color-spr-primer);
+  background: var(--color-surface-soft);
+}
+.m4g-ramka__primer-label {
+  font-weight: 700;
+  color: var(--m4-cvet, var(--color-spr-primer));
+}
+
+/* Алгоритм — номера в кружках. */
+.m4g-algoritm {
+  counter-reset: m4g;
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  line-height: var(--lh-body);
+}
+.m4g-algoritm > li {
+  counter-increment: m4g;
+  position: relative;
+  padding-left: var(--space-8);
+}
+.m4g-algoritm > li::before {
+  content: counter(m4g);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--m4-cvet);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--m4-cvet);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+}
+
+/* ── Разобранная задача ────────────────────────────────────────────── */
+
+.m4g-zadacha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'title'
+    'uslovie'
+    'reshenie';
+  gap: var(--space-3) var(--space-5);
+  min-width: 0;
+}
+.m4g-zadacha.has-kartinka {
+  grid-template-columns: minmax(0, 1fr) 180px;
+  grid-template-areas:
+    'title kartinka'
+    'uslovie kartinka'
+    'reshenie reshenie';
+}
+.m4g-zadacha__title {
+  grid-area: title;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.m4g-zadacha__no {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+}
+.m4g-zadacha__kartinka {
+  grid-area: kartinka;
+  align-self: start;
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+}
+.m4g-zadacha__uslovie {
+  grid-area: uslovie;
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.m4g-zadacha__reshenie {
+  grid-area: reshenie;
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.m4g-zadacha__sub {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.m4g-shagi {
+  list-style: decimal;
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: var(--lh-body);
+}
+.m4g-shag {
+  min-width: 0;
+}
+.m4g-shag::marker {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.m4g-otvet,
+.m4g-proverka {
+  margin: 0;
+  line-height: var(--lh-body);
+}
+.m4g-otvet {
+  justify-self: start;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-spr-def-soft);
+  color: var(--color-text-brand);
+}
+.m4g-proverka b {
+  color: var(--color-spr-svo);
+}
+@media (max-width: 639px) {
+  .m4g-zadacha.has-kartinka {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'title'
+      'kartinka'
+      'uslovie'
+      'reshenie';
+  }
+  .m4g-zadacha__kartinka {
+    justify-self: center;
+    width: 120px;
+    height: 120px;
+  }
+  .m4g-ramka {
+    padding-inline: var(--space-4);
+  }
+}
+
+/* ── Типичные ошибки ───────────────────────────────────────────────── */
+
+.m4g-oshibka {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+.m4g-oshibka__ryad {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.m4g-oshibka__ryad dt {
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+.m4g-oshibka__ryad dd {
+  margin: 0;
+  line-height: var(--lh-body);
+  min-width: 0;
+}
+.m4g-oshibka__ryad--ne dt {
+  color: var(--color-spr-vaz);
+}
+.m4g-oshibka__ryad--da dt {
+  color: var(--color-spr-svo);
+}
+@media (max-width: 639px) {
+  .m4g-oshibka__ryad {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+}
+
+/* ── Кнопки главы ──────────────────────────────────────────────────── */
+
+.m4g-knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+@media (max-width: 479px) {
+  .m4g-knopki > .btn {
+    flex: 1 1 100%;
+  }
+}
+
+/* ── Интерактивы ───────────────────────────────────────────────────── */
+
+.m4i {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(160deg, var(--blue-50, #eef5ff), var(--color-surface));
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-info),
+    0 8px 24px -18px rgba(30, 80, 160, 0.45);
+  min-width: 0;
+}
+.m4i-itog {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2) var(--space-4);
+  min-height: 56px;
+  text-align: center;
+}
+.m4i-itog__podpis {
+  color: var(--color-text-secondary);
+}
+.m4i-itog__formula {
+  font-size: 1.15rem;
+}
+.m4i-mat {
+  font-family: KaTeX_Main, 'Times New Roman', serif;
+  font-size: 1.2rem;
+}
+.m4i-chislo {
+  /* Размер и шрифт — как у KaTeX рядом (.katex: 1.21em, KaTeX_Main). */
+  font-family: KaTeX_Main, 'Times New Roman', serif;
+  font-size: 1.21em;
+  font-variant-numeric: tabular-nums;
+}
+.m4i-vybor {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+.m4i-chip {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-brand);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+.m4i-chip.is-on {
+  border-color: #e98a32;
+  background: #fff3e6;
+  color: #8a4a05;
+  font-weight: 600;
+}
+.m4i-chip:focus-visible,
+.m4i-sharik:focus-visible,
+.m4i-list:focus-visible,
+.m4i-stul:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Стеклянные шарики на подносе. */
+.m4i-shariki__podnos {
+  display: grid;
+  grid-template-columns: repeat(5, 44px);
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: 999px;
+  background: radial-gradient(
+    ellipse at 40% 30%,
+    rgba(255, 255, 255, 0.9),
+    rgba(190, 215, 250, 0.55)
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(120, 165, 230, 0.6),
+    inset 0 -6px 14px rgba(120, 165, 230, 0.35);
+}
+.m4i-sharik {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 28%,
+    #fff 0 12%,
+    #d6e7ff 30%,
+    #8db6ec 72%,
+    #5f92d6 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 3px 6px rgba(40, 90, 170, 0.25);
+  cursor: pointer;
+  transition: transform 160ms ease;
+}
+.m4i-sharik:hover {
+  transform: translateY(-2px);
+}
+.m4i-sharik.is-da {
+  background: radial-gradient(
+    circle at 32% 28%,
+    #fff 0 12%,
+    #ffe1b8 30%,
+    #f7a64a 72%,
+    #d9781c 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 240, 220, 0.8),
+    0 0 14px rgba(245, 150, 50, 0.55);
+}
+@media (max-width: 379px) {
+  .m4i-shariki__podnos {
+    grid-template-columns: repeat(5, 36px);
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+  }
+  .m4i-sharik {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Таблица 6×6. */
+.m4i-kosti__ramka {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.m4i-tablica {
+  border-collapse: separate;
+  border-spacing: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.m4i-tablica th {
+  padding: var(--space-1);
+  color: var(--color-text-brand);
+  font-weight: 700;
+}
+.m4i-tablica__ugol {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.m4i-tablica td {
+  width: 44px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(120, 165, 230, 0.45);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  text-align: center;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.m4i-tablica td.is-da {
+  background: #ffd29e;
+  box-shadow:
+    inset 0 0 0 1px #e98a32,
+    0 0 10px rgba(245, 150, 50, 0.45);
+  color: #6b3800;
+  font-weight: 700;
+}
+@media (max-width: 379px) {
+  .m4i-tablica td {
+    width: 36px;
+    height: 32px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Дерево бросков. */
+.m4i-derevo__ramka {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.m4i-derevo__svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.m4i-derevo__vetka {
+  stroke: #7ea7e2;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.m4i-derevo__bukva {
+  fill: var(--color-text-brand);
+  font-size: 13px;
+  font-weight: 700;
+}
+.m4i-derevo__uzel {
+  fill: #e9f2ff;
+  stroke: #5f92d6;
+  stroke-width: 2;
+}
+.m4i-list {
+  cursor: pointer;
+}
+.m4i-list rect {
+  fill: #fff;
+  stroke: #7ea7e2;
+  stroke-width: 1.5;
+}
+.m4i-list text {
+  fill: var(--color-text-brand);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.m4i-list.is-da rect {
+  fill: #ffd29e;
+  stroke: #e98a32;
+  filter: drop-shadow(0 0 5px rgba(245, 150, 50, 0.6));
+}
+.m4i-list.is-da text {
+  fill: #6b3800;
+}
+
+/* Круглый стол. */
+.m4i-stol__svg,
+.m4i-disk__svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  touch-action: none;
+}
+.m4i-stol__stol {
+  stroke: #8db6ec;
+  stroke-width: 2;
+}
+.m4i-stul {
+  cursor: pointer;
+}
+.m4i-stul circle {
+  fill: #f4f8ff;
+  stroke: #9dbbe4;
+  stroke-width: 2;
+  transition:
+    fill 160ms ease,
+    stroke 160ms ease;
+}
+.m4i-stul.is-mozhno circle {
+  fill: #dbeaff;
+  stroke: #4f86d6;
+  filter: drop-shadow(0 0 4px rgba(79, 134, 214, 0.55));
+}
+.m4i-stul.is-sosed circle {
+  fill: #ffd29e;
+  stroke: #e98a32;
+  filter: drop-shadow(0 0 6px rgba(245, 150, 50, 0.65));
+}
+.m4i-stul.is-alisa circle {
+  fill: #1f56bb;
+  stroke: #163f8a;
+}
+.m4i-stul text {
+  fill: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Стеклянный диск. */
+.m4i-disk__svg {
+  cursor: grab;
+}
+.m4i-disk__ves {
+  stroke: #8db6ec;
+  stroke-width: 2;
+}
+.m4i-disk__sektor {
+  stroke: #e98a32;
+  stroke-width: 1.5;
+}
+.m4i-disk__granica {
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.m4i-disk__ruchka {
+  fill: #fff;
+  stroke: #e98a32;
+  stroke-width: 3;
+}
+.m4i-disk__polzunok {
+  width: min(280px, 100%);
+}
+.m4i-disk__polzunok input {
+  width: 100%;
+  accent-color: #e98a32;
+}
+.m4i-disk__a {
+  color: #8a4a05;
+}
+.m4i-disk__na {
+  color: var(--color-text-brand);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m4i-sharik,
+  .m4i-tablica td,
+  .m4i-stul circle {
+    transition: none;
+  }
+  .m4i-sharik:hover {
+    transform: none;
+  }
+}
+
+/* Клик мышью по стулу или листу дерева не рисует рамку фокуса:
+   она остаётся только для клавиатуры (:focus-visible выше). */
+.m4i-stul:focus:not(:focus-visible),
+.m4i-list:focus:not(:focus-visible) {
+  outline: none;
+}

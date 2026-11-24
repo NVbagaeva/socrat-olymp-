@@ -45,6 +45,9 @@ jobs:
           # Новая выдача ДЗ: те же Variables, что у сборки сайта.
           DZ_NOVYE: ${{ vars.NEXT_PUBLIC_DZ2 }}
           DZ_NOVYE_RAZDELY: ${{ vars.NEXT_PUBLIC_DZ2_RAZDELY }}
+          # Уведомления: флаг сайта и каналы очереди отправки (pochta, push).
+          UVEDOMLENIYA: ${{ vars.NEXT_PUBLIC_UVEDOMLENIYA }}
+          UVEDOMLENIYA_KANALY: ${{ vars.UVEDOMLENIYA_KANALY }}
         run: infra/lite/actions/migrate.sh
 
       - name: Письмо о сбое
