@@ -158,7 +158,7 @@ jobs:
         with:
           name: zadanie-12-pdf
           path: |
-            app/public/materials/zadanie-12/*.pdf
+            app/public/materials/grafiki-funkciy/*.pdf
             app/pdf-private/*.pdf
           if-no-files-found: error
           retention-days: 90
@@ -177,11 +177,11 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/public/materials/zadanie-12
+          git add app/public/materials/grafiki-funkciy
           # Сравнивать надо индекс, а не рабочее дерево: файлы могут
           # быть новыми, а git diff неотслеживаемых не видит и молча
           # сообщает, что менять нечего.
-          if git diff --cached --quiet -- app/public/materials/zadanie-12; then
+          if git diff --cached --quiet -- app/public/materials/grafiki-funkciy; then
             echo "файлы не менялись"
             exit 0
           fi

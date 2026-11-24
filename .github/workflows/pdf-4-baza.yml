@@ -121,8 +121,8 @@ jobs:
         with:
           name: zadanie-4-baza-pdf
           path: |
-            app/public/materials/zadanie-4/Zadanie_4_baza_uchenik.pdf
-            app/pdf-private/Zadanie_4_baza_uchitel.pdf
+            app/public/materials/veroyatnost/teoriya-veroyatnostey-baza-uchenik.pdf
+            app/pdf-private/teoriya-veroyatnostey-baza-uchitel.pdf
           if-no-files-found: error
           retention-days: 90
 
@@ -134,10 +134,10 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/public/materials/zadanie-4/Zadanie_4_baza_uchenik.pdf
+          git add app/public/materials/veroyatnost/teoriya-veroyatnostey-baza-uchenik.pdf
           # Сравнивать надо индекс, а не рабочее дерево: файл может
           # быть новым, а git diff неотслеживаемых не видит.
-          if git diff --cached --quiet -- app/public/materials/zadanie-4; then
+          if git diff --cached --quiet -- app/public/materials/veroyatnost; then
             echo "файл не менялся"
             exit 0
           fi
