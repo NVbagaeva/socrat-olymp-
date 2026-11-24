@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { useYakorProkrutki } from '@/components/zhivye/yakorProkrutki';
 import { VSTRECHA11 } from '@/content/tekstovye11';
 
 /**
@@ -11,6 +12,7 @@ import { VSTRECHA11 } from '@/content/tekstovye11';
  */
 export function Vstrecha11Lazy() {
   const yakor = useRef<HTMLDivElement>(null);
+  useYakorProkrutki(yakor);
   const [Scena, setScena] = useState<ComponentType | null>(null);
 
   useEffect(() => {

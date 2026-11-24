@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { useYakorProkrutki } from './yakorProkrutki';
 
 /**
  * Ленивая загрузка живой сцены: код сцены, её стили и KaTeX приходят
@@ -25,6 +26,7 @@ export function ZhivayaLazy<P extends object = Record<string, never>>({
   vysota: { uzko: number; shiroko: number };
 }) {
   const yakor = useRef<HTMLDivElement>(null);
+  useYakorProkrutki(yakor);
   const [Scena, setScena] = useState<ComponentType<P> | null>(null);
 
   useEffect(() => {

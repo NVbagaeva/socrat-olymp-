@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { useYakorProkrutki } from '@/components/zhivye/yakorProkrutki';
 import { MYACH10 } from '@/content/zhivye10';
 
 /**
@@ -11,6 +12,7 @@ import { MYACH10 } from '@/content/zhivye10';
  */
 export function MyachLazy() {
   const yakor = useRef<HTMLDivElement>(null);
+  useYakorProkrutki(yakor);
   const [Scena, setScena] = useState<ComponentType | null>(null);
 
   useEffect(() => {

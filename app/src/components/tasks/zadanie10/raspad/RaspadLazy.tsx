@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { useYakorProkrutki } from '@/components/zhivye/yakorProkrutki';
 import { RASPAD10 } from '@/content/zhivye10';
 
 /**
@@ -11,6 +12,7 @@ import { RASPAD10 } from '@/content/zhivye10';
  */
 export function RaspadLazy() {
   const yakor = useRef<HTMLDivElement>(null);
+  useYakorProkrutki(yakor);
   const [Scena, setScena] = useState<ComponentType | null>(null);
 
   useEffect(() => {
