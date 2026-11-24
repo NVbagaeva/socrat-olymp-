@@ -219,20 +219,27 @@ export function obrabotchik(cfg, sostoyanie) {
 export function zapustit(cfg = nastroyki()) {
   const sostoyanie = { posledniyUspeh: Date.now(), stop: false };
   const server = http.createServer(obrabotchik(cfg, sostoyanie));
-  server.listen(cfg.httpPort, '0.0.0.0');
+  // Без адреса — на всех (IPv6 и IPv4, где IPv6 нет — только IPv4).
+  server.listen(cfg.httpPort);
   if (!cfg.klyuch) log('Нет SERVICE_ROLE_KEY — рассыльщик не может ходить в базу.');
   if (!pochtaEst(cfg)) log('Почта не настроена (SMTP_USER/SMTP_PASS) — только колокольчик и напоминания.');
   let taymer = null;
+  // Одна и та же ошибка (например, до первых миграций функции ещё нет)
+  // пишется в журнал один раз, а не каждую минуту.
+  let proshlayaOshibka = null;
   const cikl = async () => {
     if (sostoyanie.stop) return;
     try {
       const it = await prohod(cfg);
       sostoyanie.posledniyUspeh = Date.now();
+      if (proshlayaOshibka !== null) log('проход снова удаётся');
+      proshlayaOshibka = null;
       if (it.sent + it.povtor + it.failed > 0) {
         log(`писем: отправлено ${it.sent}, повтор ${it.povtor}, не ушло ${it.failed}`);
       }
     } catch (e) {
-      log('проход не удался:', e.message);
+      if (e.message !== proshlayaOshibka) log('проход не удался:', e.message);
+      proshlayaOshibka = e.message;
     }
     if (!sostoyanie.stop) taymer = setTimeout(cikl, cfg.intervalMs);
   };
