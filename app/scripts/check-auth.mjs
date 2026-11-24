@@ -106,6 +106,8 @@ const ZHURNAL_ON = process.env.NEXT_PUBLIC_ZHURNAL === '1';
 /* Сборка с экранами прогресса (NEXT_PUBLIC_PROGRESS_UCHITEL=1 и _UCHENIK=1). */
 /* Сборка с новой выдачей ДЗ (NEXT_PUBLIC_DZ2=1). */
 const DZ2_ON = process.env.NEXT_PUBLIC_DZ2 === '1';
+/* Разделы выдачи на этой сборке (этап 4): сценарий №4 и теории — при 4 и 9. */
+const DZ2_RAZDELY = (process.env.NEXT_PUBLIC_DZ2_RAZDELY || '5,8').split(',').map((x) => Number(x.trim()));
 const UVED_ON = process.env.NEXT_PUBLIC_UVEDOMLENIYA === '1';
 /* Сборка с push (NEXT_PUBLIC_UVEDOMLENIYA_PUSH=1, PR 3г). */
 const PUSH_ON = UVED_ON && process.env.NEXT_PUBLIC_UVEDOMLENIYA_PUSH === '1';
@@ -3763,10 +3765,82 @@ async function runDz2() {
 
   await runDz2Uchenik(mock, errors, snap);
   await runDz2Itogi(mock, errors, snap);
+  if (DZ2_RAZDELY.includes(4) && DZ2_RAZDELY.includes(9)) await runDz2Etap4(mock, errors, snap);
   check(
     errors.length === 0,
     `ДЗ: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`,
   );
+}
+
+/* ── Этап 4а: опорные №4 и «В домашку» у глав теории ────────────────
+   Сборка с NEXT_PUBLIC_DZ2_RAZDELY=4,5,8,9. Учитель кладёт блок опорных
+   №4 (задачи с ответами, сложность базовая) и главу теории №9 — у каждой
+   написанной главы своя кнопка; в разделе вне выдачи (№7) кнопок нет;
+   ученик их не видит. */
+async function runDz2Etap4(mock, errors, snap) {
+  const NORM = /^-?[0-9]+(\.[0-9]+)?$/;
+  const { prep4Pool } = requireSrc('lib/veroyatnost/pool.ts');
+  const blok4 = prep4Pool()[0];
+  for (const width of [375, 1280]) {
+    const { context, page } = await newPage(mock, width, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+    await page.evaluate(() => {
+      for (const k of Object.keys(localStorage)) if (k.includes('dz2')) localStorage.removeItem(k);
+    });
+
+    await page.goto(`${SITE}/zadaniya/veroyatnost/opornye-zadachi/${blok4.id}/`, { waitUntil: 'networkidle' });
+    await page.locator('.dz2-ryad .dz2-knopka__glavnaya').click();
+    await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
+    await snap(page, 'opornye4', width);
+
+    await page.goto(`${SITE}/zadaniya/proizvodnaya/teoriya/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.vteor-razdel .dz2-knopka__glavnaya');
+    const glavy = await page.locator('.vteor-razdel:not(.is-skoro)').count();
+    const knopki = await page.locator('.vteor-razdel .dz2-knopka__glavnaya').count();
+    check(knopki > 0 && knopki <= glavy, `ДЗ 4а ${width}: у глав теории №9 кнопки (${knopki} из ${glavy})`);
+    const pervaya = page.locator('.vteor-razdel').filter({ has: page.locator('.dz2-knopka__glavnaya') }).first();
+    const glavaId = (await pervaya.getAttribute('id')).replace(/^teoriya-/, '');
+    await pervaya.locator('.dz2-knopka__glavnaya').click();
+    await pervaya.locator('.dz2-knopka__glavnaya[aria-pressed="true"]').waitFor();
+    check(await noHorizontalScroll(page), `ДЗ 4а ${width}: теория №9 без горизонтальной прокрутки`);
+    if (SHOTS !== null) {
+      /* Теория длинная: снимок — экран у первой главы с кнопкой, а не вся страница. */
+      await pervaya.locator('.vteor-razdel__title').evaluate((el) => el.scrollIntoView({ block: 'start' }));
+      await page.evaluate(() => window.scrollBy(0, -90));
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({ path: path.join(SHOTS, `dz2-teoriya9-${width}.png`),
+        style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+    }
+
+    await page.goto(`${SITE}/zadaniya/uravneniya/teoriya/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.vteor-razdel');
+    check((await page.locator('.dz2-knopka').count()) === 0, `ДЗ 4а ${width}: в теории №7 (вне выдачи) кнопок нет`);
+
+    const korz = await page.evaluate(() => {
+      for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
+      return null;
+    });
+    const el = JSON.parse(korz ?? '{}').elementy ?? [];
+    const op4 = el.find((e) => e.key === `opornye:4:${blok4.id}`);
+    const t9 = el.find((e) => e.key === `teoriya:9:${glavaId}`);
+    check(
+      op4 !== undefined && op4.task_no === 4 && op4.tasks.length > 0 &&
+        op4.tasks.every((t) => NORM.test(t.answer) && t.level === 1),
+      `ДЗ 4а ${width}: опорные №4 в корзине, ответы и базовая сложность (${op4?.tasks?.length})`,
+    );
+    check(t9 !== undefined && t9.vid === 'teoriya' && t9.task_no === 9 && t9.spec.glava === glavaId,
+      `ДЗ 4а ${width}: глава теории №9 в корзине`);
+    await context.close();
+  }
+
+  const { context, page } = await newPage(mock, 375, errors);
+  await welcomeSeen(context);
+  await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
+  await page.goto(`${SITE}/zadaniya/proizvodnaya/teoriya/`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('.vteor-razdel');
+  check((await page.locator('.dz2-knopka').count()) === 0, 'ДЗ 4а: ученик не видит «В домашку» у теории');
+  await context.close();
 }
 
 /* ── Итоги ДЗ у учителя (PR 2г) ────────────────────────────────────

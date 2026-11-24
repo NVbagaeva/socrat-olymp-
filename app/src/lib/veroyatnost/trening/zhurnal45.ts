@@ -1,10 +1,11 @@
 /**
  * №4 и №5 в журнале решения задач (docs/kabinet-zhurnal.md). Задачи —
  * из банка, id «прототип:вариант»: по нему учитель видит ту же задачу.
- * Пишется только раздел из флага журнала (сейчас — №5).
+ * Пишется только раздел из флага журнала.
  */
 
 import { idIz, otpechatokUsloviya, type Mesto, type NovayaZadacha } from '@/lib/zhurnal/model';
+import { urovenZadachi } from '@/lib/zhurnal/uroven';
 import type { Zadanie45 } from './links';
 
 export interface Zadacha45Dlya {
@@ -33,8 +34,8 @@ export function zhurnal45(
     task_ref: z.id,
     place,
     place_ref: placeRef,
-    /* №5 — задача повышенного уровня в ЕГЭ, №4 — базового (решение В-7). */
-    level: zadanie === 5 ? 2 : 1,
+    /* №5 — повышенная, №4 — базовая (решение В-7, lib/zhurnal/uroven.ts). */
+    level: urovenZadachi(zadanie),
     gen_hash: otpechatokUsloviya(z.uslovie),
     ...(z.uslovie.length <= 2000 ? { uslovie_tex: z.uslovie } : {}),
     ...(risunokIz(z) === undefined ? {} : { risunok: risunokIz(z) }),

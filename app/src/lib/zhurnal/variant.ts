@@ -12,6 +12,7 @@
  * разделов.
  */
 
+import { urovenZadachi } from '@/lib/zhurnal/uroven';
 import type { ZapisVarianta, ZapisZadachi } from './model';
 import { idIz, novayaZapis, sPopytkoy, sShagomPodskazki, zakryta } from './model';
 import { zapisatVariant, zapisatZadachu } from './ochered';
@@ -52,15 +53,16 @@ export interface ResheniyeVarianta {
   seconds: number;
 }
 
-/** Сложность задачи варианта (решение В-7): №5 и повышенный уровень №8 — повышенная. */
-function uroven(t: ZadachaVarianta): 1 | 2 {
-  if (t.taskNo === 5) return 2;
-  if (t.taskNo === 8 && t.taskId.endsWith('|advanced')) return 2;
-  return 1;
+/** Сложность задачи варианта (решение В-7, lib/zhurnal/uroven.ts). */
+function uroven(t: ZadachaVarianta): 1 | 2 | 3 {
+  return urovenZadachi(t.taskNo, t.taskId.endsWith('|advanced'));
 }
 
 /** Записи журнала по варианту: чистая функция (проверка — scripts/check-zhurnal.mjs). */
-export function zapisiVarianta(r: ResheniyeVarianta): { variant: ZapisVarianta; zadachi: ZapisZadachi[] } {
+export function zapisiVarianta(r: ResheniyeVarianta): {
+  variant: ZapisVarianta;
+  zadachi: ZapisZadachi[];
+} {
   const variantId = idIz(`variant|${r.code}|${r.variant}|${r.mode}|${r.startedAt}`);
   const variant: ZapisVarianta = {
     id: variantId,
@@ -90,14 +92,16 @@ export function zapisiVarianta(r: ResheniyeVarianta): { variant: ZapisVarianta; 
       r.startedAt,
     );
     const first = r.answers[i] ?? '';
-    const ok1 = r.mode === 'trening' && r.v1[i] !== undefined ? r.v1[i] === 'right' : r.right[i] === true;
+    const ok1 =
+      r.mode === 'trening' && r.v1[i] !== undefined ? r.v1[i] === 'right' : r.right[i] === true;
     if (r.hinted.includes(i)) z = sShagomPodskazki(z, Math.max(1, r.steps[i] ?? 1));
     if (first !== '') z = sPopytkoy(z, first, ok1, 'answer', r.finishedAt);
     const vtoraya = r.second[i] ?? '';
     if (vtoraya !== '') z = sPopytkoy(z, vtoraya, r.v2[i] === 'right', 'answer', r.finishedAt);
     const ms = Math.round(r.times[i] ?? 0);
     z = { ...z, active_ms: ms, total_ms: ms };
-    const iskhod = first === '' ? 'skipped' : ok1 ? (r.hinted.includes(i) ? 'hinted' : 'right') : 'wrong';
+    const iskhod =
+      first === '' ? 'skipped' : ok1 ? (r.hinted.includes(i) ? 'hinted' : 'right') : 'wrong';
     return zakryta(z, iskhod, r.finishedAt, r.key[i]);
   });
   return { variant, zadachi };
