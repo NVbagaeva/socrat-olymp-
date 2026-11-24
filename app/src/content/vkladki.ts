@@ -40,6 +40,13 @@ export type VkladkaIcon =
  */
 export const TUTORS_TAIL = 'dlya-repetitorov/';
 
+/**
+ * Подпись вкладки материалов для репетитора — одна на все разделы.
+ * Её же называет страница «Как пользоваться сайтом»: переименуют
+ * вкладку — тексты не разъедутся.
+ */
+export const TUTORS_LABEL = 'Для репетиторов';
+
 export interface RazdelTab {
   /** Идентификатор вкладки: по нему лента понимает, какая активна. */
   id: string;
@@ -84,7 +91,7 @@ export const VKLADKI_ZAGLUSHKI: readonly RazdelTab[] = [
   { id: 'opornye', label: OPORNYE.title, tail: '', icon: 'target' },
   { id: 'trenazher', label: 'Тренажёр', tail: '', icon: 'dumbbell' },
   { id: 'generator', label: 'Генератор', tail: '', icon: 'settings' },
-  { id: 'repetitory', label: 'Для репетиторов', tail: '', icon: 'materials' },
+  { id: 'repetitory', label: TUTORS_LABEL, tail: '', icon: 'materials' },
 ];
 
 /**

@@ -16,7 +16,12 @@ import type { RazdelKod } from '@/content/struktura';
 import { zagruzitZhivoy, type ZhivoyProps } from './zhivye/tip';
 
 export interface ZhivayaKartinkaProps {
-  kod: RazdelKod;
+  /**
+   * Раздел, чей живой чертёж встаёт на место картинки. Не задан —
+   * чертежа нет: по нажатию картинка поворачивается и покачивается
+   * (шапка страницы «Как пользоваться сайтом»).
+   */
+  kod?: RazdelKod;
   src560: string;
   src280: string;
   /** Подпись картинки для скринридера. */
@@ -80,7 +85,7 @@ export function ZhivayaKartinka({
 
   const zagruzit = useCallback(() => {
     if (modul.current !== null) return modul.current;
-    const p = zagruzitZhivoy(kod);
+    const p = kod === undefined ? null : zagruzitZhivoy(kod);
     modul.current =
       p?.then((m) => {
         setZhivoy(() => m.default);
@@ -90,6 +95,7 @@ export function ZhivayaKartinka({
 
   /* Код чертежа — после первой отрисовки, когда браузер свободен. */
   useEffect(() => {
+    if (kod === undefined) return undefined;
     const w = window as Window & {
       requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
       cancelIdleCallback?: (id: number) => void;
@@ -100,7 +106,7 @@ export function ZhivayaKartinka({
     }
     const t = window.setTimeout(() => void zagruzit(), 1200);
     return () => window.clearTimeout(t);
-  }, [zagruzit]);
+  }, [kod, zagruzit]);
 
   /* Смена: живой чертёж смонтирован — через кадр картинка гаснет. */
   useEffect(() => {
@@ -109,14 +115,20 @@ export function ZhivayaKartinka({
     return () => window.cancelAnimationFrame(id);
   }, [nuzhen, Zhivoy]);
 
+  const [kach, setKach] = useState(0);
   const ozhivit = useCallback(() => {
+    if (kod === undefined) {
+      /* Без чертежа: поворот с покачиванием, на каждое нажатие заново. */
+      setKach((k) => k + 1);
+      return;
+    }
     if (nuzhen) return;
     setNuzhen(true);
     /* На телефоне живой чертёж встаёт под текстом во всю ширину:
        в кольце 112 px его не потянуть пальцем. */
     ramka.current?.closest('.shapka')?.classList.add('shapka--zhivaya');
     void zagruzit();
-  }, [nuzhen, zagruzit]);
+  }, [kod, nuzhen, zagruzit]);
 
   /* ── Наклон за курсором на пружине ── */
   const tsel = useRef({ x: 0, y: 0 });
@@ -177,6 +189,7 @@ export function ZhivayaKartinka({
     <div
       ref={ramka}
       className={clsx('zhk', `zhk--${vid}`, pokazan && 'is-zhivoy', naklonyat && 'zhk--naklon')}
+      data-kach={kach === 0 ? undefined : kach % 2}
       onPointerMove={onMove}
       onPointerLeave={onLeave}
     >
@@ -194,7 +207,7 @@ export function ZhivayaKartinka({
             /* Мышью — сразу, чтобы жест продолжился уже по чертежу.
                Пальцем — только тапом (click): касание, с которого
                начинается прокрутка страницы, картинку не трогает. */
-            if (e.pointerType === 'mouse') ozhivit();
+            if (e.pointerType === 'mouse' && kod !== undefined) ozhivit();
           }}
           onClick={ozhivit}
           onKeyDown={onPosterKey}

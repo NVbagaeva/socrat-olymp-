@@ -146,6 +146,7 @@ const nextConfig: NextConfig = {
             !file.startsWith('/data/') &&
             !file.startsWith('/images/zadachi/') &&
             !file.startsWith('/images/shapki/') &&
+            !file.startsWith('/images/kak-polzovatsya/') &&
             !METODY4.some((dir) => file.startsWith(dir)) &&
             !ILLYUSTRACII.some((prefix) => file.startsWith(prefix)),
         ),
@@ -164,6 +165,14 @@ const nextConfig: NextConfig = {
     SHAPKI_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/shapki/')),
+      ),
+    ),
+    // Картинки и снимки страницы «Как пользоваться сайтом»: адреса с
+    // версией считает серверная страница (app/kak-polzovatsya/page.tsx)
+    // и передаёт готовыми — общая таблица первой загрузки не растёт.
+    HOWTO_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/kak-polzovatsya/')),
       ),
     ),
     METODY4_ASSET_VERSIONS: JSON.stringify(

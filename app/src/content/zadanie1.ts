@@ -5,6 +5,7 @@
  * content/teoriya1.ts. Формулы — в $…$, их набирает KaTeX.
  */
 
+import { TUTORS_LABEL } from './vkladki';
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
@@ -35,7 +36,7 @@ export const ZADANIE1 = {
     { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
     { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
     { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
-    { id: 'repetitory', label: 'Для репетиторов', tail: 'dlya-repetitorov/', icon: 'materials' },
+    { id: 'repetitory', label: TUTORS_LABEL, tail: 'dlya-repetitorov/', icon: 'materials' },
   ] as readonly RazdelTab[],
 } as const;
 

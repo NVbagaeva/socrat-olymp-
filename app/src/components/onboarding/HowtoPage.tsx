@@ -1,15 +1,33 @@
 'use client';
 
 import { clsx } from 'clsx';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useRef, useState } from 'react';
 import { Details } from '@/components/ui';
-import { HOWTO, type HowtoTabContent } from '@/content/kakPolzovatsya';
+import { ZhivayaKartinka } from '@/components/tasks/shapka/ZhivayaKartinka';
+import {
+  HOWTO,
+  type HowtoFeature,
+  type HowtoSnimok,
+  type HowtoTabContent,
+} from '@/content/kakPolzovatsya';
 import { howtoHref, type HowtoTab } from '@/content/onboarding';
 import { requestIntro, startTour } from '@/lib/onboarding';
-import { illustrationRamka } from '@/components/ui/illustrationRamka';
-import { assetUrl } from '@/lib/assetUrl';
+import { Kartinka, kartinkaSrc, snimokPut, type HowtoFaily } from './howto/Kartinka';
+import { PriPoyavlenii } from './howto/PriPoyavlenii';
+import { Put } from './howto/Put';
+import { Video } from './howto/Video';
+import '@/components/tasks/steklo/steklo.css';
+import '@/components/tasks/shapka/shapka.css';
 import './howto.css';
+
+/* Тяжёлое — отдельными кусками: мини-задача (KaTeX, стили тренажёра),
+   демо генератора и окно со снимком грузятся, когда понадобятся. */
+const Proba = dynamic(() => import('./howto/Proba'), { ssr: false });
+const GeneratorDemo = dynamic(() => import('./howto/GeneratorDemo'), { ssr: false });
+const SnimokOkno = dynamic(() => import('./howto/SnimokOkno'), { ssr: false });
 
 /** Вкладка по умолчанию, когда в адресе её нет. */
 const DEFAULT_TAB: HowtoTab = 'repetitor';
@@ -19,53 +37,70 @@ function tabOf(value: string | null): HowtoTab {
 }
 
 /** Страница с вкладкой из адреса: ?dlya=uchenik | repetitor. */
-export function HowtoFromUrl() {
+export function HowtoFromUrl({ faily }: { faily: HowtoFaily }) {
   const params = useSearchParams();
-  return <HowtoView tab={tabOf(params.get('dlya'))} />;
+  return <HowtoView tab={tabOf(params.get('dlya'))} faily={faily} />;
 }
 
 /**
- * «Как пользоваться сайтом»: переключатель «Ученику | Репетитору»,
- * место под видео, шаги, возможности, частые вопросы и плашка с
+ * «Как пользоваться сайтом»: шапка как у разделов заданий (картинка в
+ * стеклянном круге), видео с главами, путь по сайту со снимками,
+ * мини-задача с подсказкой, возможности, частые вопросы и плашка с
  * главной кнопкой. Вкладка — ссылка: её можно отправить человеку.
  */
-export function HowtoView({ tab }: { tab: HowtoTab }) {
+export function HowtoView({ tab, faily }: { tab: HowtoTab; faily: HowtoFaily }) {
   const content: HowtoTabContent = HOWTO[tab];
   const order: HowtoTab[] = ['uchenik', 'repetitor'];
+  const shapka = kartinkaSrc(faily, 'shapka', 'shapka');
+  const [okno, setOkno] = useState<{ id: HowtoSnimok; alt: string; knopka: HTMLElement } | null>(
+    null,
+  );
 
   return (
     <div className="howto">
-      <header className="howto__head">
-        <div>
-          <h1 className="t-h1">{HOWTO.title}</h1>
-          <p className="howto__lead">{HOWTO.lead}</p>
+      <header className={clsx('shapka howto-shapka', shapka === null && 'howto-shapka--tekst')}>
+        <h1 className="t-h1 shapka__title">{HOWTO.title}</h1>
+        <div className="shapka__text">
+          <p className="shapka__lead">{HOWTO.lead}</p>
+          <nav className="howto__tabs" aria-label={HOWTO.tabsLabel}>
+            {order.map((t) => (
+              <Link
+                key={t}
+                href={howtoHref(t)}
+                scroll={false}
+                replace
+                className={clsx('howto__tab', t === tab && 'is-active')}
+                aria-current={t === tab ? 'page' : undefined}
+              >
+                <span className="howto__tab-ico" aria-hidden="true">
+                  {t === 'uchenik' ? <CapIcon /> : <PeopleIcon />}
+                </span>
+                {HOWTO[t].tab}
+              </Link>
+            ))}
+          </nav>
         </div>
-        <nav className="howto__tabs" aria-label={HOWTO.tabsLabel}>
-          {order.map((t) => (
-            <Link
-              key={t}
-              href={howtoHref(t)}
-              scroll={false}
-              replace
-              className={clsx('howto__tab', t === tab && 'is-active')}
-              aria-current={t === tab ? 'page' : undefined}
-            >
-              <span className="howto__tab-ico" aria-hidden="true">
-                {t === 'uchenik' ? <CapIcon /> : <PeopleIcon />}
-              </span>
-              {HOWTO[t].tab}
-            </Link>
-          ))}
-        </nav>
+        {shapka === null ? null : (
+          <div className="shapka__media" data-ill="header">
+            <div className="howto-krug">
+              <ZhivayaKartinka
+                src560={faily['/images/kak-polzovatsya/shapka-560.webp']!}
+                src280={faily['/images/kak-polzovatsya/shapka-280.webp']!}
+                alt={HOWTO.shapka.alt}
+                label={HOWTO.shapka.alt}
+                podskazka={HOWTO.shapka.podskazka}
+                vid="nazhat"
+                obyomnaya={false}
+              />
+            </div>
+          </div>
+        )}
       </header>
 
-      <div className="howto__top">
-        <section className="howto__video" aria-labelledby="howto-video">
-          <h2 className="howto__video-title" id="howto-video">Видео о сайте</h2>
-          <video className="howto__player" controls playsInline preload="metadata" aria-label="Видео о сайте Будет на ЕГЭ">
-            <source src={assetUrl('/video/budetege-tour-20261124.mp4')} type="video/mp4" />
-            Ваш браузер не поддерживает воспроизведение видео.
-          </video>
+      {/* Смена вкладки — мягкое появление содержимого: блок ставится
+          заново по key. */}
+      <div className="howto__telo" key={tab}>
+        <Video>
           <div className="howto__video-actions">
             {content.cta.tour !== undefined ? (
               <button type="button" className="btn btn--primary" onClick={() => startTour(tab, 0)}>
@@ -78,90 +113,148 @@ export function HowtoView({ tab }: { tab: HowtoTab }) {
               {HOWTO.intro}
             </button>
           </div>
+        </Video>
+
+        <Put title={content.stepsTitle} hint={content.stepsHint} steps={content.steps} faily={faily} />
+
+        <PriPoyavlenii minHeight={420}>
+          <Proba title={content.probaTitle} />
+        </PriPoyavlenii>
+
+        <section aria-labelledby="howto-features">
+          <h2 className="howto__h howto__h--block" id="howto-features">
+            {content.featuresTitle}
+          </h2>
+          <ul
+            className={clsx(
+              'howto__features',
+              content.features.some((f) => f.demo !== undefined) && 'howto__features--demo',
+            )}
+          >
+            {content.features.map((f) => (
+              <Karta
+                key={f.title}
+                f={f}
+                faily={faily}
+                onSnimok={(knopka) =>
+                  f.snimok === undefined ? undefined : setOkno({ ...f.snimok, knopka })
+                }
+              />
+            ))}
+            {content.features.some((f) => f.demo === 'generator') ? (
+              <li className="howto__demo">
+                <PriPoyavlenii minHeight={460}>
+                  <GeneratorDemo faily={faily} />
+                </PriPoyavlenii>
+              </li>
+            ) : null}
+          </ul>
         </section>
 
-        <section className="howto__steps" aria-labelledby="howto-steps">
-          <h2 className="howto__h" id="howto-steps">
-            {content.stepsTitle}
+        <section aria-labelledby="howto-faq">
+          <h2 className="howto__h howto__h--block" id="howto-faq">
+            {content.faqTitle}
           </h2>
-          <ol>
-            {content.steps.map((s, i) => (
-              <li key={s.title} className="howto__step">
-                <span className="howto__step-no" aria-hidden="true">
-                  {i + 1}
-                </span>
-                <span>
-                  <span className="howto__step-title">{s.title}</span>
-                  <span className="howto__step-text">{s.text}</span>
-                </span>
-              </li>
+          <div className="howto__faq">
+            {content.faq.map((f) => (
+              <Details key={f.q} title={f.q} className="howto__q">
+                <p>{f.a}</p>
+                {f.link === undefined ? null : (
+                  <p className="howto__q-link">
+                    <Link href={f.link.href}>{f.link.label}</Link>
+                  </p>
+                )}
+              </Details>
             ))}
-          </ol>
+          </div>
+        </section>
+
+        <section className="howto__cta" aria-labelledby="howto-cta">
+          <div className="howto__cta-tekst">
+            <h2 className="howto__cta-title" id="howto-cta">
+              {content.cta.title}
+            </h2>
+            <p className="howto__cta-text">{content.cta.text}</p>
+          </div>
+          <div className="howto__cta-actions">
+            {content.cta.tour !== undefined ? (
+              <button type="button" className="btn btn--secondary" onClick={() => startTour(tab, 0)}>
+                {content.cta.tour}
+              </button>
+            ) : null}
+            <div className="howto__cta-main">
+              <Link className="btn howto__accent" href={content.cta.primary.href}>
+                {content.cta.primary.label} →
+              </Link>
+              {content.cta.note !== undefined ? (
+                <p className="howto__cta-note">{content.cta.note}</p>
+              ) : null}
+            </div>
+          </div>
+          <Kartinka
+            faily={faily}
+            id="start"
+            razmer="karta"
+            px={120}
+            alt={HOWTO.start.alt}
+            className="howto__cta-kart"
+          />
         </section>
       </div>
 
-      <section aria-labelledby="howto-features">
-        <h2 className="howto__h howto__h--block" id="howto-features">
-          {content.featuresTitle}
-        </h2>
-        <ul className="howto__features">
-          {content.features.map((f) => (
-            <li key={f.title} {...illustrationRamka('section', 'howto__feature')}>
-              {f.image !== undefined ? (
-                <img
-                  className="howto__shot"
-                  src={f.image.src}
-                  alt={f.image.alt}
-                  width={f.image.width}
-                  height={f.image.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : null}
-              <h3 className="howto__feature-title">{f.title}</h3>
-              <p className="howto__feature-text">{f.text}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section aria-labelledby="howto-faq">
-        <h2 className="howto__h howto__h--block" id="howto-faq">
-          {content.faqTitle}
-        </h2>
-        <div className="howto__faq">
-          {content.faq.map((f) => (
-            <Details key={f.q} title={f.q} className="howto__q">
-              <p>{f.a}</p>
-            </Details>
-          ))}
-        </div>
-      </section>
-
-      <section className="howto__cta" aria-labelledby="howto-cta">
-        <div>
-          <h2 className="howto__cta-title" id="howto-cta">
-            {content.cta.title}
-          </h2>
-          <p className="howto__cta-text">{content.cta.text}</p>
-        </div>
-        <div className="howto__cta-actions">
-          {content.cta.tour !== undefined ? (
-            <button type="button" className="btn btn--secondary" onClick={() => startTour(tab, 0)}>
-              {content.cta.tour}
-            </button>
-          ) : null}
-          <div className="howto__cta-main">
-            <Link className="btn howto__accent" href={content.cta.primary.href}>
-              {content.cta.primary.label} →
-            </Link>
-            {content.cta.note !== undefined ? (
-              <p className="howto__cta-note">{content.cta.note}</p>
-            ) : null}
-          </div>
-        </div>
-      </section>
+      {okno === null || faily[snimokPut(okno.id)] === undefined ? null : (
+        <SnimokOkno
+          src={faily[snimokPut(okno.id)]!}
+          alt={okno.alt}
+          vozvrat={okno.knopka}
+          onClose={() => setOkno(null)}
+        />
+      )}
     </div>
+  );
+}
+
+/** Карточка возможности: картинка 96 px, текст и кнопка со снимком. */
+function Karta({
+  f,
+  faily,
+  onSnimok,
+}: {
+  f: HowtoFeature;
+  faily: HowtoFaily;
+  onSnimok: (knopka: HTMLElement) => void;
+}) {
+  const knopka = useRef<HTMLButtonElement>(null);
+  const estSnimok = f.snimok !== undefined && faily[snimokPut(f.snimok.id)] !== undefined;
+  return (
+    <li className={clsx('howto__feature', f.demo !== undefined && 'howto__feature--demo')}>
+      <Kartinka
+        faily={faily}
+        id={f.kartinka}
+        razmer="karta"
+        px={96}
+        alt={f.kartinkaAlt}
+        className="howto__feature-kart"
+      />
+      <h3 className="howto__feature-title">{f.title}</h3>
+      <p className="howto__feature-text">{f.text}</p>
+      {estSnimok ? (
+        <button
+          ref={knopka}
+          type="button"
+          className="howto__feature-snimok"
+          onClick={() => {
+            if (knopka.current !== null) onSnimok(knopka.current);
+          }}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="13" rx="2" />
+            <path d="M8 21h8M12 18v3" />
+          </svg>
+          {HOWTO.snimok.knopka}
+        </button>
+      ) : null}
+    </li>
   );
 }
 
