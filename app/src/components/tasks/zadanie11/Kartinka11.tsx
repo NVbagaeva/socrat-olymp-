@@ -1,9 +1,9 @@
-import { assetUrl } from '@/lib/assetUrl';
+import { KartinkaZadachi } from '@/components/ui/KartinkaZadachi';
 import { kartinka11 } from '@/lib/zadanie11/kartinki';
 
 /**
- * Картинка к задаче №11 (lib/zadanie11/kartinki.ts) — как есть, во всю
- * ширину колонки, без обрезки. Нет картинки у подтипа — ничего (пустых
+ * Картинка сюжета подтипа №11 (lib/zadanie11/kartinki.ts) — для примера
+ * типа во вкладке «О задании». Нет картинки у подтипа — ничего (пустых
  * рамок нет).
  */
 export function Kartinka11({ podtip }: { podtip: string }) {
@@ -11,17 +11,7 @@ export function Kartinka11({ podtip }: { podtip: string }) {
   if (k === undefined) {
     return null;
   }
-  return (
-    <img
-      className="z11-kartinka"
-      src={assetUrl(k.src)}
-      alt={k.alt}
-      width={k.width}
-      height={k.height}
-      decoding="async"
-      loading="lazy"
-    />
-  );
+  return <KartinkaZadachi src={k.src} src280={k.src280} alt={k.alt} />;
 }
 
 /** Есть ли картинка у подтипа: слот выводится только тогда. */
