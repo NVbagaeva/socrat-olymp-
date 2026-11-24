@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState, type ComponentType } from 'react';
-import { useYakorProkrutki } from '@/components/zhivye/yakorProkrutki';
+import { LenivoeMesto } from '@/components/zhivye/LenivoeMesto';
 import { VSTRECHA11 } from '@/content/tekstovye11';
+
+const zagruzit = () => import('./Scena');
 
 /**
  * Ленивая загрузка сцены «Встречное движение»: код сцены, её стили и
@@ -11,50 +12,15 @@ import { VSTRECHA11 } from '@/content/tekstovye11';
  * чтобы страница не прыгала.
  */
 export function Vstrecha11Lazy() {
-  const yakor = useRef<HTMLDivElement>(null);
-  useYakorProkrutki(yakor);
-  const [Scena, setScena] = useState<ComponentType | null>(null);
-
-  useEffect(() => {
-    const el = yakor.current;
-    if (el === null) return undefined;
-    let alive = true;
-    const zagruzit = () => {
-      void import('./Scena').then((mod) => {
-        if (alive) setScena(() => mod.default);
-      });
-    };
-    if (typeof IntersectionObserver === 'undefined') {
-      zagruzit();
-      return () => {
-        alive = false;
-      };
-    }
-    const io = new IntersectionObserver(
-      (zapisi) => {
-        if (zapisi.some((z) => z.isIntersecting)) {
-          io.disconnect();
-          zagruzit();
-        }
-      },
-      { rootMargin: '600px 0px' },
-    );
-    io.observe(el);
-    return () => {
-      alive = false;
-      io.disconnect();
-    };
-  }, []);
-
   return (
-    <div ref={yakor} className="z11-vst__mesto">
-      {Scena === null ? (
+    <LenivoeMesto
+      zagruzit={zagruzit}
+      className="z11-vst__mesto"
+      zaglushka={
         <div className="z11-vst__zaglushka" role="status">
           <span>{VSTRECHA11.zagruzka}</span>
         </div>
-      ) : (
-        <Scena />
-      )}
-    </div>
+      }
+    />
   );
 }

@@ -157,7 +157,9 @@
 .z10-rs__zaglushka {
   display: grid;
   place-items: center;
-  min-height: 720px;
+  /* Высота загруженной сцены (замер в WebKit): 1100–1130 px от 768 px
+     ширины, 1190–1240 px на телефоне. */
+  min-height: 1120px;
   border-radius: 18px;
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(234, 241, 255, 0.6));
   box-shadow: var(--glass-ring), var(--glass-hi);
@@ -167,6 +169,10 @@
 @media (max-width: 480px) {
   .z10-my {
     padding: var(--space-4) var(--space-3);
+  }
+  .z10-my__zaglushka,
+  .z10-rs__zaglushka {
+    min-height: 1210px;
   }
 }
 @media print {
