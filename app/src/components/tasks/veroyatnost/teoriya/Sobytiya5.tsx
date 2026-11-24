@@ -9,9 +9,9 @@ export function NezavisimyeSobytiya5() {
       <section className="v5-sobytiya__card" aria-labelledby="v5-independent-definition">
         <h3 id="v5-independent-definition">Когда события независимы</h3>
         <p><Tex text="События $A$ и $B$ независимы, если наступление события $A$ не меняет вероятность события $B$ (и наоборот). Для таких событий вероятность того, что произойдут оба, равна произведению вероятностей:" /></p>
-        <div className="v5-sobytiya__formula"><Tex text="$P(A\\cap B)=P(A)\\cdot P(B)$" /></div>
+        <div className="v5-sobytiya__formula"><Tex text="$P(A\cap B)=P(A)\cdot P(B)$" /></div>
         <p className="v5-sobytiya__note">
-          <Tex text="Слова «и то, и другое» часто подсказывают пересечение $A\\cap B$. Но умножать вероятности можно, только если события независимы." />
+          <Tex text="Слова «и то, и другое» часто подсказывают пересечение $A\cap B$. Но умножать вероятности можно, только если события независимы." />
         </p>
       </section>
       <section className="v5-sobytiya__card" aria-labelledby="v5-independent-example">
@@ -49,9 +49,9 @@ export function NezavisimyeSobytiya5() {
           <figcaption><Tex text="Орёл и любое из чисел 2, 4, 6: $3$ подходящих исхода из $12$." /></figcaption>
         </figure>
         <ol className="v5-sobytiya__steps">
-          <li><Tex text="$P(A)=\\dfrac12$, а $P(B)=\\dfrac36=\\dfrac12$." /></li>
-          <li><Tex text="События независимы, поэтому $P(A\\cap B)=\\dfrac12\\cdot\\dfrac12=\\dfrac14$." /></li>
-          <li><Tex text="Проверка по таблице исходов: $3$ из $12$, то есть $\\dfrac{3}{12}=\\dfrac14$." /></li>
+          <li><Tex text="$P(A)=\dfrac12$, а $P(B)=\dfrac36=\dfrac12$." /></li>
+          <li><Tex text="События независимы, поэтому $P(A\cap B)=\dfrac12\cdot\dfrac12=\dfrac14$." /></li>
+          <li><Tex text="Проверка по таблице исходов: $3$ из $12$, то есть $\dfrac{3}{12}=\dfrac14$." /></li>
         </ol>
       </section>
       <aside className="v5-sobytiya__warning">
@@ -69,10 +69,10 @@ export function SovmestnyeSobytiya5() {
       </p>
       <section className="v5-sobytiya__card" aria-labelledby="v5-joint-definition">
         <h3 id="v5-joint-definition">Совместные события и их объединение</h3>
-        <p><Tex text="События $A$ и $B$ называются совместными, если они могут наступить одновременно. Их объединение $A\\cup B$ означает: произошло хотя бы одно из событий." /></p>
-        <div className="v5-sobytiya__formula"><Tex text="$P(A\\cup B)=P(A)+P(B)-P(A\\cap B)$" /></div>
+        <p><Tex text="События $A$ и $B$ называются совместными, если они могут наступить одновременно. Их объединение $A\cup B$ означает: произошло хотя бы одно из событий." /></p>
+        <div className="v5-sobytiya__formula"><Tex text="$P(A\cup B)=P(A)+P(B)-P(A\cap B)$" /></div>
         <p className="v5-sobytiya__note">
-          <Tex text="Общие исходы входят и в $A$, и в $B$, поэтому при сложении их посчитали дважды. Вычитаем пересечение $A\\cap B$ один раз." />
+          <Tex text="Общие исходы входят и в $A$, и в $B$, поэтому при сложении их посчитали дважды. Вычитаем пересечение $A\cap B$ один раз." />
         </p>
       </section>
       <section className="v5-sobytiya__card" aria-labelledby="v5-joint-example">
@@ -93,17 +93,17 @@ export function SovmestnyeSobytiya5() {
             <text x="545" y="275" fill="#18243a" fontSize="23" fontWeight="650">3</text>
             <text x="310" y="294" textAnchor="middle" fill="#506783" fontSize="15">Два общих исхода: 4 и 6</text>
           </svg>
-          <figcaption><Tex text="$A=\\{2;4;6\\}$, $B=\\{4;5;6\\}$, $A\\cap B=\\{4;6\\}$, $A\\cup B=\\{2;4;5;6\\}$." /></figcaption>
+          <figcaption><Tex text="$A=\{2;4;6\}$, $B=\{4;5;6\}$, $A\cap B=\{4;6\}$, $A\cup B=\{2;4;5;6\}$." /></figcaption>
         </figure>
         <ol className="v5-sobytiya__steps">
-          <li><Tex text="$P(A)=\\dfrac36$, $P(B)=\\dfrac36$, $P(A\\cap B)=\\dfrac26$." /></li>
-          <li><Tex text="Подставляем в правило: $P(A\\cup B)=\\dfrac36+\\dfrac36-\\dfrac26=\\dfrac46=\\dfrac23$." /></li>
+          <li><Tex text="$P(A)=\dfrac36$, $P(B)=\dfrac36$, $P(A\cap B)=\dfrac26$." /></li>
+          <li><Tex text="Подставляем в правило: $P(A\cup B)=\dfrac36+\dfrac36-\dfrac26=\dfrac46=\dfrac23$." /></li>
         </ol>
       </section>
       <section className="v5-sobytiya__card v5-sobytiya__card--small" aria-labelledby="v5-disjoint">
         <h3 id="v5-disjoint">Если события несовместны</h3>
-        <p><Tex text="У несовместных событий общих исходов нет: $P(A\\cap B)=0$. Тогда формула упрощается: вероятность события «$A$ или $B$» равна сумме вероятностей." /></p>
-        <div className="v5-sobytiya__formula"><Tex text="$P(A\\cup B)=P(A)+P(B)$" /></div>
+        <p><Tex text="У несовместных событий общих исходов нет: $P(A\cap B)=0$. Тогда формула упрощается: вероятность события «$A$ или $B$» равна сумме вероятностей." /></p>
+        <div className="v5-sobytiya__formula"><Tex text="$P(A\cup B)=P(A)+P(B)$" /></div>
         <p>Например, при одном броске число не может быть одновременно чётным и нечётным.</p>
       </section>
     </div>

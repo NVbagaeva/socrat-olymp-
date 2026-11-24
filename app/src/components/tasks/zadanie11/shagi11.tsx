@@ -43,7 +43,23 @@ export function shagi11(r: Razbor11): Shag[] {
       chtoHtml: e.stroki.map((html) => `<div class="z11-stroka">${html}</div>`).join(''),
       formulaHtml: '',
       ...(ton === undefined ? {} : { ton }),
-      ...(i === sTablitsey ? { risunok: <Tablitsy11 tables={r.tables} /> } : {}),
+      ...(i === sTablitsey
+        ? { risunok: <Tablitsy11 tables={r.tables} /> }
+        : e.skhema !== undefined
+          ? {
+              risunok: (
+                <img
+                  className="z11-skhema"
+                  src={e.skhema.src}
+                  alt={e.skhema.alt}
+                  width={e.skhema.width}
+                  height={e.skhema.height}
+                  decoding="async"
+                  loading="lazy"
+                />
+              ),
+            }
+          : {}),
     };
   });
 }

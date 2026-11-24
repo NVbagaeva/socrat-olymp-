@@ -48,6 +48,30 @@ export function Tablitsa11({
   onOtkryt?: (key: string) => void;
 }) {
   const vynoska = table.uravnenie !== undefined;
+  const rz = table.raznica;
+  const rzOt = rz === undefined ? -1 : Math.min(rz.bolshe, rz.menshe);
+  const rzDo = rz === undefined ? -1 : Math.max(rz.bolshe, rz.menshe);
+  /* Столбец стрелки разницы: одна ячейка на строки от rzOt до rzDo. */
+  const strelka = (r: number) => {
+    if (rz === undefined) return null;
+    if (r > rzOt && r <= rzDo) return null;
+    if (r !== rzOt) return <td className="z11-tab__rzn" aria-hidden="true" />;
+    const n = rzDo - rzOt + 1;
+    const kray = `${50 / n}%`;
+    return (
+      <td className="z11-tab__rzn" rowSpan={n}>
+        <span
+          className={clsx('z11-rzn', rz.bolshe > rz.menshe ? 'is-vniz' : 'is-vverh')}
+          style={{ top: kray, bottom: kray }}
+        >
+          <span className="z11-rzn__line" aria-hidden="true" />
+          <span className="z11-rzn__podpis">
+            <Tex text={rz.podpis} />
+          </span>
+        </span>
+      </td>
+    );
+  };
   return (
     <figure className={clsx('z11-tab', `z11-tab--${table.vid}`, className)}>
       {table.title === undefined ? null : (
@@ -65,6 +89,7 @@ export function Tablitsa11({
                 </th>
               ))}
               {vynoska ? <td className="z11-tab__vyn" aria-hidden="true" /> : null}
+              {rz === undefined ? null : <td className="z11-tab__rzn" aria-hidden="true" />}
             </tr>
           </thead>
           <tbody>
@@ -97,6 +122,7 @@ export function Tablitsa11({
                     ) : null}
                   </td>
                 ) : null}
+                {strelka(r)}
               </tr>
             ))}
           </tbody>
