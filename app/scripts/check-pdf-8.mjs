@@ -8,7 +8,7 @@
    состав, нумерация, ответы, формулы, шрифты, цвета, ссылки.
    Ненулевой код возврата валит сборку.
 
-   Проверки идут по готовым файлам в app/public/materials/zadanie-8
+   Проверки идут по готовым файлам в app/public/materials/vychisleniya
    и по промежуточному HTML в app/.pdf-build: PDF отвечает за шрифты,
    цвета и ссылки, HTML — за состав и нумерацию.
 */
@@ -21,9 +21,11 @@ import content from '../src/content/sheet8.js';
 import outputs from '../src/lib/sheet/outputs.js';
 import { requireSrc } from './lib/load-ts.mjs';
 import { checkNoAnswersTracked, checkPdfFile } from './lib/sheet-check.mjs';
+import { kod } from './lib/adres.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SECTION = 'zadanie-8';
+/* Папка в public/materials — по коду раздела (lib/adres.mjs). */
+const SECTION = kod(8);
 const BUILD = path.join(APP, '.pdf-build');
 
 function pdfPath(name, withAnswers) {

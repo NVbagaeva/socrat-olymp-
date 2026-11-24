@@ -146,7 +146,7 @@ jobs:
         with:
           name: zadanie-5-pdf
           path: |
-            app/public/materials/zadanie-5/*.pdf
+            app/public/materials/slozhnaya-veroyatnost/*.pdf
             app/pdf-private/*.pdf
           if-no-files-found: error
           retention-days: 90
@@ -164,11 +164,11 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/public/materials/zadanie-5
+          git add app/public/materials/slozhnaya-veroyatnost
           # Сравнивать надо индекс, а не рабочее дерево: файлы могут
           # быть новыми, а git diff неотслеживаемых не видит и молча
           # сообщает, что менять нечего.
-          if git diff --cached --quiet -- app/public/materials/zadanie-5; then
+          if git diff --cached --quiet -- app/public/materials/slozhnaya-veroyatnost; then
             echo "файлы не менялись"
             exit 0
           fi
@@ -177,7 +177,7 @@ jobs:
           # число страниц и текст страниц; совпало, значит коммитить
           # нечего, иначе история копится из одинаковых файлов.
           echo "сравнение с файлами ветки:"
-          if [ "$(node app/scripts/pdf-changed.mjs app/public/materials/zadanie-5)" = same ]; then
+          if [ "$(node app/scripts/pdf-changed.mjs app/public/materials/slozhnaya-veroyatnost)" = same ]; then
             echo "содержимое то же — коммит не нужен"
             exit 0
           fi

@@ -34,10 +34,12 @@ import { sectionHead } from '../src/lib/sheet/answers.js';
 import content from '../src/content/sheet8.js';
 import { requireSrc } from './lib/load-ts.mjs';
 import { buildSheet } from './lib/sheet-build.mjs';
+import { kod } from './lib/adres.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
-const SECTION = 'zadanie-8';
+/* Папка в public/materials — по коду раздела (lib/adres.mjs). */
+const SECTION = kod(8);
 
 const { BANK } = requireSrc('lib/vychisleniya/bank');
 const { generate } = requireSrc('lib/vychisleniya/generate');

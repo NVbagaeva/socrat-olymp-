@@ -32,7 +32,7 @@ const PRIVATE_DIR = ['pdf-private'];
  * appDir      — папка app/ проекта
  * name        — имя файла без расширения
  * withAnswers — есть ли в файле ответы или решения
- * section     — подпапка внутри materials, например 'zadanie-12'
+ * section     — подпапка внутри materials, например 'grafiki-funkciy' (код раздела)
  *
  * Вернёт { dir, file, published } — published это путь от корня
  * сайта либо null, если файл сайтом не отдаётся.

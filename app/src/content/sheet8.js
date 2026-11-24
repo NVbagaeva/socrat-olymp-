@@ -71,10 +71,10 @@ export const blocks = [
 
 /** Названия файлов сборника — заполняются на этапе 5. */
 export const files = {
-  uchenik: 'zadanie-8-vychisleniya-uchenik',
-  uchenikChb: 'zadanie-8-vychisleniya-uchenik-chb',
-  uchitel: 'zadanie-8-vychisleniya-uchitel',
-  uchitelChb: 'zadanie-8-vychisleniya-uchitel-chb',
+  uchenik: 'vychisleniya-uchenik',
+  uchenikChb: 'vychisleniya-uchenik-chb',
+  uchitel: 'vychisleniya-uchitel',
+  uchitelChb: 'vychisleniya-uchitel-chb',
 };
 
 const content = { head, title, runner, resheniya, vse, foot, blocks, files };
