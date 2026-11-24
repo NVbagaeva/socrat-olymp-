@@ -329,7 +329,7 @@ export async function proverkiKartaNazad(deps, shots) {
       const do1 = await sostoyanie(page);
       const dlina0 = await page.evaluate(() => history.length);
       await page.locator('.karta-panel.is-otkryta a:has-text("Опорные задачи")').click();
-      await page.waitForURL(/\/zadaniya\/8\/opornye-zadachi\/$/);
+      await page.waitForURL(/\/zadaniya\/vychisleniya\/opornye-zadachi\/$/);
       await page.waitForSelector(VIDIMAYA);
       const k1 = await korobki(page);
       check(
@@ -358,11 +358,11 @@ export async function proverkiKartaNazad(deps, shots) {
       );
       /* Вкладка → другая вкладка → другое задание. */
       await vkladka(page, 'Тренажёр');
-      await page.waitForURL(/\/zadaniya\/8\/trenazher\//);
+      await page.waitForURL(/\/zadaniya\/vychisleniya\/trenazher\//);
       await page.waitForSelector(VIDIMAYA);
       check(true, `${kto}, 1280: на вкладке «Тренажёр» кнопка есть`);
       await vkladka(page, 'Теория');
-      await page.waitForURL(/\/zadaniya\/8\/teoriya\//);
+      await page.waitForURL(/\/zadaniya\/vychisleniya\/teoriya\//);
       await page.waitForSelector(VIDIMAYA);
       check(true, `${kto}, 1280: на вкладке «Теория» кнопка есть`);
       /* Другое задание — ссылкой со страницы задания. */
@@ -466,7 +466,7 @@ export async function proverkiKartaNazad(deps, shots) {
       });
       await page.waitForTimeout(800);
       await page.click('#zadanie-s-glavnoy');
-      await page.waitForURL(/\/zadaniya\/8\/teoriya\/$/);
+      await page.waitForURL(/\/zadaniya\/vychisleniya\/teoriya\/$/);
       await page.waitForSelector('.topic-tabs-row');
       check(await bezKnopki(page), `${kto}, 1280: карта → задание → главная → задание: кнопки нет`);
       check(oshibki.length === 0, `${kto}, 1280: ошибок на страницах нет ${oshibki.join(' | ')}`);
@@ -606,7 +606,7 @@ export async function proverkiKartaNazad(deps, shots) {
     await voytiKKarte(deps, page, 'uchenik');
     await vybratOstrov(page, 8);
     await page.locator('.karta-panel.is-otkryta a.karta-knopka--glavnaya').click();
-    await page.waitForURL(/\/zadaniya\/8\/trenazher\//);
+    await page.waitForURL(/\/zadaniya\/vychisleniya\/trenazher\//);
     await page.waitForSelector('.trn-start');
     await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
     await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
@@ -618,7 +618,7 @@ export async function proverkiKartaNazad(deps, shots) {
     await page.waitForSelector('.karta-panel.is-otkryta');
     check(true, 'тренировка: «назад» из тренажёра — сразу на карту');
     await page.locator('.karta-panel.is-otkryta a.karta-knopka--glavnaya').click();
-    await page.waitForURL(/\/zadaniya\/8\/trenazher\//);
+    await page.waitForURL(/\/zadaniya\/vychisleniya\/trenazher\//);
     await page.waitForSelector('.trn-zadacha[data-task]', { timeout: 10000 }).catch(() => null);
     const snova = await page
       .locator('.trn-zadacha[data-task]')

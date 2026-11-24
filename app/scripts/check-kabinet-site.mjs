@@ -215,7 +215,7 @@ try {
   await page.getByTestId('tutors').getByText('Репетитор Анна').waitFor();
   await page.getByTestId('homework').getByRole('link', { name: 'Вычисления к пятнице' }).click();
   await page.getByRole('link', { name: 'Решать' }).first().click();
-  await page.waitForURL(/\/zadaniya\/8\/$/);
+  await page.waitForURL(/\/zadaniya\/vychisleniya\/$/);
   await go('/zadaniya/vychisleniya/trenazher/');
   /* Тренажёр №8 начинается карточкой «Все типы вперемешку». */
   await page

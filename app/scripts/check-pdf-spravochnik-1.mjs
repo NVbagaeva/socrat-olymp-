@@ -341,7 +341,7 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
   await page.locator('.spr1-pdf__pechat').click();
   await page.waitForURL(/\/pechat\/spravochnik\//);
   await page.locator('.spr1-nazad__knopka').click();
-  await page.waitForURL(/\/zadaniya\/1\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
+  await page.waitForURL(/\/zadaniya\/planimetriya\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
   proverka(
     page.url().endsWith('/zadaniya/planimetriya/teoriya/'),
     `назад: с печати после теории попали на ${page.url()}`,
@@ -372,7 +372,7 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
     'назад: кнопка не липкая при прокрутке',
   );
   await nazad.click();
-  await page.waitForURL(/\/zadaniya\/1\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
+  await page.waitForURL(/\/zadaniya\/planimetriya\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
   proverka(
     page.url().endsWith('/zadaniya/planimetriya/teoriya/'),
     `назад: с прямого захода попали на ${page.url()}`,

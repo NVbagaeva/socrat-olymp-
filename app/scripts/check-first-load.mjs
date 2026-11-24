@@ -48,11 +48,14 @@ const kb = (n) => Math.round(n / 1024);
    206 КБ: «← К карте» (+≈200 байт: сторож метки в NavigationGuard, место
    кнопки в строке вкладок и строчка ленивого куска в карте webpack; сама
    кнопка и код метки — отдельным куском, только пришедшим с карты) при
-   запасе ~130 байт. */
+   запасе ~130 байт.
+   HTML «Линейной функции» — 62 КБ: адреса разделов по коду
+   (/zadaniya/grafiki-funkciy/ вместо /zadaniya/12/, 262 ссылки на
+   странице) добавили 0,47 КБ gz — 60,35 КБ при прежнем пороге 60. */
 const BUDGET = [
   { page: 'zadaniya/grafiki-funkciy/rational', htmlGz: 200 * 1024, scriptsGz: 206 * 1024 },
   { page: 'zadaniya/grafiki-funkciy/quadratic', htmlGz: 260 * 1024, scriptsGz: 206 * 1024 },
-  { page: 'zadaniya/grafiki-funkciy/linear', htmlGz: 60 * 1024, scriptsGz: 206 * 1024 },
+  { page: 'zadaniya/grafiki-funkciy/linear', htmlGz: 62 * 1024, scriptsGz: 206 * 1024 },
 ];
 /* Признаки тяжёлого кода внутри скриптов первой загрузки. */
 const HEAVY = [

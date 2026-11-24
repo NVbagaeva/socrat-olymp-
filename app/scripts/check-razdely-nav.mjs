@@ -317,7 +317,7 @@ for (const size of SIZES) {
     window.__bezPerezagruzki = true;
   });
   await page.locator(`${MENU} a.razdel-karta`, { hasText: 'Квадратичная функция' }).click();
-  await page.waitForURL(/\/zadaniya\/12\/quadratic\//);
+  await page.waitForURL(/\/zadaniya\/grafiki-funkciy\/quadratic\//);
   await page.waitForTimeout(600);
   check(
     page.url().endsWith('/zadaniya/grafiki-funkciy/quadratic/?vkladka=theory'),
@@ -338,7 +338,7 @@ for (const size of SIZES) {
   );
 
   await page.goBack();
-  await page.waitForURL(/\/zadaniya\/12\/irrational\//);
+  await page.waitForURL(/\/zadaniya\/grafiki-funkciy\/irrational\//);
   await page.waitForTimeout(600);
   check(
     (await page
@@ -402,7 +402,7 @@ for (const size of SIZES) {
   });
   await openByPlate(page);
   await page.locator(`${MENU} a.razdel-karta`, { hasText: 'Дробно-линейная функция' }).click();
-  await page.waitForURL(/\/zadaniya\/12\/rational\//);
+  await page.waitForURL(/\/zadaniya\/grafiki-funkciy\/rational\//);
   await page.waitForTimeout(400);
   check(
     page.url().endsWith('/zadaniya/grafiki-funkciy/rational/opornye-zadachi/'),
