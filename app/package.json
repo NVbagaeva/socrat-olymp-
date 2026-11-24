@@ -234,6 +234,8 @@
     "test:illyustracii-10": "node scripts/check-illyustracii-10.mjs",
     "test:illyustracii": "node scripts/check-illyustracii.mjs",
     "audit:illyustracii": "node scripts/audit-illyustracii.mjs",
+    "test:myach-10": "node scripts/check-myach-10.mjs",
+    "test:raspad-10": "node scripts/check-raspad-10.mjs",
     "test:seriya-10": "node scripts/check-seriya-10.mjs",
     "test:legal": "node scripts/check-legal.mjs",
     "test:oferta": "node scripts/check-oferta.mjs",

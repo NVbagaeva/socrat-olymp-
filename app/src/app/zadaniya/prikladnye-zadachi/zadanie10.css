@@ -128,39 +128,57 @@
   height: auto;
 }
 
-/* ── Живые графики ── */
-.z10-zhivoy {
-  max-width: 560px;
+/* ── «Мяч выше отметки»: оболочка (сцена и её стили — лениво,
+   components/tasks/zadanie10/myach/myach.css) ── */
+.z10-my {
+  container: z10-my / inline-size;
+  display: grid;
+  gap: var(--space-4);
   margin: var(--space-6) 0;
-  padding: var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
-  border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--color-surface-soft) 55%, var(--color-surface));
+  padding: var(--space-5);
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(31, 95, 208, 0.1), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(240, 138, 36, 0.1), transparent 60%),
+    var(--glass-bg-strong);
   break-inside: avoid;
 }
-
-.z10-zhivoy svg {
-  display: block;
-  width: 100%;
-  height: auto;
+.z10-my__text {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 72ch;
+}
+.z10-my__lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+.z10-my__zaglushka,
+.z10-rs__zaglushka {
+  display: grid;
+  place-items: center;
+  min-height: 720px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(234, 241, 255, 0.6));
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+@media (max-width: 480px) {
+  .z10-my {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+@media print {
+  .z10-my__zaglushka,
+  .z10-rs__zaglushka {
+    display: none;
+  }
 }
 
-.z10-zhivoy__polzunok {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  align-items: center;
-  margin-top: var(--space-3);
-}
-
-.z10-zhivoy__polzunok input {
-  flex: 1 1 200px;
-  accent-color: var(--color-primary);
-}
-
-.z10-zhivoy figcaption {
-  margin-top: var(--space-2);
-  line-height: 1.6;
+/* «Распад изотопа» — та же оболочка, своё имя контейнера для raspad.css. */
+.z10-rs {
+  container: z10-rs / inline-size;
 }
 
 /* ── Где на ЕГЭ ── */
@@ -270,12 +288,10 @@
 }
 
 @media print {
-  .z10-zhivoy__polzunok,
   .z10-gde {
     display: none;
   }
 
-  .z10-zhivoy,
   .z10-gde,
   .z10-tablica th {
     background: none;
