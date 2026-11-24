@@ -143,7 +143,7 @@
   gap: var(--space-2);
   padding: var(--space-2);
   border-radius: 14px;
-  background: rgb(255 255 255 / 0.6);
+  background: color-mix(in srgb, var(--color-surface) 60%, transparent);
   box-shadow: var(--glass-ring);
 }
 .trn-stroka.is-on {
@@ -614,7 +614,11 @@
   animation: trn-poyavlenie var(--motion-base) var(--ease-out) both;
 }
 .trn-verdikt--da {
-  background: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(214 242 230 / 0.8));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-surface) 74%, transparent),
+    rgb(214 242 230 / 0.8)
+  );
   box-shadow:
     0 0 0 1px var(--color-uspeh-border),
     var(--glass-hi);
@@ -626,7 +630,11 @@
     var(--glass-hi);
 }
 .trn-verdikt--razbor {
-  background: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(254 244 227 / 0.8));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-surface) 74%, transparent),
+    rgb(254 244 227 / 0.8)
+  );
   box-shadow:
     0 0 0 1px var(--color-border-warm),
     var(--glass-hi);
@@ -684,7 +692,7 @@
   font-size: var(--fs-lg);
 }
 .trn-verdikt--da .trn-verdikt__text > b {
-  color: #06704f;
+  color: var(--color-uspeh-text);
 }
 .trn-verdikt--net .trn-verdikt__text > b {
   color: var(--color-accent-text);
@@ -843,7 +851,7 @@
   gap: var(--space-1) var(--space-3);
   padding: var(--space-3);
   border-radius: 14px;
-  background: rgb(255 255 255 / 0.7);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
   box-shadow: var(--glass-ring);
 }
 .trn-razbivka li.is-slabo {
@@ -880,7 +888,7 @@
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.7);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
   font-size: var(--fs-caption);
 }
 .trn-itogi__rows dt {
@@ -909,7 +917,7 @@
   min-width: 0;
   padding: var(--space-3);
   border-radius: 14px;
-  background: rgb(255 255 255 / 0.7);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
   box-shadow: var(--glass-ring);
 }
 .trn-itog-zadacha--wrong {
@@ -1189,7 +1197,7 @@
 }
 .trn-vopros__knopka:disabled {
   cursor: default;
-  color: var(--color-text-muted, #5b6b85);
+  color: var(--color-text-secondary);
 }
 .trn-vopros__knopka.is-verno {
   background: var(--color-uspeh-soft);
@@ -1212,7 +1220,7 @@
   color: var(--color-text);
 }
 .trn-vopros__otklik.is-verno b {
-  color: #06704f;
+  color: var(--color-uspeh-text);
 }
 .trn-voprosy__gotovo {
   margin: 0;
@@ -1258,7 +1266,7 @@
 .trn-istochnik {
   margin: 0;
   font-size: var(--fs-caption);
-  color: var(--color-text-muted, #5b6b85);
+  color: var(--color-text-secondary);
   text-align: center;
 }
 
@@ -1331,7 +1339,7 @@
 .trn-vybor__knopka {
   min-height: 48px;
   padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--blue-200, #c9d6ee);
+  border: 1px solid var(--blue-200);
   border-radius: 14px;
   background: var(--color-surface);
   color: var(--color-text);
@@ -1350,8 +1358,8 @@
   box-shadow: inset 0 0 0 1px var(--color-primary);
 }
 .trn-vybor__knopka.is-right {
-  border-color: var(--green-600, #2e8b57);
-  box-shadow: inset 0 0 0 1px var(--green-600, #2e8b57);
+  border-color: var(--green-600);
+  box-shadow: inset 0 0 0 1px var(--green-600);
 }
 .trn-vybor__knopka.is-wrong {
   border-color: var(--color-accent);

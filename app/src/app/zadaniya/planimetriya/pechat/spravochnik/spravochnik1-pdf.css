@@ -118,7 +118,7 @@
   padding: 0.35mm 1.8mm;
   border-radius: 99mm;
   background: var(--spr-cvet);
-  color: var(--color-text-inverse);
+  color: var(--color-text-on-accent);
   font-size: 7pt;
   line-height: 1.3;
   font-weight: 700;
@@ -285,7 +285,7 @@
   padding: 0.3mm 1.6mm;
   border-radius: 99mm;
   background: var(--color-spr-primer);
-  color: var(--color-text-inverse);
+  color: var(--color-text-on-accent);
   font-size: 7pt;
   font-weight: 700;
 }

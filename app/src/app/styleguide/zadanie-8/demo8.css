@@ -53,7 +53,7 @@
 .d8-gruppa--navy,
 .d8-ramka--navy {
   --ton: var(--color-text-brand);
-  --ton-soft: var(--blue-glass-2);
+  --ton-soft: var(--color-glass-end);
   --ton-border: var(--color-accent-soft);
   --ton-text: var(--color-text-brand);
 }
@@ -620,7 +620,7 @@ details[open] > summary .d8-shevron {
   padding: 3px var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--ton);
-  color: var(--color-text-inverse);
+  color: var(--color-text-on-accent);
   font-size: var(--fs-caption);
   font-weight: 600;
 }
@@ -1093,7 +1093,7 @@ details[open] > summary .d8-shevron {
   font-size: var(--fs-lg);
 }
 .d8-verdikt--da .d8-verdikt__text > b {
-  color: #06704f;
+  color: var(--color-uspeh-text);
 }
 .d8-verdikt--net .d8-verdikt__text > b {
   color: var(--color-accent-text);

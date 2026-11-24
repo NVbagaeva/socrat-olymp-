@@ -10,7 +10,7 @@
 }
 .stk-ton--navy {
   --ton: var(--color-text-brand);
-  --ton-soft: var(--blue-glass-2);
+  --ton-soft: var(--color-glass-end);
   --ton-border: var(--color-accent-soft);
   --ton-text: var(--color-text-brand);
 }
@@ -30,7 +30,7 @@
   --ton: var(--color-uspeh);
   --ton-soft: var(--color-uspeh-soft);
   --ton-border: var(--color-uspeh-border);
-  --ton-text: #06704f;
+  --ton-text: var(--color-uspeh-text);
 }
 
 /* Одна рецептура стекла на все поверхности. */
@@ -116,7 +116,7 @@
 }
 .stk-metka--green {
   background: var(--color-uspeh-soft);
-  color: #06704f;
+  color: var(--color-uspeh-text);
 }
 .stk-metka--grey {
   background: var(--color-surface-2, var(--color-track));

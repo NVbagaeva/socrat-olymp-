@@ -849,7 +849,7 @@ a.karta-gorod__ssylka:focus-visible {
   border-color: var(--color-uspeh-border);
 }
 .karta-panel__itog.is-mozhno b {
-  color: #06704f;
+  color: var(--color-uspeh-text);
 }
 
 .karta-polosy {

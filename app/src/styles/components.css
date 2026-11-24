@@ -39,7 +39,7 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: rgb(255 255 255 / 0.14);
+  background: color-mix(in srgb, var(--color-surface) 14%, transparent);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--motion-fast) var(--ease-out);
@@ -993,7 +993,7 @@ a.task-card--soon:hover {
      прокручивается вместе со списком: свечение стоит у низа экрана. */
   background:
     radial-gradient(120% 40% at 0% 100%, rgb(59 130 246 / 0.12), transparent 70%),
-    linear-gradient(180deg, var(--navy-800), var(--navy-900));
+    linear-gradient(180deg, var(--color-sidebar-verh), var(--color-sidebar-niz));
   background-color: var(--color-surface-brand);
   padding: var(--space-5) var(--space-3);
   min-height: 340px;
@@ -1857,7 +1857,7 @@ a.task-card--bank:focus-visible {
 }
 /* Неоткрытый раздел — то же стекло, приглушённое. */
 .task-card--bank.task-card--soon {
-  background: rgb(255 255 255 / 0.4);
+  background: color-mix(in srgb, var(--color-surface) 40%, transparent);
   box-shadow: var(--glass-ring);
 }
 .task-card--bank.task-card--soon:hover {

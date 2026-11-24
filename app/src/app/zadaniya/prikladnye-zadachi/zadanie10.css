@@ -159,7 +159,11 @@
   place-items: center;
   min-height: 720px;
   border-radius: 18px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(234, 241, 255, 0.6));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-surface) 70%, transparent),
+    color-mix(in srgb, var(--color-surface-info) 60%, transparent)
+  );
   box-shadow: var(--glass-ring), var(--glass-hi);
   color: var(--color-text-tertiary);
   font-size: var(--fs-caption);

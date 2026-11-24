@@ -16,24 +16,24 @@
   min-height: 44px;
   padding: 0 var(--space-4);
   border-radius: 999px;
-  background: var(--glass-bg-strong, rgba(255, 255, 255, 0.7));
+  background: var(--glass-bg-strong, color-mix(in srgb, var(--color-surface) 70%, transparent));
   box-shadow: var(--glass-ring, inset 0 0 0 1px rgba(31, 95, 208, 0.16));
-  color: var(--blue-700, #1f4fb0);
+  color: var(--blue-700);
   font-size: var(--fs-caption);
   font-weight: 600;
   text-decoration: none;
 }
 .z11-materialy__ssylka:hover {
-  background: var(--blue-50, #eef4ff);
+  background: var(--blue-50);
 }
 .z11-materialy__ssylka:focus-visible {
-  outline: 2px solid var(--blue-600, #1f5fd0);
+  outline: 2px solid var(--blue-600);
   outline-offset: 2px;
 }
 
 /* ── Таблица модели в стекле: на телефоне 375 px S | v | t влезают целиком ── */
 :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab table {
-  background: var(--glass-bg-strong, rgba(255, 255, 255, 0.85));
+  background: var(--glass-bg-strong, color-mix(in srgb, var(--color-surface) 85%, transparent));
   border-radius: 12px;
 }
 :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab th,
@@ -111,7 +111,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--blue-700, #1f4fb0);
+  color: var(--blue-700);
   font-weight: 600;
   text-decoration: none;
 }
@@ -136,26 +136,26 @@
   .teor-steklo .z11-tip {
     border: 0;
     border-radius: 18px;
-    background: linear-gradient(160deg, var(--white, #fff), var(--blue-50, #eef4ff));
+    background: linear-gradient(160deg, var(--white), var(--blue-50));
     box-shadow:
-      inset 0 0 0 1px var(--blue-200, #c7d8f7),
-      var(--glass-hi, inset 0 1px 0 rgba(255, 255, 255, 0.8)),
+      inset 0 0 0 1px var(--blue-200),
+      var(--glass-hi, inset 0 1px 0 color-mix(in srgb, var(--color-surface) 80%, transparent)),
       0 8px 24px rgb(31 95 208 / 0.06);
   }
   /* Лайфхак — оранжевый тон, ловушка — терракотовый; роль видна и по значку. */
   .teor-steklo .z11-card--layfhak {
-    background: linear-gradient(160deg, var(--white, #fff), var(--glass-tint-warm, #fff6e8));
+    background: linear-gradient(160deg, var(--white), var(--glass-tint-warm));
     box-shadow:
       inset 0 0 0 1px var(--amber-200, #f3d6a4),
-      inset 4px 0 0 var(--amber-600, #c7781a),
-      var(--glass-hi, inset 0 1px 0 rgba(255, 255, 255, 0.8));
+      inset 4px 0 0 var(--amber-600),
+      var(--glass-hi, inset 0 1px 0 color-mix(in srgb, var(--color-surface) 80%, transparent));
   }
   .teor-steklo .z11-card--lovushka {
-    background: linear-gradient(160deg, var(--white, #fff), #fdf0ec);
+    background: linear-gradient(160deg, var(--white), #fdf0ec);
     box-shadow:
       inset 0 0 0 1px #f0c9bd,
-      inset 4px 0 0 var(--terracotta, #c4553a),
-      var(--glass-hi, inset 0 1px 0 rgba(255, 255, 255, 0.8));
+      inset 4px 0 0 var(--terracotta),
+      var(--glass-hi, inset 0 1px 0 color-mix(in srgb, var(--color-surface) 80%, transparent));
   }
   .teor-steklo .z11-card__formula {
     border-radius: 12px;
@@ -196,7 +196,11 @@
   place-items: center;
   min-height: 560px;
   border-radius: 18px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(234, 241, 255, 0.6));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-surface) 70%, transparent),
+    color-mix(in srgb, var(--color-surface-info) 60%, transparent)
+  );
   box-shadow: var(--glass-ring), var(--glass-hi);
   color: var(--color-text-tertiary);
   font-size: var(--fs-caption);
@@ -220,8 +224,8 @@
   height: 26px;
   margin-right: var(--space-1);
   border-radius: 50%;
-  background: var(--blue-50, #eef4ff);
-  color: var(--blue-700, #1f4fb0);
+  background: var(--blue-50);
+  color: var(--blue-700);
   font-weight: 700;
   vertical-align: middle;
 }

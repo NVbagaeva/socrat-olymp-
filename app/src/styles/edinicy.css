@@ -115,7 +115,7 @@
   padding: 2px var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--ed-cvet);
-  color: var(--color-text-inverse);
+  color: var(--color-text-on-accent);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   font-weight: 600;
@@ -280,7 +280,7 @@
   padding: 2px var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--color-spr-primer);
-  color: var(--color-text-inverse);
+  color: var(--color-text-on-accent);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   font-weight: 600;

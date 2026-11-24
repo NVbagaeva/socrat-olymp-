@@ -42,7 +42,7 @@
   .teor-steklo .ramka--formula,
   .teor-steklo .teor-ramka--pravilo {
     --ton: var(--color-text-brand);
-    --ton-soft: var(--blue-glass-2, var(--color-surface-info));
+    --ton-soft: var(--color-glass-end);
     --ton-border: var(--color-accent-soft);
     --ton-text: var(--color-text-brand);
   }
@@ -67,7 +67,7 @@
     --ton: var(--color-uspeh);
     --ton-soft: var(--color-uspeh-soft);
     --ton-border: var(--color-uspeh-border);
-    --ton-text: #06704f;
+    --ton-text: var(--color-uspeh-text);
   }
 
   /* Подпись-плашка: тон рамки, а не свой цвет у каждого раздела. */
@@ -80,7 +80,7 @@
     border: 0;
     border-radius: var(--radius-pill);
     background: var(--ton);
-    color: var(--color-text-inverse);
+    color: var(--color-text-on-accent);
     font-size: var(--fs-caption);
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -91,7 +91,7 @@
   }
   .teor-steklo .ramka__znak {
     background: var(--ton);
-    color: var(--color-text-inverse);
+    color: var(--color-text-on-accent);
   }
   .teor-steklo .ramka__shag::before {
     background: var(--ton);
@@ -183,7 +183,7 @@
   }
   .teor-steklo .qth-card--forward {
     --ton: var(--color-text-brand);
-    --ton-soft: var(--blue-glass-2, var(--color-surface-info));
+    --ton-soft: var(--color-glass-end);
     --ton-border: var(--color-accent-soft);
   }
   .teor-steklo .qth-card__formula {

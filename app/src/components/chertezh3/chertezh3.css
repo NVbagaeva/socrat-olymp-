@@ -60,7 +60,7 @@
 /* Вершины — синий полужирный курсив, на 12 % крупнее (тема чертежей,
    KOEF_IMENI в lib/chertezh3/kadr.ts); величины — обычные. */
 .ch3__label--imya {
-  color: var(--chertezh-vershina, #1f5fd0);
+  color: var(--chertezh-vershina);
   font-size: 16.8px;
   font-weight: 700;
 }

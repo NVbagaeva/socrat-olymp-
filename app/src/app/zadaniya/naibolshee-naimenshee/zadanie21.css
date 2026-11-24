@@ -74,7 +74,7 @@
   border-bottom: 0;
 }
 .z21-tablica-proizvodnyh tbody tr:nth-child(even) {
-  background: rgb(241 246 255 / 0.5);
+  background: color-mix(in srgb, var(--color-surface-info) 50%, transparent);
 }
 .z21-tablica-proizvodnyh td:nth-child(-n + 2) {
   white-space: nowrap;
@@ -202,7 +202,7 @@
 }
 .z21-znaki__row--sign .is-positive,
 .z21-znaki__row--move .is-positive {
-  color: var(--green-700, #087f5b);
+  color: var(--green-700);
   font-weight: 700;
 }
 .z21-znaki__row--sign .is-negative,
@@ -232,7 +232,7 @@
   overflow: hidden;
   border: 1px solid var(--color-border-info);
   border-radius: 16px;
-  background: linear-gradient(180deg, #fff, #f6f9ff);
+  background: linear-gradient(180deg, var(--color-surface), var(--color-surface-info));
 }
 .z21-monotonnost__graph svg {
   display: block;
@@ -312,21 +312,21 @@
    на белой карточке со скруглением, чтобы край не резал фон страницы. */
 
 .z21-cvet--siniy {
-  --kukla: #1f5fd0;
-  --kukla-fon: #eef4fd;
-  --kukla-tekst: #1a4fb0;
+  --kukla: var(--color-primary);
+  --kukla-fon: var(--color-surface-info);
+  --kukla-tekst: var(--color-primary-text);
 }
 
 .z21-cvet--goluboy {
-  --kukla: #3ea6e6;
-  --kukla-fon: #eaf6fd;
-  --kukla-tekst: #0e6496;
+  --kukla: var(--color-z11-sm);
+  --kukla-fon: var(--color-z11-sm-soft);
+  --kukla-tekst: var(--color-spr-svo);
 }
 
 .z21-cvet--oranzh {
-  --kukla: #f08a24;
-  --kukla-fon: #fef3e7;
-  --kukla-tekst: #a85f06;
+  --kukla: var(--color-accent);
+  --kukla-fon: var(--color-accent-soft-surface);
+  --kukla-tekst: var(--color-accent-text);
 }
 
 .z21-kart {
@@ -339,7 +339,7 @@
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 6px 24px rgb(16 23 40 / 6%);
 }
 
@@ -427,7 +427,7 @@
 
 .z21-mat__sloy .z21-mat__sloy {
   margin-top: var(--space-2);
-  background: #fff;
+  background: var(--color-surface);
 }
 
 .z21-mat__sloy .z21-mat__sloy .z21-mat__sloy {

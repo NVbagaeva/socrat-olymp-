@@ -219,7 +219,7 @@
   text-align: left;
   font: inherit;
   color: var(--color-text-tertiary);
-  background: rgb(255 255 255 / 0.4);
+  background: color-mix(in srgb, var(--color-surface) 40%, transparent);
   box-shadow: var(--glass-ring);
   cursor: pointer;
   -webkit-touch-callout: none;
@@ -239,7 +239,11 @@
 /* Выбранная — синее стекло: светлая синяя заливка, синий номер. */
 .var-plitka.is-on .var-plitka__main {
   color: var(--color-text);
-  background: linear-gradient(160deg, rgb(236 243 255 / 0.95), rgb(214 229 255 / 0.85));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-surface-info) 95%, transparent),
+    rgb(214 229 255 / 0.85)
+  );
   box-shadow:
     0 0 0 1px rgb(31 95 208 / 0.22),
     var(--glass-hi),
@@ -255,7 +259,7 @@
 }
 .var-plitka.is-skoro .var-plitka__metka {
   color: var(--color-text-secondary);
-  background: rgb(255 255 255 / 0.85);
+  background: color-mix(in srgb, var(--color-surface) 85%, transparent);
   box-shadow: 0 0 0 1px var(--glass-edge);
 }
 .var-plitka__no {
@@ -311,7 +315,7 @@
   padding: 2px;
   border-radius: 8px;
   fill: currentColor;
-  background: rgb(255 255 255 / 0.7);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
   box-shadow: 0 0 0 1px rgb(31 95 208 / 0.12);
 }
 .var-plitka.is-on .var-plitka__more {
@@ -427,7 +431,7 @@
   padding: var(--space-5) var(--space-6);
   border: 1px dashed rgb(31 95 208 / 0.22);
   border-radius: 20px;
-  background: rgb(255 255 255 / 0.4);
+  background: color-mix(in srgb, var(--color-surface) 40%, transparent);
 }
 .var-prizrak__list {
   display: grid;

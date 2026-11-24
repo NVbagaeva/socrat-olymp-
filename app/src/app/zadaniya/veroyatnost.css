@@ -279,7 +279,7 @@
     radial-gradient(60% 90% at 85% 20%, rgba(240, 138, 36, 0.12), transparent 70%),
     linear-gradient(180deg, #f6f9ff, #eaf1fc);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-surface) 90%, transparent),
     inset 0 -18px 30px -24px rgba(31, 95, 208, 0.35);
   overflow: hidden;
 }
@@ -1776,7 +1776,8 @@
   overflow: hidden;
   border: 1px solid var(--color-border-info);
   border-radius: var(--radius-lg);
-  background: #fff;
+  /* Рисунок нарисован на белом — в тёмной теме он на светлой подложке. */
+  background: var(--color-podlozhka);
 }
 .v5-sobytiya__figure svg {
   display: block;
@@ -1785,7 +1786,7 @@
 }
 .v5-sobytiya__figure figcaption {
   padding: 0 var(--space-4) var(--space-3);
-  color: var(--color-text-secondary);
+  color: var(--color-podlozhka-text);
   text-align: center;
   line-height: var(--lh-caption);
 }

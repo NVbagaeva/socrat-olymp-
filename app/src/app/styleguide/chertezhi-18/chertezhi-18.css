@@ -33,9 +33,9 @@
 .sg18__ris {
   margin: 0;
   padding: 8px;
-  border: 1px solid var(--color-border, #e3e8f0);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: var(--color-surface, #fff);
+  background: var(--color-surface);
   min-width: 0;
 }
 .sg18__ris figcaption {

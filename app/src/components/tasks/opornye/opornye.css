@@ -373,7 +373,7 @@
 .op-tochka.is-verno {
   background: var(--color-uspeh-soft);
   box-shadow: inset 0 0 0 1px var(--color-uspeh-border);
-  color: #06704f;
+  color: var(--color-uspeh-text);
 }
 .op-tochka.is-neverno {
   background: var(--color-accent-soft-surface);

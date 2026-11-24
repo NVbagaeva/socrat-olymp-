@@ -167,7 +167,7 @@
   background: var(--color-surface-2);
 }
 .sg-root [data-token='surface-brand'] {
-  background: var(--navy-800);
+  background: var(--color-surface-brand);
 }
 .sg-root [data-token='text'] {
   background: var(--color-text);
@@ -251,7 +251,7 @@
   background: var(--color-primary-fill);
 }
 .sg-root .ruler [data-scale='4'] {
-  background: var(--navy-800);
+  background: var(--color-surface-brand);
 }
 
 .sg-root .radii {

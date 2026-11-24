@@ -23,13 +23,13 @@
   max-width: 100%;
   padding: var(--space-2);
   border: 0;
-  background: rgb(255 255 255 / 0.7);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
 }
 /* Место под чертёж, пока движок едет: страница не прыгает. */
 .z3-chertezh--zhdyot {
   aspect-ratio: 4 / 3;
   border-radius: var(--radius-lg);
-  background: rgb(255 255 255 / 0.5);
+  background: color-mix(in srgb, var(--color-surface) 50%, transparent);
 }
 /* Экран задачи на телефоне: чертёж не выше трети экрана — поле ответа
    остаётся рядом. */
@@ -275,7 +275,7 @@
   gap: 2px var(--space-3);
   padding: var(--space-3);
   border-radius: 12px;
-  background: rgb(255 255 255 / 0.85);
+  background: color-mix(in srgb, var(--color-surface) 85%, transparent);
 }
 .z3-podobie__stroki b {
   color: var(--color-accent-text);

@@ -28,7 +28,7 @@
 }
 
 .tipk__karta {
-  --tipk-fon: rgb(255 255 255 / 0.82);
+  --tipk-fon: color-mix(in srgb, var(--color-surface) 82%, transparent);
   position: relative;
   /* Номер | заголовок и текст; ссылки — рядом ниже на всю ширину
      карточки: на телефоне обе пилюли встают в одну строку. */
@@ -57,7 +57,11 @@
 .tipk__setka > .tipk__karta:nth-child(even) {
   --tipk-fon:
     radial-gradient(110% 90% at 100% 0%, rgb(155 192 242 / 0.36), transparent 62%),
-    linear-gradient(160deg, rgb(242 247 254 / 0.94), rgb(232 240 252 / 0.92));
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-surface-info) 94%, transparent),
+      color-mix(in srgb, var(--color-surface-info) 92%, transparent)
+    );
   box-shadow:
     0 0 0 1px rgb(31 95 208 / 0.14),
     var(--glass-hi),
@@ -67,14 +71,18 @@
 @container tipk (min-width: 540px) and (max-width: 899.98px) {
   .tipk__setka > .tipk__karta:nth-child(4n + 1),
   .tipk__setka > .tipk__karta:nth-child(4n) {
-    --tipk-fon: rgb(255 255 255 / 0.82);
+    --tipk-fon: color-mix(in srgb, var(--color-surface) 82%, transparent);
     box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
   }
   .tipk__setka > .tipk__karta:nth-child(4n + 2),
   .tipk__setka > .tipk__karta:nth-child(4n + 3) {
     --tipk-fon:
       radial-gradient(110% 90% at 100% 0%, rgb(155 192 242 / 0.36), transparent 62%),
-      linear-gradient(160deg, rgb(242 247 254 / 0.94), rgb(232 240 252 / 0.92));
+      linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--color-surface-info) 94%, transparent),
+        color-mix(in srgb, var(--color-surface-info) 92%, transparent)
+      );
     box-shadow:
       0 0 0 1px rgb(31 95 208 / 0.14),
       var(--glass-hi),

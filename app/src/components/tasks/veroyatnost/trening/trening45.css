@@ -131,7 +131,11 @@
 .z45-metod-knopka.is-verno,
 .z45-metod-knopka.is-pravilny {
   border-color: var(--color-uspeh-border);
-  background: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(214 242 230 / 0.8));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-surface) 74%, transparent),
+    rgb(214 242 230 / 0.8)
+  );
 }
 .z45-metod-knopka.is-neverno {
   border-color: var(--color-border-accent);
