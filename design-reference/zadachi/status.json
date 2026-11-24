@@ -47,7 +47,7 @@
  "zhrebiy-nachat-igru": {
   "ok": true,
   "problemy": [],
-  "popytok": 1
+  "popytok": 3
  },
  "futbolist-tri-penalti": {
   "ok": true,
@@ -349,7 +349,7 @@
  "zaryadka-samokatov": {
   "ok": true,
   "problemy": [],
-  "popytok": 1
+  "popytok": 2
  },
  "akkumulyator-samokata": {
   "ok": true,
@@ -1152,8 +1152,7 @@
  "dp-06-cyclists": {
   "ok": true,
   "problemy": [],
-  "popytok": 4,
-  "primechanie": "оставлена прежняя картинка dp-06-cyclists-1.png: новые попытки не прошли проверку фона"
+  "popytok": 5
  },
  "dp-06-trucks": {
   "ok": true,
@@ -1393,8 +1392,7 @@
  "dp-13-rowboats": {
   "ok": true,
   "problemy": [],
-  "popytok": 4,
-  "primechanie": "оставлена прежняя картинка dp-13-rowboats-1.png: новые попытки не прошли проверку фона"
+  "popytok": 5
  },
  "dp-13-barges": {
   "ok": true,
@@ -1670,416 +1668,527 @@
  "pr-05-grandparent-pension": {
   "ok": true,
   "problemy": [],
-  "popytok": 2,
-  "primechanie": "оставлена прежняя картинка pr-05-grandparent-pension-1.png: новые попытки не прошли проверку фона"
+  "popytok": 3
  },
  "pr-05-student-daughter": {
-  "ok": false,
-  "problemy": [
-   "дымка-подложка во всех попытках — ждёт перерисовки"
-  ],
-  "popytok": 2
+  "ok": true,
+  "problemy": [],
+  "popytok": 3
  },
  "sluzhba-podderzhki-zvonki": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sobesedovaniya-tri-kompanii": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "rybak-dva-ozera": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "taksi-tsentr-prigorod": {
   "ok": true,
   "problemy": [],
-  "popytok": 2,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 4
  },
  "samolet-zaderzhka-pogoda": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "turfirma-transport": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "strelok-ochki": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "printery-bumaga": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "tri-strelka-mishen": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pribor-tri-bloka": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "vaza-yabloki-grushi": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "robot-pylesos": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "reyting-videoblogov": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 3
  },
  "usb-zashchita": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "uvlazhnitel-pristavka": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "robot-pylesos-i-sobaka": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "tormozhenie-samokata": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "tormozhenie-avtobusa": {
   "ok": true,
   "problemy": [],
-  "popytok": 2,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 5
  },
  "rentgen-apparat": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "roboty-sumoisty": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "shayby-aerohokkeya": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "velogenerator-svetodiod": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-06-fridge": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-06-tv": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-06-smartphone": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-06-laptop": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-06-bank-deposits": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-07-car-faster": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-07-bus-rain": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-07-truck-new-road": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-07-fast-vs-suburban-train": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 4
  },
  "pr-07-ship-fog": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pr-07-flat-tire": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-01-vessel": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-01-alcohol-canister": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-01-pharmacy-glycerin": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 3
  },
  "sm-02-equal-solutions": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-03-milk": {
   "ok": true,
   "problemy": [],
-  "popytok": 2,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 3
  },
  "sm-03-lab-acid": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-06-milk-powder": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-06-baby-formula": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-07-acid-vessels": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-07-alcohol-canisters": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-08-lab-two-solutions-water": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-09-antiseptic": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-09-descaling": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "sm-09-floating-pool": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pt-01-tunnel": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pt-01-platform": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pt-02-trains-opposite": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "pt-03-trains-overtaking": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 3
  },
  "pt-04-two-ships-swap": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "vd-01-motor-ship": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "vd-01-cutter": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 3
  },
  "vd-01-tug": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 3
  },
  "vd-02-cutter": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 3
  },
  "vd-02-tug": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 3
  },
  "vd-02-ferry": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "vd-03-cutter": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 4
  },
  "vd-03-tug": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "vd-04-kayak": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "vd-07-tug": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "rb-01-workshop-parts": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 4
  },
  "rb-01-typesetters": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "rb-02-workshop-parts": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 2
  },
  "rb-03-tank": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 3
  },
  "rb-03-pool": {
   "ok": true,
   "problemy": [],
-  "popytok": 1,
-  "primechanie": "прежняя картинка, в очереди на перерисовку"
+  "popytok": 4,
+  "primechanie": "выбрана rb-03-pool-1.png: последние попытки не прошли проверку фона"
+ },
+ "rb-04-harvesters": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-04-facade-painters": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-04-masters-order": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-04-pit-pumps": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-04-pumps-pool": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-04-pumps-tank": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-04-road-brigades": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-04-taps-bathtub": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-04-pipes-cistern": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "rb-05-christmas-tree": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-04-printers": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "rb-05-class-cleaning": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-05-ironing": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-05-puzzle": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-05-raspberries": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-05-sweeping-yard": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-05-weeding": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-06-pool": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-05-dishes": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "rb-07-apple-harvest": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-05-dumplings": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "rb-07-birdhouses": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-07-boat": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-05-watering": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "rb-07-digging": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-07-embroidery": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-07-ship-model": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-07-snow": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "rb-07-fence": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "rb-07-paving": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "rb-07-firewood": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "z11-dvoe-rabochih": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "z11-dve-truby": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "z11-bystryy": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "z11-ocheredno": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "z11-brigady": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
  }
 }
