@@ -4,7 +4,7 @@ import { VariantFromSection } from '@/components/variant/VariantEntry';
 import { ZADANIE10, zadanie10Title } from '@/content/zadanie10';
 import { indeksBanka } from '@/lib/generator/obshchiy/bankServer';
 import { config10 } from '@/lib/zadanie10/generator10';
-import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
+import { kartinkiZadach10 } from '@/lib/zadanie10/kartinkiZadach10';
 import { gruppy10, protoInfo10 } from '@/lib/zadanie10/protoInfo';
 import { razdelBase } from '@/lib/paths';
 
@@ -22,7 +22,7 @@ export default function Generator10Tab() {
       <Generator10
         config={config10(BASE, protoInfo10(), gruppy10(), indeksBanka('data/zadanie10'))}
         base={BASE}
-        ill={kartinkiPrototipov()}
+        ill={kartinkiZadach10()}
       />
     </>
   );

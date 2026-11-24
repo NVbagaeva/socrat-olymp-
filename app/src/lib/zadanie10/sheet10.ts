@@ -9,6 +9,7 @@
  */
 
 import { createElement } from 'react';
+import { klyuchKartinki10 } from '@/lib/zadanie10/kartinkiSyuzhetov';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Abzacy, RamkaFormula, RamkaPrimer, RamkaVazhno } from '@/components/teoriya/Ramki';
 import { Tex } from '@/components/ui/Tex';
@@ -60,7 +61,7 @@ function tex(text: string): string {
 }
 
 function kartinka(o: Sborka10, z: ZadachaLite): string {
-  const ill = o.ill[z.prototypeId];
+  const ill = o.ill[klyuchKartinki10(z)];
   if (!o.kartinki || ill === undefined) return '';
   return (
     `<picture class="z10-list__kartinka" style="width:${SHIRINA_MM.kartinka}mm">` +

@@ -48,7 +48,13 @@ export interface UslovieBanka {
    * Аналог из пула: «новая» задача с готовым условием. Номер аналога
    * («ДП-07-a01»), его текст и метка сюжета; ответа нет и здесь.
    */
-  analog?: { kod: string; tekst: string; plotTag: string };
+  analog?: {
+    kod: string;
+    tekst: string;
+    plotTag: string;
+    /** Ключ сюжета картинки (lib/zadanie11/kartinki.ts) — только в данных варианта. */
+    ks?: string;
+  };
 }
 
 export type ZadachaPlan =
