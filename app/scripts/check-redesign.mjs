@@ -28,7 +28,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { strukturaObrazca, toZheSoderzhanie } from './sverka-soderzhaniya.mjs';
+import { strukturaObrazca, toZheSoderzhanie, toZheTekst } from './sverka-soderzhaniya.mjs';
 import { kod } from './lib/adres.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -631,7 +631,8 @@ if (puti === undefined) {
   const plohie = [];
   for (const stroka of neodobreno) {
     const [status, file] = stroka.split('\t');
-    if (status !== 'M' || !/\.(ts|tsx|js|mjs)$/.test(file)) {
+    const opisanie = /\.md$/.test(file);
+    if (status !== 'M' || !(opisanie || /\.(ts|tsx|js|mjs)$/.test(file))) {
       plohie.push(stroka);
       continue;
     }
@@ -642,7 +643,10 @@ if (puti === undefined) {
         maxBuffer: 256 * 1024 * 1024,
       });
       const novyy = fs.readFileSync(path.join(REPO, file), 'utf8');
-      const { ravno, gde } = toZheSoderzhanie(staryy, novyy, file, STRUKTURA_OBRAZCA);
+      /* Описание (README) — текстом: та же запись после приведения адресов. */
+      const { ravno, gde } = opisanie
+        ? { ravno: toZheTekst(staryy, novyy), gde: 'текст описания изменён' }
+        : toZheSoderzhanie(staryy, novyy, file, STRUKTURA_OBRAZCA);
       if (ravno) inayaZapis.push(file);
       else plohie.push(`${stroka}\n      ${gde}`);
     } catch (error) {
