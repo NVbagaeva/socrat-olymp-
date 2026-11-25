@@ -1,5 +1,8 @@
 'use client';
 
+import { VDomashkuOpornyeBanka } from '@/components/dz2/knopki';
+import { zhurnalBanka } from '@/lib/trening/zhurnalBanka';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { useMemo, useState, type ReactNode } from 'react';
 import { formatHint, fractionRightHint, type Reading } from '@/lib/otvet';
 import type { ProgressStore } from '@/lib/progressStore';
@@ -70,9 +73,15 @@ export interface MikroZadachaBrauzera {
   /** Строки разбора JSON-ом, закрытые ключом задачи. */
   razbor: string;
   seal: string;
+  /** Ответ, закрытый ключом «id|otvet» (этап 4в): только для «В домашку». */
+  otvet?: string;
 }
 
 export interface OpornyeBankaProps {
+  /** Номер хранения раздела: журнал решения задач (этап 4в). Нет — не пишется. */
+  taskNo?: number;
+  /** Название блока: «В домашку» учителю (этап 4в). Нет — кнопки нет. */
+  nazvanie?: string;
   blok: string;
   /** Правило блока, уже набранное (серверный узел). */
   zapomni: ReactNode;
@@ -112,6 +121,8 @@ function shagiRazbora(z: MikroZadachaBrauzera, raskryt: OpornyeBankaProps['raskr
  * не на карточке блока.
  */
 export function OpornyeBanka({
+  taskNo,
+  nazvanie,
   blok,
   zapomni,
   zadachi,
@@ -132,6 +143,12 @@ export function OpornyeBanka({
 
   const z = zadachi[index];
   const shagi = useMemo(() => (z === undefined ? [] : shagiRazbora(z, raskryt)), [z, raskryt]);
+  /* Журнал решения задач (lib/zhurnal, этап 4в): тип — блок, задача — её ключ. */
+  const zapis = useZapisZadachi(
+    z === undefined || taskNo === undefined
+      ? null
+      : zhurnalBanka(String(taskNo), { id: z.id, p: blok, text: z.uslovie }, 'opornye', blok, z.id),
+  );
   if (z === undefined) {
     return null;
   }
@@ -146,6 +163,7 @@ export function OpornyeBanka({
     if (next < 0 || next >= zadachi.length) {
       return;
     }
+    if (checked === 'wrong') zapis?.zakryt(false);
     setIndex(next);
     setValue('');
     setChecked(null);
@@ -161,20 +179,25 @@ export function OpornyeBanka({
     }
     const reading = proverit(value, zadacha.seal);
     if (reading.kind === 'pi') {
+      zapis?.popytka(value, false, 'format');
       setFormat(piPodskazka);
       return;
     }
     if (reading.kind === 'format') {
+      zapis?.popytka(value, false, 'format');
       setFormat(formatHint(reading.problem, reading.meant));
       return;
     }
     if (reading.kind === 'fractionRight') {
+      zapis?.popytka(value, false, 'fraction');
       setFormat(fractionRightHint(reading.decimal));
       return;
     }
     setFormat(null);
     const ok = reading.right;
     setChecked(ok ? 'right' : 'wrong');
+    zapis?.popytka(value, ok);
+    if (ok) zapis?.zakryt(true);
     store.recordAttempt({
       kind: blok,
       taskId: zadacha.id,
@@ -186,36 +209,60 @@ export function OpornyeBanka({
   }
 
   return (
-    <OpornayaZadacha
-      index={index}
-      ishody={ishody}
-      onOpen={open}
-      uslovieHtml={typeset(zadacha.uslovie)}
-      {...(risunki?.[zadacha.id] === undefined ? {} : { risunok: risunki[zadacha.id] })}
-      value={value}
-      onValue={(next) => {
-        setValue(next);
-        setFormat(null);
-        if (checked === 'wrong') {
-          setChecked(null);
+    <>
+      {taskNo === undefined || nazvanie === undefined ? null : (
+        /* Учителю: блок целиком — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). */
+        <div className="dz2-ryad">
+          <VDomashkuOpornyeBanka
+            taskNo={taskNo}
+            blok={blok}
+            nazvanie={nazvanie}
+            zadachi={zadachi}
+            raskryt={raskryt}
+          />
+        </div>
+      )}
+      <OpornayaZadacha
+        index={index}
+        ishody={ishody}
+        onOpen={open}
+        uslovieHtml={typeset(zadacha.uslovie)}
+        {...(risunki?.[zadacha.id] === undefined ? {} : { risunok: risunki[zadacha.id] })}
+        value={value}
+        onValue={(next) => {
+          setValue(next);
+          setFormat(null);
+          if (checked === 'wrong') {
+            setChecked(null);
+          }
+        }}
+        checked={checked}
+        onCheck={check}
+        formatHint={format}
+        podskazka={{
+          html: typeset(zadacha.podskazka),
+          open: hintOpen,
+          onOpen: () => {
+            setHintOpen(true);
+            zapis?.shagPodskazki(1);
+          },
+        }}
+        /* Решение — после ответа: до проверки доступна только подсказка. */
+        reshenie={
+          checked === null
+            ? null
+            : {
+                shagi,
+                open: solutionOpen,
+                onToggle: () => {
+                  if (!solutionOpen) zapis?.reshenie();
+                  setSolutionOpen(!solutionOpen);
+                },
+              }
         }
-      }}
-      checked={checked}
-      onCheck={check}
-      formatHint={format}
-      podskazka={{
-        html: typeset(zadacha.podskazka),
-        open: hintOpen,
-        onOpen: () => setHintOpen(true),
-      }}
-      /* Решение — после ответа: до проверки доступна только подсказка. */
-      reshenie={
-        checked === null
-          ? null
-          : { shagi, open: solutionOpen, onToggle: () => setSolutionOpen(!solutionOpen) }
-      }
-      zapomni={zapomni}
-      labels={labels}
-    />
+        zapomni={zapomni}
+        labels={labels}
+      />
+    </>
   );
 }

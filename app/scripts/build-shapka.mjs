@@ -53,6 +53,24 @@ const SHAPKI = [
   { papka: 'zadanie-04', imya: 'metod-monety', widths: [240, 480], budget: 100 * 1024 },
   { papka: 'zadanie-04', imya: 'metod-kruglyy-stol', widths: [240, 480], budget: 100 * 1024 },
   { papka: 'zadanie-04', imya: 'metod-protivopolozhnye', widths: [240, 480], budget: 100 * 1024 },
+  /* Устный счёт (/ustnyy-schet/): секундомер шапки, знаки-слои его
+     анимации, картинки групп приёмов, Виет, таблица и рейтинг. */
+  { papka: 'ustnyy-schet', imya: 'shapka-sekundomer', widths: [280, 560], budget: 100 * 1024 },
+  ...[
+    'znak-plyus',
+    'znak-minus',
+    'znak-umnozhit',
+    'znak-delit',
+    'gruppa-kvadraty',
+    'gruppa-umnozhenie',
+    'gruppa-delenie',
+    'gruppa-slozhenie',
+    'gruppa-doli',
+    'gruppa-uravneniya',
+    'vieta',
+    'tablica',
+    'reyting',
+  ].map((imya) => ({ papka: 'ustnyy-schet', imya, widths: [240, 480], budget: 100 * 1024 })),
 ];
 
 /** Ширины для srcset: телефон 1x, планшет и компьютер 1x и 2x. */
@@ -119,7 +137,11 @@ async function kadr(source) {
 
 let failed = false;
 
+/* Можно собрать только одну папку: node scripts/build-shapka.mjs ustnyy-schet */
+const TOLKO = process.argv[2];
+
 for (const { papka, imya, widths = WIDTHS, budget } of SHAPKI) {
+  if (TOLKO !== undefined && papka !== TOLKO) continue;
   const source = path.join(ROOT, 'assets', papka, `${imya}.png`);
   const out = path.join(ROOT, 'public', 'images', papka);
   await mkdir(out, { recursive: true });

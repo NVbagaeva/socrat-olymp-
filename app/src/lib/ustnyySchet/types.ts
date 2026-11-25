@@ -13,7 +13,14 @@ export const UROVNI: readonly Uroven[] = [1, 2, 3];
 
 /** Действие — для миксов «по действию». */
 export type Deystvie =
-  'slozhenie' | 'vychitanie' | 'umnozhenie' | 'delenie' | 'kvadraty' | 'tablica' | 'doli';
+  | 'slozhenie'
+  | 'vychitanie'
+  | 'umnozhenie'
+  | 'delenie'
+  | 'kvadraty'
+  | 'tablica'
+  | 'doli'
+  | 'uravneniya';
 
 export const DEYSTVIYA: readonly Deystvie[] = [
   'slozhenie',
@@ -23,9 +30,10 @@ export const DEYSTVIYA: readonly Deystvie[] = [
   'kvadraty',
   'tablica',
   'doli',
+  'uravneniya',
 ];
 
-export type GruppaId = 'kvadraty' | 'umnozhenie' | 'delenie' | 'slozhenie' | 'doli';
+export type GruppaId = 'kvadraty' | 'umnozhenie' | 'delenie' | 'slozhenie' | 'doli' | 'uravneniya';
 
 export const PRIYOM_IDS = [
   'kvadraty-11-30',
@@ -54,6 +62,10 @@ export const PRIYOM_IDS = [
   'doli-procenty',
   'procent-ot-chisla',
   'stepeni-kuby-korni',
+  'vieta-privedennoe',
+  'vieta-delim-na-a',
+  'vieta-summa-koefficientov',
+  'vieta-perebroska',
   /* Таблица умножения — отдельный режим, но генератор тот же по устройству. */
   'tablica',
 ] as const;
@@ -72,6 +84,8 @@ export interface GenOpts {
   /** Таблица умножения: какие строки (2…10) и обратная форма. */
   stroki?: readonly number[];
   obratnaya?: boolean;
+  /** Квадратные уравнения «Как в ЕГЭ»: в ответ один корень — меньший или больший. */
+  ege?: 'men' | 'bol';
 }
 
 /** Звено цепочки разбора: выражение (вычисляется) и, если нужно, своя запись TeX. */
@@ -84,6 +98,7 @@ export type Zveno = string | { e: string; tex: string };
 export interface Shag {
   /** Пояснение, формулы — в $…$. */
   tekst?: string;
+  /** Цепочка; пустая — шаг только словами (тогда tekst обязателен). */
   cep: readonly Zveno[];
 }
 
@@ -105,6 +120,12 @@ export interface Primer {
   text: string;
   /** Ответ — нормальная запись lib/otvet: «-2.25», «7225». */
   otvet: string;
+  /**
+   * Несколько ответов — корни уравнения, по возрастанию (равные —
+   * дважды). Ученик вводит их в любом порядке; otvet тогда — меньший
+   * корень (для итогов и старых мест, где ответ один).
+   */
+  otvety?: readonly string[];
   /** Знак после поля ответа: «%», когда ответ — проценты. */
   ed?: '%';
 }

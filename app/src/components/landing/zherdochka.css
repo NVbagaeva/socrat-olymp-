@@ -88,7 +88,7 @@
   /* Нарисован клювом вправо — на жёрдочке смотрит влево, на текст. */
   transform: scaleX(-1);
   pointer-events: auto;
-  filter: drop-shadow(0 0.03em 0.05em rgb(20 40 90 / 0.2));
+  filter: drop-shadow(0 0.03em 0.05em color-mix(in srgb, var(--lend-ten-ptica) 20%, transparent));
   -webkit-tap-highlight-color: transparent;
 }
 
