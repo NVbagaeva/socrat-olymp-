@@ -3291,6 +3291,31 @@ async function runZhurnalBanka(mock, errors) {
     await context.close();
   }
 
+  /* Опорные №7 (этап 4в): неверный ответ в блоке — строка «opornye» в журнале. */
+  {
+    const { BLOKI_OPORNYH } = requireSrc('lib/zadanie7/opornye.ts');
+    const blok = BLOKI_OPORNYH[0];
+    mock.zhurnal.length = 0;
+    const { context, page } = await newPage(mock, 375, errors);
+    await welcomeSeen(context);
+    await login(page, uchenik[375], 'zhurnal-parol-1');
+    await page.goto(`${SITE}/zadaniya/uravneniya/opornye-zadachi/${blok.slug}/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.op-zad');
+    check((await page.locator('.dz2-knopka').count()) === 0, 'журнал опорных №7: ученик не видит «В домашку»');
+    await page.locator('.op-zad__pole input').first().fill('987654');
+    await page.locator('.op-zad__glavnaya').first().click();
+    const until = Date.now() + 15000;
+    const row = () => mock.zhurnal.find((r) => r.place === 'opornye' && r.task_no === 7);
+    while (Date.now() < until && (row() === undefined || row().popytki.length === 0)) {
+      await new Promise((done) => setTimeout(done, 250));
+    }
+    const r = row();
+    check(r !== undefined && r.kind === blok.id && r.place_ref === blok.id && r.task_ref === blok.zadachi[0].id
+      && r.popytki.length === 1 && !r.popytki[0].ok,
+    `журнал опорных №7: блок, задача и неверная попытка (${r?.kind}, ${r?.popytki?.length})`);
+    await context.close();
+  }
+
   /* Учитель: «В домашку» у тренажёра №7; №11 — без разминок. */
   if (DZ2_RAZDELY.includes(7) && DZ2_RAZDELY.includes(11)) {
     const { context, page } = await newPage(mock, 1280, errors);
@@ -3313,6 +3338,22 @@ async function runZhurnalBanka(mock, errors) {
       }
       await page.setViewportSize({ width: 1280, height: 900 });
     }
+    /* Блок опорных №7 — целиком. */
+    {
+      const { BLOKI_OPORNYH } = requireSrc('lib/zadanie7/opornye.ts');
+      await page.goto(`${SITE}/zadaniya/uravneniya/opornye-zadachi/${BLOKI_OPORNYH[0].slug}/`, { waitUntil: 'networkidle' });
+      await page.locator('.dz2-ryad .dz2-knopka__glavnaya').click();
+      await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
+      if (SHOTS !== null) {
+        for (const w of [375, 1280]) {
+          await page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
+          await page.evaluate(() => document.fonts.ready);
+          await page.screenshot({ path: path.join(SHOTS, `dz2-opornye7-${w}.png`),
+            style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+        }
+        await page.setViewportSize({ width: 1280, height: 900 });
+      }
+    }
     await page.goto(`${SITE}/zadaniya/tekstovye-zadachi/trenazher/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.trn-start');
     await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
@@ -3325,6 +3366,11 @@ async function runZhurnalBanka(mock, errors) {
     const el = JSON.parse(korz ?? '{}').elementy ?? [];
     const t7 = el.find((e) => e.task_no === 7 && e.vid === 'trenazher');
     const t11 = el.find((e) => e.task_no === 11 && e.vid === 'trenazher');
+    const op7 = el.find((e) => e.task_no === 7 && e.vid === 'opornye');
+    const NORM = /^-?[0-9]+(\.[0-9]+)?$/;
+    check(op7 !== undefined && op7.tasks.length === requireSrc('lib/zadanie7/opornye.ts').BLOKI_OPORNYH[0].zadachi.length
+      && op7.tasks.every((t) => NORM.test(t.answer) && t.razbor?.shagi?.length > 0),
+    `ДЗ 4в: блок опорных №7 в корзине — все задачи с ответами и разбором (${op7?.tasks?.length})`);
     check(t7 !== undefined && t7.tipy.length > 0, `ДЗ 4б: тренажёр №7 в корзине (${t7?.tipy?.length} типов)`);
     check(t11 !== undefined && t11.tipy.length > 0 && t11.tipy.every((t) => !t.startsWith('RZ-')),
       `ДЗ 4б: тренажёр №11 без разминок (${t11?.tipy?.length} типов)`);

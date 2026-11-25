@@ -8,7 +8,9 @@ import { withVersion } from './assetUrl';
  *                                  (zadanie11/vstrecha/Scena — ленивый кусок);
  *   /images/zadanie-0N/metod-    — картинки карточек «Ключевые методы
  *                                  решения» №4 и №5 (серверная KlyuchevyeMetody,
- *                                  список — lib/veroyatnost/metody-kartinki.ts).
+ *                                  список — lib/veroyatnost/metody-kartinki.ts);
+ *   /images/ustnyy-schet/        — стеклянные картинки раздела «Устный счёт»
+ *                                  (список и размеры — lib/ustnyySchet/kartinki.ts).
  *
  * Общая таблица ASSET_VERSIONS входит в первую загрузку каждой страницы
  * (порог — scripts/check-first-load.mjs), поэтому эти файлы в ней не

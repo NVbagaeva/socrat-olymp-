@@ -9,6 +9,7 @@ import { KVADRATY } from './priyomy/kvadraty';
 import { SLOZHENIE } from './priyomy/slozhenie';
 import { tablica } from './priyomy/tablica';
 import { UMNOZHENIE } from './priyomy/umnozhenie';
+import { VIETA } from './priyomy/vieta';
 import type { Deystvie, GruppaId, Priyom, PriyomId } from './types';
 
 /** Приёмы со своими страницами — по группам, в порядке витрины. */
@@ -18,6 +19,7 @@ export const PRIYOMY: readonly Priyom[] = [
   ...DELENIE,
   ...SLOZHENIE,
   ...DOLI,
+  ...VIETA,
 ];
 
 /** Все генераторы, включая таблицу умножения. */
@@ -41,6 +43,7 @@ export const GRUPPY: readonly GruppaId[] = [
   'delenie',
   'slozhenie',
   'doli',
+  'uravneniya',
 ];
 
 export function priyomyGruppy(g: GruppaId): Priyom[] {

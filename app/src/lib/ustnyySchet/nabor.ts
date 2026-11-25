@@ -34,6 +34,8 @@ export interface Nastroyki {
   otricatelnye: boolean;
   /** Числа не больше (по модулю), null — без ограничения. */
   predel: number | null;
+  /** Квадратные уравнения «Как в ЕГЭ»: один корень в ответ (нет — оба корня). */
+  ege?: 'men' | 'bol';
 }
 
 export const NASTROYKI_PO_UMOLCHANIYU: Nastroyki = {
@@ -60,7 +62,7 @@ function vPredele(p: Primer, predel: number | null): boolean {
     const v = dec(s);
     return cmp(v.m < 0n ? { m: -v.m, e: v.e } : v, lim) <= 0;
   };
-  return ok(p.otvet) && p.d.every(ok);
+  return ok(p.otvet) && (p.otvety ?? []).every(ok) && p.d.every(ok);
 }
 
 /** Пары «генератор + действие», из которых тянется микс. */
@@ -137,6 +139,7 @@ export function sozdatGenerator(nabor: Nabor, nast: Nastroyki, g: GeneratorOpts)
       uroven: nast.uroven,
       desyatichnye: nast.desyatichnye,
       otricatelnye: nast.otricatelnye,
+      ...(nast.ege === undefined ? {} : { ege: nast.ege }),
       ...(s.deystvie === undefined ? {} : { deystvie: s.deystvie }),
       ...(tab === null
         ? {}

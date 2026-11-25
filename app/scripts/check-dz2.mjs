@@ -208,6 +208,44 @@ for (const n of [8, 5]) {
   }
 }
 
+/* Этап 4в: опорные на общем экране банка (№7, 10, 21). Ответ уходит в
+   браузер закрытым ключом «id|otvet» (как разбор; добавляет страница блока,
+   lib/opornye/otvetDz.ts) и открывается только по
+   «В домашку»: открытый ответ совпадает с исходным у каждой задачи, разбор
+   читается, задача ДЗ собирается с ответом в нормальной записи. */
+{
+  const nabor = { tekst: (t) => t, formula: (t) => t };
+  for (const [n, fn] of [[7, 'opornyeDlyaBrauzera'], [10, 'opornyeDlyaBrauzera'], [21, 'opornyeDlyaBrauzera21']]) {
+    const O = requireSrc(`lib/zadanie${n}/opornye.ts`);
+    const { openText, sealText } = requireSrc(`lib/zadanie${n}/secret.ts`);
+    const { sOtvetomDz } = requireSrc('lib/opornye/otvetDz.ts');
+    let vsego = 0;
+    let bad = 0;
+    let dz = 0;
+    for (const b of O.BLOKI_OPORNYH ?? O.BLOKI_OPORNYH21) {
+      /* Так же, как страница блока: данные раздела + ответ для ДЗ. */
+      const brauzer = sOtvetomDz(O[fn](b), b.zadachi, sealText);
+      for (const [i, z] of brauzer.entries()) {
+        vsego += 1;
+        const iskhodnyy = b.zadachi[i];
+        const otvet = openText(z.otvet, `${z.id}|otvet`);
+        if (otvet !== String(iskhodnyy.answer) || 'answer' in z) bad += 1;
+        let shagi = [];
+        try {
+          const stroki = JSON.parse(openText(z.razbor, z.id));
+          shagi = Array.isArray(stroki) ? stroki.map((text) => ({ text })) : [];
+        } catch {
+          shagi = [];
+        }
+        const d = Z.zadachaOpornaya5({ id: z.id, uslovie: z.uslovie }, { otvet, shagi }, nabor, 1);
+        if (d !== null && NORM.test(d.answer) && Number(d.answer) === Number(iskhodnyy.answer)) dz += 1;
+      }
+    }
+    check(vsego > 0 && bad === 0, `№${n} опорные: закрытый ответ открывается в исходный (${vsego - bad} из ${vsego})`);
+    check(dz === vsego, `№${n} опорные: задачи ДЗ с ответом (${dz} из ${vsego})`);
+  }
+}
+
 /* Опорные №8: весь блок, ответ генератора, разбор открыт отпечатком. */
 {
   const { prepPool } = requireSrc('lib/vychisleniya/prep/pool.ts');

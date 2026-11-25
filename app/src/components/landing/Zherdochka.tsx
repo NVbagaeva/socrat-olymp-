@@ -256,9 +256,13 @@ function Steklo() {
           <stop offset="1" stopColor="#b9701c" />
         </linearGradient>
         <radialGradient id="zh-ten">
-          <stop offset="0" stopColor="#1f5fd0" stopOpacity="0.3" />
-          <stop offset="0.6" stopColor="#1f5fd0" stopOpacity="0.1" />
-          <stop offset="1" stopColor="#1f5fd0" stopOpacity="0" />
+          <stop offset="0" style={{ stopColor: 'var(--lend-zherdochka-ten)' }} stopOpacity="0.3" />
+          <stop
+            offset="0.6"
+            style={{ stopColor: 'var(--lend-zherdochka-ten)' }}
+            stopOpacity="0.1"
+          />
+          <stop offset="1" style={{ stopColor: 'var(--lend-zherdochka-ten)' }} stopOpacity="0" />
         </radialGradient>
       </defs>
       <ellipse cx="100" cy="36" rx="84" ry="4.5" fill="url(#zh-ten)" />
@@ -321,9 +325,21 @@ function Vetka() {
           <stop offset="1" stopColor="#2b9a4e" stopOpacity="0.92" />
         </linearGradient>
         <radialGradient id="zh-ten-v">
-          <stop offset="0" stopColor="#3c2a14" stopOpacity="0.2" />
-          <stop offset="0.6" stopColor="#3c2a14" stopOpacity="0.07" />
-          <stop offset="1" stopColor="#3c2a14" stopOpacity="0" />
+          <stop
+            offset="0"
+            style={{ stopColor: 'var(--lend-zherdochka-ten-derevo)' }}
+            stopOpacity="0.2"
+          />
+          <stop
+            offset="0.6"
+            style={{ stopColor: 'var(--lend-zherdochka-ten-derevo)' }}
+            stopOpacity="0.07"
+          />
+          <stop
+            offset="1"
+            style={{ stopColor: 'var(--lend-zherdochka-ten-derevo)' }}
+            stopOpacity="0"
+          />
         </radialGradient>
       </defs>
       <ellipse cx="98" cy="36" rx="82" ry="4.2" fill="url(#zh-ten-v)" />
