@@ -1,13 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
-import { displayAnswer } from '@/lib/otvet';
 import { dlitelnost } from '@/lib/ustnyySchet/chasy';
 import { itogMs, prohodit, tochnostProc } from '@/lib/ustnyySchet/ochki';
 import { priyom } from '@/lib/ustnyySchet/registry';
 import type { Itogi as ItogiT, Rezhim } from '@/lib/ustnyySchet/sessiya';
 import type { Rekord } from '@/lib/ustnyySchet/statistika/model';
-import { primerSOtvetomHtml, shagHtml } from '@/lib/ustnyySchet/vyvod';
+import { primerSOtvetomHtml, shagHtml, vvodText } from '@/lib/ustnyySchet/vyvod';
 import { USTNYY } from '@/content/ustnyySchet';
 import { RazborShagi } from './RazborShagi';
 import Link from 'next/link';
@@ -178,7 +177,7 @@ export function Itogi({
               <li key={i} className="us-oshibka">
                 <p className="us-oshibka__vopros" dangerouslySetInnerHTML={{ __html: vopros }} />
                 <p className="us-oshibka__tvoy">
-                  {T.tvoyOtvet}: <s>{displayAnswer(h.vvod)}</s>
+                  {T.tvoyOtvet}: <s>{vvodText(h)}</s>
                 </p>
                 <RazborShagi shagi={shagi} vse />
               </li>
