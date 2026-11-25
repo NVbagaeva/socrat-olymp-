@@ -18,11 +18,16 @@ import { TYPE_NAMES } from '@/lib/zadanie13/types';
 import { otvetText } from '@/lib/zadanie13/html';
 import { shagi13, voprosy13 } from './shagi13';
 import { TablitsaZapolni13, urovenPoNomeru } from './TablitsaZapolni13';
+import { zhurnalOpornoy } from '@/lib/zhurnal/opornye';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
+import { VDomashkuOpornyeGen } from '@/components/dz2/knopki';
 /* Подсказка-вопросы — общий компонент тренажёра; его стили — при тренажёре. */
 import '../trening/trening.css';
 
 export interface Opornye13ScreenProps {
   blockId: string;
+  /** Название блока — для «В домашку» учителя. */
+  nazvanie: string;
   vid: 'zadachi' | 'tip';
   /** Десять задач блока в закрытом виде, собраны на сборке. */
   tasks: (Zadacha13Sealed & { no: number })[];
@@ -51,7 +56,7 @@ function sluchaynyySeed(): string {
  * подсказка-вопросы, решение по шагам с таблицами, «Ещё вариант» и
  * точки-номера. Прогресс — прежнее хранилище опорных задач №13.
  */
-export function Opornye13Screen({ blockId, vid, tasks, zapomni }: Opornye13ScreenProps) {
+export function Opornye13Screen({ blockId, nazvanie, vid, tasks, zapomni }: Opornye13ScreenProps) {
   const progress = opornye13.useProgress();
   const [index, setIndex] = useState(0);
   const [value, setValue] = useState('');
@@ -97,6 +102,12 @@ export function Opornye13Screen({ blockId, vid, tasks, zapomni }: Opornye13Scree
     }
   }, [task, solutionOpen, vid]);
 
+  /* Журнал решения задач (lib/zhurnal, этап 4г): задача — «прототип@seed». */
+  const zapis = useZapisZadachi(
+    base === undefined || task === undefined
+      ? null
+      : zhurnalOpornoy(13, blockId, base.no, { ...task, id: task.prototypeId }),
+  );
   if (base === undefined || task === undefined) {
     return null;
   }
@@ -121,6 +132,7 @@ export function Opornye13Screen({ blockId, vid, tasks, zapomni }: Opornye13Scree
 
   function open(next: number) {
     if (next < 0 || next >= tasks.length) return;
+    if (checked === 'wrong') zapis?.zakryt(false);
     setIndex(next);
     reset();
     scrollTabTo('.op-zad');
@@ -130,15 +142,18 @@ export function Opornye13Screen({ blockId, vid, tasks, zapomni }: Opornye13Scree
     if (value.trim() === '') return;
     const tip = zadacha.vybory !== null;
     if (!tip && estPi(value)) {
+      zapis?.popytka(value, false, 'format');
       setFormat(TRENAZHER13.ekran.piPodskazka);
       return;
     }
     const reading = proverit13(value, { ...zadacha, sealTip: zadacha.seal }, tip);
     if (reading.kind === 'format') {
+      zapis?.popytka(value, false, 'format');
       setFormat(formatHint(reading.problem, reading.meant));
       return;
     }
     if (reading.kind === 'fractionRight') {
+      zapis?.popytka(value, false, 'fraction');
       setFormat(fractionRightHint(reading.decimal));
       return;
     }
@@ -147,9 +162,12 @@ export function Opornye13Screen({ blockId, vid, tasks, zapomni }: Opornye13Scree
     setEdinicy(reading.kind === 'edinicy');
     setChecked(ok ? 'right' : 'wrong');
     zapisat13(blockId, no, ok ? 'right' : 'wrong');
+    zapis?.popytka(value, ok);
+    if (ok) zapis?.zakryt(true);
   }
 
   function another() {
+    if (checked === 'wrong') zapis?.zakryt(false);
     setFresh((prev) => ({
       ...prev,
       [no]: sealZadacha13(zadacha.prototypeId, sluchaynyySeed(), vid, no),
@@ -158,6 +176,7 @@ export function Opornye13Screen({ blockId, vid, tasks, zapomni }: Opornye13Scree
   }
 
   function toggleSolution() {
+    if (!solutionOpen) zapis?.reshenie();
     if (!solutionOpen && ishody[index] !== 'right') {
       zapisat13(blockId, no, 'revealed');
     }
@@ -185,77 +204,115 @@ export function Opornye13Screen({ blockId, vid, tasks, zapomni }: Opornye13Scree
     );
 
   return (
-    <OpornayaZadacha
-      index={index}
-      ishody={ishody}
-      onOpen={open}
-      uslovieHtml={
-        (zadacha.metki.length === 0
-          ? ''
-          : `<p class="z13-op__metki">${zadacha.metki.join(' · ')}</p>`) + zadacha.uslovieHtml
-      }
-      {...(risunok === undefined ? {} : { risunok })}
-      value={value}
-      onValue={(next) => {
-        setValue(next);
-        setFormat(null);
-        if (checked === 'wrong') {
-          setChecked(null);
-          setEdinicy(false);
-        }
-      }}
-      checked={checked}
-      onCheck={check}
-      formatHint={format}
-      {...(zadacha.vybory === null
-        ? {}
-        : { vybory: zadacha.vybory.map((v) => ({ number: v.number, labelHtml: v.label })) })}
-      {...(edinicy && checked === 'wrong' ? { verdiktNeverno: TRENAZHER13.ekran.edinicy } : {})}
-      podskazka={{
-        html: '',
-        open: hintOpen,
-        onOpen: () => setHintOpen(true),
-        telo: (
-          <PodskazkaVoprosy
-            voprosy={voprosy}
-            otkryto={shag}
-            mimo={mimo}
-            onVerno={() => {
-              setShag(shag + 1);
-              setMimo([]);
-            }}
-            onMimo={(j) => setMimo([...mimo, j])}
-            labels={TRENAZHER13.ekran.voprosy}
-          />
-        ),
-      }}
-      /* Решение — после ответа: до проверки доступна только подсказка. */
-      reshenie={
-        checked === null
-          ? null
-          : {
-              shagi:
-                reshenie === null
-                  ? []
-                  : [
-                      ...reshenie.shagi,
-                      {
-                        zagolovok: OPORNYE13.otvet,
-                        chtoHtml: `<p>${reshenie.otvet}</p>`,
-                        formulaHtml: '',
-                      },
-                    ],
-              open: solutionOpen,
-              onToggle: toggleSolution,
+    <>
+      {vid === 'tip' ? null : (
+        /* Учителю: блок — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). «Определи
+           тип» (выбор схемы) и «Заполни таблицу» в ДЗ не идут: база сверяет число. */
+        <div className="dz2-ryad">
+          <VDomashkuOpornyeGen
+            taskNo={13}
+            blok={blockId}
+            nazvanie={nazvanie}
+            sobrat={async () =>
+              tasks
+                .filter((x) => x.vybory === null && x.zapolni === null)
+                .map((x) => {
+                  const t = generate(x.prototypeId, x.seed);
+                  return {
+                    id: x.prototypeId,
+                    seed: x.seed,
+                    uslovieHtml: x.uslovieHtml,
+                    tablitsaHtml: x.tablitsaHtml,
+                    otvet: t.answer,
+                    shagi: reshenieShagami(t.solution, t.tableModel).map((sh) => ({
+                      chto: `<b>${sh.zagolovokHtml}.</b> ${sh.chtoHtml}${sh.dopHtml}`,
+                      tex: sh.formulaHtml,
+                    })),
+                  };
+                })
             }
-      }
-      dop={
-        <button type="button" className="stk-btn stk-btn--tihaya" onClick={another}>
-          {OPORNYE13.eshcheVariant}
-        </button>
-      }
-      zapomni={zapomni}
-      labels={OPORNYE13.zadacha}
-    />
+          />
+        </div>
+      )}
+      <OpornayaZadacha
+        index={index}
+        ishody={ishody}
+        onOpen={open}
+        uslovieHtml={
+          (zadacha.metki.length === 0
+            ? ''
+            : `<p class="z13-op__metki">${zadacha.metki.join(' · ')}</p>`) + zadacha.uslovieHtml
+        }
+        {...(risunok === undefined ? {} : { risunok })}
+        value={value}
+        onValue={(next) => {
+          setValue(next);
+          setFormat(null);
+          if (checked === 'wrong') {
+            setChecked(null);
+            setEdinicy(false);
+          }
+        }}
+        checked={checked}
+        onCheck={check}
+        formatHint={format}
+        {...(zadacha.vybory === null
+          ? {}
+          : { vybory: zadacha.vybory.map((v) => ({ number: v.number, labelHtml: v.label })) })}
+        {...(edinicy && checked === 'wrong' ? { verdiktNeverno: TRENAZHER13.ekran.edinicy } : {})}
+        podskazka={{
+          html: '',
+          open: hintOpen,
+          onOpen: () => {
+            setHintOpen(true);
+            zapis?.shagPodskazki(1);
+          },
+          telo: (
+            <PodskazkaVoprosy
+              voprosy={voprosy}
+              otkryto={shag}
+              mimo={mimo}
+              onVerno={() => {
+                setShag(shag + 1);
+                setMimo([]);
+                zapis?.shagPodskazki(shag + 1);
+              }}
+              onMimo={(j) => {
+                setMimo([...mimo, j]);
+                zapis?.oshibkaPodskazki(shag);
+              }}
+              labels={TRENAZHER13.ekran.voprosy}
+            />
+          ),
+        }}
+        /* Решение — после ответа: до проверки доступна только подсказка. */
+        reshenie={
+          checked === null
+            ? null
+            : {
+                shagi:
+                  reshenie === null
+                    ? []
+                    : [
+                        ...reshenie.shagi,
+                        {
+                          zagolovok: OPORNYE13.otvet,
+                          chtoHtml: `<p>${reshenie.otvet}</p>`,
+                          formulaHtml: '',
+                        },
+                      ],
+                open: solutionOpen,
+                onToggle: toggleSolution,
+              }
+        }
+        dop={
+          <button type="button" className="stk-btn stk-btn--tihaya" onClick={another}>
+            {OPORNYE13.eshcheVariant}
+          </button>
+        }
+        zapomni={zapomni}
+        labels={OPORNYE13.zadacha}
+      />
+    </>
   );
 }

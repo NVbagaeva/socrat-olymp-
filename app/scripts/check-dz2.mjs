@@ -159,6 +159,29 @@ for (const n of [8, 5]) {
     `№${n}: тот же seed — тот же набор`);
 }
 
+/* Очистка ДЗ (lib/dz/sanitize.ts) в браузере работает с DOM; здесь —
+   та же сверка по разметке: теги и атрибуты SVG из её списков, id — только
+   у <pattern>, ссылки — только url(#id). Возвращает, что очистка вырежет. */
+const SAN = requireSrc('lib/dz/sanitize.ts');
+function vneDopuska(svg) {
+  const out = [];
+  for (const m of svg.matchAll(/<([a-zA-Z][\w:-]*)((?:\s+[\w:-]+\s*=\s*"[^"]*")*)\s*\/?>/g)) {
+    const tag = m[1].toLowerCase();
+    if (!SAN.TAGS.has(tag)) out.push(`<${tag}>`);
+    for (const at of m[2].matchAll(/([\w:-]+)\s*=\s*"([^"]*)"/g)) {
+      const name = at[1].toLowerCase();
+      if (!(SAN.ATTRS.has(name) || (name === 'id' && tag === 'pattern') || name.startsWith('data-'))) {
+        out.push(`${tag}@${name}`);
+      }
+      for (const u of at[2].match(/url\s*\([^)]*\)/gi) ?? []) {
+        if (!/^url\(#[A-Za-z0-9_-]+\)$/.test(u.replace(/\s+/g, ''))) out.push(`${tag}@${name}=${u}`);
+      }
+    }
+  }
+  return out;
+}
+const chertezhiRazdelov = [];
+
 /* Этап 4б: тренажёр по банку — «В домашку» у №1, 2, 7, 9, 10, 11, 12, 13, 21.
    Типы тренажёра (id из выбора тем) должны совпадать с прототипами адаптера
    «Собрать вариант», из которого собирается запас ДЗ: каждый тип, который
@@ -205,6 +228,137 @@ for (const n of [8, 5]) {
     );
     check(zapas.length > 0 && zapas.every((t) => NORM.test(t.answer) && vDz.slice(0, 3).includes(t.kind)),
       `№${n}: запас ДЗ из трёх типов с ответами (${zapas.length})`);
+    /* Чертёж ученика — в условии ДЗ (4г): по задаче каждого типа, у которой
+       у адаптера есть рисунок, условие несёт его SVG, и очистка его не режет. */
+    let sRisunkom = 0;
+    let sChertezhom = 0;
+    const plohieSvg = [];
+    for (const tip of vDz) {
+      const zadacha = vzyat(tip, `chertezh|${tip}`);
+      if (zadacha === null) continue;
+      const svg = typeof zadacha.figure?.svg === 'string' ? zadacha.figure.svg : null;
+      const [dz] = Z.zapasTrenazhera([tip], 1, () => zadacha, () => 1);
+      if (dz === undefined) continue;
+      /* Условие целиком (таблицы №13, KaTeX) — тоже без вырезанного. */
+      plohieSvg.push(...vneDopuska(dz.question_html).map((x) => `${tip}: ${x}`));
+      if (svg !== null) {
+        sRisunkom += 1;
+        if (dz.question_html.includes(svg) && dz.question_html.includes('dz2-chertezh')) sChertezhom += 1;
+      }
+    }
+    check(sRisunkom === sChertezhom, `№${n}: чертёж в условии ДЗ у ${sChertezhom} из ${sRisunkom} типов с рисунком`);
+    check(plohieSvg.length === 0, `№${n}: очистка ДЗ режет условие: ${[...new Set(plohieSvg)].slice(0, 6).join('; ')}`);
+    if (sRisunkom > 0) chertezhiRazdelov.push(n);
+  }
+  /* Разделы, где чертёж решает задачу: проверка выше не должна пустеть. */
+  for (const n of [1, 2, 9, 10]) {
+    check(chertezhiRazdelov.includes(n), `№${n}: у тренажёра в ДЗ нашлись задачи с чертежом`);
+  }
+}
+
+/* Этап 4г: опорные на своих экранах (№1, 2, 9, 11, 13). «В домашку»
+   собирает задачи блока тем же генератором, что «Ещё вариант»: ответ
+   генератора по (задача, seed) — тот, что закрыт отпечатком на экране;
+   разбор открывается; чертёж и таблица условия проходят очистку ДЗ;
+   задача ДЗ — с ответом в нормальной записи и чертежом в условии.
+   Задачи с выбором («Определи тип», варианты) и «Заполни таблицу» — не в ДЗ. */
+{
+  const RAZDELY = {
+    1: {
+      pool: () => requireSrc('lib/planimetriya/prep/pool.ts').prepPool1(),
+      secret: 'lib/planimetriya/secret.ts',
+      otvet: (x) => requireSrc('lib/planimetriya/prep/generate.ts').generateMikro(x.id, x.seed).otvet,
+      stroki: (x, open) => JSON.parse(open(x.razbor, x.seal)).stroki,
+      chislom: () => true,
+    },
+    2: {
+      pool: () => requireSrc('lib/vektory/prep/pool.ts').prepPool2(),
+      secret: 'lib/vektory/secret.ts',
+      otvet: (x) => requireSrc('lib/vektory/prep/generate.ts').generateMikro(x.id, x.seed).otvet,
+      stroki: (x, open) => JSON.parse(open(x.razbor, x.seal)).stroki,
+      chislom: (x) => x.answerType === 'number',
+    },
+    9: {
+      pool: () => requireSrc('lib/proizvodnaya/prep/pool.ts').prepPool9(),
+      secret: 'lib/proizvodnaya/secret.ts',
+      otvet: (x) => requireSrc('lib/proizvodnaya/prep/generate.ts').generatePrepById(x.id, x.seed).otvet,
+      stroki: (x, open) => JSON.parse(open(x.zakryto, x.seal)).razborHtml,
+      chislom: (x) => x.answerType === 'number',
+    },
+    11: {
+      pool: () => requireSrc('lib/zadanie11/prep/pool.ts').prepPool11(),
+      secret: 'lib/zadanie11/secret.ts',
+      otvet: (x) => requireSrc('lib/zadanie11/prep/generate.ts').generateMikro(x.id, x.seed).otvet,
+      stroki: (x, open) => JSON.parse(open(x.razbor, x.seal)).stroki,
+      tablitsa: (x) => (x.tablitsa === null ? null : requireSrc('lib/zadanie11/sheet11.ts').tablitsaHtml(x.tablitsa)),
+      chislom: (x) => x.answerType === 'number',
+    },
+    13: {
+      pool: () => requireSrc('lib/zadanie13/opornye/pool.ts').prepPool13().filter((b) => b.vid !== 'tip'),
+      secret: 'lib/zadanie13/secret.ts',
+      id: (x) => x.prototypeId,
+      otvet: (x) => requireSrc('lib/zadanie13/generate.ts').generate(x.prototypeId, x.seed).answer,
+      stroki: (x) => {
+        const t = requireSrc('lib/zadanie13/generate.ts').generate(x.prototypeId, x.seed);
+        return requireSrc('lib/zadanie13/reshenieHtml.ts').reshenieShagami(t.solution, t.tableModel).map((sh) => sh.chtoHtml + sh.formulaHtml);
+      },
+      tablitsa: (x) => x.tablitsaHtml,
+      chislom: (x) => x.vybory === null && x.zapolni === null,
+    },
+  };
+  for (const [nStr, R] of Object.entries(RAZDELY)) {
+    const n = Number(nStr);
+    const { sealAnswer, openText } = requireSrc(R.secret);
+    let vsego = 0;
+    let seal = 0;
+    let razbor = 0;
+    let dz = 0;
+    let sRisunkom = 0;
+    let sTablitsey = 0;
+    const plohie = [];
+    for (const b of R.pool()) {
+      for (const x of b.zadachi.filter(R.chislom)) {
+        vsego += 1;
+        const otvet = R.otvet(x);
+        if (sealAnswer(otvet) === x.seal) seal += 1;
+        let stroki = [];
+        try {
+          stroki = R.stroki(x, openText);
+        } catch {
+          stroki = [];
+        }
+        if (Array.isArray(stroki) && stroki.length > 0) razbor += 1;
+        const tablitsaHtml = R.tablitsa?.(x) ?? null;
+        const d = Z.zadachaOpornayaGen(
+          {
+            id: R.id?.(x) ?? x.id,
+            seed: x.seed,
+            uslovieHtml: x.uslovieHtml,
+            risunokSvg: x.risunokSvg ?? null,
+            tablitsaHtml,
+            otvet,
+            shagi: stroki.map((chto) => ({ chto })),
+          },
+          2,
+        );
+        if (d !== null && NORM.test(d.answer) && Number(d.answer) === Number(otvet)) dz += 1;
+        /* Условие целиком — чертёж, таблица, KaTeX — очистка не режет. */
+        if (d !== null) plohie.push(...vneDopuska(d.question_html).map((v) => `${R.id?.(x) ?? x.id}: ${v}`));
+        if (typeof x.risunokSvg === 'string') {
+          sRisunkom += 1;
+          if (!d?.question_html.includes(x.risunokSvg)) plohie.push(`${x.id}: чертежа нет в условии`);
+        }
+        if (tablitsaHtml !== null) {
+          sTablitsey += 1;
+        }
+      }
+    }
+    check(vsego > 0 && seal === vsego, `№${n} опорные: ответ генератора совпадает с отпечатком экрана (${seal} из ${vsego})`);
+    check(razbor === vsego, `№${n} опорные: разбор открывается (${razbor} из ${vsego})`);
+    check(dz === vsego, `№${n} опорные: задачи ДЗ с ответом (${dz} из ${vsego})`);
+    check(plohie.length === 0, `№${n} опорные: чертёж и таблица в ДЗ: ${[...new Set(plohie)].slice(0, 6).join('; ')}`);
+    if ([1, 2, 9].includes(n)) check(sRisunkom > 0, `№${n} опорные: есть задачи с чертежом (${sRisunkom})`);
+    if ([11, 13].includes(n)) check(sTablitsey > 0, `№${n} опорные: есть задачи с таблицей (${sTablitsey})`);
   }
 }
 

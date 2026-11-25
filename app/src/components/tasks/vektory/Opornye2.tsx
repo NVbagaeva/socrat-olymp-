@@ -15,6 +15,9 @@ import { choiceMatches, openText } from '@/lib/vektory/secret';
 import { tipHref2 } from '@/lib/vektory/links';
 import { readSealed2 } from '@/lib/vektory/trening/otvet2';
 import { RisunokSvg } from './shagi2';
+import { zhurnalOpornoy } from '@/lib/zhurnal/opornye';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
+import { VDomashkuOpornyeGen } from '@/components/dz2/knopki';
 
 const T = OPORNYE2;
 
@@ -79,10 +82,13 @@ function shagiRazbora(task: MikroSealed): Shag[] {
  */
 export function Opornye2({
   blokId,
+  nazvanie,
   zapomni,
   zadachi,
 }: {
   blokId: string;
+  /** Название блока — для «В домашку» учителя. */
+  nazvanie: string;
   zapomni: ReactNode;
   /** Десять задач блока в закрытом виде, собраны на сборке. */
   zadachi: (MikroSealed & { no: number })[];
@@ -102,6 +108,10 @@ export function Opornye2({
   const shagi = useMemo(
     () => (task === undefined || !solutionOpen ? [] : shagiRazbora(task)),
     [task, solutionOpen],
+  );
+  /* Журнал решения задач (lib/zhurnal, этап 4г): задача — «микрозадача@seed». */
+  const zapis = useZapisZadachi(
+    base === undefined || task === undefined ? null : zhurnalOpornoy(2, blokId, base.no, task),
   );
   if (base === undefined || task === undefined) {
     return null;
@@ -126,6 +136,7 @@ export function Opornye2({
     if (next < 0 || next >= zadachi.length) {
       return;
     }
+    if (checked === 'wrong') zapis?.zakryt(false);
     setIndex(next);
     sbros();
     scrollTabTo('.op-zad');
@@ -141,10 +152,12 @@ export function Opornye2({
     } else {
       const reading = readSealed2(value, zadacha.seal);
       if (reading.kind === 'format') {
+        zapis?.popytka(value, false, 'format');
         setFormat(formatHint(reading.problem, reading.meant));
         return;
       }
       if (reading.kind === 'fractionRight') {
+        zapis?.popytka(value, false, 'fraction');
         setFormat(fractionRightHint(reading.decimal));
         return;
       }
@@ -152,10 +165,13 @@ export function Opornye2({
     }
     setFormat(null);
     setChecked(ok ? 'right' : 'wrong');
+    zapis?.popytka(value, ok);
+    if (ok) zapis?.zakryt(true);
     mikroZapisat(blokId, no, ok ? 'right' : 'wrong');
   }
 
   function pokazatReshenie() {
+    if (!solutionOpen) zapis?.reshenie();
     if (!solutionOpen && ishody[index] !== 'right' && checked !== 'right') {
       /* Решение открыто, задача не решена: исход «открыл решение», как было. */
       mikroZapisat(blokId, no, 'revealed');
@@ -168,42 +184,80 @@ export function Opornye2({
     if (micro === undefined) {
       return;
     }
+    if (checked === 'wrong') zapis?.zakryt(false);
     setFresh((prev) => ({ ...prev, [no]: sealMikro(micro, sluchaynyySeed()) }));
     sbros();
   }
 
   return (
-    <OpornayaZadacha
-      index={index}
-      ishody={ishody}
-      onOpen={open}
-      uslovieHtml={zadacha.uslovieHtml}
-      {...(zadacha.risunokSvg === null ? {} : { risunok: <RisunokSvg svg={zadacha.risunokSvg} /> })}
-      {...(zadacha.answerType === 'choice' && zadacha.vybory !== null
-        ? { vybory: zadacha.vybory.map((v) => ({ number: v.number, labelHtml: v.label })) }
-        : {})}
-      value={value}
-      onValue={(next) => {
-        setValue(next);
-        setFormat(null);
-        if (checked === 'wrong') {
-          setChecked(null);
+    <>
+      {/* Учителю: блок целиком — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). */}
+      <div className="dz2-ryad">
+        <VDomashkuOpornyeGen
+          taskNo={2}
+          blok={blokId}
+          nazvanie={nazvanie}
+          sobrat={async () => {
+            const { generateMikro } = await import('@/lib/vektory/prep/generate');
+            /* Чертёж — ученика (без катетов); рисунок разбора в ДЗ не идёт. */
+            return zadachi
+              .filter((x) => x.answerType === 'number')
+              .map((x) => ({
+                id: x.id,
+                seed: x.seed,
+                uslovieHtml: x.uslovieHtml,
+                risunokSvg: x.risunokSvg,
+                otvet: generateMikro(x.id, x.seed).otvet,
+                shagi: (razborIz(openText(x.razbor, x.seal))?.stroki ?? []).map((chto) => ({
+                  chto,
+                })),
+              }));
+          }}
+        />
+      </div>
+      <OpornayaZadacha
+        index={index}
+        ishody={ishody}
+        onOpen={open}
+        uslovieHtml={zadacha.uslovieHtml}
+        {...(zadacha.risunokSvg === null
+          ? {}
+          : { risunok: <RisunokSvg svg={zadacha.risunokSvg} /> })}
+        {...(zadacha.answerType === 'choice' && zadacha.vybory !== null
+          ? { vybory: zadacha.vybory.map((v) => ({ number: v.number, labelHtml: v.label })) }
+          : {})}
+        value={value}
+        onValue={(next) => {
+          setValue(next);
+          setFormat(null);
+          if (checked === 'wrong') {
+            setChecked(null);
+          }
+        }}
+        checked={checked}
+        onCheck={check}
+        formatHint={format}
+        /* Подсказка — формула навыка, без ответа (как было). */
+        podskazka={{
+          html: zadacha.formulaHtml,
+          open: hintOpen,
+          onOpen: () => {
+            setHintOpen(true);
+            zapis?.shagPodskazki(1);
+          },
+        }}
+        /* Решение — после ответа: до проверки доступна только подсказка. */
+        reshenie={
+          checked === null ? null : { shagi, open: solutionOpen, onToggle: pokazatReshenie }
         }
-      }}
-      checked={checked}
-      onCheck={check}
-      formatHint={format}
-      /* Подсказка — формула навыка, без ответа (как было). */
-      podskazka={{ html: zadacha.formulaHtml, open: hintOpen, onOpen: () => setHintOpen(true) }}
-      /* Решение — после ответа: до проверки доступна только подсказка. */
-      reshenie={checked === null ? null : { shagi, open: solutionOpen, onToggle: pokazatReshenie }}
-      zapomni={zapomni}
-      dop={
-        <button type="button" className="stk-btn stk-btn--tihaya" onClick={eshcheVariant}>
-          {T.zadacha.eshcheVariant}
-        </button>
-      }
-      labels={T.zadacha}
-    />
+        zapomni={zapomni}
+        dop={
+          <button type="button" className="stk-btn stk-btn--tihaya" onClick={eshcheVariant}>
+            {T.zadacha.eshcheVariant}
+          </button>
+        }
+        labels={T.zadacha}
+      />
+    </>
   );
 }

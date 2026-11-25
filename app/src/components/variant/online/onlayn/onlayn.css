@@ -129,7 +129,7 @@
   box-shadow:
     var(--glass-ring),
     var(--glass-hi),
-    0 4px 14px -8px rgb(31 95 208 / 0.25);
+    0 4px 14px -8px color-mix(in srgb, var(--varianty-kromka) 25%, transparent);
 }
 .onl-chip .onl-ik {
   color: var(--color-primary);
@@ -182,7 +182,7 @@
   height: 9px;
   margin-top: -4px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 0 0 2px var(--color-primary);
 }
 
@@ -230,12 +230,12 @@
   width: 100%;
 }
 .onl-btn--siniy {
-  color: #fff;
+  color: var(--color-text-inverse);
   background: var(--gloss);
   box-shadow: var(--gloss-shadow-soft);
 }
 .onl-btn--tyoplyy {
-  color: #fff;
+  color: var(--color-text-inverse);
   background: var(--gloss-warm);
   box-shadow: var(--gloss-warm-shadow-soft);
 }
@@ -303,10 +303,10 @@
   border-radius: 999px;
   overflow: hidden;
   appearance: none;
-  background: rgb(31 95 208 / 0.12);
+  background: color-mix(in srgb, var(--varianty-kromka) 12%, transparent);
 }
 .onl-plashka__polosa::-webkit-progress-bar {
-  background: rgb(31 95 208 / 0.12);
+  background: color-mix(in srgb, var(--varianty-kromka) 12%, transparent);
   border-radius: 999px;
 }
 .onl-plashka__polosa::-webkit-progress-value {

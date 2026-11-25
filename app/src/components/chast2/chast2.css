@@ -557,8 +557,8 @@ math-field.c2-math::part(menu-toggle) {
 }
 .c2-red__crop {
   position: absolute;
-  box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.45);
-  outline: 2px solid #fff;
+  box-shadow: 0 0 0 9999px var(--c2-obrezka-ten);
+  outline: 2px solid var(--c2-obrezka-ramka);
   cursor: move;
 }
 .c2-red__crop:focus-visible {
@@ -568,8 +568,8 @@ math-field.c2-math::part(menu-toggle) {
   position: absolute;
   width: 28px;
   height: 28px;
-  border: 3px solid #fff;
-  background: rgb(0 0 0 / 0.2);
+  border: 3px solid var(--c2-obrezka-ramka);
+  background: var(--c2-obrezka-ruchka);
 }
 .c2-red__h--nw {
   top: -6px;
@@ -732,10 +732,10 @@ math-field.c2-math::part(menu-toggle) {
   display: inline-block;
   margin-left: 0.5em;
   padding: 0.05em 0.5em;
-  border: 1px solid #e8894a;
+  border: 1px solid var(--ball-plashka-kromka);
   border-radius: 0.6em;
-  background: #fff3ea;
-  color: #a5481a;
+  background: var(--ball-plashka-fon);
+  color: var(--ball-plashka-tekst);
   font-size: 0.78em;
   font-weight: 600;
   line-height: 1.5;
@@ -867,7 +867,7 @@ math-field.c2-math::part(menu-toggle) {
   margin: 0 0 var(--space-3);
   padding: var(--space-3);
   border-radius: var(--radius-md, 8px);
-  background: var(--color-surface-muted, #f6f6f6);
+  background: var(--c2-chast-fon);
 }
 .vo-part-head h2 {
   margin: 0 0 var(--space-1);
@@ -995,7 +995,7 @@ math-field.c2-math::part(menu-toggle) {
   cursor: grabbing;
 }
 .c2-graf__ruchka {
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
+  filter: drop-shadow(0 1px 2px var(--c2-ruchka-ten));
 }
 .c2-graf-panel {
   display: grid;

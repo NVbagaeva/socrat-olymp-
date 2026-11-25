@@ -20,6 +20,9 @@ import { mikroItog11, mikroZapisat11, opornye11 } from '@/lib/zadanie11/progress
 import { choiceMatches, openText } from '@/lib/zadanie11/secret';
 import { readSealed11 } from '@/lib/zadanie11/trening/otvet11';
 import { Tablitsa11 } from './Tablitsa11';
+import { zhurnalOpornoy } from '@/lib/zhurnal/opornye';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
+import { VDomashkuOpornyeGen } from '@/components/dz2/knopki';
 /* Подсказка-вопросы — общий компонент тренажёра, его стили лежат при общем входе. */
 import '../trening/trening.css';
 
@@ -86,10 +89,13 @@ function voprosyPodskazki(task: MikroSealed11): VoprosPodskazki[] {
  */
 export function Opornye11({
   blokId,
+  nazvanie,
   zapomni,
   zadachi,
 }: {
   blokId: string;
+  /** Название блока — для «В домашку» учителя. */
+  nazvanie: string;
   zapomni: ReactNode;
   /** Десять задач блока в закрытом виде, собраны на сборке. */
   zadachi: (MikroSealed11 & { no: number })[];
@@ -116,6 +122,10 @@ export function Opornye11({
     () => (task === undefined || !hintOpen ? [] : voprosyPodskazki(task)),
     [task, hintOpen],
   );
+  /* Журнал решения задач (lib/zhurnal, этап 4г): задача — «микрозадача@seed». */
+  const zapis = useZapisZadachi(
+    base === undefined || task === undefined ? null : zhurnalOpornoy(11, blokId, base.no, task),
+  );
   if (base === undefined || task === undefined) {
     return null;
   }
@@ -141,6 +151,7 @@ export function Opornye11({
     if (next < 0 || next >= zadachi.length) {
       return;
     }
+    if (checked === 'wrong') zapis?.zakryt(false);
     setIndex(next);
     sbros();
     scrollTabTo('.op-zad');
@@ -156,10 +167,12 @@ export function Opornye11({
     } else {
       const reading = readSealed11(value, zadacha.seal);
       if (reading.kind === 'format') {
+        zapis?.popytka(value, false, 'format');
         setFormat(formatHint(reading.problem, reading.meant));
         return;
       }
       if (reading.kind === 'fractionRight') {
+        zapis?.popytka(value, false, 'fraction');
         setFormat(fractionRightHint(reading.decimal));
         return;
       }
@@ -167,10 +180,13 @@ export function Opornye11({
     }
     setFormat(null);
     setChecked(ok ? 'right' : 'wrong');
+    zapis?.popytka(value, ok);
+    if (ok) zapis?.zakryt(true);
     mikroZapisat11(blokId, no, ok ? 'right' : 'wrong');
   }
 
   function pokazatReshenie() {
+    if (!solutionOpen) zapis?.reshenie();
     if (!solutionOpen && ishody[index] !== 'right' && checked !== 'right') {
       /* Решение открыто, задача не решена: исход «открыл решение», как было. */
       mikroZapisat11(blokId, no, 'revealed');
@@ -183,61 +199,100 @@ export function Opornye11({
     if (micro === undefined) {
       return;
     }
+    if (checked === 'wrong') zapis?.zakryt(false);
     setFresh((prev) => ({ ...prev, [no]: sealMikro11(micro, sluchaynyySeed()) }));
     sbros();
   }
 
   return (
-    <OpornayaZadacha
-      index={index}
-      ishody={ishody}
-      onOpen={open}
-      uslovieHtml={zadacha.uslovieHtml}
-      {...(zadacha.tablitsa === null
-        ? {}
-        : { risunok: <Tablitsa11 table={zadacha.tablitsa} className="z11-op__tab" /> })}
-      {...(zadacha.answerType === 'choice' && zadacha.vybory !== null
-        ? { vybory: zadacha.vybory.map((v) => ({ number: v.number, labelHtml: v.label })) }
-        : {})}
-      value={value}
-      onValue={(next) => {
-        setValue(next);
-        setFormat(null);
-        if (checked === 'wrong') {
-          setChecked(null);
+    <>
+      {/* Учителю: блок целиком — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). */}
+      <div className="dz2-ryad">
+        <VDomashkuOpornyeGen
+          taskNo={11}
+          blok={blokId}
+          nazvanie={nazvanie}
+          sobrat={async () => {
+            const [{ generateMikro }, { tablitsaHtml }] = await Promise.all([
+              import('@/lib/zadanie11/prep/generate'),
+              import('@/lib/zadanie11/sheet11'),
+            ]);
+            /* Таблица условия — как на экране: «?» — то, что ищут. */
+            return zadachi
+              .filter((x) => x.answerType === 'number')
+              .map((x) => ({
+                id: x.id,
+                seed: x.seed,
+                uslovieHtml: x.uslovieHtml,
+                tablitsaHtml: x.tablitsa === null ? null : tablitsaHtml(x.tablitsa),
+                otvet: generateMikro(x.id, x.seed).otvet,
+                shagi: (izJson<MikroRazbor11>(openText(x.razbor, x.seal))?.stroki ?? []).map(
+                  (chto) => ({ chto }),
+                ),
+              }));
+          }}
+        />
+      </div>
+      <OpornayaZadacha
+        index={index}
+        ishody={ishody}
+        onOpen={open}
+        uslovieHtml={zadacha.uslovieHtml}
+        {...(zadacha.tablitsa === null
+          ? {}
+          : { risunok: <Tablitsa11 table={zadacha.tablitsa} className="z11-op__tab" /> })}
+        {...(zadacha.answerType === 'choice' && zadacha.vybory !== null
+          ? { vybory: zadacha.vybory.map((v) => ({ number: v.number, labelHtml: v.label })) }
+          : {})}
+        value={value}
+        onValue={(next) => {
+          setValue(next);
+          setFormat(null);
+          if (checked === 'wrong') {
+            setChecked(null);
+          }
+        }}
+        checked={checked}
+        onCheck={check}
+        formatHint={format}
+        /* Подсказка — пошаговые вопросы с кнопками (как было), в общем виде. */
+        podskazka={{
+          html: '',
+          open: hintOpen,
+          onOpen: () => {
+            setHintOpen(true);
+            zapis?.shagPodskazki(1);
+          },
+          telo: (
+            <PodskazkaVoprosy
+              voprosy={voprosy}
+              otkryto={shag}
+              mimo={mimo}
+              onVerno={() => {
+                setShag(shag + 1);
+                setMimo([]);
+                zapis?.shagPodskazki(shag + 1);
+              }}
+              onMimo={(j) => {
+                setMimo([...mimo, j]);
+                zapis?.oshibkaPodskazki(shag);
+              }}
+              labels={TRENAZHER11.ekran.voprosy}
+            />
+          ),
+        }}
+        /* Решение — после ответа: до проверки доступна только подсказка. */
+        reshenie={
+          checked === null ? null : { shagi, open: solutionOpen, onToggle: pokazatReshenie }
         }
-      }}
-      checked={checked}
-      onCheck={check}
-      formatHint={format}
-      /* Подсказка — пошаговые вопросы с кнопками (как было), в общем виде. */
-      podskazka={{
-        html: '',
-        open: hintOpen,
-        onOpen: () => setHintOpen(true),
-        telo: (
-          <PodskazkaVoprosy
-            voprosy={voprosy}
-            otkryto={shag}
-            mimo={mimo}
-            onVerno={() => {
-              setShag(shag + 1);
-              setMimo([]);
-            }}
-            onMimo={(j) => setMimo([...mimo, j])}
-            labels={TRENAZHER11.ekran.voprosy}
-          />
-        ),
-      }}
-      /* Решение — после ответа: до проверки доступна только подсказка. */
-      reshenie={checked === null ? null : { shagi, open: solutionOpen, onToggle: pokazatReshenie }}
-      zapomni={zapomni}
-      dop={
-        <button type="button" className="stk-btn stk-btn--tihaya" onClick={eshcheVariant}>
-          {T.zadacha.eshcheVariant}
-        </button>
-      }
-      labels={T.zadacha}
-    />
+        zapomni={zapomni}
+        dop={
+          <button type="button" className="stk-btn stk-btn--tihaya" onClick={eshcheVariant}>
+            {T.zadacha.eshcheVariant}
+          </button>
+        }
+        labels={T.zadacha}
+      />
+    </>
   );
 }

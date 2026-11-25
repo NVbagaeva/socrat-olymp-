@@ -11,7 +11,12 @@ import type { PrepSealed } from '@/lib/vychisleniya/prep/seal';
 import type { PrepPoolZadacha } from '@/lib/veroyatnost/pool';
 import type { ZadachaDz } from '@/lib/dz2/model';
 import { urovenZadachi } from '@/lib/zhurnal/uroven';
-import { zadachaOpornaya5, zadachaOpornaya8 } from '@/lib/dz2/zadachi';
+import {
+  zadachaOpornaya5,
+  zadachaOpornaya8,
+  zadachaOpornayaGen,
+  type OpornayaGen,
+} from '@/lib/dz2/zadachi';
 import { nomerEgeRazdela } from '@/lib/zhurnal/vid';
 import { VDomashku } from './VDomashku';
 
@@ -184,6 +189,46 @@ export function VDomashkuOpornyeBanka({
               return null;
             }
           })
+          .filter((z): z is ZadachaDz => z !== null);
+        if (tasks.length === 0) throw new Error('pusto');
+        return {
+          key: `opornye:${taskNo}:${blok}`,
+          vid: 'opornye',
+          task_no: taskNo,
+          title: DZ2.elementy.opornye(nomerEgeRazdela(taskNo), nazvanie),
+          spec: { blok },
+          tasks,
+        };
+      }}
+    />
+  );
+}
+
+/**
+ * Блок опорных на своём экране раздела (№1, 2, 9, 11, 13; этап 4г): задачи
+ * собирает раздел по нажатию — ответ генератором, разбор открытым
+ * отпечатком; в разметке страницы их нет. Задачи с выбором варианта в ДЗ
+ * не идут: база сверяет число.
+ */
+export function VDomashkuOpornyeGen({
+  taskNo,
+  blok,
+  nazvanie,
+  sobrat,
+}: {
+  taskNo: number;
+  blok: string;
+  nazvanie: string;
+  sobrat: () => Promise<OpornayaGen[]>;
+}) {
+  return (
+    <VDomashku
+      taskNo={taskNo}
+      klyuch={`opornye:${taskNo}:${blok}`}
+      element={async () => {
+        const level = urovenZadachi(taskNo);
+        const tasks = (await sobrat())
+          .map((z) => zadachaOpornayaGen(z, level))
           .filter((z): z is ZadachaDz => z !== null);
         if (tasks.length === 0) throw new Error('pusto');
         return {
