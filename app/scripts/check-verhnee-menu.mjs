@@ -145,14 +145,6 @@ for (const w of [...WIDE, ...PHONE]) {
     viewport: { width: w, height: phone ? 800 : 900 },
     ...(phone ? { hasTouch: true, isMobile: true } : {}),
   });
-  /* TEMA=1 — с видимым переключателем темы (lib/tema.ts, tema-proverka). */
-  if (process.env.TEMA === '1') {
-    await ctx.addInitScript(() => {
-      try {
-        localStorage.setItem('tema-proverka', '1');
-      } catch {}
-    });
-  }
   const page = await ctx.newPage();
   for (const [name, url] of PAGES) {
     await page.goto(BASE + url, { waitUntil: 'networkidle' });

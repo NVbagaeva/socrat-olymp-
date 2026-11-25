@@ -7,8 +7,7 @@
       отрисовки — скрипты страницы задержаны, а фон уже тёмный.
    2. Печать при тёмной теме — светлая (тёмные значения только в
       @media screen).
-   3. Переключатель: ?tema=dark показывает его (пока тема на проверке),
-      щелчок меняет data-tema, aria-checked, localStorage и meta
+   3. Переключатель виден всем; щелчок меняет data-tema, aria-checked, localStorage и meta
       theme-color / color-scheme; выбор переживает перезагрузку. */
 
 import fs from 'node:fs';
@@ -155,12 +154,15 @@ for (const width of [1440, 375]) {
   await ctx.close();
 }
 
-/* Без ?tema переключателя пока нет (тема на проверке, PR 1). */
+/* Без ?tema переключатель виден, тема по умолчанию — светлая. */
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 800 } });
   const page = await ctx.newPage();
   await page.goto(BASE + href(ZADANIYA), { waitUntil: 'networkidle' });
-  check(!(await page.locator('.tema-switch').first().isVisible()), 'без ?tema переключатель виден');
+  check(
+    await page.locator('.site-head .tema-switch').isVisible(),
+    'без ?tema переключатель не виден',
+  );
   check(
     (await page.evaluate(() => document.documentElement.hasAttribute('data-tema'))) === false,
     'по умолчанию тема не светлая',

@@ -514,14 +514,13 @@ body:has(.site-menu) .help-fab {
   }
 }
 
-/* 1024–1279px с переключателем темы (пока он виден только на проверке,
-   html[data-tema-vidna], lib/tema.ts): в строке меню, «Профиль / База» и
+/* 1024–1279px с переключателем темы (lib/tema.ts): в строке меню, «Профиль / База» и
    кнопки справа — от логотипа остаётся знак, название читает скринридер. */
 @media (min-width: 1024px) and (max-width: 1279.98px) {
-  html[data-tema-vidna] .site-head__in > .logo {
+  .site-head__in > .logo {
     gap: 0;
   }
-  html[data-tema-vidna] .site-head__in > .logo .logo__name {
+  .site-head__in > .logo .logo__name {
     position: absolute;
     width: 1px;
     height: 1px;
