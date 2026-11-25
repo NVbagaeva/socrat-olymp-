@@ -19,10 +19,10 @@ import http from 'node:http';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ADRESA, pismo, soderzhanie, srok, zagolovok } from './pisma.mjs';
+import { ADRESA, pismo, pismoRoditelyu, soderzhanie, srok, zagolovok } from './pisma.mjs';
 import { otpravit, SmtpError } from './smtp.mjs';
 import crypto from 'node:crypto';
-import { bezAdresov, klyuchiVapid, obrabotchik, prohod, soderzhaniePush } from './notifier.mjs';
+import { bezAdresov, klyuchiVapid, obrabotchik, prohod, prohodRoditeli, soderzhaniePush } from './notifier.mjs';
 import { ADRES_PUSH, b64u, izB64u, otpravitPush, vapidKlyuchi, vapidZagolovok, zashifrovat } from './webpush.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -316,7 +316,7 @@ await ok('SMTP: STARTTLS предложен, но не вышел — ошибк
 
 function restServer() {
   const vyzovy = [];
-  const st = { ochered: [], itogi: [], otpiski: [], klyuch: 'service-key', pushOchered: [], vapid: null, pushRez: [] };
+  const st = { ochered: [], itogi: [], otpiski: [], klyuch: 'service-key', pushOchered: [], vapid: null, pushRez: [], roditeli: [], roditelItog: [], soglasiya: [] };
   const server = http.createServer(async (req, res) => {
     let telo = '';
     for await (const ch of req) telo += ch;
@@ -343,6 +343,16 @@ function restServer() {
     if (imya === 'push_rezultat') {
       st.pushRez.push(args);
       return json(200, null);
+    }
+    if (imya === 'roditel_zabrat') return json(200, st.roditeli.splice(0, args.p_limit));
+    if (imya === 'roditel_itog') {
+      st.roditelItog.push(args);
+      return json(200, null);
+    }
+    if (imya === 'confirm_parent_consent') {
+      if (args.p_token !== 'd'.repeat(64)) return json(400, { code: 'P0001', message: 'bad_token: ссылка устарела' });
+      st.soglasiya.push(args);
+      return json(200, 'c1000000-0000-0000-0000-000000000000');
     }
     if (imya === 'notify_otpiska') {
       if (args.p_t !== 'b'.repeat(32)) return json(400, { code: '23514', message: 'bad_link' });
@@ -632,6 +642,59 @@ await ok('отписка: чужая подпись и кривые ссылки
   assert.equal(rs.st.otpiski.length, 1);
   assert.equal((await fetch(`${H}/otpiska?u=${U}&t=${'b'.repeat(32)}`, { method: 'DELETE' })).status, 405);
   assert.equal((await fetch(`${H}/drugoe`)).status, 404);
+});
+
+/* ── Письмо родителю ────────────────────────────────────────────── */
+
+await ok('родителю: письмо без рода, со ссылкой на подтверждение и документами', async () => {
+  const p = pismoRoditelyu(
+    { user_id: U, parent_email: 'mama@example.test', imya: 'Петя <b>', token: 'e'.repeat(64) },
+    { sayt: SAYT, apiDomain: 'api.budetege.ru', from: 'noreply@budetege.ru' },
+  );
+  assert.match(p.tekst, /зарегистрирован ученик «Петя <b>»/);
+  assert.ok(p.html.includes('Петя &lt;b&gt;') && !p.html.includes('Петя <b>'));
+  assert.ok(p.tekst.includes(`https://api.budetege.ru/roditel?t=${'e'.repeat(64)}`));
+  assert.ok(p.tekst.includes('/soglasie/#variant-b') && p.tekst.includes('/politika/'));
+  assert.ok(!/List-Unsubscribe/.test(p.raw));
+  assert.match(p.raw, /\r\nTo: <mama@example\.test>\r\n/);
+});
+
+await ok('родителю: проход отправляет, кривой адрес — без повтора, временный сбой — повтор', async () => {
+  const do_ = fs1.pisma.length;
+  rs.st.roditeli.push(
+    { user_id: 'a', parent_email: 'mama@example.test', imya: 'Аня', token: 'f'.repeat(64) },
+    { user_id: 'b', parent_email: 'ne adres\r\nBcc: x@y.z', imya: 'Боря', token: 'f'.repeat(64) },
+  );
+  const it = await prohodRoditeli(cfg);
+  assert.deepEqual(it, { sent: 1, povtor: 0, failed: 1 });
+  assert.equal(fs1.pisma.length, do_ + 1);
+  assert.deepEqual(rs.st.roditelItog, [{ p_user: 'b', p_povtor: false }]);
+  rs.st.roditeli.push({ user_id: 'c', parent_email: 'mama@example.test', imya: 'Вера', token: 'f'.repeat(64) });
+  const sboy = async () => {
+    throw new Error('обрыв связи');
+  };
+  const it2 = await prohodRoditeli(cfg, sboy);
+  assert.deepEqual(it2, { sent: 0, povtor: 1, failed: 0 });
+  assert.deepEqual(rs.st.roditelItog.at(-1), { p_user: 'c', p_povtor: true });
+});
+
+await ok('родителю: GET ничего не меняет, POST записывает согласие с IP', async () => {
+  const g = await fetch(`${H}/roditel?t=${'d'.repeat(64)}`);
+  assert.equal(g.status, 200);
+  assert.match(await g.text(), /Даю согласие/);
+  assert.equal(rs.st.soglasiya.length, 0);
+  const p = await fetch(`${H}/roditel?t=${'d'.repeat(64)}`, {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '203.0.113.9' },
+  });
+  assert.equal(p.status, 200);
+  assert.deepEqual(rs.st.soglasiya, [{ p_token: 'd'.repeat(64), p_ip: '203.0.113.9' }]);
+  const chuzhoy = await fetch(`${H}/roditel?t=${'9'.repeat(64)}`, { method: 'POST' });
+  assert.equal(chuzhoy.status, 400);
+  for (const q of ['', '?t=short', `?t=${'d'.repeat(63)}<`]) {
+    const r = await fetch(`${H}/roditel${q}`);
+    assert.equal(r.status, 400, q);
+  }
 });
 
 await ok('здоровье', async () => {

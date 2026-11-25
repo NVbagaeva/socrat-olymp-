@@ -268,6 +268,9 @@ jobs:
           test -z "$(psql_db "select digest from public.notify_prefs where user_id = '$uid'")"
           test "$(api "https://api.lite.test/otpiska?u=$uid&t=$t" -X POST -d 'List-Unsubscribe=One-Click')" = 200
           test "$(psql_db "select digest || ' ' || (kanaly -> 'dz_novoe' ->> 'pochta') from public.notify_prefs where user_id = '$uid'")" = 'off false'
+          # Согласие родителя (/roditel): кривая и чужая ссылка — 400, через Caddy без ключа.
+          test "$(api "https://api.lite.test/roditel?t=short")" = 400
+          test "$(api "https://api.lite.test/roditel?t=$(printf '0%.0s' $(seq 1 64))" -X POST)" = 400
           # Push (PR 3г): ключи VAPID рассыльщик создал сам и положил в базу.
           for _ in $(seq 1 20); do
             [ "$(psql_db "select count(*) from vault.secrets where name in ('vapid_public', 'vapid_private')")" = 2 ] && break
