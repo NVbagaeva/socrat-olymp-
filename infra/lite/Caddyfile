@@ -67,11 +67,22 @@
 		-Server
 		X-Content-Type-Options nosniff
 		Referrer-Policy no-referrer
-		Strict-Transport-Security "max-age=31536000"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 	}
+	# Журнал запросов — без одноразовых токенов из писем (token в
+	# /auth/v1/verify) и подписи «Отписаться» (t в /otpiska): путь, время
+	# и код ответа для разбора сбоев остаются.
 	log {
 		output stdout
-		format json
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					delete token
+					delete t
+				}
+			}
+		}
 	}
 
 	import cors
