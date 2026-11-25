@@ -216,8 +216,8 @@ function Svg({ id, W, dx }: { id: string; W: number; dx: number }) {
           <circle cx={cL.x} cy={cL.y} r={R} />
         </clipPath>
         <radialGradient id={`${id}-lupa-fon`}>
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.96" />
-          <stop offset="1" stopColor="#e6eefc" stopOpacity="0.92" />
+          <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.96" />
+          <stop offset="1" stopColor="var(--chertezh-zalivka-svet)" stopOpacity="0.92" />
         </radialGradient>
       </defs>
 

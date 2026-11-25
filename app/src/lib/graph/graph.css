@@ -111,7 +111,7 @@
   gap: var(--space-3, 12px);
   background: var(--color-surface);
   border-radius: var(--radius-lg, 12px);
-  box-shadow: var(--shadow-sm, 0 2px 6px rgba(16, 23, 40, 0.05));
+  box-shadow: var(--shadow-sm, 0 2px 6px color-mix(in srgb, var(--chertezh-tekst) 5%, transparent));
   padding: var(--space-5, 20px);
 }
 

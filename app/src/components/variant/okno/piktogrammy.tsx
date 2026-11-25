@@ -350,7 +350,7 @@ export const PIKTOGRAMMY: Record<string, ReactNode> = {
   '4:protivopolozhnye': (
     <>
       <rect className="z" x="6" y="10" width="36" height="28" rx="3" />
-      <circle cx="20" cy="24" r="9" fill="#fff" />
+      <circle cx="20" cy="24" r="9" fill="var(--chertezh-fon)" />
       <N x={20} y={27.5}>
         A
       </N>
@@ -373,7 +373,7 @@ export const PIKTOGRAMMY: Record<string, ReactNode> = {
   '5:protivopolozhnoe': (
     <>
       <rect className="z" x="6" y="10" width="36" height="28" rx="3" />
-      <circle cx="24" cy="24" r="9" fill="#fff" />
+      <circle cx="24" cy="24" r="9" fill="var(--chertezh-fon)" />
     </>
   ),
   '5:koordinatnaya': (

@@ -259,6 +259,26 @@
   --chertezh-velichina-tekst: var(--terracotta-700);
   --chertezh-velichina-2: var(--amber-700);
   --graph-aux-axis: var(--graph-accent);
+  /* Чертежи, графики, схемы и живые иллюстрации (PR 2 тёмной темы):
+     цвета, которые раньше были вписаны в TSX. Синие подписи вершин —
+     --chertezh-vershina, оранжевые выделения — --chertezh-akcent. */
+  --chertezh-fon: #ffffff;
+  /* Блик на стекле иллюстраций (полупрозрачный): белый, в тёмной — светло-голубой. */
+  --chertezh-blik: #ffffff;
+  --chertezh-tekst: #172b50;
+  --chertezh-podpis: #506783;
+  --chertezh-liniya: #2856a0;
+  --chertezh-siniy: #2b67d8;
+  --chertezh-setka: #8eafe7;
+  --chertezh-zalivka-siniy: #dbe7f7;
+  --chertezh-zalivka-svet: #eaf1fc;
+  --chertezh-akcent: #e07a2f;
+  --chertezh-akcent-tekst: #ad4b0b;
+  --chertezh-akcent-svet: #f6bc8c;
+  --chertezh-akcent-zalivka: #fff3e8;
+  --chertezh-zoloto: #d49a1e;
+  --chertezh-goluboy: #4fb0ff;
+  --chertezh-goluboy-svet: #cfe9ff;
   /* Асимптота: значимая линия чертежа, а не фон. Цвет оси с
      прозрачностью — темнее сетки, но не спорит с самими осями. */
   --graph-asymptote: color-mix(in srgb, var(--graph-axis) 50%, transparent);
@@ -861,7 +881,7 @@
 }
 
 @media screen {
-  :root[data-tema='dark'] {
+  :root[data-tema='dark']:not([data-sheet-theme]) {
     --color-bg: var(--noch-bg);
     --color-surface: var(--noch-surface);
     --color-surface-2: var(--noch-surface-2);
@@ -1080,6 +1100,43 @@
     --vit-teplyy-text: #ffab80;
 
     /* Полосы прокрутки и выделение. */
+    /* Чертежи и графики: линии и подписи — светлые, заливки — тёмное
+       стекло, оранжевое остаётся оранжевым, вершины — светло-синие. */
+    --chertezh-fon: var(--noch-surface);
+    --chertezh-blik: #cfe0ff;
+    --chertezh-tekst: #e6eeff;
+    --chertezh-podpis: var(--noch-text-2);
+    --chertezh-liniya: #9cc2ff;
+    --chertezh-siniy: var(--noch-blue);
+    --chertezh-setka: #4f6fae;
+    --chertezh-zalivka-siniy: #22365f;
+    /* Заливка фигур планиметрии и схем: в светлой теме не задана — там
+       действует запасной полупрозрачный синий из lib/planimetriya/stil.ts. */
+    --chertezh-zalivka: rgb(127 176 255 / 0.1);
+    --chertezh-novoe: var(--noch-orange);
+    --chertezh-zalivka-svet: #18284d;
+    --chertezh-akcent: var(--noch-orange);
+    --chertezh-akcent-tekst: #ffab80;
+    --chertezh-akcent-svet: #b8622a;
+    --chertezh-akcent-zalivka: #3a2a26;
+    --chertezh-zoloto: var(--noch-gold);
+    --chertezh-goluboy: #6ccbff;
+    --chertezh-goluboy-svet: #1f4f7a;
+    --chertezh-vershina: var(--noch-blue);
+    --chertezh-velichina: var(--noch-orange);
+    --chertezh-velichina-tekst: #ffab80;
+    --chertezh-velichina-2: #ffd27a;
+    --graph-axis: #d3ddf2;
+    --graph-grid: #34477a;
+    --graph-accent: var(--noch-orange);
+    --solid-edge: var(--noch-blue);
+    --solid-face: #22365f;
+    --solid-liquid: #3a64b0;
+    --solid-steklo-rebro: #7fb0ff;
+    --solid-steklo-1: #18284d;
+    --solid-steklo-2: #2a4170;
+    --solid-steklo-ten: rgb(0 0 0 / 0.3);
+
     --scroll-thumb: #34477a;
     --scroll-track: var(--noch-bg);
   }

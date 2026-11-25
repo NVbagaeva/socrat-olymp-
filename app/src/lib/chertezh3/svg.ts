@@ -46,11 +46,11 @@ export interface OpciiSvg {
 /* Рёбра — тёмные, построения и подсветка — терракота сайта. Режим
    tsveta оставлен для совместимости: и 'tokeny', и 'fiks' дают значения. */
 const FIKS = {
-  rebro: '#101728',
-  akcent: '#e07a2f',
-  podsvetka: '#e07a2f',
-  tekst: '#101728',
-  fon: '#ffffff',
+  rebro: 'var(--chertezh-tekst)',
+  akcent: 'var(--chertezh-akcent)',
+  podsvetka: 'var(--chertezh-akcent)',
+  tekst: 'var(--chertezh-tekst)',
+  fon: 'var(--chertezh-fon)',
   /* Тема чертежей (styles/tokens.css, lib/sheet/theme.css): вершины и
      точки — синие, величины — терракота; в ч/б теме листа — чёрные.
      Запасной цвет — для чертежа вне страницы (файл). */

@@ -3,10 +3,10 @@
    терракотовый #c4553a. Подписи не мельче 13 px, кнопки — от 44 px. */
 
 .z11-vst__osnova {
-  --vst-sin: #1f5fd0;
-  --vst-sin-text: #1a4fb0;
-  --vst-terra: #c4553a;
-  --vst-terra-text: #a8452c;
+  --vst-sin: var(--chertezh-siniy);
+  --vst-sin-text: var(--chertezh-liniya);
+  --vst-terra: var(--chertezh-akcent);
+  --vst-terra-text: var(--chertezh-akcent-tekst);
   display: grid;
   gap: var(--space-4);
   grid-template-columns: minmax(0, 1fr);
@@ -31,7 +31,11 @@
   gap: var(--space-3);
   padding: var(--space-2) var(--space-4) var(--space-1) var(--space-3);
   border-radius: 18px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(234, 241, 255, 0.7));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--chertezh-fon) 85%, transparent),
+    color-mix(in srgb, var(--chertezh-zalivka-svet) 70%, transparent)
+  );
   box-shadow: var(--glass-ring), var(--glass-hi);
 }
 .z11-vst__ciferblat {
@@ -40,17 +44,17 @@
   height: 44px;
 }
 .z11-vst__ciferblat line {
-  stroke: rgba(26, 79, 176, 0.45);
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 45%, transparent);
   stroke-width: 1;
   stroke-linecap: round;
 }
 .z11-vst__ciferblat-krug {
-  fill: rgba(255, 255, 255, 0.9);
-  stroke: rgba(31, 95, 208, 0.35);
+  fill: color-mix(in srgb, var(--chertezh-fon) 90%, transparent);
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 35%, transparent);
   stroke-width: 1.2;
 }
 .z11-vst__ciferblat .z11-vst__strelka-chas {
-  stroke: #12306e;
+  stroke: var(--chertezh-liniya);
   stroke-width: 2.2;
 }
 .z11-vst__ciferblat .z11-vst__strelka-min {
@@ -58,7 +62,7 @@
   stroke-width: 1.5;
 }
 .z11-vst__ciferblat-os {
-  fill: #f08a24;
+  fill: var(--chertezh-akcent);
 }
 .z11-vst__lenta-vremeni {
   --thumb: 24px;
@@ -74,8 +78,8 @@
   transform: translateX(-50%);
   padding: 2px 9px;
   border-radius: 999px;
-  background: #12306e;
-  color: #fff;
+  background: var(--chertezh-liniya);
+  color: var(--chertezh-fon);
   font-size: 13px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
@@ -103,19 +107,27 @@
   height: 8px;
   border-radius: 4px;
   background:
-    linear-gradient(90deg, var(--track-on, var(--vst-sin)), var(--track-on2, #f08a24)) 0 0 /
-      calc(var(--p) * 100%) 100% no-repeat,
-    rgba(31, 95, 208, 0.12);
-  box-shadow: inset 0 1px 2px rgba(18, 48, 110, 0.12);
+    linear-gradient(
+        90deg,
+        var(--track-on, var(--vst-sin)),
+        var(--track-on2, var(--chertezh-akcent))
+      )
+      0 0 / calc(var(--p) * 100%) 100% no-repeat,
+    color-mix(in srgb, var(--chertezh-siniy) 12%, transparent);
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--chertezh-liniya) 12%, transparent);
 }
 .z11-vst__polzunok-t::-moz-range-track,
 .z11-vst__param input::-moz-range-track {
   height: 8px;
   border-radius: 4px;
   background:
-    linear-gradient(90deg, var(--track-on, var(--vst-sin)), var(--track-on2, #f08a24)) 0 0 /
-      calc(var(--p) * 100%) 100% no-repeat,
-    rgba(31, 95, 208, 0.12);
+    linear-gradient(
+        90deg,
+        var(--track-on, var(--vst-sin)),
+        var(--track-on2, var(--chertezh-akcent))
+      )
+      0 0 / calc(var(--p) * 100%) 100% no-repeat,
+    color-mix(in srgb, var(--chertezh-siniy) 12%, transparent);
 }
 .z11-vst__polzunok-t::-webkit-slider-thumb,
 .z11-vst__param input::-webkit-slider-thumb {
@@ -124,10 +136,14 @@
   margin-top: -8px;
   border: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--chertezh-fon),
+    var(--chertezh-zalivka-svet) 70%
+  );
   box-shadow:
-    0 0 0 1px rgba(31, 95, 208, 0.35),
-    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+    0 0 0 1px color-mix(in srgb, var(--chertezh-siniy) 35%, transparent),
+    0 4px 10px -2px color-mix(in srgb, var(--chertezh-liniya) 35%, transparent);
   -webkit-appearance: none;
   appearance: none;
 }
@@ -137,10 +153,14 @@
   height: 24px;
   border: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff, #e6eefc 70%);
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--chertezh-fon),
+    var(--chertezh-zalivka-svet) 70%
+  );
   box-shadow:
-    0 0 0 1px rgba(31, 95, 208, 0.35),
-    0 4px 10px -2px rgba(18, 48, 110, 0.35);
+    0 0 0 1px color-mix(in srgb, var(--chertezh-siniy) 35%, transparent),
+    0 4px 10px -2px color-mix(in srgb, var(--chertezh-liniya) 35%, transparent);
 }
 .z11-vst__polzunok-t:focus-visible,
 .z11-vst__param input:focus-visible {
@@ -183,13 +203,26 @@
   border-radius: 20px;
   overflow: hidden;
   background:
-    radial-gradient(70% 90% at 8% 10%, rgba(31, 95, 208, 0.16), transparent 70%),
-    radial-gradient(60% 90% at 94% 10%, rgba(240, 138, 36, 0.16), transparent 70%),
-    linear-gradient(180deg, #f6f9ff 0%, #eef3fc 58%, #e4ecf9 100%);
+    radial-gradient(
+      70% 90% at 8% 10%,
+      color-mix(in srgb, var(--chertezh-siniy) 16%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      60% 90% at 94% 10%,
+      color-mix(in srgb, var(--chertezh-akcent) 16%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      var(--chertezh-zalivka-svet) 0%,
+      var(--chertezh-zalivka-svet) 58%,
+      var(--chertezh-zalivka-svet) 100%
+    );
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
-    inset 0 -24px 40px -30px rgba(31, 95, 208, 0.35),
-    0 18px 36px -28px rgba(18, 48, 110, 0.45);
+    inset 0 0 0 1px color-mix(in srgb, var(--chertezh-fon) 90%, transparent),
+    inset 0 -24px 40px -30px color-mix(in srgb, var(--chertezh-siniy) 35%, transparent),
+    0 18px 36px -28px color-mix(in srgb, var(--chertezh-liniya) 45%, transparent);
 }
 .z11-vst__scena:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -213,31 +246,31 @@
 
 /* Дорога — стеклянная лента. */
 .z11-vst__lenta {
-  stroke: rgba(255, 255, 255, 0.95);
+  stroke: color-mix(in srgb, var(--chertezh-fon) 95%, transparent);
   stroke-width: 1;
-  filter: drop-shadow(0 4px 6px rgba(18, 48, 110, 0.18));
+  filter: drop-shadow(0 4px 6px color-mix(in srgb, var(--chertezh-liniya) 18%, transparent));
 }
 .z11-vst__lenta-blik {
-  fill: rgba(255, 255, 255, 0.9);
+  fill: color-mix(in srgb, var(--chertezh-fon) 90%, transparent);
 }
 .z11-vst__shtrih {
-  stroke: rgba(18, 48, 110, 0.35);
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 35%, transparent);
   stroke-width: 1;
 }
 .z11-vst__shtrih.is-krupnyy {
-  stroke: rgba(18, 48, 110, 0.6);
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 60%, transparent);
   stroke-width: 1.4;
 }
 .z11-vst__km {
-  fill: #5a6b8c;
+  fill: var(--chertezh-podpis);
 }
 
 /* Города: подпись буквой под картинкой. */
 .z11-vst__gorod image {
-  filter: drop-shadow(0 10px 12px rgba(18, 48, 110, 0.18));
+  filter: drop-shadow(0 10px 12px color-mix(in srgb, var(--chertezh-liniya) 18%, transparent));
 }
 .z11-vst__gorod rect {
-  fill: rgba(255, 255, 255, 0.9);
+  fill: color-mix(in srgb, var(--chertezh-fon) 90%, transparent);
   stroke: var(--vst-sin);
   stroke-opacity: 0.4;
 }
@@ -254,9 +287,9 @@
 
 /* Подписи пути. */
 .z11-vst__podpis rect {
-  fill: rgba(255, 255, 255, 0.88);
-  stroke: rgba(255, 255, 255, 1);
-  filter: drop-shadow(0 2px 4px rgba(18, 48, 110, 0.12));
+  fill: color-mix(in srgb, var(--chertezh-fon) 88%, transparent);
+  stroke: var(--chertezh-fon);
+  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--chertezh-liniya) 12%, transparent));
 }
 .z11-vst__podpis.is-sin text {
   fill: var(--vst-sin-text);
@@ -265,7 +298,7 @@
   fill: var(--vst-terra-text);
 }
 .z11-vst__podpis.is-ost text {
-  fill: #33405a;
+  fill: var(--chertezh-liniya);
 }
 .z11-vst__razmer {
   fill: none;
@@ -279,7 +312,7 @@
   stroke: var(--vst-terra);
 }
 .z11-vst__razmer.is-ost {
-  stroke: #7a879f;
+  stroke: var(--chertezh-podpis);
   stroke-dasharray: 3 3;
 }
 
@@ -291,10 +324,10 @@
   opacity: 0;
 }
 .z11-vst__plashka rect {
-  fill: rgba(255, 255, 255, 0.82);
+  fill: color-mix(in srgb, var(--chertezh-fon) 82%, transparent);
   stroke: currentColor;
   stroke-opacity: 0.35;
-  filter: drop-shadow(0 4px 8px rgba(18, 48, 110, 0.16));
+  filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--chertezh-liniya) 16%, transparent));
 }
 .z11-vst__plashka text {
   fill: currentColor;
@@ -316,20 +349,20 @@
 /* ── Путник ── */
 .z11-put {
   --kurtka: var(--vst-sin);
-  --kurtka-dal: #17489f;
-  --bryuki: #1d2f57;
-  --bryuki-dal: #14213f;
-  --ryukzak: #7fa6ec;
+  --kurtka-dal: var(--chertezh-liniya);
+  --bryuki: var(--chertezh-tekst);
+  --bryuki-dal: var(--chertezh-tekst);
+  --ryukzak: var(--chertezh-setka);
 }
 .z11-put--terra {
   --kurtka: var(--vst-terra);
-  --kurtka-dal: #9c3f2a;
-  --bryuki: #4a2a22;
-  --bryuki-dal: #33201a;
-  --ryukzak: #eaa58f;
+  --kurtka-dal: var(--chertezh-akcent-tekst);
+  --bryuki: var(--chertezh-akcent-tekst);
+  --bryuki-dal: var(--chertezh-akcent-tekst);
+  --ryukzak: var(--chertezh-akcent-svet);
 }
 .z11-put__ten {
-  fill: rgba(18, 48, 110, 0.22);
+  fill: color-mix(in srgb, var(--chertezh-liniya) 22%, transparent);
 }
 .z11-put line {
   stroke-linecap: round;
@@ -342,7 +375,7 @@
   stroke: var(--bryuki-dal);
 }
 .z11-put__botinok {
-  fill: #20242e;
+  fill: var(--chertezh-tekst);
 }
 .z11-put__ruka line {
   stroke: var(--kurtka);
@@ -353,7 +386,7 @@
 }
 .z11-put__kist,
 .z11-put__kozha {
-  fill: #f2c4a2;
+  fill: var(--chertezh-akcent-svet);
 }
 .z11-put__ryukzak {
   fill: var(--ryukzak);
@@ -363,15 +396,15 @@
 }
 .z11-put__blik {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.45);
+  stroke: color-mix(in srgb, var(--chertezh-fon) 45%, transparent);
   stroke-width: 1.6;
   stroke-linecap: round;
 }
 .z11-put__volosy {
-  fill: #2a2f3b;
+  fill: var(--chertezh-tekst);
 }
 .z11-put__glaz {
-  fill: #2a2f3b;
+  fill: var(--chertezh-tekst);
 }
 .z11-put--prizrak {
   opacity: 0.28;
@@ -380,12 +413,12 @@
 
 /* Встреча: флажок поднимается, вспышка гаснет. */
 .z11-vst__flag line {
-  stroke: #8a5a1c;
+  stroke: var(--chertezh-akcent-tekst);
   stroke-width: 2;
   stroke-linecap: round;
 }
 .z11-vst__flag circle {
-  fill: #ffb547;
+  fill: var(--chertezh-akcent);
 }
 .z11-vst__flag {
   transform-box: fill-box;
@@ -417,17 +450,17 @@
   }
 }
 .z11-vst__konfetti rect {
-  stroke: rgba(255, 255, 255, 0.85);
+  stroke: color-mix(in srgb, var(--chertezh-fon) 85%, transparent);
   stroke-width: 0.8;
 }
 .z11-vst__konfetti .is-sin {
-  fill: rgba(31, 95, 208, 0.55);
+  fill: color-mix(in srgb, var(--chertezh-siniy) 55%, transparent);
 }
 .z11-vst__konfetti .is-terra {
-  fill: rgba(196, 85, 58, 0.55);
+  fill: color-mix(in srgb, var(--chertezh-akcent) 55%, transparent);
 }
 .z11-vst__konfetti .is-bel {
-  fill: rgba(255, 214, 140, 0.75);
+  fill: color-mix(in srgb, var(--chertezh-zoloto) 75%, transparent);
 }
 
 /* ── Строка состояния и управление ── */
@@ -465,7 +498,7 @@
   display: inline-flex;
   padding: 3px;
   border-radius: 999px;
-  background: rgba(31, 95, 208, 0.08);
+  background: color-mix(in srgb, var(--chertezh-siniy) 8%, transparent);
   box-shadow: var(--glass-ring);
 }
 .z11-vst__x {
@@ -486,10 +519,10 @@
     box-shadow 0.2s ease;
 }
 .z11-vst__x.is-on {
-  background: #fff;
+  background: var(--chertezh-fon);
   box-shadow:
-    0 0 0 1px rgba(31, 95, 208, 0.2),
-    0 4px 10px -4px rgba(18, 48, 110, 0.35);
+    0 0 0 1px color-mix(in srgb, var(--chertezh-siniy) 20%, transparent),
+    0 4px 10px -4px color-mix(in srgb, var(--chertezh-liniya) 35%, transparent);
 }
 .z11-vst__x:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -515,7 +548,7 @@
   padding: var(--space-3) var(--space-4) var(--space-2);
   border: 0;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.55);
+  background: color-mix(in srgb, var(--chertezh-fon) 55%, transparent);
   box-shadow: var(--glass-ring), var(--glass-hi);
 }
 .z11-vst__chisla legend {
@@ -543,7 +576,7 @@
   font-variant-numeric: tabular-nums;
 }
 .z11-vst__param input {
-  --track-on: #12306e;
+  --track-on: var(--chertezh-liniya);
   --track-on2: var(--vst-sin);
 }
 .z11-vst__param.is-sin input {
@@ -573,7 +606,7 @@
   border-spacing: 0;
   overflow: hidden;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.72);
+  background: color-mix(in srgb, var(--chertezh-fon) 72%, transparent);
   box-shadow: var(--glass-ring), var(--glass-hi);
   font-variant-numeric: tabular-nums;
 }
@@ -589,7 +622,7 @@
 .z11-vst__tablica td {
   padding: 9px 6px;
   white-space: nowrap;
-  border-bottom: 1px solid rgba(31, 95, 208, 0.1);
+  border-bottom: 1px solid color-mix(in srgb, var(--chertezh-siniy) 10%, transparent);
   font-size: 15px;
   text-align: center;
 }
@@ -602,10 +635,10 @@
   color: var(--color-text-secondary);
   font-size: 14px;
   font-weight: 650;
-  background: rgba(234, 241, 255, 0.7);
+  background: color-mix(in srgb, var(--chertezh-zalivka-svet) 70%, transparent);
 }
 .z11-vst__tablica thead td {
-  background: rgba(234, 241, 255, 0.7);
+  background: color-mix(in srgb, var(--chertezh-zalivka-svet) 70%, transparent);
 }
 .z11-vst__tablica tbody th {
   font-size: 14px;
@@ -641,14 +674,14 @@
   font-size: 17px;
 }
 .z11-vst__S.is-itog {
-  background: rgba(240, 138, 36, 0.1);
+  background: color-mix(in srgb, var(--chertezh-akcent) 10%, transparent);
 }
 .z11-vst__v.is-vidno {
   animation: z11-vst-poyavlenie 0.45s ease-out both;
 }
 .z11-vst__t {
-  border-left: 1px solid rgba(31, 95, 208, 0.1);
-  background: rgba(234, 241, 255, 0.45);
+  border-left: 1px solid color-mix(in srgb, var(--chertezh-siniy) 10%, transparent);
+  background: color-mix(in srgb, var(--chertezh-zalivka-svet) 45%, transparent);
 }
 .z11-vst__t b {
   display: block;
@@ -671,7 +704,11 @@
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   border-radius: 16px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(253, 241, 234, 0.75));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--chertezh-fon) 85%, transparent),
+    color-mix(in srgb, var(--chertezh-akcent-zalivka) 75%, transparent)
+  );
   box-shadow: var(--glass-ring-warm, var(--glass-ring)), var(--glass-hi);
 }
 .z11-vst__reshenie:not(.is-vidno) {

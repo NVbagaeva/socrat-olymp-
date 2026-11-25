@@ -8,7 +8,7 @@
   stroke-linejoin: round;
 }
 .zv8-kasatelnaya {
-  stroke: #12306e;
+  stroke: var(--chertezh-liniya);
   stroke-width: 1.6;
   stroke-dasharray: 7 5;
 }
@@ -18,33 +18,33 @@
   stroke-linecap: round;
 }
 .zv8-sekushchaya-svet {
-  stroke: rgba(240, 138, 36, 0.35);
+  stroke: color-mix(in srgb, var(--chertezh-akcent) 35%, transparent);
   stroke-width: 9;
   stroke-linecap: round;
   filter: blur(3px);
 }
 .zv8-sled {
-  stroke: rgba(31, 95, 208, 0.45);
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 45%, transparent);
   stroke-width: 2;
   stroke-dasharray: 4 5;
 }
 .zv8-treugolnik {
-  fill: rgba(240, 138, 36, 0.06);
-  stroke: rgba(240, 138, 36, 0.7);
+  fill: color-mix(in srgb, var(--chertezh-akcent) 6%, transparent);
+  stroke: color-mix(in srgb, var(--chertezh-akcent) 70%, transparent);
   stroke-width: 1.4;
   stroke-dasharray: 4 3;
 }
 .zv8-tochka-m {
   fill: var(--zv-sin);
-  stroke: #fff;
+  stroke: var(--chertezh-fon);
   stroke-width: 2.5;
-  filter: drop-shadow(0 0 5px rgba(31, 95, 208, 0.55));
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--chertezh-siniy) 55%, transparent));
 }
 .zv8-tochka-m1 {
   fill: var(--zv-zhar);
-  stroke: #fff;
+  stroke: var(--chertezh-fon);
   stroke-width: 2.5;
-  filter: drop-shadow(0 0 6px rgba(240, 138, 36, 0.7));
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--chertezh-akcent) 70%, transparent));
 }
 .zv8-bukva,
 .zv8-bukva-t {
@@ -57,29 +57,29 @@
   fill: var(--zv-zhar-text);
 }
 .zv8-bukva-t {
-  fill: #12306e;
+  fill: var(--chertezh-liniya);
 }
 /* Лупа. */
 .zv8-lupa-steklo {
-  filter: drop-shadow(0 8px 14px rgba(18, 48, 110, 0.22));
+  filter: drop-shadow(0 8px 14px color-mix(in srgb, var(--chertezh-liniya) 22%, transparent));
 }
 .zv8-lupa-obod {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.95);
+  stroke: color-mix(in srgb, var(--chertezh-fon) 95%, transparent);
   stroke-width: 4;
 }
 .zv8-lupa-luch {
-  stroke: rgba(18, 48, 110, 0.25);
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 25%, transparent);
   stroke-width: 1.2;
   stroke-dasharray: 3 4;
 }
 .zv8-lupa-podpis {
-  fill: #5a6b8c;
+  fill: var(--chertezh-podpis);
 }
 /* Спидометр и дорога. */
 .zv8-spidometr-fon {
   fill: none;
-  stroke: rgba(31, 95, 208, 0.12);
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 12%, transparent);
   stroke-width: 14;
   stroke-linecap: round;
 }
@@ -88,10 +88,10 @@
   stroke: var(--zv-zhar);
   stroke-width: 14;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 5px rgba(240, 138, 36, 0.5));
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--chertezh-akcent) 50%, transparent));
 }
 .zv8-spidometr-shtrih {
-  stroke: rgba(18, 48, 110, 0.55);
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 55%, transparent);
   stroke-width: 1.4;
 }
 .zv8-chislo-akcent {
@@ -99,35 +99,35 @@
   font-weight: 750 !important;
 }
 .zv8-igla {
-  stroke: #12306e;
+  stroke: var(--chertezh-liniya);
   stroke-width: 3;
   stroke-linecap: round;
 }
 .zv8-igla-os {
-  fill: #12306e;
-  stroke: #fff;
+  fill: var(--chertezh-liniya);
+  stroke: var(--chertezh-fon);
   stroke-width: 2;
 }
 .zv8-spidometr-podpis {
-  fill: #5a6b8c;
+  fill: var(--chertezh-podpis);
 }
 .zv8-doroga {
-  fill: rgba(255, 255, 255, 0.85);
-  stroke: rgba(255, 255, 255, 1);
-  filter: drop-shadow(0 4px 6px rgba(18, 48, 110, 0.18));
+  fill: color-mix(in srgb, var(--chertezh-fon) 85%, transparent);
+  stroke: var(--chertezh-fon);
+  filter: drop-shadow(0 4px 6px color-mix(in srgb, var(--chertezh-liniya) 18%, transparent));
 }
 .zv8-doroga-shtrih {
-  stroke: rgba(18, 48, 110, 0.5);
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 50%, transparent);
   stroke-width: 1.2;
 }
 .zv8-put {
   stroke: var(--zv-zhar);
   stroke-width: 6;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 5px rgba(240, 138, 36, 0.6));
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--chertezh-akcent) 60%, transparent));
 }
 /* Таблица модуля: граница между «справа» и «слева». */
 .zv8-tablica-modul tr.zv8-razryv th,
 .zv8-tablica-modul tr.zv8-razryv td {
-  border-top: 2px dashed rgba(240, 138, 36, 0.5);
+  border-top: 2px dashed color-mix(in srgb, var(--chertezh-akcent) 50%, transparent);
 }

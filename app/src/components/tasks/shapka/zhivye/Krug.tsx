@@ -107,7 +107,13 @@ export default function Krug({ label, avtofokus }: ZhivoyProps) {
       naEnter={() => setVid((v) => (v === 'cos' ? 'sin' : 'cos'))}
     >
       <svg ref={svg} viewBox="0 0 260 260" aria-hidden="true">
-        <circle cx={C0[0]} cy={C0[1]} r={R} fill="rgb(255 255 255 / 0.35)" className="zhv__ln" />
+        <circle
+          cx={C0[0]}
+          cy={C0[1]}
+          r={R}
+          fill="color-mix(in srgb, var(--chertezh-blik) 35%, transparent)"
+          className="zhv__ln"
+        />
         <path
           className="zhv__ln zhv__ln--tonko"
           d={`M${C0[0] - R - 14} ${C0[1]}H${C0[0] + R + 14}M${C0[0]} ${C0[1] + R + 14}V${C0[1] - R - 14}`}
@@ -131,11 +137,21 @@ export default function Krug({ label, avtofokus }: ZhivoyProps) {
         <circle className="zhv__tochka--or" cx={proekciya[0]} cy={proekciya[1]} r={3.5} />
         {odna ? null : (
           <g>
-            <circle cx={Q[0]} cy={Q[1]} r={9} fill="rgb(255 170 90 / 0.3)" />
-            <circle cx={Q[0]} cy={Q[1]} r={5} fill="#f08a2c" />
+            <circle
+              cx={Q[0]}
+              cy={Q[1]}
+              r={9}
+              fill="color-mix(in srgb, var(--chertezh-akcent) 30%, transparent)"
+            />
+            <circle cx={Q[0]} cy={Q[1]} r={5} fill="var(--chertezh-akcent)" />
           </g>
         )}
-        <circle cx={P[0]} cy={P[1]} r={11} fill="rgb(255 170 90 / 0.3)" />
+        <circle
+          cx={P[0]}
+          cy={P[1]}
+          r={11}
+          fill="color-mix(in srgb, var(--chertezh-akcent) 30%, transparent)"
+        />
         <Ruchka
           svg={svg}
           x={P[0]}

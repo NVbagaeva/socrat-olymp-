@@ -71,7 +71,7 @@ export default function Okruzhnosti({ label, avtofokus }: ZhivoyProps) {
           cx={O1[0]}
           cy={O1[1]}
           r={R1}
-          fill="rgb(170 200 245 / 0.22)"
+          fill="color-mix(in srgb, var(--chertezh-zalivka-siniy) 22%, transparent)"
           className="zhv__ln"
           strokeWidth={5}
         />
@@ -79,7 +79,7 @@ export default function Okruzhnosti({ label, avtofokus }: ZhivoyProps) {
           cx={O2[0]}
           cy={O2[1]}
           r={R2}
-          fill="rgb(170 200 245 / 0.22)"
+          fill="color-mix(in srgb, var(--chertezh-zalivka-siniy) 22%, transparent)"
           className="zhv__ln"
           strokeWidth={5}
         />

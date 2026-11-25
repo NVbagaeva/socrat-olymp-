@@ -88,38 +88,38 @@ export function GlassBadge({ className, glif = 'stolbiki' }: GlassBadgeProps) {
         <defs>
           {/* тело: лазурное, темнее к центру-верху, светлеет к нижнему краю */}
           <radialGradient id={body} cx="45%" cy="38%" r="68%">
-            <stop offset="0%" stopColor="#2A64DB" />
-            <stop offset="45%" stopColor="#2D72E8" />
-            <stop offset="75%" stopColor="#3C93F5" />
-            <stop offset="100%" stopColor="#5CB8FF" />
+            <stop offset="0%" stopColor="var(--chertezh-siniy)" />
+            <stop offset="45%" stopColor="var(--chertezh-siniy)" />
+            <stop offset="75%" stopColor="var(--chertezh-goluboy)" />
+            <stop offset="100%" stopColor="var(--chertezh-goluboy)" />
           </radialGradient>
           {/* свет, проходящий сквозь низ шара */}
           <radialGradient id={refract} cx="55%" cy="95%" r="55%">
-            <stop offset="0%" stopColor="#A8ECFF" stopOpacity="1" />
-            <stop offset="55%" stopColor="#6CCBFF" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#6CCBFF" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--chertezh-goluboy-svet)" stopOpacity="1" />
+            <stop offset="55%" stopColor="var(--chertezh-goluboy)" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="var(--chertezh-goluboy)" stopOpacity="0" />
           </radialGradient>
           {/* мягкий блик сверху */}
           <radialGradient id={sheen} cx="40%" cy="20%" r="45%">
-            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--chertezh-fon)" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="var(--chertezh-fon)" stopOpacity="0" />
           </radialGradient>
           {/* ободок: яркая дуга сверху-слева и голубая снизу */}
           <linearGradient id={rim} x1="0.2" y1="0" x2="0.8" y2="1">
-            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.45" />
-            <stop offset="35%" stopColor="#FFFFFF" stopOpacity="0.08" />
-            <stop offset="70%" stopColor="#8FDCFF" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#B8F0FF" stopOpacity="0.95" />
+            <stop offset="0%" stopColor="var(--chertezh-fon)" stopOpacity="0.45" />
+            <stop offset="35%" stopColor="var(--chertezh-fon)" stopOpacity="0.08" />
+            <stop offset="70%" stopColor="var(--chertezh-goluboy)" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="var(--chertezh-goluboy-svet)" stopOpacity="0.95" />
           </linearGradient>
           {/* столбики: белые, к основанию уходят в голубой */}
           <linearGradient id={bar} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
-            <stop offset="100%" stopColor="#CFE9FF" stopOpacity="0.7" />
+            <stop offset="0%" stopColor="var(--chertezh-fon)" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="var(--chertezh-goluboy-svet)" stopOpacity="0.7" />
           </linearGradient>
           {/* голубое свечение вокруг */}
           <radialGradient id={halo} cx="50%" cy="55%" r="50%">
-            <stop offset="72%" stopColor="#4FB0FF" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#4FB0FF" stopOpacity="0" />
+            <stop offset="72%" stopColor="var(--chertezh-goluboy)" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="var(--chertezh-goluboy)" stopOpacity="0" />
           </radialGradient>
           <filter id={blurs} x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="1.4" />
@@ -154,7 +154,12 @@ export function GlassBadge({ className, glif = 'stolbiki' }: GlassBadgeProps) {
           />
 
           {/* лёгкая тень под глифом */}
-          <g fill="#1B4DB8" opacity="0.25" filter={`url(#${blurs})`} transform="translate(1,2)">
+          <g
+            fill="var(--chertezh-liniya)"
+            opacity="0.25"
+            filter={`url(#${blurs})`}
+            transform="translate(1,2)"
+          >
             <Glif glif={glif} />
           </g>
           {/* глиф: тонкие полупрозрачные фигуры */}
@@ -162,13 +167,21 @@ export function GlassBadge({ className, glif = 'stolbiki' }: GlassBadgeProps) {
             <Glif glif={glif} />
           </g>
           {glif === 'stolbiki' ? (
-            <rect x="52" y="100" width="58" height="4" rx="2" fill="#FFFFFF" opacity="0.65" />
+            <rect
+              x="52"
+              y="100"
+              width="58"
+              height="4"
+              rx="2"
+              fill="var(--chertezh-fon)"
+              opacity="0.65"
+            />
           ) : null}
         </g>
         <path
           d="M42,62 A52,52 0 0 1 100,32"
           fill="none"
-          stroke="#FFFFFF"
+          stroke="var(--chertezh-fon)"
           strokeWidth="3"
           strokeLinecap="round"
           opacity="0.22"

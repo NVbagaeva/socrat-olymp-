@@ -23,11 +23,11 @@ html {
    браузеру затемнять страницу сам остаётся: «only dark». На печати —
    светлая всегда: тёмные значения переменных стоят только в @media screen. */
 @media screen {
-  html[data-tema='dark'] {
+  html[data-tema='dark']:not([data-sheet-theme]) {
     color-scheme: only dark;
     scrollbar-color: var(--scroll-thumb) var(--scroll-track);
   }
-  html[data-tema='dark'] ::selection {
+  html[data-tema='dark']:not([data-sheet-theme]) ::selection {
     background: color-mix(in srgb, var(--color-primary-fill) 40%, transparent);
   }
 }
