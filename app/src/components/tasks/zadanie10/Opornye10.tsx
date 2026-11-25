@@ -24,17 +24,22 @@ export function Opornye10Spisok({ navyki }: { navyki: NavykKartochki[] }) {
  */
 export function Opornye10({
   blok,
+  nazvanie,
   zapomni,
   zadachi,
   risunki,
 }: {
   blok: string;
+  /** Название блока — для «В домашку» учителя. */
+  nazvanie: string;
   zapomni: ReactNode;
   zadachi: MikroZadachaBrauzera[];
   risunki: Record<string, ReactNode>;
 }) {
   return (
     <OpornyeBanka
+      taskNo={10}
+      nazvanie={nazvanie}
       blok={blok}
       zapomni={zapomni}
       zadachi={zadachi}
