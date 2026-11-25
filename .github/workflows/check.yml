@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -64,6 +64,11 @@ jobs:
       - name: Проверить, что в репозитории нет ключей и паролей сервера
         working-directory: app
         run: pnpm test:infra-secrets
+
+      # Сторонние действия GitHub Actions — только полным SHA коммита.
+      - name: Проверить закрепление действий
+        working-directory: app
+        run: pnpm test:actions-pin
 
       # Safari до iOS 18 размывает стекло только с префиксом -webkit-, а
       # сборка его не добавляет: у каждого backdrop-filter должна быть пара.
@@ -275,7 +280,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -617,7 +622,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -836,7 +841,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -941,7 +946,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -979,7 +984,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -1042,7 +1047,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -1307,7 +1312,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -1458,7 +1463,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -1493,7 +1498,7 @@ jobs:
 
       - name: Сохранить снимки скрытого раздела
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: skrytye-snimki
           path: app/skrytye-snimki

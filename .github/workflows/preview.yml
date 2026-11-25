@@ -13,20 +13,23 @@ name: Preview
 # Каждый прогон переписывает её одним коммитом без истории, поэтому
 # репозиторий не растёт от снимка к снимку.
 #
-# Права здесь шире, чем у check.yml: нужно записать ветку и оставить
-# комментарий. Прогон запускается на коде из pull request, так что
-# такие права стоит держать, пока pull request приходят из этого же
-# репозитория. Для копий репозитория GitHub выдаёт токен только
-# на чтение, и шаг публикации там просто не сработает.
+# Право записать ветку и оставить комментарий есть только у заданий
+# publish и cleanup; код из pull request с ним не выполняется. Для копий
+# репозитория GitHub выдаёт токен только на чтение, и публикация там
+# просто не сработает.
 
 on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, closed]
 
+# Права по умолчанию — только чтение: код из pull request (установка
+# пакетов, сборка, снимки) выполняется в задании shots с ними. Запись
+# ветки previews и комментарий — в задании publish, которое кода из
+# pull request не запускает: оно берёт готовые снимки артефактом, а
+# скрипт комментария — из main.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 # Новый пуш в pull request отменяет прошлый прогон: снимки прошлой
 # версии всё равно некому смотреть.
@@ -49,16 +52,18 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
 
       # pnpm ставим до setup-node: иначе кэшу нечего искать.
       - name: Установить pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           package_json_file: app/package.json
 
       - name: Установить Node.js 22
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: pnpm
@@ -112,11 +117,27 @@ jobs:
       # Снимки нужны и сами по себе: артефакт живёт независимо
       # от ветки и годится, когда комментарий перезаписан.
       - name: Сохранить снимки артефактом
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: preview-${{ github.event.pull_request.number }}
           path: ${{ runner.temp }}/shots
           retention-days: 14
+
+  publish:
+    name: Опубликовать снимки
+    needs: shots
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Забрать снимки
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: preview-${{ github.event.pull_request.number }}
+          path: ${{ runner.temp }}/shots
 
       - name: Положить снимки в ветку previews
         id: publish
@@ -172,19 +193,26 @@ jobs:
           exit 1
 
       - name: Оставить комментарий со снимками
-        working-directory: app
         env:
           SHOTS_DIR: ${{ runner.temp }}/shots
           SHOTS_BASE: >-
             https://raw.githubusercontent.com/${{ github.repository }}/previews/${{ steps.publish.outputs.papka }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: node scripts/preview-comment.mjs
+        # Скрипт — из main, а не из pull request: здесь токен с правом записи.
+        run: |
+          set -euo pipefail
+          curl -fsSL -H "Authorization: Bearer ${GITHUB_TOKEN}" -H 'Accept: application/vnd.github.raw' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/app/scripts/preview-comment.mjs?ref=main" \
+            -o "${RUNNER_TEMP}/preview-comment.mjs"
+          node "${RUNNER_TEMP}/preview-comment.mjs"
 
   cleanup:
     name: Убрать снимки закрытого pull request
     if: github.event.action == 'closed'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
 
     steps:
       - name: Стереть папку в ветке previews
