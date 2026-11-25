@@ -35,7 +35,7 @@ export default function SnimokOkno({
   return (
     <dialog
       ref={ref}
-      className="okno"
+      className="snimok-okno"
       aria-label={alt}
       onClose={onClose}
       onCancel={(e) => {
@@ -44,19 +44,19 @@ export default function SnimokOkno({
       }}
       onClick={(e) => {
         /* Нажатие мимо снимка: по самому окну или его полю. */
-        if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('okno__pole')) {
+        if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('snimok-okno__pole')) {
           onClose();
         }
       }}
     >
-      <div className="okno__pole">
-        <button type="button" className="okno__zakryt" onClick={onClose} aria-label={HOWTO.snimok.zakryt}>
+      <div className="snimok-okno__pole">
+        <button type="button" className="snimok-okno__zakryt" onClick={onClose} aria-label={HOWTO.snimok.zakryt}>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M6 6l12 12M18 6 6 18" />
           </svg>
         </button>
         <img
-          className="okno__img"
+          className="snimok-okno__img"
           src={src}
           alt={alt}
           width={SNIMOK_RAZMER.width}

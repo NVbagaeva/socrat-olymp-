@@ -896,8 +896,10 @@
 }
 
 /* ── Окно со снимком ───────────────────────────────────────────── */
+/* Префикс snimok-okno-. Короткое okno- занято всплывающим окном
+   «Варианта» (components/variant/okno/okno.css) — имена не пересекать. */
 
-.okno {
+.snimok-okno {
   width: 100vw;
   max-width: 100vw;
   height: 100dvh;
@@ -907,12 +909,12 @@
   border: 0;
   background: transparent;
 }
-.okno::backdrop {
+.snimok-okno::backdrop {
   background: var(--color-bg-translucent-strong);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
 }
-.okno__pole {
+.snimok-okno__pole {
   position: relative;
   display: grid;
   place-items: center;
@@ -920,7 +922,7 @@
   height: 100%;
   padding: var(--space-12) var(--space-4) var(--space-4);
 }
-.okno__img {
+.snimok-okno__img {
   max-width: min(100%, 1600px);
   max-height: 100%;
   width: auto;
@@ -929,7 +931,7 @@
   box-shadow: var(--shadow-lg);
   background: var(--color-surface);
 }
-.okno__zakryt {
+.snimok-okno__zakryt {
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
@@ -944,11 +946,11 @@
   color: var(--color-text);
   cursor: pointer;
 }
-.okno__zakryt:focus-visible {
+.snimok-okno__zakryt:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
-.okno__zakryt svg {
+.snimok-okno__zakryt svg {
   width: 22px;
   height: 22px;
   fill: none;
