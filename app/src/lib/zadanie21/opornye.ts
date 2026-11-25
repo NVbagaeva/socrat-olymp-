@@ -456,7 +456,5 @@ export function opornyeDlyaBrauzera21(b: BlokOpornyh) {
     podskazka,
     razbor: sealText(JSON.stringify(razbor), id),
     seal: sealAnswer(answer),
-    /* Ответ для «В домашку» учителя (этап 4в): закрыт ключом задачи, как разбор. */
-    otvet: sealText(String(answer), `${id}|otvet`),
   }));
 }

@@ -7,7 +7,9 @@ import { Tex } from '@/components/ui/Tex';
 import { OPORNYE7 } from '@/content/uravneniya7';
 import { zadanie7Title } from '@/content/zadanie7';
 import { OPORNYE7_HREF, tipHref7 } from '@/lib/zadanie7/links';
+import { sOtvetomDz } from '@/lib/opornye/otvetDz';
 import { BLOKI_OPORNYH, blokPoSlugu, opornyeDlyaBrauzera } from '@/lib/zadanie7/opornye';
+import { sealText } from '@/lib/zadanie7/secret';
 import { prototype } from '@/lib/zadanie7/prototypes';
 
 export function generateStaticParams() {
@@ -44,7 +46,7 @@ export default async function Opornye7Blok({ params }: { params: Promise<{ blok:
             <b>{OPORNYE7.zapomni}</b> <Tex text={b.zapomni} />
           </>
         }
-        zadachi={opornyeDlyaBrauzera(b)}
+        zadachi={sOtvetomDz(opornyeDlyaBrauzera(b), b.zadachi, sealText)}
       />
       <section className="z7-op__gde" aria-labelledby="z7-op-gde">
         <h3 id="z7-op-gde" className="stk-h4">
