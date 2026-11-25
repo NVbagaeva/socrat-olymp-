@@ -20,15 +20,20 @@ export function Opornye21Spisok({ navyki }: { navyki: NavykKartochki[] }) {
 /** Экран блока опорных задач: общий экран блока с проверкой ответа раздела. */
 export function Opornye21({
   blok,
+  nazvanie,
   zapomni,
   zadachi,
 }: {
   blok: string;
+  /** Название блока — для «В домашку» учителя. */
+  nazvanie: string;
   zapomni: ReactNode;
   zadachi: MikroZadachaBrauzera[];
 }) {
   return (
     <OpornyeBanka
+      taskNo={21}
+      nazvanie={nazvanie}
       blok={blok}
       zapomni={zapomni}
       zadachi={zadachi}
