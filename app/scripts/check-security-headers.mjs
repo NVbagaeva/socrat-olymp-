@@ -22,7 +22,12 @@ const OUT = path.join(ROOT, 'out');
 const NADO = {
   'x-frame-options': (v) => v === 'sameorigin' || v === 'deny',
   'content-security-policy': (v) =>
-    /frame-ancestors\s+('self'|'none')/.test(v) && /object-src\s+'none'/.test(v) && /base-uri\s+'self'/.test(v),
+    /frame-ancestors\s+('self'|'none')/.test(v) &&
+    /object-src\s+'none'/.test(v) &&
+    /base-uri\s+'self'/.test(v) &&
+    /script-src\s+'self'/.test(v) &&
+    !/unsafe-eval/.test(v) &&
+    /connect-src\s+'self'/.test(v),
   'x-content-type-options': (v) => v === 'nosniff',
   'referrer-policy': (v) => /strict-origin|no-referrer|same-origin/.test(v),
   'permissions-policy': (v) => /camera=\(\)/.test(v) && /microphone=\(\)/.test(v),

@@ -70,6 +70,11 @@ jobs:
         working-directory: app
         run: pnpm test:actions-pin
 
+      # Регистрация и новый пароль: самые частые и простые пароли не проходят.
+      - name: Проверить запрет простых паролей
+        working-directory: app
+        run: pnpm test:password
+
       # Safari до iOS 18 размывает стекло только с префиксом -webkit-, а
       # сборка его не добавляет: у каждого backdrop-filter должна быть пара.
       - name: Проверить префикс -webkit- у стекла
@@ -1091,6 +1096,12 @@ jobs:
       - name: Проверить заголовки защиты
         working-directory: app
         run: pnpm test:headers
+
+      # Chromium за Apache с CSP: главная, банк, тренажёры, MathLive,
+      # печать, вход и кабинет — без нарушений политики.
+      - name: Проверить, что CSP ничего не блокирует
+        working-directory: app
+        run: pnpm test:csp
 
       # Chromium: условие из журнала ученика в «Прогрессе» учителя и сама
       # очистка вёрстки (lib/dz/sanitize.ts) — формулы KaTeX проходят,

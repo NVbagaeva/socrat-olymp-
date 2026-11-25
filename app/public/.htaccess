@@ -33,15 +33,18 @@ AddType application/manifest+json .webmanifest
 # (свои страницы в рамке — можно, ими пользуется /dev/intro/), тип файла
 # не угадывать, адрес страницы чужим сайтам — только домен, ненужные
 # устройства (камера, микрофон, геопозиция) выключены, сайт открывать
-# только по https. CSP — только правила, которые не трогают скрипты
-# Next.js: рамки, <base>, плагины, адреса отправки форм. Полную CSP
-# со скриптами включают отдельной правкой, сначала в режиме Report-Only.
-# Проверка — scripts/check-security-headers.mjs (pnpm test:headers,
-# с --url — на живом сайте).
+# только по https. CSP: скрипты, стили, картинки, шрифты и запросы —
+# только со своего сайта, запросы ещё и к API (api.budetege.ru);
+# встроенные скрипты Next.js разрешены ('unsafe-inline'), eval — нет.
+# Если вредная вставка всё же пройдёт, она не загрузит чужой скрипт и не
+# отправит данные на чужой адрес.
+# Проверки — scripts/check-security-headers.mjs (pnpm test:headers, с
+# --url — на живом сайте) и scripts/check-csp.mjs (pnpm test:csp:
+# страницы в Chromium без нарушений политики).
 
 <IfModule mod_headers.c>
   Header always set X-Frame-Options "SAMEORIGIN"
-  Header always set Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://api.budetege.ru; media-src 'self' data: blob:; worker-src 'self' blob:; manifest-src 'self'; frame-src 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self' https://api.budetege.ru"
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
