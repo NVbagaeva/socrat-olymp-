@@ -2788,7 +2788,14 @@ async function runEnabled() {
       (await st1.page.inputValue('[data-form="join"] input[name="class-code"]')) === code,
       'ДЗ: после входа код из ссылки уже в форме «Вступить»',
     );
-    await st1.page.locator('[data-form="join"] button:has-text("Вступить")').click();
+    await st1.page.locator('[data-form="join"] button:has-text("Дальше")').click();
+    await st1.page.waitForSelector('[data-join="confirm"]');
+    check(
+      (await text(st1.page, '[data-join="confirm"]')).includes('Группа по средам') &&
+        (await text(st1.page, '[data-join="confirm"]')).includes('будет видеть'),
+      'ДЗ: до вступления — класс, учитель и что учитель увидит',
+    );
+    await st1.page.locator('[data-join="confirm"] button:has-text("Вступить в класс")').click();
     await st1.page.waitForSelector('[data-form="join"] .dz-ok');
     check(
       (await text(st1.page, '[data-form="join"] .dz-ok')).includes('Группа по средам'),
@@ -2801,7 +2808,7 @@ async function runEnabled() {
     await login(st2.page, 'dz-uchenik2@yandex.ru', 'dz-uchenik-2');
     await st2.page.waitForSelector('[data-form="join"] input[name="class-code"]');
     await st2.page.fill('[data-form="join"] input[name="class-code"]', 'ZZZZZZ');
-    await st2.page.locator('[data-form="join"] button:has-text("Вступить")').click();
+    await st2.page.locator('[data-form="join"] button:has-text("Дальше")').click();
     await st2.page.waitForFunction(() =>
       document.querySelector('[data-form="join"]')?.textContent?.includes('Такого кода нет'),
     );
@@ -2813,7 +2820,8 @@ async function runEnabled() {
       '[data-form="join"] input[name="class-code"]',
       `${code.slice(0, 3).toLowerCase()}-${code.slice(3).toLowerCase()}`,
     );
-    await st2.page.locator('[data-form="join"] button:has-text("Вступить")').click();
+    await st2.page.locator('[data-form="join"] button:has-text("Дальше")').click();
+    await st2.page.locator('[data-join="confirm"] button:has-text("Вступить в класс")').click();
     await st2.page.waitForSelector('[data-form="join"] .dz-ok');
     check(true, 'ДЗ: код строчными и с дефисом тоже подходит');
 
