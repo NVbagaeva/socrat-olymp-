@@ -3308,6 +3308,145 @@ async function runZhurnalBanka(mock, errors) {
     await context.close();
   }
 
+  /* Опорные №1 (этап 4г): свой экран раздела — неверный ответ в журнале
+     строкой «opornye»: блок, «микрозадача@seed», сложность части 1. */
+  if (ZHURNAL_RAZDELY.includes(1)) {
+    const { prepPool1 } = requireSrc('lib/planimetriya/prep/pool.ts');
+    const { OPORNYE1_HREF } = requireSrc('lib/planimetriya/trening/links.ts');
+    const blok = prepPool1()[0];
+    mock.zhurnal.length = 0;
+    const { context, page } = await newPage(mock, 375, errors);
+    await welcomeSeen(context);
+    await login(page, uchenik[375], 'zhurnal-parol-1');
+    await page.goto(`${SITE}${OPORNYE1_HREF}${blok.slug}/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.op-zad');
+    check((await page.locator('.dz2-knopka').count()) === 0, 'журнал опорных №1: ученик не видит «В домашку»');
+    check((await page.locator('.dz2-ryad:visible').count()) === 0, 'журнал опорных №1: у ученика нет пустого ряда кнопки');
+    await page.locator('.op-zad__pole input').first().fill('987654');
+    await page.locator('.op-zad__glavnaya').first().click();
+    const until = Date.now() + 15000;
+    const row = () => mock.zhurnal.find((r) => r.place === 'opornye' && r.task_no === 1);
+    while (Date.now() < until && (row() === undefined || row().popytki.length === 0)) {
+      await new Promise((done) => setTimeout(done, 250));
+    }
+    const r = row();
+    const z0 = blok.zadachi[0];
+    check(r !== undefined && r.kind === blok.id && r.place_ref === blok.id && r.task_ref === `${z0.id}@${z0.seed}`
+      && r.level === 1 && r.popytki.length === 1 && !r.popytki[0].ok,
+    `журнал опорных №1: блок, задача@seed и неверная попытка (${r?.kind}, ${r?.task_ref}, ${r?.popytki?.length})`);
+    await context.close();
+  }
+
+  /* Учитель: блоки опорных №1 (чертёж) и №13 (таблица) «В домашку» (этап 4г);
+     ученик видит чертёж в условии ДЗ после очистки. */
+  if (DZ2_RAZDELY.includes(1) && DZ2_RAZDELY.includes(13)) {
+    const { prepPool1 } = requireSrc('lib/planimetriya/prep/pool.ts');
+    const { OPORNYE1_HREF } = requireSrc('lib/planimetriya/trening/links.ts');
+    const { prepPool13 } = requireSrc('lib/zadanie13/opornye/pool.ts');
+    const { OPORNYE13_HREF } = requireSrc('lib/zadanie13/links.ts');
+    const blok1 = prepPool1()[0];
+    const blok13 = prepPool13().find(
+      (b) => b.vid !== 'tip' && b.zadachi.some((x) => x.tablitsaHtml !== null && x.vybory === null && x.zapolni === null),
+    );
+    const { context, page } = await newPage(mock, 1280, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+    await page.evaluate(() => {
+      for (const k of Object.keys(localStorage)) if (k.includes('dz2')) localStorage.removeItem(k);
+    });
+    await page.goto(`${SITE}${OPORNYE1_HREF}${blok1.slug}/`, { waitUntil: 'networkidle' });
+    await page.locator('.dz2-ryad .dz2-knopka__glavnaya').click();
+    await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
+    if (SHOTS !== null) {
+      for (const w of [375, 1280]) {
+        await page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
+        await page.evaluate(() => document.fonts.ready);
+        await page.screenshot({ path: path.join(SHOTS, `dz2-opornye1-${w}.png`),
+          style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+      }
+      await page.setViewportSize({ width: 1280, height: 900 });
+    }
+    check(blok13 !== undefined, 'ДЗ 4г: у №13 есть блок с таблицей условия');
+    if (blok13 !== undefined) {
+      await page.goto(`${SITE}${OPORNYE13_HREF}${blok13.slug}/`, { waitUntil: 'networkidle' });
+      await page.locator('.dz2-ryad .dz2-knopka__glavnaya').click();
+      await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
+    }
+    const korz = await page.evaluate(() => {
+      for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
+      return null;
+    });
+    const el = JSON.parse(korz ?? '{}').elementy ?? [];
+    const NORM = /^-?[0-9]+(\.[0-9]+)?$/;
+    const op1 = el.find((e) => e.task_no === 1 && e.vid === 'opornye');
+    const op13 = el.find((e) => e.task_no === 13 && e.vid === 'opornye');
+    check(op1 !== undefined && op1.tasks.length === blok1.zadachi.length
+      && op1.tasks.every((t) => NORM.test(t.answer) && t.razbor?.shagi?.length > 0 && t.level === 1)
+      && op1.tasks.filter((t) => t.question_html.includes('dz2-chertezh')).length
+        === blok1.zadachi.filter((x) => x.risunokSvg !== null).length,
+    `ДЗ 4г: блок опорных №1 — ответы, разбор и чертежи (${op1?.tasks?.length})`);
+    check(op13 !== undefined && op13.tasks.length > 0 && op13.tasks.every((t) => NORM.test(t.answer) && t.level === 2)
+      && op13.tasks.some((t) => t.question_html.includes('dz2-tablitsa')),
+    `ДЗ 4г: блок опорных №13 — ответы и таблица условия (${op13?.tasks?.length})`);
+    await context.close();
+
+    /* Ученик: ДЗ с задачами блока №1 — чертёж в условии после очистки. */
+    if (op1 !== undefined) {
+      const uid = mock.users.get(uchenik[1280]).id;
+      const tutor = mock.users.get('zhurnal-uchitel@yandex.ru');
+      mock.dz2.push({
+        id: 'dz2-chertezh-1',
+        tutor_id: tutor.id,
+        status: 'published',
+        recipients: [uid],
+        created_at: new Date().toISOString(),
+        p: {
+          title: 'Планиметрия по чертежу',
+          note: '',
+          due_at: '2027-05-20T15:00:00.000Z',
+          after_due: 'late_ok',
+          hints_allowed: true,
+          attempts_limit: 2,
+          solutions_when: 'instant',
+          individual: false,
+          kontrol: false,
+          items: [{ position: 1, kind: 'opornye', task_no: 1, title: op1.title, spec: op1.spec, goal_kind: 'all',
+            tasks: op1.tasks.slice(0, 3).map((t, j) => ({ ...t, position: j + 1 })) }],
+        },
+      });
+      const s = await newPage(mock, 375, errors);
+      await welcomeSeen(s.context);
+      await login(s.page, uchenik[1280], 'zhurnal-parol-1');
+      await s.page.goto(`${SITE}/kabinet/domashki/reshat/?id=dz2-chertezh-1`, { waitUntil: 'networkidle' });
+      await s.page.waitForSelector('[data-page="reshat-dz2"]');
+      const elem = s.page.locator('.dz2-u-element[data-kind="opornye"]');
+      await elem.locator('.dz2-u-element__verh').click();
+      await elem.locator('.dz2-u-zadacha').first().waitFor();
+      const ris = elem.locator('.dz2-u-zadacha__uslovie .dz2-chertezh svg').first();
+      const s0 = blok1.zadachi[0].risunokSvg;
+      if (s0 !== null) {
+        await ris.waitFor();
+        const vnutri = await ris.evaluate((svg) => ({
+          text: svg.querySelectorAll('text').length,
+          fig: svg.querySelectorAll('path, circle, line, polygon').length,
+          w: svg.getBoundingClientRect().width,
+        }));
+        check(vnutri.text > 0 && vnutri.fig > 0 && vnutri.w > 100 && vnutri.w <= 375,
+          `ДЗ 4г ученик: чертёж в условии после очистки — подписи и фигуры (${JSON.stringify(vnutri)})`);
+      }
+      if (SHOTS !== null) {
+        for (const w of [375, 1280]) {
+          await s.page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
+          await elem.locator('.dz2-u-zadacha').first().scrollIntoViewIfNeeded();
+          await s.page.evaluate(() => document.fonts.ready);
+          await s.page.screenshot({ path: path.join(SHOTS, `dz2-u-chertezh1-${w}.png`),
+            style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+        }
+      }
+      await s.context.close();
+    }
+  }
+
   /* Учитель: «В домашку» у тренажёра №7; №11 — без разминок. */
   if (DZ2_RAZDELY.includes(7) && DZ2_RAZDELY.includes(11)) {
     const { context, page } = await newPage(mock, 1280, errors);

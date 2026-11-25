@@ -29,6 +29,10 @@
   align-items: center;
   margin-block: var(--space-4);
 }
+/* Ученику и гостю кнопки нет — пустой ряд не занимает места. */
+.dz2-ryad:empty {
+  display: none;
+}
 
 /* Мастер и список */
 .dz2-uspeh {
@@ -372,6 +376,28 @@
 }
 .dz2-u-zadacha__uslovie p {
   margin: 0;
+}
+.dz2-chertezh {
+  margin-top: var(--space-3, 12px);
+}
+/* Чертёж движка в условии (lib/dz2/zadachi.ts, sChertezhom). */
+.dz2-chertezh svg {
+  display: block;
+  max-width: min(100%, 420px);
+  height: auto;
+}
+.dz2-tablitsa {
+  margin-top: var(--space-3, 12px);
+  overflow-x: auto;
+}
+.dz2-tablitsa table {
+  border-collapse: collapse;
+}
+.dz2-tablitsa th,
+.dz2-tablitsa td {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border, #d0d4dc);
+  text-align: center;
 }
 .dz2-u-zadacha__risunok {
   max-width: min(100%, 420px);

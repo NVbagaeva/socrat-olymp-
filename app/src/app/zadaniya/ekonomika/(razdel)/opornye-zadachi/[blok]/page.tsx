@@ -51,6 +51,7 @@ export default async function Opornye13BlokPage({ params }: { params: Params }) 
       <TabScrollOnMount />
       <Opornye13Screen
         blockId={found.id}
+        nazvanie={found.nazvanie}
         vid={found.vid}
         tasks={found.zadachi}
         zapomni={

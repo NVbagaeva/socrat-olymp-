@@ -50,6 +50,7 @@ export default async function Opornye9BlokPage({ params }: { params: Params }) {
       <ErrorBoundary what="задачи">
         <Opornye9
           blokId={found.id}
+          nazvanie={found.nazvanie}
           zapomni={
             <>
               <b>{OPORNYE9.zapomni}</b>

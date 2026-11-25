@@ -46,6 +46,7 @@ export default async function Opornye1BlokPage({ params }: { params: Params }) {
       <TabScrollOnMount />
       <Opornye1
         blok={found.id}
+        nazvanie={found.nazvanie}
         zapomni={
           <>
             <b>{OPORNYE1.zapomni}</b>

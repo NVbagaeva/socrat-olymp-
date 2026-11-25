@@ -91,6 +91,67 @@ export function zadachaOpornaya5(
   };
 }
 
+/* ── Чертёж в условии ─────────────────────────────────────────── */
+
+/**
+ * Чертёж движка сайта (SVG ученика, без ответа) — в условие задачи ДЗ:
+ * без него задача по рисунку не решается. Показ пропускает его через
+ * sanitizeHtml (lib/dz/sanitize.ts: фигуры, подписи, штриховка).
+ */
+export function sChertezhom(uslovieHtml: string, svg: string | null | undefined): string {
+  if (typeof svg !== 'string' || !svg.trimStart().startsWith('<svg')) return uslovieHtml;
+  return `${uslovieHtml}<div class="dz2-chertezh">${svg}</div>`;
+}
+
+/** Рисунок ученика из задачи адаптера (lib/variant/types.ts, Figure). */
+function svgFigury(figure: unknown): string | null {
+  if (typeof figure !== 'object' || figure === null || !('svg' in figure)) return null;
+  const svg = (figure as { svg: unknown }).svg;
+  return typeof svg === 'string' ? svg : null;
+}
+
+/* ── Опорные на своих экранах №1, 2, 9, 11, 13 (этап 4г) ─────────── */
+
+/** Задача блока с seed: ответ — генератором раздела, разбор — строками HTML. */
+export interface OpornayaGen {
+  /** Микрозадача (прототип) — тип задачи ДЗ. */
+  id: string;
+  seed: string;
+  uslovieHtml: string;
+  /** Чертёж условия (ученика): SVG движка. */
+  risunokSvg?: string | null;
+  /** Таблица условия, свёрстана. */
+  tablitsaHtml?: string | null;
+  otvet: number | string;
+  shagi: readonly { chto: string; tex?: string }[];
+}
+
+export function zadachaOpornayaGen(z: OpornayaGen, level: 1 | 2 | 3): ZadachaDz | null {
+  const answer = normalnayaZapis(String(z.otvet));
+  if (answer === null) return null;
+  const tablitsa =
+    typeof z.tablitsaHtml === 'string' && z.tablitsaHtml !== ''
+      ? `<div class="dz2-tablitsa">${z.tablitsaHtml}</div>`
+      : '';
+  return {
+    kind: z.id,
+    task_ref: `${z.id}@${z.seed}`,
+    question_html: sChertezhom(z.uslovieHtml + tablitsa, z.risunokSvg),
+    level,
+    answer,
+    ...(z.shagi.length === 0
+      ? {}
+      : {
+          razbor: {
+            shagi: z.shagi.map((s) => ({
+              chto: s.chto,
+              ...(s.tex === undefined || s.tex === '' ? {} : { tex: s.tex }),
+            })),
+          },
+        }),
+  };
+}
+
 /* ── Тренажёр: запас из адаптера «Собрать вариант» ──────────────── */
 
 /** То, что отдаёт адаптер раздела (lib/variant/types.ts, VariantTask). */
@@ -130,7 +191,7 @@ export function zapasTrenazhera(
     out.push({
       kind: z.prototypeId,
       task_ref: z.taskId,
-      question_html: z.statement,
+      question_html: sChertezhom(z.statement, svgFigury(z.figure)),
       level: uroven(z),
       answer,
       ...(z.solutionStudent === null ? {} : { razbor: { shagi: [{ chto: z.solutionStudent }] } }),
