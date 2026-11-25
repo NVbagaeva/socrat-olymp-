@@ -578,8 +578,14 @@
   word-break: break-all;
 }
 .vo-qr {
+  box-sizing: content-box;
   width: 168px;
-  color: var(--color-text);
+  padding: var(--varianty-qr-polya);
+  border-radius: 10px;
+  /* QR — всегда тёмные точки на белом (рамка у svg своя, белая); в
+     тёмной теме — ещё и белые поля вокруг, чтобы код читался камерой. */
+  background: var(--varianty-qr-fon);
+  color: var(--varianty-qr-tochki);
 }
 .vo-qr svg {
   display: block;
@@ -913,4 +919,11 @@
   font-size: var(--fs-caption);
   font-weight: 600;
   vertical-align: middle;
+}
+
+/* «Завершить работу»: красная кнопка. В тёмной теме заливка светлая
+   (--color-error), поэтому текст — --color-text-on-accent: белый в
+   светлой теме, тёмный в тёмной (контраст AA). */
+.btn.vo-zavershit {
+  color: var(--color-text-on-accent);
 }

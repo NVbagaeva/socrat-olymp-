@@ -143,7 +143,7 @@
   opacity: 0.6;
 }
 .var-btn--tyoplyy {
-  color: #fff;
+  color: var(--color-text-inverse);
   background: var(--gloss-warm);
   box-shadow: var(--gloss-warm-shadow-soft);
 }
@@ -242,12 +242,12 @@
   background: linear-gradient(
     160deg,
     color-mix(in srgb, var(--color-surface-info) 95%, transparent),
-    rgb(214 229 255 / 0.85)
+    var(--varianty-plitka-vybor)
   );
   box-shadow:
-    0 0 0 1px rgb(31 95 208 / 0.22),
+    0 0 0 1px color-mix(in srgb, var(--varianty-kromka) 22%, transparent),
     var(--glass-hi),
-    0 6px 16px -10px rgb(31 95 208 / 0.45);
+    0 6px 16px -10px color-mix(in srgb, var(--varianty-kromka) 45%, transparent);
 }
 /* Раздел, для которого задач ещё нет: плитка не нажимается. */
 .var-plitka.is-skoro .var-plitka__main {
@@ -286,7 +286,7 @@
   font-size: 12px;
   line-height: 16px;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-text-on-accent);
   background: var(--terracotta-600);
   pointer-events: none;
 }
@@ -316,13 +316,13 @@
   border-radius: 8px;
   fill: currentColor;
   background: color-mix(in srgb, var(--color-surface) 70%, transparent);
-  box-shadow: 0 0 0 1px rgb(31 95 208 / 0.12);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--varianty-kromka) 12%, transparent);
 }
 .var-plitka.is-on .var-plitka__more {
   color: var(--color-primary);
 }
 .var-plitka__more:hover svg {
-  background: #fff;
+  background: var(--color-surface);
 }
 .var-plitka__more:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -429,7 +429,7 @@
   align-items: center;
   gap: var(--space-6);
   padding: var(--space-5) var(--space-6);
-  border: 1px dashed rgb(31 95 208 / 0.22);
+  border: 1px dashed color-mix(in srgb, var(--varianty-kromka) 22%, transparent);
   border-radius: 20px;
   background: color-mix(in srgb, var(--color-surface) 40%, transparent);
 }
@@ -444,16 +444,16 @@
   overflow: hidden;
   padding: 16px 16px 0;
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-podlozhka);
   box-shadow:
-    0 0 0 1px rgb(31 95 208 / 0.1),
-    0 10px 24px -14px rgb(16 40 100 / 0.35);
+    0 0 0 1px color-mix(in srgb, var(--varianty-kromka) 10%, transparent),
+    0 10px 24px -14px color-mix(in srgb, var(--varianty-ten) 35%, transparent);
 }
 .var-prizrak__stroka {
   display: block;
   height: 6px;
   border-radius: 3px;
-  background: rgb(31 95 208 / 0.1);
+  background: color-mix(in srgb, var(--varianty-kromka) 10%, transparent);
 }
 .var-prizrak__stroka--w60 {
   width: 60%;
@@ -467,8 +467,8 @@
 .var-prizrak__ris {
   width: 64%;
   justify-self: center;
-  fill: rgb(31 95 208 / 0.06);
-  stroke: rgb(31 95 208 / 0.3);
+  fill: color-mix(in srgb, var(--varianty-kromka) 6%, transparent);
+  stroke: color-mix(in srgb, var(--varianty-kromka) 30%, transparent);
   stroke-width: 1.5;
   stroke-linejoin: round;
 }
@@ -497,7 +497,7 @@
   box-shadow:
     var(--glass-ring),
     var(--glass-hi),
-    0 10px 32px -12px rgb(16 40 100 / 0.3);
+    0 10px 32px -12px color-mix(in srgb, var(--varianty-ten) 30%, transparent);
 }
 .var-bar__row {
   display: flex;
@@ -582,7 +582,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   padding: 4px;
   border: 0;
   border-radius: 14px;
-  background: rgb(16 23 40 / 0.055);
+  background: color-mix(in srgb, var(--varianty-chernila) 5.5%, transparent);
 }
 .okno .var-seg__btn,
 .okno .sp-opt__btn {
@@ -600,16 +600,16 @@ body:has(.var-stranica .var-bar) .cookie-notice {
 .okno .sp-opt__btn.is-active {
   color: var(--color-primary);
   font-weight: 650;
-  background: #fff;
+  background: var(--varianty-segment-aktivnyy);
   box-shadow:
-    0 1px 2px rgb(16 23 40 / 0.08),
-    0 2px 8px -2px rgb(16 40 100 / 0.12);
+    0 1px 2px color-mix(in srgb, var(--varianty-ten-chernila) 8%, transparent),
+    0 2px 8px -2px color-mix(in srgb, var(--varianty-ten) 12%, transparent);
 }
 /* Звёзды: выбранные — тёплый оранжевый, остальные — серые, читаемые. */
 .okno .var-seg .var-seg__btn.var-stars {
   font-size: 18px;
   letter-spacing: 2px;
-  color: #6b7588;
+  color: var(--varianty-zvezda-off);
 }
 .okno .var-seg .var-seg__btn.var-stars.is-active {
   color: var(--color-warning);
@@ -625,7 +625,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
 }
 .okno .var-count__btn {
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: var(--glass-ring);
   border: 0;
 }
@@ -691,10 +691,10 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   font-size: 16px;
   line-height: 22px;
   color: var(--color-text);
-  background: #fff;
+  background: var(--color-surface);
   box-shadow:
     var(--glass-ring),
-    0 4px 14px -10px rgb(16 40 100 / 0.3);
+    0 4px 14px -10px color-mix(in srgb, var(--varianty-ten) 30%, transparent);
   cursor: pointer;
 }
 .var-podtip:focus-visible {
@@ -710,14 +710,14 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  box-shadow: inset 0 0 0 1.5px rgb(16 23 40 / 0.35);
-  background: #fff;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--varianty-chernila) 35%, transparent);
+  background: var(--color-surface);
 }
 .var-podtip__check svg {
   width: 18px;
   height: 18px;
   fill: none;
-  stroke: #fff;
+  stroke: var(--color-text-inverse);
   stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -731,33 +731,33 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   opacity: 1;
 }
 
-/* Пиктограммы подтипов: линия #0c3ebc, голубая заливка, точки-узлы. */
+/* Пиктограммы подтипов: линия --pikt-liniya, голубая заливка, точки-узлы. */
 .pikt {
   width: 64px;
   height: 64px;
   fill: none;
-  stroke: #0c3ebc;
+  stroke: var(--pikt-liniya);
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .pikt .z {
-  fill: #c3dffa;
+  fill: var(--pikt-zalivka);
   fill-opacity: 0.55;
 }
 .pikt .a {
-  fill: #7faeea;
+  fill: var(--pikt-zalivka-2);
   fill-opacity: 0.35;
 }
 .pikt .t {
-  fill: #0c3ebc;
+  fill: var(--pikt-liniya);
   stroke: none;
 }
 .pikt .s {
   stroke-dasharray: 2.5 2.5;
 }
 .pikt .n {
-  fill: #0c3ebc;
+  fill: var(--pikt-liniya);
   stroke: none;
   font-family: var(--font-sans);
   font-size: 9px;
@@ -793,12 +793,12 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   text-align: left;
   font: inherit;
   color: var(--color-text);
-  background: #fff;
-  box-shadow: inset 0 0 0 1px rgb(16 23 40 / 0.12);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--varianty-chernila) 12%, transparent);
   cursor: pointer;
 }
 .bv__row.is-on {
-  background: rgb(236 243 255);
+  background: var(--varianty-vybor-fon);
   box-shadow: inset 0 0 0 2px var(--color-primary);
 }
 .bv__row:focus-visible {
@@ -830,7 +830,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   width: 16px;
   height: 16px;
   fill: none;
-  stroke: #fff;
+  stroke: var(--color-text-inverse);
   stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -850,7 +850,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
 }
 .bv__error {
   margin: 0;
-  color: var(--color-danger, #b42318);
+  color: var(--varianty-oshibka);
 }
 .bv__deystvie .var-btn {
   width: 100%;
