@@ -4,11 +4,8 @@
    противомасштабируется через --pk, чтобы читаться на любом виде. */
 
 .karta {
-  --karta-led: #f3f8ff;
-  --karta-stek: rgb(255 255 255 / 0.62);
-  --karta-tuman: rgb(228 238 250 / 0.55);
-  --karta-teplo: #f0a04a;
-  --karta-teplo-2: #e77f2e;
+  /* Постоянные цвета карты (--karta-led, --karta-teplo…) — в tokens.css. */
+  --karta-znachok-fon: var(--karta-znachok-prosvet);
   --karta-terra: var(--terracotta-600);
   --karta-sinij: var(--color-primary);
   --karta-navy: var(--navy-800);
@@ -127,7 +124,7 @@
   overflow: hidden;
   height: clamp(420px, calc(100vh - 290px), 760px);
   border-radius: 24px;
-  background: #9ad3f6 var(--fon-zaglushka) center / cover no-repeat;
+  background: var(--karta-more) var(--fon-zaglushka) center / cover no-repeat;
   box-shadow: var(--glass-ring), var(--glass-shadow);
   touch-action: none;
   user-select: none;
@@ -161,6 +158,8 @@
   pointer-events: none;
 }
 .karta-svg {
+  /* На карте — тёмные чернила по светлому льду в обеих темах. */
+  --karta-znachok-fon: var(--karta-led);
   position: absolute;
   inset: 0;
   display: block;
@@ -171,7 +170,7 @@
 .karta-faktura path {
   fill: url(#karta-led);
   opacity: var(--faktura);
-  stroke: #fff;
+  stroke: var(--karta-belyy);
   stroke-width: 2;
   stroke-opacity: var(--faktura);
 }
@@ -192,14 +191,14 @@
 }
 .karta-ostrov--skoro .karta-ostrov__zalivka,
 .karta-svobodnyy .karta-ostrov__zalivka {
-  fill: rgb(214 230 248 / 0.78);
+  fill: var(--karta-ostrov-svobodnyy);
 }
 .karta-ostrov--v-processe .karta-ostrov__zalivka {
-  fill: rgb(142 196 250 / 0.3);
+  fill: var(--karta-ostrov-v-processe);
 }
 .karta-ostrov--osvoeno .karta-ostrov__zalivka {
   /* Тёплый свет поверх льда: фактура стекла просвечивает сквозь заливку. */
-  fill: rgb(247 168 84 / 0.66);
+  fill: var(--karta-ostrov-osvoeno);
 }
 .karta-ostrov__svet {
   fill: url(#karta-svet);
@@ -233,10 +232,10 @@
   outline: none;
 }
 .karta-ostrov__kontur:hover {
-  stroke: rgb(255 255 255 / 0.9);
+  stroke: color-mix(in srgb, var(--karta-belyy) 90%, transparent);
 }
 .karta-ostrov__kontur:focus-visible {
-  stroke: var(--color-primary);
+  stroke: var(--karta-chernila-sinij);
   stroke-width: 4;
   stroke-dasharray: 10 6;
 }
@@ -245,7 +244,7 @@
   stroke-width: 4;
 }
 .karta-ostrov.is-sleduyushchaya .karta-ostrov__kontur {
-  stroke: rgb(240 160 74 / 0.8);
+  stroke: color-mix(in srgb, var(--karta-teplo) 80%, transparent);
   stroke-width: 3;
 }
 .karta-ostrov--skoro .karta-ostrov__kontur {
@@ -260,7 +259,7 @@
   pointer-events: none;
 }
 .karta-ostrov__podpis {
-  color: var(--karta-navy);
+  color: var(--karta-chernila);
   font-family: var(--font-sans);
 }
 .karta-podpis__nomer {
@@ -275,12 +274,12 @@
   fill: currentColor;
 }
 .karta-podpis__znachok {
-  color: var(--color-text-brand);
+  color: var(--karta-chernila);
 }
 .karta-ostrov--skoro .karta-ostrov__podpis,
 .karta-ostrov--pozzhe .karta-ostrov__podpis,
 .karta-svobodnyy .karta-ostrov__podpis {
-  color: var(--color-text-brand);
+  color: var(--karta-chernila);
   opacity: 0.7;
 }
 .karta-ostrov--skoro .karta-podpis__nazvanie,
@@ -289,13 +288,13 @@
   font-weight: 500;
 }
 .karta-podpis__kolco-fon {
-  fill: rgb(255 255 255 / 0.85);
-  stroke: var(--color-surface-soft);
+  fill: color-mix(in srgb, var(--karta-belyy) 85%, transparent);
+  stroke: var(--karta-kolco-obvod);
   stroke-width: 3.5;
 }
 .karta-podpis__kolco-hod {
   fill: none;
-  stroke: var(--karta-sinij);
+  stroke: var(--karta-chernila-sinij);
   stroke-width: 3.5;
   stroke-linecap: round;
   transition: stroke-dasharray 600ms var(--ease);
@@ -303,11 +302,11 @@
 .karta-podpis__procent {
   font-size: 8.5px;
   font-weight: 700;
-  fill: var(--color-primary-text);
+  fill: var(--karta-chernila-sinij-tekst);
 }
 .karta-podpis__flag path {
   fill: none;
-  stroke: var(--karta-terra);
+  stroke: var(--karta-terra-na-karte);
   stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -316,11 +315,11 @@
   fill: var(--karta-teplo) !important;
 }
 .karta-podpis__povtorit circle {
-  fill: var(--karta-terra);
+  fill: var(--karta-terra-na-karte);
 }
 .karta-podpis__povtorit path {
   fill: none;
-  stroke: #fff;
+  stroke: var(--karta-belyy);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -344,7 +343,7 @@
   cursor: pointer;
 }
 .karta-mayak__volna {
-  fill: rgb(240 160 74 / 0.35);
+  fill: color-mix(in srgb, var(--karta-teplo) 35%, transparent);
   animation: karta-volna 2.2s ease-out infinite;
   transform-box: fill-box;
   transform-origin: center;
@@ -361,13 +360,13 @@
 }
 .karta-mayak__kaplya {
   fill: var(--karta-teplo-2);
-  stroke: #fff;
+  stroke: var(--karta-belyy);
   stroke-width: 1.5;
-  filter: drop-shadow(0 4px 6px rgb(160 80 20 / 0.35));
+  filter: drop-shadow(0 4px 6px var(--karta-mayak-ten));
 }
 .karta-mayak__golova,
 .karta-mayak__plechi {
-  fill: #fff;
+  fill: var(--karta-belyy);
 }
 
 /* Путь. */
@@ -400,7 +399,7 @@
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.35em;
-  fill: rgb(17 60 140 / 0.62);
+  fill: var(--karta-proliv-tekst);
   font-style: italic;
   pointer-events: none;
 }
@@ -414,13 +413,13 @@
   pointer-events: auto;
 }
 .karta-tablichka rect {
-  fill: rgb(255 255 255 / 0.72);
-  stroke: rgb(255 255 255 / 0.95);
+  fill: color-mix(in srgb, var(--karta-belyy) 72%, transparent);
+  stroke: color-mix(in srgb, var(--karta-belyy) 95%, transparent);
   stroke-width: 1.5;
-  filter: drop-shadow(0 6px 14px rgb(31 95 208 / 0.22));
+  filter: drop-shadow(0 6px 14px var(--karta-tablichka-ten));
 }
 .karta-tablichka:focus-visible rect {
-  stroke: var(--color-primary);
+  stroke: var(--karta-chernila-sinij);
   stroke-width: 3;
 }
 .karta-tablichka text {
@@ -429,31 +428,31 @@
   font-weight: 800;
   font-style: italic;
   letter-spacing: -0.01em;
-  fill: var(--karta-navy);
+  fill: var(--karta-chernila);
 }
 
 /* Отладка: контуры поверх картинки. */
 .karta-debug path {
-  fill: rgb(255 0 80 / 0.12);
-  stroke: #ff0050;
+  fill: color-mix(in srgb, var(--karta-otladka) 12%, transparent);
+  stroke: var(--karta-otladka);
   stroke-width: 1.5;
 }
 .karta-debug circle {
-  fill: #ff0050;
+  fill: var(--karta-otladka);
 }
 .karta-debug .karta-debug__radius {
   fill: none;
-  stroke: #ff0050;
+  stroke: var(--karta-otladka);
   stroke-dasharray: 3 3;
 }
 .karta-debug text {
   font-size: 14px;
   font-weight: 700;
-  fill: #b00030;
+  fill: var(--karta-otladka-tekst);
 }
 .karta-debug .karta-debug__proliv {
   fill: none;
-  stroke: #0070ff;
+  stroke: var(--karta-otladka-proliv);
   stroke-width: 44;
   stroke-opacity: 0.25;
   stroke-linecap: round;
@@ -609,7 +608,7 @@ a.karta-gorod__ssylka:focus-visible {
   height: 18px;
   border-radius: 50%;
   border: 2px solid var(--color-border-info);
-  background: #fff;
+  background: var(--color-surface);
   display: grid;
   place-items: center;
   position: relative;
@@ -619,7 +618,7 @@ a.karta-gorod__ssylka:focus-visible {
   width: 12px;
   height: 12px;
   fill: none;
-  stroke: #fff;
+  stroke: var(--color-text-inverse);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -630,7 +629,7 @@ a.karta-gorod__ssylka:focus-visible {
 }
 .karta-gorod--tekushchaya .karta-gorod__tochka {
   border-color: var(--karta-teplo-2);
-  box-shadow: 0 0 0 4px rgb(231 127 46 / 0.2);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--karta-teplo-2) 20%, transparent);
 }
 .karta-gorod--tekushchaya .karta-gorod__tochka::after {
   content: '';
@@ -726,7 +725,7 @@ a.karta-gorod__ssylka:focus-visible {
 .karta-panel {
   --stk-r-card: 24px;
   /* Плотнее обычного стекла: под панелью — подписи островов. */
-  background: rgb(247 251 255 / 0.9);
+  background: var(--karta-panel-fon);
   position: absolute;
   right: var(--space-4);
   top: var(--space-4);
@@ -769,7 +768,7 @@ a.karta-gorod__ssylka:focus-visible {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(160deg, #fff, var(--color-surface-soft));
+  background: linear-gradient(160deg, var(--color-surface), var(--color-surface-soft));
   box-shadow: inset 0 0 0 1px var(--color-border-info);
   display: grid;
   place-items: center;
@@ -958,9 +957,9 @@ a.karta-gorod__ssylka:focus-visible {
 }
 .karta-knopka--glavnaya {
   background: var(--gloss);
-  color: #fff;
+  color: var(--color-text-inverse);
   border-color: transparent;
-  box-shadow: 0 10px 24px -10px rgb(31 95 208 / 0.6);
+  box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--color-primary-fill) 60%, transparent);
 }
 .karta-knopka--malaya {
   min-height: 36px;
@@ -983,7 +982,7 @@ a.karta-gorod__ssylka:focus-visible {
   gap: 2px;
   padding: var(--space-2) var(--space-3);
   border-radius: 12px;
-  background: rgb(255 255 255 / 0.5);
+  background: var(--karta-svyazka-fon);
   font-size: 0.8125rem;
 }
 .karta-svyazka.is-gotovo {
@@ -1071,7 +1070,7 @@ a.karta-gorod__ssylka:focus-visible {
 .karta-legenda__p--v-processe::before {
   border: 3px solid var(--karta-sinij);
   border-right-color: var(--color-surface-soft);
-  background: #fff;
+  background: var(--color-surface);
 }
 .karta-legenda__p--ne-nachato::before {
   background: var(--karta-tuman);
@@ -1108,7 +1107,7 @@ a.karta-gorod__ssylka:focus-visible {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: linear-gradient(160deg, #fff, var(--color-surface-soft));
+  background: linear-gradient(160deg, var(--color-surface), var(--color-surface-soft));
   box-shadow: inset 0 0 0 1px var(--color-border-info);
   display: grid;
   place-items: center;

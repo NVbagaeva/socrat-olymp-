@@ -31,8 +31,51 @@ function rng(seed: number): () => number {
   };
 }
 
-/* Цвета: белый, голубой (--blue-300), тёплый (--terracotta → светлее). */
-const COLORS = ['255,255,255', '155,192,242', '255,200,140'] as const;
+/** Цвета света (tokens.css, --onb-svet-*): «r,g,b» для rgba() с прозрачностью. */
+interface Svet {
+  /** Частицы: белый, голубой, тёплый. */
+  chastica: readonly [string, string, string];
+  /** Сердцевина искры и её край. */
+  yadro: string;
+  kray: string;
+  /** Лучи искры. */
+  luch: string;
+}
+
+/* Запасные — если переменных нет (страница без tokens.css). */
+const SVET_ZAPAS: Svet = {
+  chastica: ['255,255,255', '155,192,242', '255,200,140'],
+  yadro: '255,255,255',
+  kray: '255,220,170',
+  luch: '255,235,205',
+};
+
+/**
+ * Цвета из CSS-переменных у canvas. Любую запись цвета (hex, rgb(),
+ * var(--noch-…) уже подставлен) приводит к «#rrggbb» сам canvas.
+ */
+function svetIzCss(canvas: HTMLCanvasElement, g: CanvasRenderingContext2D): Svet {
+  const cs = getComputedStyle(canvas);
+  const rgb = (name: string, zapas: string): string => {
+    const v = cs.getPropertyValue(name).trim();
+    if (v === '') return zapas;
+    g.fillStyle = '#000';
+    g.fillStyle = v;
+    const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(String(g.fillStyle));
+    if (m === null) return zapas;
+    return m.slice(1, 4).map((h) => parseInt(h, 16)).join(',');
+  };
+  return {
+    chastica: [
+      rgb('--onb-svet-belyy', SVET_ZAPAS.chastica[0]),
+      rgb('--onb-svet-goluboy', SVET_ZAPAS.chastica[1]),
+      rgb('--onb-svet-teplyy', SVET_ZAPAS.chastica[2]),
+    ],
+    yadro: rgb('--onb-svet-belyy', SVET_ZAPAS.yadro),
+    kray: rgb('--onb-svet-kray', SVET_ZAPAS.kray),
+    luch: rgb('--onb-svet-luch', SVET_ZAPAS.luch),
+  };
+}
 
 export class Fx2D {
   private readonly ctx: CanvasRenderingContext2D;
@@ -41,10 +84,21 @@ export class Fx2D {
   private w = 1;
   private h = 1;
   private dpr = 1;
+  private svet: Svet;
+  /** Смена темы (data-tema на <html>) — цвета перечитываются. */
+  private readonly temaObs: MutationObserver;
 
   constructor(canvas: HTMLCanvasElement, phone: boolean) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
+    this.svet = svetIzCss(canvas, this.ctx);
+    this.temaObs = new MutationObserver(() => {
+      this.svet = svetIzCss(canvas, this.ctx);
+    });
+    this.temaObs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-tema'],
+    });
     const rand = rng(17);
     const n = phone ? 22 : 44;
     this.particles = Array.from({ length: n }, () => ({
@@ -56,6 +110,10 @@ export class Fx2D {
       size: 3 + rand() * 4.5,
       hue: (rand() < 0.5 ? 2 : rand() < 0.6 ? 0 : 1) as 0 | 1 | 2,
     }));
+  }
+
+  dispose(): void {
+    this.temaObs.disconnect();
   }
 
   setView(w: number, h: number): void {
@@ -95,9 +153,10 @@ export class Fx2D {
       const y = py(p.y - p.rise * life);
       const r = p.size * unit;
       const grad = g.createRadialGradient(x, y, 0, x, y, r * 3);
-      grad.addColorStop(0, `rgba(${COLORS[p.hue]},${0.9 * a})`);
-      grad.addColorStop(0.3, `rgba(${COLORS[p.hue]},${0.35 * a})`);
-      grad.addColorStop(1, `rgba(${COLORS[p.hue]},0)`);
+      const c = this.svet.chastica[p.hue];
+      grad.addColorStop(0, `rgba(${c},${0.9 * a})`);
+      grad.addColorStop(0.3, `rgba(${c},${0.35 * a})`);
+      grad.addColorStop(1, `rgba(${c},0)`);
       g.fillStyle = grad;
       g.fillRect(x - r * 3, y - r * 3, r * 6, r * 6);
     });
@@ -111,6 +170,7 @@ export class Fx2D {
       [SPARKS.B, ph.b],
     ];
     const lit = smooth(span(t, 0.15, 0.55));
+    const { yadro, kray, luch } = this.svet;
     let n = 0;
     for (const [points, layer] of groups) {
       if (layer.a < 0.02) continue;
@@ -123,11 +183,11 @@ export class Fx2D {
         const y = py(BASE.y + (v.y - BASE.y) * layer.s);
         const r = 26 * unit * (0.7 + 0.3 * tw);
         const core = g.createRadialGradient(x, y, 0, x, y, r * 0.45);
-        core.addColorStop(0, `rgba(255,255,255,${a})`);
-        core.addColorStop(1, 'rgba(255,220,170,0)');
+        core.addColorStop(0, `rgba(${yadro},${a})`);
+        core.addColorStop(1, `rgba(${kray},0)`);
         g.fillStyle = core;
         g.fillRect(x - r, y - r, r * 2, r * 2);
-        g.fillStyle = `rgba(255,235,205,${0.7 * a})`;
+        g.fillStyle = `rgba(${luch},${0.7 * a})`;
         g.fillRect(x - r, y - 0.8, r * 2, 1.6);
         g.fillRect(x - 0.8, y - r, 1.6, r * 2);
       }

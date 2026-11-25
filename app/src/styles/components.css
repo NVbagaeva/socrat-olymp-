@@ -78,7 +78,8 @@
 }
 .btn--danger {
   background: var(--color-error);
-  color: var(--color-text-inverse);
+  /* Текст на яркой красной: в светлой белый, в тёмной — тёмный (AA). */
+  color: var(--color-text-on-accent);
 }
 .btn--sm {
   height: var(--h-control-sm);

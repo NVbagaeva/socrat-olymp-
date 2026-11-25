@@ -10,7 +10,7 @@
 
 .tour,
 .help-fab {
-  --onb-veil: color-mix(in srgb, var(--color-text) 48%, transparent);
+  --onb-veil: var(--onb-zatemnenie);
 }
 
 /* ── Тур ───────────────────────────────────────────────────────── */
