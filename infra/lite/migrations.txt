@@ -30,3 +30,4 @@ supabase/migrations/20261125120000_uvedomleniya.sql
 supabase/migrations/20261126120000_uvedomleniya_pochta.sql
 supabase/migrations/20261127120000_uvedomleniya_push.sql
 supabase/migrations/20261122130000_avatar_profiles.sql
+supabase/migrations/20261128120000_zhurnal_uslovie.sql

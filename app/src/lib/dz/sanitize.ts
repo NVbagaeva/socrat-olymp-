@@ -130,10 +130,13 @@ function clean(node: Element): void {
 /** Вёрстка, которую можно вставить в страницу. Без браузера — пустая строка. */
 export function sanitizeHtml(html: string): string {
   if (typeof document === 'undefined') return '';
-  const template = document.createElement('template');
-  template.innerHTML = html;
-  const root = document.createElement('div');
-  root.append(template.content.cloneNode(true));
+  /* Разбор и чистка — в отдельном документе без окна: в нём картинки не
+     грузятся и обработчики (onerror у <img>) не срабатывают. Элемент
+     основного документа, даже не вставленный в страницу, начал бы
+     загрузку картинки сразу, ещё до чистки. */
+  const doc = document.implementation.createHTMLDocument('');
+  const root = doc.createElement('div');
+  root.innerHTML = html;
   clean(root);
   return root.innerHTML;
 }

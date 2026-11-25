@@ -277,6 +277,7 @@
     "test:karta-site": "node scripts/check-karta-site.mjs",
     "test:progress-log": "node scripts/check-progress-log.mjs",
     "test:zhurnal": "node scripts/check-zhurnal.mjs",
+    "test:zhurnal-pokaz": "node scripts/check-zhurnal-pokaz.mjs",
     "test:dz2": "node scripts/check-dz2.mjs",
     "test:uvedomleniya": "node scripts/check-uvedomleniya.mjs",
     "test:progress-perevod": "node scripts/check-progress-perevod.mjs",

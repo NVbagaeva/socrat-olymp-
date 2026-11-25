@@ -1081,6 +1081,19 @@ jobs:
         working-directory: app
         run: pnpm test:rsc-serving
 
+      # Apache с нашим .htaccess: заголовки защиты на страницах и 404,
+      # файлы с точкой в начале имени закрыты.
+      - name: Проверить заголовки защиты
+        working-directory: app
+        run: pnpm test:headers
+
+      # Chromium: условие из журнала ученика в «Прогрессе» учителя и сама
+      # очистка вёрстки (lib/dz/sanitize.ts) — формулы KaTeX проходят,
+      # скрипты, картинки и обработчики — нет, и ничего не выполняется.
+      - name: Проверить очистку условия журнала
+        working-directory: app
+        run: pnpm test:zhurnal-pokaz
+
       # Переходы без белого экрана: Apache с нашим .htaccess добавляет
       # «/» одним редиректом сразу на https; в WebKit и Chromium на ширине
       # iPhone нижняя кнопка «Банк заданий» открывает банк с тренажёра,
