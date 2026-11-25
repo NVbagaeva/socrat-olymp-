@@ -10,6 +10,8 @@ import { formatHint, fractionRightHint } from '@/lib/otvet';
 import type { LogOutcome } from '@/lib/progressLog';
 import { pickRound, useRound } from '@/lib/trainerRound';
 import type { TaskMark } from '@/lib/trainerSession/types';
+import { zhurnalBanka } from '@/lib/trening/zhurnalBanka';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import {
   ZAMENY,
   analogOf,
@@ -153,6 +155,20 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
 
   const task = zameny[poolIndex] ?? pool[poolIndex];
   const zadacha = task === undefined ? undefined : zagruzka.izKesha(task.id);
+  /* Журнал решения задач (lib/zhurnal, этап 4б): ученику, который вошёл,
+     при флаге и в разделах журнала; база («baza-…») не пишется. */
+  const zapis = useZapisZadachi(
+    zadacha === undefined || task === undefined
+      ? null
+      : zhurnalBanka(
+          razdel.razdel,
+          { id: zadacha.id, p: task.p, text: zadacha.text },
+          'trenazher',
+          roundKey,
+          String(index),
+          razdel.kartinka?.(zadacha)?.src,
+        ),
+  );
 
   useSessionReport<UiBanka>(report, {
     index,
@@ -209,6 +225,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   useBeforeFinish(setBeforeFinish, () => {
     if (task !== undefined && checked === 'wrong' && marks[index] === undefined) {
       remember(task, 'wrong');
+      zapis?.zakryt(false);
     }
   });
 
@@ -251,6 +268,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
     const reading = razdel.proverit(value, dannye.seal, dannye, rezhim);
     if (reading.kind === 'edinicy') {
       /* Число верное, а единицы нет: на ЕГЭ это 0 баллов — ошибка со своим вердиктом. */
+      zapis?.popytka(value, false);
       setFormat(null);
       setViaFraction(false);
       setEdinicy(true);
@@ -262,16 +280,19 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
     }
     if (reading.kind === 'pi') {
       /* Ответ через π: подсказка о записи, попытка не тратится. */
+      zapis?.popytka(value, false, 'format');
       setFormat(T.ekran.piPodskazka);
       return;
     }
     if (reading.kind === 'format') {
       /* Неверная запись: подсказка, попытка не тратится. */
+      zapis?.popytka(value, false, 'format');
       setFormat(formatHint(reading.problem, reading.meant));
       return;
     }
     if (reading.kind === 'fractionRight') {
       /* Значение верное, но дробью: не засчитано и не ошибка. */
+      zapis?.popytka(value, false, 'fraction');
       setFormat(fractionRightHint(reading.decimal));
       return;
     }
@@ -280,7 +301,9 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
     const right = reading.right;
     setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
+    zapis?.popytka(value, right);
     if (right) {
+      zapis?.zakryt(true);
       if (!zakryta) {
         /* Начисто — без ошибок и без подсказки; иначе «с разбором». */
         const chisto = !failed && !hintOpen;
@@ -298,6 +321,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   function reveal() {
     const wasOpen = solutionOpen;
     setSolutionOpen(!wasOpen);
+    if (!wasOpen) zapis?.reshenie();
     if (!wasOpen && checked !== 'right' && !zakryta) {
       /* Решение открыто до ответа: задача закрыта «с разбором». */
       setMarks({ ...marks, [index]: 'hinted' });
@@ -323,6 +347,10 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
     if (checked === 'wrong' && !zakryta) {
       remember(tekushchaya, 'wrong');
     }
+    /* Ушёл с задачи: была ошибка — ошибка, решение открыто — с разбором, без ответа — пропуск. */
+    if (checked === 'wrong') zapis?.zakryt(false);
+    else if (solutionOpen) zapis?.zakrytKak('revealed');
+    else if (checked === null) zapis?.propustit();
     if (last) {
       onFinish();
       return;
@@ -400,12 +428,18 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
           : {
               html: '',
               open: hintOpen,
-              onOpen: () => setHintOpen(true),
+              onOpen: () => {
+                setHintOpen(true);
+                zapis?.shagPodskazki(1);
+              },
               telo:
                 razbor !== null && razdel.podskazka !== undefined ? (
                   razdel.podskazka(razbor, {
                     otkryto: shag,
-                    dalshe: () => setShag(shag + 1),
+                    dalshe: () => {
+                      setShag(shag + 1);
+                      zapis?.shagPodskazki(shag + 1);
+                    },
                   })
                 ) : voprosy.length === 0 ? (
                   <p>{T.ekran.zagruzka}</p>
@@ -417,8 +451,12 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
                     onVerno={() => {
                       setShag(shag + 1);
                       setMimo([]);
+                      zapis?.shagPodskazki(shag + 1);
                     }}
-                    onMimo={(j) => setMimo([...mimo, j])}
+                    onMimo={(j) => {
+                      setMimo([...mimo, j]);
+                      zapis?.oshibkaPodskazki(shag);
+                    }}
                     labels={T.ekran.voprosy}
                   />
                 ),

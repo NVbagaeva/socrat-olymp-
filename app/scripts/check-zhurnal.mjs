@@ -258,6 +258,25 @@ const meta = { id: M.idIz('8|trenazher|r1|0|8.A|s1|base'), task_no: 8, kind: '8.
   check(U.urovenZadachi(999) === 1, 'неизвестный раздел — 1');
 }
 
+/* Тренажёр по банку (этап 4б): запись задачи — lib/trening/zhurnalBanka.ts. */
+{
+  const B = requireSrc('lib/trening/zhurnalBanka.ts');
+  const z = { id: '7-P3-12', p: 'P3', text: 'Решите уравнение $x^2=4$.' };
+  const a = B.zhurnalBanka('7', z, 'trenazher', 'r1', '0');
+  check(a !== null && a.task_no === 7 && a.kind === 'P3' && a.task_ref === '7-P3-12' && a.level === 1
+    && a.place === 'trenazher' && a.place_ref === 'r1' && a.uslovie_tex === z.text && a.gen_hash.length > 0,
+  'банк: номер, тип, задача, место, сложность, условие');
+  check(B.zhurnalBanka('7', z, 'trenazher', 'r1', '0').id === a.id && B.zhurnalBanka('7', z, 'trenazher', 'r1', '1').id !== a.id,
+    'банк: id одинаков у той же задачи на том же месте, другой — на другом');
+  check(B.zhurnalBanka('13', z, 'trenazher', 'r1', '0').level === 2, 'банк: №13 (ЕГЭ 16) — повышенная');
+  check(B.zhurnalBanka('baza-7', z, 'trenazher', 'r1', '0') === null, 'банк: раздел базы не пишется');
+  check(B.zhurnalBanka('7', z, 'trenazher', 'r1', '0', '/images/z7.webp').risunok === '/images/z7.webp'
+    && B.zhurnalBanka('7', z, 'trenazher', 'r1', '0', 'data:image/svg+xml,x').risunok === undefined,
+  'банк: картинка — только файл сайта');
+  check(B.zhurnalBanka('7', { ...z, text: 'x'.repeat(2500) }, 'trenazher', 'r1', '0').uslovie_tex === undefined,
+    'банк: длинное условие не пишется текстом');
+}
+
 console.log(`Журнал решения задач: ${checks} проверок, не прошло ${failures.length}.`);
 if (failures.length > 0) {
   for (const f of failures) console.error(`  НЕТ ${f}`);

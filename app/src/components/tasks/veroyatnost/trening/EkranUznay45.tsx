@@ -141,7 +141,7 @@ export function EkranUznay45({
             dangerouslySetInnerHTML={{ __html: task.uslovie }}
           />
         ) : (
-          <div className="kz-ryad">
+          <div className="kzad-ryad">
             <KartinkaZadachi
               src={kartinka.path}
               {...(kartinka.path280 === undefined ? {} : { src280: kartinka.path280 })}
