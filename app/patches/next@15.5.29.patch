@@ -1,0 +1,54 @@
+diff --git a/dist/client/components/router-reducer/fetch-server-response.js b/dist/client/components/router-reducer/fetch-server-response.js
+index 1b5e66b4cc684002e1600235f9f81296b255a6a7..46e0937df81301dae61e099cdc11f294803e6cc4 100644
+--- a/dist/client/components/router-reducer/fetch-server-response.js
++++ b/dist/client/components/router-reducer/fetch-server-response.js
+@@ -156,7 +156,10 @@ async function fetchServerResponse(url, options) {
+         // TODO-APP: Add a test for the case where a CORS request fails, e.g. external url redirect coming from the response.
+         // See https://github.com/vercel/next.js/issues/43605#issuecomment-1451617521 for a reproduction.
+         return {
+-            flightData: url.toString(),
++            // budetege-patch: rsc-fallback-url. В режиме output: 'export' url здесь
++            // уже указывает на служебный /…/index.txt; полная навигация на него
++            // показывала бы сырой RSC-текст. Ведём на адрес самой страницы.
++            flightData: (0, _routeparams.urlToUrlWithoutFlightMarker)(url).toString(),
+             canonicalUrl: undefined,
+             couldBeIntercepted: false,
+             prerendered: false,
+@@ -178,6 +181,10 @@ async function createFetch(url, headers, fetchPriority, signal) {
+     const fetchOptions = {
+         // Backwards compat for older browsers. `same-origin` is the default in modern browsers.
+         credentials: 'same-origin',
++        // budetege-patch: rsc-no-cache. Адрес …/index.txt?_rsc=… не зависит от
++        // версии сборки, а хостинг отдаёт .txt с max-age на год: без
++        // перепроверки браузер брал бы ответ прошлого релиза.
++        cache: process.env.__NEXT_CONFIG_OUTPUT === 'export' ? 'no-cache' : undefined,
+         headers,
+         priority: fetchPriority || undefined,
+         signal
+diff --git a/dist/esm/client/components/router-reducer/fetch-server-response.js b/dist/esm/client/components/router-reducer/fetch-server-response.js
+index 06c09762991d266a9d0932d3ec51e503f8c1da77..54e3d1461f0ff3f008273f78d84747a8adbf73b0 100644
+--- a/dist/esm/client/components/router-reducer/fetch-server-response.js
++++ b/dist/esm/client/components/router-reducer/fetch-server-response.js
+@@ -135,7 +135,10 @@ if (typeof window !== 'undefined') {
+         // TODO-APP: Add a test for the case where a CORS request fails, e.g. external url redirect coming from the response.
+         // See https://github.com/vercel/next.js/issues/43605#issuecomment-1451617521 for a reproduction.
+         return {
+-            flightData: url.toString(),
++            // budetege-patch: rsc-fallback-url. В режиме output: 'export' url здесь
++            // уже указывает на служебный /…/index.txt; полная навигация на него
++            // показывала бы сырой RSC-текст. Ведём на адрес самой страницы.
++            flightData: urlToUrlWithoutFlightMarker(url).toString(),
+             canonicalUrl: undefined,
+             couldBeIntercepted: false,
+             prerendered: false,
+@@ -157,6 +160,10 @@ export async function createFetch(url, headers, fetchPriority, signal) {
+     const fetchOptions = {
+         // Backwards compat for older browsers. `same-origin` is the default in modern browsers.
+         credentials: 'same-origin',
++        // budetege-patch: rsc-no-cache. Адрес …/index.txt?_rsc=… не зависит от
++        // версии сборки, а хостинг отдаёт .txt с max-age на год: без
++        // перепроверки браузер брал бы ответ прошлого релиза.
++        cache: process.env.__NEXT_CONFIG_OUTPUT === 'export' ? 'no-cache' : undefined,
+         headers,
+         priority: fetchPriority || undefined,
+         signal
