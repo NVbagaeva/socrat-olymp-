@@ -1141,3 +1141,162 @@
     --scroll-track: var(--noch-bg);
   }
 }
+
+/* ── PR 3б: тарифы, об авторе, правовые ── */
+/* Тарифы (components/tarify, app/tarify), «Об авторе» (app/about),
+   плашка автора (components/avtor). Светлые значения — те же, что
+   прежде стояли в CSS строкой. В тёмной: тонкие линии и подложки —
+   светло-синие поверх тёмного стекла, тени — чёрные, блик стекла
+   приглушён. «Ночная» плашка тарифа (.tf--b) тёмная в обеих темах —
+   её цвета одни на обе. */
+:root {
+  /* Плашки тарифов. */
+  --tf-blik: rgb(255 255 255 / 0.55);
+  --tf-blik-konec: rgb(255 255 255 / 0);
+  --tf-ten-kartinki: rgb(31 95 208 / 0.28);
+  --tf-ten-kartinki-teplaya: rgb(191 86 28 / 0.36);
+  --tf-ten-lampy: rgb(224 122 47 / 0.3);
+  --tf-ten-kristalla: rgb(31 95 208 / 0.3);
+  --tf-metka-fon: rgb(224 122 47 / 0.14);
+  --tf-metka-kromka: rgb(224 122 47 / 0.28);
+  --tf-liniya: rgb(31 95 208 / 0.12);
+  --tf-liniya-tablicy: rgb(31 95 208 / 0.1);
+  --tf-liniya-teplaya: rgb(224 122 47 / 0.2);
+  --tf-znak-fon: rgb(31 95 208 / 0.1);
+  --tf-znak-net-fon: rgb(16 23 40 / 0.06);
+  --tf-knopka-kromka: rgb(31 95 208 / 0.2);
+  --tf-knopka-steklo-hover: var(--white);
+  --tf-punktir: rgb(16 23 40 / 0.22);
+  --tf-platnyy-kromka: rgb(255 255 255 / 0.8);
+  --tf-platnyy-ten:
+    0 0 0 1px rgb(224 122 47 / 0.22), var(--glass-hi), 0 2px 4px rgb(100 50 16 / 0.06),
+    0 28px 60px -18px rgb(224 122 47 / 0.5), 0 0 90px -24px rgb(245 160 74 / 0.55);
+  --tf-platnyy-ten-hover:
+    0 0 0 1px rgb(224 122 47 / 0.3), var(--glass-hi), 0 2px 4px rgb(100 50 16 / 0.06),
+    0 36px 70px -18px rgb(224 122 47 / 0.56), 0 0 110px -22px rgb(245 160 74 / 0.66);
+  --tf-pereklyuchatel-hover: rgb(255 255 255 / 0.7);
+  --tf-tochka: rgb(31 95 208 / 0.25);
+  --tf-svechenie-teploe: rgb(245 160 74 / 0.2);
+  --tf-svechenie-sinee: rgb(61 121 224 / 0.14);
+  --tf-svechenie-stena: rgb(61 121 224 / 0.16);
+  --tf-podskazka-fon: rgb(255 255 255 / 0.6);
+  --tf-podskazka-kromka: rgb(31 95 208 / 0.08);
+  --tf-kolonka-platnaya: rgb(245 160 74 / 0.08);
+  --tf-zakreplennyy-stolbec: rgb(250 252 255 / 0.97);
+  --tf-zakreplennyy-stolbec-ten: rgb(31 95 208 / 0.12);
+  /* Фон страницы тарифов и тонкая черта над подвалом. */
+  --tf-fon-siniy: rgb(31 95 208 / 0.07);
+  --tf-fon-teplyy: rgb(245 160 74 / 0.08);
+  --tf-podval-cherta: rgb(31 95 208 / 0.06);
+
+  /* «Ночная» плашка тарифа (.tf--b): тёмное стекло в обеих темах. */
+  --tf-noch-text: #f4f7fd;
+  --tf-noch-text-2: #c3d0e8;
+  --tf-noch-text-3: #9fb0cf;
+  --tf-noch-knopka-text: #dbe4f5;
+  --tf-noch-yakor: rgb(232 240 252 / 0.75);
+  --tf-noch-yakor-akcent: #ffc28a;
+  --tf-noch-metka-text: #ffd9b0;
+  --tf-noch-metka-fon: rgb(245 160 74 / 0.18);
+  --tf-noch-metka-kromka: rgb(245 160 74 / 0.45);
+  --tf-noch-kromka: rgb(255 255 255 / 0.16);
+  --tf-noch-liniya: rgb(255 255 255 / 0.16);
+  --tf-noch-znak-fon: rgb(255 255 255 / 0.1);
+  --tf-noch-punktir: rgb(255 255 255 / 0.36);
+  --tf-noch-blik: rgb(255 255 255 / 0.16);
+  --tf-noch-fon:
+    radial-gradient(120% 70% at 100% 0%, rgb(245 160 74 / 0.34), transparent 62%),
+    radial-gradient(90% 60% at 0% 100%, rgb(79 134 230 / 0.3), transparent 65%),
+    linear-gradient(165deg, rgb(20 44 96 / 0.94), rgb(10 24 58 / 0.96));
+  --tf-noch-ten:
+    0 0 0 1px rgb(245 160 74 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 30px 64px -18px rgb(14 35 80 / 0.6), 0 0 100px -20px rgb(245 160 74 / 0.6);
+  --tf-noch-ten-hover:
+    0 0 0 1px rgb(245 160 74 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 38px 72px -18px rgb(14 35 80 / 0.66), 0 0 120px -18px rgb(245 160 74 / 0.72);
+
+  /* «Об авторе». */
+  --oa-liniya: rgb(31 95 208 / 0.14);
+  --oa-fon-teplyy: rgb(245 160 74 / 0.12);
+  --oa-fon-siniy: rgb(31 95 208 / 0.07);
+  --oa-fon-siniy-2: rgb(31 95 208 / 0.06);
+  --oa-krug-zalivka: rgb(226 237 255 / 0.4);
+  --oa-treugolnik-zalivka: rgb(31 95 208 / 0.07);
+  --oa-pol-ten: rgb(31 95 208 / 0.2);
+  --oa-byust-ten: rgb(22 50 107 / 0.24);
+  --oa-ten-kartinki: rgb(31 95 208 / 0.16);
+  --oa-ten-samolyotika: rgb(31 95 208 / 0.14);
+  /* Рукописные пометки — синие чернила на прозрачном фоне: в светлой
+     теме лежат прямо на странице, в тёмной — на светлой подложке. */
+  --oa-pometka-fon: transparent;
+  --oa-pometka-otstup: 0;
+
+  /* Плашка автора: белое кольцо вокруг фото и синяя тень под ним. */
+  --avtor-foto-kolco: var(--white);
+  --avtor-foto-ten: rgb(31 95 208 / 0.35);
+}
+
+@media screen {
+  :root[data-tema='dark']:not([data-sheet-theme]) {
+    --tf-blik: rgb(200 220 255 / 0.1);
+    --tf-blik-konec: rgb(200 220 255 / 0);
+    --tf-ten-kartinki: rgb(0 0 0 / 0.45);
+    --tf-ten-kartinki-teplaya: rgb(0 0 0 / 0.5);
+    --tf-ten-lampy: rgb(0 0 0 / 0.45);
+    --tf-ten-kristalla: rgb(0 0 0 / 0.45);
+    --tf-metka-fon: rgb(255 154 77 / 0.14);
+    --tf-metka-kromka: rgb(255 154 77 / 0.4);
+    --tf-liniya: rgb(160 195 255 / 0.16);
+    --tf-liniya-tablicy: rgb(160 195 255 / 0.14);
+    --tf-liniya-teplaya: rgb(255 154 77 / 0.28);
+    --tf-znak-fon: rgb(127 176 255 / 0.16);
+    --tf-znak-net-fon: rgb(200 220 255 / 0.08);
+    --tf-knopka-kromka: rgb(160 195 255 / 0.3);
+    --tf-knopka-steklo-hover: rgb(40 62 112 / 0.92);
+    --tf-punktir: rgb(200 220 255 / 0.32);
+    --tf-platnyy-kromka: rgb(255 170 110 / 0.3);
+    --tf-platnyy-ten:
+      0 0 0 1px rgb(255 154 77 / 0.3), var(--glass-hi), 0 2px 4px rgb(0 0 0 / 0.35),
+      0 28px 60px -18px rgb(255 140 70 / 0.3), 0 0 90px -24px rgb(255 150 70 / 0.35);
+    --tf-platnyy-ten-hover:
+      0 0 0 1px rgb(255 154 77 / 0.42), var(--glass-hi), 0 2px 4px rgb(0 0 0 / 0.4),
+      0 36px 70px -18px rgb(255 140 70 / 0.38), 0 0 110px -22px rgb(255 150 70 / 0.45);
+    --tf-pereklyuchatel-hover: rgb(160 195 255 / 0.12);
+    --tf-tochka: rgb(127 176 255 / 0.35);
+    --tf-svechenie-teploe: rgb(255 150 70 / 0.14);
+    --tf-svechenie-sinee: rgb(70 130 255 / 0.16);
+    --tf-svechenie-stena: rgb(70 130 255 / 0.18);
+    --tf-podskazka-fon: rgb(160 195 255 / 0.06);
+    --tf-podskazka-kromka: rgb(160 195 255 / 0.14);
+    --tf-kolonka-platnaya: rgb(255 150 70 / 0.08);
+    --tf-zakreplennyy-stolbec: rgb(18 30 60 / 0.97);
+    --tf-zakreplennyy-stolbec-ten: rgb(160 195 255 / 0.16);
+    --tf-fon-siniy: rgb(70 130 255 / 0.1);
+    --tf-fon-teplyy: rgb(255 150 70 / 0.07);
+    --tf-podval-cherta: rgb(160 195 255 / 0.08);
+    /* «Ночная» плашка на ночном фоне: тень чёрная, тёплое свечение
+       сдержаннее, чтобы не слепило. */
+    --tf-noch-ten:
+      0 0 0 1px rgb(245 160 74 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 30px 64px -18px rgb(0 0 0 / 0.6), 0 0 90px -24px rgb(245 160 74 / 0.4);
+    --tf-noch-ten-hover:
+      0 0 0 1px rgb(245 160 74 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.2),
+      0 38px 72px -18px rgb(0 0 0 / 0.66), 0 0 110px -20px rgb(245 160 74 / 0.5);
+
+    --oa-liniya: rgb(160 195 255 / 0.18);
+    --oa-fon-teplyy: rgb(255 150 70 / 0.08);
+    --oa-fon-siniy: rgb(70 130 255 / 0.1);
+    --oa-fon-siniy-2: rgb(70 130 255 / 0.08);
+    --oa-krug-zalivka: rgb(127 176 255 / 0.06);
+    --oa-treugolnik-zalivka: rgb(127 176 255 / 0.1);
+    --oa-pol-ten: rgb(0 0 0 / 0.5);
+    --oa-byust-ten: rgb(0 0 0 / 0.55);
+    --oa-ten-kartinki: rgb(0 0 0 / 0.4);
+    --oa-ten-samolyotika: rgb(0 0 0 / 0.4);
+    --oa-pometka-fon: var(--color-podlozhka);
+    --oa-pometka-otstup: 10px;
+
+    --avtor-foto-kolco: var(--noch-surface-3);
+    --avtor-foto-ten: rgb(0 0 0 / 0.45);
+  }
+}
