@@ -106,7 +106,9 @@ const SUPABASE = 'http://127.0.0.1:54321';
 /* Сборка с журналом решения задач (NEXT_PUBLIC_ZHURNAL=1): сценарий журнала. */
 const ZHURNAL_ON = process.env.NEXT_PUBLIC_ZHURNAL === '1';
 /* Разделы журнала на этой сборке (этап 4б): сценарий тренажёра банка — при №7. */
-const ZHURNAL_RAZDELY = (process.env.NEXT_PUBLIC_ZHURNAL_RAZDELY || '5,8').split(',').map((x) => Number(x.trim()));
+const ZHURNAL_RAZDELY = (process.env.NEXT_PUBLIC_ZHURNAL_RAZDELY || '5,8')
+  .split(',')
+  .map((x) => Number(x.trim()));
 /* Сборка с экранами прогресса (NEXT_PUBLIC_PROGRESS_UCHITEL=1 и _UCHENIK=1). */
 /* Сборка с новой выдачей ДЗ (NEXT_PUBLIC_DZ2=1). */
 const DZ2_ON = process.env.NEXT_PUBLIC_DZ2 === '1';
@@ -1807,7 +1809,9 @@ async function runEnabled() {
     const head = await phoneHead(page);
     check(head.login !== null, `главная ${width}: «Войти» видна в шапке`);
     check(head.loginText === 'Войти', `главная ${width}: на кнопке слово «Войти»`);
-    check(!head.loginIcon, `главная ${width}: значка-человечка у «Войти» нет`);
+    /* На телефоне рядом с переключателем темы «Войти» — кружок 44×44 со
+       значком, слово — для скринридера (auth-widget.css). */
+    check(head.loginIcon, `главная ${width}: «Войти» — кружок со значком`);
     check(
       head.login !== null && head.login.w >= 44 && head.login.h >= 44,
       `главная ${width}: «Войти» не меньше 44×44`,
@@ -3259,7 +3263,10 @@ async function runZhurnalBanka(mock, errors) {
     await page.goto(`${SITE}/zadaniya/uravneniya/trenazher/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.trn-start');
     await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
-    check((await page.locator('.dz2-knopka').count()) === 0, `журнал банка ${width}: ученик не видит «В домашку»`);
+    check(
+      (await page.locator('.dz2-knopka').count()) === 0,
+      `журнал банка ${width}: ученик не видит «В домашку»`,
+    );
     await page.locator('.trn-vybor__start').click();
     const CARD = '.trn-zadacha[data-task]';
     await page.waitForSelector(CARD);
@@ -3281,12 +3288,21 @@ async function runZhurnalBanka(mock, errors) {
     const a = rowOf(first);
     check(a !== undefined, `журнал банка ${width}: задача №7 ушла в базу`);
     if (a !== undefined) {
-      check(a.task_no === 7 && a.place === 'trenazher' && a.kind.length > 0 && a.level === 1,
-        `журнал банка ${width}: раздел 7, тип, место, сложность (${a.task_no}, ${a.kind}, ${a.level})`);
-      check(a.popytki.length === 1 && a.popytki[0].answer === '987654' && !a.popytki[0].ok && a.outcome === 'wrong',
-        `журнал банка ${width}: попытка и исход «ошибка» (${a.outcome})`);
-      check(typeof a.gen_hash === 'string' && a.gen_hash.length === 16 && a.uslovie_tex.length > 0,
-        `журнал банка ${width}: отпечаток и условие для учителя`);
+      check(
+        a.task_no === 7 && a.place === 'trenazher' && a.kind.length > 0 && a.level === 1,
+        `журнал банка ${width}: раздел 7, тип, место, сложность (${a.task_no}, ${a.kind}, ${a.level})`,
+      );
+      check(
+        a.popytki.length === 1 &&
+          a.popytki[0].answer === '987654' &&
+          !a.popytki[0].ok &&
+          a.outcome === 'wrong',
+        `журнал банка ${width}: попытка и исход «ошибка» (${a.outcome})`,
+      );
+      check(
+        typeof a.gen_hash === 'string' && a.gen_hash.length === 16 && a.uslovie_tex.length > 0,
+        `журнал банка ${width}: отпечаток и условие для учителя`,
+      );
     }
     await context.close();
   }
@@ -3299,9 +3315,14 @@ async function runZhurnalBanka(mock, errors) {
     const { context, page } = await newPage(mock, 375, errors);
     await welcomeSeen(context);
     await login(page, uchenik[375], 'zhurnal-parol-1');
-    await page.goto(`${SITE}/zadaniya/uravneniya/opornye-zadachi/${blok.slug}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/zadaniya/uravneniya/opornye-zadachi/${blok.slug}/`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('.op-zad');
-    check((await page.locator('.dz2-knopka').count()) === 0, 'журнал опорных №7: ученик не видит «В домашку»');
+    check(
+      (await page.locator('.dz2-knopka').count()) === 0,
+      'журнал опорных №7: ученик не видит «В домашку»',
+    );
     await page.locator('.op-zad__pole input').first().fill('987654');
     await page.locator('.op-zad__glavnaya').first().click();
     const until = Date.now() + 15000;
@@ -3310,9 +3331,15 @@ async function runZhurnalBanka(mock, errors) {
       await new Promise((done) => setTimeout(done, 250));
     }
     const r = row();
-    check(r !== undefined && r.kind === blok.id && r.place_ref === blok.id && r.task_ref === blok.zadachi[0].id
-      && r.popytki.length === 1 && !r.popytki[0].ok,
-    `журнал опорных №7: блок, задача и неверная попытка (${r?.kind}, ${r?.popytki?.length})`);
+    check(
+      r !== undefined &&
+        r.kind === blok.id &&
+        r.place_ref === blok.id &&
+        r.task_ref === blok.zadachi[0].id &&
+        r.popytki.length === 1 &&
+        !r.popytki[0].ok,
+      `журнал опорных №7: блок, задача и неверная попытка (${r?.kind}, ${r?.popytki?.length})`,
+    );
     await context.close();
   }
 
@@ -3328,8 +3355,14 @@ async function runZhurnalBanka(mock, errors) {
     await login(page, uchenik[375], 'zhurnal-parol-1');
     await page.goto(`${SITE}${OPORNYE1_HREF}${blok.slug}/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.op-zad');
-    check((await page.locator('.dz2-knopka').count()) === 0, 'журнал опорных №1: ученик не видит «В домашку»');
-    check((await page.locator('.dz2-ryad:visible').count()) === 0, 'журнал опорных №1: у ученика нет пустого ряда кнопки');
+    check(
+      (await page.locator('.dz2-knopka').count()) === 0,
+      'журнал опорных №1: ученик не видит «В домашку»',
+    );
+    check(
+      (await page.locator('.dz2-ryad:visible').count()) === 0,
+      'журнал опорных №1: у ученика нет пустого ряда кнопки',
+    );
     await page.locator('.op-zad__pole input').first().fill('987654');
     await page.locator('.op-zad__glavnaya').first().click();
     const until = Date.now() + 15000;
@@ -3339,9 +3372,16 @@ async function runZhurnalBanka(mock, errors) {
     }
     const r = row();
     const z0 = blok.zadachi[0];
-    check(r !== undefined && r.kind === blok.id && r.place_ref === blok.id && r.task_ref === `${z0.id}@${z0.seed}`
-      && r.level === 1 && r.popytki.length === 1 && !r.popytki[0].ok,
-    `журнал опорных №1: блок, задача@seed и неверная попытка (${r?.kind}, ${r?.task_ref}, ${r?.popytki?.length})`);
+    check(
+      r !== undefined &&
+        r.kind === blok.id &&
+        r.place_ref === blok.id &&
+        r.task_ref === `${z0.id}@${z0.seed}` &&
+        r.level === 1 &&
+        r.popytki.length === 1 &&
+        !r.popytki[0].ok,
+      `журнал опорных №1: блок, задача@seed и неверная попытка (${r?.kind}, ${r?.task_ref}, ${r?.popytki?.length})`,
+    );
     await context.close();
   }
 
@@ -3354,7 +3394,9 @@ async function runZhurnalBanka(mock, errors) {
     const { OPORNYE13_HREF } = requireSrc('lib/zadanie13/links.ts');
     const blok1 = prepPool1()[0];
     const blok13 = prepPool13().find(
-      (b) => b.vid !== 'tip' && b.zadachi.some((x) => x.tablitsaHtml !== null && x.vybory === null && x.zapolni === null),
+      (b) =>
+        b.vid !== 'tip' &&
+        b.zadachi.some((x) => x.tablitsaHtml !== null && x.vybory === null && x.zapolni === null),
     );
     const { context, page } = await newPage(mock, 1280, errors);
     await welcomeSeen(context);
@@ -3369,8 +3411,10 @@ async function runZhurnalBanka(mock, errors) {
       for (const w of [375, 1280]) {
         await page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
         await page.evaluate(() => document.fonts.ready);
-        await page.screenshot({ path: path.join(SHOTS, `dz2-opornye1-${w}.png`),
-          style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+        await page.screenshot({
+          path: path.join(SHOTS, `dz2-opornye1-${w}.png`),
+          style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+        });
       }
       await page.setViewportSize({ width: 1280, height: 900 });
     }
@@ -3381,21 +3425,31 @@ async function runZhurnalBanka(mock, errors) {
       await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
     }
     const korz = await page.evaluate(() => {
-      for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
+      for (const k of Object.keys(localStorage))
+        if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
       return null;
     });
     const el = JSON.parse(korz ?? '{}').elementy ?? [];
     const NORM = /^-?[0-9]+(\.[0-9]+)?$/;
     const op1 = el.find((e) => e.task_no === 1 && e.vid === 'opornye');
     const op13 = el.find((e) => e.task_no === 13 && e.vid === 'opornye');
-    check(op1 !== undefined && op1.tasks.length === blok1.zadachi.length
-      && op1.tasks.every((t) => NORM.test(t.answer) && t.razbor?.shagi?.length > 0 && t.level === 1)
-      && op1.tasks.filter((t) => t.question_html.includes('dz2-chertezh')).length
-        === blok1.zadachi.filter((x) => x.risunokSvg !== null).length,
-    `ДЗ 4г: блок опорных №1 — ответы, разбор и чертежи (${op1?.tasks?.length})`);
-    check(op13 !== undefined && op13.tasks.length > 0 && op13.tasks.every((t) => NORM.test(t.answer) && t.level === 2)
-      && op13.tasks.some((t) => t.question_html.includes('dz2-tablitsa')),
-    `ДЗ 4г: блок опорных №13 — ответы и таблица условия (${op13?.tasks?.length})`);
+    check(
+      op1 !== undefined &&
+        op1.tasks.length === blok1.zadachi.length &&
+        op1.tasks.every(
+          (t) => NORM.test(t.answer) && t.razbor?.shagi?.length > 0 && t.level === 1,
+        ) &&
+        op1.tasks.filter((t) => t.question_html.includes('dz2-chertezh')).length ===
+          blok1.zadachi.filter((x) => x.risunokSvg !== null).length,
+      `ДЗ 4г: блок опорных №1 — ответы, разбор и чертежи (${op1?.tasks?.length})`,
+    );
+    check(
+      op13 !== undefined &&
+        op13.tasks.length > 0 &&
+        op13.tasks.every((t) => NORM.test(t.answer) && t.level === 2) &&
+        op13.tasks.some((t) => t.question_html.includes('dz2-tablitsa')),
+      `ДЗ 4г: блок опорных №13 — ответы и таблица условия (${op13?.tasks?.length})`,
+    );
     await context.close();
 
     /* Ученик: ДЗ с задачами блока №1 — чертёж в условии после очистки. */
@@ -3418,14 +3472,25 @@ async function runZhurnalBanka(mock, errors) {
           solutions_when: 'instant',
           individual: false,
           kontrol: false,
-          items: [{ position: 1, kind: 'opornye', task_no: 1, title: op1.title, spec: op1.spec, goal_kind: 'all',
-            tasks: op1.tasks.slice(0, 3).map((t, j) => ({ ...t, position: j + 1 })) }],
+          items: [
+            {
+              position: 1,
+              kind: 'opornye',
+              task_no: 1,
+              title: op1.title,
+              spec: op1.spec,
+              goal_kind: 'all',
+              tasks: op1.tasks.slice(0, 3).map((t, j) => ({ ...t, position: j + 1 })),
+            },
+          ],
         },
       });
       const s = await newPage(mock, 375, errors);
       await welcomeSeen(s.context);
       await login(s.page, uchenik[1280], 'zhurnal-parol-1');
-      await s.page.goto(`${SITE}/kabinet/domashki/reshat/?id=dz2-chertezh-1`, { waitUntil: 'networkidle' });
+      await s.page.goto(`${SITE}/kabinet/domashki/reshat/?id=dz2-chertezh-1`, {
+        waitUntil: 'networkidle',
+      });
       await s.page.waitForSelector('[data-page="reshat-dz2"]');
       /* Первый невыполненный элемент открыт сразу. */
       const elem = s.page.locator('.dz2-u-element[data-kind="opornye"]');
@@ -3439,16 +3504,20 @@ async function runZhurnalBanka(mock, errors) {
           fig: svg.querySelectorAll('path, circle, line, polygon').length,
           w: svg.getBoundingClientRect().width,
         }));
-        check(vnutri.text > 0 && vnutri.fig > 0 && vnutri.w > 100 && vnutri.w <= 375,
-          `ДЗ 4г ученик: чертёж в условии после очистки — подписи и фигуры (${JSON.stringify(vnutri)})`);
+        check(
+          vnutri.text > 0 && vnutri.fig > 0 && vnutri.w > 100 && vnutri.w <= 375,
+          `ДЗ 4г ученик: чертёж в условии после очистки — подписи и фигуры (${JSON.stringify(vnutri)})`,
+        );
       }
       if (SHOTS !== null) {
         for (const w of [375, 1280]) {
           await s.page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
           await elem.locator('.dz2-u-zadacha').first().scrollIntoViewIfNeeded();
           await s.page.evaluate(() => document.fonts.ready);
-          await s.page.screenshot({ path: path.join(SHOTS, `dz2-u-chertezh1-${w}.png`),
-            style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+          await s.page.screenshot({
+            path: path.join(SHOTS, `dz2-u-chertezh1-${w}.png`),
+            style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+          });
         }
       }
       await s.context.close();
@@ -3472,23 +3541,29 @@ async function runZhurnalBanka(mock, errors) {
         await page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
         await knopka.scrollIntoViewIfNeeded();
         await page.evaluate(() => document.fonts.ready);
-        await page.screenshot({ path: path.join(SHOTS, `dz2-trenazher7-${w}.png`),
-          style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+        await page.screenshot({
+          path: path.join(SHOTS, `dz2-trenazher7-${w}.png`),
+          style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+        });
       }
       await page.setViewportSize({ width: 1280, height: 900 });
     }
     /* Блок опорных №7 — целиком. */
     {
       const { BLOKI_OPORNYH } = requireSrc('lib/zadanie7/opornye.ts');
-      await page.goto(`${SITE}/zadaniya/uravneniya/opornye-zadachi/${BLOKI_OPORNYH[0].slug}/`, { waitUntil: 'networkidle' });
+      await page.goto(`${SITE}/zadaniya/uravneniya/opornye-zadachi/${BLOKI_OPORNYH[0].slug}/`, {
+        waitUntil: 'networkidle',
+      });
       await page.locator('.dz2-ryad .dz2-knopka__glavnaya').click();
       await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
       if (SHOTS !== null) {
         for (const w of [375, 1280]) {
           await page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
           await page.evaluate(() => document.fonts.ready);
-          await page.screenshot({ path: path.join(SHOTS, `dz2-opornye7-${w}.png`),
-            style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+          await page.screenshot({
+            path: path.join(SHOTS, `dz2-opornye7-${w}.png`),
+            style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+          });
         }
         await page.setViewportSize({ width: 1280, height: 900 });
       }
@@ -3499,7 +3574,8 @@ async function runZhurnalBanka(mock, errors) {
     await page.locator('.trn-vybor__ryadom .dz2-knopka__glavnaya').click();
     await page.waitForSelector('.trn-vybor__ryadom .dz2-knopka__glavnaya[aria-pressed="true"]');
     const korz = await page.evaluate(() => {
-      for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
+      for (const k of Object.keys(localStorage))
+        if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
       return null;
     });
     const el = JSON.parse(korz ?? '{}').elementy ?? [];
@@ -3507,12 +3583,21 @@ async function runZhurnalBanka(mock, errors) {
     const t11 = el.find((e) => e.task_no === 11 && e.vid === 'trenazher');
     const op7 = el.find((e) => e.task_no === 7 && e.vid === 'opornye');
     const NORM = /^-?[0-9]+(\.[0-9]+)?$/;
-    check(op7 !== undefined && op7.tasks.length === requireSrc('lib/zadanie7/opornye.ts').BLOKI_OPORNYH[0].zadachi.length
-      && op7.tasks.every((t) => NORM.test(t.answer) && t.razbor?.shagi?.length > 0),
-    `ДЗ 4в: блок опорных №7 в корзине — все задачи с ответами и разбором (${op7?.tasks?.length})`);
-    check(t7 !== undefined && t7.tipy.length > 0, `ДЗ 4б: тренажёр №7 в корзине (${t7?.tipy?.length} типов)`);
-    check(t11 !== undefined && t11.tipy.length > 0 && t11.tipy.every((t) => !t.startsWith('RZ-')),
-      `ДЗ 4б: тренажёр №11 без разминок (${t11?.tipy?.length} типов)`);
+    check(
+      op7 !== undefined &&
+        op7.tasks.length ===
+          requireSrc('lib/zadanie7/opornye.ts').BLOKI_OPORNYH[0].zadachi.length &&
+        op7.tasks.every((t) => NORM.test(t.answer) && t.razbor?.shagi?.length > 0),
+      `ДЗ 4в: блок опорных №7 в корзине — все задачи с ответами и разбором (${op7?.tasks?.length})`,
+    );
+    check(
+      t7 !== undefined && t7.tipy.length > 0,
+      `ДЗ 4б: тренажёр №7 в корзине (${t7?.tipy?.length} типов)`,
+    );
+    check(
+      t11 !== undefined && t11.tipy.length > 0 && t11.tipy.every((t) => !t.startsWith('RZ-')),
+      `ДЗ 4б: тренажёр №11 без разминок (${t11?.tipy?.length} типов)`,
+    );
     await context.close();
   }
 }
@@ -4141,13 +4226,18 @@ async function runDz2Etap4(mock, errors, snap) {
     }
 
     /* Раздел вне выдачи на этой сборке: первый из №10, №21, №7, которого нет в списке. */
-    const vne = [[10, 'prikladnye-zadachi'], [21, 'naibolshee-naimenshee'], [7, 'uravneniya']].find(
-      ([n]) => !DZ2_RAZDELY.includes(n),
-    );
+    const vne = [
+      [10, 'prikladnye-zadachi'],
+      [21, 'naibolshee-naimenshee'],
+      [7, 'uravneniya'],
+    ].find(([n]) => !DZ2_RAZDELY.includes(n));
     if (vne !== undefined) {
       await page.goto(`${SITE}/zadaniya/${vne[1]}/teoriya/`, { waitUntil: 'networkidle' });
       await page.waitForSelector('.vteor-razdel');
-      check((await page.locator('.dz2-knopka').count()) === 0, `ДЗ 4а ${width}: в теории №${vne[0]} (вне выдачи) кнопок нет`);
+      check(
+        (await page.locator('.dz2-knopka').count()) === 0,
+        `ДЗ 4а ${width}: в теории №${vne[0]} (вне выдачи) кнопок нет`,
+      );
     }
 
     const korz = await page.evaluate(() => {
