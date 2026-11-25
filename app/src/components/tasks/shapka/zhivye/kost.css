@@ -18,10 +18,10 @@
   font-size: 12px;
 }
 .kost__schet > span.is-vypalo {
-  color: #c2621b;
+  color: var(--chertezh-akcent-tekst);
 }
 .kost__schet > span.is-vypalo b {
-  color: #e07a2f;
+  color: var(--chertezh-akcent);
 }
 
 .derevo__vetka {
@@ -31,7 +31,7 @@
   outline: none;
 }
 .derevo__vetka:focus-visible .derevo__hit {
-  stroke: rgb(31 95 208 / 0.25);
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 25%, transparent);
 }
 .derevo__hit {
   fill: none;
@@ -44,11 +44,11 @@
   font-size: 11px;
   font-weight: 700;
   paint-order: stroke;
-  stroke: rgb(255 255 255 / 0.9);
+  stroke: color-mix(in srgb, var(--chertezh-blik) 90%, transparent);
   stroke-width: 3px;
 }
 .derevo__p.is-put {
-  fill: #c2621b;
+  fill: var(--chertezh-akcent-tekst);
 }
 @media (prefers-reduced-motion: no-preference) {
   .derevo__lin {

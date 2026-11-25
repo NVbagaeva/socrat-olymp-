@@ -95,17 +95,17 @@
 /* ── Заливки и секторы ── */
 /* Непрозрачные: тон смешан с белым заранее — две заливки не накладываются. */
 .skh-mnog {
-  fill: color-mix(in srgb, var(--skh-cvet) 14%, #fff);
+  fill: color-mix(in srgb, var(--skh-cvet) 14%, var(--chertezh-fon));
   stroke: none;
   animation: skh-poyavlenie var(--dur-reveal) var(--ease);
 }
 /* Заливка круга: на чертеже нет многоугольника — основная фигура круг. */
 .skh-zalivka-okr {
-  fill: color-mix(in srgb, var(--skh-a) 10%, #fff);
+  fill: color-mix(in srgb, var(--skh-a) 10%, var(--chertezh-fon));
   stroke: none;
 }
 .skh-sektor {
-  fill: color-mix(in srgb, var(--skh-cvet) 18%, #fff);
+  fill: color-mix(in srgb, var(--skh-cvet) 18%, var(--chertezh-fon));
   stroke: none;
 }
 

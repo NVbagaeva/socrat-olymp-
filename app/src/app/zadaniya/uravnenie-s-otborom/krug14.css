@@ -68,7 +68,7 @@
   opacity: 0.9;
 }
 .k14__duga-strelka {
-  fill: var(--graph-line-c, #a8500f);
+  fill: var(--graph-line-c, var(--chertezh-akcent-tekst));
 }
 .k14__tochka {
   fill: var(--color-primary);
@@ -76,14 +76,14 @@
   stroke-width: 1.6;
 }
 .k14__tochka--akcent {
-  fill: var(--graph-line-c, #a8500f);
+  fill: var(--graph-line-c, var(--chertezh-akcent-tekst));
 }
 .k14__tochka--znach {
   fill: var(--graph-accent);
 }
 .k14__tochka--vykolota {
   fill: var(--color-surface);
-  stroke: var(--graph-line-c, #a8500f);
+  stroke: var(--graph-line-c, var(--chertezh-akcent-tekst));
   stroke-width: 2.2;
 }
 .k14__podpis {

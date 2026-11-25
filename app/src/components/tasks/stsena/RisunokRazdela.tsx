@@ -83,56 +83,82 @@ const raspredelenie: Motiv = () => (
 /** №7 и №14 — уравнения: равновесие двух выражений. */
 const uravnenie: Motiv = () => (
   <>
-    <circle cx="60" cy="65" r="48" fill="#fff" fillOpacity=".22" />
-    <ellipse cx="60" cy="116" rx="31" ry="5" fill="#8eaddd" fillOpacity=".2" />
+    <circle cx="60" cy="65" r="48" fill="var(--chertezh-fon)" fillOpacity=".22" />
+    <ellipse cx="60" cy="116" rx="31" ry="5" fill="var(--chertezh-setka)" fillOpacity=".2" />
 
     {/* Опора: мягкие голубые плоскости и золотой шарнир. */}
-    <path d="M60 44v59" stroke="#8eafe7" strokeWidth="5" strokeLinecap="round" />
-    <path d="M50 103h20l8 12H42z" fill="#dce7fb" />
-    <path d="M47 114h26" stroke="#356bc5" strokeWidth="7" strokeLinecap="round" />
-    <path d="M60 33v11" stroke="#e9a351" strokeWidth="3" strokeLinecap="round" />
-    <circle cx="60" cy="31" r="10" fill="#f1a047" />
-    <circle cx="60" cy="31" r="4.5" fill="#fff8ee" />
+    <path d="M60 44v59" stroke="var(--chertezh-setka)" strokeWidth="5" strokeLinecap="round" />
+    <path d="M50 103h20l8 12H42z" fill="var(--chertezh-zalivka-svet)" />
+    <path d="M47 114h26" stroke="var(--chertezh-siniy)" strokeWidth="7" strokeLinecap="round" />
+    <path d="M60 33v11" stroke="var(--chertezh-akcent)" strokeWidth="3" strokeLinecap="round" />
+    <circle cx="60" cy="31" r="10" fill="var(--chertezh-akcent)" />
+    <circle cx="60" cy="31" r="4.5" fill="var(--chertezh-akcent-zalivka)" />
 
     {/* Ровная перекладина и подвесы. */}
-    <path d="M23 45h74" stroke="#2f68c7" strokeWidth="6" strokeLinecap="round" />
-    <path d="M60 42H23" stroke="#2f68c7" strokeWidth="6" strokeLinecap="round" />
-    <path d="M60 42h37" stroke="#e58645" strokeWidth="6" strokeLinecap="round" />
-    <circle cx="60" cy="42" r="8" fill="#fff" stroke="#e58645" strokeWidth="4" />
-    <path d="M32 48v15m56-15v15" stroke="#8eafe7" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M23 45h74" stroke="var(--chertezh-siniy)" strokeWidth="6" strokeLinecap="round" />
+    <path d="M60 42H23" stroke="var(--chertezh-siniy)" strokeWidth="6" strokeLinecap="round" />
+    <path d="M60 42h37" stroke="var(--chertezh-akcent)" strokeWidth="6" strokeLinecap="round" />
+    <circle
+      cx="60"
+      cy="42"
+      r="8"
+      fill="var(--chertezh-fon)"
+      stroke="var(--chertezh-akcent)"
+      strokeWidth="4"
+    />
+    <path
+      d="M32 48v15m56-15v15"
+      stroke="var(--chertezh-setka)"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+    />
 
     {/* Чаши с выражениями делают мотив узнаваемым, а не абстрактной схемой. */}
     <path
       d="M19 64h26l-4 13c-2 6-5 9-9 9s-7-3-9-9z"
-      fill="#e7efff"
-      stroke="#3971d1"
+      fill="var(--chertezh-zalivka-svet)"
+      stroke="var(--chertezh-siniy)"
       strokeWidth="2.5"
       strokeLinejoin="round"
     />
     <path
       d="M75 64h26l-4 13c-2 6-5 9-9 9s-7-3-9-9z"
-      fill="#fff0e3"
-      stroke="#e58645"
+      fill="var(--chertezh-akcent-zalivka)"
+      stroke="var(--chertezh-akcent)"
       strokeWidth="2.5"
       strokeLinejoin="round"
     />
-    <path d="M23 67h18" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-    <path d="M79 67h18" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-    <text x="32" y="77" textAnchor="middle" fontSize="7" fontWeight="700" fill="#2856a0">
+    <path d="M23 67h18" stroke="var(--chertezh-fon)" strokeWidth="2" strokeLinecap="round" />
+    <path d="M79 67h18" stroke="var(--chertezh-fon)" strokeWidth="2" strokeLinecap="round" />
+    <text
+      x="32"
+      y="77"
+      textAnchor="middle"
+      fontSize="7"
+      fontWeight="700"
+      fill="var(--chertezh-liniya)"
+    >
       x + 3
     </text>
-    <text x="88" y="77" textAnchor="middle" fontSize="8" fontWeight="700" fill="#a9552c">
+    <text
+      x="88"
+      y="77"
+      textAnchor="middle"
+      fontSize="8"
+      fontWeight="700"
+      fill="var(--chertezh-akcent-tekst)"
+    >
       7
     </text>
 
     {/* Лёгкие искры добавляют рисунку живости. */}
     <path
       d="M17 36v7m-3.5-3.5h7M103 58v6m-3-3h6"
-      stroke="#e9a351"
+      stroke="var(--chertezh-akcent)"
       strokeWidth="2"
       strokeLinecap="round"
     />
-    <circle cx="101" cy="30" r="2" fill="#3971d1" />
+    <circle cx="101" cy="30" r="2" fill="var(--chertezh-siniy)" />
   </>
 );
 
@@ -151,24 +177,59 @@ const vychisleniya: Motiv = () => (
 /** №9 — производная: касательная к кривой. */
 const proizvodnaya: Motiv = () => (
   <>
-    <path d="M25 41h76M25 57h76M25 73h76M25 89h76" stroke="#8eafe7" strokeOpacity=".2" strokeWidth=".7" />
-    <path d="M41 31v70M57 31v70M73 31v70M89 31v70" stroke="#8eafe7" strokeOpacity=".2" strokeWidth=".7" />
+    <path
+      d="M25 41h76M25 57h76M25 73h76M25 89h76"
+      stroke="var(--chertezh-setka)"
+      strokeOpacity=".2"
+      strokeWidth=".7"
+    />
+    <path
+      d="M41 31v70M57 31v70M73 31v70M89 31v70"
+      stroke="var(--chertezh-setka)"
+      strokeOpacity=".2"
+      strokeWidth=".7"
+    />
     <path className={tonk} d="M17 101h88M24 110V30" />
-    <path d="m105 101-4-2v4zM24 30l-2 4h4z" fill="#8eafe7" />
-    <path d="M24 89c13 0 19-8 26-22 5-11 8-24 18-27 12-4 18 11 22 25 4 14 8 25 17 25v9H24z" fill="url(#z9-curve-fill)" opacity=".62" />
+    <path d="m105 101-4-2v4zM24 30l-2 4h4z" fill="var(--chertezh-setka)" />
+    <path
+      d="M24 89c13 0 19-8 26-22 5-11 8-24 18-27 12-4 18 11 22 25 4 14 8 25 17 25v9H24z"
+      fill="url(#z9-curve-fill)"
+      opacity=".62"
+    />
     <defs>
       <linearGradient id="z9-curve-fill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#3971d1" stopOpacity=".28" />
-        <stop offset="1" stopColor="#3971d1" stopOpacity=".02" />
+        <stop offset="0" stopColor="var(--chertezh-siniy)" stopOpacity=".28" />
+        <stop offset="1" stopColor="var(--chertezh-siniy)" stopOpacity=".02" />
       </linearGradient>
     </defs>
-    <path className={sin} strokeWidth="3.5" d="M24 89c13 0 19-8 26-22 5-11 8-24 18-27 12-4 18 11 22 25 4 14 8 25 17 25" />
-    <path d="M68 40v61" stroke="#e58645" strokeOpacity=".62" strokeWidth="1.2" strokeDasharray="2.5 3" />
+    <path
+      className={sin}
+      strokeWidth="3.5"
+      d="M24 89c13 0 19-8 26-22 5-11 8-24 18-27 12-4 18 11 22 25 4 14 8 25 17 25"
+    />
+    <path
+      d="M68 40v61"
+      stroke="var(--chertezh-akcent)"
+      strokeOpacity=".62"
+      strokeWidth="1.2"
+      strokeDasharray="2.5 3"
+    />
     <path className={tepl} strokeWidth="2.6" d="M48 47h40" />
-    <circle cx="68" cy="47" r="5.6" fill="#fff8ee" stroke="#e58645" strokeWidth="2.8" />
-    <circle cx="68" cy="47" r="1.7" fill="#e58645" />
-    <text x="71" y="108" fill="#2856a0" fontSize="6" fontStyle="italic">x₀</text>
-    <text x="30" y="39" fill="#2856a0" fontSize="6" fontStyle="italic">y = f(x)</text>
+    <circle
+      cx="68"
+      cy="47"
+      r="5.6"
+      fill="var(--chertezh-akcent-zalivka)"
+      stroke="var(--chertezh-akcent)"
+      strokeWidth="2.8"
+    />
+    <circle cx="68" cy="47" r="1.7" fill="var(--chertezh-akcent)" />
+    <text x="71" y="108" fill="var(--chertezh-liniya)" fontSize="6" fontStyle="italic">
+      x₀
+    </text>
+    <text x="30" y="39" fill="var(--chertezh-liniya)" fontSize="6" fontStyle="italic">
+      y = f(x)
+    </text>
   </>
 );
 
@@ -176,20 +237,20 @@ const proizvodnaya: Motiv = () => (
 const fizika: Motiv = () => (
   <>
     {/* Мягкая подложка повторяет дугу полёта и отделяет её от осей. */}
-    <ellipse cx="63" cy="112" rx="39" ry="5" fill="#8eaddd" fillOpacity=".18" />
+    <ellipse cx="63" cy="112" rx="39" ry="5" fill="var(--chertezh-setka)" fillOpacity=".18" />
     <path className={stek} d="M24 101c13-42 27-60 43-60s29 18 42 60z" />
 
     {/* Координатная сетка, оси со стрелками и деления времени. */}
     <path
       d="M38 50v52M53 43v59M80 43v59M95 50v52"
-      stroke="#bfd3f4"
+      stroke="var(--chertezh-zalivka-siniy)"
       strokeWidth="1"
       strokeDasharray="2 5"
     />
     <path className={tonk} d="M16 102h88m-4-4 4 4-4 4M22 110V28m-4 4 4-4 4 4" />
     <path
       d="M38 99v6m15-6v6m27-6v6m15-6v6"
-      stroke="#8eafe7"
+      stroke="var(--chertezh-setka)"
       strokeWidth="1.5"
       strokeLinecap="round"
     />
@@ -198,28 +259,35 @@ const fizika: Motiv = () => (
     <path className={sin} d="M24 101c13-42 27-60 43-60s29 18 42 60" />
     <path
       d="M67 47v53"
-      stroke="#8eafe7"
+      stroke="var(--chertezh-setka)"
       strokeWidth="1.7"
       strokeDasharray="3 4"
       strokeLinecap="round"
     />
 
     {/* Тело в полёте: стеклянный шар с тёплым бликом и вектор скорости. */}
-    <circle cx="67" cy="41" r="10" fill="#e58645" fillOpacity=".14" />
+    <circle cx="67" cy="41" r="10" fill="var(--chertezh-akcent)" fillOpacity=".14" />
     <path className={tepl} d="M67 41h22m-7-7 8 7-8 7" />
-    <circle cx="67" cy="41" r="6" fill="#fff8ee" stroke="#e58645" strokeWidth="3" />
-    <circle cx="65" cy="39" r="1.4" fill="#fff" />
+    <circle
+      cx="67"
+      cy="41"
+      r="6"
+      fill="var(--chertezh-akcent-zalivka)"
+      stroke="var(--chertezh-akcent)"
+      strokeWidth="3"
+    />
+    <circle cx="65" cy="39" r="1.4" fill="var(--chertezh-fon)" />
 
     {/* Короткие подписи превращают знак в понятный график движения. */}
-    <text x="13" y="27" fontSize="7" fontWeight="700" fill="#5579b8">
+    <text x="13" y="27" fontSize="7" fontWeight="700" fill="var(--chertezh-podpis)">
       s
     </text>
-    <text x="106" y="108" fontSize="7" fontWeight="700" fill="#5579b8">
+    <text x="106" y="108" fontSize="7" fontWeight="700" fill="var(--chertezh-podpis)">
       t
     </text>
     <path
       d="M31 31v5m-2.5-2.5h5M98 39v4m-2-2h4"
-      stroke="#e9a351"
+      stroke="var(--chertezh-akcent)"
       strokeWidth="1.8"
       strokeLinecap="round"
     />

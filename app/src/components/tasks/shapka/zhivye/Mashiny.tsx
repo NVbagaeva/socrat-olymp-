@@ -55,8 +55,8 @@ function naDoroge(q: number): { p: Tochka; ugol: number } {
 
 function Mashina({ q, nazad, ton }: { q: number; nazad: boolean; ton: 'blue' | 'or' }) {
   const { p, ugol } = naDoroge(q);
-  const kuzov = ton === 'blue' ? '#5b8ff0' : '#f08a2c';
-  const kray = ton === 'blue' ? '#2a5fc4' : '#c2621a';
+  const kuzov = ton === 'blue' ? 'var(--chertezh-setka)' : 'var(--chertezh-akcent)';
+  const kray = ton === 'blue' ? 'var(--chertezh-siniy)' : 'var(--chertezh-akcent-tekst)';
   return (
     <g transform={`translate(${p[0]} ${p[1]}) rotate(${ugol + (nazad ? 180 : 0)})`}>
       <rect
@@ -69,9 +69,16 @@ function Mashina({ q, nazad, ton }: { q: number; nazad: boolean; ton: 'blue' | '
         stroke={kray}
         strokeWidth={1.2}
       />
-      <rect x={-3} y={-5} width={8} height={10} rx={2.5} fill="rgb(235 245 255 / 0.9)" />
-      <circle cx={10} cy={-4} r={1.4} fill="#fff6d6" />
-      <circle cx={10} cy={4} r={1.4} fill="#fff6d6" />
+      <rect
+        x={-3}
+        y={-5}
+        width={8}
+        height={10}
+        rx={2.5}
+        fill="color-mix(in srgb, var(--chertezh-goluboy-svet) 90%, transparent)"
+      />
+      <circle cx={10} cy={-4} r={1.4} fill="var(--chertezh-akcent-zalivka)" />
+      <circle cx={10} cy={4} r={1.4} fill="var(--chertezh-akcent-zalivka)" />
     </g>
   );
 }
@@ -158,7 +165,7 @@ export default function Mashiny({ label, tiho, avtofokus }: ZhivoyProps) {
       </span>
       <Begunki>
         <Begunok
-          podpis={<span style={{ color: '#2a5fc4' }}>v₁</span>}
+          podpis={<span style={{ color: 'var(--chertezh-siniy)' }}>v₁</span>}
           min={40}
           max={100}
           shag={5}
@@ -167,7 +174,7 @@ export default function Mashiny({ label, tiho, avtofokus }: ZhivoyProps) {
           menyat={skorost(setV1)}
         />
         <Begunok
-          podpis={<span style={{ color: '#c2621a' }}>v₂</span>}
+          podpis={<span style={{ color: 'var(--chertezh-akcent-tekst)' }}>v₂</span>}
           min={40}
           max={100}
           shag={5}

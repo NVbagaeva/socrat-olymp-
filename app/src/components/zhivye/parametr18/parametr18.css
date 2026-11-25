@@ -24,8 +24,8 @@
   position: relative;
   height: 30px;
   border-radius: 10px;
-  background: rgba(31, 95, 208, 0.06);
-  box-shadow: inset 0 1px 2px rgba(18, 48, 110, 0.12);
+  background: color-mix(in srgb, var(--chertezh-siniy) 6%, transparent);
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--chertezh-liniya) 12%, transparent);
 }
 .zv18-kusok {
   position: absolute;
@@ -50,35 +50,35 @@
   top: 50%;
   left: calc(var(--vidno) * 50%);
   transform: translate(-50%, -50%);
-  color: #fff;
+  color: var(--chertezh-fon);
   font-size: 13px;
   font-weight: 750;
 }
 .zv18-kusok.is-n0 {
-  --zv18-c: #9aa6bd;
+  --zv18-c: var(--chertezh-setka);
 }
 .zv18-kusok.is-n1,
 .zv18-tochka.is-n1 {
-  --zv18-c: #1f5fd0;
+  --zv18-c: var(--chertezh-siniy);
 }
 .zv18-kusok.is-n2,
 .zv18-tochka.is-n2 {
-  --zv18-c: #f08a24;
+  --zv18-c: var(--chertezh-akcent);
 }
 .zv18-kusok.is-n3,
 .zv18-tochka.is-n3 {
-  --zv18-c: #0f9d6b;
+  --zv18-c: var(--color-uspeh);
 }
 .zv18-kusok.is-n4,
 .zv18-tochka.is-n4 {
-  --zv18-c: #7a4fd0;
+  --zv18-c: var(--color-spr-pri);
 }
 .zv18-kusok.is-ninf,
 .zv18-tochka.is-ninf {
-  --zv18-c: #12306e;
+  --zv18-c: var(--chertezh-liniya);
 }
 .zv18-tochka.is-n0 {
-  --zv18-c: #9aa6bd;
+  --zv18-c: var(--chertezh-setka);
 }
 .zv18-tochka {
   position: absolute;
@@ -93,9 +93,9 @@
   border-radius: 50%;
   background: var(--zv18-c);
   box-shadow:
-    0 0 0 2px #fff,
-    0 0 8px rgba(18, 48, 110, 0.4);
-  color: #fff;
+    0 0 0 2px var(--chertezh-fon),
+    0 0 8px color-mix(in srgb, var(--chertezh-liniya) 40%, transparent);
+  color: var(--chertezh-fon);
   font-size: 13px;
   font-style: normal;
   font-weight: 750;
@@ -109,8 +109,8 @@
   width: 3px;
   margin-left: -1.5px;
   border-radius: 2px;
-  background: #12306e;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+  background: var(--chertezh-liniya);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--chertezh-fon) 80%, transparent);
 }
 .zv18-osi {
   position: relative;
@@ -150,16 +150,16 @@
   padding: 0 var(--space-3);
   border: 0;
   border-radius: 999px;
-  background: rgba(31, 95, 208, 0.08);
+  background: color-mix(in srgb, var(--chertezh-siniy) 8%, transparent);
   color: var(--blue-700);
   font: inherit;
   font-size: 15px;
   cursor: pointer;
 }
 .zv18-osobye button.is-on {
-  background: #fff4e6;
+  background: var(--chertezh-akcent-zalivka);
   color: var(--zv-zhar-text);
-  box-shadow: 0 0 0 1px rgba(240, 138, 36, 0.5);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--chertezh-akcent) 50%, transparent);
 }
 .zv18-osobye button:focus-visible {
   outline: 2px solid var(--blue-600);

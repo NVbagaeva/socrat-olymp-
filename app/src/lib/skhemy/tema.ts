@@ -52,15 +52,15 @@
 /** Цвета темы: фирменные (на экране и в цветном PDF). */
 export const TEMA_CVET = {
   /** Контуры фигур. */
-  navy: '#0E2350',
+  navy: 'var(--chertezh-tekst, #0E2350)',
   /** Вершины и точки — единственный синий на чертеже. */
-  vershina: '#1F5FD0',
+  vershina: 'var(--chertezh-siniy, #1F5FD0)',
   /** Величины (числа и выражения), первая переменная (x, a), угол, площадь. */
-  velichina: '#E07A2F',
+  velichina: 'var(--chertezh-akcent, #E07A2F)',
   /** Вторая переменная (y, b): янтарь палитры сайта (--amber-700), 4,9 : 1. */
-  velichina2: '#A85F06',
+  velichina2: 'var(--chertezh-akcent-tekst, #A85F06)',
   /** Построения: серо-синий. */
-  postroenie: '#6B7A99',
+  postroenie: 'var(--chertezh-podpis, #6B7A99)',
 } as const;
 
 /** Подписи вершин: на 12 % крупнее прежних 17 px, полужирный курсив. */
@@ -76,13 +76,13 @@ export const KEGL_VELICHINY = 19;
 /** Заливки: непрозрачные тона (цвет, смешанный с белым). */
 export const TEMA_ZALIVKI = {
   /** Основная фигура: светлый голубой тон сайта. */
-  figura: '#EAF1FC',
+  figura: 'var(--chertezh-zalivka-svet, #EAF1FC)',
   /** Данная площадь: светлый тёплый тон. */
-  dano: '#FCEBDD',
+  dano: 'var(--chertezh-akcent-zalivka, #FCEBDD)',
   /** Искомая площадь: насыщенный оранжевый тон. */
-  iskomaya: '#F6BC8C',
+  iskomaya: 'var(--chertezh-akcent-svet, #F6BC8C)',
   /** Сектор угла. */
-  ugol: '#F9D6BB',
+  ugol: 'var(--chertezh-akcent-svet, #F9D6BB)',
 } as const;
 
 /** Узор штриховки 45° для искомой площади в ч/б: шаг 6 px. */

@@ -109,7 +109,9 @@ const ZHURNAL_RAZDELY = (process.env.NEXT_PUBLIC_ZHURNAL_RAZDELY || '5,8').split
 /* Сборка с новой выдачей ДЗ (NEXT_PUBLIC_DZ2=1). */
 const DZ2_ON = process.env.NEXT_PUBLIC_DZ2 === '1';
 /* Разделы выдачи на этой сборке (этап 4): сценарий №4 и теории — при 4 и 9. */
-const DZ2_RAZDELY = (process.env.NEXT_PUBLIC_DZ2_RAZDELY || '5,8').split(',').map((x) => Number(x.trim()));
+const DZ2_RAZDELY = (process.env.NEXT_PUBLIC_DZ2_RAZDELY || '5,8')
+  .split(',')
+  .map((x) => Number(x.trim()));
 const UVED_ON = process.env.NEXT_PUBLIC_UVEDOMLENIYA === '1';
 /* Сборка с push (NEXT_PUBLIC_UVEDOMLENIYA_PUSH=1, PR 3г). */
 const PUSH_ON = UVED_ON && process.env.NEXT_PUBLIC_UVEDOMLENIYA_PUSH === '1';
@@ -261,7 +263,10 @@ function makeMock() {
   const uvedFlag = { kanaly: [] };
   /* Push (PR 3г): подписки, как push_subscriptions; ключ VAPID, как push_klyuch. */
   const pushSubs = []; // { user_id, endpoint, p256dh, auth }
-  const pushState = { klyuch: 'BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4' };
+  const pushState = {
+    klyuch:
+      'BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4',
+  };
   let uvedSeq = 0;
   const uvedDobavit = (user_id, event, homework_id, payload = {}) =>
     uved.push({
@@ -588,22 +593,37 @@ function makeMock() {
       const PUSH_RPC = ['push_klyuch', 'push_podpisat', 'push_otpisat', 'moi_push'];
       if (PUSH_RPC.includes(rpcName) && method === 'POST') {
         const ok = (b) => ({ status: 200, body: b });
-        const pg = (message) => ({ status: 400, body: { code: '23514', message, details: null, hint: null } });
+        const pg = (message) => ({
+          status: 400,
+          body: { code: '23514', message, details: null, hint: null },
+        });
         const vkl = uvedFlag.kanaly.includes('push');
         if (rpcName === 'push_klyuch') return ok(vkl ? pushState.klyuch : null);
         if (rpcName === 'moi_push') return ok(pushSubs.filter((x) => x.user_id === me.id).length);
         if (rpcName === 'push_otpisat') {
-          const i = pushSubs.findIndex((x) => x.endpoint === body.p_endpoint && x.user_id === me.id);
+          const i = pushSubs.findIndex(
+            (x) => x.endpoint === body.p_endpoint && x.user_id === me.id,
+          );
           if (i >= 0) pushSubs.splice(i, 1);
           return ok(i >= 0);
         }
         if (!vkl) return pg('push_off');
-        if (!/^https:\/\/(fcm\.googleapis\.com|web\.push\.apple\.com|updates\.push\.services\.mozilla\.com)\//.test(body.p_endpoint ?? '')) {
+        if (
+          !/^https:\/\/(fcm\.googleapis\.com|web\.push\.apple\.com|updates\.push\.services\.mozilla\.com)\//.test(
+            body.p_endpoint ?? '',
+          )
+        ) {
           return pg('bad_endpoint');
         }
         const old = pushSubs.find((x) => x.endpoint === body.p_endpoint);
         if (old) Object.assign(old, { user_id: me.id, p256dh: body.p_p256dh, auth: body.p_auth });
-        else pushSubs.push({ user_id: me.id, endpoint: body.p_endpoint, p256dh: body.p_p256dh, auth: body.p_auth });
+        else
+          pushSubs.push({
+            user_id: me.id,
+            endpoint: body.p_endpoint,
+            p256dh: body.p_p256dh,
+            auth: body.p_auth,
+          });
         return ok(pushSubs.filter((x) => x.user_id === me.id).length);
       }
       /* Уведомления (PR 3б): только свои строки, как функции базы. */
@@ -1594,7 +1614,9 @@ async function phoneHead(page) {
     return {
       login: box(login),
       loginText: login?.innerText.trim() ?? null,
-      loginIcon: login?.querySelector('svg, .auth-login__ico') !== null && login !== null,
+      /* Значок есть в разметке, но в публичной шапке без переключателя
+         темы скрыт — считается только видимый. */
+      loginIcon: box(login?.querySelector('.auth-login__ico') ?? null) !== null,
       burger: box(q('.site-head .burger')),
       startVisible: box(q('.site-head .site-head__start')) !== null,
       logo: box(logo),
@@ -1752,7 +1774,7 @@ async function runEnabled() {
       'главная: «Начать бесплатно» ведёт на регистрацию',
     );
     check(
-      (await page.locator('.site-head .auth-login__ico').count()) === 0,
+      !(await page.locator('.site-head .auth-login__ico').isVisible()),
       'главная 1440: у «Войти» нет значка-дубля',
     );
     check(
@@ -3889,7 +3911,9 @@ async function runDz2Etap4(mock, errors, snap) {
       for (const k of Object.keys(localStorage)) if (k.includes('dz2')) localStorage.removeItem(k);
     });
 
-    await page.goto(`${SITE}/zadaniya/veroyatnost/opornye-zadachi/${blok4.id}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/zadaniya/veroyatnost/opornye-zadachi/${blok4.id}/`, {
+      waitUntil: 'networkidle',
+    });
     await page.locator('.dz2-ryad .dz2-knopka__glavnaya').click();
     await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
     await snap(page, 'opornye4', width);
@@ -3898,19 +3922,29 @@ async function runDz2Etap4(mock, errors, snap) {
     await page.waitForSelector('.vteor-razdel .dz2-knopka__glavnaya');
     const glavy = await page.locator('.vteor-razdel:not(.is-skoro)').count();
     const knopki = await page.locator('.vteor-razdel .dz2-knopka__glavnaya').count();
-    check(knopki > 0 && knopki <= glavy, `ДЗ 4а ${width}: у глав теории №9 кнопки (${knopki} из ${glavy})`);
-    const pervaya = page.locator('.vteor-razdel').filter({ has: page.locator('.dz2-knopka__glavnaya') }).first();
+    check(
+      knopki > 0 && knopki <= glavy,
+      `ДЗ 4а ${width}: у глав теории №9 кнопки (${knopki} из ${glavy})`,
+    );
+    const pervaya = page
+      .locator('.vteor-razdel')
+      .filter({ has: page.locator('.dz2-knopka__glavnaya') })
+      .first();
     const glavaId = (await pervaya.getAttribute('id')).replace(/^teoriya-/, '');
     await pervaya.locator('.dz2-knopka__glavnaya').click();
     await pervaya.locator('.dz2-knopka__glavnaya[aria-pressed="true"]').waitFor();
     check(await noHorizontalScroll(page), `ДЗ 4а ${width}: теория №9 без горизонтальной прокрутки`);
     if (SHOTS !== null) {
       /* Теория длинная: снимок — экран у первой главы с кнопкой, а не вся страница. */
-      await pervaya.locator('.vteor-razdel__title').evaluate((el) => el.scrollIntoView({ block: 'start' }));
+      await pervaya
+        .locator('.vteor-razdel__title')
+        .evaluate((el) => el.scrollIntoView({ block: 'start' }));
       await page.evaluate(() => window.scrollBy(0, -90));
       await page.evaluate(() => document.fonts.ready);
-      await page.screenshot({ path: path.join(SHOTS, `dz2-teoriya9-${width}.png`),
-        style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+      await page.screenshot({
+        path: path.join(SHOTS, `dz2-teoriya9-${width}.png`),
+        style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+      });
     }
 
     /* Раздел вне выдачи на этой сборке: первый из №10, №21, №7, которого нет в списке. */
@@ -3924,19 +3958,24 @@ async function runDz2Etap4(mock, errors, snap) {
     }
 
     const korz = await page.evaluate(() => {
-      for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
+      for (const k of Object.keys(localStorage))
+        if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
       return null;
     });
     const el = JSON.parse(korz ?? '{}').elementy ?? [];
     const op4 = el.find((e) => e.key === `opornye:4:${blok4.id}`);
     const t9 = el.find((e) => e.key === `teoriya:9:${glavaId}`);
     check(
-      op4 !== undefined && op4.task_no === 4 && op4.tasks.length > 0 &&
+      op4 !== undefined &&
+        op4.task_no === 4 &&
+        op4.tasks.length > 0 &&
         op4.tasks.every((t) => NORM.test(t.answer) && t.level === 1),
       `ДЗ 4а ${width}: опорные №4 в корзине, ответы и базовая сложность (${op4?.tasks?.length})`,
     );
-    check(t9 !== undefined && t9.vid === 'teoriya' && t9.task_no === 9 && t9.spec.glava === glavaId,
-      `ДЗ 4а ${width}: глава теории №9 в корзине`);
+    check(
+      t9 !== undefined && t9.vid === 'teoriya' && t9.task_no === 9 && t9.spec.glava === glavaId,
+      `ДЗ 4а ${width}: глава теории №9 в корзине`,
+    );
     await context.close();
   }
 
@@ -3945,7 +3984,10 @@ async function runDz2Etap4(mock, errors, snap) {
   await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
   await page.goto(`${SITE}/zadaniya/proizvodnaya/teoriya/`, { waitUntil: 'networkidle' });
   await page.waitForSelector('.vteor-razdel');
-  check((await page.locator('.dz2-knopka').count()) === 0, 'ДЗ 4а: ученик не видит «В домашку» у теории');
+  check(
+    (await page.locator('.dz2-knopka').count()) === 0,
+    'ДЗ 4а: ученик не видит «В домашку» у теории',
+  );
   await context.close();
 }
 
@@ -4603,7 +4645,9 @@ async function runUvedomleniya() {
 function pushBrauzer({ permission = 'default', otvet = 'granted', est = true } = {}) {
   return ({ permission: perm0, otvet: otv, est: e }) => {
     if (!e) {
-      try { delete window.PushManager; } catch {}
+      try {
+        delete window.PushManager;
+      } catch {}
       Object.defineProperty(window, 'PushManager', { value: undefined, configurable: true });
       Object.defineProperty(window, 'Notification', { value: undefined, configurable: true });
       return;
@@ -4611,37 +4655,70 @@ function pushBrauzer({ permission = 'default', otvet = 'granted', est = true } =
     /* Подписка и разрешение переживают перезагрузку, как у браузера. */
     const hran = JSON.parse(localStorage.getItem('__push') || 'null');
     const st = { perm: hran?.perm ?? perm0, sub: null, reg: hran?.reg ?? false, registered: [] };
-    const sohr = () => localStorage.setItem('__push', JSON.stringify({ perm: st.perm, reg: st.reg, endpoint: st.sub?.endpoint ?? null }));
+    const sohr = () =>
+      localStorage.setItem(
+        '__push',
+        JSON.stringify({ perm: st.perm, reg: st.reg, endpoint: st.sub?.endpoint ?? null }),
+      );
     const sdelat = (endpoint) => ({
       endpoint,
       toJSON: () => ({ endpoint, keys: { p256dh: 'B' + 'x'.repeat(86), auth: 'y'.repeat(22) } }),
-      unsubscribe: async () => { st.sub = null; sohr(); return true; },
+      unsubscribe: async () => {
+        st.sub = null;
+        sohr();
+        return true;
+      },
     });
     if (hran?.endpoint) st.sub = sdelat(hran.endpoint);
     window.__push = st;
     class FakeNotification {
-      static get permission() { return st.perm; }
-      static async requestPermission() { st.perm = otv; sohr(); return otv; }
+      static get permission() {
+        return st.perm;
+      }
+      static async requestPermission() {
+        st.perm = otv;
+        sohr();
+        return otv;
+      }
     }
     Object.defineProperty(window, 'Notification', { value: FakeNotification, configurable: true });
-    Object.defineProperty(window, 'PushManager', { value: function PushManager() {}, configurable: true });
+    Object.defineProperty(window, 'PushManager', {
+      value: function PushManager() {},
+      configurable: true,
+    });
     const pushManager = {
-      async getSubscription() { return st.sub; },
+      async getSubscription() {
+        return st.sub;
+      },
       async subscribe(opts) {
         const key = new Uint8Array(opts.applicationServerKey);
         st.klyuchDlina = key.length;
-        st.sub = sdelat('https://fcm.googleapis.com/fcm/send/fake-' + Math.random().toString(36).slice(2));
+        st.sub = sdelat(
+          'https://fcm.googleapis.com/fcm/send/fake-' + Math.random().toString(36).slice(2),
+        );
         sohr();
         return st.sub;
       },
     };
     const reg = { pushManager };
     const sw = {
-      async register(url, o) { st.reg = true; st.registered.push([url, o?.scope]); sohr(); return reg; },
-      get ready() { return Promise.resolve(reg); },
-      async getRegistration() { return st.reg ? reg : undefined; },
+      async register(url, o) {
+        st.reg = true;
+        st.registered.push([url, o?.scope]);
+        sohr();
+        return reg;
+      },
+      get ready() {
+        return Promise.resolve(reg);
+      },
+      async getRegistration() {
+        return st.reg ? reg : undefined;
+      },
     };
-    Object.defineProperty(Navigator.prototype, 'serviceWorker', { get: () => sw, configurable: true });
+    Object.defineProperty(Navigator.prototype, 'serviceWorker', {
+      get: () => sw,
+      configurable: true,
+    });
   };
 }
 
@@ -4650,23 +4727,43 @@ async function runPushNaUstroystve(mock, anya, snap, errors) {
   for (const width of [375, 1280]) {
     mock.pushSubs.length = 0;
     const { context, page } = await newPage(mock, width, errors);
-    await context.addInitScript(pushBrauzer(), { permission: 'default', otvet: 'granted', est: true });
+    await context.addInitScript(pushBrauzer(), {
+      permission: 'default',
+      otvet: 'granted',
+      est: true,
+    });
     await welcomeSeen(context);
     await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
-    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('.uved-push[data-push="vykl"]');
-    check(await page.locator('input[aria-label="Новое ДЗ: Push"]').isVisible(), `Push ${width}: столбец «Push» в таблице`);
+    check(
+      await page.locator('input[aria-label="Новое ДЗ: Push"]').isVisible(),
+      `Push ${width}: столбец «Push» в таблице`,
+    );
     await snap(page, 'push-vykl', width);
     await page.locator('.uved-push button:has-text("Включить на этом устройстве")').click();
     await page.waitForSelector('.uved-push[data-push="vkl"]');
     const reg = await page.evaluate(() => window.__push);
-    check(reg.registered.length === 1 && reg.registered[0][0] === '/sw.js' && reg.registered[0][1] === '/',
-      `Push ${width}: service worker /sw.js — только по кнопке`);
+    check(
+      reg.registered.length === 1 &&
+        reg.registered[0][0] === '/sw.js' &&
+        reg.registered[0][1] === '/',
+      `Push ${width}: service worker /sw.js — только по кнопке`,
+    );
     check(reg.klyuchDlina === 65, `Push ${width}: ключ VAPID передан браузеру (65 байт)`);
-    check(mock.pushSubs.length === 1 && mock.pushSubs[0].user_id === anya.id &&
-      mock.pushSubs[0].endpoint.startsWith('https://fcm.googleapis.com/') && mock.pushSubs[0].auth === 'y'.repeat(22),
-    `Push ${width}: подписка записана в базу на вошедшего`);
-    check((await page.locator('.uved-push').textContent()).includes('включён'), `Push ${width}: «включён»`);
+    check(
+      mock.pushSubs.length === 1 &&
+        mock.pushSubs[0].user_id === anya.id &&
+        mock.pushSubs[0].endpoint.startsWith('https://fcm.googleapis.com/') &&
+        mock.pushSubs[0].auth === 'y'.repeat(22),
+      `Push ${width}: подписка записана в базу на вошедшего`,
+    );
+    check(
+      (await page.locator('.uved-push').textContent()).includes('включён'),
+      `Push ${width}: «включён»`,
+    );
     await snap(page, 'push-vkl', width);
     /* Перезагрузка: включено, подписка не задвоилась. */
     await page.reload({ waitUntil: 'networkidle' });
@@ -4681,15 +4778,23 @@ async function runPushNaUstroystve(mock, anya, snap, errors) {
   /* Браузер не разрешил — пояснение, подписки нет. */
   {
     const { context, page } = await newPage(mock, 375, errors);
-    await context.addInitScript(pushBrauzer(), { permission: 'default', otvet: 'denied', est: true });
+    await context.addInitScript(pushBrauzer(), {
+      permission: 'default',
+      otvet: 'denied',
+      est: true,
+    });
     await welcomeSeen(context);
     await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
-    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('.uved-push[data-push="vykl"]');
     await page.locator('.uved-push button:has-text("Включить на этом устройстве")').click();
     await page.waitForSelector('.uved-push[data-push="zapret"]');
-    check((await page.locator('.uved-push').textContent()).includes('запрещены в настройках браузера'),
-      'Push: отказ браузера — как разрешить');
+    check(
+      (await page.locator('.uved-push').textContent()).includes('запрещены в настройках браузера'),
+      'Push: отказ браузера — как разрешить',
+    );
     check(mock.pushSubs.length === 0, 'Push: без разрешения подписки нет');
     await snap(page, 'push-zapret', 375);
     await context.close();
@@ -4700,14 +4805,23 @@ async function runPushNaUstroystve(mock, anya, snap, errors) {
     const klyuch = mock.pushState.klyuch;
     mock.pushState.klyuch = null;
     const { context, page } = await newPage(mock, 375, errors);
-    await context.addInitScript(pushBrauzer(), { permission: 'default', otvet: 'granted', est: true });
+    await context.addInitScript(pushBrauzer(), {
+      permission: 'default',
+      otvet: 'granted',
+      est: true,
+    });
     await welcomeSeen(context);
     await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
-    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('.uved-push[data-push="vykl"]');
     await page.locator('.uved-push button:has-text("Включить на этом устройстве")').click();
     await page.waitForSelector('.uved-push .field-message, .uved-push [role="alert"]');
-    check((await page.locator('.uved-push').textContent()).includes('ещё не готов'), 'Push: нет ключа — «ещё не готов»');
+    check(
+      (await page.locator('.uved-push').textContent()).includes('ещё не готов'),
+      'Push: нет ключа — «ещё не готов»',
+    );
     mock.pushState.klyuch = klyuch;
     await context.close();
   }
@@ -4718,20 +4832,35 @@ async function runPushNaUstroystve(mock, anya, snap, errors) {
       viewport: { width: 375, height: 844 },
       deviceScaleFactor: 1,
       hasTouch: true,
-      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+      userAgent:
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
     });
     await installMock(context, mock);
-    await context.addInitScript(pushBrauzer(), { permission: 'default', otvet: 'granted', est: false });
+    await context.addInitScript(pushBrauzer(), {
+      permission: 'default',
+      otvet: 'granted',
+      est: false,
+    });
     const page = await context.newPage();
     watchConsole(page, errors);
     await welcomeSeen(context);
     await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
-    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('.uved-push[data-push="ios"]');
-    check((await page.locator('.uved-push').textContent()).includes('На экран „Домой“'), 'Push: iPhone — инструкция');
-    check((await page.locator('.uved-push button').count()) === 0, 'Push: iPhone в Safari — без кнопки');
-    check((await page.locator('link[rel="manifest"]').getAttribute('href')) === '/manifest.webmanifest',
-      'Push: manifest для экрана «Домой» подключён');
+    check(
+      (await page.locator('.uved-push').textContent()).includes('На экран „Домой“'),
+      'Push: iPhone — инструкция',
+    );
+    check(
+      (await page.locator('.uved-push button').count()) === 0,
+      'Push: iPhone в Safari — без кнопки',
+    );
+    check(
+      (await page.locator('link[rel="manifest"]').getAttribute('href')) === '/manifest.webmanifest',
+      'Push: manifest для экрана «Домой» подключён',
+    );
     await snap(page, 'push-ios', 375);
     await context.close();
   }
@@ -4742,7 +4871,9 @@ async function runPushNaUstroystve(mock, anya, snap, errors) {
     const { context, page } = await newPage(mock, 375, errors);
     await welcomeSeen(context);
     await login(page, 'zhurnal@yandex.ru', 'zhurnal-parol-1');
-    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE}/kabinet/uvedomleniya/?vkladka=nastroyki`, {
+      waitUntil: 'networkidle',
+    });
     await page.waitForSelector('.uved-tablica');
     check((await page.locator('.uved-push').count()) === 0, 'Push: без "push" в каналах блока нет');
     await context.close();

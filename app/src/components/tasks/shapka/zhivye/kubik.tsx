@@ -182,14 +182,14 @@ export function Kubik({ b, ugly, m, c, pod = 0, podsvetka = null, bukvaP = false
                   ? `rgb(255 ${170 + s * 40} ${100 + s * 40} / 0.55)`
                   : `rgb(${170 + s * 70} ${200 + s * 45} 250 / 0.55)`
               }
-              stroke={or ? '#f08a2c' : 'var(--blue-600)'}
+              stroke={or ? 'var(--chertezh-akcent)' : 'var(--blue-600)'}
               strokeWidth={or ? 2.4 : 1.8}
               strokeLinejoin="round"
             />
             <path
               d={put(ugolki(g, 0.86))}
               fill="none"
-              stroke="rgb(255 255 255 / 0.7)"
+              stroke="color-mix(in srgb, var(--chertezh-blik) 70%, transparent)"
               strokeWidth={1}
             />
             {bukvaP && g.znachenie === 5 ? (
@@ -211,7 +211,7 @@ export function Kubik({ b, ugly, m, c, pod = 0, podsvetka = null, bukvaP = false
               <path
                 key={i}
                 d={krug(g, t)}
-                fill={or ? '#e07a2f' : 'var(--blue-600)'}
+                fill={or ? 'var(--chertezh-akcent)' : 'var(--blue-600)'}
                 opacity={0.9}
               />
             ))}

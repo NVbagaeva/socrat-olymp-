@@ -55,8 +55,8 @@ import './vstrecha.css';
  */
 
 const T = VSTRECHA11;
-const SIN = '#1f5fd0';
-const TERRA = '#c4553a';
+const SIN = 'var(--chertezh-siniy)';
+const TERRA = 'var(--chertezh-akcent)';
 /** Шаг фигурки, px пути на полшага. */
 const POLSHAGA = 17;
 /** Конфетти: длительность, с, и число стеклянных частиц. */
@@ -929,13 +929,13 @@ function ScenaSvg({
     >
       <defs>
         <linearGradient id={`${id}-lenta`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="0.55" stopColor="#e6eefc" stopOpacity="0.85" />
-          <stop offset="1" stopColor="#c9d8f4" stopOpacity="0.9" />
+          <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.95" />
+          <stop offset="0.55" stopColor="var(--chertezh-zalivka-svet)" stopOpacity="0.85" />
+          <stop offset="1" stopColor="var(--chertezh-zalivka-siniy)" stopOpacity="0.9" />
         </linearGradient>
         <radialGradient id={`${id}-pol`}>
-          <stop offset="0" stopColor="#1f5fd0" stopOpacity="0.16" />
-          <stop offset="1" stopColor="#1f5fd0" stopOpacity="0" />
+          <stop offset="0" stopColor="var(--chertezh-siniy)" stopOpacity="0.16" />
+          <stop offset="1" stopColor="var(--chertezh-siniy)" stopOpacity="0" />
         </radialGradient>
         <linearGradient
           id={`${id}-sled1`}
@@ -963,13 +963,13 @@ function ScenaSvg({
           <feGaussianBlur stdDeviation="2.6" />
         </filter>
         <radialGradient id={`${id}-vspyshka`}>
-          <stop offset="0" stopColor="#fff4d6" stopOpacity="1" />
-          <stop offset="0.4" stopColor="#ffd27a" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#ffd27a" stopOpacity="0" />
+          <stop offset="0" stopColor="var(--chertezh-akcent-zalivka)" stopOpacity="1" />
+          <stop offset="0.4" stopColor="var(--chertezh-zoloto)" stopOpacity="0.55" />
+          <stop offset="1" stopColor="var(--chertezh-zoloto)" stopOpacity="0" />
         </radialGradient>
         <linearGradient id={`${id}-flag`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ffc35a" />
-          <stop offset="1" stopColor="#f08a24" />
+          <stop offset="0" stopColor="var(--chertezh-zoloto)" />
+          <stop offset="1" stopColor="var(--chertezh-akcent)" />
         </linearGradient>
       </defs>
 
