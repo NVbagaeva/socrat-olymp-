@@ -28,3 +28,5 @@ supabase/migrations/20261123120000_dz2.sql
 supabase/migrations/20261124120000_dz2_chernovik.sql
 supabase/migrations/20261125120000_uvedomleniya.sql
 supabase/migrations/20261126120000_uvedomleniya_pochta.sql
+supabase/migrations/20261127120000_uvedomleniya_push.sql
+supabase/migrations/20261122130000_avatar_profiles.sql

@@ -305,7 +305,7 @@ math-field.c2-math::part(menu-toggle) {
 }
 .c2-krit__ball.is-on {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .c2-krit__table {
@@ -798,7 +798,7 @@ math-field.c2-math::part(menu-toggle) {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--color-accent-text, #a5481a);
+  color: var(--color-accent-text);
   font: inherit;
   text-align: inherit;
   text-decoration: underline dotted;
@@ -846,12 +846,12 @@ math-field.c2-math::part(menu-toggle) {
 }
 .vo-strip__label {
   font-size: 0.75rem;
-  color: var(--color-text-secondary, #666);
+  color: var(--color-text-secondary);
 }
 .vo-strip__sep {
   align-self: stretch;
   width: 1px;
-  background: var(--color-border, #ccc);
+  background: var(--color-border);
 }
 .vo-strip--parts {
   display: flex;

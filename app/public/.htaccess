@@ -17,6 +17,16 @@
   </FilesMatch>
 </IfModule>
 
+# Service worker push (docs/kabinet-uvedomleniya.md, PR 3г) и manifest:
+# имя постоянное, поэтому тоже перепроверять всегда — иначе исправление
+# в sw.js доходило бы до браузеров через сутки.
+<IfModule mod_headers.c>
+  <FilesMatch "^(sw\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+AddType application/manifest+json .webmanifest
+
 # ── Скрытые разделы: посетителю — 404 ───────────────────────────────
 #
 # Раздел, которого нет в действующей структуре экзамена

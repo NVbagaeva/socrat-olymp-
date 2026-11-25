@@ -9,11 +9,11 @@
   },
   "scripts": {
     "predev": "node scripts/build-kartochki.mjs",
-    "dev": "next dev",
+    "dev": "node scripts/next-cli.mjs dev",
     "prebuild": "node scripts/build-kartochki.mjs && node scripts/audit-planimetry-hints.mjs --check",
-    "build": "NODE_OPTIONS=--max-old-space-size=6144 next build",
+    "build": "NODE_OPTIONS=--max-old-space-size=6144 node scripts/next-cli.mjs build",
     "postbuild": "node scripts/build-skrytye.mjs && node scripts/build-sitemap.mjs",
-    "start": "next start",
+    "start": "node scripts/next-cli.mjs start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
@@ -26,6 +26,7 @@
     "record:intro": "node scripts/record-intro.mjs",
     "build:razdely": "node scripts/build-razdely-icons.mjs",
     "build:shapka": "node scripts/build-shapka.mjs",
+    "build:kak-polzovatsya": "node scripts/build-kak-polzovatsya-kartinki.mjs",
     "validate:graph": "node scripts/validate-graph.mjs",
     "build:graph-answers": "node scripts/build-graph-answers.mjs",
     "build:pereezd": "node scripts/build-pereezd.mjs",
@@ -219,6 +220,7 @@
     "build:tarify-teksty": "node scripts/build-tarify-teksty.mjs",
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
     "test:links": "node scripts/check-links.mjs",
+    "test:kak-polzovatsya": "node scripts/check-kak-polzovatsya.mjs",
     "test:zhivye": "node scripts/check-zhivye.mjs",
     "test:baza": "node scripts/check-baza.mjs && node scripts/build-bank-baza.mjs --check",
     "build:bank-baza": "node scripts/build-bank-baza.mjs",
@@ -281,7 +283,9 @@
     "test:z8-uchenik": "node scripts/check-z8-uchenik.mjs",
     "build:kartochki": "node scripts/build-kartochki.mjs",
     "test:kartochki": "node scripts/verify_cards/index.mjs",
-    "build:variant-images": "node scripts/build-variant-images.mjs"
+    "build:variant-images": "node scripts/build-variant-images.mjs",
+    "test:verhnee-menu": "node scripts/check-verhnee-menu.mjs",
+    "test:tema": "node scripts/check-tema.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
@@ -299,6 +303,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
     "@next/eslint-plugin-next": "15.5.27",
+    "@swc/helpers": "0.5.15",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.20.2",
     "@types/react": "^19.3.0",

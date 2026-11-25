@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 /** Банк заданий базы: тот же экран, что у профиля, со списком 1–21. */
 export default function BazaTasksPage() {
   return (
-    <AppShell active="tasks" search={false} level="base">
+    <AppShell active="tasks" level="base">
       <TaskBank level="base" />
     </AppShell>
   );

@@ -25,13 +25,6 @@
    СТЕКЛО: шапка, подвал, кнопки
    ══════════════════════════════════════════════ */
 
-.glavnaya .site-head--steklo {
-  background: var(--glass-bg-strong);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border-bottom: 0;
-  box-shadow: 0 1px 0 rgb(31 95 208 / 0.08);
-}
 .glavnaya .site-foot--steklo {
   background: var(--glass-bg);
   border-top: 1px solid var(--glass-edge);
@@ -1071,7 +1064,7 @@ section.band {
     inset 0 -1px 0 rgb(200 70 0 / 0.18),
     0 0 36px -10px rgb(251 140 60 / 0.55),
     0 18px 36px -18px rgb(234 92 10 / 0.45);
-  color: var(--white);
+  color: var(--color-text-inverse);
 }
 .bank-razd__blik {
   position: absolute;
@@ -1095,7 +1088,7 @@ section.band {
   line-height: 1.15;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--white);
+  color: var(--color-text-inverse);
 }
 .bank-razd__schet {
   display: inline-block;
@@ -1118,7 +1111,7 @@ section.band {
   white-space: nowrap;
 }
 .bank-razd :focus-visible {
-  outline-color: var(--white);
+  outline-color: var(--color-surface);
 }
 
 @media (max-width: 760px) {

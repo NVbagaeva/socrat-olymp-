@@ -180,6 +180,7 @@ export function TeoriyaStereo({ no, vkladka }: { no: StereoNo; vkladka: string }
   const model = THUMBS['thumb-III'];
   const shell = (
     <TeoriyaShell
+      taskNo={Number(no)}
       vkladka={vkladka}
       razdely={glavy.map((glava) => {
         const podpunkty = PODPUNKTY[`${no}:${glava.id}`];

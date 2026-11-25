@@ -10,6 +10,7 @@ import { DZ2 } from '@/content/dz2';
 import type { PrepSealed } from '@/lib/vychisleniya/prep/seal';
 import type { PrepPoolZadacha } from '@/lib/veroyatnost/pool';
 import type { ZadachaDz } from '@/lib/dz2/model';
+import { urovenZadachi } from '@/lib/zhurnal/uroven';
 import { zadachaOpornaya5, zadachaOpornaya8 } from '@/lib/dz2/zadachi';
 import { nomerEgeRazdela } from '@/lib/zhurnal/vid';
 import { VDomashku } from './VDomashku';
@@ -69,7 +70,9 @@ export function VDomashkuOpornye8({
           .map((t) => {
             let razbor = null;
             try {
-              razbor = JSON.parse(openText(t.razbor, t.seal)) as { shagi: { chto: string; tex: string }[] };
+              razbor = JSON.parse(openText(t.razbor, t.seal)) as {
+                shagi: { chto: string; tex: string }[];
+              };
             } catch {
               razbor = null;
             }
@@ -90,30 +93,33 @@ export function VDomashkuOpornye8({
   );
 }
 
-/** Блок опорных №5: задачи банка, ответ и шаги — из закрытого разбора. */
-export function VDomashkuOpornye5({
+/** Блок опорных №4 или №5: задачи банка, ответ и шаги — из закрытого разбора. */
+export function VDomashkuOpornye45({
+  taskNo,
   blok,
   nazvanie,
   zadachi,
 }: {
+  taskNo: 4 | 5;
   blok: string;
   nazvanie: string;
   zadachi: readonly PrepPoolZadacha[];
 }) {
   return (
     <VDomashku
-      taskNo={5}
-      klyuch={`opornye:5:${blok}`}
+      taskNo={taskNo}
+      klyuch={`opornye:${taskNo}:${blok}`}
       element={async () => {
         const [{ otkrytRazbor }, { typeset, typesetText }] = await Promise.all([
           import('@/lib/veroyatnost/razbor'),
           import('@/lib/tex'),
         ]);
         const nabor = { tekst: typesetText, formula: (tex: string) => typeset(`$${tex}$`) };
+        const level = urovenZadachi(taskNo);
         const tasks = zadachi
           .map((z) => {
             try {
-              return zadachaOpornaya5(z, otkrytRazbor(z.steps, z.seal), nabor);
+              return zadachaOpornaya5(z, otkrytRazbor(z.steps, z.seal), nabor, level);
             } catch {
               return null;
             }
@@ -121,10 +127,10 @@ export function VDomashkuOpornye5({
           .filter((z): z is ZadachaDz => z !== null);
         if (tasks.length === 0) throw new Error('pusto');
         return {
-          key: `opornye:5:${blok}`,
+          key: `opornye:${taskNo}:${blok}`,
           vid: 'opornye',
-          task_no: 5,
-          title: DZ2.elementy.opornye(nomerEgeRazdela(5), nazvanie),
+          task_no: taskNo,
+          title: DZ2.elementy.opornye(nomerEgeRazdela(taskNo), nazvanie),
           spec: { blok },
           tasks,
         };
@@ -151,7 +157,15 @@ export function VDomashkuKartochki({ taskNo, kartochek }: { taskNo: number; kart
 }
 
 /** Глава теории: отметка «прочитано». */
-export function VDomashkuTeoriya({ taskNo, glava, nazvanie }: { taskNo: number; glava: string; nazvanie: string }) {
+export function VDomashkuTeoriya({
+  taskNo,
+  glava,
+  nazvanie,
+}: {
+  taskNo: number;
+  glava: string;
+  nazvanie: string;
+}) {
   return (
     <VDomashku
       taskNo={taskNo}

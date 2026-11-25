@@ -10,7 +10,7 @@
  */
 
 import { OPORNYE } from './opornye';
-import { TUTORS_TAIL, type RazdelTab } from './vkladki';
+import { TUTORS_TAIL, type RazdelTab, TUTORS_LABEL } from './vkladki';
 import type { TutorMaterial } from './sections';
 import { counted } from '@/lib/plural';
 import { taskName } from './tasks';
@@ -73,7 +73,7 @@ const TABS: readonly VeroyatnostTab[] = [
   { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
   { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
-  { id: 'repetitory', label: 'Для репетиторов', tail: TUTORS_TAIL, icon: 'materials' },
+  { id: 'repetitory', label: TUTORS_LABEL, tail: TUTORS_TAIL, icon: 'materials' },
 ];
 const TABS_4 = TABS;
 const TABS_5 = TABS;

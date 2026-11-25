@@ -1,0 +1,75 @@
+/* Переключатель темы в шапке (TemaSwitch.tsx). Стеклянная круглая
+   таблетка; область нажатия 44×44. Цвета — только переменные. */
+.tema-switch {
+  /* Пока тема на проверке: виден только при ?tema=… (lib/tema.ts). */
+  display: none;
+  position: relative;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+}
+html[data-tema-vidna] .tema-switch {
+  display: inline-flex;
+}
+.tema-switch__plate {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+.tema-switch:hover .tema-switch__plate {
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.tema-switch:focus-visible {
+  outline: none;
+}
+.tema-switch:focus-visible .tema-switch__plate {
+  box-shadow:
+    0 0 0 2px var(--color-bg),
+    0 0 0 4px var(--color-primary);
+}
+.tema-switch svg {
+  position: absolute;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    opacity 0.25s ease,
+    transform 0.35s ease;
+}
+.tema-switch__sun circle {
+  fill: currentColor;
+}
+.tema-switch__moon path {
+  fill: currentColor;
+  stroke: none;
+}
+.tema-switch__moon {
+  opacity: 0;
+  transform: rotate(-60deg) scale(0.6);
+}
+.tema-switch[aria-checked='true'] .tema-switch__sun {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
+}
+.tema-switch[aria-checked='true'] .tema-switch__moon {
+  opacity: 1;
+  transform: none;
+}
+html[data-motion-level='reduce'] .tema-switch svg,
+html[data-motion-level='reduce'] .tema-switch__plate {
+  transition: none;
+}

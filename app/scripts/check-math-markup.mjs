@@ -56,6 +56,10 @@ const SKIP_FILES = [
   },
   { re: /answers\.json$/, why: 'ключи ответов, не текст' },
   {
+    re: /^lib\/tema\.ts$/,
+    why: 'тёмная тема: код скрипта для <head> строкой (d=document…), на экран не выводится',
+  },
+  {
     re: /^lib\/variant\/online\/normalizeCases\.json$/,
     why: 'таблица случаев ввода ответа для тестов: сырой ввод ученика, на сайт не выводится',
   },
@@ -84,6 +88,10 @@ const SKIP_FILES = [
   {
     re: /^content\/kabinet\/katalog\.json$/,
     why: 'названия прототипов для списка «Выдать ДЗ» (<option>) и базы: обычный текст через texPlain, KaTeX там не набрать',
+  },
+  {
+    re: /^lib\/tema\.ts$/,
+    why: 'TEMA_SCRIPT — код скрипта темы в строке (вставляется в <head>), на экран не выводится',
   },
   {
     re: /^content\/legal\//,

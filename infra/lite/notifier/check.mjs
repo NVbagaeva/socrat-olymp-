@@ -21,7 +21,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ADRESA, pismo, soderzhanie, srok, zagolovok } from './pisma.mjs';
 import { otpravit, SmtpError } from './smtp.mjs';
-import { bezAdresov, obrabotchik, prohod } from './notifier.mjs';
+import crypto from 'node:crypto';
+import { bezAdresov, klyuchiVapid, obrabotchik, prohod, soderzhaniePush } from './notifier.mjs';
+import { ADRES_PUSH, b64u, izB64u, otpravitPush, vapidKlyuchi, vapidZagolovok, zashifrovat } from './webpush.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 let n = 0;
@@ -314,7 +316,7 @@ await ok('SMTP: STARTTLS предложен, но не вышел — ошибк
 
 function restServer() {
   const vyzovy = [];
-  const st = { ochered: [], itogi: [], otpiski: [], klyuch: 'service-key' };
+  const st = { ochered: [], itogi: [], otpiski: [], klyuch: 'service-key', pushOchered: [], vapid: null, pushRez: [] };
   const server = http.createServer(async (req, res) => {
     let telo = '';
     for await (const ch of req) telo += ch;
@@ -331,6 +333,16 @@ function restServer() {
     if (imya === 'notify_itog') {
       st.itogi.push(args);
       return json(200, args.p_rezultat === 'sent' ? 'sent' : args.p_rezultat === 'povtor' ? 'wait' : 'failed');
+    }
+    if (imya === 'notify_zabrat_push') return json(200, st.pushOchered.splice(0, args.p_limit));
+    if (imya === 'push_vapid') return json(200, st.vapid);
+    if (imya === 'push_vapid_sohranit') {
+      st.vapid ??= { public: args.p_public, private: args.p_private };
+      return json(200, st.vapid);
+    }
+    if (imya === 'push_rezultat') {
+      st.pushRez.push(args);
+      return json(200, null);
     }
     if (imya === 'notify_otpiska') {
       if (args.p_t !== 'b'.repeat(32)) return json(400, { code: '23514', message: 'bad_link' });
@@ -380,18 +392,204 @@ await ok('проход: тик, пачки, итоги', async () => {
   assert.ok(rs.vyzovy.every((v) => v.auth === 'Bearer service-key'));
 });
 
-await ok('проход без почты: только тик', async () => {
+await ok('проход без почты: тик и push, писем не берёт', async () => {
   const do_ = rs.vyzovy.length;
   rs.st.ochered.push({ ...baza('dz_novoe'), id: 9 });
-  const it = await prohod({ ...cfg, smtp: { ...smtpCfg, pass: '', bezVhoda: false } });
+  const it = await prohod({ ...cfg, smtp: { ...smtpCfg, pass: '', bezVhoda: false }, vapid: { public: 'x', private: 'y' } });
   assert.equal(it.sent, 0);
-  assert.deepEqual(rs.vyzovy.slice(do_).map((v) => v.imya), ['notify_tick_pochta']);
+  assert.deepEqual(rs.vyzovy.slice(do_).map((v) => v.imya), ['notify_tick_pochta', 'notify_zabrat_push']);
   rs.st.ochered.length = 0;
 });
 
 await ok('проход: база не ответила — ошибка наружу', async () => {
   await assert.rejects(prohod({ ...cfg, klyuch: 'chuzhoy' }), /notify_tick_pochta: 401/);
 });
+
+
+/* ── Push (PR 3г) ──────────────────────────────────────────────── */
+
+await ok('push: шифрование по примеру RFC 8291 (приложение A)', () => {
+  const out = zashifrovat(
+    'When I grow up, I want to be a watermelon',
+    'BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4',
+    'BTBZMqHH6r4Tts7J_aSIgg',
+    { salt: 'DGv6ra1nlYgDCS1FRnbzlw', asPrivate: 'yfWPiYE-n46HLnH0KqZOF1fJJU3MYrct3AELtAQ-oRw' },
+  );
+  assert.equal(
+    b64u(out),
+    'DGv6ra1nlYgDCS1FRnbzlwAAEABBBP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27mlmlMoZIIgDll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A_yl95bQpu6cVPTpK4Mqgkf1CXztLVBSt2Ks3oZwbuwXPXLWyouBWLVWGNWQexSgSxsj_Qulcy4a-fN',
+  );
+});
+
+/** Сторона браузера: расшифровать aes128gcm своим закрытым ключом. */
+function rasshifrovat(telo, ua, authSecret) {
+  const salt = telo.subarray(0, 16);
+  const idlen = telo[20];
+  const asPublic = telo.subarray(21, 21 + idlen);
+  const zapis = telo.subarray(21 + idlen);
+  const secret = ua.computeSecret(asPublic);
+  const h = (s, k, i, l) => Buffer.from(crypto.hkdfSync('sha256', k, s, i, l));
+  const ikm = h(authSecret, secret, Buffer.concat([Buffer.from('WebPush: info\0'), ua.getPublicKey(), asPublic]), 32);
+  const cek = h(salt, ikm, Buffer.from('Content-Encoding: aes128gcm\0'), 16);
+  const nonce = h(salt, ikm, Buffer.from('Content-Encoding: nonce\0'), 12);
+  const d = crypto.createDecipheriv('aes-128-gcm', cek, nonce);
+  d.setAuthTag(zapis.subarray(zapis.length - 16));
+  const t = Buffer.concat([d.update(zapis.subarray(0, zapis.length - 16)), d.final()]);
+  assert.equal(t[t.length - 1], 2, 'разделитель последней записи');
+  return t.subarray(0, t.length - 1).toString('utf8');
+}
+
+await ok('push: подпись VAPID проверяется открытым ключом', () => {
+  const k = vapidKlyuchi();
+  assert.equal(izB64u(k.public).length, 65);
+  assert.equal(izB64u(k.private).length, 32);
+  const z = vapidZagolovok('https://fcm.googleapis.com/fcm/send/abc', k, 'https://budetege.ru', Date.UTC(2026, 10, 24));
+  const m = /^vapid t=([^.]+)\.([^.]+)\.([^,]+), k=(.+)$/.exec(z);
+  assert.ok(m, z);
+  assert.equal(m[4], k.public);
+  assert.deepEqual(JSON.parse(izB64u(m[1])), { typ: 'JWT', alg: 'ES256' });
+  const claims = JSON.parse(izB64u(m[2]));
+  assert.deepEqual(claims, { aud: 'https://fcm.googleapis.com', exp: Date.UTC(2026, 10, 24) / 1000 + 12 * 3600, sub: 'https://budetege.ru' });
+  const pub = izB64u(k.public);
+  const key = crypto.createPublicKey({ format: 'jwk', key: { kty: 'EC', crv: 'P-256', x: b64u(pub.subarray(1, 33)), y: b64u(pub.subarray(33)) } });
+  assert.ok(crypto.verify('sha256', Buffer.from(`${m[1]}.${m[2]}`), { key, dsaEncoding: 'ieee-p1363' }, izB64u(m[3])));
+});
+
+await ok('push: адреса — только сервисы push (как в базе)', () => {
+  for (const a of [
+    'https://fcm.googleapis.com/fcm/send/dAbC1:APA91bH-s1-telefon',
+    'https://web.push.apple.com/QGwXz_s1-iphone',
+    'https://updates.push.services.mozilla.com/wpush/v2/gAAAAA',
+    'https://wns2-par02p.notify.windows.com/w/?token=BQYAAA%2b',
+  ]) assert.ok(ADRES_PUSH.test(a), a);
+  for (const a of [
+    'http://fcm.googleapis.com/fcm/send/x1234567890',
+    'https://rest:3000/rpc/notify_zabrat',
+    'https://evil.example/fcm.googleapis.com/x',
+    'https://fcm.googleapis.com.evil.example/x1234',
+    'https://x.push.apple.com@evil.example/x1234',
+    'https://127.0.0.1/x',
+  ]) assert.ok(!ADRES_PUSH.test(a), a);
+  // Списки в базе и здесь одинаковые.
+  const sql = fs.readFileSync(path.join(ROOT, 'supabase/migrations/20261127120000_uvedomleniya_push.sql'), 'utf8');
+  for (const host of [String.raw`fcm\.googleapis\.com`, String.raw`updates\.push\.services\.mozilla\.com`,
+    String.raw`push\.services\.mozilla\.com`, String.raw`web\.push\.apple\.com`, String.raw`[a-z0-9-]+\.push\.apple\.com`,
+    String.raw`[a-z0-9-]+\.notify\.windows\.com`]) {
+    assert.ok(sql.includes(host), `в базе нет ${host}`);
+    assert.ok(ADRES_PUSH.source.includes(host.replaceAll('/', '\\/')), `здесь нет ${host}`);
+  }
+});
+
+await ok('push: содержимое — только тип и ссылка (В-5)', () => {
+  assert.deepEqual(soderzhaniePush({ event: 'dz_novoe', homework_id: HW, title: 'Логарифмы' }), {
+    t: 'dz_novoe',
+    u: `/kabinet/domashki/reshat/?id=${HW}`,
+  });
+  assert.deepEqual(soderzhaniePush({ event: 'dz_sdano', homework_id: HW, uchenik_name: 'Аня С.' }), {
+    t: 'dz_sdano',
+    u: `/kabinet/dz2/itogi/?id=${HW}`,
+  });
+  assert.deepEqual(soderzhaniePush({ event: 'dz_napominanie', homework_id: HW, za: 3 }).za, 3);
+  assert.equal(soderzhaniePush({ event: 'dz_srok', homework_id: HW, pozdno: true }).pozdno, true);
+  assert.equal(soderzhaniePush({ event: 'dz_ne_sdali' }).u, '/kabinet/uvedomleniya/');
+});
+
+// Поддельный сервис push: /ok → 201, /gone → 410, /busy → 429, /bad → 400.
+const pushPriem = [];
+const ps = http.createServer(async (req, res) => {
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  pushPriem.push({ url: req.url, headers: req.headers, telo: Buffer.concat(chunks) });
+  const kod = req.url.startsWith('/ok') ? 201 : req.url.startsWith('/gone') ? 410 : req.url.startsWith('/busy') ? 429 : 400;
+  res.writeHead(kod);
+  res.end();
+});
+await new Promise((r) => ps.listen(0, '127.0.0.1', r));
+const P = `http://127.0.0.1:${ps.address().port}`;
+const brauzer = () => {
+  const ua = crypto.createECDH('prime256v1');
+  ua.generateKeys();
+  const auth = crypto.randomBytes(16);
+  return { ua, auth, p256dh: b64u(ua.getPublicKey()), authB: b64u(auth) };
+};
+
+await ok('push: доходит, расшифровывается, заголовки', async () => {
+  const b = brauzer();
+  const k = vapidKlyuchi();
+  const r = await otpravitPush(
+    { endpoint: `${P}/ok/sekretnyy-put`, p256dh: b.p256dh, auth: b.authB },
+    { t: 'dz_novoe', u: '/kabinet/domashki/reshat/?id=1' },
+    { vapid: k, sub: 'https://budetege.ru', ttl: 600, urgency: 'high', proverkaAdresa: false },
+  );
+  assert.equal(r.rez, 'ok');
+  assert.ok(!r.detail.includes('sekretnyy'), 'в итоге — путь подписки');
+  const p = pushPriem.at(-1);
+  assert.equal(p.headers['content-encoding'], 'aes128gcm');
+  assert.equal(p.headers.ttl, '600');
+  assert.equal(p.headers.urgency, 'high');
+  assert.match(p.headers.authorization, /^vapid t=.+, k=/);
+  assert.deepEqual(JSON.parse(rasshifrovat(p.telo, b.ua, b.auth)), { t: 'dz_novoe', u: '/kabinet/domashki/reshat/?id=1' });
+});
+
+await ok('push: ответы сервиса', async () => {
+  const b = brauzer();
+  const k = vapidKlyuchi();
+  const s = (put) => otpravitPush({ endpoint: `${P}${put}`, p256dh: b.p256dh, auth: b.authB }, { t: 'x', u: '/' },
+    { vapid: k, sub: 'https://budetege.ru', proverkaAdresa: false });
+  assert.equal((await s('/gone/1')).rez, 'gone');
+  assert.equal((await s('/busy/1')).rez, 'povtor');
+  assert.equal((await s('/bad/1')).rez, 'failed');
+  const net_ = await otpravitPush({ endpoint: 'http://127.0.0.1:1/x', p256dh: b.p256dh, auth: b.authB }, { t: 'x', u: '/' },
+    { vapid: k, sub: 'https://budetege.ru', proverkaAdresa: false, timeoutMs: 2000 });
+  assert.equal(net_.rez, 'povtor');
+  // С проверкой адреса — не сервис push: подписку убрать, никуда не ходить.
+  const do_ = pushPriem.length;
+  assert.equal((await otpravitPush({ endpoint: `${P}/ok/1`, p256dh: b.p256dh, auth: b.authB }, { t: 'x', u: '/' },
+    { vapid: k, sub: 'https://budetege.ru' })).rez, 'gone');
+  assert.equal(pushPriem.length, do_);
+  // Кривые ключи — подписку убрать.
+  assert.equal((await otpravitPush({ endpoint: `${P}/ok/1`, p256dh: 'korotkiy', auth: b.authB }, { t: 'x', u: '/' },
+    { vapid: k, sub: 'https://budetege.ru', proverkaAdresa: false })).rez, 'gone');
+});
+
+await ok('push: проход — ключи, все устройства, итоги', async () => {
+  rs.st.vapid = null;
+  const b1 = brauzer();
+  const b2 = brauzer();
+  const sub = (put, b) => ({ endpoint: `${P}${put}`, p256dh: b.p256dh, auth: b.authB });
+  rs.st.pushOchered.push(
+    { id: 21, channel: 'push', event: 'dz_novoe', homework_id: HW, ttl: 86400, subs: [sub('/ok/a', b1), sub('/gone/b', b2)] },
+    { id: 22, channel: 'push', event: 'dz_napominanie', homework_id: HW, za: 3, ttl: 3000, subs: [sub('/busy/a', b1)] },
+    { id: 23, channel: 'push', event: 'dz_sdano', homework_id: HW, ttl: 86400, subs: [sub('/gone/c', b1)] },
+  );
+  const do_ = pushPriem.length;
+  const doItog = rs.st.itogi.length;
+  const c = { ...cfg, vapid: undefined, smtp: { ...smtpCfg, pass: '', bezVhoda: false }, proverkaAdresaPush: false };
+  const it = await prohod(c);
+  assert.deepEqual(it.push, { sent: 1, povtor: 1, failed: 1 });
+  assert.ok(rs.st.vapid, 'ключи VAPID не созданы');
+  assert.deepEqual(c.vapid, rs.st.vapid, 'взяты не ключи из базы');
+  const itogi = Object.fromEntries(rs.st.itogi.slice(doItog).map((x) => [x.p_id, x.p_rezultat]));
+  assert.deepEqual(itogi, { 21: 'sent', 22: 'povtor', 23: 'failed' });
+  assert.deepEqual(rs.st.pushRez.map((x) => [x.p_endpoint.replace(P, ''), x.p_ok, x.p_gone]), [
+    ['/ok/a', true, false], ['/gone/b', false, true], ['/busy/a', false, false], ['/gone/c', false, true],
+  ]);
+  const prishlo = pushPriem.slice(do_);
+  assert.equal(prishlo.length, 4);
+  assert.equal(prishlo[0].headers.urgency, 'normal');
+  assert.equal(prishlo[2].headers.urgency, 'high', '«за 3 часа» — важное');
+  assert.equal(prishlo[2].headers.ttl, '3000');
+  assert.deepEqual(JSON.parse(rasshifrovat(prishlo[3].telo, b1.ua, b1.auth)), { t: 'dz_sdano', u: `/kabinet/dz2/itogi/?id=${HW}` });
+  for (const x of rs.st.itogi.slice(doItog)) assert.ok(!/\/(ok|gone|busy)\//.test(x.p_detail ?? ''), `путь подписки в журнале: ${x.p_detail}`);
+});
+
+await ok('push: ключи из базы не пересоздаются', async () => {
+  rs.st.vapid = { public: 'P'.repeat(87), private: 's'.repeat(43) };
+  const c = { ...cfg, vapid: undefined };
+  assert.deepEqual(await klyuchiVapid(c), rs.st.vapid);
+});
+
+ps.close();
 
 /* ── «Отписаться» ──────────────────────────────────────────────── */
 

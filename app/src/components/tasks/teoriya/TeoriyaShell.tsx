@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+import { DZ2_ON } from '@/lib/dz2/config';
 import { EmptyState, HandNote, Modal } from '@/components/ui';
 import { TopicContents, ZamokIkonka } from '@/components/tasks/TopicContents';
 import { scrollToSection, useActiveSection } from '@/components/tasks/useActiveSection';
@@ -54,7 +56,21 @@ export interface TeoriyaShellProps {
    * полосой, а не шторкой (макеты №3). Не задано — шторка, как везде.
    */
   soderzhanieRaskryvashka?: boolean;
+  /**
+   * Номер хранения раздела: у каждой написанной главы — «В домашку» для
+   * учителя (этап 4). Не задан — кнопок нет (теория базы).
+   */
+  taskNo?: number;
 }
+
+/**
+ * «В домашку» у главы (этап 4, docs/kabinet-dz2.md): видна только учителю
+ * в разделах выдачи. Отдельным куском и только при флаге новой выдачи:
+ * в первую загрузку страниц теории не попадает.
+ */
+const VDomashkuTeoriya = DZ2_ON
+  ? dynamic(() => import('@/components/dz2/knopki').then((m) => m.VDomashkuTeoriya), { ssr: false })
+  : null;
 
 /** Якорь раздела на странице — из общих констант (lib/paths.ts). */
 function razdelId(id: string): string {
@@ -83,6 +99,7 @@ export function TeoriyaShell({
   nadZagolovkom,
   vSoderzhanii,
   soderzhanieRaskryvashka = false,
+  taskNo,
 }: TeoriyaShellProps) {
   const pervyy = razdely[0]?.id ?? '';
   const [aktivnyy, setAktivnyy] = useState(pervyy);
@@ -274,6 +291,14 @@ export function TeoriyaShell({
                 </span>
                 {razdel.title}
               </h3>
+              {VDomashkuTeoriya !== null &&
+              taskNo !== undefined &&
+              !razdel.skoro &&
+              tela[razdel.id] !== undefined ? (
+                <div className="dz2-ryad">
+                  <VDomashkuTeoriya taskNo={taskNo} glava={razdel.id} nazvanie={razdel.title} />
+                </div>
+              ) : null}
               {tela[razdel.id] ?? (
                 <EmptyState
                   title={SODERZHANIE.gotovitsya}

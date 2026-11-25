@@ -9,6 +9,7 @@
  * KaTeX.
  */
 
+import { TUTORS_LABEL } from './vkladki';
 import { OPORNYE } from './opornye';
 import type { TutorMaterial } from './sections';
 import { taskName } from './tasks';
@@ -28,7 +29,7 @@ export const VEKTORY = {
     { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
     { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
     { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
-    { id: 'repetitory', label: 'Для репетиторов', tail: 'dlya-repetitorov/', icon: 'materials' },
+    { id: 'repetitory', label: TUTORS_LABEL, tail: 'dlya-repetitorov/', icon: 'materials' },
   ] as readonly RazdelTab[],
   /* Материалы репетитора — не файлы, а страница-вкладка с банком и
      печатными листами, поэтому меню материалов в ленте нет. */

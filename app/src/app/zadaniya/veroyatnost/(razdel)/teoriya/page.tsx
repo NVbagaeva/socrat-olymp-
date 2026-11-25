@@ -42,7 +42,12 @@ export default function Teoriya4Tab() {
       {/* «Стеклянная сцена»: общий слой рамок теории (teoriya-steklo.css),
           содержание и разметка разделов не меняются. */}
       <div className="teor-steklo z45-teoriya">
-        <TeoriyaShell vkladka={vkladka('4', 'teoriya')} razdely={RAZDELY_4} tela={telaRazdelov4} />
+        <TeoriyaShell
+          taskNo={4}
+          vkladka={vkladka('4', 'teoriya')}
+          razdely={RAZDELY_4}
+          tela={telaRazdelov4}
+        />
       </div>
     </>
   );
