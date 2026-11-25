@@ -10,8 +10,17 @@
      вбок. clip, а не hidden: липкая шапка остаётся липкой. */
   overflow-x: clip;
   background:
-    radial-gradient(60% 40% at 85% 55%, rgb(31 95 208 / 0.07), transparent 70%),
-    radial-gradient(50% 35% at 10% 85%, rgb(245 160 74 / 0.08), transparent 70%), var(--color-bg);
+    radial-gradient(
+      60% 40% at 85% 55%,
+      color-mix(in srgb, var(--lend-aura-siniy) 7%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 35% at 10% 85%,
+      color-mix(in srgb, var(--lend-aura-oranzh) 8%, transparent),
+      transparent 70%
+    ),
+    var(--color-bg);
 }
 .glavnaya h1,
 .glavnaya h2 {
@@ -28,7 +37,7 @@
 .glavnaya .site-foot--steklo {
   background: var(--glass-bg);
   border-top: 1px solid var(--glass-edge);
-  box-shadow: 0 -1px 0 rgb(31 95 208 / 0.06);
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--lend-liniya) 6%, transparent);
 }
 
 /* Главная кнопка — глянцевая «таблетка», вторичная — стекло. */
@@ -241,29 +250,20 @@
 .door--uchenik,
 .door--uchitel {
   border-color: transparent;
-  color: #fff;
+  color: var(--color-text-inverse);
 }
 /* Двери залиты так же, как на главной профиля (sumerki.css, .sm-dver):
    ученику — синяя, учителю — чистая оранжевая, тот же блик и свечение. */
 .door--uchenik {
   background: linear-gradient(180deg, var(--sumerki-knopka-siniy-1), var(--sumerki-knopka-siniy-2));
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.18),
-    inset 0 1px 0 rgb(255 255 255 / 0.32),
-    inset 0 -1px 0 rgb(0 0 0 / 0.14),
-    0 0 28px -4px rgb(140 185 255 / 0.7),
-    0 16px 36px -12px rgb(16 40 110 / 0.7);
+  box-shadow: var(--lend-dver-siniy-ten);
 }
 .door--uchitel {
   /* Чистый оранжевый, как «Я преподаю» на главной профиля и полоса
      «Банк заданий»: насыщеннее слева, под текстом, светлее к стрелке. */
-  background: linear-gradient(105deg, #ea5c0a 0%, #f2701c 50%, #fb9442 100%);
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.22),
-    inset 0 1px 0 rgb(255 255 255 / 0.45),
-    0 0 30px -6px rgb(251 140 60 / 0.65),
-    0 16px 36px -14px rgb(234 92 10 / 0.55);
-  text-shadow: 0 1px 2px rgb(150 50 0 / 0.35);
+  background: var(--lend-dver-oranzh);
+  box-shadow: var(--lend-dver-oranzh-ten);
+  text-shadow: var(--lend-dver-oranzh-ten-teksta);
 }
 .door:hover,
 .door:focus-visible {
@@ -271,19 +271,11 @@
 }
 .door--uchenik:hover,
 .door--uchenik:focus-visible {
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.28),
-    inset 0 -1px 0 rgb(0 0 0 / 0.14),
-    0 0 40px -2px rgb(160 200 255 / 0.9),
-    0 22px 44px -12px rgb(16 40 110 / 0.75);
+  box-shadow: var(--lend-dver-siniy-ten-hover);
 }
 .door--uchitel:hover,
 .door--uchitel:focus-visible {
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.26),
-    inset 0 1px 0 rgb(255 255 255 / 0.5),
-    0 0 42px -4px rgb(251 140 60 / 0.85),
-    0 22px 44px -14px rgb(234 92 10 / 0.6);
+  box-shadow: var(--lend-dver-oranzh-ten-hover);
 }
 .door:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -298,7 +290,7 @@
 .door__text {
   font-size: 14px;
   line-height: 1.45;
-  color: rgb(255 255 255 / 0.94);
+  color: var(--lend-dver-tekst-2);
 }
 .door__action {
   display: inline-flex;
@@ -307,7 +299,7 @@
   margin-top: var(--space-2);
   font-size: 16px;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-text-inverse);
 }
 .door__action svg {
   width: 18px;
@@ -344,7 +336,7 @@
   padding: var(--space-5) var(--space-6);
 }
 .hero__fact + .hero__fact {
-  border-left: 1px solid rgb(31 95 208 / 0.1);
+  border-left: 1px solid color-mix(in srgb, var(--lend-liniya) 10%, transparent);
 }
 .hero__fact dd {
   margin: 0;
@@ -447,7 +439,12 @@ section.band {
   border: 1px solid var(--glass-edge);
   border-radius: 20px;
   background:
-    radial-gradient(80% 160% at 100% 50%, rgb(61 121 224 / 0.14), transparent 60%), var(--glass-bg);
+    radial-gradient(
+      80% 160% at 100% 50%,
+      color-mix(in srgb, var(--lend-aura-siniy-2) 14%, transparent),
+      transparent 60%
+    ),
+    var(--glass-bg);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
@@ -499,7 +496,7 @@ section.band {
 }
 /* Неоткрытый раздел — то же стекло, но приглушённое. */
 .glavnaya .task-card--bank.task-card--soon {
-  background: rgb(255 255 255 / 0.4);
+  background: color-mix(in srgb, var(--lend-steklo) 40%, transparent);
   box-shadow: var(--glass-ring);
 }
 
@@ -943,11 +940,21 @@ section.band {
 }
 .tk__karta--uchenik {
   background:
-    radial-gradient(120% 90% at 100% 0%, rgb(61 121 224 / 0.16), transparent 60%), var(--glass-bg);
+    radial-gradient(
+      120% 90% at 100% 0%,
+      color-mix(in srgb, var(--lend-aura-siniy-2) 16%, transparent),
+      transparent 60%
+    ),
+    var(--glass-bg);
 }
 .tk__karta--repetitor {
   background:
-    radial-gradient(120% 90% at 100% 0%, rgb(245 160 74 / 0.2), transparent 60%), var(--glass-bg);
+    radial-gradient(
+      120% 90% at 100% 0%,
+      color-mix(in srgb, var(--lend-aura-oranzh) 20%, transparent),
+      transparent 60%
+    ),
+    var(--glass-bg);
 }
 .tk__nazvanie {
   font-size: 19px;
@@ -976,7 +983,7 @@ section.band {
   gap: var(--space-2);
   margin: var(--space-3) 0 0;
   padding: var(--space-4) 0 0;
-  border-top: 1px solid rgb(31 95 208 / 0.1);
+  border-top: 1px solid color-mix(in srgb, var(--lend-liniya) 10%, transparent);
   list-style: none;
 }
 .tk__punkty li {
@@ -1047,23 +1054,10 @@ section.band {
      свечения фона, размытые backdrop-filter; сверху — глянцевый
      отсвет, по кромке — светлая линия. Слева, под заголовком, заливка
      плотнее: белый текст читается. */
-  background:
-    radial-gradient(130% 80% at 60% -30%, rgb(255 255 255 / 0.34), transparent 62%),
-    linear-gradient(
-      105deg,
-      rgb(234 92 10 / 0.92) 0%,
-      rgb(244 116 32 / 0.82) 40%,
-      rgb(251 148 66 / 0.68) 75%,
-      rgb(255 180 107 / 0.56) 100%
-    );
+  background: var(--lend-bank-razd-zaliv);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   backdrop-filter: blur(18px) saturate(160%);
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.4),
-    inset 0 1px 0 rgb(255 255 255 / 0.75),
-    inset 0 -1px 0 rgb(200 70 0 / 0.18),
-    0 0 36px -10px rgb(251 140 60 / 0.55),
-    0 18px 36px -18px rgb(234 92 10 / 0.45);
+  box-shadow: var(--lend-bank-razd-ten);
   color: var(--color-text-inverse);
 }
 .bank-razd__blik {
@@ -1074,12 +1068,7 @@ section.band {
   width: 420px;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(
-    closest-side,
-    rgb(255 236 214 / 0.55),
-    rgb(255 220 180 / 0.18) 60%,
-    transparent
-  );
+  background: var(--lend-bank-razd-blik);
   pointer-events: none;
 }
 .bank-razd__z {
@@ -1095,17 +1084,17 @@ section.band {
   margin: var(--space-1) 0 0;
   padding: 2px 10px;
   border-radius: var(--radius-pill);
-  background: rgb(255 255 255 / 0.92);
+  background: var(--lend-bank-razd-schet-fon);
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
-  color: #b9460a;
+  color: var(--lend-bank-razd-schet-tekst);
   font-variant-numeric: tabular-nums;
 }
 .bank-razd__tabs .level-tabs {
   margin-bottom: 0;
-  border-color: rgb(255 255 255 / 0.7);
-  box-shadow: 0 8px 20px -12px rgb(180 70 10 / 0.45);
+  border-color: var(--lend-bank-razd-tabs-kromka);
+  box-shadow: var(--lend-bank-razd-tabs-ten);
 }
 .bank-razd__tabs .level-tabs__range {
   white-space: nowrap;

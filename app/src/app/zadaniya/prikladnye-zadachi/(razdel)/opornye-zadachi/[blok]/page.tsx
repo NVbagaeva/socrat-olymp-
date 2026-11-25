@@ -10,6 +10,7 @@ import { OPORNYE10 } from '@/content/prikladnye10';
 import { zadanie10Title } from '@/content/zadanie10';
 import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
 import { OPORNYE10_HREF, tipHref10 } from '@/lib/zadanie10/links';
+import { sOtvetomDz } from '@/lib/opornye/otvetDz';
 import { BLOKI_OPORNYH, blokPoSlugu, opornyeDlyaBrauzera } from '@/lib/zadanie10/opornye';
 import { prototype } from '@/lib/zadanie10/prototypes';
 import { sealText } from '@/lib/zadanie10/secret';
@@ -64,18 +65,23 @@ export default async function Opornye10Blok({ params }: { params: Promise<{ blok
       <TabScrollOnMount />
       <Opornye10
         blok={b.id}
+        nazvanie={b.nazvanie}
         zapomni={
           <>
             <b>{OPORNYE10.zapomni}</b> <Tex text={b.zapomni} />
           </>
         }
-        zadachi={zadachi.map((z) => ({
-          id: z.id,
-          uslovie: z.uslovie,
-          podskazka: z.podskazka,
-          razbor: sealText(JSON.stringify(z.razbor), z.id),
-          seal: z.seal,
-        }))}
+        zadachi={sOtvetomDz(
+          zadachi.map((z) => ({
+            id: z.id,
+            uslovie: z.uslovie,
+            podskazka: z.podskazka,
+            razbor: sealText(JSON.stringify(z.razbor), z.id),
+            seal: z.seal,
+          })),
+          b.zadachi,
+          sealText,
+        )}
         risunki={risunki}
       />
       <section className="z10-op__gde" aria-labelledby="z10-op-gde">

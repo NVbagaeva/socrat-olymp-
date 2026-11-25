@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import { useId } from 'react';
 import type { Nabor, Nastroyki as NastroykiT } from '@/lib/ustnyySchet/nabor';
-import { GRUPPY, priyomyGruppy } from '@/lib/ustnyySchet/registry';
+import { GRUPPY, priyom, priyomyGruppy } from '@/lib/ustnyySchet/registry';
 import { LIMITY_SEK, SERII, type Rezhim } from '@/lib/ustnyySchet/sessiya';
 import { DEYSTVIYA, UROVNI, type Deystvie, type PriyomId } from '@/lib/ustnyySchet/types';
 import { USTNYY } from '@/content/ustnyySchet';
@@ -81,6 +81,13 @@ export function naborPust(n: Nabor): string | null {
   if (n.tip === 'priyomy' && n.ids.length === 0) return T.vyberiPriyom;
   if (n.tip === 'deystviya' && n.ids.length === 0) return T.vyberiDeystvie;
   return null;
+}
+
+/** Есть ли в наборе квадратные уравнения (для переключателя «Как в ЕГЭ»). */
+export function estUravneniya(n: Nabor): boolean {
+  if (n.tip === 'priyomy') return n.ids.some((id) => priyom(id).gruppa === 'uravneniya');
+  if (n.tip === 'deystviya') return n.ids.includes('uravneniya');
+  return false;
 }
 
 /**
@@ -277,6 +284,34 @@ export function Nastroyki({
                 </Vykl>
               </div>
             </>
+          )}
+        </fieldset>
+      )}
+
+      {!fix && estUravneniya(nabor) && (
+        <fieldset className="us-pole">
+          <legend className="us-pole__zag">{USTNYY.gruppy.uravneniya.nazvanie}</legend>
+          <div className="us-vykly">
+            <Vykl
+              on={nast.ege !== undefined}
+              onChange={(v) => {
+                const { ege: _, ...bez } = nast;
+                onNast(v ? { ...bez, ege: 'men' } : bez);
+              }}
+            >
+              {T.ege}
+            </Vykl>
+          </div>
+          <p className="us-pole__pod">{T.egeLead}</p>
+          {nast.ege !== undefined && (
+            <div className="us-chips" role="group" aria-label={T.ege}>
+              <Chip on={nast.ege === 'men'} onClick={() => onNast({ ...nast, ege: 'men' })}>
+                {T.egeMen}
+              </Chip>
+              <Chip on={nast.ege === 'bol'} onClick={() => onNast({ ...nast, ege: 'bol' })}>
+                {T.egeBol}
+              </Chip>
+            </div>
           )}
         </fieldset>
       )}

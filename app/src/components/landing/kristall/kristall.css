@@ -56,7 +56,11 @@
   top: 58%;
   height: 30%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(61 121 224 / 0.38), rgb(61 121 224 / 0));
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--lend-kristall-pol) 38%, transparent),
+    transparent
+  );
   pointer-events: none;
 }
 .kristall__kholst canvas {
@@ -108,5 +112,9 @@
 /* Тёмная сцена главной (temnyyFon): у живой модели отсвет на полу
    светлее, как вшитый в рендер. */
 .kristall--temnyy .kristall__kholst::before {
-  background: radial-gradient(closest-side, rgb(200 222 255 / 0.5), rgb(200 222 255 / 0));
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--lend-kristall-pol-temnyy) 50%, transparent),
+    transparent
+  );
 }
