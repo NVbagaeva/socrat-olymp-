@@ -1353,7 +1353,7 @@
     background: var(--color-bg);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    box-shadow: 0 6px 12px -10px rgb(16 23 40 / 0.25);
+    box-shadow: 0 6px 12px -10px color-mix(in srgb, var(--varianty-ten-chernila) 25%, transparent);
   }
   .gen-strip__filters,
   .gen-strip__go {
