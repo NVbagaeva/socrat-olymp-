@@ -15,22 +15,29 @@ let bezPrivyazkiIdet = 0;
 const BEZ_PRIVYAZKI_MS = 300;
 
 /**
- * Привязка прокрутки (overflow-anchor) выключена до следующих кадров.
- * Если верх места сцены над экраном, точка привязки браузера — внутри
- * заглушки; после подмены WebKit сдвигает страницу на всю высоту сцены.
+ * Выключить привязку прокрутки (overflow-anchor) у страницы. Если верх
+ * места сцены над экраном, точка привязки браузера — внутри заглушки;
+ * когда заглушку убирают, WebKit сдвигает страницу на её высоту, а когда
+ * сцена вырастает — ещё на прибавку. Возвращает функцию, которая включит
+ * привязку обратно через пару кадров (сцена досчитывает ширину и KaTeX).
  */
-function bezPrivyazki() {
+function vyklyuchitPrivyazku(): () => void {
   const html = document.documentElement;
   bezPrivyazkiIdet += 1;
   html.style.overflowAnchor = 'none';
-  requestAnimationFrame(() =>
+  let vernuto = false;
+  return () => {
+    if (vernuto) return;
+    vernuto = true;
     requestAnimationFrame(() =>
-      window.setTimeout(() => {
-        bezPrivyazkiIdet -= 1;
-        if (bezPrivyazkiIdet === 0) html.style.removeProperty('overflow-anchor');
-      }, BEZ_PRIVYAZKI_MS),
-    ),
-  );
+      requestAnimationFrame(() =>
+        window.setTimeout(() => {
+          bezPrivyazkiIdet -= 1;
+          if (bezPrivyazkiIdet === 0) html.style.removeProperty('overflow-anchor');
+        }, BEZ_PRIVYAZKI_MS),
+      ),
+    );
+  };
 }
 
 /**
@@ -48,8 +55,10 @@ function bezPrivyazki() {
  *     подошёл к нему на 600 px снизу; сверху — только когда читатель
  *     возвращается к блоку (до этого блок уходил дальше 600 px), и тогда
  *     прокрутка сдвигается ровно на прибавку — текст на экране на месте;
- *   — иначе сцена растёт вниз от своего верха, а привязка прокрутки на
- *     это время выключена (bezPrivyazki).
+ *   — иначе сцена растёт вниз от своего верха.
+ *
+ * Привязка прокрутки выключена с прихода кода и до этого решения
+ * (vyklyuchitPrivyazku): иначе WebKit сдвинет страницу ещё при вставке.
  *
  * `zagruzit` — функция с import() конкретной сцены: путь должен стоять в
  * коде буквально, чтобы сборщик выделил сцену в свой кусок. `pechat` —
@@ -65,6 +74,8 @@ export function useLenivayaScena<P>(
   const vysotaZaglushki = useRef(0);
   /** Снять придержанную высоту (есть, пока место придержано). */
   const otpustit = useRef<((pered: boolean) => void) | null>(null);
+  /* Привязка прокрутки выключена до вставки сцены: вернуть её. */
+  const vernutPrivyazku = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const el = yakor.current;
@@ -77,6 +88,7 @@ export function useLenivayaScena<P>(
       void zagruzit().then((mod) => {
         if (!alive) return;
         vysotaZaglushki.current = el.getBoundingClientRect().height;
+        vernutPrivyazku.current = vyklyuchitPrivyazku();
         setScena(() => mod.default);
       });
     };
@@ -103,6 +115,8 @@ export function useLenivayaScena<P>(
       alive = false;
       blizko?.disconnect();
       if (pechat) window.removeEventListener('beforeprint', pered);
+      vernutPrivyazku.current?.();
+      vernutPrivyazku.current = null;
     };
   }, [zagruzit, pechat]);
 
@@ -111,11 +125,12 @@ export function useLenivayaScena<P>(
   useLayoutEffect(() => {
     const el = yakor.current;
     if (Scena === null || el === null) return undefined;
+    const vernut = vernutPrivyazku.current;
+    vernutPrivyazku.current = null;
     const bylo = vysotaZaglushki.current;
     const verh = el.getBoundingClientRect().top;
     if (verh + bylo > 0 || typeof IntersectionObserver === 'undefined') {
-      bezPrivyazki();
-      el.getBoundingClientRect();
+      vernut?.();
       return undefined;
     }
     /* Заглушка была над экраном: держим её высоту. */
@@ -130,11 +145,12 @@ export function useLenivayaScena<P>(
       zhdat?.disconnect();
       naEkrane?.disconnect();
       otpustit.current = null;
-      bezPrivyazki();
+      const vernutSnyatie = vyklyuchitPrivyazku();
       el.style.removeProperty('height');
       el.style.removeProperty('overflow');
       const pribavka = el.getBoundingClientRect().height - bylo;
       if (kompensirovat && pribavka !== 0) window.scrollBy(0, pribavka);
+      vernutSnyatie();
     };
     otpustit.current = () => snyat(false);
     zhdat = new IntersectionObserver(
@@ -160,6 +176,7 @@ export function useLenivayaScena<P>(
     });
     zhdat.observe(el);
     naEkrane.observe(el);
+    vernut?.();
     return () => {
       zhdat?.disconnect();
       naEkrane?.disconnect();
