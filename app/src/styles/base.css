@@ -27,6 +27,27 @@ html {
     color-scheme: only dark;
     scrollbar-color: var(--scroll-thumb) var(--scroll-track);
   }
+  /* Чертежи-строки (lib/chertezh3) самодостаточны — цвета в них хексом,
+     для листов и файлов. На экране в тёмной теме их перекрашивает CSS:
+     свойство сильнее атрибута. */
+  html[data-tema='dark']:not([data-sheet-theme]) svg[data-engine='chertezh3'] [stroke='#101728'] {
+    stroke: var(--chertezh-tekst);
+  }
+  html[data-tema='dark']:not([data-sheet-theme]) svg[data-engine='chertezh3'] [fill='#101728'] {
+    fill: var(--chertezh-tekst);
+  }
+  html[data-tema='dark']:not([data-sheet-theme]) svg[data-engine='chertezh3'] [fill='#ffffff'] {
+    fill: var(--chertezh-fon);
+  }
+  html[data-tema='dark']:not([data-sheet-theme]) svg[data-engine='chertezh3'] [stroke='#ffffff'] {
+    stroke: var(--chertezh-fon);
+  }
+  html[data-tema='dark']:not([data-sheet-theme]) svg[data-engine='chertezh3'] [stroke='#e07a2f'] {
+    stroke: var(--chertezh-akcent);
+  }
+  html[data-tema='dark']:not([data-sheet-theme]) svg[data-engine='chertezh3'] [fill='#e07a2f'] {
+    fill: var(--chertezh-akcent);
+  }
   html[data-tema='dark']:not([data-sheet-theme]) ::selection {
     background: color-mix(in srgb, var(--color-primary-fill) 40%, transparent);
   }
