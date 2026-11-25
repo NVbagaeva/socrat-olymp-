@@ -125,6 +125,8 @@ export function razdel11(
   return {
     razdel: '11',
     klyuch: KLYUCH11,
+    /* Разминки (RZ-…) — не задачи ЕГЭ: их нет в «Собрать вариант» и в ДЗ. */
+    vDomashku: (tip) => !tip.startsWith('RZ-'),
     log: log11,
     vybor: vybor11,
     zagruzka: ZAGRUZKA11,

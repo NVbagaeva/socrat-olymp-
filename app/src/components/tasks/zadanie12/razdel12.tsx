@@ -108,6 +108,9 @@ function Metod12({ r }: { r: Reshenie12 }) {
 export const RAZDEL12: RazdelBanka<Zadacha12, Reshenie12> = {
   razdel: '12',
   klyuch: KLYUCH12,
+  /* Наборы с ответом выбором формулы (12Q.A, 12Q.G): база сверяет только
+     число, в ДЗ их нет. */
+  vDomashku: (tip) => tip !== '12Q.A' && tip !== '12Q.G',
   log: log12,
   vybor: vybor12,
   zagruzka: ZAGRUZKA12,
