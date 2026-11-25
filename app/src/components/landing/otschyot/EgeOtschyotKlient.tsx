@@ -373,9 +373,9 @@ function Kolco({ id, children }: { id: string; children: ReactNode }) {
       <svg viewBox="0 0 200 200" aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id={`eo-g-${id}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#ffc27a" />
-            <stop offset="0.5" stopColor="#f5a04a" />
-            <stop offset="1" stopColor="#e07a2f" />
+            <stop offset="0" style={{ stopColor: 'var(--lend-eo-oranzh-2)' }} />
+            <stop offset="0.5" style={{ stopColor: 'var(--lend-eo-oranzh)' }} />
+            <stop offset="1" style={{ stopColor: 'var(--lend-eo-oranzh-3)' }} />
           </linearGradient>
         </defs>
         <circle className="eo__k-lozhe" cx="100" cy="100" r="86" />
