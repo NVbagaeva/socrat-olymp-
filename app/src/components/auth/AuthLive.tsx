@@ -129,14 +129,15 @@ export function LiveWidget({ variant, className }: AuthWidgetProps) {
           className={clsx('auth-login auth-widget__login', `auth-login--${variant}`, className)}
           href={AUTH_HREF.voyti}
         >
-          {variant === 'app' ? (
-            <span className="auth-login__ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
-                <circle cx="12" cy="8.5" r="3.75" />
-                <path d="M5 19.5c1.3-3.4 3.9-5.25 7-5.25s5.7 1.85 7 5.25" />
-              </svg>
-            </span>
-          ) : null}
+          {/* Значок: в шапке оболочки — всегда; в публичной — только на
+              телефоне рядом с переключателем темы, где «Войти» — кружок
+              44×44 (auth-widget.css). */}
+          <span className="auth-login__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
+              <circle cx="12" cy="8.5" r="3.75" />
+              <path d="M5 19.5c1.3-3.4 3.9-5.25 7-5.25s5.7 1.85 7 5.25" />
+            </svg>
+          </span>
           <span className="auth-login__text">{AUTH_UI.login}</span>
         </Link>
         {variant === 'site' ? <StartButton /> : null}

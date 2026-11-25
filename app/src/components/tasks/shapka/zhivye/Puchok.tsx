@@ -129,7 +129,12 @@ export default function Puchok({ label, avtofokus }: ZhivoyProps) {
           const [sx, sy] = naEkran(PL, x, f(x));
           return (
             <g key={x.toFixed(3)}>
-              <circle cx={sx} cy={sy} r={8} fill="rgb(255 170 90 / 0.35)" />
+              <circle
+                cx={sx}
+                cy={sy}
+                r={8}
+                fill="color-mix(in srgb, var(--chertezh-akcent) 35%, transparent)"
+              />
               <circle className="zhv__tochka--or" cx={sx} cy={sy} r={4} />
             </g>
           );

@@ -554,23 +554,23 @@ function ScenaSvg({
     >
       <defs>
         <radialGradient id={`${id}-yadro`} cx="0.35" cy="0.3" r="0.8">
-          <stop offset="0" stopColor="#eaf2ff" />
-          <stop offset="0.5" stopColor="#5b8fe8" />
-          <stop offset="1" stopColor="#1a4fb0" />
+          <stop offset="0" stopColor="var(--chertezh-zalivka-svet)" />
+          <stop offset="0.5" stopColor="var(--chertezh-setka)" />
+          <stop offset="1" stopColor="var(--chertezh-liniya)" />
         </radialGradient>
         <linearGradient id={`${id}-steklo`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
-          <stop offset="0.18" stopColor="#ffffff" stopOpacity="0.9" />
-          <stop offset="0.5" stopColor="#e6eefc" stopOpacity="0.45" />
-          <stop offset="1" stopColor="#c9d8f4" stopOpacity="0.7" />
+          <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.55" />
+          <stop offset="0.18" stopColor="var(--chertezh-fon)" stopOpacity="0.9" />
+          <stop offset="0.5" stopColor="var(--chertezh-zalivka-svet)" stopOpacity="0.45" />
+          <stop offset="1" stopColor="var(--chertezh-zalivka-siniy)" stopOpacity="0.7" />
         </linearGradient>
         <linearGradient id={`${id}-stolbik`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#5b8fe8" />
-          <stop offset="1" stopColor="#1a4fb0" />
+          <stop offset="0" stopColor="var(--chertezh-setka)" />
+          <stop offset="1" stopColor="var(--chertezh-liniya)" />
         </linearGradient>
         <radialGradient id={`${id}-pol`}>
-          <stop offset="0" stopColor="#1f5fd0" stopOpacity="0.2" />
-          <stop offset="1" stopColor="#1f5fd0" stopOpacity="0" />
+          <stop offset="0" stopColor="var(--chertezh-siniy)" stopOpacity="0.2" />
+          <stop offset="1" stopColor="var(--chertezh-siniy)" stopOpacity="0" />
         </radialGradient>
       </defs>
 

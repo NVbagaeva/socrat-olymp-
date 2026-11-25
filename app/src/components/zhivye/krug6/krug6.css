@@ -6,7 +6,7 @@
   gap: var(--space-2) var(--space-4);
   padding: var(--space-3) var(--space-4);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.55);
+  background: color-mix(in srgb, var(--chertezh-fon) 55%, transparent);
   box-shadow: var(--glass-ring), var(--glass-hi);
 }
 .zv6-a {
@@ -23,10 +23,10 @@
   accent-color: var(--blue-600);
 }
 .zv6-okruzhnost {
-  fill: rgba(255, 255, 255, 0.55);
-  stroke: #12306e;
+  fill: color-mix(in srgb, var(--chertezh-fon) 55%, transparent);
+  stroke: var(--chertezh-liniya);
   stroke-width: 1.8;
-  filter: drop-shadow(0 6px 12px rgba(18, 48, 110, 0.14));
+  filter: drop-shadow(0 6px 12px color-mix(in srgb, var(--chertezh-liniya) 14%, transparent));
 }
 .zv6-liniya-a {
   stroke: var(--zv-zhar);
@@ -34,21 +34,21 @@
   stroke-dasharray: 7 5;
 }
 .zv6-os-tg {
-  stroke: rgba(18, 48, 110, 0.45);
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 45%, transparent);
   stroke-width: 1.6;
 }
 .zv6-luch-tg {
-  stroke: rgba(31, 95, 208, 0.55);
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 55%, transparent);
   stroke-width: 1.4;
   stroke-dasharray: 4 4;
 }
 .zv6-tochka-a {
   fill: var(--zv-zhar);
-  stroke: #fff;
+  stroke: var(--chertezh-fon);
   stroke-width: 2;
 }
 .zv6-proekciya {
-  stroke: rgba(31, 95, 208, 0.6);
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 60%, transparent);
   stroke-width: 1.4;
   stroke-dasharray: 3 3;
 }
@@ -59,27 +59,27 @@
 }
 .zv6-tochka-p {
   fill: var(--zv-sin);
-  stroke: #fff;
+  stroke: var(--chertezh-fon);
   stroke-width: 2.5;
-  filter: drop-shadow(0 0 6px rgba(31, 95, 208, 0.6));
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--chertezh-siniy) 60%, transparent));
 }
 .zv6-koren-krug {
   fill: var(--zv-zhar);
-  stroke: #fff;
+  stroke: var(--chertezh-fon);
   stroke-width: 2;
-  filter: drop-shadow(0 0 6px rgba(240, 138, 36, 0.7));
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--chertezh-akcent) 70%, transparent));
 }
 .zv6-ugol {
   fill: var(--zv-zhar-text);
 }
 .zv6-asimptota {
-  stroke: rgba(18, 48, 110, 0.3);
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 30%, transparent);
   stroke-width: 1.2;
   stroke-dasharray: 5 5;
 }
 .zv6-krivaya-ten {
   fill: none;
-  stroke: rgba(31, 95, 208, 0.2);
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 20%, transparent);
   stroke-width: 2;
   stroke-dasharray: 4 5;
 }
@@ -88,23 +88,23 @@
   stroke: var(--zv-sin);
   stroke-width: 3;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 4px rgba(31, 95, 208, 0.35));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--chertezh-siniy) 35%, transparent));
 }
 .zv6-koren line {
-  stroke: rgba(240, 138, 36, 0.7);
+  stroke: color-mix(in srgb, var(--chertezh-akcent) 70%, transparent);
   stroke-width: 1.3;
   stroke-dasharray: 3 3;
 }
 .zv6-koren circle {
   fill: var(--zv-zhar);
-  stroke: #fff;
+  stroke: var(--chertezh-fon);
   stroke-width: 2;
 }
 .zv6-koren.is-nuzhnyy circle {
-  filter: drop-shadow(0 0 8px rgba(240, 138, 36, 0.9));
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--chertezh-akcent) 90%, transparent));
 }
 .zv6-svyaz {
-  stroke: rgba(31, 95, 208, 0.45);
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 45%, transparent);
   stroke-width: 1.2;
   stroke-dasharray: 2 4;
 }
@@ -134,21 +134,21 @@
   min-height: 40px;
   padding: 2px 10px;
   border-radius: 12px;
-  background: rgba(31, 95, 208, 0.06);
+  background: color-mix(in srgb, var(--chertezh-siniy) 6%, transparent);
   color: var(--color-text-tertiary);
   font-size: 16px;
 }
 .zv6-korni li.is-est {
-  background: #fff4e6;
+  background: var(--chertezh-akcent-zalivka);
   color: var(--zv-zhar-text);
-  box-shadow: 0 0 0 1px rgba(240, 138, 36, 0.35);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--chertezh-akcent) 35%, transparent);
 }
 .zv6-korni li.is-nuzhnyy {
   background: var(--zv-zhar);
-  color: #fff;
+  color: var(--chertezh-fon);
 }
 .zv6-korni li.is-nuzhnyy .katex {
-  color: #fff;
+  color: var(--chertezh-fon);
 }
 .zv6-nuzhnyy {
   font-weight: 650;

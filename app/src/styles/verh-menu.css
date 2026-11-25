@@ -135,3 +135,18 @@
 .nav-drop--css:is(:hover, :focus-within) .nav-drop__button svg {
   transform: rotate(180deg);
 }
+
+/* С переключателем темы в шапке (пока на проверке, html[data-tema-vidna])
+   пункты уходят в бургер на ступень раньше, порядок тот же. */
+/* До 1920: в контейнере 1360px со входом («Войти» и «Начать бесплатно»)
+   шестой пункт рядом с переключателем не помещается. */
+@media (min-width: 1024px) and (max-width: 1919.98px) {
+  html[data-tema-vidna] .verh-menu__p--1 {
+    display: none;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1439.98px) {
+  html[data-tema-vidna] .verh-menu__p--2 {
+    display: none;
+  }
+}

@@ -576,7 +576,11 @@
   inset: 22% 8% 0;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(224 122 47 / 0.22), transparent);
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--chertezh-akcent) 22%, transparent),
+    transparent
+  );
   filter: blur(8px);
 }
 .z14-kotik__oblako,
@@ -739,7 +743,7 @@
   fill: var(--slate-600);
 }
 .ok14-okr {
-  fill: rgb(61 121 224 / 0.04);
+  fill: color-mix(in srgb, var(--chertezh-siniy) 4%, transparent);
   stroke: var(--color-primary);
   stroke-width: 2.2;
 }
@@ -752,7 +756,7 @@
   fill: var(--graph-accent);
 }
 .ok14-vynoska {
-  stroke: rgb(31 95 208 / 0.4);
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 40%, transparent);
   stroke-width: 1;
   stroke-dasharray: 3 3;
 }
@@ -795,7 +799,7 @@
   gap: calc(var(--ok14-ed) * var(--ok14-zazor) * 1px);
   border-radius: 10px;
   background: color-mix(in srgb, var(--color-surface) 55%, transparent);
-  box-shadow: inset 0 0 0 1.5px rgb(31 95 208 / 0.28);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--chertezh-siniy) 28%, transparent);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   transition:
@@ -806,25 +810,25 @@
   content: '';
   position: absolute;
   inset: 3px;
-  border: 1.5px dashed rgb(31 95 208 / 0.25);
+  border: 1.5px dashed color-mix(in srgb, var(--chertezh-siniy) 25%, transparent);
   border-radius: 8px;
   pointer-events: none;
 }
 .ok14-yacheyka.is-zhdyot {
   box-shadow:
-    inset 0 0 0 1.5px rgb(31 95 208 / 0.5),
-    0 0 0 4px rgb(61 121 224 / 0.12);
+    inset 0 0 0 1.5px color-mix(in srgb, var(--chertezh-siniy) 50%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--chertezh-siniy) 12%, transparent);
 }
 .ok14-yacheyka.is-navedena {
   background: color-mix(in srgb, var(--color-surface-info) 90%, transparent);
   box-shadow:
     inset 0 0 0 2px var(--color-primary),
-    0 0 0 5px rgb(61 121 224 / 0.22);
+    0 0 0 5px color-mix(in srgb, var(--chertezh-siniy) 22%, transparent);
 }
 .ok14-yacheyka.is-podsvetka {
   box-shadow:
     inset 0 0 0 2px var(--graph-accent),
-    0 0 0 5px rgb(224 122 47 / 0.25);
+    0 0 0 5px color-mix(in srgb, var(--chertezh-akcent) 25%, transparent);
 }
 .ok14-yacheyka__cel {
   position: absolute;
@@ -857,11 +861,11 @@
   padding: 0 2px;
   border: 0;
   border-radius: 10px;
-  background: linear-gradient(170deg, #fff, var(--color-surface-info));
+  background: linear-gradient(170deg, var(--chertezh-fon), var(--color-surface-info));
   box-shadow:
-    inset 0 0 0 1px rgb(31 95 208 / 0.22),
-    0 0 14px -2px rgb(61 121 224 / 0.45),
-    0 4px 10px -6px rgb(16 40 100 / 0.35);
+    inset 0 0 0 1px color-mix(in srgb, var(--chertezh-siniy) 22%, transparent),
+    0 0 14px -2px color-mix(in srgb, var(--chertezh-siniy) 45%, transparent),
+    0 4px 10px -6px color-mix(in srgb, var(--chertezh-tekst) 35%, transparent);
   color: var(--color-text);
   font-size: calc(var(--ok14-ed) * var(--ok14-kegl) * 1px);
   line-height: 1;
@@ -891,18 +895,18 @@
   transform: translateY(-2px);
   box-shadow:
     inset 0 0 0 2px var(--color-primary),
-    0 0 0 4px rgb(61 121 224 / 0.25),
-    0 8px 18px -8px rgb(31 95 208 / 0.6);
+    0 0 0 4px color-mix(in srgb, var(--chertezh-siniy) 25%, transparent),
+    0 8px 18px -8px color-mix(in srgb, var(--chertezh-siniy) 60%, transparent);
 }
 .ok14-karta.is-verno {
-  background: linear-gradient(170deg, #fff, var(--color-uspeh-soft));
+  background: linear-gradient(170deg, var(--chertezh-fon), var(--color-uspeh-soft));
   box-shadow:
     inset 0 0 0 2px var(--color-uspeh),
     0 0 14px -2px rgb(10 154 110 / 0.45);
 }
 .ok14-karta.is-neverno,
 .ok14-karta.is-pusto {
-  background: linear-gradient(170deg, #fff, var(--color-error-soft));
+  background: linear-gradient(170deg, var(--chertezh-fon), var(--color-error-soft));
   box-shadow:
     inset 0 0 0 2px var(--color-error),
     0 0 14px -2px rgb(220 38 38 / 0.45);
@@ -932,7 +936,7 @@
   transform: scale(1.06);
   box-shadow:
     inset 0 0 0 2px var(--color-primary),
-    0 16px 30px -10px rgb(31 95 208 / 0.6);
+    0 16px 30px -10px color-mix(in srgb, var(--chertezh-siniy) 60%, transparent);
 }
 .ok14.is-tyanu,
 .ok14.is-tyanu * {
@@ -956,7 +960,7 @@
 }
 .ok14-panel.is-zhdyot {
   box-shadow:
-    inset 0 0 0 2px rgb(31 95 208 / 0.35),
+    inset 0 0 0 2px color-mix(in srgb, var(--chertezh-siniy) 35%, transparent),
     var(--glass-shadow);
 }
 .ok14-panel__title {
@@ -1023,7 +1027,7 @@
   cursor: pointer;
 }
 .ok14-razbor__punkt.is-aktivna .ok14-razbor__knopka {
-  background: #fff;
+  background: var(--chertezh-fon);
   box-shadow: inset 0 0 0 2px var(--graph-accent);
 }
 .ok14-razbor__cep {
@@ -1104,7 +1108,7 @@
   border-color: var(--color-primary);
   box-shadow:
     inset 0 0 0 1px var(--color-primary),
-    0 0 0 4px rgb(61 121 224 / 0.15);
+    0 0 0 4px color-mix(in srgb, var(--chertezh-siniy) 15%, transparent);
 }
 .ok14-rezhim__title {
   font-weight: 700;
@@ -1230,17 +1234,17 @@
   position: absolute;
   z-index: 2;
   translate: -50% -50%;
-  color: #e3877d;
+  color: var(--chertezh-akcent);
   pointer-events: none;
   animation: kotik-serdce 1.5s ease-out forwards;
 }
 .kotik3d__serdce svg {
   display: block;
   fill: currentColor;
-  filter: drop-shadow(0 2px 6px rgb(194 106 67 / 0.45));
+  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--chertezh-akcent) 45%, transparent));
 }
 .kotik3d__serdce:nth-child(odd) {
-  color: #c26a43;
+  color: var(--chertezh-akcent);
 }
 @keyframes kotik-serdce {
   0% {
@@ -1266,7 +1270,7 @@
   border: 0;
   border-radius: 999px;
   background: color-mix(in srgb, var(--color-surface) 75%, transparent);
-  color: #7a6660;
+  color: var(--chertezh-akcent-tekst);
   font-size: 12px;
 }
 .kotik3d__fps {
@@ -1277,7 +1281,7 @@
   padding: 2px 6px;
   border-radius: 6px;
   background: rgb(0 0 0 / 0.6);
-  color: #fff;
+  color: var(--chertezh-fon);
   font: 11px/1.3 monospace;
 }
 
@@ -1299,12 +1303,12 @@
   background: linear-gradient(
     160deg,
     color-mix(in srgb, var(--color-surface) 95%, transparent),
-    rgb(251 236 228 / 0.95)
+    color-mix(in srgb, var(--chertezh-akcent-zalivka) 95%, transparent)
   );
   box-shadow:
-    0 0 0 1px rgb(194 106 67 / 0.2),
-    0 10px 24px -10px rgb(122 70 48 / 0.45);
-  color: #4a3a35;
+    0 0 0 1px color-mix(in srgb, var(--chertezh-akcent) 20%, transparent),
+    0 10px 24px -10px color-mix(in srgb, var(--chertezh-akcent-tekst) 45%, transparent);
+  color: var(--chertezh-akcent-tekst);
   font-size: 14px;
   white-space: nowrap;
   animation: kotik-podskazka 0.4s ease-out both;
@@ -1321,7 +1325,7 @@
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: #7a6660;
+  color: var(--chertezh-akcent-tekst);
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
@@ -1351,13 +1355,13 @@
   background: linear-gradient(
     160deg,
     color-mix(in srgb, var(--color-surface) 82%, transparent),
-    rgb(249 235 228 / 0.74)
+    color-mix(in srgb, var(--chertezh-akcent-zalivka) 74%, transparent)
   );
   box-shadow:
-    0 0 0 1px rgb(194 106 67 / 0.14),
+    0 0 0 1px color-mix(in srgb, var(--chertezh-akcent) 14%, transparent),
     inset 0 1px 0 color-mix(in srgb, var(--color-surface) 90%, transparent),
-    0 30px 60px -24px rgb(122 70 48 / 0.5);
-  color: #4a3a35;
+    0 30px 60px -24px color-mix(in srgb, var(--chertezh-akcent-tekst) 50%, transparent);
+  color: var(--chertezh-akcent-tekst);
 }
 .kotik-okno__shapka {
   display: flex;
@@ -1381,7 +1385,11 @@
 }
 .kotik-okno .kotik3d {
   border-radius: 20px;
-  background: radial-gradient(closest-side at 50% 60%, rgb(255 214 192 / 0.5), transparent);
+  background: radial-gradient(
+    closest-side at 50% 60%,
+    color-mix(in srgb, var(--chertezh-akcent-svet) 50%, transparent),
+    transparent
+  );
 }
 .kotik-okno__niz {
   display: flex;
@@ -1393,11 +1401,11 @@
 .kotik-okno__schet {
   display: inline-flex;
   gap: 4px;
-  color: rgb(194 106 67 / 0.3);
+  color: color-mix(in srgb, var(--chertezh-akcent) 30%, transparent);
   font-size: 22px;
 }
 .kotik-okno__schet .is-da {
-  color: #e3877d;
+  color: var(--chertezh-akcent);
 }
 @media (prefers-reduced-motion: reduce) {
   .kotik3d__serdce,

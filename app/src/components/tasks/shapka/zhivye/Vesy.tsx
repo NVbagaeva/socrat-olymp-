@@ -44,19 +44,23 @@ function Girka({ x, y, aktiv }: { x: number; y: number; aktiv?: boolean }) {
         width={11}
         height={11}
         rx={2.5}
-        fill="rgb(205 222 250 / 0.85)"
-        stroke={aktiv ? '#f08a2c' : 'var(--blue-600)'}
+        fill="color-mix(in srgb, var(--chertezh-zalivka-siniy) 85%, transparent)"
+        stroke={aktiv ? 'var(--chertezh-akcent)' : 'var(--blue-600)'}
         strokeWidth={1.3}
       />
       <circle
         cx={x}
         cy={y - 13.5}
         r={2.6}
-        fill="rgb(225 236 252)"
-        stroke={aktiv ? '#f08a2c' : 'var(--blue-600)'}
+        fill="var(--chertezh-zalivka-svet)"
+        stroke={aktiv ? 'var(--chertezh-akcent)' : 'var(--blue-600)'}
         strokeWidth={1.1}
       />
-      <path d={`M${x - 3} ${y - 9}v6`} stroke="rgb(255 255 255 / 0.9)" strokeWidth={1.5} />
+      <path
+        d={`M${x - 3} ${y - 9}v6`}
+        stroke="color-mix(in srgb, var(--chertezh-blik) 90%, transparent)"
+        strokeWidth={1.5}
+      />
     </g>
   );
 }
@@ -142,7 +146,7 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
     <g>
       <path
         d={`M${c[0] - 38} ${c[1]}Q${c[0]} ${c[1] + 22} ${c[0] + 38} ${c[1]}Z`}
-        fill="rgb(200 220 250 / 0.6)"
+        fill="color-mix(in srgb, var(--chertezh-zalivka-siniy) 60%, transparent)"
         stroke="var(--blue-600)"
         strokeWidth={1.6}
       />
@@ -151,7 +155,7 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
         cy={c[1]}
         rx={38}
         ry={5}
-        fill="rgb(235 243 255 / 0.85)"
+        fill="color-mix(in srgb, var(--chertezh-zalivka-svet) 85%, transparent)"
         stroke="var(--blue-600)"
         strokeWidth={1.4}
       />
@@ -176,13 +180,13 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
           cy={214}
           rx={50}
           ry={11}
-          fill="rgb(200 220 250 / 0.7)"
+          fill="color-mix(in srgb, var(--chertezh-zalivka-siniy) 70%, transparent)"
           stroke="var(--blue-600)"
           strokeWidth={1.5}
         />
         <path
           d="M124 80L121 206H139L136 80Z"
-          fill="rgb(205 222 250 / 0.8)"
+          fill="color-mix(in srgb, var(--chertezh-zalivka-siniy) 80%, transparent)"
           stroke="var(--blue-600)"
           strokeWidth={1.5}
         />
@@ -190,7 +194,7 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
           cx={130}
           cy={42}
           r={9}
-          fill="rgb(225 236 252)"
+          fill="var(--chertezh-zalivka-svet)"
           stroke="var(--blue-600)"
           strokeWidth={1.5}
         />
@@ -200,7 +204,7 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
         {/* Коромысло. */}
         <path
           d={`M${konL[0]} ${konL[1]}L${konR[0]} ${konR[1]}`}
-          stroke="rgb(190 212 248)"
+          stroke="var(--chertezh-zalivka-siniy)"
           strokeWidth={8}
           strokeLinecap="round"
         />
@@ -213,7 +217,7 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
           cx={konL[0]}
           cy={konL[1]}
           r={4.5}
-          fill="rgb(225 236 252)"
+          fill="var(--chertezh-zalivka-svet)"
           stroke="var(--blue-600)"
           strokeWidth={1.3}
         />
@@ -221,7 +225,7 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
           cx={konR[0]}
           cy={konR[1]}
           r={4.5}
-          fill="rgb(225 236 252)"
+          fill="var(--chertezh-zalivka-svet)"
           stroke="var(--blue-600)"
           strokeWidth={1.3}
         />
@@ -229,7 +233,7 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
           cx={OS[0]}
           cy={OS[1]}
           r={7}
-          fill="rgb(225 236 252)"
+          fill="var(--chertezh-zalivka-svet)"
           stroke="var(--blue-600)"
           strokeWidth={1.5}
         />
@@ -244,7 +248,7 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
             height={20}
             rx={3}
             fill="url(#vesy-or)"
-            stroke="#e07a2f"
+            stroke="var(--chertezh-akcent)"
             strokeWidth={1.4}
           />
           <text
@@ -252,15 +256,15 @@ export default function Vesy({ label, tiho, avtofokus }: ZhivoyProps) {
             x={chashaL[0] - 22}
             y={chashaL[1] - 7}
             textAnchor="middle"
-            style={{ fill: '#a24e12' }}
+            style={{ fill: 'var(--chertezh-akcent-tekst)' }}
           >
             x
           </text>
         </g>
         <defs>
           <linearGradient id="vesy-or" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#ffd7a8" />
-            <stop offset="1" stopColor="#f5a04a" />
+            <stop offset="0" stopColor="var(--chertezh-akcent-svet)" />
+            <stop offset="1" stopColor="var(--chertezh-akcent)" />
           </linearGradient>
         </defs>
         {storony.map((_, i) => {
