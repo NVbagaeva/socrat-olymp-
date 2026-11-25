@@ -55,13 +55,13 @@
   background:
     radial-gradient(
       closest-side,
-      color-mix(in srgb, var(--color-surface) 95%, transparent),
+      color-mix(in srgb, var(--onb-svet-belyy) 95%, transparent),
       transparent 18%
     ),
     linear-gradient(
         90deg,
         transparent,
-        color-mix(in srgb, var(--color-surface) 75%, transparent) 50%,
+        color-mix(in srgb, var(--onb-svet-belyy) 75%, transparent) 50%,
         transparent
       )
       center / 100% 3px no-repeat,
@@ -85,7 +85,7 @@
   background: linear-gradient(
     100deg,
     transparent 42%,
-    color-mix(in srgb, var(--color-surface) 45%, transparent) 50%,
+    color-mix(in srgb, var(--onb-svet-belyy) 45%, transparent) 50%,
     transparent 58%
   );
   background-size: 300% 100%;
@@ -105,8 +105,8 @@
   mix-blend-mode: plus-lighter;
   background: radial-gradient(
     circle,
-    var(--color-surface) 0%,
-    color-mix(in srgb, var(--color-accent) 70%, var(--color-surface)) 20%,
+    var(--onb-svet-belyy) 0%,
+    color-mix(in srgb, var(--color-accent) 70%, var(--onb-svet-belyy)) 20%,
     color-mix(in srgb, var(--color-accent) 35%, transparent) 42%,
     transparent 70%
   );
@@ -126,7 +126,7 @@
   pointer-events: none;
   background: radial-gradient(
     circle,
-    color-mix(in srgb, var(--color-surface) 85%, transparent) 0%,
+    color-mix(in srgb, var(--onb-svet-belyy) 85%, transparent) 0%,
     color-mix(in srgb, var(--color-accent-soft) 45%, transparent) 30%,
     transparent 68%
   );
@@ -174,14 +174,14 @@
   z-index: 1;
   width: min(880px, calc(100% - 48px));
   padding: var(--space-10) var(--space-12) var(--space-8);
-  border: 1px solid color-mix(in srgb, var(--color-surface) 75%, transparent);
+  border: 1px solid var(--onb-kartochka-kromka);
   border-radius: 28px;
   background: color-mix(in srgb, var(--color-surface-info) 84%, transparent);
   backdrop-filter: blur(18px) saturate(1.2);
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
   box-shadow:
-    0 30px 80px color-mix(in srgb, var(--color-surface-inverse) 28%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 80%, transparent);
+    0 30px 80px var(--onb-kartochka-ten),
+    inset 0 1px 0 var(--onb-kartochka-blik);
   text-align: center;
   outline: none;
   transform: translateY(24px);

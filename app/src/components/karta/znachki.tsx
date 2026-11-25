@@ -131,8 +131,8 @@ const ZNACHKI: Record<number, ReactNode> = {
   19: (
     <g {...LINIYA}>
       <path d="M-10 -5 H10 M-10 5 H10" />
-      <circle cx={4} cy={-5} r={2.6} fill="var(--karta-led, #fff)" />
-      <circle cx={-4} cy={5} r={2.6} fill="var(--karta-led, #fff)" />
+      <circle cx={4} cy={-5} r={2.6} fill="var(--karta-znachok-fon, var(--color-surface))" />
+      <circle cx={-4} cy={5} r={2.6} fill="var(--karta-znachok-fon, var(--color-surface))" />
     </g>
   ),
   20: (

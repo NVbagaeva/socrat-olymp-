@@ -6,6 +6,8 @@
      node scripts/check-auth.mjs --no-header               вход есть, кнопки в шапке нет
      node scripts/check-auth.mjs --disabled                сборка без входа
      node scripts/check-auth.mjs --gallery <папка>         только снимки ключевых экранов
+     node scripts/check-auth.mjs --tema-kabinety [папка]   тёмная тема входа и кабинетов:
+                                                           контраст axe и снимки светлая/тёмная
      NEXT_PUBLIC_ZHURNAL=1 node scripts/check-auth.mjs --zhurnal [папка]
                                                            только журнал решения задач
 
@@ -140,8 +142,14 @@ const SHOTS_KARTA = process.argv.includes('--shots-karta')
   : null;
 /* Сценарии «← К карте» и карты на телефоне (pnpm test:karta-nazad). */
 const KARTA_NAZAD = process.argv.includes('--karta-nazad');
+/* Тёмная тема входа, кабинетов и онбординга (scripts/lib/tema-kabinety.mjs). */
+const TEMA_KABINETY = process.argv.includes('--tema-kabinety');
 const SHOTS =
-  GALLERY !== null || GALLERY_Z8 !== null || GALLERY_DZ !== null || SHOTS_KARTA !== null
+  GALLERY !== null ||
+  GALLERY_Z8 !== null ||
+  GALLERY_DZ !== null ||
+  SHOTS_KARTA !== null ||
+  TEMA_KABINETY
     ? null
     : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null);
 if (SHOTS !== null) fs.mkdirSync(SHOTS, { recursive: true });
@@ -5264,7 +5272,14 @@ try {
   else if (process.argv.includes('--progress')) await runProgress();
   else if (process.argv.includes('--dz2')) await runDz2();
   else if (process.argv.includes('--uvedomleniya')) await runUvedomleniya();
-  else if (SHOTS_KARTA !== null || KARTA_NAZAD) {
+  else if (TEMA_KABINETY) {
+    const { temaKabinety } = await import('./lib/tema-kabinety.mjs');
+    const dir = process.argv[process.argv.indexOf('--tema-kabinety') + 1];
+    await temaKabinety(
+      { browser, SITE, makeMock, installMock, registerInMock, login, check },
+      dir && !dir.startsWith('--') ? dir : null,
+    );
+  } else if (SHOTS_KARTA !== null || KARTA_NAZAD) {
     const K = await import('./lib/karta-nazad.mjs');
     const deps = { browser, SITE, mock: makeMock(), installMock, registerInMock, login, check };
     if (SHOTS_KARTA !== null) await K.snimkiKarty(deps, SHOTS_KARTA.dir, SHOTS_KARTA.pristavka);

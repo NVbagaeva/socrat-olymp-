@@ -482,12 +482,12 @@ export function KartaEkran({
                     </clipPath>
                   ))}
                   <linearGradient id="karta-led" x1="0" y1="0" x2="0.3" y2="1">
-                    <stop offset="0" stopColor="#ffffff" />
-                    <stop offset="1" stopColor="#dbeafe" />
+                    <stop offset="0" stopColor="var(--karta-belyy)" />
+                    <stop offset="1" stopColor="var(--karta-led-niz)" />
                   </linearGradient>
                   <radialGradient id="karta-svet">
-                    <stop offset="0" stopColor="#ffd9a8" stopOpacity="0.95" />
-                    <stop offset="1" stopColor="#ffb55c" stopOpacity="0" />
+                    <stop offset="0" stopColor="var(--karta-svet-yadro)" stopOpacity="0.95" />
+                    <stop offset="1" stopColor="var(--karta-svet-kray)" stopOpacity="0" />
                   </radialGradient>
                 </defs>
 

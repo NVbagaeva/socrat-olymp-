@@ -296,6 +296,7 @@ export function IntroSplash(props: IntroSplashProps) {
     return () => {
       disposed = true;
       if (raf !== 0) cancelAnimationFrame(raf);
+      fx.dispose();
       document.removeEventListener('visibilitychange', onVisibility);
       skipRequest.current = () => {};
       redraw.current = () => {};

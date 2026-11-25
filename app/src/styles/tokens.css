@@ -1141,3 +1141,111 @@
     --scroll-track: var(--noch-bg);
   }
 }
+
+/* ── PR 3в: кабинеты, вход, онбординг ── */
+/* Раскладка кабинета (kab-), «Карта ЕГЭ» (karta-), студия аватара,
+   онбординг (onb-). Светлые значения — прежние вписанные цвета этих
+   компонентов, светлая тема не меняется.
+
+   Карта — картинка на своём фоне (льдины в море): в тёмной теме она та
+   же, поэтому всё, что лежит НА карте (подписи островов, таблички,
+   маячок, заливки), берёт постоянные --karta-* без тёмных значений:
+   тёмные чернила на светлом льду. Тёмные значения — только у того, что
+   вокруг карты: фон кабинета, панель раздела, список на телефоне. */
+:root {
+  /* Фон кабинета: блик сверху и мягкий голубой перелив. */
+  --kab-fon-blik: rgb(255 255 255 / 0.9);
+  --kab-fon-verh: #eef5ff;
+  --kab-fon-niz: #e4effc;
+  /* Пункт меню кабинета: наведение; подложка пункта на планшете. */
+  --kab-punkt-hover: rgb(255 255 255 / 0.6);
+  --kab-punkt-fon: rgb(255 255 255 / 0.55);
+  /* Карточка «Ключевые схемы»: плитка с треугольником. */
+  --kab-kartinka-1: #dbeafe;
+  --kab-kartinka-2: #f5f9ff;
+  --kab-kartinka-3: #ffe9d6;
+  --kab-treugolnik-1: #dbeafe;
+  --kab-treugolnik-2: #60a5fa;
+  --kab-treugolnik-rebro: #ffffff;
+  --kab-treugolnik-osnova: #1f5fd0;
+
+  /* Карта: постоянные цвета (картинка одна в обеих темах). */
+  --karta-more: #9ad3f6;
+  --karta-belyy: #ffffff;
+  --karta-led: #f3f8ff;
+  --karta-led-niz: #dbeafe;
+  --karta-tuman: rgb(228 238 250 / 0.55);
+  --karta-teplo: #f0a04a;
+  --karta-teplo-2: #e77f2e;
+  --karta-chernila: #0e2350;
+  --karta-chernila-sinij: #1f5fd0;
+  --karta-chernila-sinij-tekst: #1a4fb0;
+  --karta-kolco-obvod: #e8f0fc;
+  --karta-terra-na-karte: #c2502e;
+  --karta-ostrov-svobodnyy: rgb(214 230 248 / 0.78);
+  --karta-ostrov-v-processe: rgb(142 196 250 / 0.3);
+  --karta-ostrov-osvoeno: rgb(247 168 84 / 0.66);
+  --karta-svet-yadro: #ffd9a8;
+  --karta-svet-kray: #ffb55c;
+  --karta-mayak-ten: rgb(160 80 20 / 0.35);
+  --karta-proliv-tekst: rgb(17 60 140 / 0.62);
+  --karta-tablichka-ten: rgb(31 95 208 / 0.22);
+  /* Отладочные контуры (?otladka): ярко-розовый поверх картинки. */
+  --karta-otladka: #ff0050;
+  --karta-otladka-tekst: #b00030;
+  --karta-otladka-proliv: #0070ff;
+  /* Карта: то, что вокруг неё, — по теме. */
+  --karta-panel-fon: rgb(247 251 255 / 0.9);
+  --karta-svyazka-fon: rgb(255 255 255 / 0.5);
+  --karta-ps-uzel: rgb(255 255 255 / 0.86);
+  /* «Просвет» в значках заданий (кружки ползунка №19) — цвет под значком. */
+  --karta-znachok-prosvet: #f3f8ff;
+
+  /* Студия аватара: свет за превью, кромка и блик образца цвета. */
+  --avatar-studio-svet: rgb(255 255 255 / 85%);
+  --avatar-obrazec-kromka: rgb(25 35 55 / 12%);
+  --avatar-obrazec-blik: rgb(255 255 255 / 36%);
+
+  /* Онбординг: затемнение под туром; окно заставки; свет заставки
+     (блики, сердцевина, частицы canvas — fx2d.ts читает их отсюда).
+     Свет — светлый в обеих темах: он складывается с картинкой. */
+  --onb-zatemnenie: color-mix(in srgb, var(--color-text) 48%, transparent);
+  --onb-kartochka-kromka: rgb(255 255 255 / 0.75);
+  --onb-kartochka-blik: rgb(255 255 255 / 0.8);
+  --onb-kartochka-ten: rgb(11 31 69 / 0.28);
+  --onb-svet-belyy: #ffffff;
+  --onb-svet-goluboy: #9bc0f2;
+  --onb-svet-teplyy: #ffc88c;
+  --onb-svet-kray: #ffdcaa;
+  --onb-svet-luch: #ffebcd;
+}
+
+@media screen {
+  :root[data-tema='dark']:not([data-sheet-theme]) {
+    --kab-fon-blik: rgb(70 130 255 / 0.12);
+    --kab-fon-verh: var(--noch-bg-2);
+    --kab-fon-niz: var(--noch-bg);
+    --kab-punkt-hover: rgb(160 195 255 / 0.08);
+    --kab-punkt-fon: rgb(22 36 72 / 0.55);
+    --kab-kartinka-1: #1d3a78;
+    --kab-kartinka-2: var(--noch-surface-2);
+    --kab-kartinka-3: #3a2a26;
+    --kab-treugolnik-1: #cfe0ff;
+    --kab-treugolnik-2: #4f8cf5;
+    --kab-treugolnik-rebro: #eef3ff;
+    --kab-treugolnik-osnova: var(--noch-blue);
+
+    --karta-panel-fon: rgb(18 30 60 / 0.94);
+    --karta-svyazka-fon: rgb(22 36 72 / 0.5);
+    --karta-ps-uzel: rgb(22 36 72 / 0.86);
+    --karta-znachok-prosvet: var(--noch-surface-2);
+
+    --avatar-studio-svet: rgb(127 176 255 / 0.18);
+    --avatar-obrazec-kromka: rgb(200 220 255 / 0.3);
+
+    --onb-zatemnenie: rgb(2 6 20 / 0.68);
+    --onb-kartochka-kromka: rgb(160 195 255 / 0.22);
+    --onb-kartochka-blik: rgb(200 220 255 / 0.14);
+    --onb-kartochka-ten: rgb(0 0 0 / 0.5);
+  }
+}
