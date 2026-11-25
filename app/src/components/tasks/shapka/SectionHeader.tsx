@@ -10,6 +10,7 @@ import { KARTA_ZHURNALY } from '@/lib/karta/katalog';
 import { opornyeRazdela } from '@/lib/shapka/opornyeRazdela';
 import { ChasyIkonka, ZvezdaIkonka } from '@/components/tasks/stsena';
 import { KoltsoProgressa } from './KoltsoProgressa';
+import { ShapkaKarkas } from './ShapkaKarkas';
 import { ZhivayaKartinka } from './ZhivayaKartinka';
 import '@/components/tasks/steklo/steklo.css';
 import './shapka.css';
@@ -83,41 +84,11 @@ export function SectionHeader({ kod, pereklyuchatel, actions }: SectionHeaderPro
       {pereklyuchatel === undefined ? null : (
         <div className="shapka-pereklyuchatel">{pereklyuchatel}</div>
       )}
-      <header className="shapka" data-razdel={kod}>
-        {/* На телефоне — короткое название, как в меню: полное в узкой
-            колонке ломается на четыре строки. */}
-        <h1
-          className={
-            korotko === null
-              ? 't-h1 shapka__title'
-              : 't-h1 shapka__title shapka__title--est-korotko'
-          }
-        >
-          <span className="shapka__title-polno">{title}</span>
-          {korotko === null ? null : <span className="shapka__title-korotko">{korotko}</span>}
-        </h1>
-        <div className="shapka__text">
-          <ul className="shapka__chipy">
-            <li className="shapka__chip shapka__chip--uroven">{T.uroven}</li>
-            <li className="shapka__chip">{T.chast(chast)}</li>
-            <li className="shapka__chip shapka__chip--warm">
-              <span className="shapka__chip-ik" aria-hidden="true">
-                <ZvezdaIkonka />
-              </span>
-              {T.ball(ball)}
-            </li>
-            <li className="shapka__chip">
-              <span className="shapka__chip-ik" aria-hidden="true">
-                <ChasyIkonka />
-              </span>
-              {T.minuty(s.minuty)}
-            </li>
-          </ul>
-          <p className="shapka__lead">{s.lead}</p>
-          <EtoZheV level="profile" slug={task.slug} />
-          {actions === undefined ? null : <div className="shapka__actions">{actions}</div>}
-        </div>
-        <div className="shapka__media" data-ill="header">
+      <ShapkaKarkas
+        razdel={kod}
+        title={title}
+        korotko={korotko}
+        media={
           <KoltsoProgressa
             hranenie={hranenie}
             logKey={KARTA_ZHURNALY[hranenie] ?? null}
@@ -135,8 +106,28 @@ export function SectionHeader({ kod, pereklyuchatel, actions }: SectionHeaderPro
               obyomnaya={s.obyomnaya}
             />
           </KoltsoProgressa>
-        </div>
-      </header>
+        }
+      >
+        <ul className="shapka__chipy">
+          <li className="shapka__chip shapka__chip--uroven">{T.uroven}</li>
+          <li className="shapka__chip">{T.chast(chast)}</li>
+          <li className="shapka__chip shapka__chip--warm">
+            <span className="shapka__chip-ik" aria-hidden="true">
+              <ZvezdaIkonka />
+            </span>
+            {T.ball(ball)}
+          </li>
+          <li className="shapka__chip">
+            <span className="shapka__chip-ik" aria-hidden="true">
+              <ChasyIkonka />
+            </span>
+            {T.minuty(s.minuty)}
+          </li>
+        </ul>
+        <p className="shapka__lead">{s.lead}</p>
+        <EtoZheV level="profile" slug={task.slug} />
+        {actions === undefined ? null : <div className="shapka__actions">{actions}</div>}
+      </ShapkaKarkas>
     </>
   );
 }
