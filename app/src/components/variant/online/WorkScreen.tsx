@@ -499,7 +499,7 @@ export function WorkScreen({
               dangerouslySetInnerHTML={{ __html: task.statement }}
             />
           ) : (
-            <div className="kz-ryad">
+            <div className="kzad-ryad">
               <KartinkaZadachi
                 src={task.kartinka.src}
                 {...(task.kartinka.src280 === undefined ? {} : { src280: task.kartinka.src280 })}
