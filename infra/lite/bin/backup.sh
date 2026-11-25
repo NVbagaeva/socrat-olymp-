@@ -96,6 +96,13 @@ if [ "$(psql_db -tAc "select to_regprocedure('public.notify_svernut()') is not n
   log "Уведомления: удалено $(psql_db -tAc 'select public.notify_svernut()')"
 fi
 
+# Журнал согласий (политика, п. 6.4): записи удалённых аккаунтов
+# старше трёх лет. pg_cron на своём сервере нет — запуск здесь.
+step="срок хранения согласий"
+if [ "$(psql_db -tAc "select to_regprocedure('public.purge_old_consents()') is not null")" = "t" ]; then
+  log "Согласия: удалено $(psql_db -tAc 'select public.purge_old_consents()')"
+fi
+
 rm -f "$dump" "$meta"
 printf '%s %s\n' "$(date -u +%s)" "$name" > "$STATE_DIR/last-backup"
 trap - ERR

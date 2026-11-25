@@ -14,7 +14,7 @@ import { useCallback, useEffect, useId, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Button, Card, FieldLabel, FieldMessage, Input } from '@/components/ui';
 import { DZ, dueRu, dzError } from '@/content/dz';
-import type { HwListItem, TutorClass } from '@/lib/dz/api';
+import type { ClassPreview, HwListItem, TutorClass } from '@/lib/dz/api';
 import { DZ_HREF, homeworkHref, issueHref, klassHref } from '@/lib/dz/links';
 import { statusOf } from '@/lib/dz/results';
 import './dz.css';
@@ -255,10 +255,12 @@ export function JoinClassForm({
   const [code, setCode] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const [preview, setPreview] = useState<ClassPreview | null>(null);
   const [busy, setBusy] = useState(false);
   const id = useId();
 
-  async function join(event: FormEvent) {
+  /* Шаг 1: к кому вступаешь и что увидит учитель. */
+  async function check(event: FormEvent) {
     event.preventDefault();
     if (code.trim() === '') {
       setError(DZ_ERRORS_EMPTY);
@@ -266,11 +268,11 @@ export function JoinClassForm({
     }
     setBusy(true);
     setError(null);
+    setDone(null);
     try {
-      const joined = await (await api()).joinClass(code);
-      setDone(DZ.join.done(joined.className, joined.tutorName));
-      setCode('');
-      onJoined?.();
+      const found = await (await api()).previewClass(code);
+      if (found.already) setDone(DZ.join.already);
+      else setPreview(found);
     } catch (e) {
       setError(dzError(errorCode(e)));
     } finally {
@@ -278,8 +280,26 @@ export function JoinClassForm({
     }
   }
 
+  /* Шаг 2: вступить. */
+  async function join() {
+    setBusy(true);
+    setError(null);
+    try {
+      const joined = await (await api()).joinClass(code);
+      setDone(DZ.join.done(joined.className, joined.tutorName));
+      setCode('');
+      setPreview(null);
+      onJoined?.();
+    } catch (e) {
+      setError(dzError(errorCode(e)));
+      setPreview(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <form className="dz-inline-form" onSubmit={(e) => void join(e)} noValidate data-form="join">
+    <form className="dz-inline-form" onSubmit={(e) => void check(e)} noValidate data-form="join">
       <FieldLabel htmlFor={id}>{DZ.join.label}</FieldLabel>
       <div className="dz-inline-form__row">
         <Input
@@ -291,13 +311,35 @@ export function JoinClassForm({
           autoComplete="off"
           spellCheck={false}
           placeholder={DZ.join.placeholder}
-          onChange={(e) => setCode(e.target.value)}
+          onChange={(e) => {
+            setCode(e.target.value);
+            setPreview(null);
+          }}
           state={error === null ? 'default' : 'error'}
+          disabled={preview !== null}
         />
-        <Button type="submit" variant="secondary" disabled={busy}>
-          {DZ.join.submit}
-        </Button>
+        {preview === null ? (
+          <Button type="submit" variant="secondary" disabled={busy}>
+            {DZ.join.check}
+          </Button>
+        ) : null}
       </div>
+      {preview === null ? null : (
+        <div className="dz-join-confirm" role="alert" data-join="confirm">
+          <p className="dz-join-confirm__title">
+            <strong>{DZ.join.confirmTitle(preview.className, preview.tutorName)}</strong>
+          </p>
+          <p>{DZ.join.confirmText}</p>
+          <div className="dz-inline-form__row">
+            <Button type="button" variant="primary" disabled={busy} onClick={() => void join()}>
+              {DZ.join.confirm}
+            </Button>
+            <Button type="button" variant="ghost" disabled={busy} onClick={() => setPreview(null)}>
+              {DZ.join.cancel}
+            </Button>
+          </div>
+        </div>
+      )}
       {error === null ? null : <FieldMessage tone="error">{error}</FieldMessage>}
       {done === null ? null : (
         <p className="dz-ok" role="status">
