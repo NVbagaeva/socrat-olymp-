@@ -442,6 +442,7 @@ export function Teoriya11({ vkladka, base }: { vkladka: string; base: string }) 
   return (
     <div className="z11-teoriya teor-steklo">
       <TeoriyaShell
+        taskNo={11}
         vkladka={vkladka}
         razdely={RAZDELY_TEORII_11.map((r) => ({
           id: r.id,

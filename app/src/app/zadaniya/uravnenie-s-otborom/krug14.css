@@ -26,43 +26,43 @@
   overflow: visible;
 }
 .k14__os {
-  stroke: var(--graph-axis, #101728);
+  stroke: var(--graph-axis);
   stroke-width: 1.6;
 }
 .k14__strelka {
-  fill: var(--graph-axis, #101728);
+  fill: var(--graph-axis);
 }
 .k14__os-tg {
-  stroke: var(--color-text-tertiary, #6b7280);
+  stroke: var(--color-text-tertiary);
   stroke-width: 1.6;
   stroke-dasharray: 6 4;
 }
 .k14__okr {
   fill: none;
-  stroke: var(--graph-axis, #101728);
+  stroke: var(--graph-axis);
   stroke-width: 2;
 }
 .k14__zasechka {
-  stroke: var(--color-primary, #1f5fd0);
+  stroke: var(--color-primary);
   stroke-width: 2.4;
 }
 .k14__sechenie {
-  stroke: var(--graph-accent, #e07a2f);
+  stroke: var(--graph-accent);
   stroke-width: 2.4;
   stroke-dasharray: 7 5;
 }
 .k14__proekciya {
-  stroke: var(--color-primary, #1f5fd0);
+  stroke: var(--color-primary);
   stroke-width: 1.4;
   stroke-dasharray: 4 4;
 }
 .k14__luch {
-  stroke: var(--color-primary, #1f5fd0);
+  stroke: var(--color-primary);
   stroke-width: 2;
 }
 .k14__duga {
   fill: none;
-  stroke: var(--graph-accent, #e07a2f);
+  stroke: var(--graph-accent);
   stroke-width: 6;
   stroke-linecap: round;
   opacity: 0.9;
@@ -71,18 +71,18 @@
   fill: var(--graph-line-c, #a8500f);
 }
 .k14__tochka {
-  fill: var(--color-primary, #1f5fd0);
-  stroke: var(--color-surface, #fff);
+  fill: var(--color-primary);
+  stroke: var(--color-surface);
   stroke-width: 1.6;
 }
 .k14__tochka--akcent {
   fill: var(--graph-line-c, #a8500f);
 }
 .k14__tochka--znach {
-  fill: var(--graph-accent, #e07a2f);
+  fill: var(--graph-accent);
 }
 .k14__tochka--vykolota {
-  fill: var(--color-surface, #fff);
+  fill: var(--color-surface);
   stroke: var(--graph-line-c, #a8500f);
   stroke-width: 2.2;
 }
@@ -93,16 +93,16 @@
   line-height: 1;
   white-space: nowrap;
   pointer-events: none;
-  color: var(--color-primary, #1f5fd0);
+  color: var(--color-primary);
 }
 .k14__podpis--os {
-  color: var(--graph-axis, #101728);
+  color: var(--graph-axis);
 }
 .k14__podpis--znach {
-  color: var(--color-accent-text, #a8500f);
+  color: var(--color-accent-text);
 }
 .k14__podpis--konec {
-  color: var(--color-accent-text, #a8500f);
+  color: var(--color-accent-text);
 }
 .k14-ryad {
   display: grid;

@@ -66,7 +66,7 @@
   gap: var(--space-1);
   padding: var(--space-2);
   border-radius: 16px;
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: var(--glass-ring), var(--glass-shadow);
 }
 .z12-primer__chertezh .z12-chertezh {
@@ -133,7 +133,7 @@
 .z12-shag__formula.is-glavnaya {
   padding: var(--space-2) var(--space-3);
   border-radius: 12px;
-  background: var(--blue-50);
+  background: var(--color-surface-info);
 }
 .z12-shag__chertezh {
   max-width: 360px;
@@ -145,8 +145,8 @@
 .z12-shag__vrezka {
   padding: var(--space-2) var(--space-3);
   border-radius: 12px;
-  background: var(--amber-50);
-  box-shadow: inset 3px 0 0 var(--amber-600);
+  background: var(--color-warning-soft);
+  box-shadow: inset 3px 0 0 var(--color-warning);
 }
 .z12-shag__vrezka-zag {
   margin: 0;
@@ -158,7 +158,7 @@
   align-items: center;
   cursor: pointer;
   font-weight: 600;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 
 /* ── Тренажёр: чертёж условия, подсказка, метод ────────────────── */
@@ -183,7 +183,7 @@
   margin-top: var(--space-3);
   padding: var(--space-3);
   border-radius: 14px;
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: var(--glass-ring);
 }
 .z12-metod__chertezh svg {
@@ -206,19 +206,19 @@
 .z12-zachyot .zs-sum {
   border: 0;
   border-radius: 22px;
-  background: linear-gradient(160deg, var(--white), var(--blue-50));
+  background: linear-gradient(160deg, var(--color-surface), var(--color-surface-info));
   box-shadow: var(--glass-ring), var(--glass-shadow);
 }
 .z12-zachyot .sostav-row,
 .z12-zachyot .sostav-tile {
   border-color: transparent;
   border-radius: 16px;
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: var(--glass-ring);
 }
 .z12-zachyot .sostav-row.is-open {
-  box-shadow: inset 0 0 0 1.5px var(--blue-300);
-  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent-soft);
+  background: var(--color-surface);
 }
 /* Название вида функции не обрезается: колонке названия — не меньше
    девяти знаков, строка переносится. */

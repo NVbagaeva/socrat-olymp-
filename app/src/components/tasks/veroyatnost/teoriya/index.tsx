@@ -5,6 +5,9 @@ import { KlassicheskayaVeroyatnost } from './KlassicheskayaVeroyatnost';
 import { KoordinatnayaPryamaya } from './KoordinatnayaPryamaya';
 import { VidySobytiy } from './VidySobytiy';
 import { NezavisimyeSobytiya5, SovmestnyeSobytiya5 } from './Sobytiya5';
+import { GlavaMetoda4 } from './metody/GlavaMetoda4';
+import { glavaMetoda } from '@/lib/paths-teoriya';
+import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 
 /**
  * Свёрстанные разделы теории по идентификатору из конфига.
@@ -19,6 +22,10 @@ export const telaRazdelov4: Record<string, ReactNode> = {
   klassicheskaya: <KlassicheskayaVeroyatnost />,
   'kak-izobrazhat': <KakIzobrazhatSobytiya />,
   protivopolozhnoe: <ProtivopolozhnoeSobytiye4 />,
+  /* Главы ключевых методов: ключ — glavaMetoda(id метода). */
+  ...Object.fromEntries(
+    KLYUCHEVYE_4.map((m) => [glavaMetoda(m.id), <GlavaMetoda4 key={m.id} metod={m.id} />]),
+  ),
 };
 
 /** Разделы теории задания №5. */

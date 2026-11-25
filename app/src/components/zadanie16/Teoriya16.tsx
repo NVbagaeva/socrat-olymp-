@@ -300,6 +300,7 @@ export function Teoriya16({ vkladka }: { vkladka: string }) {
   );
   return (
     <TeoriyaShell
+      taskNo={16}
       vkladka={vkladka}
       razdely={GLAVY_16.map((g) => ({
         id: g.id,

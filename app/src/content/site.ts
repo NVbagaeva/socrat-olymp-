@@ -19,6 +19,11 @@ import { nomeraChasti } from '@/content/struktura';
 import { href, USTNYY } from '@/lib/paths';
 
 export interface SiteLink {
+  /**
+   * Пункт верхнего меню: по нему отмечается текущий раздел — тот же id,
+   * что AppShell получает в active (content/appNav.ts).
+   */
+  id?: string;
   label: string;
   href: string;
   /**
@@ -35,6 +40,7 @@ export interface SiteLink {
  * Бургер-меню собрано отдельно — см. site.menu.
  */
 export interface NavGroup {
+  id: string;
   label: string;
   items: MenuLink[];
 }
@@ -67,8 +73,9 @@ export interface ExternalLink extends SiteLink {
    вариантов короче заголовков страниц — длинные в бургере переносились
    на две строки. Пояснения — из лидов самих страниц, без новых
    обещаний. */
-const LINKS = {
+export const LINKS = {
   bank: {
+    id: 'tasks',
     label: 'Банк заданий',
     hint: 'Все задания по темам',
     href: tasksPage.href,
@@ -77,6 +84,7 @@ const LINKS = {
   },
   /* Раздел общий для профиля и базы — адрес от уровня не зависит. */
   ustnyy: {
+    id: 'ustnyy',
     label: 'Устный счёт',
     hint: 'Приёмы, таймер и рейтинг',
     href: href(USTNYY),
@@ -84,12 +92,14 @@ const LINKS = {
     akcent: true,
   },
   sobrat: {
+    id: 'variant',
     label: 'Собрать вариант',
     hint: 'Для домашней и контрольной',
     href: VARIANT_HREF,
     icon: 'variant',
   },
   onlayn: {
+    id: 'onlayn',
     label: ONLINE_TEXT.nachalo.menu,
     hint: `Задания ${nomeraChasti(1)} с автопроверкой`,
     href: VARIANT_ONLAYN_HREF,
@@ -97,24 +107,28 @@ const LINKS = {
   },
   /* Вариант базовой математики: тот же сборщик, уровень — «База». */
   baza: {
+    id: 'variant-baza',
     label: 'Вариант базы',
     hint: '21 задание · отметка 2–5',
     href: levelInfo('base').variant,
     icon: 'variant',
   },
   mesyaca: {
+    id: 'ezhemesyachnye',
     label: 'Варианты месяца',
     hint: 'По одному на месяц, части 1 и 2',
     href: EZH_HREF,
     icon: 'ezhemesyachnye',
   },
   slozhnye: {
+    id: 'povyshennye',
     label: 'Сложные варианты',
     hint: '36 вариантов, по шесть версий',
     href: POV_HREF,
     icon: 'povyshennye',
   },
   howto: {
+    id: 'help',
     label: 'Как пользоваться',
     hint: 'Короткий гид по сайту',
     href: HOWTO_HREF,
@@ -123,15 +137,28 @@ const LINKS = {
   /* «Учителям» ведёт на блок «Мы взяли на себя то, что обычно забирает
      ваш вечер» — он про самостоятельные, домашние и проверку. */
   uchitelyam: {
+    id: 'uchitelyam',
     label: 'Учителям',
     hint: 'Самостоятельные и домашние',
     href: '/#how',
     icon: 'homework',
   },
-  avtor: { label: 'Об авторе', hint: 'Кто делает сайт', href: '/about/', icon: 'teacher' },
+  avtor: {
+    id: 'avtor',
+    label: 'Об авторе',
+    hint: 'Кто делает сайт',
+    href: '/about/',
+    icon: 'teacher',
+  },
   /* Страница с тарифами; оплата на ней пока выключена
      (lib/tarify/config.ts, PAYMENTS_ENABLED). */
-  tarify: { label: 'Тарифы', hint: 'Что входит в доступ', href: TARIFY_HREF, icon: 'favourites' },
+  tarify: {
+    id: 'tarify',
+    label: 'Тарифы',
+    hint: 'Что входит в доступ',
+    href: TARIFY_HREF,
+    icon: 'favourites',
+  },
 } satisfies Record<string, MenuLink>;
 
 /**
@@ -166,6 +193,7 @@ export const site = {
        помещались даже на 1440 px, и шапка переносилась в две строки.
        Первым — главное действие, оно в списке выделено. */
     {
+      id: 'varianty',
       label: 'Варианты',
       items: [LINKS.onlayn, LINKS.sobrat, LINKS.baza, LINKS.mesyaca, LINKS.slozhnye],
     },

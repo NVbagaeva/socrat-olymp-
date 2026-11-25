@@ -34,6 +34,10 @@
 #                        Variable NEXT_PUBLIC_DZ2);
 #   DZ_NOVYE_RAZDELY   — разделы новой выдачи ДЗ (Variable NEXT_PUBLIC_DZ2_RAZDELY);
 #                        пусто — 5,8.
+#   UVEDOMLENIYA       — «1» — уведомления (флаг базы kabinet_flags.uvedomleniya,
+#                        Variable NEXT_PUBLIC_UVEDOMLENIYA);
+#   UVEDOMLENIYA_KANALY — каналы очереди отправки через запятую: pochta, push
+#                        (Variable UVEDOMLENIYA_KANALY); пусто — только колокольчик.
 set -eu
 . "$(dirname "$0")/lib.sh"
 load_env
@@ -47,6 +51,8 @@ ZHURNAL=
 ZHURNAL_RAZDELY=
 DZ_NOVYE=
 DZ_NOVYE_RAZDELY=
+UVEDOMLENIYA=
+UVEDOMLENIYA_KANALY=
 DB_ADMIN_PASSWORD=
 while IFS= read -r line; do
   case "$line" in
@@ -59,6 +65,8 @@ while IFS= read -r line; do
     ZHURNAL_RAZDELY=*) ZHURNAL_RAZDELY=${line#ZHURNAL_RAZDELY=} ;;
     DZ_NOVYE=*) DZ_NOVYE=${line#DZ_NOVYE=} ;;
     DZ_NOVYE_RAZDELY=*) DZ_NOVYE_RAZDELY=${line#DZ_NOVYE_RAZDELY=} ;;
+    UVEDOMLENIYA=*) UVEDOMLENIYA=${line#UVEDOMLENIYA=} ;;
+    UVEDOMLENIYA_KANALY=*) UVEDOMLENIYA_KANALY=${line#UVEDOMLENIYA_KANALY=} ;;
   esac
 done
 
@@ -68,7 +76,12 @@ for file in migrations/*.sql; do
   name=$(basename "$file")
   sum=$(sha256sum "$file" | cut -d' ' -f1)
   known=$(psql_db -tA -v name="$name" <<'SQL'
-select sha256 from lite.migrations where name = :'name';
+-- Первая выкладка аватаров записала тот же SQL под номером 011.
+-- Сверяем хеш до пропуска, как и для канонического имени.
+select distinct sha256 from lite.migrations
+where name = :'name'
+   or (substring(:'name' from 5) = '20261122130000_avatar_profiles.sql'
+       and name = '011-20261122130000_avatar_profiles.sql');
 SQL
 )
   if [ "$known" = "$sum" ]; then
@@ -192,5 +205,20 @@ insert into public.kabinet_flags (key, value) values ('dz_novye', :'on'::jsonb),
 on conflict (key) do update set value = excluded.value, updated_at = now();
 SQL
 log "Новая выдача ДЗ: $([ "$DZ_NOVYE" = 1 ] && echo включена || echo выключена), разделы $DZ_NOVYE_RAZDELY"
+
+# Уведомления (миграция 20261125120000_uvedomleniya.sql): флаг и каналы
+# очереди отправки. Пустой список каналов — только колокольчик на сайте.
+kanaly=
+for k in $(printf '%s' "$UVEDOMLENIYA_KANALY" | tr ',' ' '); do
+  case "$k" in
+    pochta|push) kanaly="${kanaly:+$kanaly,}\"$k\"" ;;
+    *) log "UVEDOMLENIYA_KANALY: известны каналы pochta и push, а не «$k»"; exit 1 ;;
+  esac
+done
+psql_db -v on="$([ "$UVEDOMLENIYA" = 1 ] && echo true || echo false)" -v kanaly="[$kanaly]" <<'SQL'
+insert into public.kabinet_flags (key, value) values ('uvedomleniya', :'on'::jsonb), ('uvedomleniya_kanaly', :'kanaly'::jsonb)
+on conflict (key) do update set value = excluded.value, updated_at = now();
+SQL
+log "Уведомления: $([ "$UVEDOMLENIYA" = 1 ] && echo включены || echo выключены), каналы [${kanaly}]"
 
 psql_db -c "notify pgrst, 'reload schema'"

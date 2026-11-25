@@ -11,6 +11,7 @@
  */
 
 import { storage } from '@/lib/storage';
+import { parseAvatarConfig, type AvatarConfig } from '@/lib/avatar';
 import { getClient, signOut } from './client';
 import { SESSION_KEY } from './config';
 import { roleOf, removeStoredSession, sessionChanged, type UserRole } from './session';
@@ -22,6 +23,8 @@ export interface Profile {
   id: string;
   name: string;
   role: AccountRole;
+  /** Настраиваемый SVG-персонаж. null — новый аккаунт ещё не выбирал образ. */
+  avatarConfig: AvatarConfig | null;
   /** Класс школы ученика (9–11), если указан. */
   grade: number | null;
   /** Когда окно «Впервые здесь?» было отмечено просмотренным. null — не было. */
@@ -36,6 +39,7 @@ interface ProfileRow {
   user_id: string;
   display_name: string;
   role: string;
+  avatar_config: unknown;
   grade: number | null;
   welcome_seen_at: string | null;
   tour_id: string | null;
@@ -44,7 +48,7 @@ interface ProfileRow {
 }
 
 const COLUMNS =
-  'user_id, display_name, role, grade, welcome_seen_at, tour_id, tour_done, created_at';
+  'user_id, display_name, role, avatar_config, grade, welcome_seen_at, tour_id, tour_done, created_at';
 
 function accountRole(value: unknown): AccountRole {
   return value === 'admin' ? 'admin' : roleOf(value);
@@ -55,6 +59,7 @@ function fromRow(row: ProfileRow): Profile {
     id: row.user_id,
     name: row.display_name,
     role: accountRole(row.role),
+    avatarConfig: parseAvatarConfig(row.avatar_config),
     grade: row.grade,
     welcomeSeenAt: row.welcome_seen_at,
     tourId: row.tour_id,
@@ -94,6 +99,7 @@ export async function loadProfile(): Promise<Profile | null> {
       id: user.id,
       name: typeof meta.name === 'string' ? meta.name : '',
       role: roleOf(meta.role),
+      avatarConfig: null,
       grade: null,
       welcomeSeenAt: null,
       tourId: null,
@@ -128,6 +134,27 @@ export async function updateProfile(patch: { name: string }): Promise<Profile> {
   /* Сессия — следом: шапка читает имя оттуда. */
   const { error: metaError } = await supabase.auth.updateUser({ data: { name } });
   if (metaError) throw new ProfileError(metaError.message, metaError.code, metaError.status);
+  sessionChanged();
+  return fromRow(data);
+}
+
+/** Сохранить собственный SVG-образ в профиле текущего аккаунта. */
+export async function updateAvatarConfig(avatar: AvatarConfig): Promise<Profile> {
+  const safeAvatar = parseAvatarConfig(avatar);
+  if (safeAvatar === null) throw new ProfileError('invalid avatar', 'invalid_avatar');
+  const supabase = await getClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || user === null) throw new ProfileError('no session', 'session_not_found', 401);
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ avatar_config: safeAvatar })
+    .eq('user_id', user.id)
+    .select(COLUMNS)
+    .single<ProfileRow>();
+  if (error) throw new ProfileError(error.message, error.code);
   sessionChanged();
   return fromRow(data);
 }

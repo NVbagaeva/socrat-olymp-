@@ -2,7 +2,7 @@
 /* scripts/pdf-changed.mjs — изменилось ли содержимое собранных PDF.
 
    Запуск из корня репозитория:
-     node app/scripts/pdf-changed.mjs app/public/materials/zadanie-4
+     node app/scripts/pdf-changed.mjs app/public/materials/veroyatnost
 
    Две сборки одного и того же сборника расходятся байтами всегда:
    в файле лежат дата печати и внутренние идентификаторы. Если

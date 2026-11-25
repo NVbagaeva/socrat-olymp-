@@ -1,0 +1,31 @@
+/* Карточки ключевых методов задания №4: ссылка на главу теории.
+   Плашка с картинкой, номер, название и описание — общие стили
+   карточки метода (.vmetod, .vmetod--kartinka, .vmetod__kartinka в
+   app/zadaniya/veroyatnost.css), здесь — только ряд «Читать теорию →»,
+   прижатый к низу карточки. */
+
+.m4k {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  text-decoration: none;
+}
+.m4k.vmetod--kartinka {
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+/* Название — целыми словами: без переноса с дефисом посреди слова. */
+.m4k .m4k__title {
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+.m4k .m4k__sut {
+  align-self: start;
+}
+.m4k .m4k__chitat {
+  grid-column: 1 / -1;
+  align-self: end;
+  margin-top: var(--space-2);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.m4k:hover .m4k__chitat {
+  text-decoration: underline;
+}

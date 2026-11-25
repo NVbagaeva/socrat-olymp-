@@ -150,7 +150,7 @@
   position: absolute;
   inset: 0 0 auto;
   height: 4px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  background: linear-gradient(90deg, var(--color-primary-fill), var(--color-accent));
 }
 .z18-vv__ikonka {
   display: grid;
@@ -223,7 +223,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
   font-size: 13px;
   font-weight: 700;
@@ -586,7 +586,7 @@
   font-weight: 700;
 }
 .z18-sled__fakt.is-active .z18-sled__no {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .z18-sled__tekst {
@@ -619,7 +619,7 @@
   background: var(--color-accent-soft);
 }
 .z18-dok__tochka.is-active {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .z18-dok__nomer {
   margin: 0;
@@ -775,7 +775,7 @@
   cursor: pointer;
 }
 .z18-ch__rezhim.is-active {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .z18-ch__rezhim:focus-visible {

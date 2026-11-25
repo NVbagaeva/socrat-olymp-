@@ -20,10 +20,12 @@ import { fileURLToPath } from 'node:url';
 
 import { buildSheet } from './lib/sheet-build.mjs';
 import { collectSections, content, sheetSpec } from './lib/sheet4-tasks.mjs';
+import { kod } from './lib/adres.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
-const SECTION = 'zadanie-4';
+/* Папка в public/materials — по коду раздела (lib/adres.mjs). */
+const SECTION = kod(4);
 
 /* Стили рисунков: те же, что на сайте, плюс лист и ч/б штриховка. */
 function figuresCss() {

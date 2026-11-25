@@ -17,9 +17,6 @@ type MenuState = 'open' | 'closing';
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
-/** Ширина, ниже которой меню уезжает в бургер. Совпадает с site.css. */
-const NARROW = '(max-width: 1023.98px)';
-
 /** Шеврон справа у строки: показывает, что строка ведёт дальше. */
 function Chevron() {
   return (
@@ -118,17 +115,6 @@ export function SiteMenu() {
       document.body.style.overflow = previous;
     };
   }, [state, onKeyDown]);
-
-  // Экран стал шире — бургера больше нет, панель закрывается без следа.
-  useEffect(() => {
-    if (!open) return undefined;
-    const wide = window.matchMedia(NARROW);
-    const onChange = () => {
-      if (!wide.matches) setState(null);
-    };
-    wide.addEventListener('change', onChange);
-    return () => wide.removeEventListener('change', onChange);
-  }, [open]);
 
   const finishClosing = (animationName: string) => {
     if (state !== 'closing' || animationName !== 'menu-out') return;

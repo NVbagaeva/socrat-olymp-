@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { VDomashkuTeoriya } from '@/components/dz2/knopki';
 import { ProverkaTeorii } from '@/components/kartochki/ProverkaTeorii';
 import { TeoriyaShell, telaRazdelov5 } from '@/components/tasks/veroyatnost/teoriya';
 import { kolodaNomera } from '@/content/kartochki';
@@ -35,18 +34,15 @@ export default function Teoriya5Tab() {
         href={`${razdelBase(5)}/kartochki/`}
         ids={kolodaNomera(5).kartochki.map((k) => k.id)}
       />
-      {/* Учителю: глава с текстом — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md). */}
-      <div className="dz2-ryad">
-        <VDomashkuTeoriya
-          taskNo={5}
-          glava="koordinatnaya-pryamaya"
-          nazvanie="Координатная прямая"
-        />
-      </div>
       {/* «Стеклянная сцена»: общий слой рамок теории (teoriya-steklo.css),
           содержание и разметка разделов не меняются. */}
       <div className="teor-steklo z45-teoriya">
-        <TeoriyaShell vkladka={vkladka('5', 'teoriya')} razdely={RAZDELY_5} tela={telaRazdelov5} />
+        <TeoriyaShell
+          taskNo={5}
+          vkladka={vkladka('5', 'teoriya')}
+          razdely={RAZDELY_5}
+          tela={telaRazdelov5}
+        />
       </div>
     </>
   );

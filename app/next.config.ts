@@ -45,9 +45,12 @@ const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 /** Папки иллюстраций со своей таблицей версий (lib/illyustraciiUrl.ts). */
 const ILLYUSTRACII = [
   '/images/zadanie-11/gorod-',
-  '/images/zadanie-05/metod-',
   '/images/zadanie-04/metod-',
+  '/images/zadanie-05/metod-',
 ];
+
+/** Картинки задач глав методов №4 — своей таблицей версий (METODY4_ASSET_VERSIONS). */
+const METODY4 = ['/images/zadanie-04/primery/'];
 
 const nextConfig: NextConfig = {
   ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
@@ -120,6 +123,19 @@ const nextConfig: NextConfig = {
         ? '1'
         : '0',
     DZ2_RAZDELY: process.env.NEXT_PUBLIC_DZ2_RAZDELY || '5,8',
+    // Уведомления (docs/kabinet-uvedomleniya.md): колокольчик и настройки; только при входе.
+    UVEDOMLENIYA_ON:
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' && process.env.NEXT_PUBLIC_UVEDOMLENIYA === '1'
+        ? '1'
+        : '0',
+    // Web push (PR 3г): кнопка «Включить на этом устройстве» и manifest;
+    // своим флагом, только вместе с уведомлениями (В-5).
+    UVEDOMLENIYA_PUSH_ON:
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' &&
+      process.env.NEXT_PUBLIC_UVEDOMLENIYA === '1' &&
+      process.env.NEXT_PUBLIC_UVEDOMLENIYA_PUSH === '1'
+        ? '1'
+        : '0',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
     // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,
@@ -128,6 +144,9 @@ const nextConfig: NextConfig = {
     // DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts. И картинки
     // шапок разделов (public/images/shapki/): SHAPKI_ASSET_VERSIONS, адреса
     // считает серверная шапка (SectionHeader), в браузер таблица не идёт.
+    // Так же — картинки задач глав методов №4
+    // (public/images/zadanie-04/primery/): METODY4_ASSET_VERSIONS,
+    // адреса считает серверная GlavaMetoda4.
     ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(
@@ -136,13 +155,15 @@ const nextConfig: NextConfig = {
             !file.startsWith('/data/') &&
             !file.startsWith('/images/zadachi/') &&
             !file.startsWith('/images/shapki/') &&
+            !file.startsWith('/images/kak-polzovatsya/') &&
+            !METODY4.some((dir) => file.startsWith(dir)) &&
             !ILLYUSTRACII.some((prefix) => file.startsWith(prefix)),
         ),
       ),
     ),
     // Иллюстрации живых сцен и карточек методов: ILLYUSTRACII_ASSET_VERSIONS,
     // её подставляет только lib/illyustraciiUrl.ts (ленивая сцена №10 и
-    // серверная карточка метода №5) — первая загрузка других страниц не растёт.
+    // серверные карточки методов №4 и №5) — первая загрузка других страниц не растёт.
     ILLYUSTRACII_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(([file]) =>
@@ -153,6 +174,19 @@ const nextConfig: NextConfig = {
     SHAPKI_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(
         Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/shapki/')),
+      ),
+    ),
+    // Картинки и снимки страницы «Как пользоваться сайтом»: адреса с
+    // версией считает серверная страница (app/kak-polzovatsya/page.tsx)
+    // и передаёт готовыми — общая таблица первой загрузки не растёт.
+    HOWTO_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) => file.startsWith('/images/kak-polzovatsya/')),
+      ),
+    ),
+    METODY4_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(([file]) => METODY4.some((dir) => file.startsWith(dir))),
       ),
     ),
     INTRO_ASSET_VERSIONS: JSON.stringify(

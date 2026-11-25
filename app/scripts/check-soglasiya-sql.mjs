@@ -265,6 +265,55 @@ const SUITES = [
     ],
   },
   {
+    /* Уведомления (docs/kabinet-uvedomleniya.md): события ДЗ →
+       колокольчик и очередь отправки, напоминания за 24 и 3 ч только
+       несдавшим и без дублей, перенос дедлайна, закрытое ДЗ, «срок» и «не
+       сдали», тихие часы в поясе получателя, настройки, флаги; чужое не
+       читается, очередь не видна, notify_tick — только сервер. */
+    name: 'Уведомления',
+    db: 'uvedomleniya',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['uvedomleniya.test.sql', path.join(SUPA, 'tests', 'uvedomleniya.test.sql')],
+    ],
+  },
+  {
+    /* Уведомления, почта (PR 3в): рассыльщик забирает пачку,
+       перепроверяет и отменяет ненужное, повторы и «не отправлено»,
+       зависшие возвращаются, «Отписаться» по подписи без входа, сводка
+       учителю в 19:00 без дублей; функции — только сервер. */
+    name: 'Уведомления: почта',
+    db: 'uvedomleniya_pochta',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['uvedomleniya-pochta.test.sql', path.join(SUPA, 'tests', 'uvedomleniya-pochta.test.sql')],
+    ],
+  },
+  {
+    /* Уведомления, push (PR 3г): подписка только на адрес известного
+       сервиса push, своя, переход адреса к другому аккаунту, не больше 10;
+       строка push — только с подпиской; в пачке без названия ДЗ и имён
+       (В-5); ответы сервиса, ключи VAPID, флаг push; права. */
+    name: 'Уведомления: push',
+    db: 'uvedomleniya_push',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['uvedomleniya-push.test.sql', path.join(SUPA, 'tests', 'uvedomleniya-push.test.sql')],
+    ],
+  },
+  {
     /* Регистрация только с почтой российских почтовых сервисов: хук,
        триггер, смена почты, ручной список, старые пользователи
        (supabase/tests/domeny.test.sql). Без добавленного x.ru. */
@@ -326,5 +375,5 @@ for (const suite of SUITES) {
 stop();
 if (failed) process.exit(1);
 console.log(
-  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8, журнал, новая выдача ДЗ, почтовые домены и устный счёт в базе: все проверки прошли.',
+  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8, журнал, новая выдача ДЗ, уведомления (колокольчик, почта, push), почтовые домены и устный счёт в базе: все проверки прошли.',
 );

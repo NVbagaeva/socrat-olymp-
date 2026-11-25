@@ -20,6 +20,10 @@ export const metadata: Metadata = {
  * говорит, что материал готовится: придуманного здесь нет. Раздел
  * «Координатная прямая» уехал в теорию задания №5 — там его метод.
  *
+ * Ниже — пять глав ключевых методов (GlavaMetoda4): к ним ведут
+ * карточки вкладки «Ключевые методы решения», из них — тренажёр и
+ * опорные задачи метода.
+ *
  * Над теорией — «Проверить теорию»: карточки по теории №4
  * (content/kartochki/04-veroyatnost.ts); их «Повторить теорию» ведёт
  * к блокам этой страницы.
@@ -38,7 +42,12 @@ export default function Teoriya4Tab() {
       {/* «Стеклянная сцена»: общий слой рамок теории (teoriya-steklo.css),
           содержание и разметка разделов не меняются. */}
       <div className="teor-steklo z45-teoriya">
-        <TeoriyaShell vkladka={vkladka('4', 'teoriya')} razdely={RAZDELY_4} tela={telaRazdelov4} />
+        <TeoriyaShell
+          taskNo={4}
+          vkladka={vkladka('4', 'teoriya')}
+          razdely={RAZDELY_4}
+          tela={telaRazdelov4}
+        />
       </div>
     </>
   );

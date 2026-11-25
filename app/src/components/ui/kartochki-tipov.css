@@ -28,7 +28,7 @@
 }
 
 .tipk__karta {
-  --tipk-fon: rgb(255 255 255 / 0.82);
+  --tipk-fon: color-mix(in srgb, var(--color-surface) 82%, transparent);
   position: relative;
   /* Номер | заголовок и текст; ссылки — рядом ниже на всю ширину
      карточки: на телефоне обе пилюли встают в одну строку. */
@@ -57,7 +57,11 @@
 .tipk__setka > .tipk__karta:nth-child(even) {
   --tipk-fon:
     radial-gradient(110% 90% at 100% 0%, rgb(155 192 242 / 0.36), transparent 62%),
-    linear-gradient(160deg, rgb(242 247 254 / 0.94), rgb(232 240 252 / 0.92));
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-surface-info) 94%, transparent),
+      color-mix(in srgb, var(--color-surface-info) 92%, transparent)
+    );
   box-shadow:
     0 0 0 1px rgb(31 95 208 / 0.14),
     var(--glass-hi),
@@ -67,14 +71,18 @@
 @container tipk (min-width: 540px) and (max-width: 899.98px) {
   .tipk__setka > .tipk__karta:nth-child(4n + 1),
   .tipk__setka > .tipk__karta:nth-child(4n) {
-    --tipk-fon: rgb(255 255 255 / 0.82);
+    --tipk-fon: color-mix(in srgb, var(--color-surface) 82%, transparent);
     box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
   }
   .tipk__setka > .tipk__karta:nth-child(4n + 2),
   .tipk__setka > .tipk__karta:nth-child(4n + 3) {
     --tipk-fon:
       radial-gradient(110% 90% at 100% 0%, rgb(155 192 242 / 0.36), transparent 62%),
-      linear-gradient(160deg, rgb(242 247 254 / 0.94), rgb(232 240 252 / 0.92));
+      linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--color-surface-info) 94%, transparent),
+        color-mix(in srgb, var(--color-surface-info) 92%, transparent)
+      );
     box-shadow:
       0 0 0 1px rgb(31 95 208 / 0.14),
       var(--glass-hi),
@@ -107,9 +115,9 @@
   width: 34px;
   height: 34px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(160deg, var(--blue-600), var(--blue-800));
+  background: linear-gradient(160deg, var(--color-primary-fill), var(--color-primary-fill-active));
   box-shadow: var(--gloss-shadow-soft);
-  color: var(--white);
+  color: var(--color-text-inverse);
   font-size: var(--fs-caption);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -144,11 +152,11 @@
   line-height: var(--lh-caption);
   /* Не --color-text-secondary (--grey-700): на голубом блике это 3,7:1.
      --grey-800 — «второй голос» с запасом AA на обоих оттенках. */
-  color: var(--grey-800);
+  color: var(--color-text-lead);
 }
 .tipk__formula {
   overflow-x: auto;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .tipk__chipy {
   display: flex;
@@ -177,11 +185,11 @@
   gap: 6px;
   min-height: 40px;
   padding: 0 var(--space-3) 0 10px;
-  border: 1px solid var(--blue-200);
+  border: 1px solid var(--color-border-info);
   border-radius: var(--radius-pill);
-  background: var(--white);
+  background: var(--color-surface);
   box-shadow: 0 1px 2px rgb(16 40 100 / 0.06);
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-size: var(--fs-caption);
   line-height: 1.2;
   font-weight: 600;
@@ -198,8 +206,8 @@
      «Главы» её отличают тон и иконка. Рамка прозрачная, а не нулевая:
      размер пилюль одинаковый. */
   border-color: transparent;
-  background: var(--blue-100);
-  color: var(--blue-800);
+  background: var(--color-surface-soft);
+  color: var(--color-primary-active);
 }
 .tipk__ik {
   flex: none;
@@ -209,11 +217,11 @@
 @media (hover: hover) {
   .tipk__ssylka:hover {
     border-color: var(--color-primary);
-    background: var(--blue-50);
+    background: var(--color-surface-info);
   }
   .tipk__ssylka--primer:hover {
     border-color: transparent;
-    background: var(--blue-200);
+    background: var(--color-border-info);
   }
 }
 .tipk__ssylka:active {

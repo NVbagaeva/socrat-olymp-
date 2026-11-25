@@ -80,10 +80,10 @@ export const podskazki = {
 
 /** Названия файлов сборника. */
 export const files = {
-  uchenik: 'zadanie-5-veroyatnosti-sobytiy-uchenik',
-  uchenikChb: 'zadanie-5-veroyatnosti-sobytiy-uchenik-chb',
-  uchitel: 'zadanie-5-veroyatnosti-sobytiy-uchitel',
-  uchitelChb: 'zadanie-5-veroyatnosti-sobytiy-uchitel-chb',
+  uchenik: 'veroyatnosti-sobytiy-uchenik',
+  uchenikChb: 'veroyatnosti-sobytiy-uchenik-chb',
+  uchitel: 'veroyatnosti-sobytiy-uchitel',
+  uchitelChb: 'veroyatnosti-sobytiy-uchitel-chb',
 };
 
 const content = { head, foot, subtitle, recap, prototypeSections, otvety, podskazki, files };

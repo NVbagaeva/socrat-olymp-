@@ -2190,5 +2190,40 @@
   "ok": true,
   "problemy": [],
   "popytok": 2
+ },
+ "pirozhki-paket": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "pirozhki-tarelka": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "monety-karmany": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
+ },
+ "zhrebiy-mars": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "kinder-princessy": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "sad-foto": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 1
+ },
+ "kot-v-podezde": {
+  "ok": true,
+  "problemy": [],
+  "popytok": 2
  }
 }

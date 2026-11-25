@@ -23,7 +23,9 @@ export default function GraphPreviewPage() {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!container.current) { return; }
+    if (!container.current) {
+      return;
+    }
     mountPreview(container.current, { sets: { prep, prototypes }, katex });
   }, []);
 

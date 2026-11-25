@@ -38,7 +38,7 @@
 }
 .pu-chip--on {
   border-color: var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .pu-select select {
@@ -237,11 +237,21 @@ i.pu-cell {
   border-radius: 3px;
   background: var(--color-surface-2);
 }
-.pu-den[data-l='1'] { background: var(--heat-1); }
-.pu-den[data-l='2'] { background: var(--heat-2); }
-.pu-den[data-l='3'] { background: var(--heat-3); }
-.pu-den[data-l='4'] { background: var(--heat-4); }
-.pu-den[data-l='5'] { background: var(--heat-5); }
+.pu-den[data-l='1'] {
+  background: var(--heat-1);
+}
+.pu-den[data-l='2'] {
+  background: var(--heat-2);
+}
+.pu-den[data-l='3'] {
+  background: var(--heat-3);
+}
+.pu-den[data-l='4'] {
+  background: var(--heat-4);
+}
+.pu-den[data-l='5'] {
+  background: var(--heat-5);
+}
 
 /* Лента */
 .pu-lenta {

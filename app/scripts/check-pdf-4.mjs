@@ -8,7 +8,7 @@
    для ученика нет ни одного ответа: ни в карточках, ни в разметке,
    ни в заголовке PDF. Ненулевой код возврата валит сборку.
 
-   Проверки идут по готовым файлам в app/public/materials/zadanie-4
+   Проверки идут по готовым файлам в app/public/materials/veroyatnost
    и по промежуточному HTML с отчётом в app/.pdf-build. */
 
 import fs from 'node:fs';
@@ -19,9 +19,11 @@ import outputs from '../src/lib/sheet/outputs.js';
 import { buildDir } from './lib/sheet-build.mjs';
 import { checkNoAnswersTracked, checkNoTaskImages, checkPdfFile } from './lib/sheet-check.mjs';
 import { collectSections, content, naming } from './lib/sheet4-tasks.mjs';
+import { kod } from './lib/adres.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SECTION = 'zadanie-4';
+/* Папка в public/materials — по коду раздела (lib/adres.mjs). */
+const SECTION = kod(4);
 const BUILD = buildDir(APP);
 
 const LINKS = content.foot.social.map((item) => item.href);

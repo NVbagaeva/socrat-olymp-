@@ -144,7 +144,7 @@
 }
 .z11-vst__polzunok-t:focus-visible,
 .z11-vst__param input:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 8px;
 }
@@ -192,7 +192,7 @@
     0 18px 36px -28px rgba(18, 48, 110, 0.45);
 }
 .z11-vst__scena:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 @container z11-vst (min-width: 560px) {
@@ -475,7 +475,7 @@
   border: 0;
   border-radius: 999px;
   background: none;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font: inherit;
   font-size: 15px;
   font-weight: 650;
@@ -492,7 +492,7 @@
     0 4px 10px -4px rgba(18, 48, 110, 0.35);
 }
 .z11-vst__x:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 .z11-vst__podskazka {
@@ -528,7 +528,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
 }
 .z11-vst__param label {
   display: flex;

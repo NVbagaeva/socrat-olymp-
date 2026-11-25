@@ -294,6 +294,7 @@ export function Teoriya9({ vkladka }: { vkladka: string }) {
   );
   return (
     <TeoriyaShell
+      taskNo={9}
       vkladka={vkladka}
       razdely={razdely}
       tela={tela}

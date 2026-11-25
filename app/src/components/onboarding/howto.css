@@ -1,4 +1,6 @@
-/* Страница «Как пользоваться сайтом». Цвета только семантические. */
+/* Страница «Как пользоваться сайтом». Цвета — только токены
+   (styles/tokens.css): страница готова к тёмной теме. Шапка — общая
+   вёрстка шапок разделов (.shapka, components/tasks/shapka/shapka.css). */
 
 .howto {
   display: grid;
@@ -6,25 +8,58 @@
   margin-top: var(--space-2);
   padding-bottom: var(--space-12);
 }
-
-.howto__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-5);
+.howto__telo {
+  display: grid;
+  gap: var(--space-10);
+  min-width: 0;
 }
-.howto__lead {
-  max-width: 640px;
-  margin-top: var(--space-2);
-  color: var(--color-text-secondary);
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion-level='reduce']) .howto__telo {
+    animation: howto-poyavlenie 200ms var(--ease-out) both;
+  }
+}
+@keyframes howto-poyavlenie {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Шапка ─────────────────────────────────────────────────────── */
+
+.howto-shapka {
+  margin: 0;
+  min-height: 300px;
+}
+.howto-shapka--tekst {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+}
+.howto-shapka .shapka__lead {
   font-size: 18px;
-  line-height: 1.5;
+}
+/* Стеклянный круг вокруг картинки — как кольцо шапок разделов. */
+.howto-krug {
+  position: relative;
+  width: var(--shapka-media);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  padding: 7%;
+  border-radius: 50%;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.howto-krug .zhk__poster {
+  border-radius: 50%;
 }
 
-/* Переключатель «Ученику | Репетитору». */
+/* Переключатель «Ученику | Учителю». */
 .howto__tabs {
   display: inline-flex;
+  justify-self: start;
   gap: var(--space-1);
   padding: var(--space-1);
   border-radius: var(--radius-lg);
@@ -49,12 +84,16 @@
 .howto__tab:hover {
   color: var(--color-text);
 }
+.howto__tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
 .howto__tab.is-active {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-text-inverse);
 }
 .howto__tab-ico svg,
-.howto__video svg {
+.howto__feature-snimok svg {
   display: block;
   width: 20px;
   height: 20px;
@@ -65,82 +104,8 @@
   stroke-linejoin: round;
 }
 
-.howto__top {
-  display: grid;
-  gap: var(--space-6);
-}
-@media (min-width: 1024px) {
-  .howto__top {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  }
-}
-
-/* Заглушка видео: без кнопки воспроизведения. */
-.howto__video {
-  display: grid;
-  align-content: center;
-  justify-items: start;
-  gap: var(--space-3);
-  min-height: 280px;
-  padding: var(--space-8);
-  border-radius: var(--radius-xl);
-  border: 1px dashed var(--color-border-info);
-  background: var(--color-surface-soft);
-}
-.howto__video-title {
-  font-size: 30px;
-  line-height: 1.2;
-  font-weight: 700;
-  color: var(--color-text-brand);
-}
-.howto__video-text {
-  max-width: 440px;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
-.howto__steps {
-  padding: var(--space-6);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-}
-.howto__steps ol {
-  display: grid;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
-}
-.howto__step {
-  display: flex;
-  gap: var(--space-3);
-}
-.howto__step-no {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--color-border-info);
-  background: var(--color-surface-info);
-  color: var(--color-primary);
-  font-weight: 700;
-}
-.howto__step-title {
-  display: block;
-  font-weight: 600;
-  line-height: 1.35;
-}
-.howto__step-text {
-  display: block;
-  margin-top: 2px;
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1.45;
-}
-
 .howto__h {
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1.3;
   font-weight: 700;
 }
@@ -149,6 +114,529 @@
   font-size: 24px;
 }
 
+/* Покачивание картинок при наведении: ±4°, 200 мс. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion-level='reduce']) .howto__feature:hover .howto-kart,
+  :root:not([data-motion-level='reduce']) .howto__cta:hover .howto-kart,
+  :root:not([data-motion-level='reduce']) .put__shag:hover .howto-kart {
+    animation: howto-kach 200ms var(--ease-in-out) 2 alternate;
+  }
+}
+@keyframes howto-kach {
+  0% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+  100% {
+    transform: rotate(4deg);
+  }
+}
+.howto-kart {
+  display: block;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* ── Видео ─────────────────────────────────────────────────────── */
+
+/* Видео — отдельной строкой: слева ролик, справа заголовок, главы и
+   кнопки. Пустой колонки рядом нет ни на какой ширине. */
+.howto__video {
+  display: grid;
+  gap: var(--space-4) var(--space-6);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+@media (min-width: 1024px) {
+  .howto__video {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-rows: auto auto 1fr;
+    align-items: start;
+  }
+  .howto__video .vid {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+  .howto__video > .howto__h,
+  .vid__glavy,
+  .howto__video-actions {
+    grid-column: 2;
+  }
+  .vid__glavy {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.vid {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface-info);
+  aspect-ratio: 16 / 9;
+}
+.vid__player {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.vid__start {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--color-text);
+}
+.vid__start:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: -3px;
+}
+.vid__krug {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+  color: var(--color-primary);
+  transition: transform var(--dur-hover, 160ms) var(--ease);
+}
+.vid__start:hover .vid__krug {
+  transform: scale(1.06);
+}
+.vid__krug svg {
+  width: 36px;
+  height: 36px;
+  margin-left: 4px;
+  fill: currentColor;
+}
+.vid__smotret {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  font-weight: 600;
+}
+.vid__glavy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.vid__glava {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-hover, 160ms) var(--ease),
+    border-color var(--dur-hover, 160ms) var(--ease);
+}
+.vid__glava:hover {
+  border-color: var(--color-border-hover);
+}
+.vid__glava:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.vid__glava.is-active {
+  border-color: var(--color-border-accent);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-text-brand);
+}
+.vid__vremya {
+  min-width: 3.2em;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.howto__video-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ── Путь по сайту ─────────────────────────────────────────────── */
+
+.put {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.put__shapka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+.put__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--blue-200);
+  background: var(--color-surface-info);
+  color: var(--blue-700);
+  font-size: 13px;
+  font-weight: 600;
+  transition: opacity 250ms var(--ease);
+}
+.put__hint.is-skryt {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Одна сетка: шаги — колонка 1, по строкам; снимок — колонка 2 через
+   все строки и строку-распорку (1fr), которая забирает лишнюю высоту
+   снимка, чтобы шаги не раздвигались. */
+.put__setka {
+  --put-ik: 48px;
+  --put-x: calc(var(--space-3) + var(--put-ik) / 2);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-rows: repeat(var(--put-n), auto) auto 1fr;
+  column-gap: var(--space-6);
+  row-gap: var(--space-2);
+  align-items: start;
+}
+.put__spisok {
+  display: contents;
+}
+
+/* Дорожка: тонкая голубая линия со свечением, оранжевая заливка до
+   выбранного шага. Положение меряет Put.tsx по центрам значков. */
+.put__dorozhka {
+  position: absolute;
+  z-index: 0;
+  left: calc(var(--put-x) - 1.5px);
+  top: var(--put-top);
+  width: 3px;
+  height: var(--put-h);
+  border-radius: 2px;
+  background: var(--blue-200);
+  box-shadow: 0 0 8px var(--aura-blue);
+  pointer-events: none;
+}
+.put__zalivka {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--put-zal);
+  border-radius: inherit;
+  background: var(--gloss-warm);
+  box-shadow: 0 0 10px var(--aura-orange);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion-level='reduce']) .put__zalivka {
+    transition: height 300ms var(--ease-in-out);
+  }
+}
+
+.put__shag {
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+  grid-row: var(--ryad);
+  display: grid;
+  grid-template-columns: var(--put-ik) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 72px;
+  padding: var(--space-3);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  box-shadow: var(--glass-ring);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--dur-hover, 160ms) var(--ease),
+    box-shadow var(--dur-hover, 160ms) var(--ease),
+    border-color var(--dur-hover, 160ms) var(--ease),
+    background-color var(--dur-hover, 160ms) var(--ease);
+}
+.put__shag:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+}
+.put__shag:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.put__shag.is-active {
+  transform: translateY(-2px);
+  border-color: var(--blue-300);
+  background: var(--glass-bg-strong);
+  box-shadow:
+    var(--glass-ring),
+    var(--glass-hi),
+    var(--glass-shadow-hover),
+    0 0 0 4px var(--color-focus-ring);
+}
+.put__ikonka {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--put-ik);
+  height: var(--put-ik);
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: var(--glass-ring);
+}
+.put__ikonka .howto-kart {
+  width: 100%;
+  height: 100%;
+}
+.put__nomer {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--blue-200);
+  background: var(--color-surface);
+  color: var(--blue-700);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+/* Значка нет в сборке — номер встаёт на его место крупно. */
+.put__ikonka:not(:has(img)) .put__nomer {
+  position: static;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  font-size: 16px;
+}
+.put__shag.is-active .put__nomer,
+.put__shag.is-proyden .put__nomer {
+  border-color: var(--color-border-accent);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-text-brand);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion-level='reduce']) .put__shag.is-active .put__ikonka .howto-kart {
+    animation: howto-kach-raz 600ms var(--ease-out);
+  }
+}
+@keyframes howto-kach-raz {
+  0% {
+    transform: rotate(0);
+  }
+  30% {
+    transform: rotate(-8deg) scale(1.06);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+.put__tekst {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.put__title {
+  font-weight: 700;
+  line-height: 1.3;
+}
+.put__text {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.put__panel {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  min-width: 0;
+}
+.put__snimok {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion-level='reduce']) .put__snimok {
+    animation: put-smena 250ms var(--ease-out) both;
+  }
+}
+@keyframes put-smena {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.put__ramka {
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  padding: 6px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-tint-blue);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.put__ramka img,
+.put__zaglushka {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+  border-radius: calc(var(--radius-xl) - 6px);
+  background: var(--color-surface);
+}
+.put__podpis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+.put__otkryt {
+  flex: none;
+  text-decoration: none;
+}
+
+.put__nav {
+  grid-column: 1;
+  grid-row: var(--ryad-nav);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.put__schet {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Планшет и телефон: колонка одна. Снимок раскрывается под выбранным
+   шагом (order), остальные шаги свёрнуты — только заголовок. */
+@media (max-width: 1023.98px) {
+  .put {
+    padding: var(--space-4);
+  }
+  .put__setka {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+  .put__shag,
+  .put__panel,
+  .put__nav {
+    grid-column: 1;
+    grid-row: auto;
+    order: var(--poryadok);
+  }
+  .put__nav {
+    order: 999;
+  }
+  .put__shag:not(.is-active) .put__text {
+    display: none;
+  }
+  .put__panel {
+    padding-left: calc(var(--put-x) + var(--space-4));
+  }
+}
+@media (max-width: 767.98px) {
+  .put__setka {
+    --put-ik: 40px;
+  }
+  .put__shag {
+    min-height: 60px;
+  }
+  .put__podpis .btn {
+    width: 100%;
+  }
+  .put__nav .btn {
+    min-height: 44px;
+    padding-inline: var(--space-3);
+  }
+}
+
+/* ── Мини-задача ───────────────────────────────────────────────── */
+
+.proba {
+  display: grid;
+  gap: var(--space-4);
+}
+.proba .proba__ekran {
+  max-width: none;
+  margin: 0;
+  justify-items: start;
+}
+.proba__zadacha {
+  width: 100%;
+  max-width: 820px;
+}
+.proba .trn-pole {
+  justify-self: stretch;
+}
+.proba__dalshe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.proba__dalshe .btn {
+  text-decoration: none;
+}
+
+/* ── Возможности ───────────────────────────────────────────────── */
+
 .howto__features {
   display: grid;
   gap: var(--space-4);
@@ -156,6 +644,10 @@
 @media (min-width: 768px) {
   .howto__features {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: dense;
+  }
+  .howto__demo {
+    grid-column: 1 / -1;
   }
 }
 @media (min-width: 1280px) {
@@ -163,27 +655,46 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+/* Демо — сразу за карточкой генератора на любой ширине. */
+.howto__features--demo > li {
+  order: 2;
+}
+.howto__features--demo > .howto__feature--demo {
+  order: 0;
+}
+.howto__features--demo > .howto__demo {
+  order: 1;
+}
+/* Вкладка «Учителю»: в первой строке карточка генератора и демо рядом,
+   во второй — три карточки. Три колонки — без пустой ячейки. */
+@media (min-width: 1024px) {
+  .howto__features--demo {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .howto__features--demo .howto__feature--demo {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  .howto__features--demo .howto__demo {
+    grid-row: 1;
+    grid-column: 2 / span 2;
+  }
+}
 .howto__feature {
   display: grid;
   align-content: start;
+  justify-items: start;
   gap: var(--space-2);
-  padding: var(--space-4);
+  padding: var(--space-5);
   border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg);
+  box-shadow: var(--glass-ring), var(--glass-hi);
 }
-/* Настоящий фрагмент интерфейса сайта: целиком (object-fit: contain),
-   не шире нормы section Illustration (280). */
-.howto__shot {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 12 / 7;
-  object-fit: contain;
-  margin-bottom: var(--space-2);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+.howto__feature-kart {
+  width: 96px;
+  height: 96px;
+  margin-bottom: var(--space-1);
 }
 .howto__feature-title {
   font-weight: 700;
@@ -194,11 +705,264 @@
   font-size: 14px;
   line-height: 1.45;
 }
+.howto__feature-snimok {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin-top: var(--space-1);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--blue-700);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.howto__feature-snimok:hover {
+  border-color: var(--blue-300);
+}
+.howto__feature-snimok:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
 
-/* Частые вопросы: строки с плюсом. */
+/* ── Демо генератора ───────────────────────────────────────────── */
+
+.howto__demo {
+  min-width: 0;
+}
+.gdemo {
+  display: grid;
+  gap: var(--space-5);
+  height: 100%;
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+@media (min-width: 640px) {
+  .gdemo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+.gdemo__nastroyki {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+.gdemo__title {
+  font-size: 20px;
+  font-weight: 700;
+}
+.gdemo__gruppa {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.gdemo__legend {
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.gdemo__skolko {
+  font-weight: 400;
+}
+.gdemo__chipy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.gdemo__chip,
+.gdemo__minus,
+.gdemo__seg-k {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.gdemo__chip.is-on,
+.gdemo__seg-k.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.gdemo__chip[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+.gdemo__chip:not(.is-on)[aria-disabled='true'] {
+  opacity: 0.6;
+}
+.gdemo__minus:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.gdemo__chip:focus-visible,
+.gdemo__minus:focus-visible,
+.gdemo__seg-k:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.gdemo__shagi {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.gdemo__n {
+  min-width: 2ch;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.gdemo__seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.gdemo__sobrat {
+  justify-self: start;
+  text-decoration: none;
+}
+.gdemo__primechanie {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+/* Веер листов А4: столько, сколько вариантов. */
+.gdemo__veer {
+  position: relative;
+  min-height: 300px;
+  aspect-ratio: 1;
+  max-width: 420px;
+  width: 100%;
+  justify-self: center;
+}
+.gdemo__list {
+  --shag: calc(var(--i) - (var(--n) - 1) / 2);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 52%;
+  aspect-ratio: 210 / 297;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  transform: translate(-50%, -50%) translateX(calc(var(--shag) * 7%))
+    rotate(calc(var(--shag) * 5deg));
+  transform-origin: 50% 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion-level='reduce']) .gdemo__list {
+    transition: transform 250ms var(--ease-out);
+    animation: howto-poyavlenie 250ms var(--ease-out) both;
+  }
+}
+.gdemo__list img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.gdemo__metka {
+  position: absolute;
+  inset: auto 6px 6px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg-strong);
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Окно со снимком ───────────────────────────────────────────── */
+
+.okno {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.okno::backdrop {
+  background: var(--color-bg-translucent-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.okno__pole {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-12) var(--space-4) var(--space-4);
+}
+.okno__img {
+  max-width: min(100%, 1600px);
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  background: var(--color-surface);
+}
+.okno__zakryt {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 50%;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+  color: var(--color-text);
+  cursor: pointer;
+}
+.okno__zakryt:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.okno__zakryt svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* ── Частые вопросы ────────────────────────────────────────────── */
+
 .howto__faq {
   display: grid;
   gap: 0 var(--space-6);
+  align-items: start;
   border-radius: var(--radius-xl);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -217,11 +981,16 @@
   position: relative;
   display: block;
   width: 100%;
+  min-height: 44px;
   padding: var(--space-3) var(--space-8) var(--space-3) 0;
   border: 0;
   color: var(--color-text);
   font-size: 16px;
   text-align: left;
+}
+.howto__q .solution-details-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 .howto__q .solution-details-toggle::after {
   content: '+';
@@ -236,13 +1005,26 @@
 .howto__q.open .solution-details-toggle::after {
   content: '−';
 }
+/* Без отступа сверху; снизу — распорка внутри обрезаемого блока
+   (padding строка 0fr не сжимает — components.css, Details). */
 .howto__q .solution-details-body > div {
-  padding: 0 0 var(--space-3);
   color: var(--color-text-secondary);
   line-height: 1.5;
 }
+.howto__q .solution-details-body > div::before {
+  height: 0;
+}
+.howto__q .solution-details-body > div::after {
+  content: '';
+  display: block;
+  height: var(--space-3);
+}
+.howto__q-link {
+  margin-top: var(--space-2);
+}
 
-/* Плашка внизу: главная кнопка — приглушённый терракотовый акцент. */
+/* ── Плашка внизу ──────────────────────────────────────────────── */
+
 .howto__cta {
   display: flex;
   flex-wrap: wrap;
@@ -253,6 +1035,9 @@
   border-radius: var(--radius-xl);
   background: var(--color-surface-warm);
   border: 1px solid var(--color-border-warm);
+}
+.howto__cta-tekst {
+  flex: 1 1 240px;
 }
 .howto__cta-title {
   font-size: 24px;
@@ -286,9 +1071,44 @@
   font-size: 14px;
   line-height: 1.4;
 }
+.howto__cta-kart {
+  flex: none;
+  width: 120px;
+  height: 120px;
+}
 
+/* ── Телефон ───────────────────────────────────────────────────── */
+
+@media (max-width: 1023.98px) {
+  /* Шапка: картинка 120 px над заголовком, под ним лид и переключатель. */
+  .howto-shapka {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+    min-height: 0;
+  }
+  .howto-shapka .shapka__media {
+    order: 0;
+    align-self: flex-start;
+  }
+  .howto-shapka .shapka__title {
+    order: 1;
+  }
+  .howto-shapka .shapka__text {
+    order: 2;
+    display: grid;
+  }
+  .howto-krug {
+    --shapka-media: 120px;
+  }
+  .howto-krug .zhk__chip {
+    font-size: 11px;
+  }
+}
 @media (max-width: 767.98px) {
-  .howto {
+  .howto,
+  .howto__telo {
     gap: var(--space-8);
   }
   .howto__tabs {
@@ -301,11 +1121,10 @@
     padding: 0 var(--space-3);
   }
   .howto__video {
-    min-height: 0;
-    padding: var(--space-6) var(--space-5);
+    padding: var(--space-4);
   }
-  .howto__video-title {
-    font-size: 24px;
+  .vid__glava {
+    flex: 1 1 calc(50% - var(--space-2));
   }
   .howto__cta {
     padding: var(--space-5);
@@ -318,20 +1137,7 @@
   .howto__cta-actions .btn {
     width: 100%;
   }
-}
-
-/* Кнопки под текстом про видео: тур и повтор приветствия. */
-.howto__video-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-}
-
-.howto__player {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: var(--radius-md);
-  background: #0b1931;
+  .howto__cta-kart {
+    order: -1;
+  }
 }

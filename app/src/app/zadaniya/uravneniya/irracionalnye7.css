@@ -8,12 +8,12 @@
 
 .z7-irr {
   --irr-ur: var(--navy-800);
-  --irr-ur-bg: var(--blue-50);
-  --irr-us: var(--amber-600);
-  --irr-us-text: var(--terracotta-700);
+  --irr-ur-bg: var(--color-surface-info);
+  --irr-us: var(--color-warning);
+  --irr-us-text: var(--color-accent-text);
   --irr-us-bg: var(--sun-50);
-  --irr-samo: var(--grey-700);
-  --irr-samo-bg: var(--grey-50);
+  --irr-samo: var(--color-text-secondary);
+  --irr-samo-bg: var(--color-surface-2);
 
   display: flex;
   flex-direction: column;
@@ -102,8 +102,8 @@
 }
 
 .z7-irr__vid {
-  --ton: var(--blue-600);
-  --ton-bg: var(--blue-50);
+  --ton: var(--color-primary);
+  --ton-bg: var(--color-surface-info);
 
   display: flex;
   flex-direction: column;
@@ -127,8 +127,8 @@
 }
 
 .z7-irr__vid--seryy {
-  --ton: var(--grey-700);
-  --ton-bg: var(--grey-100);
+  --ton: var(--color-text-secondary);
+  --ton-bg: var(--color-track);
 }
 
 .z7-irr__vid-shapka {
@@ -142,7 +142,7 @@
   padding: 3px 12px;
   border-radius: 999px;
   background: var(--ton);
-  color: var(--color-text-inverse);
+  color: var(--color-text-on-accent);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -375,7 +375,7 @@
 }
 
 .z7-irr__poyasnenie--samo {
-  border: 1.5px dashed var(--grey-500);
+  border: 1.5px dashed var(--color-text-tertiary);
   background: var(--irr-samo-bg);
 }
 
@@ -460,7 +460,7 @@
 
 .z7-irr__primer[open] .z7-irr__primer-knopka {
   background: var(--ton);
-  color: var(--color-text-inverse);
+  color: var(--color-text-on-accent);
 }
 
 .z7-irr__primer-title {
@@ -514,7 +514,7 @@
 .z7-irr-graf__liniya {
   width: 28px;
   height: 0;
-  border-top: 3px solid var(--blue-600);
+  border-top: 3px solid var(--color-primary);
 }
 
 .z7-irr-graf__l--nash .z7-irr-graf__liniya {
@@ -572,8 +572,8 @@
 }
 
 .z7-irr__tr {
-  --ton: var(--blue-600);
-  --ton-bg: var(--blue-50);
+  --ton: var(--color-primary);
+  --ton-bg: var(--color-surface-info);
 }
 
 .z7-irr__tr--fiolet {
@@ -587,8 +587,8 @@
 }
 
 .z7-irr__tr--seryy {
-  --ton: var(--grey-700);
-  --ton-bg: var(--grey-100);
+  --ton: var(--color-text-secondary);
+  --ton-bg: var(--color-track);
 }
 
 .z7-irr__tr > * {

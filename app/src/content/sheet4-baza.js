@@ -91,8 +91,8 @@ export const podskazki = {
 
 /** Названия файлов базы. */
 export const files = {
-  uchenik: 'Zadanie_4_baza_uchenik',
-  uchitel: 'Zadanie_4_baza_uchitel',
+  uchenik: 'teoriya-veroyatnostey-baza-uchenik',
+  uchitel: 'teoriya-veroyatnostey-baza-uchitel',
 };
 
 const content = { head, foot, subtitle, variants, dvoyniki, sections, metodLabel, otvety, podskazki, files };

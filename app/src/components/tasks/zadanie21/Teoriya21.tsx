@@ -569,6 +569,7 @@ export function Teoriya21({ vkladka }: { vkladka: string }) {
   const tela = Object.fromEntries(RAZDELY_TEORII_21.map((r) => [r.id, <Telo r={r} key={r.id} />]));
   return (
     <TeoriyaShell
+      taskNo={21}
       vkladka={vkladka}
       razdely={RAZDELY_TEORII_21.map((r) => ({ id: r.id, title: r.title }))}
       tela={tela}

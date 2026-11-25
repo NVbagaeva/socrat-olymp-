@@ -112,6 +112,7 @@ export function Spravochnik1({
   const d = Array.isArray(dekor) ? dekor[0] : dekor;
   return (
     <TeoriyaShell
+      taskNo={1}
       vkladka={SPRAVOCHNIK_1.title}
       podZagolovkom={
         <div className="spr1-shapka">

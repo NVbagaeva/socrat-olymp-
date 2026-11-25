@@ -8,62 +8,34 @@
  */
 
 import type { NavItem } from '@/components/ui';
-import { HOWTO_HREF } from '@/content/howto';
-import { tasksPage } from '@/content/tasks';
-import { EZH_HREF } from '@/content/ezhemesyachnye';
-import { POV_HREF } from '@/content/povyshennye';
-import { href, USTNYY } from '@/lib/paths';
-import { VARIANT_HREF } from '@/content/variant';
-import { TARIFY_HREF } from '@/lib/tarify/href';
+import { LINKS, type MenuLink } from '@/content/site';
 
-/* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
-   «Прогресс» и «Статистика» → «Статистика», «Материалы» →
-   «Мои материалы», «Учитель» и «Домашние работы» → «Для учителя»,
-   «Уведомления» → колокольчик в шапке. */
+/* Пункт нижней панели и экрана «Ещё» из общего списка меню (LINKS,
+   content/site.ts): id, название, адрес и значок заведены там один раз.
+   short — короткая подпись только для панели и «Ещё»; в верхнем меню
+   названия всегда полные (components/layout/VerhneeMenu.tsx). */
+function punkt(link: MenuLink, extra: Partial<NavItem> = {}): NavItem {
+  return {
+    id: link.id ?? link.href,
+    label: link.label,
+    href: link.href,
+    icon: link.icon,
+    ...(link.akcent === true ? { akcent: true } : {}),
+    ...extra,
+  };
+}
+
+/* Разделы кабинета для нижней панели и экрана «Ещё». Верхнее меню
+   берёт пункты прямо из site.nav. «Главная» — только здесь: в верхнем
+   меню на главную ведёт логотип. */
 const vseRazdely: NavItem[] = [
   { id: 'home', label: 'Главная', href: '/', icon: 'home' },
-  /* В нижней панели пункт называется полным именем страницы —
-     «Банк заданий»: он ведёт на список всех заданий, а не в раздел. */
-  { id: 'tasks', label: 'Задания', panel: 'Банк заданий', href: tasksPage.href, icon: 'tasks' },
-  /* Устный счёт — общий для профиля и базы (lib/paths.ts, USTNYY). В
-     нижнюю панель не входит: попадает на экран «Ещё». */
-  /* Устный счёт — общий для профиля и базы (lib/paths.ts, USTNYY).
-     Выделен тёплым акцентом и стоит в нижней панели среди главных. */
-  {
-    id: 'ustnyy',
-    label: 'Устный счёт',
-    short: 'Счёт',
-    href: href(USTNYY),
-    icon: 'schet',
-    akcent: true,
-  },
-  /* Генератор варианта из всех заданий первой части (/variant/). */
-  {
-    id: 'variant',
-    label: 'Собрать вариант',
-    short: 'Вариант',
-    href: VARIANT_HREF,
-    icon: 'variant',
-  },
-  /* 36 вариантов × 6 версий: решать онлайн и печатать (/povyshennye/). */
-  {
-    id: 'povyshennye',
-    label: 'Варианты повышенной сложности',
-    short: 'Повышенные',
-    href: POV_HREF,
-    icon: 'povyshennye',
-  },
-  /* 4 варианта по месяцам (октябрь 2026 — январь 2027): решать и печатать. */
-  {
-    id: 'ezhemesyachnye',
-    label: 'Ежемесячные варианты',
-    short: 'Ежемесячные',
-    href: EZH_HREF,
-    icon: 'ezhemesyachnye',
-  },
+  punkt(LINKS.bank),
+  punkt(LINKS.ustnyy, { short: 'Счёт' }),
+  punkt(LINKS.sobrat, { short: 'Вариант' }),
+  punkt(LINKS.slozhnye, { short: 'Сложные' }),
+  punkt(LINKS.mesyaca, { short: 'Месяца' }),
   { id: 'stats', label: 'Статистика', href: '/statistika/', icon: 'stats' },
-  /* Короткая подпись — для нижней панели и экрана «Ещё»: полное
-     название в ячейку шириной в четверть экрана не помещается. */
   {
     id: 'materials',
     label: 'Мои материалы',
@@ -78,18 +50,8 @@ const vseRazdely: NavItem[] = [
     href: '/dlya-uchitelya/',
     icon: 'teacher',
   },
-  /* Инструкция и тур. В нижнюю панель не входит — живёт на экране «Ещё». */
-  {
-    id: 'help',
-    label: 'Как пользоваться',
-    short: 'Инструкция',
-    href: HOWTO_HREF,
-    icon: 'help',
-  },
-  /* Тарифы — последними, как в шапке главной: из задания, тренажёра и
-     генератора к цене один клик (docs/audit-prodazhi.md, C1). В нижнюю
-     панель не входит — на экране «Ещё». */
-  { id: 'tarify', label: 'Тарифы', href: TARIFY_HREF, icon: 'favourites' },
+  punkt(LINKS.howto, { short: 'Инструкция' }),
+  punkt(LINKS.tarify),
 ];
 
 /**
@@ -113,7 +75,7 @@ const NE_GOTOVY = new Set([
 
 const gotovye = (items: NavItem[]): NavItem[] => items.filter((item) => !NE_GOTOVY.has(item.id));
 
-/** Верхнее меню кабинета: только готовые разделы. */
+/** Готовые разделы кабинета: нижняя панель и экран «Ещё». */
 export const topNav: NavItem[] = gotovye(vseRazdely);
 
 /** Уведомления живут за колокольчиком, в списке меню их нет. */

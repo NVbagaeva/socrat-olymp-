@@ -10,7 +10,7 @@
  */
 
 import { OPORNYE } from './opornye';
-import { TUTORS_TAIL, type RazdelTab } from './vkladki';
+import { TUTORS_TAIL, type RazdelTab, TUTORS_LABEL } from './vkladki';
 import type { TutorMaterial } from './sections';
 import { counted } from '@/lib/plural';
 import { taskName } from './tasks';
@@ -73,7 +73,7 @@ const TABS: readonly VeroyatnostTab[] = [
   { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
   { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
-  { id: 'repetitory', label: 'Для репетиторов', tail: TUTORS_TAIL, icon: 'materials' },
+  { id: 'repetitory', label: TUTORS_LABEL, tail: TUTORS_TAIL, icon: 'materials' },
 ];
 const TABS_4 = TABS;
 const TABS_5 = TABS;
@@ -136,14 +136,14 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
           title: 'Рабочая тетрадь для репетиторов',
           lead: 'Задачи с заготовками рисунков и строкой для ответа',
           icon: 'doc',
-          file: assetUrl('/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik.pdf'),
+          file: assetUrl('/materials/veroyatnost/teoriya-veroyatnostey-uchenik.pdf'),
         },
         {
           id: 'pdf',
           title: 'PDF-практикум',
           lead: 'Те же задания чёрно-белым — для принтера',
           icon: 'pdf',
-          file: assetUrl('/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik-chb.pdf'),
+          file: assetUrl('/materials/veroyatnost/teoriya-veroyatnostey-uchenik-chb.pdf'),
         },
         /* Печатная база тренажёра: все прототипы, варианты 1–10.
            Собирает scripts/build-pdf-4-baza.mjs (workflow «PDF 4 база»);
@@ -153,7 +153,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
           title: `Печатная база задания ${nomerRazdela('veroyatnost')}`,
           lead: 'Все прототипы тренажёра, по десять вариантов, без рисунков — со строкой для ответа',
           icon: 'pdf',
-          file: assetUrl('/materials/zadanie-4/Zadanie_4_baza_uchenik.pdf'),
+          file: assetUrl('/materials/veroyatnost/teoriya-veroyatnostey-baza-uchenik.pdf'),
         },
       ],
     },
@@ -178,14 +178,14 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
           title: 'Рабочая тетрадь для репетиторов',
           lead: 'Опорные задачи и прототипы с заготовками рисунков и строкой для ответа',
           icon: 'doc',
-          file: assetUrl('/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik.pdf'),
+          file: assetUrl('/materials/slozhnaya-veroyatnost/veroyatnosti-sobytiy-uchenik.pdf'),
         },
         {
           id: 'pdf',
           title: 'PDF-практикум',
           lead: 'Те же задания чёрно-белым — для принтера',
           icon: 'pdf',
-          file: assetUrl('/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik-chb.pdf'),
+          file: assetUrl('/materials/slozhnaya-veroyatnost/veroyatnosti-sobytiy-uchenik-chb.pdf'),
         },
       ],
     },

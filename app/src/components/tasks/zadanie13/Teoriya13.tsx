@@ -373,6 +373,7 @@ export function Teoriya13({ vkladka }: { vkladka: string }) {
   return (
     <div className="z13-teoriya teor-steklo">
       <TeoriyaShell
+        taskNo={13}
         vkladka={vkladka}
         razdely={GLAVY_13.map((g) => ({
           id: g.id,
