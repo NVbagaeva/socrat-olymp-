@@ -1,0 +1,54 @@
+name: 'Сервер: новый ключ SSH'
+
+# Заменяет ключ, которым GitHub Actions входит на сервер (пользователь
+# deploy): новый ключ — в окружение server, старый на сервере перестаёт
+# работать. Ни на одном шаге вход не теряется (infra/lite/actions/ssh-key.sh).
+# Нажимать после переноса секретов в окружения и при любом подозрении,
+# что ключ мог утечь.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server
+  cancel-in-progress: false
+
+jobs:
+  ssh-key:
+    name: Заменить ключ SSH
+    runs-on: ubuntu-24.04
+    # Ключи сервера — в окружении server (Settings → Environments): оно
+    # пускает только ветку main и, если включено, ждёт подтверждения.
+    environment: server
+    timeout-minutes: 10
+    steps:
+      # На сервер уезжает код той ветки, с которой нажата кнопка, —
+      # поэтому только main.
+      - name: Только из main
+        run: |
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "::error::Эту кнопку можно нажимать только для ветки main (сейчас: $GITHUB_REF_NAME). Сначала влейте изменения в main."
+            exit 1
+          fi
+
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Новый ключ
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+          GH_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: infra/lite/actions/ssh-key.sh
+
+      - name: Письмо о сбое
+        if: failure()
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
+        run: infra/lite/actions/notify.sh '«Новый ключ SSH» не прошёл'
