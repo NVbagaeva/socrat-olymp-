@@ -86,7 +86,7 @@ export default function Vektory({ label, avtofokus }: ZhivoyProps) {
         <path className="zhv__ln" d={strelka(O, A)[0]} />
         <path d={strelka(O, A)[1]} fill="var(--blue-600)" />
         <path className="zhv__ln zhv__ln--or" d={strelka(O, B)[0]} />
-        <path d={strelka(O, B)[1]} fill="#f08a2c" />
+        <path d={strelka(O, B)[1]} fill="var(--chertezh-akcent)" />
         <circle className="zhv__tochka" cx={e(O)[0]} cy={e(O)[1]} r={4} />
         <text className="zhv__v" x={e(O)[0] - 16} y={e(O)[1] + 4}>
           O

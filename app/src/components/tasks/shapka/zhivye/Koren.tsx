@@ -95,7 +95,7 @@ function BrusokSvg({ br, ton }: { br: Brusok; ton: 'blue' | 'or' }) {
   for (let j = 1; j < Math.round(b); j += 1) {
     shvy.push(`M${iso(br, 0, j, c)}L${iso(br, a, j, c)}L${iso(br, a, j, 0)}`);
   }
-  const s = ton === 'or' ? '#e07a2f' : 'var(--blue-600)';
+  const s = ton === 'or' ? 'var(--chertezh-akcent)' : 'var(--blue-600)';
   const f =
     ton === 'or'
       ? ['255 214 170', '255 190 130', '250 170 100']
@@ -117,7 +117,7 @@ function KorenSvg({ r }: { r: ZnakKornya }) {
       <path
         d={d}
         fill="none"
-        stroke="rgb(190 212 248 / 0.8)"
+        stroke="color-mix(in srgb, var(--chertezh-zalivka-siniy) 80%, transparent)"
         strokeWidth={9}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -132,7 +132,7 @@ function KorenSvg({ r }: { r: ZnakKornya }) {
       />
       <path
         d={`M${r.x0 + 6} ${r.yt}L${r.x1} ${r.yt}`}
-        stroke="#f5a04a"
+        stroke="var(--chertezh-akcent)"
         strokeWidth={1.6}
         strokeLinecap="round"
         opacity={0.9}

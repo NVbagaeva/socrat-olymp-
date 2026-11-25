@@ -15,6 +15,16 @@
   filter: drop-shadow(0 10px 16px var(--solid-steklo-ten));
 }
 
+/* Тёмная тема: кружки вершин — цвета фона чертежа, а не белые. */
+:root[data-tema='dark']:not([data-sheet-theme]) .solid--ekran .solid-vershina,
+:root[data-tema='dark']:not([data-sheet-theme]) .ploskiy--ekran .solid-vershina {
+  fill: var(--chertezh-fon);
+}
+/* Ореол подписей (paint-order: stroke) — цвета фона, а не белый. */
+:root[data-tema='dark']:not([data-sheet-theme]) :is(.solid--ekran, .ploskiy--ekran) text[stroke] {
+  stroke: var(--chertezh-fon);
+}
+
 /* На печати экранная тема возвращается к строгой: тёмные рёбра,
    сплошные точки, чёрные подписи — и без заливок: ни граней, ни
    выделенных фигур (правило сайта для печати и чёрно-белых листов). */

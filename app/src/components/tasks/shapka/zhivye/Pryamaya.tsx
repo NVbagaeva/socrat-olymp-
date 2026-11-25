@@ -60,8 +60,8 @@ export default function Pryamaya({ label, avtofokus }: ZhivoyProps) {
           cx={x}
           cy={y}
           r={7}
-          fill={k.vkl ? '#f08a2c' : '#fff'}
-          stroke="#f08a2c"
+          fill={k.vkl ? 'var(--chertezh-akcent)' : 'var(--chertezh-fon)'}
+          stroke="var(--chertezh-akcent)"
           strokeWidth={3}
         />
         <Ruchka
@@ -93,7 +93,7 @@ export default function Pryamaya({ label, avtofokus }: ZhivoyProps) {
         {/* Штриховка промежутка: дуга метода интервалов над ним. */}
         <path
           d={`M${a0} ${a1}Q${(a0 + b0) / 2 + uy * 70} ${(a1 + b1) / 2 - ux * 70} ${b0} ${b1}`}
-          fill="rgb(255 176 112 / 0.18)"
+          fill="color-mix(in srgb, var(--chertezh-akcent-svet) 18%, transparent)"
           className="zhv__ln zhv__ln--tonko zhv__ln--or zhv__ln--pk"
         />
         <path className="zhv__ln" strokeWidth={5} d={`M${l0} ${l1}L${r0} ${r1}`} />

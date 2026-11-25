@@ -104,15 +104,15 @@
 /* Окно чертежа. */
 .z15-ch {
   --z15-liniya: var(--color-text);
-  --z15-liniya-3d: #24324a;
-  --z15-gran: #9dbcf0;
+  --z15-liniya-3d: var(--chertezh-tekst);
+  --z15-gran: var(--chertezh-setka);
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: #fff;
+  background: var(--chertezh-fon);
   /* Жесты внутри окна — чертежу: вращение пальцем, щипок. */
   touch-action: none;
   user-select: none;

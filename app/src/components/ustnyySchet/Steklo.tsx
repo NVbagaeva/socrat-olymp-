@@ -18,8 +18,8 @@ export function Steklo() {
           <stop offset="1" stopColor="var(--us-glass-3)" stopOpacity="0.85" />
         </linearGradient>
         <linearGradient id="us-steklo-blik" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.9" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.9" />
+          <stop offset="1" stopColor="var(--chertezh-fon)" stopOpacity="0" />
         </linearGradient>
       </defs>
       <circle cx="100" cy="100" r="96" fill="url(#us-steklo-teplo)" />

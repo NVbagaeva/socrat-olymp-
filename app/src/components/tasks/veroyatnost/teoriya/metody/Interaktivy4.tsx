@@ -328,8 +328,8 @@ export function Stol4({ mest, formula }: { mest: number; formula: string }) {
       >
         <defs>
           <radialGradient id="m4i-stol-steklo" cx="40%" cy="35%" r="70%">
-            <stop offset="0" stopColor="#ffffff" stopOpacity="0.95" />
-            <stop offset="1" stopColor="#bcd7ff" stopOpacity="0.7" />
+            <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.95" />
+            <stop offset="1" stopColor="var(--chertezh-zalivka-siniy)" stopOpacity="0.7" />
           </radialGradient>
         </defs>
         <circle className="m4i-stol__stol" cx={C} cy={C} r={80} fill="url(#m4i-stol-steklo)" />
@@ -456,12 +456,12 @@ export function Disk4({ nachalo, tex }: { nachalo: number; tex: DiskTex }) {
       >
         <defs>
           <radialGradient id="m4i-disk-steklo" cx="38%" cy="32%" r="75%">
-            <stop offset="0" stopColor="#ffffff" stopOpacity="0.95" />
-            <stop offset="1" stopColor="#a9caf5" stopOpacity="0.75" />
+            <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.95" />
+            <stop offset="1" stopColor="var(--chertezh-zalivka-siniy)" stopOpacity="0.75" />
           </radialGradient>
           <radialGradient id="m4i-disk-ogon" cx="40%" cy="35%" r="75%">
-            <stop offset="0" stopColor="#ffe2bd" />
-            <stop offset="1" stopColor="#f39a3d" />
+            <stop offset="0" stopColor="var(--chertezh-akcent-svet)" />
+            <stop offset="1" stopColor="var(--chertezh-akcent)" />
           </radialGradient>
         </defs>
         <circle className="m4i-disk__ves" cx={C} cy={C} r={R} fill="url(#m4i-disk-steklo)" />

@@ -203,7 +203,7 @@ export default function Golovolomka({ label, tiho, avtofokus }: ZhivoyProps) {
               <path
                 d={kromki}
                 fill="none"
-                stroke={or ? '#e07a2f' : 'var(--blue-600)'}
+                stroke={or ? 'var(--chertezh-akcent)' : 'var(--blue-600)'}
                 strokeWidth={1.6}
                 strokeLinecap="round"
               />

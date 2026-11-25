@@ -47,7 +47,11 @@ function Uzel({ p, r, or }: { p: Tochka; r: number; or: boolean }) {
         cy={p[1]}
         r={r}
         fill={or ? 'url(#der-or)' : 'url(#der-shar)'}
-        stroke={or ? '#e07a2f' : 'rgb(61 121 224 / 0.6)'}
+        stroke={
+          or
+            ? 'var(--chertezh-akcent)'
+            : 'color-mix(in srgb, var(--chertezh-siniy) 60%, transparent)'
+        }
         strokeWidth={1.4}
       />
       <ellipse
@@ -55,7 +59,7 @@ function Uzel({ p, r, or }: { p: Tochka; r: number; or: boolean }) {
         cy={p[1] - r * 0.38}
         rx={r * 0.33}
         ry={r * 0.2}
-        fill="rgb(255 255 255 / 0.85)"
+        fill="color-mix(in srgb, var(--chertezh-blik) 85%, transparent)"
       />
     </g>
   );
@@ -121,14 +125,14 @@ export default function Derevo({ label, tiho, avtofokus }: ZhivoyProps) {
       <svg viewBox="0 0 260 260" aria-hidden="true">
         <defs>
           <radialGradient id="der-shar" cx="0.35" cy="0.3" r="0.8">
-            <stop offset="0" stopColor="#ffffff" stopOpacity="0.95" />
-            <stop offset="0.6" stopColor="#c6dbfa" stopOpacity="0.75" />
-            <stop offset="1" stopColor="#7aa3e6" stopOpacity="0.8" />
+            <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.95" />
+            <stop offset="0.6" stopColor="var(--chertezh-zalivka-siniy)" stopOpacity="0.75" />
+            <stop offset="1" stopColor="var(--chertezh-setka)" stopOpacity="0.8" />
           </radialGradient>
           <radialGradient id="der-or" cx="0.35" cy="0.3" r="0.8">
-            <stop offset="0" stopColor="#fff3e4" />
-            <stop offset="0.6" stopColor="#ffc27a" />
-            <stop offset="1" stopColor="#e07a2f" />
+            <stop offset="0" stopColor="var(--chertezh-akcent-zalivka)" />
+            <stop offset="0.6" stopColor="var(--chertezh-akcent-svet)" />
+            <stop offset="1" stopColor="var(--chertezh-akcent)" />
           </radialGradient>
         </defs>
         {rebra.map((r) => (
@@ -136,7 +140,11 @@ export default function Derevo({ label, tiho, avtofokus }: ZhivoyProps) {
             <path
               d={krivaya(r.p, r.q)}
               fill="none"
-              stroke={r.put ? 'rgb(255 190 120 / 0.55)' : 'rgb(190 212 248 / 0.7)'}
+              stroke={
+                r.put
+                  ? 'color-mix(in srgb, var(--chertezh-akcent-svet) 55%, transparent)'
+                  : 'color-mix(in srgb, var(--chertezh-zalivka-siniy) 70%, transparent)'
+              }
               strokeWidth={9}
               strokeLinecap="round"
             />
@@ -144,7 +152,7 @@ export default function Derevo({ label, tiho, avtofokus }: ZhivoyProps) {
               className="derevo__lin"
               d={krivaya(r.p, r.q)}
               fill="none"
-              stroke={r.put ? '#f08a2c' : 'var(--blue-600)'}
+              stroke={r.put ? 'var(--chertezh-akcent)' : 'var(--blue-600)'}
               strokeWidth={r.put ? 3 : 1.8}
               strokeLinecap="round"
             />
@@ -183,7 +191,13 @@ export default function Derevo({ label, tiho, avtofokus }: ZhivoyProps) {
             </g>
           );
         })}
-        <ellipse cx={168} cy={244} rx={40 - pod * 10} ry={7} fill="rgb(31 95 208 / 0.12)" />
+        <ellipse
+          cx={168}
+          cy={244}
+          rx={40 - pod * 10}
+          ry={7}
+          fill="color-mix(in srgb, var(--chertezh-siniy) 12%, transparent)"
+        />
         <Kubik b={vr.b} ugly={ugly} m={22} c={[168, 208]} pod={pod} podsvetka={vypalo} />
       </svg>
       <div

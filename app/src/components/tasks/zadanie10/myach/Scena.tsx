@@ -738,30 +738,30 @@ function ScenaSvg({
     >
       <defs>
         <radialGradient id={`${id}-myach`} cx="0.35" cy="0.3" r="0.8">
-          <stop offset="0" stopColor="#eaf2ff" />
-          <stop offset="0.45" stopColor="#5b8fe8" />
-          <stop offset="1" stopColor="#1a4fb0" />
+          <stop offset="0" stopColor="var(--chertezh-zalivka-svet)" />
+          <stop offset="0.45" stopColor="var(--chertezh-setka)" />
+          <stop offset="1" stopColor="var(--chertezh-liniya)" />
         </radialGradient>
         <radialGradient id={`${id}-myach-vyshe`} cx="0.35" cy="0.3" r="0.8">
-          <stop offset="0" stopColor="#fff4dc" />
-          <stop offset="0.45" stopColor="#f4a24a" />
-          <stop offset="1" stopColor="#c2502e" />
+          <stop offset="0" stopColor="var(--chertezh-akcent-zalivka)" />
+          <stop offset="0.45" stopColor="var(--chertezh-akcent)" />
+          <stop offset="1" stopColor="var(--chertezh-akcent)" />
         </radialGradient>
         <radialGradient id={`${id}-svet`}>
-          <stop offset="0" stopColor="#ffc35a" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#ffc35a" stopOpacity="0" />
+          <stop offset="0" stopColor="var(--chertezh-zoloto)" stopOpacity="0.55" />
+          <stop offset="1" stopColor="var(--chertezh-zoloto)" stopOpacity="0" />
         </radialGradient>
         <linearGradient id={`${id}-lineyka`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="1" stopColor="#dbe6fa" stopOpacity="0.9" />
+          <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.95" />
+          <stop offset="1" stopColor="var(--chertezh-zalivka-siniy)" stopOpacity="0.9" />
         </linearGradient>
         <radialGradient id={`${id}-pol`}>
-          <stop offset="0" stopColor="#1f5fd0" stopOpacity="0.2" />
-          <stop offset="1" stopColor="#1f5fd0" stopOpacity="0" />
+          <stop offset="0" stopColor="var(--chertezh-siniy)" stopOpacity="0.2" />
+          <stop offset="1" stopColor="var(--chertezh-siniy)" stopOpacity="0" />
         </radialGradient>
         <linearGradient id={`${id}-zona`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f08a24" stopOpacity="0.14" />
-          <stop offset="1" stopColor="#f08a24" stopOpacity="0.03" />
+          <stop offset="0" stopColor="var(--chertezh-akcent)" stopOpacity="0.14" />
+          <stop offset="1" stopColor="var(--chertezh-akcent)" stopOpacity="0.03" />
         </linearGradient>
       </defs>
 

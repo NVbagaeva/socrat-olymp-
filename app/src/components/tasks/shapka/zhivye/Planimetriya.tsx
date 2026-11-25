@@ -111,12 +111,16 @@ export default function Planimetriya({ label, tiho, avtofokus }: ZhivoyProps) {
     >
       <svg ref={svg} viewBox="0 0 260 260" aria-hidden="true">
         <circle cx={C0[0]} cy={C0[1]} r={R} fill="none" className="zhv__ln" />
-        <polygon points={pts(A, B, C)} fill="rgb(170 200 245 / 0.25)" className="zhv__ln" />
+        <polygon
+          points={pts(A, B, C)}
+          fill="color-mix(in srgb, var(--chertezh-zalivka-siniy) 25%, transparent)"
+          className="zhv__ln"
+        />
         <circle
           cx={I[0]}
           cy={I[1]}
           r={r}
-          fill="rgb(255 190 120 / 0.14)"
+          fill="color-mix(in srgb, var(--chertezh-akcent-svet) 14%, transparent)"
           className="zhv__ln zhv__ln--or"
         />
         <path
