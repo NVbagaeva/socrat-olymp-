@@ -3419,8 +3419,8 @@ async function runZhurnalBanka(mock, errors) {
       await login(s.page, uchenik[1280], 'zhurnal-parol-1');
       await s.page.goto(`${SITE}/kabinet/domashki/reshat/?id=dz2-chertezh-1`, { waitUntil: 'networkidle' });
       await s.page.waitForSelector('[data-page="reshat-dz2"]');
+      /* Первый невыполненный элемент открыт сразу. */
       const elem = s.page.locator('.dz2-u-element[data-kind="opornye"]');
-      await elem.locator('.dz2-u-element__verh').click();
       await elem.locator('.dz2-u-zadacha').first().waitFor();
       const ris = elem.locator('.dz2-u-zadacha__uslovie .dz2-chertezh svg').first();
       const s0 = blok1.zadachi[0].risunokSvg;
