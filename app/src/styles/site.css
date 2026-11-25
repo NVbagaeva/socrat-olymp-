@@ -498,6 +498,22 @@ body:has(.site-menu) .help-fab {
   }
 }
 
+/* 1024–1151px в сборке с «Войти» в шапке (.site-head--vhod): от
+   логотипа остаётся знак, как с переключателем темы ниже. */
+@media (min-width: 1024px) and (max-width: 1151.98px) {
+  .site-head--vhod > .site-head__in > .logo {
+    gap: 0;
+  }
+  .site-head--vhod > .site-head__in > .logo .logo__name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
 /* 1024–1279px с переключателем темы (пока он виден только на проверке,
    html[data-tema-vidna], lib/tema.ts): в строке меню, «Профиль / База» и
    кнопки справа — от логотипа остаётся знак, название читает скринридер. */

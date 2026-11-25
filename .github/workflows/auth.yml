@@ -122,6 +122,13 @@ jobs:
         working-directory: app
         run: pnpm test:karta-nazad snimki-karta-nazad
 
+      # Верхнее меню на сборке с «Войти» в шапке: справа шире, пункты
+      # уходят в бургер раньше (.site-head--vhod) — ничего не налезает.
+      - name: Проверить верхнее меню со входом
+        if: matrix.header == '1'
+        working-directory: app
+        run: pnpm test:verhnee-menu
+
       # Рейтинг устного счёта: гость, серия с буфером и очередью ответов,
       # срок сервера, ошибки старта, страница рейтинга и ник — на моке
       # функций базы (сами функции — pnpm test:soglasiya-sql).
