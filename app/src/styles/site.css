@@ -717,4 +717,10 @@ body:has(.site-menu) .help-fab {
   .site-head .site-head__in {
     padding: 0 var(--space-2);
   }
+  /* Уже 360px (окно сбоку, 320px) знак уходит: в строке остаются
+     «Профиль / База», переключатель темы, аккаунт и бургер. На главную —
+     пункт «Главная» нижней панели. */
+  .site-head .site-head__in > .logo {
+    display: none;
+  }
 }

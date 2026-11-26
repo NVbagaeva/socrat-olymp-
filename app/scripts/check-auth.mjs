@@ -1827,7 +1827,7 @@ async function runEnabled() {
       `главная ${width}: название сайта видно рядом со знаком`,
     );
     check(
-      head.login !== null && head.logo.right <= head.login.x - 4,
+      head.login !== null && (head.logo === null || head.logo.right <= head.login.x - 4),
       `главная ${width}: логотип не налезает на «Войти»`,
     );
     check(
