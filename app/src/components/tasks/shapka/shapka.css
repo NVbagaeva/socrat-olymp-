@@ -36,7 +36,7 @@
     var(--glass-ring),
     var(--glass-hi),
     0 1px 2px rgb(16 40 100 / 0.06),
-    0 24px 48px -20px rgb(31 95 208 / 0.28);
+    0 24px 48px -20px color-mix(in srgb, var(--color-primary) 28%, transparent);
 }
 /* Мягкое голубое свечение за картинкой и тёплое — в углу. */
 .shapka::before,
@@ -54,7 +54,11 @@
   max-width: 420px;
   aspect-ratio: 1;
   transform: translateY(-50%);
-  background: radial-gradient(closest-side, rgb(61 121 224 / 0.36), rgb(61 121 224 / 0));
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--color-primary) 36%, transparent),
+    color-mix(in srgb, var(--color-primary) 0%, transparent)
+  );
 }
 .shapka::after {
   right: -8%;
@@ -62,7 +66,11 @@
   width: 36%;
   max-width: 360px;
   aspect-ratio: 1;
-  background: radial-gradient(closest-side, rgb(255 176 112 / 0.5), rgb(255 176 112 / 0));
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--color-accent) 50%, transparent),
+    color-mix(in srgb, var(--color-accent) 0%, transparent)
+  );
 }
 
 .shapka__title {
@@ -208,10 +216,10 @@
 .koltso__lozhe {
   stroke: color-mix(in srgb, var(--color-surface) 70%, transparent);
   stroke-width: 7;
-  filter: drop-shadow(0 2px 6px rgb(31 95 208 / 0.18));
+  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--color-primary) 18%, transparent));
 }
 .koltso--gost .koltso__lozhe {
-  stroke: rgb(31 95 208 / 0.28);
+  stroke: color-mix(in srgb, var(--color-primary) 28%, transparent);
   stroke-width: 3;
   stroke-dasharray: 2 7;
   stroke-linecap: round;
@@ -239,7 +247,7 @@
 }
 .koltso__golova circle {
   fill: var(--color-accent-soft-surface);
-  filter: drop-shadow(0 0 4px rgb(255 190 120 / 0.95));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-accent) 95%, transparent));
 }
 .koltso--gotovo {
   --koltso-oranzh: var(--color-star);
@@ -299,7 +307,7 @@
   font-weight: 500;
   color: var(--color-primary-text);
   text-decoration: underline;
-  text-decoration-color: rgb(31 95 208 / 0.35);
+  text-decoration-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
   text-underline-offset: 3px;
 }
 .koltso__galochka {
@@ -447,20 +455,44 @@
   }
 }
 @keyframes zhk-kach-0 {
-  0% { transform: rotate(0); }
-  35% { transform: rotate(-24deg) scale(1.04); }
-  55% { transform: rotate(10deg); }
-  72% { transform: rotate(-5deg); }
-  86% { transform: rotate(2deg); }
-  100% { transform: rotate(0); }
+  0% {
+    transform: rotate(0);
+  }
+  35% {
+    transform: rotate(-24deg) scale(1.04);
+  }
+  55% {
+    transform: rotate(10deg);
+  }
+  72% {
+    transform: rotate(-5deg);
+  }
+  86% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
 }
 @keyframes zhk-kach-1 {
-  0% { transform: rotate(0); }
-  35% { transform: rotate(-24deg) scale(1.04); }
-  55% { transform: rotate(10deg); }
-  72% { transform: rotate(-5deg); }
-  86% { transform: rotate(2deg); }
-  100% { transform: rotate(0); }
+  0% {
+    transform: rotate(0);
+  }
+  35% {
+    transform: rotate(-24deg) scale(1.04);
+  }
+  55% {
+    transform: rotate(10deg);
+  }
+  72% {
+    transform: rotate(-5deg);
+  }
+  86% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .zhk__poster,
@@ -540,16 +572,16 @@
   opacity: 0.55;
 }
 .zhv .zhv__setka {
-  stroke: rgb(31 95 208 / 0.13);
+  stroke: color-mix(in srgb, var(--color-primary) 13%, transparent);
   stroke-width: 1;
 }
 .zhv .zhv__plita {
   fill: color-mix(in srgb, var(--color-surface) 55%, transparent);
-  stroke: rgb(61 121 224 / 0.55);
+  stroke: color-mix(in srgb, var(--color-primary) 55%, transparent);
   stroke-width: 1.5;
 }
 .zhv .zhv__grani {
-  fill: rgb(170 200 245 / 0.28);
+  fill: color-mix(in srgb, var(--color-primary) 28%, transparent);
   stroke: none;
 }
 /* Ручка: видимая точка и невидимый круг побольше для пальца. */
@@ -575,7 +607,7 @@
   fill: var(--color-surface);
   stroke: var(--color-accent);
   stroke-width: 3;
-  filter: drop-shadow(0 0 4px rgb(255 160 80 / 0.7));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-accent) 70%, transparent));
   transition: r 150ms ease;
 }
 .zhv .zhv__ruchka:hover .zhv__ruchka-tochka,

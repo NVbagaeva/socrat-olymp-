@@ -325,6 +325,10 @@
   max-width: none;
   height: 97%;
   transform: translateX(-50%);
+  /* Фото обрезано снизу по поясу: низ растворяется в фон, а не обрывается
+     ровной линией (в тёмной теме срез был особенно заметен). */
+  -webkit-mask-image: linear-gradient(to bottom, black 78%, transparent 99%);
+  mask-image: linear-gradient(to bottom, black 78%, transparent 99%);
 }
 /* Бюст — акцент: стоит свободно на полу, лицом к построению, ничего не
    перекрывает и сам перекрыт только краем пирамиды. При прокрутке едва

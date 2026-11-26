@@ -134,7 +134,7 @@
   background: linear-gradient(
     160deg,
     color-mix(in srgb, var(--color-surface) 74%, transparent),
-    rgb(214 242 230 / 0.8)
+    color-mix(in srgb, var(--color-success-soft) 80%, transparent)
   );
 }
 .z45-metod-knopka.is-neverno {

@@ -20,7 +20,7 @@
 
 /* Стеклянная плоскость: заливка без обводки. */
 .rsz-stek {
-  fill: rgb(61 121 224 / 0.14);
+  fill: color-mix(in srgb, var(--color-primary) 14%, transparent);
   stroke: none;
 }
 

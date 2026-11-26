@@ -56,14 +56,18 @@
    контраст текста не зависит от того, что под карточкой. */
 .tipk__setka > .tipk__karta:nth-child(even) {
   --tipk-fon:
-    radial-gradient(110% 90% at 100% 0%, rgb(155 192 242 / 0.36), transparent 62%),
+    radial-gradient(
+      110% 90% at 100% 0%,
+      color-mix(in srgb, var(--color-primary) 36%, transparent),
+      transparent 62%
+    ),
     linear-gradient(
       160deg,
       color-mix(in srgb, var(--color-surface-info) 94%, transparent),
       color-mix(in srgb, var(--color-surface-info) 92%, transparent)
     );
   box-shadow:
-    0 0 0 1px rgb(31 95 208 / 0.14),
+    0 0 0 1px color-mix(in srgb, var(--color-primary) 14%, transparent),
     var(--glass-hi),
     var(--glass-shadow);
 }
@@ -77,14 +81,18 @@
   .tipk__setka > .tipk__karta:nth-child(4n + 2),
   .tipk__setka > .tipk__karta:nth-child(4n + 3) {
     --tipk-fon:
-      radial-gradient(110% 90% at 100% 0%, rgb(155 192 242 / 0.36), transparent 62%),
+      radial-gradient(
+        110% 90% at 100% 0%,
+        color-mix(in srgb, var(--color-primary) 36%, transparent),
+        transparent 62%
+      ),
       linear-gradient(
         160deg,
         color-mix(in srgb, var(--color-surface-info) 94%, transparent),
         color-mix(in srgb, var(--color-surface-info) 92%, transparent)
       );
     box-shadow:
-      0 0 0 1px rgb(31 95 208 / 0.14),
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 14%, transparent),
       var(--glass-hi),
       var(--glass-shadow);
   }
@@ -95,14 +103,14 @@
   .tipk__karta:hover {
     transform: translateY(-2px);
     box-shadow:
-      0 0 0 1px rgb(31 95 208 / 0.16),
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 16%, transparent),
       var(--glass-hi),
       var(--glass-shadow-hover);
   }
 }
 .tipk__karta:focus-within {
   box-shadow:
-    0 0 0 1px rgb(31 95 208 / 0.22),
+    0 0 0 1px color-mix(in srgb, var(--color-primary) 22%, transparent),
     var(--glass-hi),
     var(--glass-shadow-hover);
 }

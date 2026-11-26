@@ -20,7 +20,7 @@
 .zv6-a input {
   width: 100%;
   min-height: 44px;
-  accent-color: var(--blue-600);
+  accent-color: var(--color-primary);
 }
 .zv6-okruzhnost {
   fill: color-mix(in srgb, var(--chertezh-fon) 55%, transparent);
