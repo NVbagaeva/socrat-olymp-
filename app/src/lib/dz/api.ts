@@ -213,6 +213,25 @@ export interface Joined {
   tutorName: string;
 }
 
+export interface ClassPreview {
+  className: string;
+  tutorName: string;
+  /** Ученик уже в этом классе. */
+  already: boolean;
+}
+
+/** Класс по коду — до вступления: к кому вступает ученик. */
+export async function previewClass(code: string): Promise<ClassPreview> {
+  const supabase = await getClient();
+  const result = await supabase.rpc('klass_po_kodu', { p_code: code });
+  if (result.error) fail(result.error);
+  const data = result.data as
+    | { class_name: string; tutor_name: string | null; uzhe: boolean; error?: undefined }
+    | { error: string };
+  if (data.error !== undefined) throw new DzError(data.error, data.error);
+  return { className: data.class_name, tutorName: data.tutor_name ?? '', already: data.uzhe === true };
+}
+
 export async function joinClass(code: string): Promise<Joined> {
   const supabase = await getClient();
   const result = await supabase.rpc('join_class', { p_code: code });

@@ -26,6 +26,20 @@
       тренировки, после — тренировки, примеры, точность.
    7. 320 px: прокрутки вбок нет на витрине, странице приёма, таблице,
       настройках, экране тренировки и итогах.
+   8. Квадратные уравнения (обратная теорема Виета): страницы четырёх приёмов открываются
+      (картинка в шапке, без прокрутки вбок на 375 и 1440 px); тренировка
+      с двумя полями решается с клавиатуры (Enter в «x₁» — к «x₂», корни
+      в любом порядке), верный ответ — точки на прямой, ошибка — оба
+      корня; режим «Как в ЕГЭ» — одно поле; «Конструктор корней» ходит
+      стрелками, парабола проходит через выбранные точки.
+   9. Витрина: шапка — стеклянная сцена (секундомер и четыре знака; на
+      телефоне 140 px над заголовком); «Реши за 10 секунд» грузится по
+      нажатию, принимает верный ответ («+1», всплеск) и не пишет в
+      статистику; пустая статистика — плашка с кнопкой; карточки
+      приёмов переворачиваются мышью, клавиатурой (Enter, Tab по кнопкам
+      оборота) и кнопкой «Как?» на телефоне, при reduce — без поворота;
+      мини-таблица показывает «a × b = ?» и ответ; картинки — с
+      размерами и ленивой загрузкой; без прокрутки вбок на 1440 и 375.
    --snimki — снимки в docs/ustnyy-schet-snimki/ (телефон 320 и 390,
    планшет, компьютер). */
 
@@ -290,7 +304,7 @@ console.log('2а. 3D-таймер');
   );
   if (est3d) {
     /* Витрина и страница приёма: сцены three.js в загрузке нет. */
-    const v = await open(ctx, '/ustnyy-schet/', '.us-hero');
+    const v = await open(ctx, '/ustnyy-schet/', '.shapka--ustnyy');
     await v.waitForTimeout(500);
     const naVitrine = new Set(skripty.keys());
     const pr = await open(ctx, '/ustnyy-schet/kvadrat-na-5/', '.us-pravilo');
@@ -573,7 +587,7 @@ console.log('6а. Разминка и статистика');
 /* ── 7. 320 px и снимки ──────────────────────────────────────── */
 console.log('7. Ширина 320 и снимки');
 const STRANICY = [
-  ['vitrina', '/ustnyy-schet/', '.us-hero'],
+  ['vitrina', '/ustnyy-schet/', '.shapka--ustnyy'],
   ['priyom', '/ustnyy-schet/kvadrat-na-5/', '.us-pravilo'],
   ['kvadraty', '/ustnyy-schet/kvadraty-11-30/', '.us-kartochki'],
   ['tablica', '/ustnyy-schet/tablica-umnozheniya/', '.us-setka'],
@@ -612,6 +626,373 @@ for (const [ekran, opts] of EKRANY) {
     check(p.errors.length === 0, `${ekran} ${name}: ошибок нет ${p.errors.join('; ')}`);
     await p.close();
   }
+  await ctx.close();
+}
+
+/* ── 8. Квадратные уравнения: Виет ──────────────────────────── */
+console.log('8. Виет: страницы, два поля, ЕГЭ, конструктор');
+/** Оба корня текущего уравнения: из формулы корня в data-expr (±√D). */
+async function korniNaTekushiy(p) {
+  const expr = await p.locator('.us-igra__vopros').getAttribute('data-expr');
+  const drugoy = expr.includes('-sqrt(')
+    ? expr.replace('-sqrt(', '+sqrt(')
+    : expr.replace('+sqrt(', '-sqrt(');
+  return [str(vychislit(expr)), str(vychislit(drugoy))].map((x) => x.replace('.', ','));
+}
+{
+  for (const [ekran, vp] of [
+    ['375', { width: 375, height: 812 }],
+    ['1440', { width: 1440, height: 900 }],
+  ]) {
+    const ctx = await context({ viewport: vp });
+    for (const id of [
+      'vieta-privedennoe',
+      'vieta-delim-na-a',
+      'vieta-summa-koefficientov',
+      'vieta-perebroska',
+    ]) {
+      const p = await open(ctx, `/ustnyy-schet/${id}/`);
+      check((await p.locator('h1').count()) === 1, `${ekran} ${id}: страница открылась`);
+      const img = p.locator('.us-priyom__kartinka');
+      check(
+        (await img.count()) === 1 &&
+          (await img.getAttribute('width')) !== null &&
+          (await img.getAttribute('loading')) === 'lazy',
+        `${ekran} ${id}: картинка Виета в шапке (width/height, lazy)`,
+      );
+      check((await p.locator('.us-primer').count()) >= 2, `${ekran} ${id}: разобранные примеры`);
+      if (id === 'vieta-privedennoe') await p.locator('.us-kk').waitFor();
+      check(await bezProkrutki(p), `${ekran} ${id}: прокрутки вбок нет`);
+      await snimok(p, `vieta-${ekran}-${id}`);
+      check(p.errors.length === 0, `${ekran} ${id}: ошибок нет ${p.errors.join('; ')}`);
+      await p.close();
+    }
+    await ctx.close();
+  }
+
+  /* Тренировка: серия из 10 с двумя полями. */
+  const ctx = await context({ viewport: { width: 375, height: 812 } });
+  const p = await open(ctx, '/ustnyy-schet/trenirovka/?p=vieta-privedennoe&r=s10&go=1', '.us-igra');
+  await p.locator('#us-otvet-2').waitFor();
+  check(
+    (await p.locator('.us-igra__korni-podpis').textContent())?.includes('в любом порядке') === true,
+    'подпись «Корни в любом порядке…»',
+  );
+  check(await p.evaluate(() => document.activeElement?.id === 'us-otvet'), 'фокус в поле x₁');
+  for (let i = 0; i < 10; i += 1) {
+    const before = await p.locator('.us-igra__vopros').getAttribute('data-expr');
+    const [k1, k2] = await korniNaTekushiy(p);
+    if (i === 2) {
+      await p.keyboard.type(k1);
+      await p.keyboard.press('Enter');
+      check(
+        await p.evaluate(() => document.activeElement?.id === 'us-otvet-2'),
+        'Enter в x₁ переводит в x₂',
+      );
+      await p.keyboard.type(`${k2}1`);
+      await p.keyboard.press('Enter');
+      await p.locator('.us-igra__verniy').waitFor();
+      const t = (await p.locator('.us-igra__verniy').textContent()) ?? '';
+      check(
+        t.includes(k1.replace('-', '−')) && t.includes(k2.replace('-', '−')),
+        `ошибка — оба корня: «${t}»`,
+      );
+      await p.locator('.us-igra__verniy').waitFor({ state: 'detached', timeout: 4000 });
+      continue;
+    }
+    /* Корни в обратном порядке — тоже верно. */
+    await p.keyboard.type(k2);
+    await p.keyboard.press('Enter');
+    await p.keyboard.type(k1);
+    await p.keyboard.press('Enter');
+    if (i < 9) {
+      await p.waitForFunction(
+        (b) =>
+          document.querySelector('.us-igra__vopros')?.getAttribute('data-expr') !== b ||
+          document.querySelector('.us-itogi'),
+        before,
+      );
+      if (i === 0) {
+        check((await p.locator('.us-polet').count()) === 1, 'верно — точки на прямой');
+        await snimok(p, 'vieta-trenirovka-375', false);
+      }
+    }
+  }
+  await p.locator('.us-itogi').waitFor();
+  const plitka = (await p.locator('.us-plitka').first().textContent()) ?? '';
+  check(/9\s*из 10/.test(plitka), `Виет, итоги: ${plitka}`);
+  const oshibka = (await p.locator('.us-oshibka__vopros').first().textContent()) ?? '';
+  check(
+    /x1=.*x2=|x\s*1\s*=/.test(oshibka.replace(/\s/g, '')),
+    `итоги: оба корня у ошибки «${oshibka}»`,
+  );
+  check(await bezProkrutki(p), 'Виет, итоги: прокрутки вбок нет');
+  check(p.errors.length === 0, `Виет, тренировка: ошибок нет ${p.errors.join('; ')}`);
+  await p.close();
+
+  /* «Как в ЕГЭ»: одно поле, меньший корень. */
+  const e = await open(
+    ctx,
+    '/ustnyy-schet/trenirovka/?p=vieta-privedennoe&r=svobodnyy&ege=men&go=1',
+    '.us-igra',
+  );
+  check((await e.locator('#us-otvet-2').count()) === 0, 'ЕГЭ: одно поле');
+  check(
+    (await e.locator('.us-igra__korni-podpis').textContent())?.includes('меньший') === true,
+    'ЕГЭ: «В ответ запиши меньший корень»',
+  );
+  const b0 = await e.locator('.us-igra__vopros').getAttribute('data-expr');
+  await e.keyboard.type(await otvetNaTekushiy(e));
+  await e.keyboard.press('Enter');
+  await e.waitForFunction(
+    (b) => document.querySelector('.us-igra__vopros')?.getAttribute('data-expr') !== b,
+    b0,
+  );
+  check(
+    (await e.locator('[role="status"]').textContent())?.trim() === 'Верно',
+    'ЕГЭ: меньший корень принят',
+  );
+  await e.close();
+
+  /* Переключатель «Как в ЕГЭ» в настройках — только у уравнений. */
+  const n = await open(ctx, '/ustnyy-schet/trenirovka/?p=vieta-perebroska', '.us-nastroyki');
+  check(
+    (await n.getByRole('switch', { name: /Как в ЕГЭ/ }).count()) === 1,
+    'настройки: переключатель «Как в ЕГЭ»',
+  );
+  await n.locator('label.us-vykl', { hasText: 'Как в ЕГЭ' }).click();
+  check(
+    (await n.getByRole('button', { name: 'Больший корень' }).count()) === 1,
+    'настройки: меньший или больший корень',
+  );
+  await n.close();
+  const n2 = await open(ctx, '/ustnyy-schet/trenirovka/?p=na-11', '.us-nastroyki');
+  check(
+    (await n2.getByRole('switch', { name: /Как в ЕГЭ/ }).count()) === 0,
+    'у других приёмов переключателя нет',
+  );
+  await n2.close();
+  await ctx.close();
+
+  /* Конструктор корней: стрелки и парабола через точки. */
+  for (const vp of [
+    { width: 375, height: 812 },
+    { width: 1440, height: 900 },
+  ]) {
+    const c = await context({ viewport: vp });
+    const k = await open(c, '/ustnyy-schet/vieta-privedennoe/', '.us-kk');
+    const t1 = k.getByRole('slider', { name: 'Первый корень' });
+    await t1.focus();
+    for (let i = 0; i < 5; i += 1) await k.keyboard.press('ArrowLeft');
+    const t2 = k.getByRole('slider', { name: 'Второй корень' });
+    await t2.focus();
+    await k.keyboard.press('ArrowRight');
+    const x1 = Number(await t1.getAttribute('aria-valuenow'));
+    const x2 = Number(await t2.getAttribute('aria-valuenow'));
+    check(x1 === -3 && x2 === 6, `${vp.width}: стрелки двигают корни: ${x1}, ${x2}`);
+    /* Дождаться конца плавного перехода параболы. */
+    await k.waitForFunction(
+      ([a, b]) => {
+        const el = document.querySelector('.us-kk__parabola');
+        return (
+          el !== null &&
+          Number(el.getAttribute('data-a')) === a &&
+          Number(el.getAttribute('data-b')) === b
+        );
+      },
+      [x1, x2],
+    );
+    const proxodit = await k.evaluate(() => {
+      const path = document.querySelector('.us-kk__parabola');
+      const pts = path
+        .getAttribute('d')
+        .slice(1)
+        .split('L')
+        .map((s) => s.split(',').map(Number));
+      return [...document.querySelectorAll('.us-kk__koren')].map((c) => {
+        const cx = Number(c.getAttribute('cx'));
+        const cy = Number(c.getAttribute('cy'));
+        let best = pts[0];
+        for (const q of pts) if (Math.abs(q[0] - cx) < Math.abs(best[0] - cx)) best = q;
+        return Math.abs(best[0] - cx) < 2.5 && Math.abs(best[1] - cy) < 3;
+      });
+    });
+    check(
+      proxodit.length === 2 && proxodit.every(Boolean),
+      `${vp.width}: парабола проходит через x₁ и x₂`,
+    );
+    const uravn = (await k.locator('.us-kk__formula--itog').textContent()) ?? '';
+    check(
+      /x2−3x−18=0/.test(uravn.replace(/\s/g, '').replace(/-/g, '−')),
+      `${vp.width}: уравнение «${uravn}»`,
+    );
+    const znak = (await k.locator('.us-kk__znak').textContent()) ?? '';
+    check(/разных знаков/.test(znak), `${vp.width}: подпись знаков «${znak}»`);
+    check(k.errors.length === 0, `${vp.width}: конструктор без ошибок ${k.errors.join('; ')}`);
+    await c.close();
+  }
+}
+
+/* ── 9. Витрина: шапка, вызов, статистика, карточки ─────────── */
+console.log('9. Витрина');
+{
+  for (const [ekran, opts] of [
+    ['1440', { viewport: { width: 1440, height: 900 } }],
+    ['375', { viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true }],
+  ]) {
+    const ctx = await context(opts);
+    const p = await open(ctx, '/ustnyy-schet/');
+    check(await bezProkrutki(p), `${ekran} витрина: прокрутки вбок нет`);
+    check(
+      (await p.locator('.shapka--ustnyy .us-scena__znak').count()) === 4,
+      `${ekran}: в сцене четыре знака`,
+    );
+    const imgs = await p
+      .locator('.us-vitrina img')
+      .evaluateAll((l) =>
+        l.map((i) => [
+          i.getAttribute('width'),
+          i.getAttribute('height'),
+          i.getAttribute('loading'),
+        ]),
+      );
+    check(
+      imgs.length >= 10 && imgs.every(([w, h, l]) => w !== null && h !== null && l === 'lazy'),
+      `${ekran}: у картинок width/height и lazy (${imgs.length})`,
+    );
+    if (ekran === '375') {
+      const sc = await p.locator('.us-scena').boundingBox();
+      const h1 = await p.locator('.shapka--ustnyy h1').boundingBox();
+      check(
+        Math.abs(sc.height - 140) <= 2 && sc.y + sc.height <= h1.y + 1,
+        `375: сцена 140 px над заголовком (${Math.round(sc.height)})`,
+      );
+    }
+    check(
+      (await p.locator('.us-stat__plashka').count()) === 1 &&
+        (await p.locator('.us-stat__plashka a.btn').count()) === 1,
+      `${ekran}: пустая статистика — плашка с кнопкой`,
+    );
+    check(
+      (await p.locator('[data-gruppa="uravneniya"] .us-metka-novoe').count()) === 1,
+      `${ekran}: у «Квадратных уравнений» метка «Новое»`,
+    );
+    check(
+      (await p.locator('.us-gruppa__kartinka').count()) === 6,
+      `${ekran}: картинки у шести групп`,
+    );
+
+    /* «Реши за 10 секунд». */
+    await p.getByRole('button', { name: 'Реши за 10 секунд' }).click();
+    const pole = p.locator('#us-vyzov-otvet');
+    await pole.waitFor();
+    await p.waitForFunction(
+      () => document.getElementById('us-scena')?.getAttribute('data-vyzov') === 'idet',
+    );
+    const expr = await p.locator('.us-vyzov').getAttribute('data-expr');
+    await pole.fill(str(vychislit(expr)).replace('.', ','));
+    await pole.press('Enter');
+    await p.locator('.us-vyzov__verno').waitFor();
+    check(
+      /\+1/.test((await p.locator('.us-vyzov__verno').textContent()) ?? ''),
+      `${ekran}: «Реши за 10 секунд» принял верный ответ (+1)`,
+    );
+    check(
+      (await p.locator('#us-scena').getAttribute('data-vyzov')) === 'konec',
+      `${ekran}: ободок секундомера остановлен`,
+    );
+    await p.getByRole('button', { name: 'Ещё' }).click();
+    await p.waitForFunction(
+      (e) => document.querySelector('.us-vyzov')?.getAttribute('data-expr') !== e,
+      expr,
+    );
+    check(
+      (await p.evaluate(() => localStorage.getItem('budetege:ustnyy-schet:v1'))) === null,
+      `${ekran}: вызов не пишет в статистику`,
+    );
+    await snimok(p, `vitrina-${ekran}`);
+
+    /* Карточка приёма. */
+    const karta = p.locator('.us-flip[data-priyom="kvadrat-na-5"]');
+    await karta.scrollIntoViewIfNeeded();
+    if (ekran === '1440') {
+      await karta.hover();
+      await p.waitForTimeout(450);
+      check(
+        await karta.evaluate((e) => e.classList.contains('is-oborot')),
+        '1440: наведение переворачивает',
+      );
+      await p.mouse.move(5, 5);
+      await p.waitForTimeout(450);
+      check(
+        !(await karta.evaluate((e) => e.classList.contains('is-oborot'))),
+        '1440: увёл мышь — лицом',
+      );
+      await karta.focus();
+      await p.keyboard.press('Enter');
+      check(await karta.evaluate((e) => e.classList.contains('is-oborot')), 'Enter переворачивает');
+      await p.keyboard.press('Tab');
+      const f = await p.evaluate(() => document.activeElement?.textContent ?? '');
+      check(f.includes('Учиться'), `Tab — к «Учиться →» на обороте («${f}»)`);
+      await p.keyboard.press('Tab');
+      const f2 = await p.evaluate(() => document.activeElement?.getAttribute('href') ?? '');
+      check(f2.includes('p=kvadrat-na-5'), `Tab — к «Тренировать» (${f2})`);
+      await karta.focus();
+      await p.keyboard.press(' ');
+      check(
+        !(await karta.evaluate((e) => e.classList.contains('is-oborot'))),
+        'пробел переворачивает обратно',
+      );
+      const vys = await p
+        .locator('[data-gruppa="kvadraty"] .us-flip')
+        .evaluateAll((l) => l.map((e) => Math.round(e.getBoundingClientRect().height)));
+      check(new Set(vys).size === 1, `карточки группы одной высоты (${vys.join(', ')})`);
+
+      /* Мини-таблица. */
+      const k = p.locator('.us-mt__k[data-a="7"][data-b="8"]');
+      await k.scrollIntoViewIfNeeded();
+      await k.hover();
+      check(
+        (await p.locator('.us-mt__podpis').textContent()) === '7 × 8 = ?',
+        'таблица: наведение — «7 × 8 = ?»',
+      );
+      check(
+        (await p.locator('.us-mt__k.is-liniya').count()) === 19,
+        'таблица: подсвечены строка и столбец',
+      );
+      await k.click();
+      check(
+        (await p.locator('.us-mt__podpis').textContent()) === '7 × 8 = 56',
+        'таблица: нажатие — ответ',
+      );
+    } else {
+      await karta.getByRole('button', { name: /показать разбор/ }).click();
+      check(
+        await karta.evaluate((e) => e.classList.contains('is-oborot')),
+        '375: «Как?» переворачивает',
+      );
+      check(await bezProkrutki(p), '375: оборот без прокрутки вбок');
+    }
+    check(p.errors.length === 0, `${ekran} витрина: ошибок нет ${p.errors.join('; ')}`);
+    await ctx.close();
+  }
+
+  /* Без движения: карточка меняется без поворота. */
+  const ctx = await context({ reducedMotion: 'reduce' });
+  const p = await open(ctx, '/ustnyy-schet/');
+  const karta = p.locator('.us-flip').first();
+  await karta.focus();
+  await p.keyboard.press('Enter');
+  const tr = await karta.locator('.us-flip__vnutri').evaluate((e) => getComputedStyle(e).transform);
+  const vid = await karta
+    .locator('.us-flip__oborot')
+    .evaluate((e) => getComputedStyle(e).visibility);
+  check(tr === 'none' && vid === 'visible', `reduce: оборот без поворота (${tr}, ${vid})`);
+  const anim = await p
+    .locator('.us-scena__znak')
+    .first()
+    .evaluate((e) => getComputedStyle(e).animationName);
+  check(anim === 'none', `reduce: знаки не качаются (${anim})`);
   await ctx.close();
 }
 

@@ -259,6 +259,26 @@
   --chertezh-velichina-tekst: var(--terracotta-700);
   --chertezh-velichina-2: var(--amber-700);
   --graph-aux-axis: var(--graph-accent);
+  /* Чертежи, графики, схемы и живые иллюстрации (PR 2 тёмной темы):
+     цвета, которые раньше были вписаны в TSX. Синие подписи вершин —
+     --chertezh-vershina, оранжевые выделения — --chertezh-akcent. */
+  --chertezh-fon: #ffffff;
+  /* Блик на стекле иллюстраций (полупрозрачный): белый, в тёмной — светло-голубой. */
+  --chertezh-blik: #ffffff;
+  --chertezh-tekst: #172b50;
+  --chertezh-podpis: #506783;
+  --chertezh-liniya: #2856a0;
+  --chertezh-siniy: #2b67d8;
+  --chertezh-setka: #8eafe7;
+  --chertezh-zalivka-siniy: #dbe7f7;
+  --chertezh-zalivka-svet: #eaf1fc;
+  --chertezh-akcent: #e07a2f;
+  --chertezh-akcent-tekst: #ad4b0b;
+  --chertezh-akcent-svet: #f6bc8c;
+  --chertezh-akcent-zalivka: #fff3e8;
+  --chertezh-zoloto: #d49a1e;
+  --chertezh-goluboy: #4fb0ff;
+  --chertezh-goluboy-svet: #cfe9ff;
   /* Асимптота: значимая линия чертежа, а не фон. Цвет оси с
      прозрачностью — темнее сетки, но не спорит с самими осями. */
   --graph-asymptote: color-mix(in srgb, var(--graph-axis) 50%, transparent);
@@ -861,7 +881,7 @@
 }
 
 @media screen {
-  :root[data-tema='dark'] {
+  :root[data-tema='dark']:not([data-sheet-theme]) {
     --color-bg: var(--noch-bg);
     --color-surface: var(--noch-surface);
     --color-surface-2: var(--noch-surface-2);
@@ -1080,7 +1100,860 @@
     --vit-teplyy-text: #ffab80;
 
     /* Полосы прокрутки и выделение. */
+    /* Чертежи и графики: линии и подписи — светлые, заливки — тёмное
+       стекло, оранжевое остаётся оранжевым, вершины — светло-синие. */
+    --chertezh-fon: var(--noch-surface);
+    --chertezh-blik: #cfe0ff;
+    --chertezh-tekst: #e6eeff;
+    --chertezh-podpis: var(--noch-text-2);
+    --chertezh-liniya: #9cc2ff;
+    --chertezh-siniy: var(--noch-blue);
+    --chertezh-setka: #4f6fae;
+    --chertezh-zalivka-siniy: #22365f;
+    /* Заливка фигур планиметрии и схем: в светлой теме не задана — там
+       действует запасной полупрозрачный синий из lib/planimetriya/stil.ts. */
+    --chertezh-zalivka: rgb(127 176 255 / 0.1);
+    --chertezh-novoe: var(--noch-orange);
+    --chertezh-zalivka-svet: #18284d;
+    --chertezh-akcent: var(--noch-orange);
+    --chertezh-akcent-tekst: #ffab80;
+    --chertezh-akcent-svet: #6b3a22;
+    --chertezh-akcent-zalivka: #3a2a26;
+    --chertezh-zoloto: var(--noch-gold);
+    --chertezh-goluboy: #6ccbff;
+    --chertezh-goluboy-svet: #1f4f7a;
+    --chertezh-vershina: var(--noch-blue);
+    --chertezh-velichina: var(--noch-orange);
+    --chertezh-velichina-tekst: #ffab80;
+    --chertezh-velichina-2: #ffd27a;
+    --graph-axis: #d3ddf2;
+    --graph-grid: #34477a;
+    --graph-accent: var(--noch-orange);
+    --solid-edge: var(--noch-blue);
+    --solid-face: #22365f;
+    --solid-liquid: #3a64b0;
+    --solid-steklo-rebro: #7fb0ff;
+    --solid-steklo-1: #18284d;
+    --solid-steklo-2: #2a4170;
+    --solid-steklo-ten: rgb(0 0 0 / 0.3);
+
     --scroll-thumb: #34477a;
     --scroll-track: var(--noch-bg);
+  }
+}
+
+/* ── PR 3а: лендинг ── */
+/* Главная профиля и базы (app/landing.css, components/landing/**).
+   Базовые цвета подмешиваются через color-mix(… N %, transparent) —
+   прозрачность остаётся в месте применения, тема меняет только цвет.
+   Двери, полоса «Банк заданий», искры и просмотр снимков — яркие
+   плашки и тёмный просмотрщик: одинаковы в обеих темах, тёмных
+   значений у них нет. */
+:root {
+  /* Белое стекло, блики и тонкие синие линии. */
+  --lend-steklo: #fff;
+  --lend-blik: #fff;
+  --lend-blik-knopki: #fff;
+  --lend-knopka-kromka: rgb(0 0 0 / 0.04);
+  --lend-liniya: rgb(31 95 208);
+  /* Свечения фона и ореолы. */
+  --lend-aura-siniy: rgb(31 95 208);
+  --lend-aura-siniy-2: rgb(61 121 224);
+  --lend-aura-oranzh: rgb(245 160 74);
+  --lend-aura-teplyy: rgb(240 138 60);
+  /* Тени: в светлой теме — синеватые и тёплые, в тёмной — чёрные. */
+  --lend-ten: rgb(16 40 100);
+  --lend-ten-siniy: rgb(31 95 208);
+  --lend-ten-glubokaya: rgb(12 62 188);
+  --lend-ten-teplaya: rgb(100 50 16);
+  --lend-ten-ptica: rgb(20 40 90);
+  --lend-ten-foto: rgb(16 40 100 / 0.3);
+
+  /* Первый экран (sumerki.css): стеклянная сцена, свет за кристаллом,
+     стеклянная полоса, ореол под кристаллом, тень и отсвет птицы. */
+  --lend-scena-fon:
+    radial-gradient(55% 60% at 78% 42%, rgb(31 95 208 / 0.1), transparent 70%),
+    radial-gradient(40% 45% at 8% 92%, rgb(245 160 74 / 0.1), transparent 70%),
+    rgb(255 255 255 / 0.62);
+  --lend-scena-svet:
+    radial-gradient(
+      closest-side,
+      rgb(120 170 255 / 0.18),
+      rgb(120 170 255 / 0.06) 55%,
+      transparent
+    ),
+    radial-gradient(30% 30% at 78% 62%, rgb(240 138 60 / 0.12), transparent 70%);
+  --lend-scena-polosa: rgb(255 255 255 / 0.55);
+  --lend-oreol-1: rgb(234 242 255);
+  --lend-oreol-2: rgb(226 238 255);
+  --lend-oreol-3: rgb(210 228 255);
+  --lend-oreol-4: rgb(200 222 255);
+  --lend-oreol-sila: 1;
+  --lend-ptica-ten: radial-gradient(closest-side, rgb(8 26 80 / 0.55), rgb(8 26 80 / 0));
+  --lend-ptica-otsvet: drop-shadow(0 0.04em 0.05em rgb(0 10 40 / 0.55))
+    drop-shadow(0 0 0.12em rgb(110 160 255 / 0.35));
+  --lend-zherdochka-ten: #1f5fd0;
+  --lend-zherdochka-ten-derevo: #3c2a14;
+  --lend-kristall-pol: rgb(61 121 224);
+  --lend-kristall-pol-temnyy: rgb(200 222 255);
+
+  /* Двери «Я готовлюсь к ЕГЭ» / «Я преподаю» (sumerki.css, landing.css). */
+  --lend-dver-tekst-2: rgb(255 255 255 / 0.94);
+  --lend-dver-siniy-ten:
+    inset 0 0 0 1px rgb(255 255 255 / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.32),
+    inset 0 -1px 0 rgb(0 0 0 / 0.14), 0 0 28px -4px rgb(140 185 255 / 0.7),
+    0 16px 36px -12px rgb(16 40 110 / 0.7);
+  --lend-dver-siniy-ten-hover:
+    inset 0 1px 0 rgb(255 255 255 / 0.28), inset 0 -1px 0 rgb(0 0 0 / 0.14),
+    0 0 40px -2px rgb(160 200 255 / 0.9), 0 22px 44px -12px rgb(16 40 110 / 0.75);
+  --lend-dver-oranzh: linear-gradient(105deg, #ea5c0a 0%, #f2701c 50%, #fb9442 100%);
+  --lend-dver-oranzh-ten:
+    inset 0 0 0 1px rgb(255 255 255 / 0.22), inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 0 30px -6px rgb(251 140 60 / 0.65), 0 16px 36px -14px rgb(234 92 10 / 0.55);
+  --lend-dver-oranzh-ten-hover:
+    inset 0 0 0 1px rgb(255 255 255 / 0.26), inset 0 1px 0 rgb(255 255 255 / 0.5),
+    0 0 42px -4px rgb(251 140 60 / 0.85), 0 22px 44px -14px rgb(234 92 10 / 0.6);
+  --lend-dver-oranzh-ten-teksta: 0 1px 2px rgb(150 50 0 / 0.35);
+
+  /* Полоса «Банк заданий» (landing.css, .bank-razd). */
+  --lend-bank-razd-zaliv:
+    radial-gradient(130% 80% at 60% -30%, rgb(255 255 255 / 0.34), transparent 62%),
+    linear-gradient(
+      105deg,
+      rgb(234 92 10 / 0.92) 0%,
+      rgb(244 116 32 / 0.82) 40%,
+      rgb(251 148 66 / 0.68) 75%,
+      rgb(255 180 107 / 0.56) 100%
+    );
+  --lend-bank-razd-ten:
+    inset 0 0 0 1px rgb(255 255 255 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.75),
+    inset 0 -1px 0 rgb(200 70 0 / 0.18), 0 0 36px -10px rgb(251 140 60 / 0.55),
+    0 18px 36px -18px rgb(234 92 10 / 0.45);
+  --lend-bank-razd-blik: radial-gradient(
+    closest-side,
+    rgb(255 236 214 / 0.55),
+    rgb(255 220 180 / 0.18) 60%,
+    transparent
+  );
+  --lend-bank-razd-schet-fon: rgb(255 255 255 / 0.92);
+  --lend-bank-razd-schet-tekst: #b9460a;
+  --lend-bank-razd-tabs-kromka: rgb(255 255 255 / 0.7);
+  --lend-bank-razd-tabs-ten: 0 8px 20px -12px rgb(180 70 10 / 0.45);
+
+  /* Отсчёт до ЕГЭ (otschyot.css): цифры из синего стекла, линза,
+     карточки цифр, оранжевая дуга и искры. */
+  --lend-eo-oranzh: #f5a04a;
+  --lend-eo-oranzh-2: #ffc27a;
+  --lend-eo-oranzh-3: #e07a2f;
+  --lend-eo-svet-teplyy: rgb(255 190 120);
+  --lend-eo-golova: #fff6ea;
+  --lend-eo-cifra-svet: rgb(255 176 96);
+  --lend-eo-cifra-zaliv: linear-gradient(
+    180deg,
+    #9cc3f8 0%,
+    #4c86e6 26%,
+    #1f5fd0 54%,
+    #153f9a 100%
+  );
+  --lend-eo-cifra-ten: drop-shadow(0 1px 0 rgb(255 255 255 / 0.85))
+    drop-shadow(0 8px 14px rgb(31 95 208 / 0.24));
+  --lend-eo-cifra-ten-krupno: drop-shadow(0 1px 0 rgb(255 255 255 / 0.9))
+    drop-shadow(0 14px 22px rgb(31 95 208 / 0.26)) drop-shadow(0 6px 26px rgb(245 160 74 / 0.34));
+  --lend-eo-dvoetochie: rgb(31 95 208 / 0.38);
+  --lend-eo-linza:
+    radial-gradient(70% 50% at 50% 100%, rgb(255 214 170 / 0.5), transparent 70%),
+    radial-gradient(90% 70% at 30% 8%, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.34) 62%),
+    rgb(240 246 255 / 0.5);
+  --lend-eo-karta: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.86) 0%,
+    rgb(232 241 255 / 0.62) 100%
+  );
+  --lend-eo-karta-glavnaya:
+    radial-gradient(90% 60% at 50% 110%, rgb(255 190 120 / 0.5), transparent 70%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.9) 0%, rgb(255 240 226 / 0.66) 100%);
+  --lend-iskra-blik: #fff;
+  --lend-iskra-siniy: #9cc3f8;
+  --lend-iskra-terrakota: #f0a67a;
+
+  /* Витрина (vitrina.css, stereo-vitrina.css): заливки под белым
+     текстом и тёплый акцент заголовка. */
+  --lend-vit-siniy-zaliv-1: #1f5fd0;
+  --lend-vit-siniy-zaliv-2: #0c3ebc;
+  --lend-vit-teplyy-akcent: #c45d1c;
+
+  /* Просмотр снимков (prosmotr.css) — тёмный в обеих темах. */
+  --lend-prosmotr-fon: rgb(8 20 52);
+  --lend-prosmotr-tekst: #fff;
+  --lend-prosmotr-ten: #000;
+}
+
+@media screen {
+  :root[data-tema='dark']:not([data-sheet-theme]) {
+    /* Белое стекло — тёмное стекло поверхности, блик — приглушённая
+       голубая кромка, линии — светло-синие. */
+    --lend-steklo: var(--noch-surface-2);
+    --lend-blik: #3a5088;
+    --lend-liniya: rgb(127 176 255);
+    --lend-aura-siniy: rgb(70 130 255);
+    --lend-aura-siniy-2: rgb(90 150 255);
+    --lend-aura-oranzh: rgb(255 150 70);
+    --lend-ten: rgb(0 4 16);
+    --lend-ten-siniy: rgb(0 4 16);
+    --lend-ten-glubokaya: rgb(0 4 16);
+    --lend-ten-teplaya: rgb(0 4 16);
+    --lend-ten-ptica: rgb(0 4 16);
+    --lend-ten-foto: rgb(0 0 0 / 0.5);
+
+    /* Первый экран — то же тёмное стекло, что у карточек сайта, с
+       синим и тёплым свечением; ореол под кристаллом — мягкий голубой
+       (на тёмном белое пятно слепило бы). */
+    --lend-scena-fon:
+      radial-gradient(55% 60% at 78% 42%, rgb(70 130 255 / 0.18), transparent 70%),
+      radial-gradient(40% 45% at 8% 92%, rgb(255 150 70 / 0.1), transparent 70%),
+      rgb(22 36 72 / 0.55);
+    --lend-scena-svet:
+      radial-gradient(
+        closest-side,
+        rgb(100 155 255 / 0.16),
+        rgb(100 155 255 / 0.05) 55%,
+        transparent
+      ),
+      radial-gradient(30% 30% at 78% 62%, rgb(240 138 60 / 0.1), transparent 70%);
+    --lend-scena-polosa: rgb(24 40 80 / 0.6);
+    --lend-oreol-1: rgb(150 190 255);
+    --lend-oreol-2: rgb(130 175 255);
+    --lend-oreol-3: rgb(110 160 255);
+    --lend-oreol-4: rgb(100 150 255);
+    --lend-oreol-sila: 0.4;
+    --lend-ptica-ten: radial-gradient(closest-side, rgb(0 0 0 / 0.6), rgb(0 0 0 / 0));
+    --lend-ptica-otsvet: drop-shadow(0 0.04em 0.05em rgb(0 0 0 / 0.6))
+      drop-shadow(0 0 0.12em rgb(110 160 255 / 0.3));
+    --lend-zherdochka-ten: #000;
+    --lend-zherdochka-ten-derevo: #000;
+    /* Отсвет под кристаллом — голубой, а не белое пятно: на нём
+       читается подсказка «Покрутите фигуру». */
+    --lend-kristall-pol-temnyy: rgb(90 140 240);
+    /* Полоса «Банк заданий»: на тёмном фоне заливка плотнее, иначе
+       правый край буреет. */
+    --lend-bank-razd-zaliv:
+      radial-gradient(130% 80% at 60% -30%, rgb(255 255 255 / 0.22), transparent 62%),
+      linear-gradient(
+        105deg,
+        rgb(234 92 10 / 0.95) 0%,
+        rgb(244 116 32 / 0.9) 40%,
+        rgb(251 148 66 / 0.86) 75%,
+        rgb(255 170 95 / 0.82) 100%
+      );
+
+    /* Отсчёт: цифры — светлое голубое стекло (на тёмной плашке синие
+       цифры почти не видны), линза и карточки — тёмное стекло. */
+    --lend-eo-cifra-zaliv: linear-gradient(
+      180deg,
+      #eef4ff 0%,
+      #bcd6ff 30%,
+      #8fbaff 62%,
+      #6a9ef5 100%
+    );
+    --lend-eo-cifra-ten: drop-shadow(0 1px 0 rgb(200 220 255 / 0.2))
+      drop-shadow(0 8px 14px rgb(0 0 0 / 0.4));
+    --lend-eo-cifra-ten-krupno: drop-shadow(0 1px 0 rgb(200 220 255 / 0.22))
+      drop-shadow(0 14px 22px rgb(0 0 0 / 0.42)) drop-shadow(0 6px 26px rgb(255 150 70 / 0.3));
+    --lend-eo-dvoetochie: rgb(127 176 255 / 0.6);
+    --lend-eo-linza:
+      radial-gradient(70% 50% at 50% 100%, rgb(255 150 70 / 0.2), transparent 70%),
+      radial-gradient(90% 70% at 30% 8%, rgb(52 76 130 / 0.75), rgb(28 44 86 / 0.55) 62%),
+      rgb(18 30 60 / 0.6);
+    --lend-eo-karta: linear-gradient(180deg, rgb(36 56 102 / 0.86) 0%, rgb(24 40 80 / 0.62) 100%);
+    --lend-eo-karta-glavnaya:
+      radial-gradient(90% 60% at 50% 110%, rgb(255 150 70 / 0.3), transparent 70%),
+      linear-gradient(180deg, rgb(40 52 92 / 0.9) 0%, rgb(58 40 44 / 0.66) 100%);
+
+    /* Витрина: синий текст и акценты — светлые, заливки под белым
+       текстом — синие кнопочные (белый 5 : 1 и выше). */
+    --vit-siniy-1: #a3c6ff;
+    --vit-siniy-2: #7fb0ff;
+    --lend-vit-siniy-zaliv-1: var(--color-primary-fill);
+    --lend-vit-siniy-zaliv-2: var(--color-primary-fill-active);
+    --lend-vit-teplyy-akcent: var(--noch-orange);
+  }
+}
+
+/* ── PR 3б: тарифы, об авторе, правовые ── */
+/* Тарифы (components/tarify, app/tarify), «Об авторе» (app/about),
+   плашка автора (components/avtor). Светлые значения — те же, что
+   прежде стояли в CSS строкой. В тёмной: тонкие линии и подложки —
+   светло-синие поверх тёмного стекла, тени — чёрные, блик стекла
+   приглушён. «Ночная» плашка тарифа (.tf--b) тёмная в обеих темах —
+   её цвета одни на обе. */
+:root {
+  /* Плашки тарифов. */
+  --tf-blik: rgb(255 255 255 / 0.55);
+  --tf-blik-konec: rgb(255 255 255 / 0);
+  --tf-ten-kartinki: rgb(31 95 208 / 0.28);
+  --tf-ten-kartinki-teplaya: rgb(191 86 28 / 0.36);
+  --tf-ten-lampy: rgb(224 122 47 / 0.3);
+  --tf-ten-kristalla: rgb(31 95 208 / 0.3);
+  --tf-metka-fon: rgb(224 122 47 / 0.14);
+  --tf-metka-kromka: rgb(224 122 47 / 0.28);
+  --tf-liniya: rgb(31 95 208 / 0.12);
+  --tf-liniya-tablicy: rgb(31 95 208 / 0.1);
+  --tf-liniya-teplaya: rgb(224 122 47 / 0.2);
+  --tf-znak-fon: rgb(31 95 208 / 0.1);
+  --tf-znak-net-fon: rgb(16 23 40 / 0.06);
+  --tf-knopka-kromka: rgb(31 95 208 / 0.2);
+  --tf-knopka-steklo-hover: var(--white);
+  --tf-punktir: rgb(16 23 40 / 0.22);
+  --tf-platnyy-kromka: rgb(255 255 255 / 0.8);
+  --tf-platnyy-ten:
+    0 0 0 1px rgb(224 122 47 / 0.22), var(--glass-hi), 0 2px 4px rgb(100 50 16 / 0.06),
+    0 28px 60px -18px rgb(224 122 47 / 0.5), 0 0 90px -24px rgb(245 160 74 / 0.55);
+  --tf-platnyy-ten-hover:
+    0 0 0 1px rgb(224 122 47 / 0.3), var(--glass-hi), 0 2px 4px rgb(100 50 16 / 0.06),
+    0 36px 70px -18px rgb(224 122 47 / 0.56), 0 0 110px -22px rgb(245 160 74 / 0.66);
+  --tf-pereklyuchatel-hover: rgb(255 255 255 / 0.7);
+  --tf-tochka: rgb(31 95 208 / 0.25);
+  --tf-svechenie-teploe: rgb(245 160 74 / 0.2);
+  --tf-svechenie-sinee: rgb(61 121 224 / 0.14);
+  --tf-svechenie-stena: rgb(61 121 224 / 0.16);
+  --tf-podskazka-fon: rgb(255 255 255 / 0.6);
+  --tf-podskazka-kromka: rgb(31 95 208 / 0.08);
+  --tf-kolonka-platnaya: rgb(245 160 74 / 0.08);
+  --tf-zakreplennyy-stolbec: rgb(250 252 255 / 0.97);
+  --tf-zakreplennyy-stolbec-ten: rgb(31 95 208 / 0.12);
+  /* Фон страницы тарифов и тонкая черта над подвалом. */
+  --tf-fon-siniy: rgb(31 95 208 / 0.07);
+  --tf-fon-teplyy: rgb(245 160 74 / 0.08);
+  --tf-podval-cherta: rgb(31 95 208 / 0.06);
+
+  /* «Ночная» плашка тарифа (.tf--b): тёмное стекло в обеих темах. */
+  --tf-noch-text: #f4f7fd;
+  --tf-noch-text-2: #c3d0e8;
+  --tf-noch-text-3: #9fb0cf;
+  --tf-noch-knopka-text: #dbe4f5;
+  --tf-noch-yakor: rgb(232 240 252 / 0.75);
+  --tf-noch-yakor-akcent: #ffc28a;
+  --tf-noch-metka-text: #ffd9b0;
+  --tf-noch-metka-fon: rgb(245 160 74 / 0.18);
+  --tf-noch-metka-kromka: rgb(245 160 74 / 0.45);
+  --tf-noch-kromka: rgb(255 255 255 / 0.16);
+  --tf-noch-liniya: rgb(255 255 255 / 0.16);
+  --tf-noch-znak-fon: rgb(255 255 255 / 0.1);
+  --tf-noch-punktir: rgb(255 255 255 / 0.36);
+  --tf-noch-blik: rgb(255 255 255 / 0.16);
+  --tf-noch-fon:
+    radial-gradient(120% 70% at 100% 0%, rgb(245 160 74 / 0.34), transparent 62%),
+    radial-gradient(90% 60% at 0% 100%, rgb(79 134 230 / 0.3), transparent 65%),
+    linear-gradient(165deg, rgb(20 44 96 / 0.94), rgb(10 24 58 / 0.96));
+  --tf-noch-ten:
+    0 0 0 1px rgb(245 160 74 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 30px 64px -18px rgb(14 35 80 / 0.6), 0 0 100px -20px rgb(245 160 74 / 0.6);
+  --tf-noch-ten-hover:
+    0 0 0 1px rgb(245 160 74 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 38px 72px -18px rgb(14 35 80 / 0.66), 0 0 120px -18px rgb(245 160 74 / 0.72);
+
+  /* «Об авторе». */
+  --oa-liniya: rgb(31 95 208 / 0.14);
+  --oa-fon-teplyy: rgb(245 160 74 / 0.12);
+  --oa-fon-siniy: rgb(31 95 208 / 0.07);
+  --oa-fon-siniy-2: rgb(31 95 208 / 0.06);
+  --oa-krug-zalivka: rgb(226 237 255 / 0.4);
+  --oa-treugolnik-zalivka: rgb(31 95 208 / 0.07);
+  --oa-pol-ten: rgb(31 95 208 / 0.2);
+  --oa-byust-ten: rgb(22 50 107 / 0.24);
+  --oa-ten-kartinki: rgb(31 95 208 / 0.16);
+  --oa-ten-samolyotika: rgb(31 95 208 / 0.14);
+  /* Рукописные пометки — синие чернила на прозрачном фоне: в светлой
+     теме лежат прямо на странице, в тёмной — на светлой подложке. */
+  --oa-pometka-fon: transparent;
+  --oa-pometka-otstup: 0;
+
+  /* Плашка автора: белое кольцо вокруг фото и синяя тень под ним. */
+  --avtor-foto-kolco: var(--white);
+  --avtor-foto-ten: rgb(31 95 208 / 0.35);
+}
+
+@media screen {
+  :root[data-tema='dark']:not([data-sheet-theme]) {
+    --tf-blik: rgb(200 220 255 / 0.1);
+    --tf-blik-konec: rgb(200 220 255 / 0);
+    --tf-ten-kartinki: rgb(0 0 0 / 0.45);
+    --tf-ten-kartinki-teplaya: rgb(0 0 0 / 0.5);
+    --tf-ten-lampy: rgb(0 0 0 / 0.45);
+    --tf-ten-kristalla: rgb(0 0 0 / 0.45);
+    --tf-metka-fon: rgb(255 154 77 / 0.14);
+    --tf-metka-kromka: rgb(255 154 77 / 0.4);
+    --tf-liniya: rgb(160 195 255 / 0.16);
+    --tf-liniya-tablicy: rgb(160 195 255 / 0.14);
+    --tf-liniya-teplaya: rgb(255 154 77 / 0.28);
+    --tf-znak-fon: rgb(127 176 255 / 0.16);
+    --tf-znak-net-fon: rgb(200 220 255 / 0.08);
+    --tf-knopka-kromka: rgb(160 195 255 / 0.3);
+    --tf-knopka-steklo-hover: rgb(40 62 112 / 0.92);
+    --tf-punktir: rgb(200 220 255 / 0.32);
+    --tf-platnyy-kromka: rgb(255 170 110 / 0.3);
+    --tf-platnyy-ten:
+      0 0 0 1px rgb(255 154 77 / 0.3), var(--glass-hi), 0 2px 4px rgb(0 0 0 / 0.35),
+      0 28px 60px -18px rgb(255 140 70 / 0.3), 0 0 90px -24px rgb(255 150 70 / 0.35);
+    --tf-platnyy-ten-hover:
+      0 0 0 1px rgb(255 154 77 / 0.42), var(--glass-hi), 0 2px 4px rgb(0 0 0 / 0.4),
+      0 36px 70px -18px rgb(255 140 70 / 0.38), 0 0 110px -22px rgb(255 150 70 / 0.45);
+    --tf-pereklyuchatel-hover: rgb(160 195 255 / 0.12);
+    --tf-tochka: rgb(127 176 255 / 0.35);
+    --tf-svechenie-teploe: rgb(255 150 70 / 0.14);
+    --tf-svechenie-sinee: rgb(70 130 255 / 0.16);
+    --tf-svechenie-stena: rgb(70 130 255 / 0.18);
+    --tf-podskazka-fon: rgb(160 195 255 / 0.06);
+    --tf-podskazka-kromka: rgb(160 195 255 / 0.14);
+    --tf-kolonka-platnaya: rgb(255 150 70 / 0.08);
+    --tf-zakreplennyy-stolbec: rgb(18 30 60 / 0.97);
+    --tf-zakreplennyy-stolbec-ten: rgb(160 195 255 / 0.16);
+    --tf-fon-siniy: rgb(70 130 255 / 0.1);
+    --tf-fon-teplyy: rgb(255 150 70 / 0.07);
+    --tf-podval-cherta: rgb(160 195 255 / 0.08);
+    /* «Ночная» плашка на ночном фоне: тень чёрная, тёплое свечение
+       сдержаннее, чтобы не слепило. */
+    --tf-noch-ten:
+      0 0 0 1px rgb(245 160 74 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 30px 64px -18px rgb(0 0 0 / 0.6), 0 0 90px -24px rgb(245 160 74 / 0.4);
+    --tf-noch-ten-hover:
+      0 0 0 1px rgb(245 160 74 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.2),
+      0 38px 72px -18px rgb(0 0 0 / 0.66), 0 0 110px -20px rgb(245 160 74 / 0.5);
+
+    --oa-liniya: rgb(160 195 255 / 0.18);
+    --oa-fon-teplyy: rgb(255 150 70 / 0.08);
+    --oa-fon-siniy: rgb(70 130 255 / 0.1);
+    --oa-fon-siniy-2: rgb(70 130 255 / 0.08);
+    --oa-krug-zalivka: rgb(127 176 255 / 0.06);
+    --oa-treugolnik-zalivka: rgb(127 176 255 / 0.1);
+    --oa-pol-ten: rgb(0 0 0 / 0.5);
+    --oa-byust-ten: rgb(0 0 0 / 0.55);
+    --oa-ten-kartinki: rgb(0 0 0 / 0.4);
+    --oa-ten-samolyotika: rgb(0 0 0 / 0.4);
+    --oa-pometka-fon: var(--color-podlozhka);
+    --oa-pometka-otstup: 10px;
+
+    --avtor-foto-kolco: var(--noch-surface-3);
+    --avtor-foto-ten: rgb(0 0 0 / 0.45);
+  }
+}
+/* ── PR 3г: варианты, генератор, устный счёт ── */
+/* Сборщик и онлайн-вариант, окно настроек, пиктограммы подтипов, плашка
+   баллов второй части. Светлые значения — прежние вписанные цвета
+   (светлая тема не меняется). Полупрозрачные тени и кромки собираются
+   как color-mix(in srgb, var(--varianty-…) N%, transparent). */
+:root {
+  --varianty-kromka: rgb(31 95 208);
+  --varianty-kromka-svet: rgb(61 121 224);
+  --varianty-ten: rgb(16 40 100);
+  --varianty-ten-chernila: rgb(16 23 40);
+  --varianty-chernila: rgb(16 23 40);
+  --varianty-zatemnenie: rgb(14 35 80 / 0.32);
+  --varianty-plitka-vybor: rgb(214 229 255 / 0.85);
+  --varianty-vybor-fon: rgb(236 243 255);
+  --varianty-segment-aktivnyy: #fff;
+  --varianty-zvezda-off: #6b7588;
+  --varianty-oshibka: #b42318;
+  --pikt-liniya: #0c3ebc;
+  --pikt-zalivka: #c3dffa;
+  --pikt-zalivka-2: #7faeea;
+  --ball-plashka-kromka: #e8894a;
+  --ball-plashka-fon: #fff3ea;
+  --ball-plashka-tekst: #a5481a;
+  --c2-chast-fon: #f6f6f6;
+  --c2-obrezka-ten: rgb(0 0 0 / 0.45);
+  --c2-obrezka-ramka: #fff;
+  --c2-obrezka-ruchka: rgb(0 0 0 / 0.2);
+  --c2-ruchka-ten: rgb(0 0 0 / 0.25);
+  --varianty-qr-tochki: var(--grey-900);
+  --varianty-qr-polya: 0;
+  --varianty-qr-fon: transparent;
+}
+
+@media screen {
+  :root[data-tema='dark']:not([data-sheet-theme]) {
+    --varianty-kromka: rgb(150 190 255);
+    --varianty-kromka-svet: rgb(100 160 255);
+    --varianty-ten: rgb(0 0 0);
+    --varianty-ten-chernila: rgb(0 0 0);
+    --varianty-chernila: rgb(200 215 255);
+    --varianty-zatemnenie: rgb(2 6 20 / 0.66);
+    --varianty-plitka-vybor: color-mix(in srgb, var(--noch-blue) 22%, var(--noch-surface));
+    --varianty-vybor-fon: color-mix(in srgb, var(--noch-blue) 16%, var(--noch-surface));
+    --varianty-segment-aktivnyy: var(--noch-surface-3);
+    --varianty-zvezda-off: var(--noch-text-3);
+    --varianty-oshibka: var(--noch-red);
+    --pikt-liniya: #9cc2ff;
+    --pikt-zalivka: #22365f;
+    --pikt-zalivka-2: #3a64b0;
+    --ball-plashka-kromka: color-mix(in srgb, var(--noch-terracotta) 55%, var(--noch-surface));
+    --ball-plashka-fon: color-mix(in srgb, var(--noch-terracotta) 14%, var(--noch-surface));
+    --ball-plashka-tekst: #ffab80;
+    --c2-chast-fon: var(--noch-surface-2);
+    --varianty-qr-polya: 10px;
+    --varianty-qr-fon: var(--color-podlozhka);
+  }
+
+  /* Превью листа А4 внутри страницы (генератор, сборщик варианта) и
+     «призрак» листа в сборщике — белая «бумага» в любой теме: на корне
+     превью возвращаются светлые значения всех переменных, которые переопределяет тёмная тема
+     (список — из блока 3 и этого блока). */
+  :root[data-tema='dark']:not([data-sheet-theme]) :is(.gen-paper, .var-paper, .var-prizrak__list) {
+    --color-bg: var(--ice);
+    --color-surface: var(--white);
+    --color-surface-2: var(--grey-50);
+    --color-surface-brand: var(--navy-800);
+    --color-sidebar-verh: var(--navy-800);
+    --color-sidebar-niz: var(--navy-900);
+    --navy-600: #1e407f;
+    --navy-700: #16326b;
+    --navy-800: #0e2350;
+    --navy-900: #0b1f45;
+    --blue-400: #5d8ce8;
+    --blue-500: #3d79e0;
+    --violet-600: #7c4ddb;
+    --violet-700: #6337c2;
+    --violet-50: #efe9fc;
+    --teal-600: #0e9384;
+    --teal-700: #0b6f64;
+    --teal-50: #dff5f1;
+    --sun-500: #f0a500;
+    --sun-50: #fff4d6;
+    --gold-500: #b87300;
+    --gold-700: #8f5900;
+    --pink-600: #d63384;
+    --pink-50: #fce8f2;
+    --brown-600: #a3622c;
+    --brown-50: #f5ebe1;
+    --rust-700: #b23a1b;
+    --rust-50: #fcece6;
+    --slate-600: #4a5d79;
+    --amber-50: #fef4e3;
+    --amber-600: #d97d0b;
+    --amber-700: #9a5705;
+    --terracotta: #e07a2f;
+    --terracotta-50: #fdf1ea;
+    --terracotta-600: #c2502e;
+    --terracotta-700: #a8500f;
+    --cream-50: #fdf6ea;
+    --cream-200: #f0e2c8;
+    --color-surface-soft: var(--blue-100);
+    --color-primary: var(--blue-600);
+    --color-primary-hover: var(--blue-700);
+    --color-primary-active: var(--blue-800);
+    --color-primary-text: var(--blue-700);
+    --color-primary-fill: var(--blue-600);
+    --color-primary-fill-hover: var(--blue-700);
+    --color-primary-fill-active: var(--blue-800);
+    --color-text: var(--grey-900);
+    --color-text-secondary: var(--grey-700);
+    --color-text-tertiary: var(--grey-500);
+    --color-text-lead: var(--grey-800);
+    --color-text-inverse: var(--white);
+    --color-border: var(--grey-200);
+    --color-border-strong: var(--grey-300);
+    --color-success: var(--green-600);
+    --color-success-soft: var(--green-50);
+    --color-warning: var(--amber-600);
+    --color-warning-soft: var(--amber-50);
+    --color-error: var(--red-600);
+    --color-error-soft: var(--red-50);
+    --color-status-new: var(--grey-300);
+    --color-status-new-text: var(--grey-500);
+    --color-status-progress: var(--amber-600);
+    --color-status-progress-text: var(--amber-700);
+    --color-status-done: var(--green-600);
+    --color-status-done-text: var(--green-700);
+    --color-status-oshibki: var(--terracotta-600);
+    --color-status-oshibki-text: var(--terracotta-600);
+    --color-border-hover: var(--grey-500);
+    --color-focus-ring: var(--blue-100);
+    --color-track: var(--grey-100);
+    --color-skeleton: var(--grey-100);
+    --color-skeleton-sheen: var(--grey-50);
+    --color-surface-inverse: var(--navy-900);
+    --color-surface-info: var(--blue-50);
+    --color-accent: var(--terracotta);
+    --color-accent-soft-surface: var(--terracotta-50);
+    --color-border-accent: var(--terracotta-200);
+    --color-accent-text: var(--terracotta-700);
+    --color-surface-warm: var(--cream-50);
+    --color-border-warm: var(--cream-200);
+    --color-border-info: var(--blue-200);
+    --color-text-brand: var(--navy-900);
+    --color-accent-soft: var(--blue-300);
+    --color-heat-1: var(--heat-1);
+    --color-heat-2: var(--heat-2);
+    --color-heat-3: var(--heat-3);
+    --color-heat-4: var(--heat-4);
+    --color-heat-5: var(--heat-5);
+    --color-on-brand-accent: var(--blue-500);
+    --color-glass-mid: var(--blue-glass-1);
+    --color-glass-end: var(--blue-glass-2);
+    --color-grid-soft: var(--blue-grid);
+    --color-bg-translucent: rgba(245, 249, 255, 0.92);
+    --color-bg-translucent-strong: rgba(245, 249, 255, 0.9);
+    --color-spr-def: var(--blue-700);
+    --color-spr-def-soft: var(--blue-50);
+    --color-spr-svo: var(--teal-700);
+    --color-spr-svo-soft: var(--teal-50);
+    --color-spr-pri: var(--violet-700);
+    --color-spr-pri-soft: var(--violet-50);
+    --color-spr-teo: var(--gold-700);
+    --color-spr-teo-soft: var(--sun-50);
+    --color-spr-vaz: var(--rust-700);
+    --color-spr-vaz-soft: var(--rust-50);
+    --color-spr-priem: var(--amber-700);
+    --color-spr-priem-soft: var(--amber-50);
+    --color-spr-vyvod: var(--blue-600);
+    --color-spr-vyvod-soft: var(--white);
+    --color-spr-primer: var(--slate-600);
+    --color-spr-primer-soft: var(--grey-50);
+    --color-z13-priznak: var(--violet-700);
+    --color-z13-priznak-soft: var(--violet-50);
+    --color-spr-primenenie: var(--navy-700);
+    --color-spr-primenenie-soft: var(--grey-50);
+    --color-spr-klyuch: var(--gold-500);
+    --color-z11-rz: var(--sun-500);
+    --color-z11-rz-soft: var(--sun-50);
+    --color-z11-pr: var(--blue-600);
+    --color-z11-pr-soft: var(--blue-100);
+    --color-z11-sm: var(--teal-600);
+    --color-z11-sm-soft: var(--teal-50);
+    --color-z11-dp: var(--terracotta);
+    --color-z11-dp-soft: var(--terracotta-50);
+    --color-z11-pt: var(--brown-600);
+    --color-z11-pt-soft: var(--brown-50);
+    --color-z11-vd: var(--blue-700);
+    --color-z11-vd-soft: var(--blue-50);
+    --color-z11-ok: var(--violet-600);
+    --color-z11-ok-soft: var(--violet-50);
+    --color-z11-rb: var(--green-600);
+    --color-z11-rb-soft: var(--green-50);
+    --color-z11-pg: var(--pink-600);
+    --color-z11-pg-soft: var(--pink-50);
+    --color-metod-4: var(--blue-600);
+    --color-metod-4-soft: var(--blue-100);
+    --color-metod-4-border: var(--blue-200);
+    --color-metod-5: var(--violet-600);
+    --color-metod-5-soft: var(--violet-50);
+    --color-metod-5-border: color-mix(in srgb, var(--violet-600) 22%, var(--white));
+    --color-callout-surface: var(--cream-50);
+    --color-callout-vazhno: var(--terracotta);
+    --color-callout-vazhno-border: var(--terracotta-200);
+    --color-callout-vazhno-text: var(--terracotta-700);
+    --color-callout-zapomni: var(--blue-600);
+    --color-callout-zapomni-border: var(--blue-200);
+    --color-callout-zapomni-text: var(--blue-700);
+    --color-callout-layfhak: var(--amber-600);
+    --color-callout-layfhak-border: var(--cream-200);
+    --color-callout-layfhak-text: var(--amber-700);
+    --color-star: var(--sun-500);
+    --color-star-off: var(--grey-300);
+    --color-uspeh: var(--emerald-600);
+    --color-uspeh-soft: var(--emerald-50);
+    --color-uspeh-border: var(--emerald-200);
+    --color-uspeh-text: #06704f;
+    --color-text-on-accent: var(--white);
+    --glass-bg: rgb(255 255 255 / 0.55);
+    --glass-bg-strong: rgb(255 255 255 / 0.74);
+    --glass-edge: rgb(255 255 255 / 0.7);
+    --glass-ring: 0 0 0 1px rgb(31 95 208 / 0.08);
+    --glass-hi: inset 0 1px 0 rgb(255 255 255 / 0.9);
+    --glass-shadow: 0 1px 2px rgb(16 40 100 / 0.06), 0 12px 32px -10px rgb(31 95 208 / 0.22);
+    --glass-shadow-hover: 0 2px 4px rgb(16 40 100 / 0.06), 0 22px 44px -12px rgb(31 95 208 / 0.32);
+    --gloss: linear-gradient(180deg, var(--blue-400) 0%, var(--blue-600) 52%, var(--blue-700) 100%);
+    --gloss-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 -1px 0 rgb(0 0 0 / 0.12),
+      0 8px 18px -6px rgb(31 95 208 / 0.55);
+    --gloss-shadow-hover:
+      inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 -1px 0 rgb(0 0 0 / 0.12),
+      0 12px 24px -8px rgb(31 95 208 / 0.6);
+    --gloss-shadow-soft:
+      inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 -1px 0 rgb(0 0 0 / 0.1),
+      0 6px 14px -8px rgb(31 95 208 / 0.45);
+    --gloss-shadow-soft-hover:
+      inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 -1px 0 rgb(0 0 0 / 0.1),
+      0 10px 20px -10px rgb(31 95 208 / 0.5);
+    --glass-tint-blue: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(226 237 255 / 0.56));
+    --glass-tint-warm: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(255 236 220 / 0.6));
+    --glass-ring-warm: 0 0 0 1px rgb(224 122 47 / 0.12);
+    --glass-shadow-warm: 0 1px 2px rgb(100 50 16 / 0.06), 0 12px 32px -10px rgb(224 122 47 / 0.22);
+    --aura-blue: rgb(61 121 224 / 0.34);
+    --aura-orange: rgb(245 160 74 / 0.3);
+    --aura-terracotta: rgb(224 122 47 / 0.16);
+    --shadow-xs: 0 1px 2px rgba(16, 23, 40, 0.04);
+    --shadow-sm: 0 2px 6px rgba(16, 23, 40, 0.05);
+    --shadow-md: 0 8px 24px rgba(16, 23, 40, 0.06);
+    --shadow-lg: 0 16px 40px rgba(16, 23, 40, 0.1);
+    --glow-accent: 0 0 24px rgba(155, 192, 242, 0.18);
+    --glow-tab: 0 6px 16px rgba(31, 95, 208, 0.3);
+    --color-tab-top: var(--blue-500);
+    --color-tab-bottom: var(--blue-800);
+    --vit-siniy-ton: #eef4ff;
+    --vit-siniy-ton-2: #dde9fd;
+    --vit-teplyy-ton: #fff4ea;
+    --vit-teplyy-ton-2: #fde6d3;
+    --vit-teplyy-text: #a8500f;
+    --chertezh-fon: #ffffff;
+    --chertezh-blik: #ffffff;
+    --chertezh-tekst: #172b50;
+    --chertezh-podpis: #506783;
+    --chertezh-liniya: #2856a0;
+    --chertezh-siniy: #2b67d8;
+    --chertezh-setka: #8eafe7;
+    --chertezh-zalivka-siniy: #dbe7f7;
+    --chertezh-zalivka: initial;
+    --chertezh-novoe: initial;
+    --chertezh-zalivka-svet: #eaf1fc;
+    --chertezh-akcent: #e07a2f;
+    --chertezh-akcent-tekst: #ad4b0b;
+    --chertezh-akcent-svet: #f6bc8c;
+    --chertezh-akcent-zalivka: #fff3e8;
+    --chertezh-zoloto: #d49a1e;
+    --chertezh-goluboy: #4fb0ff;
+    --chertezh-goluboy-svet: #cfe9ff;
+    --chertezh-vershina: var(--blue-600);
+    --chertezh-velichina: var(--terracotta);
+    --chertezh-velichina-tekst: var(--terracotta-700);
+    --chertezh-velichina-2: var(--amber-700);
+    --graph-axis: var(--grey-900);
+    --graph-grid: var(--grey-300);
+    --graph-accent: var(--terracotta);
+    --solid-edge: var(--color-primary);
+    --solid-face: var(--blue-100);
+    --solid-liquid: var(--blue-300);
+    --solid-steklo-rebro: var(--blue-500);
+    --solid-steklo-1: var(--blue-50);
+    --solid-steklo-2: var(--blue-200);
+    --solid-steklo-ten: rgba(31, 95, 208, 0.14);
+    --varianty-kromka: rgb(31 95 208);
+    --varianty-kromka-svet: rgb(61 121 224);
+    --varianty-ten: rgb(16 40 100);
+    --varianty-ten-chernila: rgb(16 23 40);
+    --varianty-chernila: rgb(16 23 40);
+    --varianty-zatemnenie: rgb(14 35 80 / 0.32);
+    --varianty-plitka-vybor: rgb(214 229 255 / 0.85);
+    --varianty-vybor-fon: rgb(236 243 255);
+    --varianty-segment-aktivnyy: #fff;
+    --varianty-zvezda-off: #6b7588;
+    --varianty-oshibka: #b42318;
+    --pikt-liniya: #0c3ebc;
+    --pikt-zalivka: #c3dffa;
+    --pikt-zalivka-2: #7faeea;
+    --ball-plashka-kromka: #e8894a;
+    --ball-plashka-fon: #fff3ea;
+    --ball-plashka-tekst: #a5481a;
+    --c2-chast-fon: #f6f6f6;
+    --varianty-qr-polya: 0;
+    --varianty-qr-fon: transparent;
+    color-scheme: light;
+  }
+}
+/* ── PR 3в: кабинеты, вход, онбординг ── */
+/* Раскладка кабинета (kab-), «Карта ЕГЭ» (karta-), студия аватара,
+   онбординг (onb-). Светлые значения — прежние вписанные цвета этих
+   компонентов, светлая тема не меняется.
+
+   Карта — картинка на своём фоне (льдины в море): в тёмной теме она та
+   же, поэтому всё, что лежит НА карте (подписи островов, таблички,
+   маячок, заливки), берёт постоянные --karta-* без тёмных значений:
+   тёмные чернила на светлом льду. Тёмные значения — только у того, что
+   вокруг карты: фон кабинета, панель раздела, список на телефоне. */
+:root {
+  /* Фон кабинета: блик сверху и мягкий голубой перелив. */
+  --kab-fon-blik: rgb(255 255 255 / 0.9);
+  --kab-fon-verh: #eef5ff;
+  --kab-fon-niz: #e4effc;
+  /* Пункт меню кабинета: наведение; подложка пункта на планшете. */
+  --kab-punkt-hover: rgb(255 255 255 / 0.6);
+  --kab-punkt-fon: rgb(255 255 255 / 0.55);
+  /* Карточка «Ключевые схемы»: плитка с треугольником. */
+  --kab-kartinka-1: #dbeafe;
+  --kab-kartinka-2: #f5f9ff;
+  --kab-kartinka-3: #ffe9d6;
+  --kab-treugolnik-1: #dbeafe;
+  --kab-treugolnik-2: #60a5fa;
+  --kab-treugolnik-rebro: #ffffff;
+  --kab-treugolnik-osnova: #1f5fd0;
+
+  /* Карта: постоянные цвета (картинка одна в обеих темах). */
+  --karta-more: #9ad3f6;
+  --karta-belyy: #ffffff;
+  --karta-led: #f3f8ff;
+  --karta-led-niz: #dbeafe;
+  --karta-tuman: rgb(228 238 250 / 0.55);
+  --karta-teplo: #f0a04a;
+  --karta-teplo-2: #e77f2e;
+  --karta-chernila: #0e2350;
+  --karta-chernila-sinij: #1f5fd0;
+  --karta-chernila-sinij-tekst: #1a4fb0;
+  --karta-kolco-obvod: #e8f0fc;
+  --karta-terra-na-karte: #c2502e;
+  --karta-ostrov-svobodnyy: rgb(214 230 248 / 0.78);
+  --karta-ostrov-v-processe: rgb(142 196 250 / 0.3);
+  --karta-ostrov-osvoeno: rgb(247 168 84 / 0.66);
+  --karta-svet-yadro: #ffd9a8;
+  --karta-svet-kray: #ffb55c;
+  --karta-mayak-ten: rgb(160 80 20 / 0.35);
+  --karta-proliv-tekst: rgb(17 60 140 / 0.62);
+  --karta-tablichka-ten: rgb(31 95 208 / 0.22);
+  /* Отладочные контуры (?otladka): ярко-розовый поверх картинки. */
+  --karta-otladka: #ff0050;
+  --karta-otladka-tekst: #b00030;
+  --karta-otladka-proliv: #0070ff;
+  /* Карта: то, что вокруг неё, — по теме. */
+  --karta-panel-fon: rgb(247 251 255 / 0.9);
+  --karta-svyazka-fon: rgb(255 255 255 / 0.5);
+  --karta-ps-uzel: rgb(255 255 255 / 0.86);
+  /* «Просвет» в значках заданий (кружки ползунка №19) — цвет под значком. */
+  --karta-znachok-prosvet: #f3f8ff;
+
+  /* Студия аватара: свет за превью, кромка и блик образца цвета. */
+  --avatar-studio-svet: rgb(255 255 255 / 85%);
+  --avatar-obrazec-kromka: rgb(25 35 55 / 12%);
+  --avatar-obrazec-blik: rgb(255 255 255 / 36%);
+
+  /* Онбординг: затемнение под туром; окно заставки; свет заставки
+     (блики, сердцевина, частицы canvas — fx2d.ts читает их отсюда).
+     Свет — светлый в обеих темах: он складывается с картинкой. */
+  --onb-zatemnenie: color-mix(in srgb, var(--color-text) 48%, transparent);
+  --onb-kartochka-kromka: rgb(255 255 255 / 0.75);
+  --onb-kartochka-blik: rgb(255 255 255 / 0.8);
+  --onb-kartochka-ten: rgb(11 31 69 / 0.28);
+  --onb-svet-belyy: #ffffff;
+  --onb-svet-goluboy: #9bc0f2;
+  --onb-svet-teplyy: #ffc88c;
+  --onb-svet-kray: #ffdcaa;
+  --onb-svet-luch: #ffebcd;
+}
+
+@media screen {
+  :root[data-tema='dark']:not([data-sheet-theme]) {
+    --kab-fon-blik: rgb(70 130 255 / 0.12);
+    --kab-fon-verh: var(--noch-bg-2);
+    --kab-fon-niz: var(--noch-bg);
+    --kab-punkt-hover: rgb(160 195 255 / 0.08);
+    --kab-punkt-fon: rgb(22 36 72 / 0.55);
+    --kab-kartinka-1: #1d3a78;
+    --kab-kartinka-2: var(--noch-surface-2);
+    --kab-kartinka-3: #3a2a26;
+    --kab-treugolnik-1: #cfe0ff;
+    --kab-treugolnik-2: #4f8cf5;
+    --kab-treugolnik-rebro: #eef3ff;
+    --kab-treugolnik-osnova: var(--noch-blue);
+
+    --karta-panel-fon: rgb(18 30 60 / 0.94);
+    --karta-svyazka-fon: rgb(22 36 72 / 0.5);
+    --karta-ps-uzel: rgb(22 36 72 / 0.86);
+    --karta-znachok-prosvet: var(--noch-surface-2);
+
+    --avatar-studio-svet: rgb(127 176 255 / 0.18);
+    --avatar-obrazec-kromka: rgb(200 220 255 / 0.3);
+
+    --onb-zatemnenie: rgb(2 6 20 / 0.68);
+    --onb-kartochka-kromka: rgb(160 195 255 / 0.22);
+    --onb-kartochka-blik: rgb(200 220 255 / 0.14);
+    --onb-kartochka-ten: rgb(0 0 0 / 0.5);
   }
 }

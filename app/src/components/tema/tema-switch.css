@@ -1,8 +1,7 @@
 /* Переключатель темы в шапке (TemaSwitch.tsx). Стеклянная круглая
    таблетка; область нажатия 44×44. Цвета — только переменные. */
 .tema-switch {
-  /* Пока тема на проверке: виден только при ?tema=… (lib/tema.ts). */
-  display: none;
+  display: inline-flex;
   position: relative;
   flex: none;
   align-items: center;
@@ -11,9 +10,6 @@
   height: 44px;
   border-radius: var(--radius-pill);
   color: var(--color-primary);
-}
-html[data-tema-vidna] .tema-switch {
-  display: inline-flex;
 }
 .tema-switch__plate {
   position: relative;

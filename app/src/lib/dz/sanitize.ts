@@ -6,9 +6,15 @@
  * из вёрстки убирается всё, кроме того, из чего состоит набор KaTeX:
  * теги текста и MathML, SVG корней и скобок, классы и размеры. Скрипты,
  * ссылки, картинки, обработчики событий и url() в стилях не проходят.
+ *
+ * Чертежи движков сайта (планиметрия, векторы, графики, мосты №10 и др.)
+ * и таблицы условия (график долга, модель задачи) идут в условии ДЗ
+ * готовой вёрсткой. В SVG — фигуры, подписи <text>, штриховка
+ * <pattern>. Ссылка на штриховку — только своя, url(#id); id — только у
+ * <pattern>. Ссылок href и <image> нет.
  */
 
-const TAGS = new Set([
+export const TAGS = new Set([
   // Текст и вёрстка KaTeX.
   'span',
   'p',
@@ -58,9 +64,29 @@ const TAGS = new Set([
   'line',
   'g',
   'rect',
+  // Таблицы условия (график долга №16, модель текстовой задачи).
+  'figure',
+  'figcaption',
+  'table',
+  'caption',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
+  // Чертежи движков сайта.
+  'circle',
+  'ellipse',
+  'polygon',
+  'polyline',
+  'text',
+  'tspan',
+  'defs',
+  'pattern',
+  'title',
 ]);
 
-const ATTRS = new Set([
+export const ATTRS = new Set([
   'class',
   'style',
   'aria-hidden',
@@ -103,7 +129,46 @@ const ATTRS = new Set([
   'notation',
   'depth',
   'voffset',
+  'colspan',
+  'rowspan',
+  'scope',
+  // Чертежи движков сайта.
+  'cx',
+  'cy',
+  'r',
+  'rx',
+  'ry',
+  'dx',
+  'dy',
+  'points',
+  'opacity',
+  'fill-opacity',
+  'stroke-opacity',
+  'stroke-linejoin',
+  'stroke-linecap',
+  'stroke-dasharray',
+  'paint-order',
+  'font-family',
+  'font-size',
+  'font-style',
+  'font-weight',
+  'text-anchor',
+  'dominant-baseline',
+  'textlength',
+  'lengthadjust',
+  'aria-label',
+  'patternunits',
+  'patterntransform',
 ]);
+
+/** Ссылка в значении атрибута — только на свою штриховку: url(#id). */
+function safeValue(value: string): boolean {
+  const urls = value.match(/url\s*\([^)]*\)/gi) ?? [];
+  return (
+    urls.every((u) => /^url\(#[A-Za-z0-9_-]+\)$/.test(u.replace(/\s+/g, ''))) &&
+    !/javascript:|expression\s*\(/i.test(value)
+  );
+}
 
 /** Стиль без url(), expression() и javascript:. */
 function safeStyle(value: string): boolean {
@@ -119,7 +184,9 @@ function clean(node: Element): void {
     }
     for (const attr of Array.from(child.attributes)) {
       const name = attr.name.toLowerCase();
-      if (!ATTRS.has(name) || (name === 'style' && !safeStyle(attr.value))) {
+      /* id — только у штриховки: на неё ссылается fill="url(#id)". */
+      const razreshyon = ATTRS.has(name) || (name === 'id' && tag === 'pattern');
+      if (!razreshyon || (name === 'style' && !safeStyle(attr.value)) || !safeValue(attr.value)) {
         child.removeAttribute(attr.name);
       }
     }
@@ -130,10 +197,13 @@ function clean(node: Element): void {
 /** Вёрстка, которую можно вставить в страницу. Без браузера — пустая строка. */
 export function sanitizeHtml(html: string): string {
   if (typeof document === 'undefined') return '';
-  const template = document.createElement('template');
-  template.innerHTML = html;
-  const root = document.createElement('div');
-  root.append(template.content.cloneNode(true));
+  /* Разбор и чистка — в отдельном документе без окна: в нём картинки не
+     грузятся и обработчики (onerror у <img>) не срабатывают. Элемент
+     основного документа, даже не вставленный в страницу, начал бы
+     загрузку картинки сразу, ещё до чистки. */
+  const doc = document.implementation.createHTMLDocument('');
+  const root = doc.createElement('div');
+  root.innerHTML = html;
   clean(root);
   return root.innerHTML;
 }

@@ -17,7 +17,12 @@
  *   GET  /otpiska?u=&t= — страница с кнопкой «Отписаться»;
  *   POST /otpiska?u=&t= — отписка (кнопка и «в один клик» из почтовика,
  *        RFC 8058); подпись t проверяет база (notify_otpiska);
+ *   GET  /roditel?t= — страница «Даю согласие» для родителя ученика младше 18;
+ *   POST /roditel?t= — согласие (confirm_parent_consent), IP — из X-Forwarded-For;
  *   GET  /health — жив ли цикл.
+ *
+ * Письма родителям (roditel_zabrat → SMTP → roditel_itog при сбое) — тем
+ * же проходом, что и уведомления.
  *
  * В базу — ключом service_role через PostgREST внутри сети (rest:3000).
  */
@@ -25,7 +30,7 @@
 import http from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { otpravit, SmtpError } from './smtp.mjs';
-import { ekran, pismo, SAYT, ADRESA } from './pisma.mjs';
+import { ekran, pismo, pismoRoditelyu, DOKUMENTY, SAYT, ADRESA } from './pisma.mjs';
 import { otpravitPush, vapidKlyuchi } from './webpush.mjs';
 
 export function nastroyki(env = process.env) {
@@ -128,6 +133,43 @@ export async function prohod(cfg, smtp = otpravit, fetchPush = fetch) {
     }
   }
   itog.push = await prohodPush(cfg, fetchPush);
+  itog.roditeli = pochtaEst(cfg) ? await prohodRoditeli(cfg, smtp) : null;
+  return itog;
+}
+
+/* ── Письмо родителю (миграция …_roditel_pismo.sql) ───────────────── */
+
+const ADRES_POCHTY = /^[^\s<>@,;:"'()]+@[^\s<>@,;:"'()]+\.[^\s<>@,;:"'()]+$/;
+
+/** Письма родителям, которых ждут ученики младше 18. */
+export async function prohodRoditeli(cfg, smtp = otpravit) {
+  const itog = { sent: 0, povtor: 0, failed: 0 };
+  let pachka;
+  try {
+    pachka = (await rpc(cfg, 'roditel_zabrat', { p_limit: cfg.pachka })) ?? [];
+  } catch (e) {
+    // До миграции функции нет — тихо пропускаем.
+    if (e.status === 404) return itog;
+    throw e;
+  }
+  for (const r of pachka) {
+    let povtor = false;
+    let ok = false;
+    if (ADRES_POCHTY.test(String(r.parent_email ?? ''))) {
+      try {
+        await smtp(cfg.smtp, { from: cfg.from, to: r.parent_email, raw: pismoRoditelyu(r, cfg).raw });
+        ok = true;
+      } catch (e) {
+        povtor = !(e instanceof SmtpError && !e.vremennaya);
+        log('письмо родителю не ушло:', bezAdresov(e?.message ?? e));
+      }
+    }
+    if (ok) itog.sent += 1;
+    else if (povtor) itog.povtor += 1;
+    else itog.failed += 1;
+    if (!ok) await rpc(cfg, 'roditel_itog', { p_user: r.user_id, p_povtor: povtor });
+    if (cfg.pauzaMs > 0) await spat(cfg.pauzaMs);
+  }
   return itog;
 }
 
@@ -231,6 +273,59 @@ function stranica(zagolovok, abzacy, forma = '') {
   );
 }
 
+/* ── Согласие родителя: страница из письма ─────────────────────── */
+
+/** Адрес человека: Caddy кладёт его в X-Forwarded-For сам. */
+function ipOf(req) {
+  const xff = String(req.headers['x-forwarded-for'] ?? '').split(',')[0].trim();
+  return /^[0-9a-f.:]{2,45}$/i.test(xff) ? xff : null;
+}
+
+async function roditel(req, url, otvet, cfg) {
+  const t = url.searchParams.get('t') ?? '';
+  const doc = (put, tekst) => `<a href="${ekran(cfg.sayt + put)}">${tekst}</a>`;
+  const plohaya = () =>
+    otvet(
+      400,
+      stranica('Ссылка не подошла', [
+        'Ссылка неполная, устарела (она действует 14 дней) или уже использована.',
+        'Попросите ученика нажать в кабинете «Отправить письмо ещё раз».',
+      ]),
+    );
+  if (!/^[0-9a-f]{64}$/.test(t)) return plohaya();
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    // GET ничего не меняет: почтовые сканеры открывают ссылки сами.
+    return otvet(
+      200,
+      stranica(
+        'Согласие родителя',
+        [
+          `Ученик указал ваш адрес как адрес родителя при регистрации на сайте ${ekran(SAYT)}.`,
+          `Прочитайте ${doc(DOKUMENTY.soglasie, 'согласие на обработку персональных данных')} и ${doc(DOKUMENTY.politika, 'политику обработки данных')}.`,
+          'Если вы согласны, нажмите кнопку. Если не знаете этого ученика, просто закройте страницу.',
+        ],
+        `<form method="post" action="/roditel?t=${encodeURIComponent(t)}"><button type="submit">Даю согласие</button></form>`,
+      ),
+    );
+  }
+  if (req.method !== 'POST') return otvet(405, 'method not allowed', 'text/plain');
+  for await (const _ of req) {
+    /* пропускаем */
+  }
+  try {
+    await rpc(cfg, 'confirm_parent_consent', { p_token: t, p_ip: ipOf(req) });
+    log('согласие родителя');
+    return otvet(
+      200,
+      stranica('Спасибо!', ['Согласие записано. Теперь прогресс ученика на сайте сохраняется.']),
+    );
+  } catch (e) {
+    if (e.status === 400 && /bad_token/.test(e.message)) return plohaya();
+    log('согласие родителя не записано:', e.message);
+    return otvet(503, stranica('Не получилось', ['Сервер не ответил. Попробуйте ещё раз через минуту.']));
+  }
+}
+
 export function obrabotchik(cfg, sostoyanie) {
   const nastr = `${cfg.sayt}${ADRESA.nastroyki}`;
   return async (req, res) => {
@@ -248,6 +343,7 @@ export function obrabotchik(cfg, sostoyanie) {
       const zhiv = Date.now() - sostoyanie.posledniyUspeh < Math.max(5 * 60000, cfg.intervalMs * 5);
       return otvet(zhiv ? 200 : 503, zhiv ? 'ok' : 'stale', 'text/plain; charset=utf-8');
     }
+    if (url.pathname === '/roditel' || url.pathname === '/roditel/') return roditel(req, url, otvet, cfg);
     if (url.pathname !== '/otpiska' && url.pathname !== '/otpiska/') return otvet(404, 'not found', 'text/plain');
     const u = url.searchParams.get('u') ?? '';
     const t = url.searchParams.get('t') ?? '';
@@ -319,6 +415,10 @@ export function zapustit(cfg = nastroyki()) {
       sostoyanie.posledniyUspeh = Date.now();
       if (proshlayaOshibka !== null) log('проход снова удаётся');
       proshlayaOshibka = null;
+      const r = it.roditeli;
+      if (r && r.sent + r.povtor + r.failed > 0) {
+        log(`родителям: отправлено ${r.sent}, повтор ${r.povtor}, не ушло ${r.failed}`);
+      }
       if (it.sent + it.povtor + it.failed > 0) {
         log(`писем: отправлено ${it.sent}, повтор ${it.povtor}, не ушло ${it.failed}`);
       }

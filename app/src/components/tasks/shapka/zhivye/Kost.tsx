@@ -14,13 +14,19 @@ const M = 34;
 function Shar({ x, y, r }: { x: number; y: number; r: number }) {
   return (
     <g aria-hidden="true">
-      <circle cx={x} cy={y} r={r} fill="url(#kost-shar)" stroke="rgb(61 121 224 / 0.45)" />
+      <circle
+        cx={x}
+        cy={y}
+        r={r}
+        fill="url(#kost-shar)"
+        stroke="color-mix(in srgb, var(--chertezh-siniy) 45%, transparent)"
+      />
       <ellipse
         cx={x - r * 0.35}
         cy={y - r * 0.4}
         rx={r * 0.32}
         ry={r * 0.2}
-        fill="rgb(255 255 255 / 0.85)"
+        fill="color-mix(in srgb, var(--chertezh-blik) 85%, transparent)"
       />
     </g>
   );
@@ -67,26 +73,26 @@ export default function Kost({ label, tiho, avtofokus }: ZhivoyProps) {
       <svg viewBox="0 0 260 260" aria-hidden="true">
         <defs>
           <radialGradient id="kost-shar" cx="0.35" cy="0.3" r="0.8">
-            <stop offset="0" stopColor="#ffffff" stopOpacity="0.95" />
-            <stop offset="0.6" stopColor="#bcd3f7" stopOpacity="0.6" />
-            <stop offset="1" stopColor="#6f9be3" stopOpacity="0.7" />
+            <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.95" />
+            <stop offset="0.6" stopColor="var(--chertezh-zalivka-siniy)" stopOpacity="0.6" />
+            <stop offset="1" stopColor="var(--chertezh-setka)" stopOpacity="0.7" />
           </radialGradient>
         </defs>
         {/* Стеклянные лепестки за костью и нить с шариком — как на картинке. */}
         <path
           d="M22 112 C 30 80, 90 74, 120 92 C 140 104, 150 130, 120 150 C 90 168, 40 160, 26 140 C 20 130, 20 120, 22 112Z"
-          fill="rgb(190 212 248 / 0.45)"
-          stroke="rgb(150 185 240 / 0.5)"
+          fill="color-mix(in srgb, var(--chertezh-zalivka-siniy) 45%, transparent)"
+          stroke="color-mix(in srgb, var(--chertezh-zalivka-siniy) 50%, transparent)"
         />
         <path
           d="M140 112 C 160 96, 182 88, 182 100 C 182 120, 168 146, 146 152Z"
-          fill="rgb(190 212 248 / 0.45)"
-          stroke="rgb(150 185 240 / 0.5)"
+          fill="color-mix(in srgb, var(--chertezh-zalivka-siniy) 45%, transparent)"
+          stroke="color-mix(in srgb, var(--chertezh-zalivka-siniy) 50%, transparent)"
         />
         <path
           d="M140 150 C 175 172, 205 128, 232 116 C 252 108, 250 140, 213 158 C 196 166, 180 178, 160 170"
           fill="none"
-          stroke="rgb(120 160 230 / 0.6)"
+          stroke="color-mix(in srgb, var(--chertezh-setka) 60%, transparent)"
           strokeWidth="2"
           strokeLinecap="round"
         />
@@ -98,7 +104,7 @@ export default function Kost({ label, tiho, avtofokus }: ZhivoyProps) {
           cy={C[1] + 52}
           rx={44 - pod * 10}
           ry={8 - pod * 2}
-          fill="rgb(31 95 208 / 0.12)"
+          fill="color-mix(in srgb, var(--chertezh-siniy) 12%, transparent)"
         />
         <Kubik
           b={vr.b}

@@ -70,9 +70,9 @@ export default function Vklad({ label, avtofokus }: ZhivoyProps) {
       <svg viewBox="0 0 260 260" aria-hidden="true">
         <defs>
           <linearGradient id="zhg-zoloto" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#d49a1e" />
-            <stop offset="0.45" stopColor="#ffe08a" />
-            <stop offset="1" stopColor="#c58a12" />
+            <stop offset="0" stopColor="var(--chertezh-zoloto)" />
+            <stop offset="0.45" stopColor="var(--chertezh-zoloto)" />
+            <stop offset="1" stopColor="var(--chertezh-zoloto)" />
           </linearGradient>
         </defs>
         {/* Растущая стрелка над столбиками. */}
@@ -80,7 +80,7 @@ export default function Vklad({ label, avtofokus }: ZhivoyProps) {
           className="zhg__strelka"
           d={`M${strelka.x0} ${strelka.y0}Q${strelka.x0 + 70} ${strelka.y0 - 40} ${strelka.x1} ${strelka.y1}`}
         />
-        <path d={golovka} fill="rgb(61 121 224 / 0.85)" />
+        <path d={golovka} fill="color-mix(in srgb, var(--chertezh-siniy) 85%, transparent)" />
         {stolbiki.map((s) => {
           const y = OSNOVANIE - s.h;
           return (

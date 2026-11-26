@@ -182,6 +182,8 @@ export class Dvizhok {
   private W = 1;
   private H = 1;
   private ro: ResizeObserver;
+  /** Смена темы (lib/tema.ts): цвета чертежа перечитываются из CSS. */
+  private temaObs: MutationObserver;
   private kadrov = 0;
   private fpsT = 0;
   private prosh = 0;
@@ -248,6 +250,14 @@ export class Dvizhok {
       depthWrite: false,
       roughness: 0.85,
       metalness: 0,
+    });
+    this.temaObs = new MutationObserver(() => {
+      this.tsveta = tsvetaIzCss(host);
+      this.faceMat.color.set(this.tsveta.gran);
+    });
+    this.temaObs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-tema'],
     });
 
     this.ro = new ResizeObserver(() => this.razmerOkna());
@@ -505,6 +515,7 @@ export class Dvizhok {
     canvas.removeEventListener('pointerup', this.naOtpuskanie);
     canvas.removeEventListener('pointercancel', this.naOtmenuNazhatiya);
     this.ro.disconnect();
+    this.temaObs.disconnect();
     this.controls.dispose();
     for (const m of this.meshes) {
       m.geometry.dispose();
@@ -953,7 +964,7 @@ export class Dvizhok {
       if (m?.vybrana) {
         el.setAttribute('r', '5.5');
         el.setAttribute('fill', tsv.sechenie);
-        el.setAttribute('stroke', '#fff');
+        el.setAttribute('stroke', 'var(--chertezh-fon)');
         el.setAttribute('stroke-width', '2');
         el.setAttribute('data-vybrana', '1');
       } else {

@@ -177,7 +177,8 @@ function tekstPisma(s, pv) {
   const linii = [...s.abzacy];
   for (const st of s.stroki ?? []) linii.push(`— ${st.nazvanie}: ${st.tekst}. ${st.href}`);
   if (s.knopka) linii.push('', `${s.knopka.tekst}: ${s.knopka.href}`);
-  linii.push('', '—', `${SAYT}`, pv.pochemu, `Настройки уведомлений: ${pv.nastroyki}`);
+  linii.push('', '—', `${SAYT}`, pv.pochemu);
+  if (pv.nastroyki) linii.push(`Настройки уведомлений: ${pv.nastroyki}`);
   if (pv.otpiska) linii.push(`Отписаться от писем: ${pv.otpiska}`);
   return linii.join('\n');
 }
@@ -217,7 +218,8 @@ function htmlPisma(s, pv) {
     knopka +
     '</td></tr>' +
     `<tr><td style="padding:16px 4px 0;font-size:13px;line-height:1.5;color:${CVET.seryy}">${ekran(pv.pochemu)}<br>` +
-    `<a href="${ekran(pv.nastroyki)}" style="color:${CVET.seryy}">Настройки уведомлений</a>${otp}</td></tr>` +
+    (pv.nastroyki ? `<a href="${ekran(pv.nastroyki)}" style="color:${CVET.seryy}">Настройки уведомлений</a>${otp}` : '') +
+    '</td></tr>' +
     '</table></td></tr></table></body></html>'
   );
 }
@@ -248,17 +250,57 @@ export function pismo(u, cfg) {
   const s = soderzhanie(u, cfg.sayt);
   if (s === null) return null;
   const otpiska = otpiskaHref(cfg.apiDomain, u);
-  const pv = podval(u, cfg.sayt, otpiska);
+  return mime(s, podval(u, cfg.sayt, otpiska), { to: u.to, id: `uved-${u.id}`, otpiska }, cfg);
+}
+
+/* ── Письмо родителю ученика младше 18 ─────────────────────────── */
+
+export const DOKUMENTY = {
+  soglasie: '/soglasie/#variant-b',
+  politika: '/politika/',
+};
+
+export function roditelHref(apiDomain, token) {
+  return `https://${apiDomain}/roditel?t=${encodeURIComponent(token)}`;
+}
+
+/**
+ * Письмо родителю: ученик (имя из профиля) указал этот адрес при
+ * регистрации; ссылка ведёт на страницу подтверждения рассыльщика
+ * (/roditel через Caddy). r — строка roditel_zabrat.
+ */
+export function pismoRoditelyu(r, cfg) {
+  const imyaUchenika = r.imya === undefined || r.imya === null || r.imya === '' ? 'без имени' : r.imya;
+  const s = {
+    tema: 'Согласие родителя — Будет на ЕГЭ',
+    abzacy: [
+      `Здравствуйте! На сайте budetege.ru — это тренажёры для подготовки к ЕГЭ по математике — зарегистрирован ученик «${imyaUchenika}», и при регистрации ваш адрес указан как адрес родителя.`,
+      'Ученику младше 18 лет для сохранения прогресса, домашних заданий и решений нужно согласие родителя на обработку персональных данных.',
+      `Прочитать согласие: ${cfg.sayt}${DOKUMENTY.soglasie}. Политика обработки данных: ${cfg.sayt}${DOKUMENTY.politika}.`,
+      'Если вы согласны, нажмите кнопку ниже и подтвердите на открывшейся странице. Ссылка действует 14 дней.',
+    ],
+    knopka: { tekst: 'Перейти к подтверждению', href: roditelHref(cfg.apiDomain, r.token) },
+  };
+  const pv = {
+    pochemu:
+      'Письмо пришло, потому что этот адрес указали при регистрации на сайте. Если вы не знаете этого ученика, ничего не делайте: без вашего подтверждения его данные о прогрессе не сохраняются.',
+    nastroyki: null,
+    otpiska: null,
+  };
+  return mime(s, pv, { to: r.parent_email, id: `roditel-${r.user_id}`, otpiska: null }, cfg);
+}
+
+function mime(s, pv, { to, id, otpiska }, cfg) {
   const tekst = tekstPisma(s, pv);
   const html = htmlPisma(s, pv);
   const granica = `=_${crypto.randomBytes(12).toString('hex')}`;
   const domen = cfg.from.split('@')[1] ?? 'localhost';
   const zag = [
     `From: ${zagolovok(SAYT)} <${cfg.from}>`,
-    `To: <${u.to}>`,
+    `To: <${to}>`,
     `Subject: ${zagolovok(s.tema)}`,
     `Date: ${new Date().toUTCString().replace('GMT', '+0000')}`,
-    `Message-ID: <uved-${u.id}-${crypto.randomBytes(6).toString('hex')}@${domen}>`,
+    `Message-ID: <${id}-${crypto.randomBytes(6).toString('hex')}@${domen}>`,
     'MIME-Version: 1.0',
     'Auto-Submitted: auto-generated',
     'X-Auto-Response-Suppress: All',

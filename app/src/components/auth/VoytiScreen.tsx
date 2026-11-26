@@ -17,7 +17,6 @@ import {
   AUTH_UI,
   FORGOT_FORM,
   LOGIN_FORM,
-  PASSWORD_MIN,
   REGISTER_FORM,
   emailLooksValid,
 } from '@/content/auth';
@@ -28,6 +27,7 @@ import { AUTH_HREF } from '@/lib/auth/config';
 import { emailDomainAllowed } from '@/lib/auth/allowed-domains';
 import { AUTH_ERRORS, describeAuthError, isDomainRejected } from '@/lib/auth/errors';
 import { setRememberMe, useSessionUser, type UserRole } from '@/lib/auth/session';
+import { passwordProblem } from '@/lib/auth/password';
 import { documentsVersion, operator, operatorFilled } from '@/lib/legal/operator';
 import { PasswordField } from './PasswordField';
 import { RoleCards } from './RoleCards';
@@ -417,8 +417,9 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
       setDomainNote(true);
       return;
     }
-    if (password.length < PASSWORD_MIN) {
-      setError(AUTH_ERRORS.weakPassword);
+    const slabyy = passwordProblem(password, cleanEmail);
+    if (slabyy !== null) {
+      setError(slabyy === 'short' ? AUTH_ERRORS.weakPassword : AUTH_ERRORS.simplePassword);
       return;
     }
     if (role === null) {

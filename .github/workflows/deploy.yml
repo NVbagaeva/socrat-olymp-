@@ -25,15 +25,18 @@ jobs:
     # (playwright install --with-deps). Переезд — отдельной правкой,
     # когда Playwright его поддержит. Подробнее — docs/DEPLOYMENT.md.
     runs-on: ubuntu-24.04
+    # Пароль FTP — в окружении site (Settings → Environments): оно
+    # пускает только ветку main.
+    environment: site
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm ставим до setup-node: иначе кэшу нечего искать.
       # Версия берётся из поля packageManager в app/package.json.
       - name: Установить pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           package_json_file: app/package.json
 
@@ -43,7 +46,7 @@ jobs:
       # два механизма не спорят за один ключ. В шаге установки pnpm
       # входа cache нет, дублировать нечего.
       - name: Установить Node.js 22
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: pnpm
@@ -180,6 +183,12 @@ jobs:
       # После выкладки — живой сайт: картинки №12 (иконки разделов и
       # главная иллюстрация) отдаются с кодом 200, заглушек нет. Ловит,
       # если файл не доехал до хостинга или закэширована старая страница.
+      # Заголовки защиты из .htaccess дошли до живых страниц, служебные
+      # файлы (.htaccess, файл состояния выкладки) посетителю не отдаются.
+      - name: Проверить заголовки защиты на budetege.ru
+        working-directory: app
+        run: pnpm test:headers --url https://budetege.ru
+
       - name: Проверить картинки №12 на budetege.ru
         working-directory: app
         run: |

@@ -5,8 +5,8 @@
 #   /auth/v1/*  → GoTrue,    /rest/v1/* → PostgREST;
 #   заголовок apikey обязателен и должен быть ключом anon или
 #   service_role, иначе 401 — как у Supabase;
-#   без apikey открыты только адреса из писем (/auth/v1/verify и
-#   /otpiska), по ним человек переходит из почты обычной ссылкой;
+#   без apikey открыты только адреса из писем (/auth/v1/verify,
+#   /otpiska и /roditel), по ним человек переходит из почты обычной ссылкой;
 #   CORS — только для адресов сайта.
 #
 # Сертификат Caddy получает и продлевает сам (Let's Encrypt), как только
@@ -67,11 +67,22 @@
 		-Server
 		X-Content-Type-Options nosniff
 		Referrer-Policy no-referrer
-		Strict-Transport-Security "max-age=31536000"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 	}
+	# Журнал запросов — без одноразовых токенов из писем (token в
+	# /auth/v1/verify, t в /roditel) и подписи «Отписаться» (t в /otpiska): путь, время
+	# и код ответа для разбора сбоев остаются.
 	log {
 		output stdout
-		format json
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					delete token
+					delete t
+				}
+			}
+		}
 	}
 
 	import cors
@@ -96,6 +107,14 @@
 	# «Отписаться» из писем уведомлений (RFC 8058): ключа в ссылке нет,
 	# подпись проверяет база; отвечает рассыльщик (compose.yml, notifier).
 	handle /otpiska* {
+		reverse_proxy notifier:8090 {
+			header_down -Access-Control-Allow-Origin
+		}
+	}
+
+	# Согласие родителя из письма: ключа в ссылке нет, одноразовый токен
+	# проверяет база (confirm_parent_consent); отвечает рассыльщик.
+	handle /roditel* {
 		reverse_proxy notifier:8090 {
 			header_down -Access-Control-Allow-Origin
 		}

@@ -72,9 +72,9 @@ export default function Otrezok({ label, avtofokus }: ZhivoyProps) {
       <svg ref={svg} viewBox="0 0 260 260" aria-hidden="true">
         <defs>
           <radialGradient id="zhg-busina" cx="35%" cy="30%" r="70%">
-            <stop offset="0" stopColor="#ffffff" />
-            <stop offset="0.55" stopColor="#8fb6f2" />
-            <stop offset="1" stopColor="#2f6fd6" />
+            <stop offset="0" stopColor="var(--chertezh-fon)" />
+            <stop offset="0.55" stopColor="var(--chertezh-setka)" />
+            <stop offset="1" stopColor="var(--chertezh-siniy)" />
           </radialGradient>
         </defs>
         <PlitaSteklo pl={PL} x0={0} x1={8} y0={0} y1={6} tolshchina={9} setka={1} />

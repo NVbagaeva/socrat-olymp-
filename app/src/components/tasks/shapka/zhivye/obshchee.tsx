@@ -333,8 +333,8 @@ export function PlitaSteklo({
   }
   return (
     <g className="zhv__plita-g" aria-hidden="true">
-      <path d={bok} fill="rgb(120 165 235 / 0.35)" />
-      <path d={bok2} fill="rgb(100 150 230 / 0.42)" />
+      <path d={bok} fill="color-mix(in srgb, var(--chertezh-setka) 35%, transparent)" />
+      <path d={bok2} fill="color-mix(in srgb, var(--chertezh-setka) 42%, transparent)" />
       <path className="zhv__plita" d={verh} />
       {linii.map((d, i) => (
         <path key={i} className="zhv__setka" d={d} />
@@ -348,12 +348,12 @@ export function SteklyannyeGradienty({ id }: { id: string }) {
   return (
     <defs>
       <linearGradient id={`${id}-st`} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#ffffff" stopOpacity="0.85" />
-        <stop offset="1" stopColor="#bcd3f7" stopOpacity="0.55" />
+        <stop offset="0" stopColor="var(--chertezh-fon)" stopOpacity="0.85" />
+        <stop offset="1" stopColor="var(--chertezh-zalivka-siniy)" stopOpacity="0.55" />
       </linearGradient>
       <linearGradient id={`${id}-or`} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#ffc27a" />
-        <stop offset="1" stopColor="#e07a2f" />
+        <stop offset="0" stopColor="var(--chertezh-akcent-svet)" />
+        <stop offset="1" stopColor="var(--chertezh-akcent)" />
       </linearGradient>
       <filter id={`${id}-svet`} x="-50%" y="-50%" width="200%" height="200%">
         <feGaussianBlur stdDeviation="3" />

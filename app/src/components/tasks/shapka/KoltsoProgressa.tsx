@@ -132,14 +132,14 @@ export function KoltsoProgressa({
         <svg className="koltso__svg" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
           <defs>
             <linearGradient id={`kg-${id}`} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#ffc27a" />
-              <stop offset="0.5" stopColor="#f5a04a" />
-              <stop offset="1" stopColor="#e07a2f" />
+              <stop offset="0" stopColor="var(--chertezh-akcent-svet)" />
+              <stop offset="0.5" stopColor="var(--chertezh-akcent)" />
+              <stop offset="1" stopColor="var(--chertezh-akcent)" />
             </linearGradient>
             <linearGradient id={`kz-${id}`} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#ffe08a" />
-              <stop offset="0.5" stopColor="#f2c14e" />
-              <stop offset="1" stopColor="#d49a1e" />
+              <stop offset="0" stopColor="var(--chertezh-zoloto)" />
+              <stop offset="0.5" stopColor="var(--chertezh-zoloto)" />
+              <stop offset="1" stopColor="var(--chertezh-zoloto)" />
             </linearGradient>
           </defs>
           <circle className="koltso__lozhe" cx="100" cy="100" r="96" />

@@ -112,6 +112,11 @@ services:
       GOTRUE_MAILER_AUTOCONFIRM: 'false'
       GOTRUE_PASSWORD_MIN_LENGTH: '8'
       GOTRUE_SECURITY_REFRESH_TOKEN_ROTATION_ENABLED: 'true'
+      # Срок входа: «Запомнить меня» живёт не дольше 90 дней, а без
+      # захода на сайт 30 дней — выход сам (вход, забытый на школьном
+      # компьютере, не живёт вечно).
+      GOTRUE_SESSIONS_TIMEBOX: 2160h
+      GOTRUE_SESSIONS_INACTIVITY_TIMEOUT: 720h
 
       GOTRUE_HOOK_BEFORE_USER_CREATED_ENABLED: 'true'
       GOTRUE_HOOK_BEFORE_USER_CREATED_URI: pg-functions://postgres/auth_hooks/before_user_created

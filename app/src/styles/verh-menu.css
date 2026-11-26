@@ -135,3 +135,45 @@
 .nav-drop--css:is(:hover, :focus-within) .nav-drop__button svg {
   transform: rotate(180deg);
 }
+
+/* Сборка с «Войти» в шапке (Shapka.tsx, .site-head--vhod): у гостя
+   справа «Войти» и «Начать бесплатно», и в контейнере 1360px шестой
+   пункт не помещается — «Учителям» в бургере до 1920. Без замера
+   налезал на «Войти» на 1366–1919. Проверка — test:verhnee-menu и на
+   сборке со входом (.github/workflows/auth.yml). */
+@media (min-width: 1024px) and (max-width: 1919.98px) {
+  .site-head--vhod .verh-menu__p--1 {
+    display: none;
+  }
+}
+
+/* С переключателем темы в шапке пункты уходят в бургер на ступень
+   раньше, порядок тот же. */
+/* До 1920: в контейнере 1360px со входом («Войти» и «Начать бесплатно»)
+   шестой пункт рядом с переключателем не помещается. */
+@media (min-width: 1024px) and (max-width: 1919.98px) {
+  .verh-menu__p--1 {
+    display: none;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1439.98px) {
+  .verh-menu__p--2 {
+    display: none;
+  }
+}
+
+/* Запас строки шапки: со входом, переключателем темы и колокольчиком
+   на 1024–1919px пункты меню с полями 8px, на 1024–1279px кнопки справа
+   плотнее — в CI шрифт рисуется чуть шире, и 13px запаса не хватало
+   (test:verhnee-menu на сборке со входом). */
+@media (min-width: 1024px) and (max-width: 1919.98px) {
+  .verh-menu__p,
+  .verh-menu .nav-drop__button {
+    padding: 0 var(--space-2);
+  }
+}
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .site-head .site-head__cta {
+    gap: var(--space-2);
+  }
+}

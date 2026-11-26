@@ -2,6 +2,7 @@ import { clsx } from 'clsx';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { AuthWidget } from '@/components/auth/AuthWidget';
+import { AUTH_IN_HEADER } from '@/lib/auth/config';
 import { LevelSwitch } from '@/components/level/LevelSwitch';
 import { TemaSwitch } from '@/components/tema/TemaSwitch';
 import { site } from '@/content/site';
@@ -48,7 +49,18 @@ export function Shapka({
   className,
 }: ShapkaProps) {
   return (
-    <header className={clsx('site-head', kabinet && 'site-head--kabinet', className)}>
+    <header
+      className={clsx(
+        'site-head',
+        kabinet && 'site-head--kabinet',
+        /* Сборка с «Войти» в шапке: справа шире, пункты меню уходят в
+           бургер раньше (verh-menu.css, site.css). Класс — от флага
+           сборки, а не от состояния входа: блок аккаунта появляется
+           после загрузки, и шапка не должна перестраиваться на глазах. */
+        AUTH_IN_HEADER && 'site-head--vhod',
+        className,
+      )}
+    >
       <div className="site-head__in">
         <Link className="logo" href="/">
           <i aria-hidden="true" />

@@ -107,6 +107,8 @@ export async function otpravitPush(sub, soderzhanie, cfg, fetchImpl = fetch) {
   try {
     const r = await fetchImpl(sub.endpoint, {
       method: 'POST',
+      // Только сам адрес из белого списка: перенаправление на другой адрес не идём.
+      redirect: 'manual',
       headers: {
         TTL: String(cfg.ttl ?? 86400),
         Urgency: cfg.urgency ?? 'normal',

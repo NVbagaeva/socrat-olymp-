@@ -116,6 +116,10 @@
     "preview:planimetriya": "node scripts/galereya-planimetrii.mjs",
     "test:secrets": "node scripts/check-infra-secrets.mjs && node scripts/check-bundle-secrets.mjs",
     "test:infra-secrets": "node scripts/check-infra-secrets.mjs --self-test && node scripts/check-infra-secrets.mjs",
+    "test:headers": "node scripts/check-security-headers.mjs",
+    "test:password": "node scripts/check-password.mjs",
+    "test:csp": "node scripts/check-csp.mjs",
+    "test:actions-pin": "node scripts/check-actions-pin.mjs",
     "build:pdf-12": "node scripts/build-pdf-12.mjs",
     "build:pdf-12-sample": "node scripts/build-pdf-12.mjs --sample",
     "test:pdf-12": "node scripts/check-pdf-12.mjs",
@@ -276,6 +280,7 @@
     "test:karta-site": "node scripts/check-karta-site.mjs",
     "test:progress-log": "node scripts/check-progress-log.mjs",
     "test:zhurnal": "node scripts/check-zhurnal.mjs",
+    "test:zhurnal-pokaz": "node scripts/check-zhurnal-pokaz.mjs",
     "test:dz2": "node scripts/check-dz2.mjs",
     "test:uvedomleniya": "node scripts/check-uvedomleniya.mjs",
     "test:progress-perevod": "node scripts/check-progress-perevod.mjs",
@@ -285,15 +290,16 @@
     "test:kartochki": "node scripts/verify_cards/index.mjs",
     "build:variant-images": "node scripts/build-variant-images.mjs",
     "test:verhnee-menu": "node scripts/check-verhnee-menu.mjs",
-    "test:tema": "node scripts/check-tema.mjs"
+    "test:tema": "node scripts/check-tema.mjs",
+    "test:tsveta": "node scripts/check-tsveta.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
     "@supabase/supabase-js": "^2.117.3",
     "clsx": "^2.1.1",
     "katex": "^0.16.11",
-    "mathlive": "0.107.1",
-    "next": "15.5.27",
+    "mathlive": "0.111.4",
+    "next": "15.5.29",
     "pdf-lib": "1.17.1",
     "qrcode-generator": "1.4.4",
     "react": "^19.3.0",
@@ -302,7 +308,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
-    "@next/eslint-plugin-next": "15.5.27",
+    "@next/eslint-plugin-next": "15.5.29",
     "@swc/helpers": "0.5.15",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.20.2",
@@ -310,7 +316,7 @@
     "@types/react-dom": "^19.3.0",
     "@types/three": "^0.180.0",
     "eslint": "^9.39.5",
-    "eslint-config-next": "15.5.27",
+    "eslint-config-next": "15.5.29",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -319,7 +325,7 @@
     "postcss": "^8.5.28",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "sharp": "^0.35.4",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.0"
@@ -330,7 +336,15 @@
       "sharp"
     ],
     "patchedDependencies": {
-      "next@15.5.27": "patches/next@15.5.27.patch"
+      "next@15.5.29": "patches/next@15.5.29.patch"
+    },
+    "overrides": {
+      "postcss@<8.5.23": "^8.5.23",
+      "brace-expansion@<1.1.21": "^1.1.21",
+      "brace-expansion@>=5.0.0 <5.0.12": "^5.0.12",
+      "minimatch@>=7.0.0 <11.0.1": "^11.0.1",
+      "source-map-js@<1.2.2": "^1.2.2",
+      "zod@>=4.0.0 <4.6.6": "^4.6.6"
     }
   }
 }

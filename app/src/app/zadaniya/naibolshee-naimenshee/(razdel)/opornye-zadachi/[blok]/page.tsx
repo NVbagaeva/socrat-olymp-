@@ -7,7 +7,9 @@ import { Tex } from '@/components/ui/Tex';
 import { OPORNYE21 } from '@/content/naibolshee21';
 import { zadanie21Title } from '@/content/zadanie21';
 import { OPORNYE21_HREF, tipHref21 } from '@/lib/zadanie21/links';
+import { sOtvetomDz } from '@/lib/opornye/otvetDz';
 import { BLOKI_OPORNYH21, blokPoSlugu21, opornyeDlyaBrauzera21 } from '@/lib/zadanie21/opornye';
+import { sealText } from '@/lib/zadanie21/secret';
 import { prototype } from '@/lib/zadanie21/prototypes';
 
 export function generateStaticParams() {
@@ -38,12 +40,13 @@ export default async function Opornye21Blok({ params }: { params: Promise<{ blok
       <TabScrollOnMount />
       <Opornye21
         blok={b.slug}
+        nazvanie={b.nazvanie}
         zapomni={
           <>
             <b>{OPORNYE21.zapomni}</b> <Tex text={b.zapomni} />
           </>
         }
-        zadachi={opornyeDlyaBrauzera21(b)}
+        zadachi={sOtvetomDz(opornyeDlyaBrauzera21(b), b.zadachi, sealText)}
       />
       <section className="z21-op__gde" aria-labelledby="z21-op-gde">
         <h3 id="z21-op-gde" className="stk-h4">

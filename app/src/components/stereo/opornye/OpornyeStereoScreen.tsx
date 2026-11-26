@@ -15,12 +15,16 @@ import { IkGalochka, IkInfo, IkLampa, IkNazad, IkVpered, IkZadacha } from '../me
 import { ItogBloka } from './ItogBloka';
 import { NazhmiRisunok, NazhmiVarianty } from './NazhmiChertezh';
 import { PodskazkaShagi } from './PodskazkaShagi';
+import { VDomashkuOpornyeGen } from '@/components/dz2/knopki';
+import { zhurnalBanka } from '@/lib/trening/zhurnalBanka';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 
 export interface OpornyeStereoScreenProps {
   blokId: string;
   no: number;
   title: string;
-  tasks: ZadachaOp3Sealed[];
+  /** otvet — ответ числовой задачи, закрытый ключом «id|otvet» (этап 4д): только для «В домашку». */
+  tasks: (ZadachaOp3Sealed & { otvet?: string })[];
   /** Живые чертежи задач, собранные на сборке (у «нажми» — свой, интерактивный). */
   risunki: ReactNode[];
   /** Миниатюры чертежей задач для плиток итога (SVG без подписей). */
@@ -84,6 +88,18 @@ export function OpornyeStereoScreen({
   });
   const index = picked ?? firstOpen(status);
   const task = tasks[index];
+  /* Журнал решения задач (lib/zhurnal, этап 4д): тип — блок, задача — её ключ. */
+  const zapis = useZapisZadachi(
+    task === undefined
+      ? null
+      : zhurnalBanka(
+          '3',
+          { id: task.id, p: blokId, text: task.uslovieHtml },
+          'opornye',
+          blokId,
+          task.id,
+        ),
+  );
   if (task === undefined) return null;
   const total = tasks.length;
   const nextOpen = nextUnsolved(status, index);
@@ -100,6 +116,7 @@ export function OpornyeStereoScreen({
   }
 
   function open(next: number) {
+    if (checked === 'wrong') zapis?.zakryt(false);
     setPicked(next);
     setVZadache(true);
     reset();
@@ -114,17 +131,21 @@ export function OpornyeStereoScreen({
     setVZadache(true);
     setChecked(ok ? 'right' : 'wrong');
     zapisat3(blokId, task.id, ok ? 'right' : 'wrong');
+    zapis?.popytka(value, ok);
+    if (ok) zapis?.zakryt(true);
     if (!ok) setAttempts((prev) => ({ ...prev, [task.id]: 'wrong' }));
   }
 
   function skip() {
     if (task === undefined) return;
+    zapis?.propustit();
     setAttempts((prev) => ({ ...prev, [task.id]: 'skipped' }));
     if (nextOpen !== null) open(nextOpen);
   }
 
   function showSolution() {
     if (task === undefined) return;
+    zapis?.reshenie();
     setRazbor(izJson<RazborOp3>(openText(task.razbor, task.id)));
     if (status[index] !== 'right') zapisat3(blokId, task.id, 'revealed');
   }
@@ -153,6 +174,30 @@ export function OpornyeStereoScreen({
 
   return (
     <section className="o3-blok">
+      {/* Учителю: числовые задачи блока — в корзину новой выдачи ДЗ (docs/kabinet-dz2.md).
+          Ответ открывается ключом задачи по нажатию; чертёж рисуется тогда же. */}
+      <div className="dz2-ryad">
+        <VDomashkuOpornyeGen
+          taskNo={3}
+          blok={blokId}
+          nazvanie={title}
+          sobrat={async () => {
+            const { renderSolid } = await import('@/lib/solid/render');
+            return tasks
+              .filter((t) => t.vid === 'chislo' && t.otvet !== undefined)
+              .map((t) => ({
+                id: t.id,
+                seed: 'blok',
+                uslovieHtml: t.uslovieHtml,
+                risunokSvg: renderSolid(t.model),
+                otvet: openText(t.otvet ?? '', `${t.id}|otvet`),
+                shagi: [
+                  { chto: izJson<RazborOp3>(openText(t.razbor, t.id))?.uchenikHtml ?? '' },
+                ].filter((s) => s.chto !== ''),
+              }));
+          }}
+        />
+      </div>
       {pokazatItog ? (
         <ItogBloka
           nazvanie={`${no}. ${title}`}
@@ -340,13 +385,14 @@ export function OpornyeStereoScreen({
                     variant="secondary"
                     className="o3-btn-podskazka"
                     aria-expanded={shagi !== null}
-                    onClick={() =>
+                    onClick={() => {
+                      if (shagi === null) zapis?.shagPodskazki(1);
                       setShagi(
                         shagi === null
                           ? izJson<ShagPodskazkiHtml[]>(openText(task.podskazki, task.id))
                           : null,
-                      )
-                    }
+                      );
+                    }}
                   >
                     <IkLampa />
                     {shagi === null ? OPORNYE_3.podskazka : OPORNYE_3.skrytPodskazku}

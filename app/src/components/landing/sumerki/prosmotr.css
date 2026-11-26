@@ -10,16 +10,16 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #fff;
+  color: var(--lend-prosmotr-tekst);
   overflow: hidden;
 }
 .prosmotr::backdrop {
-  background: rgb(8 20 52 / 0.84);
+  background: color-mix(in srgb, var(--lend-prosmotr-fon) 84%, transparent);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
   backdrop-filter: blur(14px) saturate(120%);
 }
 .prosmotr:fullscreen {
-  background: rgb(8 20 52);
+  background: var(--lend-prosmotr-fon);
 }
 .prosmotr[open] {
   display: grid;
@@ -46,13 +46,13 @@
   margin: 0;
   font-size: 15px;
   line-height: 1.35;
-  color: rgb(255 255 255 / 0.9);
+  color: color-mix(in srgb, var(--lend-prosmotr-tekst) 90%, transparent);
 }
 .prosmotr__podpis span {
   flex: none;
   padding: 3px 10px;
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
+  background: color-mix(in srgb, var(--lend-prosmotr-tekst) 12%, transparent);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 }
@@ -66,22 +66,22 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgb(255 255 255 / 0.18);
+  border: 1px solid color-mix(in srgb, var(--lend-prosmotr-tekst) 18%, transparent);
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.1);
+  background: color-mix(in srgb, var(--lend-prosmotr-tekst) 10%, transparent);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  color: #fff;
+  color: var(--lend-prosmotr-tekst);
   cursor: pointer;
   transition: background-color 200ms var(--ease);
 }
 .prosmotr__knopka:hover,
 .prosmotr__strelka:hover {
-  background: rgb(255 255 255 / 0.2);
+  background: color-mix(in srgb, var(--lend-prosmotr-tekst) 20%, transparent);
 }
 .prosmotr__knopka:focus-visible,
 .prosmotr__strelka:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--lend-prosmotr-tekst);
   outline-offset: 3px;
 }
 .prosmotr__knopka svg,
@@ -106,10 +106,10 @@
   height: auto;
   margin: 0 auto;
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-podlozhka);
   box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.1),
-    0 40px 80px -30px rgb(0 0 0 / 0.7);
+    0 0 0 1px color-mix(in srgb, var(--lend-prosmotr-tekst) 10%, transparent),
+    0 40px 80px -30px color-mix(in srgb, var(--lend-prosmotr-ten) 70%, transparent);
   animation: prosmotr-list 320ms var(--ease);
 }
 @keyframes prosmotr-list {

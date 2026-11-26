@@ -32,6 +32,8 @@ import {
   zagruzitZadachi,
   type Zadacha3,
 } from '@/lib/zadanie3/trening/zagruzka';
+import { zhurnalBanka } from '@/lib/trening/zhurnalBanka';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { ChertezhZadachi } from './ChertezhZadachi';
 import type { Trenazher3Ui } from './trenazher3Ui';
 
@@ -168,6 +170,18 @@ export function Trenazher3Screen({
     return text === null ? null : nabrat(text);
   }, [zadacha]);
   const model = useMemo(() => (zadacha === undefined ? null : modelZadachi(zadacha)), [zadacha]);
+  /* Журнал решения задач (lib/zhurnal, этап 4д): задача — ключ банка, тип — прототип. */
+  const zapis = useZapisZadachi(
+    zadacha === undefined
+      ? null
+      : zhurnalBanka(
+          '3',
+          { id: zadacha.id, p: zadacha.prototip, text: zadacha.variant.uslovieHtml },
+          'trenazher',
+          roundKey,
+          String(index),
+        ),
+  );
 
   function taskSeconds(): number {
     return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
@@ -192,6 +206,7 @@ export function Trenazher3Screen({
   useBeforeFinish(setBeforeFinish, () => {
     if (task !== undefined && checked === 'wrong' && marks[index] === undefined) {
       remember(task, 'wrong');
+      zapis?.zakryt(false);
     }
   });
 
@@ -234,10 +249,12 @@ export function Trenazher3Screen({
   function check() {
     const reading = readSealed3(value, dannye.variant.seal, dannye.id);
     if (reading.kind === 'format') {
+      zapis?.popytka(value, false, 'format');
       setFormat(formatHint(reading.problem, reading.meant));
       return;
     }
     if (reading.kind === 'fractionRight') {
+      zapis?.popytka(value, false, 'fraction');
       setFormat(fractionRightHint(reading.decimal));
       return;
     }
@@ -245,6 +262,8 @@ export function Trenazher3Screen({
     const right = reading.right;
     setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
+    zapis?.popytka(value, right);
+    if (right) zapis?.zakryt(true);
     if (right) {
       if (!zakryta) {
         setMarks({ ...marks, [index]: 'right' });
@@ -260,6 +279,7 @@ export function Trenazher3Screen({
   function reveal() {
     const wasOpen = solutionOpen;
     setSolutionOpen(!wasOpen);
+    if (!wasOpen) zapis?.reshenie();
     if (!wasOpen && checked !== 'right' && !zakryta) {
       /* Решение открыто до ответа: задача закрыта «с разбором». */
       setMarks({ ...marks, [index]: 'hinted' });
@@ -282,6 +302,10 @@ export function Trenazher3Screen({
     if (checked === 'wrong' && !zakryta) {
       remember(tekushchaya, 'wrong');
     }
+    /* Ушёл с задачи: была ошибка — ошибка, решение открыто — с разбором, без ответа — пропуск. */
+    if (checked === 'wrong') zapis?.zakryt(false);
+    else if (solutionOpen) zapis?.zakrytKak('revealed');
+    else if (checked === null) zapis?.propustit();
     if (last) {
       onFinish();
       return;
@@ -291,6 +315,7 @@ export function Trenazher3Screen({
   }
 
   function pohozhaya() {
+    if (checked === 'wrong') zapis?.zakryt(false);
     const avoid = new Set([...pool.map((item) => item.id), ...Object.values(pohozhie)]);
     const fresh = analogOf3(katalog, tekushchaya.id, avoid);
     if (fresh === null) {
@@ -337,7 +362,14 @@ export function Trenazher3Screen({
       podskazka={
         control || podskazkaHtml === null
           ? null
-          : { html: podskazkaHtml, open: hintOpen, onOpen: () => setHintOpen(true) }
+          : {
+              html: podskazkaHtml,
+              open: hintOpen,
+              onOpen: () => {
+                setHintOpen(true);
+                zapis?.shagPodskazki(1);
+              },
+            }
       }
       reshenie={control ? null : { shagi, open: solutionOpen, onToggle: reveal }}
       {...(estPohozhaya ? { onPohozhaya: pohozhaya } : {})}

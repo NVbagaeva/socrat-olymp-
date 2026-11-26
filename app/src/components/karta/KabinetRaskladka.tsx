@@ -78,18 +78,18 @@ export function KabinetRaskladka({ children }: { children: ReactNode }) {
                 <svg viewBox="0 0 64 64">
                   <defs>
                     <linearGradient id="kab-skhemy-grad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0" stopColor="#dbeafe" />
-                      <stop offset="1" stopColor="#60a5fa" />
+                      <stop offset="0" stopColor="var(--kab-treugolnik-1)" />
+                      <stop offset="1" stopColor="var(--kab-treugolnik-2)" />
                     </linearGradient>
                   </defs>
                   <path d="M32 8 L54 46 L10 46 Z" fill="url(#kab-skhemy-grad)" opacity="0.9" />
                   <path
                     d="M32 8 L32 46 M32 8 L10 46 M32 8 L54 46"
-                    stroke="#fff"
+                    stroke="var(--kab-treugolnik-rebro)"
                     strokeWidth="1.5"
                     opacity="0.8"
                   />
-                  <path d="M10 46 L54 46" stroke="#1f5fd0" strokeWidth="2" />
+                  <path d="M10 46 L54 46" stroke="var(--kab-treugolnik-osnova)" strokeWidth="2" />
                 </svg>
               </span>
               <span className="kab-skhemy__tekst">

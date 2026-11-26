@@ -72,7 +72,7 @@
 .karta-ps__uzel {
   position: relative;
   border-radius: 16px;
-  background: rgb(255 255 255 / 0.86);
+  background: var(--karta-ps-uzel);
   border: 1px solid var(--color-surface-soft);
 }
 .karta-ps__uzel.is-sleduyushchaya {
@@ -80,7 +80,7 @@
 }
 .karta-ps__uzel.is-otkryt {
   border-color: var(--color-accent-soft);
-  background: #fff;
+  background: var(--color-surface);
 }
 .karta-ps__knopka {
   display: grid;
@@ -109,7 +109,7 @@
   width: var(--ps-metka);
   height: var(--ps-metka);
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-surface);
 }
 .karta-ps__metka svg {
   display: block;
@@ -122,7 +122,7 @@
 .karta-ps__krug {
   stroke: var(--color-border-info);
   stroke-width: 2;
-  fill: #fff;
+  fill: var(--color-surface);
 }
 .karta-ps__znak {
   stroke-width: 2.6;
@@ -136,7 +136,7 @@
   stroke: var(--karta-teplo-2);
 }
 .karta-ps__uzel--osvoeno .karta-ps__znak {
-  stroke: #fff;
+  stroke: var(--color-text-inverse);
 }
 .karta-ps__uzel--v-processe .karta-ps__krug {
   stroke: var(--color-accent-soft);
@@ -258,7 +258,7 @@
     border-color: var(--blue-400);
   }
   100% {
-    background: rgb(255 255 255 / 0.86);
+    background: var(--karta-ps-uzel);
   }
 }
 

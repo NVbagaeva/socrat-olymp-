@@ -226,6 +226,31 @@ export function createDzMock({ profiles, classes, members }) {
       k.join_code = newCode();
       return { status: 200, body: k.join_code };
     }
+    /* Как klass_po_kodu: класс по коду до вступления, тот же предел попыток. */
+    if (table === 'rpc/klass_po_kodu' && method === 'POST') {
+      ensureCodes();
+      if (roleOf(me.id) !== 'student') return pgErr(403, 'forbidden: вступает ученик');
+      const hour = Date.now() - 3600 * 1000;
+      if (tries.filter((t) => t.user_id === me.id && t.at > hour).length >= 10) {
+        return pgErr(400, 'too_many_tries: попробуйте через час');
+      }
+      const code = String(body.p_code ?? '')
+        .toUpperCase()
+        .replace(/[\s-]/g, '');
+      const k = classes.find((c) => c.join_code === code && c.join_open && c.archived_at === null);
+      if (k === undefined) {
+        tries.push({ user_id: me.id, at: Date.now() });
+        return { status: 200, body: { error: 'bad_code' } };
+      }
+      return {
+        status: 200,
+        body: {
+          class_name: k.name,
+          tutor_name: nameOf(k.tutor_id),
+          uzhe: members.some((m) => m.class_id === k.id && m.user_id === me.id),
+        },
+      };
+    }
     if (table === 'rpc/join_class' && method === 'POST') {
       ensureCodes();
       if (roleOf(me.id) !== 'student') return pgErr(403, 'forbidden: вступает ученик');

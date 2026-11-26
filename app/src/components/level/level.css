@@ -151,13 +151,14 @@
 /* Узкий телефон: знак, переключатель, «Войти» и бургер — в одну строку. */
 @media (max-width: 399.98px) {
   .site-head__level .level-switch__seg {
-    padding: 0 10px;
+    padding: 0 7px;
     font-size: 14px;
   }
 }
 @media (max-width: 359.98px) {
   .site-head__level .level-switch__seg {
-    padding: 0 6px;
+    padding: 0 5px;
+    font-size: 13px;
   }
 }
 @media (min-width: 768px) {

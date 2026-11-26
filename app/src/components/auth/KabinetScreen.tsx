@@ -231,10 +231,7 @@ export function KabinetScreen() {
         ]}
       />
       {parentPending ? (
-        <div className="kabinet__notice" role="status">
-          <strong>{KABINET.parentPending.title}</strong>
-          <span>{KABINET.parentPending.text(parent.email)}</span>
-        </div>
+        <ParentPendingNotice email={parent.email} />
       ) : null}
       {importNote !== null ? (
         <p className="kabinet__notice kabinet__notice--ok" role="status">
@@ -814,5 +811,31 @@ function DangerCard({ role, onRemoved }: { role: AccountRole; onRemoved: () => v
         {error !== null ? <FieldMessage tone="error">{error}</FieldMessage> : null}
       </Modal>
     </Card>
+  );
+}
+
+/** Ждём согласия родителя: письмо и «Отправить ещё раз». */
+function ParentPendingNotice({ email }: { email: string }) {
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const t = KABINET.parentPending;
+  const resend = async () => {
+    setBusy(true);
+    const { resendParentLetter } = await import('@/lib/auth/profile');
+    const kod = await resendParentLetter();
+    setNote(kod === null ? t.resent : t.errors[kod]);
+    setBusy(false);
+  };
+  return (
+    <div className="kabinet__notice" role="status">
+      <strong>{t.title}</strong>
+      <span>{t.text(email)}</span>
+      <span>
+        <Button variant="secondary" size="sm" onClick={() => void resend()} disabled={busy}>
+          {t.resend}
+        </Button>
+      </span>
+      {note === null ? null : <span>{note}</span>}
+    </div>
   );
 }

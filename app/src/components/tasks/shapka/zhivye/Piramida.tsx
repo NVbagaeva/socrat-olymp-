@@ -92,7 +92,7 @@ export default function Piramida({ label, tiho, avtofokus }: ZhivoyProps) {
           />
         ))}
         <path className="zhv__ln zhv__ln--tonko zhv__ln--skryt" d={chasti.skrytye} />
-        <path d={sechPut} fill="rgb(255 170 90 / 0.38)" />
+        <path d={sechPut} fill="color-mix(in srgb, var(--chertezh-akcent) 38%, transparent)" />
         {storony.map((s, i) => (
           <path
             key={i}

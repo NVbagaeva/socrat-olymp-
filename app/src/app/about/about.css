@@ -11,15 +11,15 @@
   --oa-sec: clamp(72px, 9vw, 128px);
   --oa-ink: var(--navy-900);
   --oa-text: var(--color-text-lead);
-  --oa-line: rgb(31 95 208 / 0.14);
+  --oa-line: var(--oa-liniya);
   position: relative;
   /* clip, а не hidden: липкая шапка остаётся липкой. */
   overflow-x: clip;
   color: var(--oa-text);
   background:
-    radial-gradient(46% 30% at 88% 6%, rgb(245 160 74 / 0.12), transparent 70%),
-    radial-gradient(50% 30% at 6% 38%, rgb(31 95 208 / 0.07), transparent 70%),
-    radial-gradient(44% 26% at 92% 72%, rgb(31 95 208 / 0.06), transparent 70%), var(--color-bg);
+    radial-gradient(46% 30% at 88% 6%, var(--oa-fon-teplyy), transparent 70%),
+    radial-gradient(50% 30% at 6% 38%, var(--oa-fon-siniy), transparent 70%),
+    radial-gradient(44% 26% at 92% 72%, var(--oa-fon-siniy-2), transparent 70%), var(--color-bg);
 }
 .oa h1,
 .oa h2,
@@ -265,12 +265,12 @@
   fill: var(--color-text-brand);
 }
 .oa-sm__krug {
-  fill: rgb(226 237 255 / 0.4);
+  fill: var(--oa-krug-zalivka);
   stroke-opacity: 0.8;
   stroke-width: 1.5;
 }
 .oa-sm__treugolnik {
-  fill: rgb(31 95 208 / 0.07);
+  fill: var(--oa-treugolnik-zalivka);
   stroke: var(--color-primary-text);
   stroke-width: 1.75;
   stroke-linejoin: round;
@@ -305,7 +305,7 @@
   right: -10%;
   bottom: -5%;
   height: 17%;
-  background: radial-gradient(closest-side, rgb(31 95 208 / 0.2), transparent);
+  background: radial-gradient(closest-side, var(--oa-pol-ten), transparent);
   filter: blur(10px);
   pointer-events: none;
 }
@@ -355,7 +355,7 @@
   width: 96%;
   height: 9%;
   transform: translateX(-50%);
-  background: radial-gradient(closest-side, rgb(22 50 107 / 0.24), transparent);
+  background: radial-gradient(closest-side, var(--oa-byust-ten), transparent);
   filter: blur(5px);
 }
 .oa-sm__piramida {
@@ -441,6 +441,11 @@
   width: min(100%, 250px);
   height: auto;
   transform: rotate(-3deg);
+  /* В тёмной теме синие чернила лежат на светлой подложке
+     (--oa-pometka-*); в светлой подложки нет, отступ 0. */
+  padding: var(--oa-pometka-otstup);
+  border-radius: 14px;
+  background: var(--oa-pometka-fon);
 }
 
 /* Иллюстрация в пустом левом поле: стоит вровень с текстом справа.
@@ -652,7 +657,7 @@
   width: 36%;
   max-width: 220px;
   pointer-events: none;
-  filter: drop-shadow(0 16px 20px rgb(31 95 208 / 0.16));
+  filter: drop-shadow(0 16px 20px var(--oa-ten-kartinki));
 }
 .oa-polza__ill img {
   display: block;
@@ -710,7 +715,7 @@
   display: block;
   width: min(100%, 320px);
   margin-top: var(--space-6);
-  filter: drop-shadow(0 12px 16px rgb(31 95 208 / 0.14));
+  filter: drop-shadow(0 12px 16px var(--oa-ten-samolyotika));
 }
 .oa-svyaz__samolyotik img {
   display: block;

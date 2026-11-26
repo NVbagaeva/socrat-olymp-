@@ -9,8 +9,16 @@
   padding: var(--space-5);
   border-radius: 22px;
   background:
-    radial-gradient(120% 80% at 0% 0%, rgba(31, 95, 208, 0.1), transparent 60%),
-    radial-gradient(90% 70% at 100% 0%, rgba(240, 138, 36, 0.1), transparent 60%),
+    radial-gradient(
+      120% 80% at 0% 0%,
+      color-mix(in srgb, var(--chertezh-siniy) 10%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 70% at 100% 0%,
+      color-mix(in srgb, var(--chertezh-akcent) 10%, transparent),
+      transparent 60%
+    ),
     var(--glass-bg-strong);
   break-inside: avoid;
 }
@@ -29,7 +37,11 @@
   place-items: center;
   min-height: var(--h-uzko, 640px);
   border-radius: 18px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(234, 241, 255, 0.6));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--chertezh-fon) 70%, transparent),
+    color-mix(in srgb, var(--chertezh-zalivka-svet) 60%, transparent)
+  );
   box-shadow: var(--glass-ring), var(--glass-hi);
   color: var(--color-text-tertiary);
   font-size: var(--fs-caption);

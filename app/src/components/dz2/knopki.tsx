@@ -11,7 +11,12 @@ import type { PrepSealed } from '@/lib/vychisleniya/prep/seal';
 import type { PrepPoolZadacha } from '@/lib/veroyatnost/pool';
 import type { ZadachaDz } from '@/lib/dz2/model';
 import { urovenZadachi } from '@/lib/zhurnal/uroven';
-import { zadachaOpornaya5, zadachaOpornaya8 } from '@/lib/dz2/zadachi';
+import {
+  zadachaOpornaya5,
+  zadachaOpornaya8,
+  zadachaOpornayaGen,
+  type OpornayaGen,
+} from '@/lib/dz2/zadachi';
 import { nomerEgeRazdela } from '@/lib/zhurnal/vid';
 import { VDomashku } from './VDomashku';
 
@@ -19,10 +24,13 @@ import { VDomashku } from './VDomashku';
 export function VDomashkuTrenazher({
   taskNo,
   tipy,
+  tipov,
   vse = false,
 }: {
   taskNo: number;
   tipy: readonly string[];
+  /** Сколько типов в названии, если tipy — прототипы адаптера (№3: тип → прототипы). */
+  tipov?: number;
   /** Выбраны все типы раздела — в названии «все типы». */
   vse?: boolean;
 }) {
@@ -35,7 +43,7 @@ export function VDomashkuTrenazher({
         key: `trenazher:${taskNo}:${sorted.join(',')}`,
         vid: 'trenazher',
         task_no: taskNo,
-        title: DZ2.elementy.trenazher(nomerEgeRazdela(taskNo), vse ? 0 : sorted.length),
+        title: DZ2.elementy.trenazher(nomerEgeRazdela(taskNo), vse ? 0 : (tipov ?? sorted.length)),
         spec: { tipy: sorted },
         tipy: sorted,
         zapas: 10,
@@ -124,6 +132,106 @@ export function VDomashkuOpornye45({
               return null;
             }
           })
+          .filter((z): z is ZadachaDz => z !== null);
+        if (tasks.length === 0) throw new Error('pusto');
+        return {
+          key: `opornye:${taskNo}:${blok}`,
+          vid: 'opornye',
+          task_no: taskNo,
+          title: DZ2.elementy.opornye(nomerEgeRazdela(taskNo), nazvanie),
+          spec: { blok },
+          tasks,
+        };
+      }}
+    />
+  );
+}
+
+/**
+ * Блок опорных на общем экране банка (№7, 10, 21; этап 4в): ответ и строки
+ * разбора открываются ключом задачи только по нажатию — в разметке
+ * страницы их нет.
+ */
+export function VDomashkuOpornyeBanka({
+  taskNo,
+  blok,
+  nazvanie,
+  zadachi,
+  raskryt,
+}: {
+  taskNo: number;
+  blok: string;
+  nazvanie: string;
+  zadachi: readonly { id: string; uslovie: string; razbor: string; otvet?: string }[];
+  /** Открыть текст, закрытый ключом (openText раздела). */
+  raskryt: (zakryto: string, klyuch: string) => string;
+}) {
+  return (
+    <VDomashku
+      taskNo={taskNo}
+      klyuch={`opornye:${taskNo}:${blok}`}
+      element={async () => {
+        const { typeset, typesetText } = await import('@/lib/tex');
+        const nabor = { tekst: typesetText, formula: (tex: string) => typeset(`$${tex}$`) };
+        const level = urovenZadachi(taskNo);
+        const tasks = zadachi
+          .map((z) => {
+            if (z.otvet === undefined) return null;
+            try {
+              const stroki = JSON.parse(raskryt(z.razbor, z.id)) as unknown;
+              const shagi = Array.isArray(stroki)
+                ? stroki.filter((x): x is string => typeof x === 'string').map((text) => ({ text }))
+                : [];
+              return zadachaOpornaya5(
+                { id: z.id, uslovie: z.uslovie },
+                { otvet: raskryt(z.otvet, `${z.id}|otvet`), shagi },
+                nabor,
+                level,
+              );
+            } catch {
+              return null;
+            }
+          })
+          .filter((z): z is ZadachaDz => z !== null);
+        if (tasks.length === 0) throw new Error('pusto');
+        return {
+          key: `opornye:${taskNo}:${blok}`,
+          vid: 'opornye',
+          task_no: taskNo,
+          title: DZ2.elementy.opornye(nomerEgeRazdela(taskNo), nazvanie),
+          spec: { blok },
+          tasks,
+        };
+      }}
+    />
+  );
+}
+
+/**
+ * Блок опорных на своём экране раздела (№1, 2, 9, 11, 13; этап 4г): задачи
+ * собирает раздел по нажатию — ответ генератором, разбор открытым
+ * отпечатком; в разметке страницы их нет. Задачи с выбором варианта в ДЗ
+ * не идут: база сверяет число.
+ */
+export function VDomashkuOpornyeGen({
+  taskNo,
+  blok,
+  nazvanie,
+  sobrat,
+}: {
+  taskNo: number;
+  blok: string;
+  nazvanie: string;
+  sobrat: () => Promise<OpornayaGen[]>;
+}) {
+  return (
+    <VDomashku
+      taskNo={taskNo}
+      klyuch={`opornye:${taskNo}:${blok}`}
+      element={async () => {
+        const level = urovenZadachi(taskNo);
+        const tasks = (await sobrat())
+          .map((z) => zadachaOpornayaGen(z, level))
           .filter((z): z is ZadachaDz => z !== null);
         if (tasks.length === 0) throw new Error('pusto');
         return {

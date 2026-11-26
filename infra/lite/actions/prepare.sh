@@ -123,7 +123,9 @@ for name in "${created[@]}"; do
     mkdir -p "$PREPARE_OUT"
     value_of "$name" > "$PREPARE_OUT/$name"
   else
-    value_of "$name" | gh secret set "$name" --repo "$GITHUB_REPOSITORY"
+    # В окружение server (docs/SERVER.md, «Окружения»): секреты
+    # репозитория получил бы сценарий из любой ветки.
+    value_of "$name" | gh secret set "$name" --env server --repo "$GITHUB_REPOSITORY"
   fi
   log "Сохранён секрет $name"
 done

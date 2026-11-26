@@ -454,7 +454,12 @@ export function WorkScreen({
             >
               {T.run.next}
             </Button>
-            <Button variant="danger" onClick={() => setConfirm(true)} data-testid="vo-finish">
+            <Button
+              variant="danger"
+              className="vo-zavershit"
+              onClick={() => setConfirm(true)}
+              data-testid="vo-finish"
+            >
               {T.run.finish}
             </Button>
           </div>
@@ -499,7 +504,7 @@ export function WorkScreen({
               dangerouslySetInnerHTML={{ __html: task.statement }}
             />
           ) : (
-            <div className="kz-ryad">
+            <div className="kzad-ryad">
               <KartinkaZadachi
                 src={task.kartinka.src}
                 {...(task.kartinka.src280 === undefined ? {} : { src280: task.kartinka.src280 })}
@@ -570,7 +575,12 @@ export function WorkScreen({
             >
               {T.run.next}
             </Button>
-            <Button variant="danger" onClick={() => setConfirm(true)} data-testid="vo-finish">
+            <Button
+              variant="danger"
+              className="vo-zavershit"
+              onClick={() => setConfirm(true)}
+              data-testid="vo-finish"
+            >
               {T.run.finish}
             </Button>
           </div>
@@ -601,6 +611,7 @@ export function WorkScreen({
             </Button>
             <Button
               variant="danger"
+              className="vo-zavershit"
               data-testid="vo-confirm"
               onClick={() => {
                 setConfirm(false);

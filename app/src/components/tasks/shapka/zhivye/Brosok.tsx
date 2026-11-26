@@ -79,9 +79,9 @@ export default function Brosok({ label, avtofokus }: ZhivoyProps) {
       <svg ref={svg} viewBox="0 0 260 260" aria-hidden="true">
         <defs>
           <radialGradient id="zhg-myach" cx="35%" cy="30%" r="70%">
-            <stop offset="0" stopColor="#ffffff" />
-            <stop offset="0.6" stopColor="#bcd3f7" />
-            <stop offset="1" stopColor="#6f9de6" />
+            <stop offset="0" stopColor="var(--chertezh-fon)" />
+            <stop offset="0.6" stopColor="var(--chertezh-zalivka-siniy)" />
+            <stop offset="1" stopColor="var(--chertezh-setka)" />
           </radialGradient>
         </defs>
         <PlitaSteklo pl={PL} x0={0} x1={8} y0={0} y1={6} tolshchina={9} setka={1} />

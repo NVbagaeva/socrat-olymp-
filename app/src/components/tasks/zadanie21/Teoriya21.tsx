@@ -178,8 +178,8 @@ function SkhemaVozrastaniya() {
       >
         <defs>
           <linearGradient id="z21-monotonic-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#2b67d8" stopOpacity=".18" />
-            <stop offset="1" stopColor="#2b67d8" stopOpacity="0" />
+            <stop offset="0" stopColor="var(--chertezh-siniy)" stopOpacity=".18" />
+            <stop offset="1" stopColor="var(--chertezh-siniy)" stopOpacity="0" />
           </linearGradient>
           <marker
             id="z21-monotonic-arrow"
@@ -189,19 +189,19 @@ function SkhemaVozrastaniya() {
             refY="4"
             orient="auto"
           >
-            <path d="M0 0 8 4 0 8z" fill="#2856a0" />
+            <path d="M0 0 8 4 0 8z" fill="var(--chertezh-liniya)" />
           </marker>
         </defs>
         <path
           d="M72 26v178h520"
           fill="none"
-          stroke="#a9c5f0"
+          stroke="var(--chertezh-zalivka-siniy)"
           strokeWidth="3"
           strokeLinecap="round"
         />
         <path
           d="M72 67h520M72 108h520M72 149h520M180 26v178M288 26v178M396 26v178M504 26v178"
-          stroke="#dbe7f7"
+          stroke="var(--chertezh-zalivka-siniy)"
           strokeWidth="1"
         />
         <path
@@ -211,32 +211,46 @@ function SkhemaVozrastaniya() {
         <path
           d="M90 184C172 178 210 164 278 144s108-43 161-67 82-31 129-42"
           fill="none"
-          stroke="#285fca"
+          stroke="var(--chertezh-siniy)"
           strokeWidth="5"
           strokeLinecap="round"
         />
         <path
           d="M145 174c45-5 80-14 119-25"
           fill="none"
-          stroke="#2856a0"
+          stroke="var(--chertezh-liniya)"
           strokeWidth="2.5"
           markerEnd="url(#z21-monotonic-arrow)"
         />
-        <circle cx="90" cy="184" r="6" fill="#fff" stroke="#285fca" strokeWidth="3" />
-        <circle cx="568" cy="35" r="6" fill="#fff" stroke="#285fca" strokeWidth="3" />
-        <text x="51" y="36" fill="#172b50" fontSize="19" fontStyle="italic">
+        <circle
+          cx="90"
+          cy="184"
+          r="6"
+          fill="var(--chertezh-fon)"
+          stroke="var(--chertezh-siniy)"
+          strokeWidth="3"
+        />
+        <circle
+          cx="568"
+          cy="35"
+          r="6"
+          fill="var(--chertezh-fon)"
+          stroke="var(--chertezh-siniy)"
+          strokeWidth="3"
+        />
+        <text x="51" y="36" fill="var(--chertezh-tekst)" fontSize="19" fontStyle="italic">
           y
         </text>
-        <text x="594" y="211" fill="#172b50" fontSize="19" fontStyle="italic">
+        <text x="594" y="211" fill="var(--chertezh-tekst)" fontSize="19" fontStyle="italic">
           x
         </text>
-        <text x="80" y="226" fill="#516783" fontSize="16">
+        <text x="80" y="226" fill="var(--chertezh-podpis)" fontSize="16">
           a
         </text>
-        <text x="562" y="226" fill="#516783" fontSize="16">
+        <text x="562" y="226" fill="var(--chertezh-podpis)" fontSize="16">
           b
         </text>
-        <text x="277" y="221" fill="#2856a0" fontSize="16" fontWeight="600">
+        <text x="277" y="221" fill="var(--chertezh-liniya)" fontSize="16" fontWeight="600">
           возрастает
         </text>
       </svg>
@@ -262,33 +276,52 @@ function SkhemaMonotonnoyVneshneyFunktsii() {
             <path
               d="M38 20v140h270"
               fill="none"
-              stroke="#a9c5f0"
+              stroke="var(--chertezh-zalivka-siniy)"
               strokeWidth="3"
               strokeLinecap="round"
             />
             <path
               d="M38 118h270M104 20v140M170 20v140M236 20v140"
-              stroke="#dbe7f7"
+              stroke="var(--chertezh-zalivka-siniy)"
               strokeWidth="1"
             />
             <path
               d="M62 44C105 90 132 132 174 137s70-44 112-93"
               fill="none"
-              stroke="#285fca"
+              stroke="var(--chertezh-siniy)"
               strokeWidth="5"
               strokeLinecap="round"
             />
-            <circle cx="174" cy="137" r="7" fill="#fff" stroke="#e87524" strokeWidth="4" />
-            <text x="46" y="31" fill="#172b50" fontSize="17" fontStyle="italic">
+            <circle
+              cx="174"
+              cy="137"
+              r="7"
+              fill="var(--chertezh-fon)"
+              stroke="var(--chertezh-akcent)"
+              strokeWidth="4"
+            />
+            <text x="46" y="31" fill="var(--chertezh-tekst)" fontSize="17" fontStyle="italic">
               t
             </text>
-            <text x="311" y="166" fill="#172b50" fontSize="17" fontStyle="italic">
+            <text x="311" y="166" fill="var(--chertezh-tekst)" fontSize="17" fontStyle="italic">
               x
             </text>
-            <text x="154" y="159" fill="#ad4b0b" fontSize="14" fontWeight="600">
+            <text
+              x="154"
+              y="159"
+              fill="var(--chertezh-akcent-tekst)"
+              fontSize="14"
+              fontWeight="600"
+            >
               x₀ = −11
             </text>
-            <text x="180" y="130" fill="#ad4b0b" fontSize="14" fontWeight="600">
+            <text
+              x="180"
+              y="130"
+              fill="var(--chertezh-akcent-tekst)"
+              fontSize="14"
+              fontWeight="600"
+            >
               tмин = 1
             </text>
           </svg>
@@ -303,39 +336,46 @@ function SkhemaMonotonnoyVneshneyFunktsii() {
             <path
               d="M38 20v140h270"
               fill="none"
-              stroke="#a9c5f0"
+              stroke="var(--chertezh-zalivka-siniy)"
               strokeWidth="3"
               strokeLinecap="round"
             />
             <path
               d="M38 116h270M104 20v140M170 20v140M236 20v140"
-              stroke="#dbe7f7"
+              stroke="var(--chertezh-zalivka-siniy)"
               strokeWidth="1"
             />
             <path
               d="M48 151C70 121 104 101 143 83S225 49 296 28"
               fill="none"
-              stroke="#285fca"
+              stroke="var(--chertezh-siniy)"
               strokeWidth="5"
               strokeLinecap="round"
             />
-            <circle cx="104" cy="111" r="7" fill="#fff" stroke="#e87524" strokeWidth="4" />
+            <circle
+              cx="104"
+              cy="111"
+              r="7"
+              fill="var(--chertezh-fon)"
+              stroke="var(--chertezh-akcent)"
+              strokeWidth="4"
+            />
             <path
               d="M104 111v49M38 111h66"
-              stroke="#e87524"
+              stroke="var(--chertezh-akcent)"
               strokeWidth="2"
               strokeDasharray="5 5"
             />
-            <text x="46" y="31" fill="#172b50" fontSize="17" fontStyle="italic">
+            <text x="46" y="31" fill="var(--chertezh-tekst)" fontSize="17" fontStyle="italic">
               y = √t
             </text>
-            <text x="311" y="166" fill="#172b50" fontSize="17" fontStyle="italic">
+            <text x="311" y="166" fill="var(--chertezh-tekst)" fontSize="17" fontStyle="italic">
               t
             </text>
-            <text x="92" y="180" fill="#ad4b0b" fontSize="14" fontWeight="600">
+            <text x="92" y="180" fill="var(--chertezh-akcent-tekst)" fontSize="14" fontWeight="600">
               t = 1
             </text>
-            <text x="44" y="105" fill="#ad4b0b" fontSize="14" fontWeight="600">
+            <text x="44" y="105" fill="var(--chertezh-akcent-tekst)" fontSize="14" fontWeight="600">
               y = 1
             </text>
           </svg>

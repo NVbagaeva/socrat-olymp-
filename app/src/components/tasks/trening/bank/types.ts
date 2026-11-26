@@ -110,6 +110,13 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   posle?: (s: S, rezhim?: string) => ReactNode;
   voprosy: (s: S, rezhim?: string) => VoprosPodskazki[];
   /**
+   * Тип можно положить «В домашку» (этап 4б, docs/kabinet-dz2.md): запас ДЗ
+   * собирает адаптер «Собрать вариант», а у него не все типы тренажёра
+   * (№11 — без разминок, №12 — без выбора формулы). Не задано — все.
+   * Совпадение с адаптером проверяет scripts/check-dz2.mjs.
+   */
+  vDomashku?: (tip: string) => boolean;
+  /**
    * Своё поле ответа вместо числа (№13, «Определи тип»: кнопки схем).
    * null — обычное поле. Значение — строка, как у числа.
    */

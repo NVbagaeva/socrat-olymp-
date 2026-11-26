@@ -255,6 +255,21 @@ export async function loadConsents(): Promise<AccountConsents> {
   }
 }
 
+/** «Отправить письмо родителю ещё раз» (roditel_pismo_snova). Возвращает код ошибки или null. */
+export async function resendParentLetter(): Promise<'too_soon' | 'too_many' | 'already_confirmed' | 'error' | null> {
+  try {
+    const supabase = await getClient();
+    const { error } = await supabase.rpc('roditel_pismo_snova');
+    if (!error) return null;
+    for (const kod of ['too_soon', 'too_many', 'already_confirmed'] as const) {
+      if (error.message.includes(kod)) return kod;
+    }
+    return 'error';
+  } catch {
+    return 'error';
+  }
+}
+
 /** «Выгрузить мои данные»: всё, что хранит аккаунт, одним JSON (export_my_data). */
 export async function exportMyData(): Promise<unknown> {
   const supabase = await getClient();

@@ -54,15 +54,15 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Установить pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           package_json_file: app/package.json
 
       - name: Установить Node.js 22
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: pnpm
@@ -83,12 +83,13 @@ jobs:
           # Журнал решения задач (docs/kabinet-zhurnal.md): сценарий журнала
           # в check-auth.mjs идёт на сборке с ним.
           NEXT_PUBLIC_ZHURNAL: '1'
+          NEXT_PUBLIC_ZHURNAL_RAZDELY: '1,3,5,7,8,13'
           # Экраны прогресса (этап 1б): сценарий runProgress в check-auth.mjs.
           NEXT_PUBLIC_PROGRESS_UCHITEL: '1'
           NEXT_PUBLIC_PROGRESS_UCHENIK: '1'
           # Новая выдача ДЗ (этап 2): сценарий runDz2 в check-auth.mjs.
           NEXT_PUBLIC_DZ2: '1'
-          NEXT_PUBLIC_DZ2_RAZDELY: '4,5,8,9'
+          NEXT_PUBLIC_DZ2_RAZDELY: '1,3,4,5,7,8,9,11,13'
           NEXT_PUBLIC_UVEDOMLENIYA: '1'
           NEXT_PUBLIC_UVEDOMLENIYA_PUSH: '1'
         run: pnpm build
@@ -103,10 +104,11 @@ jobs:
         working-directory: app
         env:
           NEXT_PUBLIC_ZHURNAL: '1'
+          NEXT_PUBLIC_ZHURNAL_RAZDELY: '1,3,5,7,8,13'
           NEXT_PUBLIC_PROGRESS_UCHITEL: '1'
           NEXT_PUBLIC_PROGRESS_UCHENIK: '1'
           NEXT_PUBLIC_DZ2: '1'
-          NEXT_PUBLIC_DZ2_RAZDELY: '4,5,8,9'
+          NEXT_PUBLIC_DZ2_RAZDELY: '1,3,4,5,7,8,9,11,13'
           NEXT_PUBLIC_UVEDOMLENIYA: '1'
           NEXT_PUBLIC_UVEDOMLENIYA_PUSH: '1'
         run: pnpm ${{ matrix.test }} ${{ matrix.shots }}
@@ -119,6 +121,13 @@ jobs:
         if: matrix.header == '1'
         working-directory: app
         run: pnpm test:karta-nazad snimki-karta-nazad
+
+      # Верхнее меню на сборке с «Войти» в шапке: справа шире, пункты
+      # уходят в бургер раньше (.site-head--vhod) — ничего не налезает.
+      - name: Проверить верхнее меню со входом
+        if: matrix.header == '1'
+        working-directory: app
+        run: pnpm test:verhnee-menu
 
       # Рейтинг устного счёта: гость, серия с буфером и очередью ответов,
       # срок сервера, ошибки старта, страница рейтинга и ник — на моке
@@ -144,7 +153,7 @@ jobs:
 
       - name: Сохранить снимки экранов входа
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ matrix.shots }}
           path: app/${{ matrix.shots }}

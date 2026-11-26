@@ -248,6 +248,36 @@ const SUITES = [
     ],
   },
   {
+    /* Условие задачи в журнале (…_zhurnal_uslovie.sql): формулы и текст
+       хранятся как есть, скрипты, картинки, обработчики, javascript: и
+       url() — нет; условие видит только свой учитель. На фоне прав своего
+       сервера. */
+    name: 'Условие в журнале',
+    db: 'zhurnal_uslovie',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['zhurnal-uslovie.test.sql', path.join(SUPA, 'tests', 'zhurnal-uslovie.test.sql')],
+    ],
+  },
+  {
+    /* Письмо родителю (…_roditel_pismo.sql) и класс по коду до
+       вступления (…_klass_po_kodu.sql). На фоне прав своего сервера. */
+    name: 'Письмо родителю и класс по коду',
+    db: 'roditel_klass',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['roditel-klass.test.sql', path.join(SUPA, 'tests', 'roditel-klass.test.sql')],
+    ],
+  },
+  {
     /* Новая выдача ДЗ (docs/kabinet-dz2.md): черновик, публикация и
        отложенная публикация, проверка ответа в базе, подсказки, попытки,
        решения, цели тренажёра, карточки и теория, сдача и опоздание,

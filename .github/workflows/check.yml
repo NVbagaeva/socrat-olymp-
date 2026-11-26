@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -64,6 +64,22 @@ jobs:
       - name: Проверить, что в репозитории нет ключей и паролей сервера
         working-directory: app
         run: pnpm test:infra-secrets
+
+      # Цвета — только из палитры (tokens.css), иначе тёмная тема их не
+      # достанет. Неизбежные исключения — scripts/tsveta-isklyucheniya.json.
+      - name: Проверить, что новых вписанных цветов нет
+        working-directory: app
+        run: pnpm test:tsveta
+
+      # Сторонние действия GitHub Actions — только полным SHA коммита.
+      - name: Проверить закрепление действий
+        working-directory: app
+        run: pnpm test:actions-pin
+
+      # Регистрация и новый пароль: самые частые и простые пароли не проходят.
+      - name: Проверить запрет простых паролей
+        working-directory: app
+        run: pnpm test:password
 
       # Safari до iOS 18 размывает стекло только с префиксом -webkit-, а
       # сборка его не добавляет: у каждого backdrop-filter должна быть пара.
@@ -275,7 +291,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -617,7 +633,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -836,7 +852,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -941,7 +957,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -965,6 +981,11 @@ jobs:
         working-directory: app
         run: pnpm test:sticky-tabs
 
+      # Тёмная тема: первый кадр без вспышки, печать светлая, переключатель.
+      - name: Проверить тёмную тему
+        working-directory: app
+        run: pnpm test:tema
+
       # Теория №3 и №15, «О задании» №3, №14, №15: в покое ни одна строка
       # текста не закрыта и не обрезана (лид главы ниже заголовка), внизу
       # страницы всё дочитывается из-под «?»; карточки типов — шахматкой,
@@ -979,7 +1000,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -1042,7 +1063,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -1080,6 +1101,25 @@ jobs:
       - name: Проверить, что сырой RSC-текст не показывается
         working-directory: app
         run: pnpm test:rsc-serving
+
+      # Apache с нашим .htaccess: заголовки защиты на страницах и 404,
+      # файлы с точкой в начале имени закрыты.
+      - name: Проверить заголовки защиты
+        working-directory: app
+        run: pnpm test:headers
+
+      # Chromium за Apache с CSP: главная, банк, тренажёры, MathLive,
+      # печать, вход и кабинет — без нарушений политики.
+      - name: Проверить, что CSP ничего не блокирует
+        working-directory: app
+        run: pnpm test:csp
+
+      # Chromium: условие из журнала ученика в «Прогрессе» учителя и сама
+      # очистка вёрстки (lib/dz/sanitize.ts) — формулы KaTeX проходят,
+      # скрипты, картинки и обработчики — нет, и ничего не выполняется.
+      - name: Проверить очистку условия журнала
+        working-directory: app
+        run: pnpm test:zhurnal-pokaz
 
       # Переходы без белого экрана: Apache с нашим .htaccess добавляет
       # «/» одним редиректом сразу на https; в WebKit и Chromium на ширине
@@ -1294,7 +1334,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -1445,7 +1485,7 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
       - name: Подготовить машину
@@ -1480,7 +1520,7 @@ jobs:
 
       - name: Сохранить снимки скрытого раздела
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: skrytye-snimki
           path: app/skrytye-snimki

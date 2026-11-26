@@ -7,6 +7,7 @@
  * условие и картинка из записи.
  */
 
+import { sanitizeHtml } from '@/lib/dz/sanitize';
 import type { ZadachaView } from './api';
 import { otpechatokUsloviya } from './model';
 
@@ -21,9 +22,11 @@ export interface PokazZadachi {
   poZapisi: boolean;
 }
 
+/* Условие из записи прислал браузер ученика: в экран учителя оно идёт
+   только через очистку — те же теги и атрибуты, что у условий ДЗ. */
 function izZapisi(z: ZadachaView, poZapisi: boolean): PokazZadachi {
   return {
-    uslovieHtml: z.uslovie_tex ?? null,
+    uslovieHtml: z.uslovie_tex ? sanitizeHtml(z.uslovie_tex) : null,
     risunok: z.risunok ?? null,
     otvet: z.answer_key ?? null,
     poZapisi,
