@@ -211,6 +211,15 @@ const chertezhiRazdelov = [];
     11: requireSrc('components/tasks/zadanie11/razdel11.tsx').razdel11({}, {}).vDomashku,
     12: requireSrc('components/tasks/zadanie12/razdel12.tsx').RAZDEL12.vDomashku,
   };
+  /* Этап 4е: тренажёр №12 по типам (TrenazherEkran) — те же подтипы, что
+     в банке, и то же правило vDomashku12. */
+  {
+    const T12 = requireSrc('lib/ves12/trenazher12.ts');
+    const podtipy = T12.trenazherConfig12().temy.flatMap((t) => t.podtipy.map((p) => p.id));
+    const katalog = Object.keys(requireSrc('lib/ves12/trening/katalog.ts').katalog12());
+    const lishnie = podtipy.filter((t) => !katalog.includes(t));
+    check(podtipy.length > 0 && lishnie.length === 0, `№12 по типам: подтипы есть в каталоге банка (${lishnie.slice(0, 5).join(', ')})`);
+  }
   for (const [nStr, tipyOf] of Object.entries(TIPY)) {
     const n = Number(nStr);
     const a = adapter(n);

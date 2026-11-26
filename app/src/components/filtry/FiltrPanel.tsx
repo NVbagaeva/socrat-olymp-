@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui';
 import { GenIcon } from '@/components/generator/GenIcons';
@@ -60,6 +60,8 @@ export interface FiltrPanelProps {
   pauza?: { resheno: number; vsego: number; onResume: () => void } | null;
   /** Ссылка на эти фильтры: учитель отправляет её ученику. */
   ssylka?: () => string;
+  /** Рядом с «Начать»: «В домашку» учителя (этап 4е). */
+  ryadomSoStartom?: ReactNode;
 }
 
 const NABORY: NaborId[] = ['bystryy', 'oshibki', 'slozhnye'];
@@ -80,6 +82,7 @@ export function FiltrPanel({
   starting,
   pauza = null,
   ssylka,
+  ryadomSoStartom,
 }: FiltrPanelProps) {
   const [sheet, setSheet] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -319,6 +322,7 @@ export function FiltrPanel({
               {copied ? FILTRY.skopirovano : FILTRY.ssylka}
             </button>
           )}
+          {ryadomSoStartom}
           {startButton}
         </div>
       </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { vDomashku12 } from '@/lib/ves12/vDomashku12';
 import { useState } from 'react';
 import { FigureZoom } from '@/components/ui';
 import type { Shagi } from '@/components/trenazher/types';
@@ -110,7 +111,7 @@ export const RAZDEL12: RazdelBanka<Zadacha12, Reshenie12> = {
   klyuch: KLYUCH12,
   /* Наборы с ответом выбором формулы (12Q.A, 12Q.G): база сверяет только
      число, в ДЗ их нет. */
-  vDomashku: (tip) => tip !== '12Q.A' && tip !== '12Q.G',
+  vDomashku: vDomashku12,
   log: log12,
   vybor: vybor12,
   zagruzka: ZAGRUZKA12,

@@ -1,5 +1,7 @@
 'use client';
 
+import { VDomashkuTrenazher } from '@/components/dz2/knopki';
+import { vDomashku12 } from '@/lib/ves12/vDomashku12';
 import { useMemo, type ReactNode } from 'react';
 import { Trenazher } from '@/components/trenazher/Trenazher';
 import type { SsylkiTipa } from '@/components/trenazher/types';
@@ -69,6 +71,15 @@ export function Trenazher12({
         backHref={backHref}
         ssylki={ssylki}
         perenos={perenos12}
+        ryadomSoStartom={(f) => {
+          /* «В домашку» (этап 4е): выбранные типы (нет выбора — все типы
+             вкладки), которые есть у адаптера ДЗ. */
+          const vse = config.temy.flatMap((t) => t.podtipy.map((p) => p.id)).filter(vDomashku12);
+          const tipy = f.tipy.length === 0 ? vse : f.tipy.filter(vDomashku12);
+          return tipy.length === 0 ? null : (
+            <VDomashkuTrenazher taskNo={12} tipy={tipy} vse={tipy.length === vse.length} />
+          );
+        }}
       />
       {pod !== undefined ? (
         <div className="trz-pod">{pod}</div>
