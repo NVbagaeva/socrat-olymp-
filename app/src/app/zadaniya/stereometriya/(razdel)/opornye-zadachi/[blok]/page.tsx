@@ -8,6 +8,7 @@ import { BLOKI3_NAZVANIYA } from '@/content/zadanie3/navyki';
 import { STEREO, stereoTitle } from '@/content/stereo/zadaniya';
 import { BLOKI_3, blokBySlug, zadachiBloka } from '@/lib/stereo/opornye3/bloki';
 import { sealZadacha } from '@/lib/stereo/opornye3/seal';
+import { sealText } from '@/lib/stereo/opornye3/secret';
 import { renderSolid } from '@/lib/solid/render';
 import { razdelBase } from '@/lib/paths';
 import '../../../../grafiki-funkciy/[type]/prep.css';
@@ -55,7 +56,11 @@ export default async function Page({ params }: { params: Params }) {
         blokId={found.id}
         no={found.no}
         title={BLOKI3_NAZVANIYA[found.slug] ?? found.nazvanie}
-        tasks={zadachi.map((z, i) => sealZadacha(z, i + 1))}
+        tasks={zadachi.map((z, i) => ({
+          ...sealZadacha(z, i + 1),
+          /* Ответ для «В домашку» учителя (этап 4д): закрыт ключом задачи, как разбор. */
+          ...(z.vid === 'chislo' ? { otvet: sealText(z.otvet, `${z.id}|otvet`) } : {}),
+        }))}
         risunki={zadachi.map((z) =>
           z.vid === 'nazhmi' ? null : <Chertezh3d key={z.id} model={z.model} tema="ekran" />,
         )}

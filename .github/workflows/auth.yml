@@ -83,13 +83,13 @@ jobs:
           # Журнал решения задач (docs/kabinet-zhurnal.md): сценарий журнала
           # в check-auth.mjs идёт на сборке с ним.
           NEXT_PUBLIC_ZHURNAL: '1'
-          NEXT_PUBLIC_ZHURNAL_RAZDELY: '1,5,7,8,13'
+          NEXT_PUBLIC_ZHURNAL_RAZDELY: '1,3,5,7,8,13'
           # Экраны прогресса (этап 1б): сценарий runProgress в check-auth.mjs.
           NEXT_PUBLIC_PROGRESS_UCHITEL: '1'
           NEXT_PUBLIC_PROGRESS_UCHENIK: '1'
           # Новая выдача ДЗ (этап 2): сценарий runDz2 в check-auth.mjs.
           NEXT_PUBLIC_DZ2: '1'
-          NEXT_PUBLIC_DZ2_RAZDELY: '1,4,5,7,8,9,11,13'
+          NEXT_PUBLIC_DZ2_RAZDELY: '1,3,4,5,7,8,9,11,13'
           NEXT_PUBLIC_UVEDOMLENIYA: '1'
           NEXT_PUBLIC_UVEDOMLENIYA_PUSH: '1'
         run: pnpm build
@@ -104,11 +104,11 @@ jobs:
         working-directory: app
         env:
           NEXT_PUBLIC_ZHURNAL: '1'
-          NEXT_PUBLIC_ZHURNAL_RAZDELY: '1,5,7,8,13'
+          NEXT_PUBLIC_ZHURNAL_RAZDELY: '1,3,5,7,8,13'
           NEXT_PUBLIC_PROGRESS_UCHITEL: '1'
           NEXT_PUBLIC_PROGRESS_UCHENIK: '1'
           NEXT_PUBLIC_DZ2: '1'
-          NEXT_PUBLIC_DZ2_RAZDELY: '1,4,5,7,8,9,11,13'
+          NEXT_PUBLIC_DZ2_RAZDELY: '1,3,4,5,7,8,9,11,13'
           NEXT_PUBLIC_UVEDOMLENIYA: '1'
           NEXT_PUBLIC_UVEDOMLENIYA_PUSH: '1'
         run: pnpm ${{ matrix.test }} ${{ matrix.shots }}
