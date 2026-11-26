@@ -313,6 +313,12 @@ export function FiltrPanel({
       {aktivnyeBlock}
       {pusto}
 
+      {ryadomSoStartom === undefined || ryadomSoStartom === null ? null : (
+        /* Учителю — своим рядом над липкой полосой «Начать»: на телефоне
+           в полосе ему нет места. */
+        <div className="dz2-ryad">{ryadomSoStartom}</div>
+      )}
+
       <div className="flt-go">
         {schyotchik}
         <div className="flt-go__actions">
@@ -322,7 +328,6 @@ export function FiltrPanel({
               {copied ? FILTRY.skopirovano : FILTRY.ssylka}
             </button>
           )}
-          {ryadomSoStartom}
           {startButton}
         </div>
       </div>

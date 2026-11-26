@@ -3498,9 +3498,9 @@ async function runZhurnalBanka(mock, errors) {
       for (const k of Object.keys(localStorage)) if (k.includes('dz2')) localStorage.removeItem(k);
     });
     await page.goto(`${SITE}${ADRES}`, { waitUntil: 'networkidle' });
-    const knopka = page.locator('.flt-go .dz2-knopka__glavnaya');
+    const knopka = page.locator('.flt .dz2-ryad .dz2-knopka__glavnaya');
     await knopka.click();
-    await page.waitForSelector('.flt-go .dz2-knopka__glavnaya[aria-pressed="true"]');
+    await page.waitForSelector('.flt .dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
     if (SHOTS !== null) {
       for (const w of [375, 1280]) {
         await page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
