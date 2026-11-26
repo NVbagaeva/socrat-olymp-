@@ -18,9 +18,21 @@ jobs:
   backup:
     name: Копия базы
     runs-on: ubuntu-24.04
+    # Ключи сервера — в окружении server (Settings → Environments): оно
+    # пускает только ветку main и, если включено, ждёт подтверждения.
+    environment: server
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      # На сервер уезжает код той ветки, с которой нажата кнопка, —
+      # поэтому только main.
+      - name: Только из main
+        run: |
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "::error::Эту кнопку можно нажимать только для ветки main (сейчас: $GITHUB_REF_NAME). Сначала влейте изменения в main."
+            exit 1
+          fi
+
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Копия
         env:

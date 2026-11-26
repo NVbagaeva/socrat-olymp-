@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Button, ErrorState, FieldMessage, SuccessState } from '@/components/ui';
-import { NEW_PASSWORD_SCREEN, PASSWORD_MIN } from '@/content/auth';
+import { NEW_PASSWORD_SCREEN } from '@/content/auth';
 import { AUTH_HREF } from '@/lib/auth/config';
 import { AUTH_ERRORS, describeAuthError } from '@/lib/auth/errors';
+import { passwordProblem } from '@/lib/auth/password';
 import { PasswordField } from './PasswordField';
 import { hashParams } from './PodtverzhdenieScreen';
 
@@ -50,8 +51,9 @@ export function NovyyParolScreen() {
     event.preventDefault();
     if (busy) return;
     setError(null);
-    if (password.length < PASSWORD_MIN) {
-      setError(AUTH_ERRORS.weakPassword);
+    const slabyy = passwordProblem(password, '');
+    if (slabyy !== null) {
+      setError(slabyy === 'short' ? AUTH_ERRORS.weakPassword : AUTH_ERRORS.simplePassword);
       return;
     }
     if (password !== repeat) {
