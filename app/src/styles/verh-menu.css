@@ -161,3 +161,19 @@
     display: none;
   }
 }
+
+/* Запас строки шапки: со входом, переключателем темы и колокольчиком
+   на 1024–1919px пункты меню с полями 8px, на 1024–1279px кнопки справа
+   плотнее — в CI шрифт рисуется чуть шире, и 13px запаса не хватало
+   (test:verhnee-menu на сборке со входом). */
+@media (min-width: 1024px) and (max-width: 1919.98px) {
+  .verh-menu__p,
+  .verh-menu .nav-drop__button {
+    padding: 0 var(--space-2);
+  }
+}
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .site-head .site-head__cta {
+    gap: var(--space-2);
+  }
+}
