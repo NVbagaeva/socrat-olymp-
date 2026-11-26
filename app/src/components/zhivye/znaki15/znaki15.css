@@ -1,0 +1,128 @@
+/* Живая сцена «Как меняется знак» (№15). Общее — ../zhivye.css.
+   Плюс — синий, минус — тёплый. */
+.zv15-vybor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--chertezh-fon) 55%, transparent);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.zv15-vybor-zag {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.zv15-vybor .zv-seg {
+  flex-wrap: wrap;
+  border-radius: 18px;
+}
+.zv15-krivaya-ten {
+  fill: none;
+  stroke: color-mix(in srgb, var(--chertezh-siniy) 20%, transparent);
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+}
+.zv15-krivaya {
+  fill: none;
+  stroke: var(--zv-sin);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--chertezh-siniy) 35%, transparent));
+}
+.zv15-nul line {
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 18%, transparent);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+}
+.zv15-nul circle {
+  fill: var(--chertezh-fon);
+  stroke: var(--chertezh-liniya);
+  stroke-width: 2;
+}
+.zv15-nul.is-proyden circle {
+  stroke: var(--zv-zhar);
+}
+.zv15-nul circle.is-vkl {
+  fill: var(--zv-zhar);
+  stroke: var(--chertezh-fon);
+}
+.zv15-nul text {
+  font-size: 14px;
+  font-weight: 700;
+  fill: var(--chertezh-liniya);
+}
+.zv15-znak-os {
+  font-size: 18px;
+  font-weight: 800;
+}
+.zv15-znak-os.is-plus {
+  fill: var(--zv-sin-text);
+}
+.zv15-znak-os.is-minus {
+  fill: var(--zv-zhar-text);
+}
+.zv15-metka {
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--chertezh-liniya);
+}
+.zv15-metka.is-glavnaya {
+  font-weight: 800;
+}
+.zv15-dorozhka {
+  fill: color-mix(in srgb, var(--chertezh-liniya) 6%, transparent);
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 12%, transparent);
+}
+.zv15-kusok.is-plus {
+  fill: color-mix(in srgb, var(--chertezh-siniy) 22%, transparent);
+}
+.zv15-kusok.is-minus {
+  fill: color-mix(in srgb, var(--chertezh-akcent) 30%, transparent);
+}
+.zv15-znak {
+  font-size: 16px;
+  font-weight: 800;
+  fill: var(--chertezh-liniya);
+}
+.zv15-proba line {
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 45%, transparent);
+  stroke-width: 1.4;
+}
+.zv15-proba-graf {
+  fill: var(--zv-sin);
+  stroke: var(--chertezh-fon);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--chertezh-siniy) 60%, transparent));
+}
+.zv15-fishka circle {
+  stroke: var(--chertezh-fon);
+  stroke-width: 2;
+}
+.zv15-fishka.is-plus circle {
+  fill: var(--zv-sin);
+}
+.zv15-fishka.is-minus circle {
+  fill: var(--zv-zhar);
+}
+.zv15-fishka.is-nul circle {
+  fill: var(--chertezh-liniya);
+}
+.zv15-fishka text {
+  font-size: 15px;
+  font-weight: 800;
+  fill: var(--chertezh-fon);
+}
+.zv15-otvet {
+  fill: color-mix(in srgb, var(--chertezh-akcent) 55%, transparent);
+}
+.is-full .zv15-otvet {
+  animation: zv15-otvet 0.6s ease-out;
+}
+@keyframes zv15-otvet {
+  from {
+    opacity: 0;
+  }
+}

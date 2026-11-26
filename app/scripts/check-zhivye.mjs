@@ -28,6 +28,14 @@ const P18 = requireSrc('lib/zhivye/parametr18.ts');
 const Z19 = requireSrc('lib/zadanie19/zhivye.ts');
 const T18 = requireSrc('content/zhivye18.ts');
 const T11 = requireSrc('content/zhivye11.ts');
+const Z15 = requireSrc('lib/zhivye/znaki15.ts');
+const T15 = requireSrc('content/zhivye15.ts');
+const O12 = requireSrc('lib/zhivye/otrezok12.ts');
+const T12 = requireSrc('content/zhivye12.ts');
+const K16 = requireSrc('lib/zhivye/kredit16.ts');
+const T16 = requireSrc('content/zhivye16.ts');
+const P1 = requireSrc('lib/zhivye/planimetriya1.ts');
+const T1 = requireSrc('content/zhivye1.ts');
 
 const failures = [];
 let checks = 0;
@@ -280,9 +288,195 @@ check(
   }
 }
 
+/* ── №15: знаки произведения ── */
+{
+  const ozhid = {
+    tri: '(-2;\\,1)\\cup(4;\\,+\\infty)',
+    kvadrat: '(1;\\,3)\\cup(3;\\,+\\infty)',
+    nestrogoe: '\\{-1\\}\\cup[2;\\,4]',
+  };
+  for (const p of T15.PRIMERY_15) {
+    check(
+      Z15.otvetTex(Z15.otvet(p)) === ozhid[p.id],
+      `№15 ${p.id}: ответ ${Z15.otvetTex(Z15.otvet(p))}`,
+    );
+    const { xMin, xMax } = Z15.granicy(p);
+    for (let x = xMin; x <= xMax; x += 0.013) {
+      const f = Z15.znachenie(p, x);
+      const z = Z15.znakProizvedeniya(p, x);
+      if (Math.abs(f) > 1e-9) check(Math.sign(f) === z, `№15 ${p.id}: знак в x=${x.toFixed(3)}`);
+      const m = p.mnozhiteli;
+      check(
+        m.reduce((s, q) => s * Z15.znakMnozhitelya(q, x), 1) === z,
+        `№15 ${p.id}: знак = произведение знаков`,
+      );
+      const v = Z15.vysotaKrivoy(p, x, Z15.masshtabKrivoy(p));
+      check(
+        Math.abs(v) < 1 && (Math.abs(f) < 1e-9 || Math.sign(v) === Math.sign(f)),
+        `№15 ${p.id}: кривая в рамке и того же знака`,
+      );
+    }
+    const o = Z15.hodZnakov(p);
+    check(
+      JSON.stringify(o.ostanovki) === JSON.stringify(Z15.nuli(p).map((z) => z.a - xMin)),
+      `№15 ${p.id}: остановки — на нулях`,
+    );
+    check(
+      o.ostanovki.every((s) => s > 0 && s < o.tMax),
+      `№15 ${p.id}: остановки внутри шкалы`,
+    );
+  }
+}
+
+/* ── №12: наибольшее и наименьшее на отрезке ── */
+{
+  const ozhid = [
+    [16, -16],
+    [16, 0],
+    [11, -11],
+    [0, -16],
+    [16, -16],
+  ];
+  check(T12.KADRY_OTREZKA.length === ozhid.length, '№12: кадров столько же, сколько ответов');
+  T12.KADRY_OTREZKA.forEach((k, i) => {
+    const { max, min } = O12.itog(k.s.a, k.s.b);
+    const [mx, mn] = ozhid[i];
+    check(
+      max.y === mx && min.y === mn,
+      `№12 кадр ${i + 1}: наибольшее ${max.y}, наименьшее ${min.y}`,
+    );
+    check(
+      k.tex.includes(String(mx)) && k.tex.includes(String(mn)),
+      `№12 кадр ${i + 1}: числа в пояснении`,
+    );
+    check(
+      k.s.a < k.s.b && k.s.a >= -4 && k.s.b <= 4,
+      `№12 кадр ${i + 1}: отрезок в пределах ползунков`,
+    );
+  });
+  for (let a = -4; a < 4; a += 0.5) {
+    for (let b = a + 0.5; b <= 4; b += 0.5) {
+      const { max, min } = O12.itog(a, b);
+      let gMax = -Infinity;
+      let gMin = Infinity;
+      for (let i = 0; i <= 400; i += 1) {
+        const y = O12.f(a + ((b - a) * i) / 400);
+        gMax = Math.max(gMax, y);
+        gMin = Math.min(gMin, y);
+      }
+      check(
+        Math.abs(max.y - gMax) < 1e-3 && Math.abs(min.y - gMin) < 1e-3,
+        `№12 [${a}; ${b}]: кандидаты дают настоящие наибольшее и наименьшее`,
+      );
+    }
+  }
+}
+
+/* ── №16: как гасится кредит ── */
+{
+  const dif = K16.kredit('dif');
+  const ann = K16.kredit('ann');
+  check(
+    JSON.stringify(dif.gody.map((g) => g.platezh)) === '[2.8,2.6,2.4,2.2]',
+    '№16 диф.: платежи 2,8 2,6 2,4 2,2',
+  );
+  check(JSON.stringify(dif.gody.map((g) => g.ostatok)) === '[6,4,2,0]', '№16 диф.: долг 6 4 2 0');
+  check(
+    ann.gody.every((g) => g.platezh === 1464.1),
+    '№16 анн.: платежи равны 1464,1',
+  );
+  check(
+    JSON.stringify(ann.gody.map((g) => g.ostatok)) === '[3641,2541,1331,0]',
+    '№16 анн.: долг 3641 2541 1331 0',
+  );
+  check(
+    JSON.stringify(ann.gody.map((g) => g.osnovnoy)) === '[1000,1100,1210,1331]',
+    '№16 анн.: часть долга растёт ×1,1',
+  );
+  for (const k of [dif, ann]) {
+    for (const g of k.gody) {
+      check(Math.abs(g.posleProcentov - g.dolg * 1.1) < 1e-6, `№16 ${k.shema}: начислено 10 %`);
+      check(
+        Math.abs(g.platezh - g.procenty - g.osnovnoy) < 1e-6,
+        `№16 ${k.shema}: платёж = проценты + часть долга`,
+      );
+    }
+    const it = K16.itogo(k);
+    check(Math.abs(it.vsego - k.S - it.pereplata) < 1e-6, `№16 ${k.shema}: переплата = всего − S`);
+    let prev = Infinity;
+    for (let t = 0; t <= k.n; t += 0.01) {
+      const st = K16.sostoyanie(k, t);
+      check(st.dolg >= -1e-9 && st.dolg <= k.S * 1.1 + 1e-6, `№16 ${k.shema}: долг в пределах`);
+      check(st.gotovo >= 0 && st.gotovo <= k.n, `№16 ${k.shema}: столбиков не больше лет`);
+      if (Math.abs(t - Math.round(t)) < 1e-9) {
+        check(st.dolg <= prev + 1e-9, `№16 ${k.shema}: к концу года долг убывает`);
+        prev = st.dolg;
+      }
+    }
+    const o = K16.hodKredita(k);
+    check(
+      o.tMax === k.n && o.ostanovki.length === k.n - 1,
+      `№16 ${k.shema}: остановки на концах лет`,
+    );
+  }
+  check(T16.KREDIT16.status.konecDif('10', '2').includes('$10$'), '№16: итог диф. подставляется');
+}
+
+/* ── №1: вписанный угол и сумма углов ── */
+{
+  for (let t = 0; t <= 3 + 1e-9; t += 0.005) {
+    const v = P1.vp(t);
+    check(
+      Math.abs(v.vpisannyy - v.centralnyy / 2) < 1e-6,
+      `№1 вписанный: половина центрального при t=${t.toFixed(3)}`,
+    );
+    if (t <= 2)
+      check(
+        Math.abs(v.vpisannyy - 40) < 1e-6,
+        `№1 вписанный: на первой части 40° (t=${t.toFixed(3)})`,
+      );
+    const arcA = v.a + 360;
+    check(v.c > v.b && v.c < arcA, `№1 вписанный: C на большой дуге (t=${t.toFixed(3)})`);
+  }
+  check(Math.abs(P1.vp(3).vpisannyy - 90) < 1e-6, '№1 вписанный: в конце 90°');
+  const [s1, s2, s3] = P1.OSTANOVKI_VP;
+  check(
+    P1.vp(s1).centr === 'na-storone' && P1.vp(s3).centr === 'na-storone',
+    '№1 вписанный: остановки — сторона через центр',
+  );
+  check(
+    P1.vp(s2).centr === 'vnutri' && P1.vp(0.1).centr === 'vne' && P1.vp(1.9).centr === 'vne',
+    '№1 вписанный: центр внутри и вне угла',
+  );
+  for (const tr of P1.TREUGOLNIKI) {
+    const { A, B, C, beta } = P1.vershiny(tr);
+    check(
+      Math.abs(P1.ugol(B, A, C) - tr.alfa) < 1e-6 &&
+        Math.abs(P1.ugol(A, C, B) - tr.gamma) < 1e-6 &&
+        Math.abs(P1.ugol(A, B, C) - beta) < 1e-6,
+      `№1 сумма ${tr.id}: углы треугольника совпадают`,
+    );
+    const k = P1.summa(tr, 3);
+    check(
+      Math.abs(k.klinA.ot - 180) < 1e-9 && Math.abs(k.klinA.do - k.klinB.ot) < 1e-9,
+      `№1 сумма ${tr.id}: угол A встал вплотную к B`,
+    );
+    check(
+      Math.abs(k.klinB.do - k.klinC.ot) < 1e-9 && Math.abs(k.klinC.do - 360) < 1e-9,
+      `№1 сумма ${tr.id}: угол C встал вплотную к B`,
+    );
+    check(
+      Math.hypot(k.klinA.v[0] - B[0], k.klinA.v[1] - B[1]) < 1e-9 &&
+        Math.hypot(k.klinC.v[0] - B[0], k.klinC.v[1] - B[1]) < 1e-9,
+      `№1 сумма ${tr.id}: углы приехали в B`,
+    );
+    check(T1.SUMMA1.vidy[tr.id] !== undefined, `№1 сумма ${tr.id}: есть название`);
+  }
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6, T13, T18, T11], (k, val) =>
+  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15, T12, T16, T1], (k, val) =>
     typeof val === 'function' ? String(val) : val,
   );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');

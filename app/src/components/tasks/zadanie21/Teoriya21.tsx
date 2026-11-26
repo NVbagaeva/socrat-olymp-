@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ZhivoyOtrezok12 } from '@/components/zhivye/otrezok12/Otrezok12';
 import type { ReactNode } from 'react';
 import {
   RamkaFormula,
@@ -597,6 +598,8 @@ function Telo({ r }: { r: RazdelTeorii21 }) {
       {r.bloki.map((b, i) => (
         <Blok21 b={b} key={`${r.id}-${i}`} />
       ))}
+      {/* Живая сцена — после алгоритма и примеров про отрезок. */}
+      {r.id === 'otrezok' ? <ZhivoyOtrezok12 /> : null}
     </div>
   );
 }
