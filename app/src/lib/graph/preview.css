@@ -82,7 +82,7 @@ button {
   color: inherit;
 }
 button.primary {
-  background: var(--color-primary-fill);
+  background: var(--color-primary);
   border-color: var(--color-primary);
   color: var(--chertezh-fon);
 }
@@ -152,7 +152,7 @@ main {
   color: var(--color-text-secondary);
 }
 .badge.unlucky {
-  background: var(--color-primary-fill);
+  background: var(--color-primary);
   color: var(--chertezh-fon);
 }
 .card svg {
