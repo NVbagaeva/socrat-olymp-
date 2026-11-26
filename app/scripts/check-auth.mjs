@@ -3393,6 +3393,79 @@ async function runZhurnalBanka(mock, errors) {
     await context.close();
   }
 
+  /* Опорные №3 (этап 4д): числовая задача блока — неверный ответ в журнале;
+     учитель кладёт блок «В домашку» — только числовые задачи, с ответом и чертежом. */
+  if (ZHURNAL_RAZDELY.includes(3) && DZ2_RAZDELY.includes(3)) {
+    const B = requireSrc('lib/stereo/opornye3/bloki.ts');
+    const { OPORNYE3_HREF, TRENAZHER3_HREF } = requireSrc('lib/zadanie3/links.ts');
+    const blok = B.BLOKI_3.find((b) => b.gotov && B.zadachiBloka(b.id)[0]?.vid === 'chislo');
+    check(blok !== undefined, 'опорные №3: есть блок с числовой первой задачей');
+    if (blok !== undefined) {
+      const z0 = B.zadachiBloka(blok.id)[0];
+      mock.zhurnal.length = 0;
+      const u = await newPage(mock, 375, errors);
+      await welcomeSeen(u.context);
+      await login(u.page, uchenik[375], 'zhurnal-parol-1');
+      await u.page.goto(`${SITE}${OPORNYE3_HREF}${blok.slug}/`, { waitUntil: 'networkidle' });
+      await u.page.waitForSelector('.o3-zad__input');
+      check((await u.page.locator('.dz2-knopka').count()) === 0, 'журнал опорных №3: ученик не видит «В домашку»');
+      await u.page.locator('.o3-zad__input input').first().fill('987654');
+      await u.page.locator('.o3-btn-glavnaya').first().click();
+      const until = Date.now() + 15000;
+      const row = () => mock.zhurnal.find((r) => r.place === 'opornye' && r.task_no === 3);
+      while (Date.now() < until && (row() === undefined || row().popytki.length === 0)) {
+        await new Promise((done) => setTimeout(done, 250));
+      }
+      const r = row();
+      check(r !== undefined && r.kind === blok.id && r.task_ref === z0.id && r.level === 1
+        && r.popytki.length === 1 && !r.popytki[0].ok,
+      `журнал опорных №3: блок, задача и неверная попытка (${r?.kind}, ${r?.task_ref})`);
+      await u.context.close();
+
+      const { context, page } = await newPage(mock, 1280, errors);
+      await welcomeSeen(context);
+      await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+      await page.evaluate(() => {
+        for (const k of Object.keys(localStorage)) if (k.includes('dz2')) localStorage.removeItem(k);
+      });
+      await page.goto(`${SITE}${OPORNYE3_HREF}${blok.slug}/`, { waitUntil: 'networkidle' });
+      await page.locator('.dz2-ryad .dz2-knopka__glavnaya').click();
+      await page.waitForSelector('.dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
+      if (SHOTS !== null) {
+        for (const w of [375, 1280]) {
+          await page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
+          await page.evaluate(() => document.fonts.ready);
+          await page.screenshot({ path: path.join(SHOTS, `dz2-opornye3-${w}.png`),
+            style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+        }
+        await page.setViewportSize({ width: 1280, height: 900 });
+      }
+      const korz = await page.evaluate(() => {
+        for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
+        return null;
+      });
+      const op3 = (JSON.parse(korz ?? '{}').elementy ?? []).find((e) => e.task_no === 3 && e.vid === 'opornye');
+      const chislo = B.zadachiBloka(blok.id).filter((z) => z.vid === 'chislo').length;
+      check(op3 !== undefined && op3.tasks.length === chislo
+        && op3.tasks.every((t) => /^-?[0-9]+(\.[0-9]+)?$/.test(t.answer) && t.question_html.includes('dz2-chertezh')),
+      `ДЗ 4д: блок опорных №3 — числовые задачи с ответом и чертежом (${op3?.tasks?.length} из ${chislo})`);
+      /* Тренажёр №3: «Выбрать темы» → «В домашку» — прототипы выбранных типов. */
+      await page.goto(`${SITE}${TRENAZHER3_HREF}`, { waitUntil: 'networkidle' });
+      await page.waitForSelector('.trn-start');
+      await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+      await page.locator('.trn-vybor__ryadom .dz2-knopka__glavnaya').click();
+      await page.waitForSelector('.trn-vybor__ryadom .dz2-knopka__glavnaya[aria-pressed="true"]');
+      const korz2 = await page.evaluate(() => {
+        for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
+        return null;
+      });
+      const t3 = (JSON.parse(korz2 ?? '{}').elementy ?? []).find((e) => e.task_no === 3 && e.vid === 'trenazher');
+      check(t3 !== undefined && t3.tipy.length > 0 && t3.tipy.every((t) => /^P03-[0-9]{2}$/.test(t)),
+        `ДЗ 4д: тренажёр №3 в корзине — прототипы (${t3?.tipy?.length})`);
+      await context.close();
+    }
+  }
+
   /* Учитель: блоки опорных №1 (чертёж) и №13 (таблица) «В домашку» (этап 4г);
      ученик видит чертёж в условии ДЗ после очистки. */
   if (DZ2_RAZDELY.includes(1) && DZ2_RAZDELY.includes(13)) {

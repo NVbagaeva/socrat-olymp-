@@ -24,10 +24,13 @@ import { VDomashku } from './VDomashku';
 export function VDomashkuTrenazher({
   taskNo,
   tipy,
+  tipov,
   vse = false,
 }: {
   taskNo: number;
   tipy: readonly string[];
+  /** Сколько типов в названии, если tipy — прототипы адаптера (№3: тип → прототипы). */
+  tipov?: number;
   /** Выбраны все типы раздела — в названии «все типы». */
   vse?: boolean;
 }) {
@@ -40,7 +43,7 @@ export function VDomashkuTrenazher({
         key: `trenazher:${taskNo}:${sorted.join(',')}`,
         vid: 'trenazher',
         task_no: taskNo,
-        title: DZ2.elementy.trenazher(nomerEgeRazdela(taskNo), vse ? 0 : sorted.length),
+        title: DZ2.elementy.trenazher(nomerEgeRazdela(taskNo), vse ? 0 : (tipov ?? sorted.length)),
         spec: { tipy: sorted },
         tipy: sorted,
         zapas: 10,

@@ -18,7 +18,8 @@ import {
   type StrokaGruppy,
 } from '../trening';
 import { TIPY3_ORDER, TRENAZHER3 } from '@/content/zadanie3';
-import { gruppaTipa, prototipZadachi, tipZadachi } from '@/content/zadanie3/gruppy';
+import { gruppaTipa, prototipyTipa, prototipZadachi, tipZadachi } from '@/content/zadanie3/gruppy';
+import { VDomashkuTrenazher } from '@/components/dz2/knopki';
 import {
   closedTasks,
   distinctSolved,
@@ -388,6 +389,16 @@ function Konfigurator3({
           bezPodskazok={vybor.bezPodskazok}
           onBezPodskazok={(bezPodskazok) => zapomnit({ ...vybor, bezPodskazok })}
           onBack={() => setEkran('rezhimy')}
+          ryadomSoStartom={
+            /* «В домашку» (этап 4д): запас ДЗ собирает адаптер «Собрать
+               вариант» по прототипам выбранных типов. */
+            <VDomashkuTrenazher
+              taskNo={3}
+              tipy={tipy.flatMap(prototipyTipa)}
+              tipov={tipy.length}
+              vse={tipy.length === TIPY3_ORDER.length}
+            />
+          }
           onStart={() =>
             start(
               buildByTipy(

@@ -194,6 +194,11 @@ const chertezhiRazdelov = [];
       return requireSrc('lib/planimetriya/stseny/index.ts').PROTOTIPY.map((p) => klyuchProto(p.id));
     },
     2: () => requireSrc('lib/vektory/prototypes/index.ts').PROTOTYPES.map((p) => p.id),
+    /* №3 (этап 4д): в ДЗ идут прототипы выбранных типов (prototipyTipa). */
+    3: () => {
+      const G = requireSrc('content/zadanie3/gruppy.ts');
+      return G.TIPY3_ORDER.flatMap((t) => G.prototipyTipa(t));
+    },
     7: () => requireSrc('lib/zadanie7/prototypes/index.ts').PROTOTYPES.map((p) => p.id),
     9: () => requireSrc('lib/proizvodnaya/prototypes/index.ts').PROTOTYPES.map((p) => p.id),
     10: () => requireSrc('lib/zadanie10/prototypes/index.ts').PROTOTYPES.map((p) => p.id),
@@ -251,7 +256,7 @@ const chertezhiRazdelov = [];
     if (sRisunkom > 0) chertezhiRazdelov.push(n);
   }
   /* Разделы, где чертёж решает задачу: проверка выше не должна пустеть. */
-  for (const n of [1, 2, 9, 10]) {
+  for (const n of [1, 2, 3, 9, 10]) {
     check(chertezhiRazdelov.includes(n), `№${n}: у тренажёра в ДЗ нашлись задачи с чертежом`);
   }
 }
@@ -360,6 +365,44 @@ const chertezhiRazdelov = [];
     if ([1, 2, 9].includes(n)) check(sRisunkom > 0, `№${n} опорные: есть задачи с чертежом (${sRisunkom})`);
     if ([11, 13].includes(n)) check(sTablitsey > 0, `№${n} опорные: есть задачи с таблицей (${sTablitsey})`);
   }
+}
+
+/* Этап 4д: опорные №3 (стереометрия). Числовая задача — ответ закрыт
+   ключом «id|otvet» на странице блока и открывается в исходный; чертёж —
+   renderSolid по модели задачи, очистка ДЗ его не режет. Задачи с выбором,
+   касанием и плоским чертежом в ДЗ не идут. */
+{
+  const B = requireSrc('lib/stereo/opornye3/bloki.ts');
+  const { sealZadacha } = requireSrc('lib/stereo/opornye3/seal.ts');
+  const { sealText, openText } = requireSrc('lib/stereo/opornye3/secret.ts');
+  const { renderSolid } = requireSrc('lib/solid/render.ts');
+  let vsego = 0;
+  let ok = 0;
+  const plohie = [];
+  for (const b of B.BLOKI_3.filter((x) => x.gotov)) {
+    const zadachi = B.zadachiBloka(b.id);
+    for (const [i, z] of zadachi.entries()) {
+      if (z.vid !== 'chislo') continue;
+      vsego += 1;
+      const t = sealZadacha(z, i + 1);
+      const otvet = openText(sealText(z.otvet, `${z.id}|otvet`), `${z.id}|otvet`);
+      let uchenik = '';
+      try {
+        uchenik = JSON.parse(openText(t.razbor, t.id)).uchenikHtml;
+      } catch {
+        uchenik = '';
+      }
+      const d = Z.zadachaOpornayaGen(
+        { id: z.id, seed: 'blok', uslovieHtml: t.uslovieHtml, risunokSvg: renderSolid(t.model), otvet, shagi: [{ chto: uchenik }] },
+        1,
+      );
+      if (d !== null && NORM.test(d.answer) && Number(d.answer) === Number(String(z.otvet).replace(',', '.'))
+        && uchenik !== '' && d.question_html.includes('dz2-chertezh')) ok += 1;
+      if (d !== null) plohie.push(...vneDopuska(d.question_html).map((v) => `${z.id}: ${v}`));
+    }
+  }
+  check(vsego > 0 && ok === vsego, `№3 опорные: ответ, разбор и чертёж в ДЗ (${ok} из ${vsego})`);
+  check(plohie.length === 0, `№3 опорные: очистка ДЗ режет условие: ${[...new Set(plohie)].slice(0, 6).join('; ')}`);
 }
 
 /* Этап 4в: опорные на общем экране банка (№7, 10, 21). Ответ уходит в
