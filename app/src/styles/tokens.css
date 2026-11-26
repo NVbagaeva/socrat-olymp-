@@ -895,6 +895,7 @@
     --navy-700: #d3ddf2;
     --navy-800: #e2e9f8;
     --navy-900: var(--noch-text);
+    --blue-50: color-mix(in srgb, var(--noch-blue) 12%, var(--noch-surface));
     --blue-400: #8fbaff;
     --blue-500: #7fb0ff;
     --violet-600: var(--noch-violet);

@@ -140,6 +140,6 @@
 }
 .baza-chertezh figcaption {
   font-size: 0.875rem;
-  color: var(--muted, #5b6478);
+  color: var(--muted, var(--color-text-secondary));
   text-align: center;
 }

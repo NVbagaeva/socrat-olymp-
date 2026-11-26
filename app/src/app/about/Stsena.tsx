@@ -156,8 +156,8 @@ export function Stsena({ children }: { children: ReactNode }) {
             r="350"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0.74" stopColor="#fff" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+            <stop offset="0.74" stopColor="var(--chertezh-blik)" />
+            <stop offset="1" stopColor="var(--chertezh-blik)" stopOpacity="0" />
           </radialGradient>
           <mask
             id="oa-sm-maska"

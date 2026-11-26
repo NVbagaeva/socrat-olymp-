@@ -24,7 +24,7 @@
   padding: 0 var(--space-4) 0 var(--space-3);
   border-radius: var(--radius-pill);
   /* Стеклянная таблетка с синим акцентом: видна, но не кричит. */
-  background: var(--glass-bg-strong, rgb(255 255 255 / 0.85));
+  background: var(--glass-bg-strong, color-mix(in srgb, var(--color-surface) 85%, transparent));
   box-shadow:
     inset 0 0 0 1px var(--color-accent-soft),
     var(--glass-hi, 0 0 0 0 transparent);
@@ -44,7 +44,7 @@
   transform: translateY(-1px);
 }
 .karta-nazad:hover {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
   box-shadow: inset 0 0 0 1px var(--blue-400);
 }
 .karta-nazad:focus-visible {

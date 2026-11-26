@@ -133,7 +133,7 @@
   width: 14px;
   height: 14px;
   fill: none;
-  stroke: #fff;
+  stroke: var(--color-surface);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;

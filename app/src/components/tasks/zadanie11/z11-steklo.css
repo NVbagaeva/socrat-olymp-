@@ -21,16 +21,16 @@
     --glass-ring,
     inset 0 0 0 1px color-mix(in srgb, var(--chertezh-siniy) 16%, transparent)
   );
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-size: var(--fs-caption);
   font-weight: 600;
   text-decoration: none;
 }
 .z11-materialy__ssylka:hover {
-  background: var(--blue-50);
+  background: var(--color-surface-info);
 }
 .z11-materialy__ssylka:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -114,7 +114,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--blue-700);
+  color: var(--color-primary-text);
   font-weight: 600;
   text-decoration: none;
 }
@@ -139,22 +139,22 @@
   .teor-steklo .z11-tip {
     border: 0;
     border-radius: 18px;
-    background: linear-gradient(160deg, var(--white), var(--blue-50));
+    background: linear-gradient(160deg, var(--color-surface), var(--color-surface-info));
     box-shadow:
-      inset 0 0 0 1px var(--blue-200),
+      inset 0 0 0 1px var(--color-border-info),
       var(--glass-hi, inset 0 1px 0 color-mix(in srgb, var(--color-surface) 80%, transparent)),
       0 8px 24px color-mix(in srgb, var(--chertezh-siniy) 6%, transparent);
   }
   /* Лайфхак — оранжевый тон, ловушка — терракотовый; роль видна и по значку. */
   .teor-steklo .z11-card--layfhak {
-    background: linear-gradient(160deg, var(--white), var(--glass-tint-warm));
+    background: linear-gradient(160deg, var(--color-surface), var(--glass-tint-warm));
     box-shadow:
       inset 0 0 0 1px var(--amber-200, var(--chertezh-akcent-svet)),
       inset 4px 0 0 var(--amber-600),
       var(--glass-hi, inset 0 1px 0 color-mix(in srgb, var(--color-surface) 80%, transparent));
   }
   .teor-steklo .z11-card--lovushka {
-    background: linear-gradient(160deg, var(--white), var(--chertezh-akcent-zalivka));
+    background: linear-gradient(160deg, var(--color-surface), var(--chertezh-akcent-zalivka));
     box-shadow:
       inset 0 0 0 1px var(--chertezh-akcent-svet),
       inset 4px 0 0 var(--terracotta),
@@ -235,8 +235,8 @@
   height: 26px;
   margin-right: var(--space-1);
   border-radius: 50%;
-  background: var(--blue-50);
-  color: var(--blue-700);
+  background: var(--color-surface-info);
+  color: var(--color-primary-text);
   font-weight: 700;
   vertical-align: middle;
 }

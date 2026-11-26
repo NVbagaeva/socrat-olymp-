@@ -99,7 +99,7 @@ a.uved-stroka:hover {
   background: var(--color-border-strong);
 }
 .uved-stroka.is-novoe .uved-stroka__znak {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
 }
 .uved-stroka.is-novoe.is-vazhnoe .uved-stroka__znak {
   background: var(--color-accent);

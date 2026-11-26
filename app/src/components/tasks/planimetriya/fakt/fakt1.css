@@ -162,8 +162,12 @@
   gap: var(--space-1);
   padding: var(--space-3) var(--space-4);
   border-radius: 14px;
-  border-left: 4px solid var(--chertezh-novoe, #e8730c);
-  background: color-mix(in srgb, var(--chertezh-novoe, #e8730c) 8%, var(--color-surface));
+  border-left: 4px solid var(--chertezh-novoe, var(--color-accent));
+  background: color-mix(
+    in srgb,
+    var(--chertezh-novoe, var(--color-accent)) 8%,
+    var(--color-surface)
+  );
 }
 .fakt1__nasha-label {
   font-size: 0.8125rem;

@@ -248,7 +248,7 @@
       inset 0 0 0 1px var(--ton-border),
       inset 4px 0 0 var(--ton),
       var(--glass-hi),
-      0 8px 24px rgb(31 95 208 / 0.06);
+      0 8px 24px color-mix(in srgb, var(--color-primary) 6%, transparent);
   }
   .teor-steklo .rich-main__frame {
     --ton: var(--color-text-brand);

@@ -156,7 +156,7 @@
       inset 0 0 0 1px var(--ton-border),
       inset 4px 0 0 var(--ton),
       var(--glass-hi),
-      0 8px 24px rgb(31 95 208 / 0.06);
+      0 8px 24px color-mix(in srgb, var(--color-primary) 6%, transparent);
   }
   .teor-steklo .z13-card--slovami,
   .teor-steklo .z13-card--priznak {
@@ -175,7 +175,7 @@
   .teor-steklo .z13-card--bystro {
     --ton: var(--color-success);
     --ton-soft: var(--green-50);
-    --ton-border: var(--green-200, #bfe8cf);
+    --ton-border: var(--green-200, var(--color-uspeh-border));
     --ton-text: var(--green-700);
   }
   .teor-steklo .z13-card__head {

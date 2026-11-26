@@ -171,8 +171,8 @@
 /* Печать: ч/б тема листа — стрелка и рамки без цвета. */
 :is([data-sheet-theme='print'], [data-sheet-theme='strict']) .z13-r-shag {
   --z13r-accent: #000;
-  --z13r-info: #fff;
-  --z13r-warm: #fff;
+  --z13r-info: var(--color-surface);
+  --z13r-warm: var(--color-surface);
 }
 @media print {
   .z13-r-tab__scroll {

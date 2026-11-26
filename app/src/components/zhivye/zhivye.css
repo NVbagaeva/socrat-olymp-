@@ -134,7 +134,7 @@
     0 4px 10px -2px color-mix(in srgb, var(--chertezh-liniya) 35%, transparent);
 }
 .zv-polzunok:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 8px;
 }
@@ -210,7 +210,7 @@
   }
 }
 .zv-scena:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 .zv-svg {
@@ -306,7 +306,7 @@
   border: 0;
   border-radius: 999px;
   background: none;
-  color: var(--blue-700);
+  color: var(--zv-sin-text);
   font: inherit;
   font-size: 15px;
   font-weight: 650;
@@ -329,7 +329,7 @@
     0 4px 10px -4px color-mix(in srgb, var(--chertezh-akcent-tekst) 35%, transparent);
 }
 .zv-seg button:focus-visible {
-  outline: 2px solid var(--blue-600);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 .zv-podskazka {
