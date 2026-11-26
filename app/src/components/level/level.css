@@ -157,7 +157,8 @@
 }
 @media (max-width: 359.98px) {
   .site-head__level .level-switch__seg {
-    padding: 0 6px;
+    padding: 0 5px;
+    font-size: 13px;
   }
 }
 @media (min-width: 768px) {

@@ -714,4 +714,7 @@ body:has(.site-menu) .help-fab {
   .site-head .bell {
     display: none;
   }
+  .site-head .site-head__in {
+    padding: 0 var(--space-2);
+  }
 }
