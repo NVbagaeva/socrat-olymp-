@@ -341,7 +341,7 @@
   gap: var(--space-4);
   padding: var(--space-5) var(--space-4);
   border-radius: var(--radius-xl);
-  background: linear-gradient(160deg, var(--color-surface-info), var(--color-surface));
+  background: linear-gradient(160deg, var(--blue-50), var(--color-surface));
   box-shadow:
     inset 0 0 0 1px var(--color-border-info),
     0 8px 24px -18px color-mix(in srgb, var(--chertezh-liniya) 45%, transparent);
