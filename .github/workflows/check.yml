@@ -65,6 +65,12 @@ jobs:
         working-directory: app
         run: pnpm test:infra-secrets
 
+      # Цвета — только из палитры (tokens.css), иначе тёмная тема их не
+      # достанет. Неизбежные исключения — scripts/tsveta-isklyucheniya.json.
+      - name: Проверить, что новых вписанных цветов нет
+        working-directory: app
+        run: pnpm test:tsveta
+
       # Сторонние действия GitHub Actions — только полным SHA коммита.
       - name: Проверить закрепление действий
         working-directory: app
@@ -974,6 +980,11 @@ jobs:
       - name: Проверить липкую ленту вкладок
         working-directory: app
         run: pnpm test:sticky-tabs
+
+      # Тёмная тема: первый кадр без вспышки, печать светлая, переключатель.
+      - name: Проверить тёмную тему
+        working-directory: app
+        run: pnpm test:tema
 
       # Теория №3 и №15, «О задании» №3, №14, №15: в покое ни одна строка
       # текста не закрыта и не обрезана (лид главы ниже заголовка), внизу
