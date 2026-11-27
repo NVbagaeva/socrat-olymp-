@@ -68,6 +68,25 @@ export interface ZapisVarianta {
   test_score?: number;
   active_ms: number;
   total_ms: number;
+  /** Часть 2 — самопроверка ученика (миграция 20261128160000_chast2_v_zhurnale.sql). */
+  chast2?: ZapisChast2[];
+}
+
+/** Задание части 2 в журнале: ответ ученика, сверка и его балл по критериям. */
+export interface ZapisChast2 {
+  /** Номер хранения 14–20. */
+  no: number;
+  shablon: string;
+  /** Ответ ученика по пунктам, TeX: «а)\ x=\pi n;\ б)\ 2\pi». */
+  otvet?: string;
+  /** Верный ответ «а) …; б) …». */
+  verno?: string;
+  sverka?: 'sovpadaet' | 'ne-sovpadaet' | 'uchitel';
+  /** Открыл решение и критерии. */
+  reshenie?: boolean;
+  /** Балл самопроверки; нет — ещё не оценил. */
+  ball?: number;
+  max: number;
 }
 
 /** Пределы базы: длиннее она не примет. */

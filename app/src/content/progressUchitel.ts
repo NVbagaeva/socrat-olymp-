@@ -138,6 +138,20 @@ export const PROGRESS = {
     podskazki: 'Подсказки',
     bal: 'Баллы',
     netOtveta: '—',
+    chast2: 'Часть 2 — самопроверка ученика',
+    chast2Lead:
+      'Решение ученик пишет на бумаге. На сайте он вписывает ответ, сверяет его, открывает решение с критериями и сам ставит себе балл.',
+    chast2Itog: (b: number, max: number, oceneno: number, vsego: number) =>
+      oceneno === vsego ? `Часть 2: ${b} из ${max}` : `Часть 2: ${b} из ${max}, оценено заданий ${oceneno} из ${vsego}`,
+    sverka: 'Сверка',
+    sverki: {
+      sovpadaet: 'совпал',
+      'ne-sovpadaet': 'не совпал',
+      uchitel: 'сверяет учитель',
+    } as Record<string, string>,
+    samoocenka: 'Балл (сам)',
+    neOcenil: 'не оценил',
+    reshenieOtkryto: 'решение открыто',
   },
 
   statistika: {
