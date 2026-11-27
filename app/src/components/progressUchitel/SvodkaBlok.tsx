@@ -14,6 +14,7 @@ import { PROGRESS } from '@/content/progressUchitel';
 import type { Svodka } from '@/lib/zhurnal/api';
 import {
   ISTOCHNIKI_VARIANTA,
+  istochnikVarianta,
   dataRu,
   podpisRazdela,
   sdvig,
@@ -104,12 +105,14 @@ export function SvodkaBlok({
                 {[...s.varianty].reverse().map((v) => (
                   <li key={v.id}>
                     <Link href={variantHref(v.id)}>
-                      {v.title ?? ISTOCHNIKI_VARIANTA[v.source]}
+                      {v.title ?? ISTOCHNIKI_VARIANTA[istochnikVarianta(v)]}
                       {v.finished_at === undefined ? '' : `, ${dataRu(v.finished_at)}`}
                     </Link>
                     <span className="t-caption">
+                      {/* Откуда вариант: собранный, серия, повышенной сложности, месяца, от учителя. */}
+                      {ISTOCHNIKI_VARIANTA[istochnikVarianta(v)] ?? ''}
                       {v.primary_score !== undefined && v.max_score !== undefined
-                        ? t.pervichnyy(v.primary_score, v.max_score)
+                        ? ` · ${t.pervichnyy(v.primary_score, v.max_score)}`
                         : ''}
                       {v.test_score !== undefined ? ` · ${t.testovyy(v.test_score)}` : ''}
                     </span>

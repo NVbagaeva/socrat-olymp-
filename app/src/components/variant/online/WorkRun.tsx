@@ -431,7 +431,9 @@ function Finished({
             payload.kabinet !== undefined
               ? 'rabota'
               : nabor !== null
-                ? 'povyshennye'
+                ? nabor.razdel === 'ev'
+                  ? 'mesyac'
+                  : 'povyshennye'
                 : series
                   ? 'seriya'
                   : 'sobrat',

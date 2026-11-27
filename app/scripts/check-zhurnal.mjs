@@ -232,6 +232,13 @@ const meta = { id: M.idIz('8|trenazher|r1|0|8.A|s1|base'), task_no: 8, kind: '8.
   check(P.sdvig('2026-03-01', 1) === '2026-02-28', 'сдвиг дня через конец февраля');
   check(P.segodnyaMsk(Date.parse('2026-11-22T22:30:00Z')) === '2026-11-23', 'сегодня — по Москве');
   check(P.dneyBez(undefined) === null, 'не заходил ни разу');
+  check(P.istochnikVarianta({ source: 'mesyac', set_code: 'EV-02' }) === 'mesyac'
+    && P.ISTOCHNIKI_VARIANTA.mesyac === 'Вариант месяца', 'вариант месяца — своя подпись');
+  check(P.istochnikVarianta({ source: 'povyshennye', set_code: 'EV-01' }) === 'mesyac',
+    'вариант месяца, записанный до миграции «повышенным», узнаётся по коду набора');
+  check(P.istochnikVarianta({ source: 'povyshennye', set_code: 'PV-07' }) === 'povyshennye'
+    && P.istochnikVarianta({ source: 'sobrat', set_code: 'EV-01' }) === 'sobrat',
+    'остальные источники не меняются');
   const rows = X.strokiUchenika([{ id: 'a', task_no: 8, kind: '8.A', task_ref: 'x', place: 'trenazher',
     outcome: 'wrong', verified: false, attempts_n: 2, hint_steps: 1, hint_wrong: [], shown_fact: false,
     shown_solution: true, skipped: false, active_ms: 61000, total_ms: 90000,

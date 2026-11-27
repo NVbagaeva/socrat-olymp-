@@ -53,7 +53,7 @@ export interface ZadachaView {
 
 export interface VariantView {
   id: string;
-  source: 'sobrat' | 'seriya' | 'povyshennye' | 'rabota';
+  source: 'sobrat' | 'seriya' | 'povyshennye' | 'mesyac' | 'rabota';
   title?: string;
   set_code: string;
   variant_no?: number;

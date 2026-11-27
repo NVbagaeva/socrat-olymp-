@@ -33,3 +33,4 @@ supabase/migrations/20261122130000_avatar_profiles.sql
 supabase/migrations/20261128120000_zhurnal_uslovie.sql
 supabase/migrations/20261128130000_roditel_pismo.sql
 supabase/migrations/20261128140000_klass_po_kodu.sql
+supabase/migrations/20261128150000_varianty_mesyaca.sql
