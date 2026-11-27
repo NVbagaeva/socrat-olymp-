@@ -1,12 +1,60 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { ZhivoyChertezh3d } from '@/components/stereo/ZhivoyChertezh3d';
 import { SHAPKA3 } from '@/content/zadanie3/spravka';
 import { dataUrl } from '@/lib/dataUrl';
 import { razdelBase } from '@/lib/paths';
+import { telo } from '@/lib/solid/sechenie';
 import type { Primer3 as Dannye } from '@/lib/zadanie3/primery';
+
+/* Построитель сечения — отдельным куском: грузится по кнопке. */
+const PostroitSechenie = lazy(() =>
+  import('@/components/stereo/PostroitSechenie').then((m) => ({ default: m.PostroitSechenie })),
+);
+
+/**
+ * Шаг, который ученик сейчас читает: последний шаг, чей верх поднялся
+ * выше линии чтения (чуть ниже закреплённого чертежа). Выше всех шагов —
+ * 0, чертёж условия.
+ */
+function useShagPoProkrutke(
+  spisok: React.RefObject<HTMLOListElement | null>,
+  chertezh: React.RefObject<HTMLDivElement | null>,
+  vklyucheno: boolean,
+  onShag: (n: number) => void,
+) {
+  useEffect(() => {
+    const ol = spisok.current;
+    if (ol === null || !vklyucheno) return undefined;
+    let kadr = 0;
+    const proverit = () => {
+      kadr = 0;
+      const niz = chertezh.current?.getBoundingClientRect().bottom ?? 0;
+      /* Линия чтения: под чертежом, но не ниже середины экрана. */
+      const liniya = Math.min(Math.max(niz, 0) + 80, window.innerHeight * 0.6);
+      const shagi = [...ol.children];
+      let n = 0;
+      shagi.forEach((li, i) => {
+        if (li.getBoundingClientRect().top < liniya) n = i + 1;
+      });
+      const posledniy = shagi[shagi.length - 1];
+      if (posledniy !== undefined && posledniy.getBoundingClientRect().bottom < 0) n = 0;
+      onShag(n);
+    };
+    const naProkrutku = () => {
+      if (kadr === 0) kadr = window.requestAnimationFrame(proverit);
+    };
+    window.addEventListener('scroll', naProkrutku, { passive: true });
+    window.addEventListener('resize', naProkrutku);
+    return () => {
+      window.removeEventListener('scroll', naProkrutku);
+      window.removeEventListener('resize', naProkrutku);
+      if (kadr !== 0) window.cancelAnimationFrame(kadr);
+    };
+  }, [spisok, chertezh, vklyucheno, onShag]);
+}
 
 /**
  * Разобранный пример типа на вкладке «О задании» №3.
@@ -28,6 +76,12 @@ export function Primer3({
 }) {
   const [shag, setShag] = useState(0);
   const [svernut, setSvernut] = useState(false);
+  const [sechenie, setSechenie] = useState(false);
+  const spisok = useRef<HTMLOListElement>(null);
+  const chertezh = useRef<HTMLDivElement>(null);
+  const mozhnoSechenie = telo(primer.model) !== null;
+  /* Чертёж идёт за чтением: шаг, до которого дочитали, построен на нём. */
+  useShagPoProkrutke(spisok, chertezh, primer.shagovChertezha > 0 && !sechenie, setShag);
   const naChertezhe = Math.min(shag, primer.shagovChertezha);
   /* Подписи чертежу не показываются (кнопки шагов — в тексте решения),
      нужно только их число: по нему он понимает, что шаги есть. */
@@ -37,8 +91,8 @@ export function Primer3({
       <p className="kz-primer__metka">{SHAPKA3.primer}</p>
       <div className="kz-uslovie" dangerouslySetInnerHTML={{ __html: primer.uslovieHtml }} />
       <div className="z3-primer__telo">
-        <div className={clsx('z3-primer__chertezh', svernut && 'is-svernut')}>
-          <div className="z3-primer__holst" hidden={svernut}>
+        <div ref={chertezh} className={clsx('z3-primer__chertezh', svernut && 'is-svernut')}>
+          <div className="z3-primer__holst" hidden={svernut || sechenie}>
             <ZhivoyChertezh3d
               model={primer.model}
               svg={primer.svg}
@@ -51,10 +105,31 @@ export function Primer3({
               tema="ekran"
             />
           </div>
+          {sechenie && !svernut ? (
+            <Suspense fallback={null}>
+              <PostroitSechenie model={primer.model} />
+            </Suspense>
+          ) : null}
           <div className="z3-primer__panel">
-            <p className="z3-primer__gde" aria-live="polite">
-              {naChertezhe === 0 ? SHAPKA3.chertezhUsloviya : SHAPKA3.naChertezhe(naChertezhe)}
-            </p>
+            {sechenie ? null : (
+              <p className="z3-primer__gde" aria-live="polite">
+                {naChertezhe === 0 ? SHAPKA3.chertezhUsloviya : SHAPKA3.naChertezhe(naChertezhe)}
+              </p>
+            )}
+            {mozhnoSechenie ? (
+              <button
+                type="button"
+                className="stk-ssylka z3-primer__sechenie"
+                aria-pressed={sechenie}
+                aria-label={sechenie ? SHAPKA3.kRazboru : SHAPKA3.sechenieDlinno}
+                onClick={() => {
+                  setSechenie(!sechenie);
+                  setSvernut(false);
+                }}
+              >
+                {sechenie ? SHAPKA3.kRazboru : SHAPKA3.sechenie}
+              </button>
+            ) : null}
             <button
               type="button"
               className="stk-ssylka z3-primer__svernut"
@@ -65,7 +140,7 @@ export function Primer3({
             </button>
           </div>
         </div>
-        <ol className="z3-primer__shagi">
+        <ol ref={spisok} className="z3-primer__shagi">
           {primer.shagi.map((s, i) => (
             <li key={i} className={clsx('z3-shag', shag === i + 1 && 'is-on')}>
               <button
@@ -73,7 +148,10 @@ export function Primer3({
                 className="z3-shag__knopka"
                 aria-pressed={shag === i + 1}
                 title={SHAPKA3.shagKnopka}
-                onClick={() => setShag(shag === i + 1 ? 0 : i + 1)}
+                onClick={() => {
+                  setSechenie(false);
+                  setShag(shag === i + 1 ? 0 : i + 1);
+                }}
               >
                 <span className="z3-shag__no">{i + 1}</span>
                 <span dangerouslySetInnerHTML={{ __html: s.chtoHtml }} />
