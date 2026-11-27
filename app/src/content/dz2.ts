@@ -77,6 +77,8 @@ export const DZ2 = {
     zadach: (n: number) => `задач: ${n}`,
     zadachIz: (n: number, iz: number) => `задач: ${n} из ${iz}`,
     vybratZadachi: 'Выбрать задачи',
+    vybratTipy: 'Выбрать типы',
+    tipovIz: (n: number, iz: number) => `типов: ${n} из ${iz}`,
     vybratVse: 'Отметить все',
     snyatVse: 'Снять все',
     zadachaN: (n: number) => `Задача ${n}`,
@@ -136,6 +138,7 @@ export const DZ2 = {
       reshenia_bez_sroka: 'Решения «после дедлайна» — нужен дедлайн.',
       cel_bolshe_zapasa: 'Цель тренажёра больше, чем задач в запасе.',
       net_vybrannyh_zadach: 'В одном из блоков опорных не отмечено ни одной задачи.',
+      net_tipov: 'В одном из тренажёров не отмечено ни одного типа.',
     } as Record<string, string>,
     prichina: (s: string) => `Причина: «${s}».`,
     oshibkaBazy: (kod: string) =>

@@ -27,6 +27,7 @@ import {
   kontrolnaya,
   proverit,
   razobrat,
+  otmechennyeTipy,
   utcVMsk,
   vybrannye,
   zapros,
@@ -34,7 +35,7 @@ import {
   type Nastroyki,
   type ZadachiElementa,
 } from '@/lib/dz2/model';
-import { dataRu } from '@/lib/zhurnal/vid';
+import { dataRu, nomerEgeRazdela } from '@/lib/zhurnal/vid';
 import 'katex/dist/katex.min.css';
 import './dz2.css';
 
@@ -413,6 +414,57 @@ function VyborZadach({ e }: { e: ElementKorziny }) {
   );
 }
 
+/**
+ * Выбор типов тренажёра: все типы раздела для ДЗ по группам, как на
+ * экране «Выбрать темы». Запас собирается при выдаче из отмеченных.
+ */
+function VyborTipov({ e }: { e: ElementKorziny }) {
+  const katalog = e.katalog ?? [];
+  const otmecheny = new Set(otmechennyeTipy(e));
+  const nazvanie = (n: number, vse: boolean) => DZ2.elementy.trenazher(nomerEgeRazdela(e.task_no), vse ? 0 : n);
+  const vybrat = (ids: Iterable<string>) => korzina.vybratTipy(e.key, [...ids], nazvanie);
+  const gruppy: { gruppa: string; tipy: typeof katalog }[] = [];
+  for (const t of katalog) {
+    const g = gruppy.at(-1);
+    if (g !== undefined && g.gruppa === t.gruppa) g.tipy.push(t);
+    else gruppy.push({ gruppa: t.gruppa, tipy: [t] });
+  }
+  return (
+    <details className="dz2-vybor">
+      <summary className="dz2-vybor__zag">
+        {t.vybratTipy} <span className="t-caption">({t.tipovIz(otmecheny.size, katalog.length)})</span>
+      </summary>
+      <div className="dz2-vybor__vse">
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => vybrat(katalog.map((x) => x.id))}>
+          {t.vybratVse}
+        </button>
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => vybrat([])}>
+          {t.snyatVse}
+        </button>
+      </div>
+      {gruppy.map((g) => (
+        <fieldset key={g.gruppa} className="dz2-vybor__gruppa">
+          <legend className="dz2-vybor__nomer">{g.gruppa}</legend>
+          {g.tipy.map((x) => (
+            <Checkbox
+              key={x.id}
+              checked={otmecheny.has(x.id)}
+              onChange={(ev) => {
+                const next = new Set(otmecheny);
+                if (ev.target.checked) next.add(x.id);
+                else next.delete(x.id);
+                vybrat(next);
+              }}
+            >
+              <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(x.html) }} />
+            </Checkbox>
+          ))}
+        </fieldset>
+      ))}
+    </details>
+  );
+}
+
 function Element({ e, pervyy, posledniy }: { e: ElementKorziny; pervyy: boolean; posledniy: boolean }) {
   const celId = useId();
   const zapasId = useId();
@@ -428,6 +480,7 @@ function Element({ e, pervyy, posledniy }: { e: ElementKorziny; pervyy: boolean;
         )}
       </div>
       {e.vid === 'opornye' && e.tasks !== undefined && e.tasks.length > 1 ? <VyborZadach e={e} /> : null}
+      {e.vid === 'trenazher' && e.katalog !== undefined && e.katalog.length > 1 ? <VyborTipov e={e} /> : null}
       {e.vid === 'trenazher' ? (
         <div className="dz2-polya">
           <div>

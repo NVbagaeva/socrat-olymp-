@@ -43,11 +43,30 @@ export interface ElementKorziny {
   vybrany?: string[];
   /** Тренажёр: типы (подтипы генератора), сколько задач в запасе, цель. */
   tipy?: string[];
+  /**
+   * Тренажёр: все типы раздела, которые можно выдать, — чтобы в мастере
+   * снять или добавить тип. Нет поля — элемент из старой корзины, типы
+   * меняются только на странице тренажёра.
+   */
+  katalog?: TipKataloga[];
+  /** Тренажёр: отмеченные типы каталога (id), в порядке каталога. */
+  vyborTipov?: string[];
   zapas?: number;
   goal_kind?: 'all' | 'count' | 'streak';
   goal_n?: number;
   /** Вариант: выданная работа. */
   variant_work_id?: string;
+}
+
+/** Тип тренажёра в каталоге элемента. */
+export interface TipKataloga {
+  id: string;
+  /** Название (HTML с KaTeX, как на экране «Выбрать темы»). */
+  html: string;
+  /** Группа типов — подзаголовок списка. */
+  gruppa: string;
+  /** Подтипы генератора, которые даёт этот тип (№3: тип → прототипы). Нет — [id]. */
+  tipy?: string[];
 }
 
 export interface Korzina {
@@ -136,6 +155,53 @@ export function otmetitVse(k: Korzina, key: string, vkl: boolean): Korzina {
   };
 }
 
+/* ── Выбор типов тренажёра ──────────────────────────────────────── */
+
+/** Подтипы генератора для отмеченных типов каталога — в порядке каталога. */
+export function tipyIzVybora(katalog: readonly TipKataloga[], vybor: readonly string[]): string[] {
+  const est = new Set(vybor);
+  return [...new Set(katalog.filter((t) => est.has(t.id)).flatMap((t) => t.tipy ?? [t.id]))];
+}
+
+/** Отмеченные типы каталога: у элемента без поля — те, чьи подтипы все в его tipy. */
+export function otmechennyeTipy(e: ElementKorziny): string[] {
+  if (e.katalog === undefined) return [];
+  if (e.vyborTipov !== undefined) {
+    const est = new Set(e.vyborTipov);
+    return e.katalog.filter((t) => est.has(t.id)).map((t) => t.id);
+  }
+  const tipy = new Set(e.tipy ?? []);
+  return e.katalog.filter((t) => (t.tipy ?? [t.id]).every((x) => tipy.has(x))).map((t) => t.id);
+}
+
+/**
+ * Новый выбор типов элемента тренажёра: подтипы генератора и название
+ * пересчитываются. nazvanie(n, vse) — «Тренажёр №7: 3 типа» / «все типы».
+ */
+export function vybratTipy(
+  k: Korzina,
+  key: string,
+  vybor: readonly string[],
+  nazvanie: (n: number, vse: boolean) => string,
+): Korzina {
+  return {
+    ...k,
+    elementy: k.elementy.map((x) => {
+      if (x.key !== key || x.katalog === undefined) return x;
+      const est = new Set(vybor);
+      const ids = x.katalog.filter((t) => est.has(t.id)).map((t) => t.id);
+      const tipy = tipyIzVybora(x.katalog, ids);
+      return {
+        ...x,
+        vyborTipov: ids,
+        tipy,
+        spec: { ...x.spec, tipy },
+        title: nazvanie(ids.length, ids.length === x.katalog.length),
+      };
+    }),
+  };
+}
+
 export function v(k: Korzina, key: string): boolean {
   return k.elementy.some((x) => x.key === key);
 }
@@ -161,8 +227,33 @@ export function razobrat(raw: unknown): Korzina {
           ? e
           : sVyborom(e, undefined),
       )
+      .map((e) => (katalogVPoryadke(e) ? e : bezKataloga(e)))
       .slice(0, PREDEL_ELEMENTOV),
   };
+}
+
+/** Каталог и выбор типов из хранилища — правильной формы. */
+function katalogVPoryadke(e: ElementKorziny): boolean {
+  const stroki = (a: unknown) => Array.isArray(a) && a.every((x) => typeof x === 'string');
+  if (e.katalog === undefined) return e.vyborTipov === undefined;
+  return (
+    Array.isArray(e.katalog) &&
+    e.katalog.every(
+      (t) =>
+        typeof t === 'object' &&
+        t !== null &&
+        typeof t.id === 'string' &&
+        typeof t.html === 'string' &&
+        typeof t.gruppa === 'string' &&
+        (t.tipy === undefined || stroki(t.tipy)),
+    ) &&
+    (e.vyborTipov === undefined || stroki(e.vyborTipov))
+  );
+}
+
+function bezKataloga(e: ElementKorziny): ElementKorziny {
+  const { katalog: _k, vyborTipov: _v, ...bez } = e;
+  return bez;
 }
 
 /* ── Настройки выдачи ───────────────────────────────────────────── */
@@ -231,7 +322,8 @@ export type OshibkaVydachi =
   | 'srok_ranshe_publikacii'
   | 'reshenia_bez_sroka'
   | 'cel_bolshe_zapasa'
-  | 'net_vybrannyh_zadach';
+  | 'net_vybrannyh_zadach'
+  | 'net_tipov';
 
 /** Что мешает выдать. Пусто — можно. */
 export function proverit(k: Korzina, n: Nastroyki, now = Date.now()): OshibkaVydachi[] {
@@ -246,6 +338,9 @@ export function proverit(k: Korzina, n: Nastroyki, now = Date.now()): OshibkaVyd
   if (n.solutions_when === 'after_due' && due === null) out.push('reshenia_bez_sroka');
   if (k.elementy.some((e) => e.vid === 'trenazher' && (e.goal_n ?? 0) > (e.zapas ?? 0))) out.push('cel_bolshe_zapasa');
   if (k.elementy.some((e) => e.tasks !== undefined && vybrannye(e).length === 0)) out.push('net_vybrannyh_zadach');
+  if (k.elementy.some((e) => e.vid === 'trenazher' && e.katalog !== undefined && (e.tipy ?? []).length === 0)) {
+    out.push('net_tipov');
+  }
   return out;
 }
 

@@ -9,7 +9,7 @@
 import { DZ2 } from '@/content/dz2';
 import type { PrepSealed } from '@/lib/vychisleniya/prep/seal';
 import type { PrepPoolZadacha } from '@/lib/veroyatnost/pool';
-import type { ZadachaDz } from '@/lib/dz2/model';
+import { otmechennyeTipy, type TipKataloga, type ZadachaDz } from '@/lib/dz2/model';
 import { urovenZadachi } from '@/lib/zhurnal/uroven';
 import {
   zadachaOpornaya5,
@@ -20,12 +20,35 @@ import {
 import { nomerEgeRazdela } from '@/lib/zhurnal/vid';
 import { VDomashku } from './VDomashku';
 
+/**
+ * Каталог типов тренажёра для мастера выдачи: группы экрана «Выбрать
+ * темы». filtr — только типы, которые знает адаптер ДЗ; tipyOf — подтипы
+ * генератора для типа (№3: тип → прототипы).
+ */
+export function katalogIzGrupp(
+  gruppy: readonly { nazvanie: string; tipy: readonly { id: string; nazvanieHtml: string }[] }[],
+  filtr: (id: string) => boolean = () => true,
+  tipyOf?: (id: string) => string[],
+): TipKataloga[] {
+  return gruppy.flatMap((g) =>
+    g.tipy
+      .filter((t) => filtr(t.id))
+      .map((t) => ({
+        id: t.id,
+        html: t.nazvanieHtml,
+        gruppa: g.nazvanie,
+        ...(tipyOf === undefined ? {} : { tipy: tipyOf(t.id) }),
+      })),
+  );
+}
+
 /** Тренажёр: выбранные типы (пусто — все), запас 10 задач, цель «решить все». */
 export function VDomashkuTrenazher({
   taskNo,
   tipy,
   tipov,
   vse = false,
+  katalog,
 }: {
   taskNo: number;
   tipy: readonly string[];
@@ -33,22 +56,29 @@ export function VDomashkuTrenazher({
   tipov?: number;
   /** Выбраны все типы раздела — в названии «все типы». */
   vse?: boolean;
+  /** Все типы раздела для ДЗ: в мастере выдачи их можно снять и добавить. */
+  katalog?: readonly TipKataloga[];
 }) {
   const sorted = [...tipy].sort();
   return (
     <VDomashku
       taskNo={taskNo}
       klyuch={`trenazher:${taskNo}:${sorted.join(',')}`}
-      element={() => ({
-        key: `trenazher:${taskNo}:${sorted.join(',')}`,
-        vid: 'trenazher',
-        task_no: taskNo,
-        title: DZ2.elementy.trenazher(nomerEgeRazdela(taskNo), vse ? 0 : (tipov ?? sorted.length)),
-        spec: { tipy: sorted },
-        tipy: sorted,
-        zapas: 10,
-        goal_kind: 'all',
-      })}
+      element={() => {
+        const e = {
+          key: `trenazher:${taskNo}:${sorted.join(',')}`,
+          vid: 'trenazher' as const,
+          task_no: taskNo,
+          title: DZ2.elementy.trenazher(nomerEgeRazdela(taskNo), vse ? 0 : (tipov ?? sorted.length)),
+          spec: { tipy: sorted },
+          tipy: sorted,
+          zapas: 10,
+          goal_kind: 'all' as const,
+        };
+        if (katalog === undefined || katalog.length === 0) return e;
+        const sKatalogom = { ...e, katalog: [...katalog] };
+        return { ...sKatalogom, vyborTipov: otmechennyeTipy(sKatalogom) };
+      }}
     />
   );
 }

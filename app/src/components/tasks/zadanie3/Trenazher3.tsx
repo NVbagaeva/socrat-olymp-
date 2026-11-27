@@ -19,7 +19,7 @@ import {
 } from '../trening';
 import { TIPY3_ORDER, TRENAZHER3 } from '@/content/zadanie3';
 import { gruppaTipa, prototipyTipa, prototipZadachi, tipZadachi } from '@/content/zadanie3/gruppy';
-import { VDomashkuTrenazher } from '@/components/dz2/knopki';
+import { VDomashkuTrenazher, katalogIzGrupp } from '@/components/dz2/knopki';
 import {
   closedTasks,
   distinctSolved,
@@ -397,6 +397,7 @@ function Konfigurator3({
               tipy={tipy.flatMap(prototipyTipa)}
               tipov={tipy.length}
               vse={tipy.length === TIPY3_ORDER.length}
+              katalog={katalogIzGrupp(gruppy, undefined, prototipyTipa)}
             />
           }
           onStart={() =>
