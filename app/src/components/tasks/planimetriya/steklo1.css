@@ -20,7 +20,7 @@
 }
 
 /* ── «О задании»: пример с закреплённым чертежом (как у №3) ───── */
-.z1-primer {
+.kz-primer.z1-primer {
   max-width: none;
 }
 .z1-primer__istochnik {
@@ -124,8 +124,19 @@
   margin: 0 0 var(--space-1);
 }
 .z1-shag .stk-shag__formula {
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
+}
+.z1-shag .stk-shag__formula .katex-display {
+  margin: 0;
+  overflow: visible;
+}
+.z1-shag .stk-shag__formula .katex-display > .katex {
+  white-space: normal;
+  text-align: start;
+  line-height: 1.65;
+}
+.z1-shag .stk-shag__formula .katex-html {
+  white-space: normal;
 }
 .z1-primer__sverka,
 .z1-trn__sverka {

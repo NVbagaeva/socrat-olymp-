@@ -30,7 +30,7 @@ export function MetodyKartochki4() {
             >
               {estKartinka ? (
                 <span className="vmetod__kartinka">
-                  <KartinkaMetodaImg zadanie={4} id={m.id} alt={glava?.kartinkaAlt ?? ''} />
+                  <KartinkaMetodaImg zadanie={4} eager={m.nomer <= 3} id={m.id} alt={glava?.kartinkaAlt ?? ''} />
                 </span>
               ) : null}
               <span className="vmetod__no" aria-hidden="true">

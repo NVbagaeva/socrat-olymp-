@@ -32,14 +32,37 @@ export const GENERATOR8_SOURCES = [
  * Пресеты: ключ — навык («S1») или прототип («8.A»). Уровень у №8 — на
  * весь лист: ★ — базовые задачи, ★★ — повышенные, оба — вперемешку.
  */
+const PO_ODNOY_NA_NAVYK = {
+  S1: 1,
+  S2: 1,
+  S3: 1,
+  S4: 1,
+  S5: 1,
+  S6: 1,
+  S7: 1,
+  S8: 1,
+  S9: 1,
+  S10: 1,
+  S11: 1,
+};
+
 export const GENERATOR8_PRESETS: GenPreset[] = [
+  {
+    id: 'kl',
+    title: 'Классная работа',
+    sub: '11 задач · 1 вариант',
+    variants: 1,
+    levels: [1],
+    sostav: PO_ODNOY_NA_NAVYK,
+    kind: 'kl',
+  },
   {
     id: 'dz',
     title: 'Домашка',
     sub: '11 задач · 1 вариант',
     variants: 1,
     levels: [1],
-    sostav: { S1: 1, S2: 1, S3: 1, S4: 1, S5: 1, S6: 1, S7: 1, S8: 1, S9: 1, S10: 1, S11: 1 },
+    sostav: PO_ODNOY_NA_NAVYK,
     kind: 'dz',
   },
   {

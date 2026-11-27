@@ -12,8 +12,8 @@ import type { tekstyKarty45 } from '@/content/veroyatnost45';
 import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { typeset, typesetText } from '@/lib/tex';
-import { BANK_4, BANK_5, PODGOTOVKA_4, PODGOTOVKA_5 } from '@/lib/veroyatnost/index';
-import { bank4Pool, bank5Pool, versiyaRazborov } from '@/lib/veroyatnost/pool';
+import { PODGOTOVKA_4, PODGOTOVKA_5 } from '@/lib/veroyatnost/index';
+import { bank4Pool, bank5Pool, variantPrimera, versiyaRazborov } from '@/lib/veroyatnost/pool';
 import {
   blokHref45,
   metodyHref45,
@@ -67,12 +67,6 @@ function tex(formula: string): string {
 function opornyeHref(zadanie: Zadanie45, metod: string): string {
   const blok = (zadanie === 4 ? PODGOTOVKA_4 : PODGOTOVKA_5).find((b) => b.metod === metod);
   return blok === undefined ? opornyeHref45(zadanie) : blokHref45(zadanie, blok.id);
-}
-
-/** Задача-пример типа: первый вариант сборника, нет — первый. */
-function variantPrimera(zadanie: Zadanie45, id: string): number {
-  const p = (zadanie === 4 ? BANK_4 : BANK_5).find((x) => x.id === id);
-  return (p?.varianty.find((v) => v.source === 'sbornik') ?? p?.varianty[0])?.n ?? 1;
 }
 
 export function OZadanii45Karta({ zadanie, shapka, opasnoTipov, formuly, ob }: OZadanii45Props) {
@@ -129,8 +123,7 @@ export function OZadanii45Karta({ zadanie, shapka, opasnoTipov, formuly, ob }: O
                 open={false}
               >
                 {tipy.map((k) => {
-                  const n = variantPrimera(zadanie, k.id);
-                  const v = k.variants.find((x) => x.n === n);
+                  const v = variantPrimera(zadanie, k);
                   const opasno = opasnoTipov[k.id];
                   const opasnoHtml = opasno === undefined ? undefined : typesetText(opasno);
                   const kartinka = v?.model?.illustration;
@@ -150,7 +143,6 @@ export function OZadanii45Karta({ zadanie, shapka, opasnoTipov, formuly, ob }: O
                         <PrimerLazy45
                           zadanie={zadanie}
                           kind={k.id}
-                          n={n}
                           seal={v.seal}
                           versiya={versiya}
                           uslovieHtml={v.uslovie}

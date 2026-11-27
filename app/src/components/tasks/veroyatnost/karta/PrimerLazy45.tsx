@@ -5,20 +5,18 @@ import { KartaPrimer } from '../../karta';
 import { tekstyKarty45 } from '@/content/veroyatnost45';
 import { razdelBase } from '@/lib/paths';
 import { otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
-import type { RazboryVida } from '@/lib/veroyatnost/pool';
 import type { Zadanie45 } from '@/lib/veroyatnost/trening/links';
 import { Kartinka45, primerIzRazbora } from './Primer45';
 
 /**
  * Пример типа №4 и №5, который раскрывается в браузере: условие и
  * картинка приходят разметкой сервера, а решение — закрытым файлом
- * разборов прототипа (тем же, что грузит тренажёр) по первому раскрытию
+ * только этого примера при выборе
  * карточки (<details>). Так страница не несёт разборы всех типов сразу.
  */
 export function PrimerLazy45({
   zadanie,
   kind,
-  n,
   seal,
   versiya,
   uslovieHtml,
@@ -29,7 +27,6 @@ export function PrimerLazy45({
 }: {
   zadanie: Zadanie45;
   kind: string;
-  n: number;
   seal: string;
   versiya: string;
   uslovieHtml: string;
@@ -49,30 +46,38 @@ export function PrimerLazy45({
     let alive = true;
     let started = false;
     const load = () => {
-      if (started || !details.open) {
+      if (started) {
         return;
       }
       started = true;
-      fetch(`${razdelBase(zadanie)}/dannye/razbory/${kind}.json?v=${versiya}`)
+      fetch(`${razdelBase(zadanie)}/dannye/primer/${kind}.json?v=${versiya}`)
         .then((r) => {
           if (!r.ok) throw new Error(String(r.status));
-          return r.json() as Promise<RazboryVida>;
+          return r.json() as Promise<string>;
         })
-        .then((vid) => {
-          const steps = vid[String(n)]?.steps;
-          if (alive) setRazbor(steps === undefined ? 'net' : otkrytRazbor(steps, seal));
+        .then((steps) => {
+          if (alive) setRazbor(otkrytRazbor(steps, seal));
         })
         .catch(() => {
+          started = false;
           if (alive) setRazbor('net');
         });
     };
-    load();
-    details.addEventListener('toggle', load);
+    const onToggle = () => {
+      if (details.open) load();
+    };
+    const summary = details.querySelector(':scope > summary');
+    onToggle();
+    summary?.addEventListener('pointerenter', load);
+    summary?.addEventListener('focus', load);
+    details.addEventListener('toggle', onToggle);
     return () => {
       alive = false;
-      details.removeEventListener('toggle', load);
+      summary?.removeEventListener('pointerenter', load);
+      summary?.removeEventListener('focus', load);
+      details.removeEventListener('toggle', onToggle);
     };
-  }, [zadanie, kind, n, seal, versiya]);
+  }, [zadanie, kind, seal, versiya]);
 
   if (razbor === null || razbor === 'net') {
     return (
