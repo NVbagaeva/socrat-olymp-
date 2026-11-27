@@ -1,0 +1,109 @@
+/* Живая сцена главы «Подобие» №3. Общее — ../zhivye.css. */
+.zv3-vybor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--chertezh-fon) 55%, transparent);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.zv3-vybor-zag {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.zv3-vybor .zv-seg {
+  flex-wrap: wrap;
+  border-radius: 18px;
+}
+.zv3-otrezok {
+  stroke: var(--zv-zhar);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.zv3-prizrak {
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 35%, transparent);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+}
+.zv3-tik {
+  stroke: var(--chertezh-liniya);
+  stroke-width: 1.6;
+}
+.zv3-chislo {
+  fill: var(--chertezh-podpis);
+  font-size: 12px;
+}
+.zv3-konec {
+  fill: var(--zv-zhar);
+  stroke: var(--chertezh-fon);
+  stroke-width: 2;
+}
+.zv3-gran {
+  stroke: var(--chertezh-liniya);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.zv3-gran--pered {
+  fill: color-mix(in srgb, var(--chertezh-siniy) 22%, transparent);
+}
+.zv3-gran--verh {
+  fill: color-mix(in srgb, var(--chertezh-siniy) 12%, transparent);
+}
+.zv3-gran--prav {
+  fill: color-mix(in srgb, var(--chertezh-siniy) 34%, transparent);
+}
+.zv3-setka {
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 55%, transparent);
+  stroke-width: 1;
+}
+.zv3-edinitsa {
+  fill: color-mix(in srgb, var(--chertezh-akcent) 30%, transparent);
+  stroke: var(--zv-zhar);
+  stroke-width: 1.8;
+  stroke-dasharray: 5 3;
+  stroke-linejoin: round;
+}
+.zv3-itog {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.zv3-itog li {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--chertezh-fon) 45%, transparent);
+  box-shadow: var(--glass-ring);
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+.zv3-itog li.is-gotovo,
+.zv3-itog li.is-idet {
+  opacity: 1;
+}
+.zv3-itog li.is-idet {
+  box-shadow:
+    var(--glass-ring),
+    0 0 0 2px color-mix(in srgb, var(--chertezh-akcent) 55%, transparent);
+}
+.zv3-itog-zag {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.zv3-itog-tex {
+  font-size: 15px;
+  color: var(--chertezh-tekst);
+}
+@media (max-width: 480px) {
+  .zv3-itog {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

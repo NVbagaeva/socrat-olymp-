@@ -36,6 +36,10 @@ const K16 = requireSrc('lib/zhivye/kredit16.ts');
 const T16 = requireSrc('content/zhivye16.ts');
 const P1 = requireSrc('lib/zhivye/planimetriya1.ts');
 const T1 = requireSrc('content/zhivye1.ts');
+const V2 = requireSrc('lib/zhivye/vektory2.ts');
+const T2 = requireSrc('content/zhivye2.ts');
+const P3 = requireSrc('lib/zhivye/podobie3.ts');
+const T3 = requireSrc('content/zhivye3.ts');
 
 const failures = [];
 let checks = 0;
@@ -474,9 +478,102 @@ check(
   }
 }
 
+/* ── №2: действия с векторами ── */
+{
+  progon(V2.hodVektory(), '№2 действия');
+  const tochno = (p, q) => Math.abs(p[0] - q[0]) < 1e-9 && Math.abs(p[1] - q[1]) < 1e-9;
+  for (const n of V2.NABORY) {
+    const gde = `№2 ${n.id}`;
+    const a = n.a;
+    const b = n.b;
+    const k1 = V2.kadr(n, 1);
+    check(k1.etap === 0 && k1.u === 1, `${gde}: t = 1 — конец суммы`);
+    check(tochno(k1.rez.do, [a[0] + b[0], a[1] + b[1]]), `${gde}: a + b по координатам`);
+    check(
+      k1.kopiyaB !== null &&
+        tochno(k1.kopiyaB.ot, a) &&
+        tochno(k1.kopiyaB.do, [a[0] + b[0], a[1] + b[1]]),
+      `${gde}: копия b стоит у конца a, её конец — в a + b`,
+    );
+    const r = V2.raznost(n);
+    const k2 = V2.kadr(n, 2);
+    check(k2.etap === 1 && k2.u === 1, `${gde}: t = 2 — конец разности`);
+    check(tochno(k2.rez.ot, b) && tochno(k2.rez.do, a), `${gde}: a − b идёт из конца b в конец a`);
+    check(tochno([b[0] + r[0], b[1] + r[1]], a), `${gde}: b + (a − b) = a`);
+    const k3 = V2.kadr(n, 3);
+    check(k3.etap === 2 && k3.u === 1, `${gde}: t = 3 — конец умножения`);
+    check(
+      tochno(k3.rez.do, [2 * a[0], 2 * a[1]]) && tochno(V2.kratnoe(n), k3.rez.do),
+      `${gde}: 2a`,
+    );
+    const R = V2.ramka(n);
+    let prev = null;
+    for (let t = 0; t <= 3 + 1e-9; t += 0.01) {
+      const k = V2.kadr(n, t);
+      for (const p of [k.rez.ot, k.rez.do, ...(k.kopiyaB ? [k.kopiyaB.ot, k.kopiyaB.do] : [])]) {
+        check(
+          p[0] >= R.x0 && p[0] <= R.x1 && p[1] >= R.y0 && p[1] <= R.y1,
+          `${gde}: рисунок в рамке (t=${t.toFixed(2)})`,
+        );
+      }
+      if (prev !== null && prev.etap === k.etap) {
+        const d = Math.hypot(k.rez.do[0] - prev.rez.do[0], k.rez.do[1] - prev.rez.do[1]);
+        check(d < 0.35, `${gde}: вектор-результат движется без скачков (t=${t.toFixed(2)})`);
+      }
+      prev = k;
+    }
+    check(T2.DEYSTVIYA2.nabory[n.id] !== undefined, `${gde}: есть название набора`);
+  }
+}
+
+/* ── №3: подобие, k / k² / k³ ── */
+{
+  progon(P3.hodPodobie(), '№3 подобие');
+  for (const k of P3.KOEFFICIENTY) {
+    const gde = `№3 k=${k}`;
+    const e0 = P3.kadr(k, 0);
+    check(e0.etap === 0 && blizko(e0.s, 1) && blizko(e0.velichina, 1), `${gde}: старт — единица`);
+    const e1 = P3.kadr(k, 1);
+    check(e1.etap === 0 && blizko(e1.s, k) && blizko(e1.velichina, k), `${gde}: длина выросла в k`);
+    const e2 = P3.kadr(k, 2);
+    check(e2.etap === 1 && blizko(e2.s, k) && blizko(e2.velichina, k * k), `${gde}: площадь в k²`);
+    const e3 = P3.kadr(k, 3);
+    check(e3.etap === 2 && blizko(e3.s, k) && blizko(e3.velichina, k ** 3), `${gde}: объём в k³`);
+    check(
+      JSON.stringify(P3.voSkolko(k)) === JSON.stringify([k, k * k, k ** 3]),
+      `${gde}: во сколько раз`,
+    );
+    check(
+      JSON.stringify(P3.linitsy(k)) ===
+        JSON.stringify(Array.from({ length: k - 1 }, (_, i) => i + 1)),
+      `${gde}: линии сетки внутри ребра`,
+    );
+    for (const etap of [0, 1, 2]) {
+      let prev = 1;
+      for (let u = 0.01; u <= 1 + 1e-9; u += 0.01) {
+        const x = P3.kadr(k, etap + u);
+        check(
+          x.etap === etap && x.s >= prev - 1e-9 && x.s <= k + 1e-9,
+          `${gde}: ребро растёт монотонно (этап ${etap})`,
+        );
+        prev = x.s;
+      }
+    }
+    const tex = T3.PODOBIE3.itog.map((x) => x.tex(k)).join(' ');
+    check(
+      tex.includes(String(k * k)) && tex.includes(String(k ** 3)),
+      `${gde}: итоговые числа в подписях`,
+    );
+  }
+  const g = P3.tochka(0, 0, 0, 10, 5, 100);
+  check(g[0] === 5 && g[1] === 100, '№3: начало координат проекции');
+  const q = P3.tochka(1, 2, 3, 10, 0, 100);
+  check(blizko(q[0], 20) && blizko(q[1], 100 - (3 + 0.35 * 2) * 10), '№3: косая проекция');
+}
+
 /* ── 3. Тексты ── */
 {
-  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15, T12, T16, T1], (k, val) =>
+  const vse = JSON.stringify([T8, T6, T13, T18, T11, T15, T12, T16, T1, T2, T3], (k, val) =>
     typeof val === 'function' ? String(val) : val,
   );
   check(!/(^|[^а-яё])(мы|нам|нас|наш)([^а-яё]|$)/i.test(vse), '№8: в текстах нет «мы»');

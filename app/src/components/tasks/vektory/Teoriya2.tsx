@@ -4,6 +4,7 @@ import { RAZDELY_TEORII } from '@/content/theoryVektory';
 import { PROGRESS_2, TEORIYA_DEKOR_2 } from '@/content/vektory';
 import { stsena, type StsenaId } from '@/lib/vektory/stseny';
 import { QuadraticSection } from '../theory/quadratic/QuadraticSection';
+import { ZhivyeDeystviya2 } from '@/components/zhivye/vektory2/Zhivye2';
 import { Risunok } from './Risunok';
 import '../teoriya/teoriya-steklo.css';
 
@@ -46,6 +47,7 @@ export function Teoriya2({ vkladka }: { vkladka: string }) {
           figureFor={figureFor}
           yakorKartochki={(id) => yakorKartochki2(r.id, id)}
         />
+        {r.id === 'deystviya' ? <ZhivyeDeystviya2 /> : null}
       </div>,
     ]),
   );

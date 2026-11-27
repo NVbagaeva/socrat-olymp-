@@ -1,0 +1,61 @@
+/* Живая сцена справочника №2 (векторы). Общее — ../zhivye.css. */
+.zv2-vybor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--chertezh-fon) 55%, transparent);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.zv2-vybor-zag {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.zv2-vybor .zv-seg {
+  flex-wrap: wrap;
+  border-radius: 18px;
+}
+.zv2-setka {
+  stroke: color-mix(in srgb, var(--chertezh-setka) 45%, transparent);
+  stroke-width: 1;
+}
+.zv2-os {
+  stroke: color-mix(in srgb, var(--chertezh-liniya) 70%, transparent);
+  stroke-width: 1.6;
+}
+.zv2-tik {
+  fill: var(--chertezh-podpis);
+  font-size: 11px;
+}
+.zv2-nachalo {
+  fill: var(--chertezh-liniya);
+}
+.zv2-vektor line {
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.zv2-vektor polygon {
+  fill: currentColor;
+}
+.zv2-vektor.is-a {
+  color: var(--zv-sin);
+}
+.zv2-vektor.is-b {
+  color: var(--zv-zhar);
+}
+.zv2-vektor.is-kopiya {
+  opacity: 0.75;
+}
+.zv2-vektor.is-kopiya line {
+  stroke-dasharray: 6 4;
+}
+.zv2-vektor.is-rez {
+  color: var(--chertezh-liniya);
+}
+.zv2-vektor.is-rez line {
+  stroke-width: 3.6;
+}
