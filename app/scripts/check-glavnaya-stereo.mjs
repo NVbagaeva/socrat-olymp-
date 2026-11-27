@@ -52,7 +52,18 @@ const zadach = Z.BANK.reduce((s, p) => s + p.varianty.length, 0);
 check(html.includes('vit-chast--stereo'), 'главная: нет части «живая стереометрия»');
 check(/class="vst-kholst"><svg/.test(html), 'главная: нет первого кадра чертежа в HTML');
 check((html.match(/data-shag="/g) ?? []).length === 3, 'главная: шагов разбора не 3');
-check((html.match(/class="vst-mini__k"/g) ?? []).length === 3, 'главная: миниатюр не 3');
+/* Миниатюры — бегущей строкой (Begushchaya): набор и две копии
+   (aria-hidden, inert); в самом наборе — три. */
+const miniNabory = (html.split('vit-beg--mini')[1] ?? '').split('</ol>').slice(0, 3);
+check(
+  (miniNabory[0]?.match(/class="vst-mini__k"/g) ?? []).length === 3 &&
+    !/<ol[^>]*aria-hidden/.test(miniNabory[0] ?? ''),
+  'главная: миниатюр не 3',
+);
+check(
+  miniNabory.slice(1).every((k) => /<ol[^>]*aria-hidden="true"[^>]*inert/.test(k)),
+  'главная: копии миниатюр в бегущей строке не скрыты (aria-hidden, inert)',
+);
 check(
   html.includes(`все ${zadach} задач`),
   `главная: в тексте нет числа задач из банка (${zadach})`,

@@ -10,6 +10,7 @@ import { razbor15 } from '@/lib/stereo/razbory15';
 import { typeset } from '@/lib/tex';
 import { BANK } from '@/lib/zadanie3';
 import { RAZDEL3, tipHref3 } from '@/lib/zadanie3/links';
+import { Begushchaya } from './Begushchaya';
 import { StereoOzhivit } from './StereoOzhivit';
 import './stereo-vitrina.css';
 
@@ -19,6 +20,26 @@ const TIP_GLAVNOY = 'diagonali';
 /** Неподвижная миниатюра: тот же движок, финальный шаг разбора, без подписей. */
 function miniSvg(model: Model, shag: number): string {
   return renderSolid(model, { tema: 'ekran', shag, ustoychivo: true, bezPodpisey: true });
+}
+
+/* Миниатюр три — набор короче широкой ленты, поэтому копий две. */
+const KOPII_MINI = [1, 2] as const;
+
+/** SVG с id, сдвинутыми на хвост: у копий в бегущей строке id не повторяются. */
+function sIdami(svg: string, hvost: string): string {
+  if (!hvost) return svg;
+  const idy = [...svg.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1] as string);
+  return idy.reduce(
+    (s, id) =>
+      s
+        .split(`id="${id}"`)
+        .join(`id="${id}${hvost}"`)
+        .split(`#${id})`)
+        .join(`#${id}${hvost})`)
+        .split(`"#${id}"`)
+        .join(`"#${id}${hvost}"`),
+    svg,
+  );
 }
 
 function razborIli<R>(r: R | undefined, tip: string): R {
@@ -77,6 +98,22 @@ export function StereoChast() {
       svg: miniSvg(sechenie.model(), sechenie.shagi.length),
     },
   ];
+
+  /* Карточка миниатюры; у копий бегущей строки в SVG свои id. */
+  const karta = (hvost: string) =>
+    mini.map((m) => ({
+      key: m.id,
+      node: (
+        <Link className="vst-mini__k" href={m.href}>
+          <span
+            className="vst-mini__ris"
+            aria-hidden="true"
+            dangerouslySetInnerHTML={{ __html: sIdami(m.svg, hvost) }}
+          />
+          <span className="vst-mini__p">{m.podpis}</span>
+        </Link>
+      ),
+    }));
 
   const i = T.zagolovok.indexOf(T.akcent);
   return (
@@ -159,20 +196,11 @@ export function StereoChast() {
 
       <div className="vst-mini-blok">
         <p className="vst-mini-z">{T.minZ}</p>
-        <ul className="vst-mini">
-          {mini.map((m) => (
-            <li key={m.id}>
-              <Link className="vst-mini__k" href={m.href}>
-                <span
-                  className="vst-mini__ris"
-                  aria-hidden="true"
-                  dangerouslySetInnerHTML={{ __html: m.svg }}
-                />
-                <span className="vst-mini__p">{m.podpis}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <Begushchaya
+          className="vit-beg--mini"
+          elementy={karta('')}
+          kopii={KOPII_MINI.map((_, k) => karta(`-k${k + 1}`))}
+        />
       </div>
 
       <StereoOzhivit model={model} az={az} el={el} nachalo={nachalo} />
