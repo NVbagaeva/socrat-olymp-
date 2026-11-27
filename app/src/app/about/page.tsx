@@ -1,10 +1,13 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { clsx } from 'clsx';
 import type { CSSProperties } from 'react';
 import type { Metadata } from 'next';
 import { ogStranicy } from '@/lib/og';
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { Illustration } from '@/components/ui/Illustration';
-import { about, type Illyustraciya, type Nadpis } from '@/content/about';
+import { assetUrl } from '@/lib/assetUrl';
+import { about, type Illyustraciya, type SteklyannayaKartinka } from '@/content/about';
 import { Dvizhenie } from './Dvizhenie';
 import { Stsena } from './Stsena';
 import './about.css';
@@ -17,19 +20,21 @@ export const metadata: Metadata = {
 
 const { hero, imya, podhod, put, sajt, polza, prizyv, svyaz } = about;
 
-/* Рукописная пометка на «бумажке»: тёплый лист с наклоном и тенью.
-   Наклон задаёт модификатор — у каждой записки свой. */
-function Zapiska({ nadpis, className }: { nadpis: Nadpis; className?: string }) {
+/* Стеклянную картинку кладёт автор в public/. Сайт статический, поэтому
+   наличие файла проверяется при сборке: нет файла — нет и блока, без
+   пустой дыры и битой картинки. */
+function estFayl(k: SteklyannayaKartinka) {
+  return existsSync(path.join(process.cwd(), 'public', k.file))
+    ? { src: assetUrl(k.file), width: k.width, height: k.height }
+    : null;
+}
+
+/* Рукописная строка в фоне секции: крупный Caveat с наклоном. Стоит в
+   своей строке сетки (не поверх текста) и срезается краем экрана. */
+function Rukopis({ text, className }: { text: string; className?: string }) {
   return (
-    <div className={clsx('oa-zapiska', className)}>
-      <img
-        src={nadpis.src}
-        alt={nadpis.alt}
-        width={nadpis.width}
-        height={nadpis.height}
-        loading="lazy"
-        decoding="async"
-      />
+    <div className={clsx('oa-rukopis', className)} aria-hidden="true">
+      <span>{text}</span>
     </div>
   );
 }
@@ -82,6 +87,8 @@ const poryadok = (i: number) => ({ '--i': i }) as CSSProperties;
    чем могу быть полезна → призыв и контакты. У каждого блока своя
    композиция, чтобы ритм не повторялся. */
 export default function AboutPage() {
+  const lenta = estFayl(hero.lenta);
+  const beskonechnost = estFayl(put.beskonechnost);
   return (
     <div className="oa">
       {/* Тот же SiteHeader, что и везде; currentHref подсвечивает пункт меню. */}
@@ -96,7 +103,7 @@ export default function AboutPage() {
         {/* ── 1. Первый экран ─────────────────────────────────── */}
         <section className="oa-hero" aria-labelledby="oa-imya">
           <div className="oa-wrap oa-hero__grid">
-            <Stsena>
+            <Stsena lenta={lenta}>
               <img
                 className="oa-foto"
                 src={hero.photo.src}
@@ -119,22 +126,28 @@ export default function AboutPage() {
                 </span>
               </h1>
               <p className="oa-rol">{hero.rol}</p>
-              <ul className="oa-hero__fakty">
-                {hero.fakty.map((fakt) => (
-                  <li key={fakt.glavnoe}>
-                    <b>{fakt.glavnoe}</b>
-                    <span>{fakt.podpis}</span>
-                  </li>
+              <dl className="oa-pokazateli">
+                {hero.pokazateli.map((p) => (
+                  <div key={p.podpis}>
+                    <dt>{p.podpis}</dt>
+                    <dd>{p.chislo}</dd>
+                  </div>
                 ))}
-              </ul>
+              </dl>
               <div className="oa-knopki">
                 <a className="btn btn--primary btn--lg" href={hero.actions.glavnaya.href}>
                   {hero.actions.glavnaya.label}
+                  <span aria-hidden="true">→</span>
                 </a>
                 <a className="btn btn--secondary btn--lg" href={hero.actions.vtoraya.href}>
                   {hero.actions.vtoraya.label}
                 </a>
               </div>
+              <ul className="oa-tegi">
+                {hero.tegi.map((teg) => (
+                  <li key={teg}>{teg}</li>
+                ))}
+              </ul>
             </div>
           </div>
         </section>
@@ -142,11 +155,13 @@ export default function AboutPage() {
         {/* ── 2. Как я учу: сетка принципов, записка на углу ──── */}
         <section className="oa-sec oa-podhod" aria-labelledby="oa-podhod">
           <div className="oa-wrap">
-            <div data-reveal>
-              <Shapka metka={podhod.metka} title={podhod.title} id="oa-podhod" />
+            <div className="oa-podhod__head">
+              <div data-reveal>
+                <Shapka metka={podhod.metka} title={podhod.title} id="oa-podhod" />
+              </div>
+              <Rukopis text={podhod.rukopis} className="oa-rukopis--podhod" />
             </div>
             <div className="oa-podhod__pole">
-              <Zapiska nadpis={podhod.nadpis} className="oa-zapiska--ugol" />
               <ol className="oa-printsipy">
                 {podhod.printsipy.map((p, i) => (
                   <li key={p.title} data-reveal style={poryadok(i)}>
@@ -168,17 +183,28 @@ export default function AboutPage() {
             <div className="oa-put-sec__intro" data-reveal>
               <Shapka metka={put.metka} title={put.title} id="oa-put" />
               <p className="oa-text">{put.lead}</p>
-              <ul className="oa-beydzhi" aria-label="Коротко">
-                {put.fakty.map((fakt) => (
-                  <li key={fakt}>{fakt}</li>
-                ))}
-              </ul>
+              {beskonechnost ? (
+                <img
+                  className="oa-beskonechnost"
+                  src={beskonechnost.src}
+                  alt=""
+                  aria-hidden="true"
+                  width={beskonechnost.width}
+                  height={beskonechnost.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : null}
+              <Rukopis text={put.rukopis} className="oa-rukopis--put" />
             </div>
             <div className="oa-put-sec__lenta">
               <ol className="oa-put">
                 {put.points.map((point, i) => (
                   <li
-                    className={point.parallel ? 'oa-put__parallel' : undefined}
+                    className={clsx(
+                      point.parallel && 'oa-put__parallel',
+                      i === put.points.length - 1 && 'oa-put__itog',
+                    )}
                     key={point.place}
                     data-reveal
                     style={poryadok(i % 3)}
@@ -189,9 +215,6 @@ export default function AboutPage() {
                   </li>
                 ))}
               </ol>
-              <div className="oa-put__itog" data-reveal>
-                <Zapiska nadpis={put.nadpis} className="oa-zapiska--itog" />
-              </div>
             </div>
           </div>
         </section>
@@ -328,7 +351,7 @@ export default function AboutPage() {
                   </a>
                 ))}
               </div>
-              <Zapiska nadpis={svyaz.nadpis} className="oa-zapiska--svyaz" />
+              <Rukopis text={svyaz.rukopis} className="oa-rukopis--svyaz" />
             </div>
           </div>
         </section>
