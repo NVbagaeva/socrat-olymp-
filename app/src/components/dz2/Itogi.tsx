@@ -14,6 +14,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Badge, Button, Card, EmptyState, FieldMessage } from '@/components/ui';
 import { Confirm, NeedLogin } from '@/components/dz/common';
 import { DZ2 } from '@/content/dz2';
+import { kodOshibki } from '@/lib/dz2/oshibka';
 import { useSessionUser } from '@/lib/auth/session';
 import { sanitizeHtml } from '@/lib/dz/sanitize';
 import {
@@ -42,10 +43,6 @@ function param(name: string): string | null {
   return typeof window === 'undefined'
     ? null
     : new URLSearchParams(window.location.search).get(name);
-}
-
-function kodOshibki(e: unknown): string {
-  return e instanceof Error && 'code' in e ? String((e as { code: string }).code) : 'unknown';
 }
 
 /** Ученик за задачу брался: отвечал, брал подсказку или она закрыта. */

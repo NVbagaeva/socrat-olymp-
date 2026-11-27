@@ -187,6 +187,18 @@ select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(json
 select pg_temp.push(pg_temp.z('d1000000-0000-0000-0000-0000000000a1', 5, '5:P02', 'right', 40000,
   extra => jsonb_build_object('place', 'variant', 'place_ref', :'v1')));
 
+-- Вариант месяца — своим источником (20261128150000_varianty_mesyaca.sql).
+-- Неизвестный источник база не примет: по имени этой проверки очередь
+-- сайта откатывается на «повышенные», пока миграции нет (lib/zhurnal/ochered.ts).
+select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(jsonb_build_object(
+  'id', 'e1000000-0000-0000-0000-0000000000e2', 'source', 'mesyac', 'set_code', 'EV-02', 'variant_no', 1,
+  'title', 'Ежемесячный вариант · Ноябрь 2026', 'started_at', now() - interval '1 minute',
+  'finished_at', now(), 'primary_score', 20, 'max_score', 31, 'test_score', 76, 'active_ms', 50000,
+  'total_ms', 60000))));
+select pg_temp.fails($q$select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(jsonb_build_object(
+  'id', gen_random_uuid(), 'source', 'chto-to', 'set_code', 'X', 'started_at', now(), 'active_ms', 0,
+  'total_ms', 0))))$q$, 'varianty_resheniya_source_check');
+
 -- Другие ученики пишут своё.
 select pg_temp.as_user(:'s3');
 select pg_temp.push(pg_temp.z(:'zc1', 8, '8.A', 'right', 20000));
@@ -273,6 +285,8 @@ select pg_temp.ok(public.uchitel_zadacha(:'s1', :'za3') -> 'bystro' is null,
 select pg_temp.ok(jsonb_array_length(public.uchitel_zadacha(:'s1', :'za1') -> 'popytki') = 2,
   'учитель не видит попытки задачи');
 select pg_temp.ok((public.uchitel_variant(:'s1', :'v1') ->> 'test_score')::int = 58, 'вариант ученика');
+select pg_temp.ok(public.uchitel_variant(:'s1', 'e1000000-0000-0000-0000-0000000000e2') ->> 'source' = 'mesyac',
+  'вариант месяца — учитель видит источник');
 select pg_temp.ok((select count(*) = 2 from jsonb_array_elements(
     public.uchitel_klass(:'class_a', current_date - 30, current_date + 1) -> 'ucheniki')), 'в классе не 2 ученика');
 select pg_temp.ok(public.uchitel_klass(:'class_a', current_date - 30, current_date + 1)::text not like

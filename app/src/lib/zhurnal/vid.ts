@@ -137,5 +137,19 @@ export const ISTOCHNIKI_VARIANTA: Record<string, string> = {
   sobrat: 'Собранный вариант',
   seriya: 'Серия вариантов',
   povyshennye: 'Вариант повышенной сложности',
+  mesyac: 'Вариант месяца',
   rabota: 'Работа от учителя',
 };
+
+/**
+ * Откуда вариант — для подписи учителю. Вариант месяца до миграции
+ * 20261128150000_varianty_mesyaca.sql записывался как «повышенной
+ * сложности»: такой узнаётся по коду набора «EV-02»
+ * (lib/ezhemesyachnye/kod.ts; модуль не импортируется — он тянет тексты раздела).
+ */
+export function istochnikVarianta(v: { source: string; set_code?: string }): string {
+  if (v.source === 'povyshennye' && v.set_code !== undefined && /^EV-\d{2}$/i.test(v.set_code.trim())) {
+    return 'mesyac';
+  }
+  return v.source;
+}

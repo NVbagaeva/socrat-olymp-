@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui';
-import { VDomashkuTrenazher } from '@/components/dz2/knopki';
+import { VDomashkuTrenazher, katalogIzGrupp } from '@/components/dz2/knopki';
 import { BookmarksList, HistoryList, MistakesList } from '@/components/progress/Lists';
 import { TrainerSessionHost, type ConfiguratorApi, type SummaryActions } from '../session';
 import type { SummaryData } from '../session/TrainerSummary';
@@ -354,6 +354,7 @@ function Konfigurator8({
               taskNo={8}
               tipy={PROTOTYPES8_ORDER.filter((id) => selected.has(id))}
               vse={selected.size === PROTOTYPES8_ORDER.length}
+              katalog={katalogIzGrupp(gruppy)}
             />
           }
         />

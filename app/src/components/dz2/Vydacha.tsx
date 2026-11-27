@@ -16,6 +16,8 @@ import type React from 'react';
 import { Button, Card, Checkbox, EmptyState, FieldLabel, Input } from '@/components/ui';
 import { NeedLogin } from '@/components/dz/common';
 import { DZ2 } from '@/content/dz2';
+import { kodOshibki, prichinaOshibki } from '@/lib/dz2/oshibka';
+import { sanitizeHtml } from '@/lib/dz/sanitize';
 import { useSessionUser } from '@/lib/auth/session';
 import type { TutorClass } from '@/lib/dz/api';
 import { korzina, useKorzina } from '@/lib/dz2/korzina';
@@ -25,13 +27,16 @@ import {
   kontrolnaya,
   proverit,
   razobrat,
+  otmechennyeTipy,
   utcVMsk,
+  vybrannye,
   zapros,
   type ElementKorziny,
   type Nastroyki,
   type ZadachiElementa,
 } from '@/lib/dz2/model';
-import { dataRu } from '@/lib/zhurnal/vid';
+import { dataRu, nomerEgeRazdela } from '@/lib/zhurnal/vid';
+import 'katex/dist/katex.min.css';
 import './dz2.css';
 
 const t = DZ2.master;
@@ -39,10 +44,6 @@ const ZAPASY = [5, 10, 15, 20, 30, 40, 60];
 
 function param(name: string): string | null {
   return typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(name);
-}
-
-function kodOshibki(e: unknown): string {
-  return e instanceof Error && 'code' in e ? String((e as { code: string }).code) : 'unknown';
 }
 
 export function Vydacha() {
@@ -81,8 +82,8 @@ export function Vydacha() {
           due_msk: dz.due_at === null ? '' : utcVMsk(dz.due_at),
         });
         if (chernovik?.korzina !== undefined) korzina.zamenit(razobrat(chernovik.korzina));
-      } catch {
-        if (alive) setError(DZ2.master.oshibkaBazy('unknown'));
+      } catch (e) {
+        if (alive) setError(DZ2.master.oshibkaBazy(kodOshibki(e)));
       }
     })();
     return () => {
@@ -107,7 +108,7 @@ export function Vydacha() {
     const { sobratZapas } = await import('@/lib/dz2/sborka');
     const seed = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
     for (const e of k.elementy) {
-      if (e.vid === 'opornye' && e.tasks !== undefined) out[e.key] = { obshchie: e.tasks };
+      if (e.vid === 'opornye' && e.tasks !== undefined) out[e.key] = { obshchie: vybrannye(e) };
       if (e.vid === 'trenazher') {
         const tipy = e.tipy ?? [];
         const zapas = e.zapas ?? 10;
@@ -148,7 +149,10 @@ export function Vydacha() {
         setNote(chto === 'template' ? t.shablonSohranen : t.sohraneno);
       }
     } catch (e) {
-      setError(t.oshibkaBazy(kodOshibki(e)));
+      const kod = kodOshibki(e);
+      const prichina = kod === 'unknown' ? prichinaOshibki(e) : null;
+      /* Неизвестную ошибку — с причиной: учитель сможет её переслать. */
+      setError(prichina === null ? t.oshibkaBazy(kod) : `${t.oshibkaBazy(kod)} ${t.prichina(prichina)}`);
     } finally {
       setBusy(false);
     }
@@ -374,6 +378,93 @@ function Galka({
   );
 }
 
+/**
+ * Выбор задач опорного блока: условие каждой задачи (та же вёрстка, что
+ * увидит ученик) и галочка. В ДЗ идут отмеченные, в порядке блока.
+ */
+function VyborZadach({ e }: { e: ElementKorziny }) {
+  const tasks = e.tasks ?? [];
+  const otmecheny = new Set(vybrannye(e).map((z) => z.task_ref));
+  return (
+    <details className="dz2-vybor">
+      <summary className="dz2-vybor__zag">{t.vybratZadachi}</summary>
+      <div className="dz2-vybor__vse">
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => korzina.otmetitVse(e.key, true)}>
+          {t.vybratVse}
+        </button>
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => korzina.otmetitVse(e.key, false)}>
+          {t.snyatVse}
+        </button>
+      </div>
+      <ol className="dz2-vybor__spisok">
+        {tasks.map((z, i) => (
+          <li key={z.task_ref} className="dz2-vybor__zadacha">
+            <Checkbox
+              checked={otmecheny.has(z.task_ref)}
+              onChange={(ev) => korzina.otmetit(e.key, z.task_ref, ev.target.checked)}
+            >
+              <span className="dz2-vybor__nomer">{t.zadachaN(i + 1)}</span>
+            </Checkbox>
+            <div className="dz2-vybor__uslovie" dangerouslySetInnerHTML={{ __html: sanitizeHtml(z.question_html) }} />
+            <span className="t-caption">{t.otvet(z.answer)}</span>
+          </li>
+        ))}
+      </ol>
+    </details>
+  );
+}
+
+/**
+ * Выбор типов тренажёра: все типы раздела для ДЗ по группам, как на
+ * экране «Выбрать темы». Запас собирается при выдаче из отмеченных.
+ */
+function VyborTipov({ e }: { e: ElementKorziny }) {
+  const katalog = e.katalog ?? [];
+  const otmecheny = new Set(otmechennyeTipy(e));
+  const nazvanie = (n: number, vse: boolean) => DZ2.elementy.trenazher(nomerEgeRazdela(e.task_no), vse ? 0 : n);
+  const vybrat = (ids: Iterable<string>) => korzina.vybratTipy(e.key, [...ids], nazvanie);
+  const gruppy: { gruppa: string; tipy: typeof katalog }[] = [];
+  for (const t of katalog) {
+    const g = gruppy.at(-1);
+    if (g !== undefined && g.gruppa === t.gruppa) g.tipy.push(t);
+    else gruppy.push({ gruppa: t.gruppa, tipy: [t] });
+  }
+  return (
+    <details className="dz2-vybor">
+      <summary className="dz2-vybor__zag">
+        {t.vybratTipy} <span className="t-caption">({t.tipovIz(otmecheny.size, katalog.length)})</span>
+      </summary>
+      <div className="dz2-vybor__vse">
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => vybrat(katalog.map((x) => x.id))}>
+          {t.vybratVse}
+        </button>
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => vybrat([])}>
+          {t.snyatVse}
+        </button>
+      </div>
+      {gruppy.map((g) => (
+        <fieldset key={g.gruppa} className="dz2-vybor__gruppa">
+          <legend className="dz2-vybor__nomer">{g.gruppa}</legend>
+          {g.tipy.map((x) => (
+            <Checkbox
+              key={x.id}
+              checked={otmecheny.has(x.id)}
+              onChange={(ev) => {
+                const next = new Set(otmecheny);
+                if (ev.target.checked) next.add(x.id);
+                else next.delete(x.id);
+                vybrat(next);
+              }}
+            >
+              <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(x.html) }} />
+            </Checkbox>
+          ))}
+        </fieldset>
+      ))}
+    </details>
+  );
+}
+
 function Element({ e, pervyy, posledniy }: { e: ElementKorziny; pervyy: boolean; posledniy: boolean }) {
   const celId = useId();
   const zapasId = useId();
@@ -382,8 +473,14 @@ function Element({ e, pervyy, posledniy }: { e: ElementKorziny; pervyy: boolean;
       <div className="dz2-element__verh">
         <span className="dz2-element__vid">{DZ2.vidy[e.vid] ?? e.vid}</span>
         <span className="dz2-element__nazvanie">{e.title}</span>
-        {e.tasks === undefined ? null : <span className="t-caption">{t.zadach(e.tasks.length)}</span>}
+        {e.tasks === undefined ? null : (
+          <span className="t-caption">
+            {e.vybrany === undefined ? t.zadach(e.tasks.length) : t.zadachIz(vybrannye(e).length, e.tasks.length)}
+          </span>
+        )}
       </div>
+      {e.vid === 'opornye' && e.tasks !== undefined && e.tasks.length > 1 ? <VyborZadach e={e} /> : null}
+      {e.vid === 'trenazher' && e.katalog !== undefined && e.katalog.length > 1 ? <VyborTipov e={e} /> : null}
       {e.vid === 'trenazher' ? (
         <div className="dz2-polya">
           <div>

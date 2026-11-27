@@ -1,6 +1,6 @@
 'use client';
 
-import { VDomashkuTrenazher } from '@/components/dz2/knopki';
+import { VDomashkuTrenazher, katalogIzGrupp } from '@/components/dz2/knopki';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui';
 import { BookmarksList, HistoryList, MistakesList } from '@/components/progress/Lists';
@@ -569,7 +569,12 @@ function Konfigurator({
           onBezPodskazok={(bezPodskazok) => zapomnit({ ...vybor, bezPodskazok })}
           onBack={() => setEkran('rezhimy')}
           ryadomSoStartom={
-            <VDomashkuTrenazher taskNo={zadanie} tipy={tipy} vse={tipy.length === tipyVse.length} />
+            <VDomashkuTrenazher
+              taskNo={zadanie}
+              tipy={tipy}
+              vse={tipy.length === tipyVse.length}
+              katalog={katalogIzGrupp(gruppy)}
+            />
           }
           onStart={() =>
             start(

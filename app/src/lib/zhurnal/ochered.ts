@@ -104,6 +104,22 @@ function podklyuchit(): void {
   window.addEventListener('online', () => zaplanirovat(500));
 }
 
+function estMesyac(q: Ochered): boolean {
+  return Object.values(q.varianty).some((x) => x.z.source === 'mesyac');
+}
+
+function bezMesyaca(q: Ochered): Ochered {
+  return {
+    ...q,
+    varianty: Object.fromEntries(
+      Object.entries(q.varianty).map(([id, x]) => [
+        id,
+        x.z.source === 'mesyac' ? { ...x, z: { ...x.z, source: 'povyshennye' as const } } : x,
+      ]),
+    ),
+  };
+}
+
 async function sLockom(fn: () => Promise<void>): Promise<void> {
   const locks = typeof navigator === 'undefined' ? undefined : navigator.locks;
   if (locks === undefined) return fn();
@@ -132,6 +148,14 @@ export async function otpravit(): Promise<void> {
         });
         if (error !== null) {
           const msg = error.message ?? '';
+          if (/varianty_resheniya_source_check/.test(msg) && estMesyac(prochest(uid))) {
+            /* База ещё без миграции 20261128150000_varianty_mesyaca.sql:
+               вариант месяца уходит прежним источником «повышенной
+               сложности» — сайт узнаёт его по коду набора, — иначе пачка
+               с задачами ученика застряла бы до миграции. */
+            zapisat(uid, bezMesyaca(prochest(uid)));
+            continue;
+          }
           if (/^(forbidden|progress_not_allowed)/.test(msg)) {
             /* Записывать нельзя (школьник до согласия родителя): очередь не копим. */
             zapisat(uid, PUSTAYA_OCHERED);
