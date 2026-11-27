@@ -76,7 +76,7 @@
 /* Подложка рисунка внизу тянется по самому рисунку, а не по всей
    карточке: маленький чертёж в широкой рамке — та же пустая зона. */
 .pc__part--risunok .pc__risunok {
-  max-width: max-content;
+  max-width: min(100%, max-content);
 }
 
 /* Справа картинки нет (нет иллюстрации и рисунок ушёл вниз): второй
@@ -164,6 +164,10 @@
 .pc__risunok {
   display: grid;
   gap: var(--space-3);
+  /* Не шире колонки: таблица и плитки (Rezinovye.tsx) ужимаются под неё. */
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  max-width: 100%;
   justify-items: center;
   margin: 0;
   padding: var(--space-4);
