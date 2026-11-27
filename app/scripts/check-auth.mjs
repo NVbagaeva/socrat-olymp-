@@ -4253,6 +4253,21 @@ async function runDz2() {
       (await page.locator('.dz2-element').count()) === 2,
       `ДЗ ${width}: в мастере два элемента`,
     );
+    /* Опорные: не весь блок — первая задача снята в «Выбрать задачи». */
+    const op = page.locator('.dz2-element').nth(1);
+    await op.locator('.dz2-vybor__zag').click();
+    const galki = op.locator('.dz2-vybor__zadacha input[type="checkbox"]');
+    const vsego = await galki.count();
+    check(vsego > 1 && (await galki.first().isChecked()), `ДЗ ${width}: у блока список задач, все отмечены (${vsego})`);
+    check(
+      (await op.locator('.dz2-vybor__uslovie').first().innerText()).trim().length > 0,
+      `ДЗ ${width}: в списке видно условие задачи`,
+    );
+    await galki.first().uncheck();
+    check(
+      (await op.locator('.dz2-element__verh').innerText()).includes(`задач: ${vsego - 1} из ${vsego}`),
+      `ДЗ ${width}: в заголовке блока «задач: ${vsego - 1} из ${vsego}»`,
+    );
     const tr = page.locator('.dz2-element').first();
     await tr.locator('select').nth(1).selectOption('streak');
     await tr.locator('input[type="number"]').fill('3');
@@ -4287,6 +4302,10 @@ async function runDz2() {
       check(
         t2.kind === 'opornye' && t2.tasks.length > 0 && t2.tasks.every((t) => NORM.test(t.answer)),
         `ДЗ ${width}: опорные с ответами (${t2.tasks.length})`,
+      );
+      check(
+        t2.tasks.length === vsego - 1 && t2.tasks.every((t, i) => t.position === i + 1),
+        `ДЗ ${width}: в ДЗ ушли только отмеченные опорные — ${t2.tasks.length} из ${vsego}, позиции подряд`,
       );
       check(
         d.p.due_at === '2027-05-20T15:00:00.000Z',

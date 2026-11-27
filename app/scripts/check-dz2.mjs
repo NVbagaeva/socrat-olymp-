@@ -52,6 +52,34 @@ function check(ok, what) {
   check(M.razobrat(null).elementy.length === 0, 'пустое хранилище — пустая корзина');
 }
 
+/* ── Выбор задач опорного блока ─────────────────────────────────── */
+{
+  const z = (ref) => ({ kind: 'k', task_ref: ref, question_html: `<p>${ref}</p>`, answer: '1' });
+  const blok = (refs) => ({ key: 'op', vid: 'opornye', task_no: 7, title: 'Блок', spec: {}, tasks: refs.map(z) });
+  const refs = (k) => M.vybrannye(k.elementy[0]).map((x) => x.task_ref);
+  let k = M.dobavit(M.PUSTAYA_KORZINA, blok(['a', 'b', 'c', 'd']));
+  check(refs(k).join() === 'a,b,c,d' && k.elementy[0].vybrany === undefined, 'по умолчанию — все задачи блока');
+  k = M.otmetit(k, 'op', 'b', false);
+  k = M.otmetit(k, 'op', 'd', false);
+  check(refs(k).join() === 'a,c', `сняты две задачи: ${refs(k).join()}`);
+  k = M.otmetit(k, 'op', 'd', true);
+  check(refs(k).join() === 'a,c,d', `снова отмечена — в порядке блока: ${refs(k).join()}`);
+  check(M.otmetit(k, 'op', 'b', true).elementy[0].vybrany === undefined, 'отмечены все — без поля выбора');
+  k = M.dobavit(k, blok(['a', 'c', 'e']));
+  check(refs(k).join() === 'a,c', `повторное «В домашку» сохраняет выбор для оставшихся задач: ${refs(k).join()}`);
+  const pusto = M.otmetitVse(k, 'op', false);
+  check(M.vybrannye(pusto.elementy[0]).length === 0, 'снять все');
+  check(M.otmetitVse(pusto, 'op', true).elementy[0].vybrany === undefined, 'отметить все');
+  const nast = { ...M.NASTROYKI_PO_UMOLCHANIYU, title: 'x', klassy: ['c'] };
+  check(M.proverit(pusto, nast).includes('net_vybrannyh_zadach'), 'ни одной задачи в блоке — выдать нельзя');
+  check(!M.proverit(k, nast).includes('net_vybrannyh_zadach'), 'есть отмеченные — можно');
+  check(M.razobrat({ v: 1, elementy: [{ ...blok(['a']), vybrany: 'мусор' }] }).elementy[0].vybrany === undefined,
+    'неверный выбор из хранилища отброшен — все задачи');
+  const r = M.zapros(k, nast, { op: { obshchie: M.vybrannye(k.elementy[0]) } }, 'draft');
+  check(r.items[0].tasks.map((t) => `${t.task_ref}:${t.position}`).join() === 'a:1,c:2',
+    'в запрос — только выбранные, позиции подряд');
+}
+
 /* ── Настройки и время по Москве ───────────────────────────────── */
 {
   check(M.mskVUtc('2026-11-27T18:00') === '2026-11-27T15:00:00.000Z', '18:00 по Москве — 15:00 UTC');

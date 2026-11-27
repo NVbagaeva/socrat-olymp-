@@ -17,6 +17,7 @@ import { Button, Card, Checkbox, EmptyState, FieldLabel, Input } from '@/compone
 import { NeedLogin } from '@/components/dz/common';
 import { DZ2 } from '@/content/dz2';
 import { kodOshibki, prichinaOshibki } from '@/lib/dz2/oshibka';
+import { sanitizeHtml } from '@/lib/dz/sanitize';
 import { useSessionUser } from '@/lib/auth/session';
 import type { TutorClass } from '@/lib/dz/api';
 import { korzina, useKorzina } from '@/lib/dz2/korzina';
@@ -27,12 +28,14 @@ import {
   proverit,
   razobrat,
   utcVMsk,
+  vybrannye,
   zapros,
   type ElementKorziny,
   type Nastroyki,
   type ZadachiElementa,
 } from '@/lib/dz2/model';
 import { dataRu } from '@/lib/zhurnal/vid';
+import 'katex/dist/katex.min.css';
 import './dz2.css';
 
 const t = DZ2.master;
@@ -104,7 +107,7 @@ export function Vydacha() {
     const { sobratZapas } = await import('@/lib/dz2/sborka');
     const seed = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
     for (const e of k.elementy) {
-      if (e.vid === 'opornye' && e.tasks !== undefined) out[e.key] = { obshchie: e.tasks };
+      if (e.vid === 'opornye' && e.tasks !== undefined) out[e.key] = { obshchie: vybrannye(e) };
       if (e.vid === 'trenazher') {
         const tipy = e.tipy ?? [];
         const zapas = e.zapas ?? 10;
@@ -374,6 +377,42 @@ function Galka({
   );
 }
 
+/**
+ * Выбор задач опорного блока: условие каждой задачи (та же вёрстка, что
+ * увидит ученик) и галочка. В ДЗ идут отмеченные, в порядке блока.
+ */
+function VyborZadach({ e }: { e: ElementKorziny }) {
+  const tasks = e.tasks ?? [];
+  const otmecheny = new Set(vybrannye(e).map((z) => z.task_ref));
+  return (
+    <details className="dz2-vybor">
+      <summary className="dz2-vybor__zag">{t.vybratZadachi}</summary>
+      <div className="dz2-vybor__vse">
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => korzina.otmetitVse(e.key, true)}>
+          {t.vybratVse}
+        </button>
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => korzina.otmetitVse(e.key, false)}>
+          {t.snyatVse}
+        </button>
+      </div>
+      <ol className="dz2-vybor__spisok">
+        {tasks.map((z, i) => (
+          <li key={z.task_ref} className="dz2-vybor__zadacha">
+            <Checkbox
+              checked={otmecheny.has(z.task_ref)}
+              onChange={(ev) => korzina.otmetit(e.key, z.task_ref, ev.target.checked)}
+            >
+              <span className="dz2-vybor__nomer">{t.zadachaN(i + 1)}</span>
+            </Checkbox>
+            <div className="dz2-vybor__uslovie" dangerouslySetInnerHTML={{ __html: sanitizeHtml(z.question_html) }} />
+            <span className="t-caption">{t.otvet(z.answer)}</span>
+          </li>
+        ))}
+      </ol>
+    </details>
+  );
+}
+
 function Element({ e, pervyy, posledniy }: { e: ElementKorziny; pervyy: boolean; posledniy: boolean }) {
   const celId = useId();
   const zapasId = useId();
@@ -382,8 +421,13 @@ function Element({ e, pervyy, posledniy }: { e: ElementKorziny; pervyy: boolean;
       <div className="dz2-element__verh">
         <span className="dz2-element__vid">{DZ2.vidy[e.vid] ?? e.vid}</span>
         <span className="dz2-element__nazvanie">{e.title}</span>
-        {e.tasks === undefined ? null : <span className="t-caption">{t.zadach(e.tasks.length)}</span>}
+        {e.tasks === undefined ? null : (
+          <span className="t-caption">
+            {e.vybrany === undefined ? t.zadach(e.tasks.length) : t.zadachIz(vybrannye(e).length, e.tasks.length)}
+          </span>
+        )}
       </div>
+      {e.vid === 'opornye' && e.tasks !== undefined && e.tasks.length > 1 ? <VyborZadach e={e} /> : null}
       {e.vid === 'trenazher' ? (
         <div className="dz2-polya">
           <div>

@@ -13,6 +13,8 @@ import {
   PUSTAYA_KORZINA,
   dobavit,
   izmenit,
+  otmetit,
+  otmetitVse,
   razobrat,
   sdvinut,
   ubrat,
@@ -69,6 +71,8 @@ export const korzina = {
   ubrat: (key: string) => zapisat(ubrat(prochest(), key)),
   sdvinut: (key: string, na: -1 | 1) => zapisat(sdvinut(prochest(), key, na)),
   izmenit: (key: string, patch: Partial<ElementKorziny>) => zapisat(izmenit(prochest(), key, patch)),
+  otmetit: (key: string, taskRef: string, vkl: boolean) => zapisat(otmetit(prochest(), key, taskRef, vkl)),
+  otmetitVse: (key: string, vkl: boolean) => zapisat(otmetitVse(prochest(), key, vkl)),
   zamenit: (k: Korzina) => zapisat(k),
   ochistit: () => zapisat(PUSTAYA_KORZINA),
 };
