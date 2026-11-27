@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';
 import { KartochkiTipov, type SsylkaTipa } from '@/components/ui/KartochkiTipov';
 import { TIPY_3 } from '@/content/stereo/tipy';
@@ -23,6 +23,7 @@ import {
 import { IkKub, IkStrelka, IkTreugolnik } from '../metodika/Ikonki';
 import { RisDekor, RisSteklo } from './Glava2Treugolnik';
 import { tipHref3 } from '@/lib/zadanie3/links';
+import { ZhivoePodobie3 } from '@/components/zhivye/podobie3/Zhivye3';
 
 /** «C2» → «C_2». */
 function tex(name: string): string {
@@ -338,11 +339,11 @@ export function GlavaMetodiki({
             {...(next === undefined ? {} : { next: { id: next.id, title: next.title } })}
           >
             {razdel.bloki.map((blok, j) => (
-              <Blok
-                key={`${razdel.id}-${j}`}
-                blok={blok}
-                {...(shpargalki === undefined ? {} : { shpargalki })}
-              />
+              <Fragment key={`${razdel.id}-${j}`}>
+                <Blok blok={blok} {...(shpargalki === undefined ? {} : { shpargalki })} />
+                {/* Живая сцена главы — сразу после формул раздела. */}
+                {razdel.id === 'g6-k' && blok.vid === 'formuly' ? <ZhivoePodobie3 /> : null}
+              </Fragment>
             ))}
           </RazdelGlavy>
         );

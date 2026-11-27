@@ -4,8 +4,8 @@ import '@/components/tasks/steklo/steklo.css';
 import './zhivye-obolochka.css';
 
 /**
- * Стеклянная карточка живой сцены: надзаголовок, заголовок и условие
- * набираются на сборке (KaTeX на сервере), внутри — ленивая сцена.
+ * Стеклянная карточка живой сцены: надзаголовок, заголовок (формулы — в
+ * $…$) и условие набираются на сборке (KaTeX на сервере), внутри — ленивая сцена.
  * Стили оболочки грузятся со страницей, стили сцены — вместе с ней.
  */
 export function ZhivayaKartochka({
@@ -27,7 +27,7 @@ export function ZhivayaKartochka({
       <div className="zv-text">
         <p className="stk-nad">{nad}</p>
         <h3 className="stk-h4" id={`${id}-zag`}>
-          {zag}
+          <Tex text={zag} />
         </h3>
         <p className="zv-lead">
           <Tex text={lead} />
