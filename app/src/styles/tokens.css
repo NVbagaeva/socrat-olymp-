@@ -1388,6 +1388,14 @@
    приглушён. «Ночная» плашка тарифа (.tf--b) тёмная в обеих темах —
    её цвета одни на обе. */
 :root {
+  /* Иллюстрации и подсветка на странице автора. */
+  --oa-led: #e2edff;
+  --oa-led-blik: #bed7ff;
+  --oa-terrakota: #e07a2f;
+  --oa-oranzh-noch: #ff9646;
+  --oa-siniy-noch: #4682ff;
+  --oa-kromka-noch: #a0c3ff;
+
   /* Плашки тарифов. */
   --tf-blik: rgb(255 255 255 / 0.55);
   --tf-blik-konec: rgb(255 255 255 / 0);
