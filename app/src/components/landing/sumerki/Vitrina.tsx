@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import { VITRINA, type PunktVitriny, type Snimok } from '@/content/vitrina';
 import { assetUrl } from '@/lib/assetUrl';
+import { Begushchaya } from './Begushchaya';
 import { Prosmotr, type SlaydProsmotra } from './Prosmotr';
 import './vitrina.css';
 
@@ -87,6 +88,33 @@ function Scena({
   );
 }
 
+function Punkt({
+  p,
+  i,
+  aktivnyy,
+  onVybor,
+}: {
+  p: PunktVitriny;
+  i: number;
+  aktivnyy: boolean;
+  onVybor: (i: number) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={clsx('vit-punkt', aktivnyy && 'is-aktivnyy')}
+      aria-pressed={aktivnyy}
+      onClick={() => onVybor(i)}
+    >
+      <span className="vit-punkt__no">{String(i + 1).padStart(2, '0')}</span>
+      <span className="vit-punkt__tekst">
+        <span className="vit-punkt__z">{p.zagolovok}</span>
+        <span className="vit-punkt__p">{p.tekst}</span>
+      </span>
+    </button>
+  );
+}
+
 function Chast({
   vid,
   metka,
@@ -96,6 +124,7 @@ function Chast({
   punkty,
   knopki,
   kletkaPodpisi,
+  begushchaya = false,
 }: {
   vid: 'gen' | 'trn';
   metka: string;
@@ -105,6 +134,8 @@ function Chast({
   punkty: readonly PunktVitriny[];
   knopki: readonly { tekst: string; href: string; glavnaya: boolean }[];
   kletkaPodpisi?: { bez: string; s: string; podpis: string };
+  /** Пункты — бегущей строкой (Begushchaya), а не вкладками. */
+  begushchaya?: boolean;
 }) {
   const [aktivnyy, setAktivnyy] = useState(0);
   const [kletka, setKletka] = useState(false);
@@ -151,26 +182,25 @@ function Chast({
         />
       </div>
 
-      <ol className="vit-punkty">
-        {punkty.map((p, i) => (
-          <li key={p.id}>
-            <button
-              type="button"
-              className={clsx('vit-punkt', i === aktivnyy && 'is-aktivnyy')}
-              aria-pressed={i === aktivnyy}
-              onClick={() => setAktivnyy(i)}
-            >
-              <span className="vit-punkt__no">{String(i + 1).padStart(2, '0')}</span>
-              <span className="vit-punkt__tekst">
-                <span className="vit-punkt__z">{p.zagolovok}</span>
-                <span className="vit-punkt__p">{p.tekst}</span>
-              </span>
-            </button>
-          </li>
-        ))}
-      </ol>
+      {begushchaya ? (
+        <Begushchaya
+          elementy={punkty.map((p, i) => ({
+            key: p.id,
+            node: <Punkt p={p} i={i} aktivnyy={i === aktivnyy} onVybor={setAktivnyy} />,
+          }))}
+        />
+      ) : (
+        <ol className="vit-punkty">
+          {punkty.map((p, i) => (
+            <li key={p.id}>
+              <Punkt p={p} i={i} aktivnyy={i === aktivnyy} onVybor={setAktivnyy} />
+            </li>
+          ))}
+        </ol>
+      )}
       {/* Телефон: пункты — полоса вкладок, описание выбранного — здесь. */}
-      <p className="vit-opisanie" aria-live="polite">
+      {/* В бегущей строке описание — в самих карточках. */}
+      <p className={clsx('vit-opisanie', begushchaya && 'vit-opisanie--net')} aria-live="polite">
         {punkt.tekst}
       </p>
 
@@ -231,6 +261,7 @@ export function Vitrina({
           punkty={g.punkty}
           knopki={g.knopki}
           kletkaPodpisi={g.kletka}
+          begushchaya
         />
         <Chast
           vid="trn"
@@ -240,6 +271,7 @@ export function Vitrina({
           lid={t.lid}
           punkty={t.punkty}
           knopki={[{ ...t.knopka, glavnaya: true }]}
+          begushchaya
         />
         {posle}
       </div>

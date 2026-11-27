@@ -304,6 +304,17 @@
   color: var(--vit-siniy-1);
 }
 
+/* Миниатюры — бегущей строкой (Begushchaya, .vit-beg в vitrina.css):
+   ширина карточки своя, вид — прежний. */
+.vit-beg.vit-beg--mini {
+  --vit-beg-w: 220;
+  margin-top: 0;
+}
+.vit-beg--mini .vst-mini__k {
+  width: 100%;
+  align-content: start;
+}
+
 /* ── Планшет и телефон ─────────────────────────────────────────── */
 
 @media (max-width: 1023.98px) {
@@ -352,6 +363,9 @@
   }
   .vst-mini__p {
     font-size: 12.5px;
+  }
+  .vit-beg.vit-beg--mini {
+    --vit-beg-w: 180;
   }
 }
 
