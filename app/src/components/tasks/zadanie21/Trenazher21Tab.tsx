@@ -7,14 +7,9 @@ import { katalog21 } from '@/lib/zadanie21/trening/katalog';
 import { texPlain, typeset } from '@/lib/tex';
 import { Trenazher21 } from './Trenazher21';
 
-/**
- * Вкладка «Тренажёр»: стартовые режимы, выбор тем (семь групп), экран
- * задачи, итоги — общий тренажёр. Названия набраны KaTeX на сборке.
- * Задачи строит генератор в браузере по ключам каталога (по 20 на тип и
- * фиксированные задачи, lib/zadanie21/sbornik.ts).
- */
-export function Trenazher21Tab({ base }: { base: string }) {
-  const gruppy: GruppaVybora[] = GRUPPY21.map((g) => ({
+/** Группы тренажёра №21: значок, тон, типы. Их же берёт окно подтипов «Собрать вариант». */
+export function gruppy21(): GruppaVybora[] {
+  return GRUPPY21.map((g) => ({
     id: String(g.id),
     nazvanie: texPlain(g.title),
     znakHtml: typeset(`$${GRUPPY21_VID[g.id].znak}$`),
@@ -24,6 +19,16 @@ export function Trenazher21Tab({ base }: { base: string }) {
       nazvanieHtml: `<span>${typeset(p.title)}</span>`,
     })),
   }));
+}
+
+/**
+ * Вкладка «Тренажёр»: стартовые режимы, выбор тем (семь групп), экран
+ * задачи, итоги — общий тренажёр. Названия набраны KaTeX на сборке.
+ * Задачи строит генератор в браузере по ключам каталога (по 20 на тип и
+ * фиксированные задачи, lib/zadanie21/sbornik.ts).
+ */
+export function Trenazher21Tab({ base }: { base: string }) {
+  const gruppy = gruppy21();
   const nazvaniyaTekst = Object.fromEntries(PROTOTYPES.map((p) => [p.id, texPlain(p.title)]));
   return (
     <section className="trainer z21-trening trn-host" aria-labelledby="z21-trening-title">

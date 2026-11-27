@@ -21,7 +21,7 @@ import {
   keys,
   naydiDlinu,
   shagDlina,
-  shagKombinatsiya,
+  shagiKombinatsii,
   shagOtvet,
   shagPoRisunku,
   signatureOf,
@@ -102,7 +102,7 @@ export const A2: Prototype = {
   gruppa: 'A',
   nazvanie: 'Длина суммы или разности',
   format: 'coords',
-  formula: modul(`${vec('a')}+${vec('b')}`),
+  formula: modul(`${vec('a')}\\pm${vec('b')}`),
   isklyucheniya: keys([
     { ax: -4, ay: 5, bx: -5, by: 7, znak: 1 },
     { ax: 9, ay: -6, bx: 1, by: 9, znak: -1 },
@@ -131,7 +131,7 @@ export const A2: Prototype = {
       risunok: null,
       otvet: len,
       proverka: Math.hypot(a[0] + znak * b[0], a[1] + znak * b[1]),
-      shagi: [shagKombinatsiya(terms, R, 'c'), shagDlina('c', R, len), shagOtvet(len)],
+      shagi: [...shagiKombinatsii(terms, R, 'c'), shagDlina('c', R, len), shagOtvet(len)],
       params: { ax: a[0], ay: a[1], bx: b[0], by: b[1], znak },
       signature: signatureOf([a, b]),
     };
@@ -168,7 +168,7 @@ export const A3: Prototype = {
   gruppa: 'A',
   nazvanie: 'Длина с целыми коэффициентами',
   format: 'coords',
-  formula: modul(`8${vec('a')}+${vec('b')}`),
+  formula: modul(`k${vec('a')}\\pm m${vec('b')}`),
   isklyucheniya: keys([
     { ax: 1, ay: 1, bx: 0, by: 7, k: 8, m: 1 },
     { ax: 2, ay: 0, bx: 1, by: 4, k: 1, m: 3 },
@@ -199,7 +199,7 @@ export const A3: Prototype = {
       risunok: null,
       otvet: len,
       proverka: Math.hypot(k * a[0] + m * b[0], k * a[1] + m * b[1]),
-      shagi: [shagKombinatsiya(terms, R, 'c'), shagDlina('c', R, len), shagOtvet(len)],
+      shagi: [...shagiKombinatsii(terms, R, 'c'), shagDlina('c', R, len), shagOtvet(len)],
       params: { ax: a[0], ay: a[1], bx: b[0], by: b[1], k, m },
       signature: signatureOf([a, b]),
       vid: `${k}:${m}`,
@@ -233,7 +233,7 @@ export const A4: Prototype = {
   gruppa: 'A',
   nazvanie: 'Длина с десятичными коэффициентами',
   format: 'coords',
-  formula: modul(`1{,}1${vec('a')}-0{,}6${vec('b')}`),
+  formula: modul(`p${vec('a')}\\pm q${vec('b')}`),
   isklyucheniya: keys([
     { ax: -3, ay: 4, bx: -9, by: 4, p: 11, q: -6 },
     { ax: 5, ay: 6, bx: 16, by: 12, p: 14, q: -5 },
@@ -267,7 +267,7 @@ export const A4: Prototype = {
       otvet,
       proverka: Math.hypot(p * a[0] + q * b[0], p * a[1] + q * b[1]),
       shagi: [
-        shagKombinatsiya(terms, result, 'c'),
+        ...shagiKombinatsii(terms, result, 'c'),
         shagDlina('c', result, otvet),
         shagOtvet(otvet),
       ],
@@ -300,7 +300,7 @@ export const A5: Prototype = {
   gruppa: 'A',
   nazvanie: 'Три вектора по координатам',
   format: 'coords',
-  formula: modul(`${vec('a')}+${vec('b')}+${vec('c')}`),
+  formula: modul(`${vec('a')}\\pm m${vec('b')}\\pm n${vec('c')}`),
   isklyucheniya: keys([
     { ax: -1, ay: 9, bx: 7, by: -2, cx: 14, cy: 8, m: 1, n: 1 },
     { ax: 12, ay: 10, bx: 7, by: -11, cx: -2, cy: -3, m: -1, n: -1 },
@@ -336,7 +336,7 @@ export const A5: Prototype = {
       risunok: null,
       otvet: len,
       proverka: Math.hypot(a[0] + m * b[0] + n * c[0], a[1] + m * b[1] + n * c[1]),
-      shagi: [shagKombinatsiya(terms, R, 'd'), shagDlina('d', R, len), shagOtvet(len)],
+      shagi: [...shagiKombinatsii(terms, R, 'd'), shagDlina('d', R, len), shagOtvet(len)],
       params: { ax: a[0], ay: a[1], bx: b[0], by: b[1], cx: c[0], cy: c[1], m, n },
       signature: signatureOf([a, b, c]),
       vid: `${m}:${n}`,
@@ -351,7 +351,7 @@ export const A6: Prototype = {
   gruppa: 'A',
   nazvanie: 'Длина по рисунку: два вектора',
   format: 'grid',
-  formula: modul(`${vec('a')}+3${vec('b')}`),
+  formula: modul(`${vec('a')}+k${vec('b')}`),
   generate(r) {
     const k = r.int(2, 4);
     const b = sluchaynyy(r, 5, { pryamoy: 1 / 7 });
@@ -376,7 +376,7 @@ export const A6: Prototype = {
       proverka: Math.hypot(a[0] + k * b[0], a[1] + k * b[1]),
       shagi: [
         shagPoRisunku(vectors),
-        shagKombinatsiya(terms, R, 'c'),
+        ...shagiKombinatsii(terms, R, 'c'),
         shagDlina('c', R, len),
         shagOtvet(len),
       ],
@@ -410,7 +410,7 @@ export const A7: Prototype = {
   gruppa: 'A',
   nazvanie: 'Длина по рисунку: три вектора',
   format: 'grid',
-  formula: modul(`7${vec('a')}-3${vec('b')}+4${vec('c')}`),
+  formula: modul(`k${vec('a')}\\pm m${vec('b')}\\pm n${vec('c')}`),
   generate(r) {
     const [k, m, n] = r.pick(KOEF_A7);
     const b = sluchaynyy(r, 6, { pryamoy: 1 / 7 });
@@ -438,7 +438,7 @@ export const A7: Prototype = {
       proverka: dlina(komb(terms.map(([kk, , p]) => [kk, p] as const))),
       shagi: [
         shagPoRisunku(vectors),
-        shagKombinatsiya(terms, R, 'd'),
+        ...shagiKombinatsii(terms, R, 'd'),
         shagDlina('d', R, len),
         shagOtvet(len),
       ],
@@ -472,7 +472,7 @@ export const A8: Prototype = {
   gruppa: 'A',
   nazvanie: 'По рисунку, десятичные коэффициенты',
   format: 'grid',
-  formula: modul(`1{,}3${vec('a')}+${vec('b')}-3{,}2${vec('c')}`),
+  formula: modul(`p${vec('a')}\\pm q${vec('b')}\\pm s${vec('c')}`),
   generate(r) {
     const [P, Q, S] = r.pick(KOEF_A8);
     const b = sluchaynyy(r, 6, { pryamoy: 1 / 7 });
@@ -506,7 +506,7 @@ export const A8: Prototype = {
       proverka: Math.hypot(p * a[0] + q * b[0] + sKoef * c[0], p * a[1] + q * b[1] + sKoef * c[1]),
       shagi: [
         shagPoRisunku(vectors),
-        shagKombinatsiya(terms, result, 'd'),
+        ...shagiKombinatsii(terms, result, 'd'),
         shagDlina('d', result, otvet),
         shagOtvet(otvet),
       ],

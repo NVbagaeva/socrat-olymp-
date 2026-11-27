@@ -14,6 +14,7 @@ import { counted } from '../../plural';
 import { keys, paramsKey } from '../../vychisleniya/prototypes/common';
 import { d, kombinatsiya, kv, kvadrat, modul, mnozhitel, slagaemoe, vec, vecKv } from '../tex';
 import { dlina, kosoy } from '../troyki';
+import { naytiTroyku, risunokPifagora } from '../pifagor';
 import type { Shag, Tochka, Vektor } from '../types';
 
 export { keys, paramsKey };
@@ -113,31 +114,155 @@ function chlen(k: number, x: number, first: boolean): string {
   return `${sign}${d(abs)}\\cdot${mnozhitel(x)}`;
 }
 
-/** Шаг «Координаты вектора 8a + b»: покоординатный счёт. */
+/** Готовое число как слагаемое со знаком коэффициента: «8», «-16», «-(-16)», «+(-3)». */
+function gotovyy(k: number, x: number, first: boolean): string {
+  const sign = k < 0 ? '-' : first ? '' : '+';
+  return sign + (sign === '' ? d(x) : mnozhitel(x));
+}
+
+/** Без «-0» и хвостов плавающей арифметики у десятичных коэффициентов. */
+function chisto(v: number): number {
+  const r = Math.round(v * 1e9) / 1e9;
+  return Object.is(r, -0) ? 0 : r;
+}
+
+/**
+ * Выкладка по строкам: каждый переход «=» — с новой строки, знаки «=»
+ * выровнены (aligned). Строка aligned не рвётся посреди выражения.
+ */
+export function vyravnyat(levo: string, pravye: readonly string[]): string {
+  return `$\\begin{aligned}${levo} &= ${pravye.join(' \\\\ &= ')}\\end{aligned}$`;
+}
+
+/**
+ * Шаг «Координаты вектора c = 8a + b»: покоординатный счёт. `gotovye` —
+ * уже найденные отдельными шагами координаты |k|·p каждого слагаемого:
+ * тогда в скобках стоят готовые числа, а не произведения.
+ */
 export function shagKombinatsiya(
   terms: readonly (readonly [number, string, Tochka])[],
   result: Tochka,
   resultName: string,
+  gotovye?: readonly Tochka[],
 ): Shag {
   const tex = kombinatsiya(terms.map(([k, n]) => [k, n] as const));
-  const ex = terms.map(([k, , p], i) => chlen(k, p[0], i === 0)).join('');
-  const ey = terms.map(([k, , p], i) => chlen(k, p[1], i === 0)).join('');
+  const coord = (i: 0 | 1) =>
+    terms
+      .map(([k, , p], j) =>
+        gotovye === undefined
+          ? chlen(k, p[i], j === 0)
+          : gotovyy(k, (gotovye[j] as Tochka)[i], j === 0),
+      )
+      .join('');
   return {
-    zagolovok: `Координаты вектора $${tex}$`,
-    stroki: [`$${vec(resultName)} = ${tex} = (${ex};\\ ${ey}) = ${kv(result[0], result[1])}$.`],
+    zagolovok: `Координаты вектора $${vec(resultName)} = ${tex}$`,
+    stroki: [
+      vyravnyat(vec(resultName), [
+        tex,
+        `(${coord(0)};\\ ${coord(1)})`,
+        kv(result[0], result[1]),
+      ]),
+    ],
   };
 }
 
-/** Шаг «Длина по формуле». */
+/**
+ * Шаги для вектора-комбинации: сначала координаты каждого вектора с
+ * коэффициентом (8b; у 3a + 2b — и 3a, и 2b) отдельными шагами, потом
+ * сама комбинация из готовых чисел. Без коэффициентов — один шаг.
+ */
+export function shagiKombinatsii(
+  terms: readonly (readonly [number, string, Tochka])[],
+  result: Tochka,
+  resultName: string,
+): Shag[] {
+  const shagi: Shag[] = [];
+  const gotovye = terms.map(([k, name, p]) => {
+    const abs = Math.abs(k);
+    if (abs === 1) {
+      return p;
+    }
+    const kp: Tochka = [chisto(abs * p[0]), chisto(abs * p[1])];
+    const tex = `${d(abs)}${vec(name)}`;
+    shagi.push({
+      zagolovok: `Координаты $${tex}$`,
+      stroki: [
+        vyravnyat(tex, [
+          `(${d(abs)}\\cdot${mnozhitel(p[0])};\\ ${d(abs)}\\cdot${mnozhitel(p[1])})`,
+          kv(kp[0], kp[1]),
+        ]),
+      ],
+    });
+    return kp;
+  });
+  shagi.push(
+    shagKombinatsiya(terms, result, resultName, shagi.length > 0 ? gotovye : undefined),
+  );
+  return shagi;
+}
+
+function napravlenie(v: number, os: 'x' | 'y'): string {
+  if (os === 'x') return v < 0 ? 'влево' : 'вправо';
+  return v < 0 ? 'вниз' : 'вверх';
+}
+
+/** «в 2 раза», «в 5 раз», «в 0,5 раза». */
+function razOkonchanie(k: number): string {
+  if (!Number.isInteger(k)) return 'раза';
+  const n10 = k % 10;
+  const n100 = k % 100;
+  return n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14) ? 'раза' : 'раз';
+}
+
+/**
+ * Шаг «Длина по формуле»: рисунок с треугольником Пифагора (svg),
+ * откуда формула и почему пропадает минус, выкладка по строкам и —
+ * если модули координат пропорциональны пифагоровой тройке (3-4-5,
+ * 5-12-13, 8-15-17…) — быстрый путь без корня.
+ */
 export function shagDlina(name: string, p: Tochka, dlinaValue: number): Shag {
   const [x, y] = p;
-  const sum = x * x + y * y;
+  const m = modul(vec(name));
+  const stroki: string[] = [];
+  const kosoy = x !== 0 && y !== 0;
+  if (kosoy) {
+    stroki.push(
+      `Знак координаты показывает только направление: $x = ${d(x)}$ — ${napravlenie(x, 'x')}, $y = ${d(y)}$ — ${napravlenie(y, 'y')}. Длины катетов — модули координат: $${d(Math.abs(x))}$ и $${d(Math.abs(y))}$.`,
+    );
+    const otr = [x, y].find((v) => v < 0);
+    stroki.push(
+      `Длина вектора — гипотенуза, поэтому формула — теорема Пифагора: ${'$'}{${m}^2 = x^2 + y^2}$.` +
+        (otr === undefined
+          ? ''
+          : ` При возведении в квадрат знак пропадает: $${kvadrat(otr)} = ${kvadrat(Math.abs(otr))}$.`),
+    );
+  }
+  stroki.push(
+    vyravnyat(m, [
+      '\\sqrt{x^2 + y^2}',
+      `\\sqrt{${kvadrat(x)} + ${kvadrat(y)}}`,
+      `\\sqrt{${d(chisto(x * x))} + ${d(chisto(y * y))}}`,
+      `\\sqrt{${d(chisto(x * x + y * y))}}`,
+      d(dlinaValue),
+    ]),
+  );
+  const t = kosoy ? naytiTroyku(x, y) : null;
+  if (t !== null) {
+    const [a, b, c] = t.troyka;
+    const egip = a === 3;
+    const imya = `${egip ? 'египетский треугольник' : 'пифагорова тройка'} $${a}$-$${b}$-$${c}$`;
+    const ax = d(Math.abs(x));
+    const ay = d(Math.abs(y));
+    stroki.push(
+      t.k === 1
+        ? `**Быстрый путь.** Катеты $${ax}$ и $${ay}$ — ${imya}. Значит, длина $${c}$ сразу, без корня.`
+        : `**Быстрый путь.** Катеты $${ax}$ и $${ay}$ — это $${d(t.k)}\\cdot${t.p}$ и $${d(t.k)}\\cdot${t.q}$: ${imya}, ${egip ? 'увеличенный' : 'увеличенная'} в $${d(t.k)}$ ${razOkonchanie(t.k)}. Значит, длина $${d(t.k)}\\cdot${c} = ${d(dlinaValue)}$ сразу, без корня.`,
+    );
+  }
   return {
     zagolovok: 'Длина по формуле',
-    stroki: [
-      `$${modul(vec(name))} = \\sqrt{x^2 + y^2}$.`,
-      `$${modul(vec(name))} = \\sqrt{${kvadrat(x)} + ${kvadrat(y)}} = \\sqrt{${d(x * x)} + ${d(y * y)}} = \\sqrt{${d(sum)}} = ${d(dlinaValue)}$.`,
-    ],
+    stroki,
+    ...(kosoy ? { svg: risunokPifagora(name, p, dlinaValue) } : {}),
   };
 }
 

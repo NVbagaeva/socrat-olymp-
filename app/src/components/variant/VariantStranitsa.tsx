@@ -7,6 +7,7 @@ import { assetUrl } from '@/lib/assetUrl';
 import { levelInfo, type Level } from '@/lib/level';
 import { VariantBazy } from './VariantBazy';
 import { VariantScreen } from './VariantScreen';
+import { znakiPodtipov } from './okno/znakiPodtipov';
 import './sectionStyles';
 import './variant.css';
 import './online/online.css';
@@ -76,7 +77,7 @@ export function VariantStranitsa({ level }: { level: Level }) {
           </h2>
           <LevelTabs level={level} to="variant" zadaniya label={T.uroven.title} />
         </section>
-        {baza ? <VariantBazy /> : <VariantScreen />}
+        {baza ? <VariantBazy /> : <VariantScreen znaki={znakiPodtipov()} />}
       </main>
     </AppShell>
   );

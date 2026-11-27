@@ -23,15 +23,9 @@ function katalog10(): KatalogBanka {
   );
 }
 
-/**
- * Вкладка «Тренажёр» задания №10 в «Стеклянной сцене»: стартовые режимы,
- * выбор тем (пять групп, 34 типа), экран задачи с картинкой сюжета,
- * итоги. Сами задачи на странице не лежат: тренировка собирается в
- * браузере из каталога, условия приезжают файлами прототипов
- * (public/data/zadanie10, без ответов).
- */
-export function Trenazher10Tab({ base }: { base: string }) {
-  const gruppy: GruppaVybora[] = GROUPS.map((g) => ({
+/** Группы тренажёра №10: значок, тон, типы. Их же берёт окно подтипов «Собрать вариант». */
+export function gruppy10(): GruppaVybora[] {
+  return GROUPS.map((g) => ({
     id: g.id,
     nazvanie: g.title,
     znakHtml: typeset(`$${GRUPPY10_VID[g.id].znak}$`),
@@ -41,6 +35,17 @@ export function Trenazher10Tab({ base }: { base: string }) {
       nazvanieHtml: `<span>${typeset(p.title)}</span>`,
     })),
   }));
+}
+
+/**
+ * Вкладка «Тренажёр» задания №10 в «Стеклянной сцене»: стартовые режимы,
+ * выбор тем (пять групп, 34 типа), экран задачи с картинкой сюжета,
+ * итоги. Сами задачи на странице не лежат: тренировка собирается в
+ * браузере из каталога, условия приезжают файлами прототипов
+ * (public/data/zadanie10, без ответов).
+ */
+export function Trenazher10Tab({ base }: { base: string }) {
+  const gruppy = gruppy10();
   const nazvaniyaTekst = Object.fromEntries(PROTOTYPES.map((p) => [p.id, texPlain(p.title)]));
   return (
     <section className="trainer z10-trening trn-host" aria-labelledby="z10-trening-title">

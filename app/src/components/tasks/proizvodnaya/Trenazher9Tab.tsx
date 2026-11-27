@@ -8,14 +8,9 @@ import { katalog9 } from '@/lib/proizvodnaya/trening/katalog';
 import { texPlain, typeset } from '@/lib/tex';
 import { Trenazher9 } from './Trenazher9';
 
-/**
- * Вкладка «Тренажёр» задания №9 в «Стеклянной сцене»: стартовые режимы,
- * выбор тем (пять групп, 31 тип), экран задачи, итоги — общий тренажёр.
- * Названия набраны KaTeX на сборке. Задачи строит генератор в браузере
- * по ключам каталога (банк зафиксированных вариантов, по 20 на тип).
- */
-export function Trenazher9Tab({ base }: { base: string }) {
-  const gruppy: GruppaVybora[] = O_ZADANII_9.gruppy.map((g) => ({
+/** Группы тренажёра №9: значок, тон, типы. Их же берёт окно подтипов «Собрать вариант». */
+export function gruppy9(): GruppaVybora[] {
+  return O_ZADANII_9.gruppy.map((g) => ({
     id: g.id,
     nazvanie: g.title,
     znakHtml: typeset(`$${GRUPPY9_VID[g.id].znak}$`),
@@ -25,6 +20,16 @@ export function Trenazher9Tab({ base }: { base: string }) {
       nazvanieHtml: `<span>${typeset(p.nazvanie)}</span>`,
     })),
   }));
+}
+
+/**
+ * Вкладка «Тренажёр» задания №9 в «Стеклянной сцене»: стартовые режимы,
+ * выбор тем (пять групп, 31 тип), экран задачи, итоги — общий тренажёр.
+ * Названия набраны KaTeX на сборке. Задачи строит генератор в браузере
+ * по ключам каталога (банк зафиксированных вариантов, по 20 на тип).
+ */
+export function Trenazher9Tab({ base }: { base: string }) {
+  const gruppy = gruppy9();
   const nazvaniyaTekst = Object.fromEntries(PROTOTYPES.map((p) => [p.id, texPlain(p.nazvanie)]));
   return (
     <section className="trainer z9-trening trn-host" aria-labelledby="z9-trening-title">

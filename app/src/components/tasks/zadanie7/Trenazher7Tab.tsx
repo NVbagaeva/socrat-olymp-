@@ -17,15 +17,9 @@ function katalog7(): Katalog7 {
   );
 }
 
-/**
- * Вкладка «Тренажёр» задания №7 в «Стеклянной сцене»: стартовые режимы,
- * выбор тем (пять групп, 35 типов), экран задачи, итоги. Названия
- * набраны KaTeX на сборке. Сами задачи на странице не лежат: тренировка
- * собирается в браузере из каталога, условия приезжают файлами
- * прототипов (public/data/zadanie7, без ответов).
- */
-export function Trenazher7Tab({ base }: { base: string }) {
-  const gruppy: GruppaVybora[] = GROUPS.map((g) => ({
+/** Группы тренажёра №7: значок, тон, типы. Их же берёт окно подтипов «Собрать вариант». */
+export function gruppy7(): GruppaVybora[] {
+  return GROUPS.map((g) => ({
     id: g.id,
     nazvanie: g.title,
     znakHtml: typeset(`$${GRUPPY7_VID[g.id].znak}$`),
@@ -37,6 +31,17 @@ export function Trenazher7Tab({ base }: { base: string }) {
       nazvanieHtml: `<span>${typeset(p.title)}</span>`,
     })),
   }));
+}
+
+/**
+ * Вкладка «Тренажёр» задания №7 в «Стеклянной сцене»: стартовые режимы,
+ * выбор тем (пять групп, 35 типов), экран задачи, итоги. Названия
+ * набраны KaTeX на сборке. Сами задачи на странице не лежат: тренировка
+ * собирается в браузере из каталога, условия приезжают файлами
+ * прототипов (public/data/zadanie7, без ответов).
+ */
+export function Trenazher7Tab({ base }: { base: string }) {
+  const gruppy = gruppy7();
   const nazvaniyaTekst = Object.fromEntries(PROTOTYPES.map((p) => [p.id, texPlain(p.title)]));
   return (
     <section className="trainer z7-trening trn-host" aria-labelledby="z7-trening-title">

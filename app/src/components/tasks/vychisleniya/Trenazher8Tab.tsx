@@ -6,16 +6,9 @@ import { typeset } from '@/lib/tex';
 import { Trenazher8 } from './Trenazher8';
 import { IssueHomeworkSkills8 } from '@/components/dz/Razdel8Dz';
 
-/**
- * Вкладка «Тренажёр» задания №8.
- *
- * Названия групп и типов с формулами набираются KaTeX здесь, на
- * сборке, и уходят в клиентский тренажёр готовой разметкой: самому
- * тренажёру KaTeX нужен только для задач, которые он собирает в
- * браузере.
- */
-export function Trenazher8Tab({ base }: { base: string }) {
-  const gruppy: GruppaVybora[] = GRUPPY8.map((g) => ({
+/** Группы тренажёра №8: значок, тон, типы. Их же берёт окно подтипов «Собрать вариант». */
+export function gruppy8(): GruppaVybora[] {
+  return GRUPPY8.map((g) => ({
     id: g.id,
     nazvanie: g.nazvanie,
     znakHtml: typeset(`$${g.znak}$`),
@@ -25,6 +18,18 @@ export function Trenazher8Tab({ base }: { base: string }) {
       nazvanieHtml: typeset(TIPY8[id]?.nazvanie ?? prototypeById(id)?.nazvanie ?? id),
     })),
   }));
+}
+
+/**
+ * Вкладка «Тренажёр» задания №8.
+ *
+ * Названия групп и типов с формулами набираются KaTeX здесь, на
+ * сборке, и уходят в клиентский тренажёр готовой разметкой: самому
+ * тренажёру KaTeX нужен только для задач, которые он собирает в
+ * браузере.
+ */
+export function Trenazher8Tab({ base }: { base: string }) {
+  const gruppy = gruppy8();
   return (
     <section className="trainer z8-trening trn-host" aria-labelledby="z8-trening-title">
       {/* Заголовок вкладки — для порядка заголовков и читалок; на экране его

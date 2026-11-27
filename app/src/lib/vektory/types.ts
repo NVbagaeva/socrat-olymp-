@@ -111,6 +111,8 @@ export type Params = Record<string, number | string>;
 export interface Shag {
   zagolovok: string;
   stroki: string[];
+  /** Рисунок шага — готовый SVG (треугольник Пифагора у шага «Длина по формуле»). */
+  svg?: string;
 }
 
 /** Что даёт генератор прототипа. */

@@ -17,6 +17,7 @@ import {
   naydiDlinu,
   shagDlina,
   shagKombinatsiya,
+  shagiKombinatsii,
   shagOtvet,
   shagPoRisunku,
   shagSkalyarnoe,
@@ -146,7 +147,7 @@ export function dlinaKombinatsiiPoRisunku(p: DlinaKombinatsii): Generated {
     ),
     shagi: [
       shagPoRisunku(risunok.vectors),
-      shagKombinatsiya(terms, R, 'c'),
+      ...shagiKombinatsii(terms, R, 'c'),
       shagDlina('c', R, otvet),
       shagOtvet(otvet),
     ],
@@ -418,7 +419,7 @@ export function dlinaKM(p: DlinaKM): Generated {
         2 * p.k * p.m * (p.ax * p.bx + p.ay * p.by) +
         p.m ** 2 * (p.bx ** 2 + p.by ** 2),
     ),
-    shagi: [shagKombinatsiya(terms, R, 'c'), shagDlina('c', R, otvet), shagOtvet(otvet)],
+    shagi: [...shagiKombinatsii(terms, R, 'c'), shagDlina('c', R, otvet), shagOtvet(otvet)],
     params: { ...p },
     signature: `pv2km|${signatureOf([a, b])}|${p.k}|${p.m}|${p.bPervym ?? 0}`,
     prototype: 'P2-DLINA-KM',
@@ -561,7 +562,7 @@ export function dlinaTrehPoRisunku(p: DlinaTreh): Generated {
     ),
     shagi: [
       shagPoRisunku(risunok.vectors),
-      shagKombinatsiya(terms, S, 'u'),
+      ...shagiKombinatsii(terms, S, 'u'),
       shagDlina('u', S, otvet),
       shagOtvet(otvet),
     ],

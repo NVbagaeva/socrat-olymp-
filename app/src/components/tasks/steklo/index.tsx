@@ -143,13 +143,17 @@ export function ShagiResheniya({
             className={clsx('stk-shag', shag.ton !== undefined && `stk-shag--${shag.ton}`)}
             key={i}
           >
+            {/* Текст и формула названия — в одной обёртке: в мобильной карте
+                название — flex, и без неё пробел между словом и формулой
+                пропадал («КООРДИНАТЫ ВЕКТОРАa + b»). */}
             {shag.zagolovokHtml !== undefined ? (
-              <p
-                className="stk-shag__zag"
-                dangerouslySetInnerHTML={{ __html: shag.zagolovokHtml }}
-              />
+              <p className="stk-shag__zag">
+                <span dangerouslySetInnerHTML={{ __html: shag.zagolovokHtml }} />
+              </p>
             ) : shag.zagolovok === undefined ? null : (
-              <p className="stk-shag__zag">{shag.zagolovok}</p>
+              <p className="stk-shag__zag">
+                <span>{shag.zagolovok}</span>
+              </p>
             )}
             <div className="stk-shag__chto" dangerouslySetInnerHTML={{ __html: shag.chtoHtml }} />
             <div

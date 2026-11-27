@@ -21,6 +21,7 @@ export function shagiIz2(shagi: readonly ShagRazbora[], { bezOtveta = false } = 
       ...(s.zagolovok.includes('$') ? { zagolovokHtml: typeset(s.zagolovok) } : {}),
       chtoHtml: s.stroki.map((line) => `<p>${typeset(line)}</p>`).join(''),
       formulaHtml: '',
+      ...(s.svg === undefined ? {} : { risunok: <RisunokSvg svg={s.svg} /> }),
     }));
 }
 
