@@ -23,7 +23,9 @@ async function rpc<T>(name: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.rpc(name, args);
   if (error !== null) {
     const message = error.message ?? 'unknown';
-    throw new Dz2Error(/^([a-z_0-9]+)/.exec(message)?.[1] ?? 'unknown', message);
+    /* Код PostgREST (PGRST301 — истёк вход) — в текст: его различает lib/dz2/oshibka.ts. */
+    const kodPostgrest = typeof error.code === 'string' && error.code.startsWith('PGRST') ? ` [${error.code}]` : '';
+    throw new Dz2Error(/^([a-z_0-9]+)/.exec(message)?.[1] ?? 'unknown', message + kodPostgrest);
   }
   return data as T;
 }

@@ -16,6 +16,7 @@ import type React from 'react';
 import { Button, Card, Checkbox, EmptyState, FieldLabel, Input } from '@/components/ui';
 import { NeedLogin } from '@/components/dz/common';
 import { DZ2 } from '@/content/dz2';
+import { kodOshibki, prichinaOshibki } from '@/lib/dz2/oshibka';
 import { useSessionUser } from '@/lib/auth/session';
 import type { TutorClass } from '@/lib/dz/api';
 import { korzina, useKorzina } from '@/lib/dz2/korzina';
@@ -39,10 +40,6 @@ const ZAPASY = [5, 10, 15, 20, 30, 40, 60];
 
 function param(name: string): string | null {
   return typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(name);
-}
-
-function kodOshibki(e: unknown): string {
-  return e instanceof Error && 'code' in e ? String((e as { code: string }).code) : 'unknown';
 }
 
 export function Vydacha() {
@@ -81,8 +78,8 @@ export function Vydacha() {
           due_msk: dz.due_at === null ? '' : utcVMsk(dz.due_at),
         });
         if (chernovik?.korzina !== undefined) korzina.zamenit(razobrat(chernovik.korzina));
-      } catch {
-        if (alive) setError(DZ2.master.oshibkaBazy('unknown'));
+      } catch (e) {
+        if (alive) setError(DZ2.master.oshibkaBazy(kodOshibki(e)));
       }
     })();
     return () => {
@@ -148,7 +145,10 @@ export function Vydacha() {
         setNote(chto === 'template' ? t.shablonSohranen : t.sohraneno);
       }
     } catch (e) {
-      setError(t.oshibkaBazy(kodOshibki(e)));
+      const kod = kodOshibki(e);
+      const prichina = kod === 'unknown' ? prichinaOshibki(e) : null;
+      /* Неизвестную ошибку — с причиной: учитель сможет её переслать. */
+      setError(prichina === null ? t.oshibkaBazy(kod) : `${t.oshibkaBazy(kod)} ${t.prichina(prichina)}`);
     } finally {
       setBusy(false);
     }
