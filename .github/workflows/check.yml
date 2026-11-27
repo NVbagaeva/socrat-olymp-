@@ -585,6 +585,12 @@ jobs:
         working-directory: app
         run: pnpm test:kabinet-catalog
 
+      # Цены тарифов в базе (supabase/seed/tarify.sql) совпадают с
+      # src/lib/tarify/config.ts: заказ оплачивается по цене из базы.
+      - name: Цены тарифов для базы
+        working-directory: app
+        run: pnpm test:tarify-sql
+
       # Структура экзамена (src/content/struktura.js): какой раздел на каком
       # номере ЕГЭ, в какой части и сколько баллов даёт. Разделы и номера
       # хранения не повторяются; действующая структура — ЕГЭ-2027 из 19

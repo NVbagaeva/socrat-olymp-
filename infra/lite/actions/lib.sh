@@ -97,14 +97,14 @@ env_line() {
 }
 
 # Файлы набора на сервер: compose, Caddyfile, скрипты, шаблоны писем,
-# миграции по списку migrations.txt, каталог банка. Секреты (.env.*) и состояние
+# миграции по списку migrations.txt, каталог банка и цены тарифов. Секреты (.env.*) и состояние
 # (state/) на сервере не трогаются.
 sync_files() {
   local stage="$WORK/stage"
   rm -rf "$stage"
   mkdir -p "$stage/templates" "$stage/migrations" "$stage/catalog"
   cp -R "$LITE_SRC/compose.yml" "$LITE_SRC/compose.ci.yml" "$LITE_SRC/Caddyfile" \
-    "$LITE_SRC/db" "$LITE_SRC/bin" "$LITE_SRC/server" "$LITE_SRC/notifier" "$stage/"
+    "$LITE_SRC/db" "$LITE_SRC/bin" "$LITE_SRC/server" "$LITE_SRC/notifier" "$LITE_SRC/oplata" "$stage/"
   cp "$REPO_ROOT"/supabase/templates/*.html "$stage/templates/"
   local n=0 path
   while IFS= read -r path; do
@@ -113,8 +113,9 @@ sync_files() {
     cp "$REPO_ROOT/$path" "$stage/migrations/$(printf '%03d' "$n")-$(basename "$path")"
   done < "$LITE_SRC/migrations.txt"
   # Каталог банка для кабинета: применяется при каждом «Миграции».
-  cp "$REPO_ROOT/supabase/seed/kabinet_katalog.sql" "$stage/catalog/"
-  log "На сервер: набор, $(ls "$stage/templates" | wc -l) шаблона писем, миграций $n, каталог банка"
+  # Цены тарифов (pnpm build:tarify-sql) — так же, после каталога.
+  cp "$REPO_ROOT/supabase/seed/kabinet_katalog.sql" "$REPO_ROOT/supabase/seed/tarify.sql" "$stage/catalog/"
+  log "На сервер: набор, $(ls "$stage/templates" | wc -l) шаблона писем, миграций $n, каталог банка и цены тарифов"
   # Файлы без секретов: читать их можно всем, и postgres в контейнере
   # (uid 70) должен видеть db/. Секреты — в .env.*, они здесь не трогаются.
   rsync -rlpt --delete --chmod=D755,F644 \

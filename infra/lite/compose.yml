@@ -5,7 +5,9 @@
 #   rest   — PostgREST, доступ к таблицам по правилам RLS;
 #   caddy  — HTTPS (Let's Encrypt), /auth/v1 и /rest/v1, apikey, CORS;
 #   notifier — рассыльщик уведомлений: напоминания, письма, «Отписаться»
-#            (docs/kabinet-uvedomleniya.md, PR 3в).
+#            (docs/kabinet-uvedomleniya.md, PR 3в);
+#   oplata — оплата через Robokassa: ссылка на оплату и Result URL
+#            (docs/oplata-robokassa.md).
 #
 # Адреса и ключи те же, что у облачного Supabase, поэтому supabase-js на
 # сайте работает без изменений. Почему без Kong, Studio, Storage и
@@ -258,6 +260,39 @@ services:
       interval: 30s
       timeout: 5s
       start_period: 20s
+      retries: 5
+
+  # Сервис оплаты (docs/oplata-robokassa.md): ссылка на оплату с подписью
+  # Паролем №1 и приём уведомлений Robokassa (Result URL) с проверкой
+  # Паролем №2. Node без зависимостей, код — папка oplata/. Без логина
+  # магазина и паролей заказов не принимает.
+  oplata:
+    image: node:22.23.5-alpine
+    restart: unless-stopped
+    mem_limit: ${OPLATA_MEM:-64m}
+    logging: *logging
+    depends_on:
+      rest: { condition: service_healthy }
+    user: node
+    working_dir: /app
+    command: [node, oplata.mjs]
+    environment:
+      NODE_OPTIONS: --max-old-space-size=32
+      REST_URL: http://rest:3000
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      ROBOKASSA_LOGIN: ${ROBOKASSA_LOGIN:-}
+      ROBOKASSA_PASS1: ${ROBOKASSA_PASS1:-}
+      ROBOKASSA_PASS2: ${ROBOKASSA_PASS2:-}
+      ROBOKASSA_HASH: ${ROBOKASSA_HASH:-md5}
+      ROBOKASSA_TEST: ${ROBOKASSA_TEST:-}
+      ROBOKASSA_RECEIPT: ${ROBOKASSA_RECEIPT:-}
+    volumes:
+      - ./oplata:/app:ro
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8091/health]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
       retries: 5
 
 volumes:

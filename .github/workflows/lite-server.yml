@@ -16,6 +16,7 @@ name: Lite server
 #   проверка здоровья снаружи и изнутри, таймеры systemd;
 #   SSH-туннель к базе: только порт 5432, без оболочки;
 #   рассыльщик уведомлений: письмо в Mailpit и «Отписаться»;
+#   сервис оплаты: Result URL без ключа, ссылка на оплату — только с ключом;
 #   shellcheck всех скриптов.
 #
 # Секреты создаются на машине CI и живут до конца запуска.
@@ -55,6 +56,11 @@ jobs:
       # Письма, SMTP, цикл и «Отписаться» — с поддельными SMTP и PostgREST.
       - name: Рассыльщик без базы и почты
         run: node infra/lite/notifier/check.mjs
+
+      # Подписи Robokassa, Result URL, заказ от имени человека — с
+      # поддельным PostgREST (docs/oplata-robokassa.md).
+      - name: Сервис оплаты без базы и Robokassa
+        run: node infra/lite/oplata/check.mjs
 
       - name: Проверить скрипты
         run: |
@@ -271,6 +277,15 @@ jobs:
           # Согласие родителя (/roditel): кривая и чужая ссылка — 400, через Caddy без ключа.
           test "$(api "https://api.lite.test/roditel?t=short")" = 400
           test "$(api "https://api.lite.test/roditel?t=$(printf '0%.0s' $(seq 1 64))" -X POST)" = 400
+          # Оплата (docs/oplata-robokassa.md): Robokassa в CI не настроена.
+          # Result URL доходит до сервиса без ключа (503 «оплата выключена»),
+          # ссылка на оплату без ключа — 401 от Caddy, с ключом — до сервиса.
+          # Цены тарифов «Миграции» положили в базу.
+          test "$(api https://api.lite.test/oplata/result -X POST -d 'OutSum=1&InvId=1&SignatureValue=x')" = 503
+          test "$(api https://api.lite.test/oplata/sozdat -X POST -d '{}')" = 401
+          anon=$(sudo sh -c '. /opt/budetege-api/.env.generated && printf %s "$ANON_KEY"')
+          test "$(api https://api.lite.test/oplata/sozdat -X POST -d '{}' -H "apikey: $anon" -H 'Authorization: Bearer a.b.c')" = 503
+          test "$(psql_db "select count(*) from public.tarif_tseny")" = 12
           # Push (PR 3г): ключи VAPID рассыльщик создал сам и положил в базу.
           for _ in $(seq 1 20); do
             [ "$(psql_db "select count(*) from vault.secrets where name in ('vapid_public', 'vapid_private')")" = 2 ] && break

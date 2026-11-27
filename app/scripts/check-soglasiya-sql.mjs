@@ -371,6 +371,22 @@ const SUITES = [
       ['ustnyy-schet.test.sql', path.join(SUPA, 'tests', 'ustnyy-schet.test.sql'), formatyCasesSql],
     ],
   },
+  {
+    /* Оплата через Robokassa (docs/oplata-robokassa.md): цена из базы,
+       заказ своей роли и с офертой, чужие заказы не видны, зачесть
+       оплату может только сервис, повтор уведомления ничего не меняет,
+       новый срок продолжает действующий. На фоне прав своего сервера. */
+    name: 'Оплата',
+    db: 'oplata',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['tarify.sql', path.join(SUPA, 'seed', 'tarify.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['oplata.test.sql', path.join(SUPA, 'tests', 'oplata.test.sql')],
+    ],
+  },
 ];
 
 let failed = false;

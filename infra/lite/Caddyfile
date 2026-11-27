@@ -6,7 +6,8 @@
 #   заголовок apikey обязателен и должен быть ключом anon или
 #   service_role, иначе 401 — как у Supabase;
 #   без apikey открыты только адреса из писем (/auth/v1/verify,
-#   /otpiska и /roditel), по ним человек переходит из почты обычной ссылкой;
+#   /otpiska и /roditel), по ним человек переходит из почты обычной ссылкой,
+#   и Result URL Robokassa (/oplata/result) — его подпись проверяет сервис;
 #   CORS — только для адресов сайта.
 #
 # Сертификат Caddy получает и продлевает сам (Let's Encrypt), как только
@@ -116,6 +117,28 @@
 	# проверяет база (confirm_parent_consent); отвечает рассыльщик.
 	handle /roditel* {
 		reverse_proxy notifier:8090 {
+			header_down -Access-Control-Allow-Origin
+		}
+	}
+
+	# Уведомление Robokassa об оплате (Result URL): ключа нет, подпись
+	# Паролем №2 проверяет сервис оплаты (compose.yml, oplata).
+	handle /oplata/result {
+		reverse_proxy oplata:8091 {
+			header_down -Access-Control-Allow-Origin
+		}
+	}
+
+	# Ссылка на оплату — с сайта: ключ anon и вход человека, как у /rest/v1.
+	handle /oplata/sozdat {
+		@bad_key not {
+			header apikey {$ANON_KEY}
+			header apikey {$SERVICE_ROLE_KEY}
+		}
+		handle @bad_key {
+			import no_key
+		}
+		reverse_proxy oplata:8091 {
 			header_down -Access-Control-Allow-Origin
 		}
 	}

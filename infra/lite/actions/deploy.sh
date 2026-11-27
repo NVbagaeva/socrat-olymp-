@@ -7,7 +7,7 @@
 . "$(dirname "$0")/lib.sh"
 ssh_setup
 
-for secret in SMTP_PASS S3_SECRET_ACCESS_KEY S3_ACCESS_KEY_ID ALERT_EMAIL; do
+for secret in SMTP_PASS S3_SECRET_ACCESS_KEY S3_ACCESS_KEY_ID ALERT_EMAIL ROBOKASSA_PASS1 ROBOKASSA_PASS2; do
   mask "${!secret:-}"
 done
 
@@ -36,6 +36,14 @@ log "Окружение набора (.env.github)"
   env_line S3_ACCESS_KEY_ID "${S3_ACCESS_KEY_ID:-}"
   env_line S3_SECRET_ACCESS_KEY "${S3_SECRET_ACCESS_KEY:-}"
   env_line BACKUP_AGE_RECIPIENT "$BACKUP_AGE_RECIPIENT"
+  # Robokassa (docs/oplata-robokassa.md): логин магазина и настройки —
+  # переменные, Пароли №1 и №2 — секреты. Пусто — оплата выключена.
+  env_line ROBOKASSA_LOGIN "${ROBOKASSA_LOGIN:-}"
+  env_line ROBOKASSA_PASS1 "${ROBOKASSA_PASS1:-}"
+  env_line ROBOKASSA_PASS2 "${ROBOKASSA_PASS2:-}"
+  env_line ROBOKASSA_HASH "${ROBOKASSA_HASH:-md5}"
+  env_line ROBOKASSA_TEST "${ROBOKASSA_TEST:-}"
+  env_line ROBOKASSA_RECEIPT "${ROBOKASSA_RECEIPT:-}"
   # Только в CI: дополнительный compose-файл, свой центр сертификатов,
   # почта без входа и короткий срок сертификата.
   env_line COMPOSE_EXTRA "${COMPOSE_EXTRA:-}"
