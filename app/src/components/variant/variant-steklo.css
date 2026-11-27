@@ -963,3 +963,19 @@ body:has(.var-stranica .var-bar) .cookie-notice {
     height: 56px;
   }
 }
+
+/* Стеклянная миниатюра подтипа (Znak группы тренажёра) — в колонке пиктограммы. */
+.var-podtip__znak {
+  justify-self: center;
+}
+/* Значки №10 (пиктограммы №11) — линией цвета тона группы: слой
+   zadanie11.css на странице варианта не подключён, вид задан здесь. */
+.var-podtip__znak .z11-pic {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: var(--ton-text);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

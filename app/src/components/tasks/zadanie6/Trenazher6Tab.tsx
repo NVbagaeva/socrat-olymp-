@@ -28,15 +28,9 @@ function katalog6(): KatalogBanka {
   );
 }
 
-/**
- * Вкладка «Тренажёр» задания №6 в «Стеклянной сцене»: стартовые режимы,
- * выбор тем (пять групп, 15 типов), экран задачи, итоги. Названия
- * набраны KaTeX на сборке. Сами задачи на странице не лежат: тренировка
- * собирается в браузере из каталога, условия приезжают файлами
- * прототипов (public/data/zadanie6, без ответов).
- */
-export function Trenazher6Tab({ base }: { base: string }) {
-  const gruppy: GruppaVybora[] = GROUPS.map((g) => ({
+/** Группы тренажёра №6: значок, тон, типы. Их же берёт окно подтипов «Собрать вариант». */
+export function gruppy6(): GruppaVybora[] {
+  return GROUPS.map((g) => ({
     id: g.id,
     nazvanie: g.title,
     znakHtml: typeset(`$${GRUPPY6_VID[g.id].znak}$`),
@@ -48,6 +42,17 @@ export function Trenazher6Tab({ base }: { base: string }) {
       nazvanieHtml: `<span>${typeset(p.title)}</span>`,
     })),
   }));
+}
+
+/**
+ * Вкладка «Тренажёр» задания №6 в «Стеклянной сцене»: стартовые режимы,
+ * выбор тем (пять групп, 15 типов), экран задачи, итоги. Названия
+ * набраны KaTeX на сборке. Сами задачи на странице не лежат: тренировка
+ * собирается в браузере из каталога, условия приезжают файлами
+ * прототипов (public/data/zadanie6, без ответов).
+ */
+export function Trenazher6Tab({ base }: { base: string }) {
+  const gruppy = gruppy6();
   const nazvaniyaTekst = Object.fromEntries(PROTOTYPES.map((p) => [p.id, texPlain(p.title)]));
   return (
     <section className="trainer z6-trening trn-host" aria-labelledby="z6-trening-title">

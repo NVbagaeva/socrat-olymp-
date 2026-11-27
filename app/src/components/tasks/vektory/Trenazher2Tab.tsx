@@ -7,14 +7,9 @@ import { PROTOTYPES } from '@/lib/vektory/prototypes';
 import { katalog2 } from '@/lib/vektory/trening/katalog';
 import { Trenazher2 } from './Trenazher2';
 
-/**
- * Вкладка «Тренажёр» задания №2 в «Стеклянной сцене»: стартовые режимы,
- * выбор тем (три группы, 19 типов), экран задачи, итоги. Названия
- * набраны KaTeX на сборке. Задачи строит генератор в браузере по ключам
- * каталога (по 50 проверенных seed на тип).
- */
-export function Trenazher2Tab({ base }: { base: string }) {
-  const gruppy: GruppaVybora[] = O_ZADANII.gruppy.map((g) => ({
+/** Группы тренажёра №2: значок, тон, типы. Их же берёт окно подтипов «Собрать вариант». */
+export function gruppy2(): GruppaVybora[] {
+  return O_ZADANII.gruppy.map((g) => ({
     id: g.id,
     nazvanie: g.title,
     znakHtml: typeset(`$${GRUPPY2_VID[g.id].znak}$`),
@@ -24,6 +19,16 @@ export function Trenazher2Tab({ base }: { base: string }) {
       nazvanieHtml: `<span>${typeset(p.nazvanie)}</span>`,
     })),
   }));
+}
+
+/**
+ * Вкладка «Тренажёр» задания №2 в «Стеклянной сцене»: стартовые режимы,
+ * выбор тем (три группы, 19 типов), экран задачи, итоги. Названия
+ * набраны KaTeX на сборке. Задачи строит генератор в браузере по ключам
+ * каталога (по 50 проверенных seed на тип).
+ */
+export function Trenazher2Tab({ base }: { base: string }) {
+  const gruppy = gruppy2();
   const nazvaniyaTekst = Object.fromEntries(PROTOTYPES.map((p) => [p.id, texPlain(p.nazvanie)]));
   return (
     <section className="trainer z2-trening trn-host" aria-labelledby="z2-trening-title">

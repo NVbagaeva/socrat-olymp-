@@ -25,3 +25,10 @@
   max-height: min(70vh, 720px);
   margin: 0 auto;
 }
+
+/* Треугольник Пифагора в шаге «Длина по формуле»: на телефоне — во всю
+   ширину шага, на широком экране не крупнее 340px. */
+.vp-wrap .vp-pifagor {
+  max-width: 340px;
+  margin-top: var(--space-2);
+}
