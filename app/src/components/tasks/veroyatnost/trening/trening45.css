@@ -36,13 +36,13 @@
 .z45-risunok {
   margin: var(--space-4) 0 0;
   max-width: 100%;
-  overflow-x: auto;
+  min-width: 0;
 }
-/* Рисунок движка (плитки, таблица, дерево) не ужимается в узкую колонку
-   телефона: подписи в клетках остаются читаемыми, рисунок прокручивается
-   вбок внутри шага, страница не едет. */
+/* Рисунок движка целиком в ширину колонки, без прокрутки вбок: таблица
+   и плитки — разметкой по ширине (probability/Rezinovye.tsx), прямая,
+   круг, дерево и сетка — SVG с viewBox, ужимаются целиком. */
 .z45-risunok > :not(figcaption) {
-  min-width: 480px;
+  max-width: 100%;
 }
 .z45-risunok__podpis {
   margin-bottom: var(--space-2);
@@ -51,15 +51,15 @@
 }
 
 /* Дерево в подсказке-вопросах (DerevoPodskazki): растёт по ответам.
-   Как и рисунок решения, не ужимается — прокручивается вбок. Новые
+   Как и рисунок решения, ужимается в ширину колонки целиком. Новые
    ветви и подписи проявляются: двигается только opacity. */
 .z45-derevo-podskazki {
   margin: var(--space-4) 0 0;
   max-width: 100%;
-  overflow-x: auto;
+  min-width: 0;
 }
 .z45-derevo-podskazki > :not(figcaption) {
-  min-width: 480px;
+  max-width: 100%;
 }
 .z45-derevo-podskazki__podpis {
   margin-bottom: var(--space-2);

@@ -15,6 +15,7 @@
 
 export { OutcomeTiles, type OutcomeTilesProps, type RisunokState } from './OutcomeTiles';
 export { OutcomeGrid, type OutcomeGridProps } from './OutcomeGrid';
+export { OutcomeGridFluid, OutcomeTilesFluid } from './Rezinovye';
 export {
   CoordinateLine,
   type CoordinateLineProps,

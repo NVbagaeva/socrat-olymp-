@@ -3,7 +3,9 @@ import {
   CoordinateLine,
   HundredGrid,
   OutcomeGrid,
+  OutcomeGridFluid,
   OutcomeTiles,
+  OutcomeTilesFluid,
   ProbabilityTree,
   tselo,
   type HighlightMode,
@@ -30,6 +32,13 @@ export interface VizualizatsiyaProps {
   podsvetka?: Podsvetka;
   state?: RisunokState;
   className?: string;
+  /**
+   * Для печатных листов: таблица и плитки — SVG с viewBox (по нему
+   * лист считает место). На экране — разметкой по ширине колонки
+   * (Rezinovye.tsx): на телефоне SVG-таблица 6×6 и ряд плиток не
+   * влезали и обрезались.
+   */
+  pechat?: boolean;
 }
 
 /** Число по-русски: запятая, без хвостовых нулей, не больше двух знаков. */
@@ -143,14 +152,17 @@ export function Vizualizatsiya({
   podsvetka,
   state = 'default',
   className,
+  pechat = false,
 }: VizualizatsiyaProps) {
+  const Plitki = pechat ? OutcomeTiles : OutcomeTilesFluid;
+  const Tablitsa = pechat ? OutcomeGrid : OutcomeGridFluid;
   const otkryto = podsvetka !== undefined;
   const highlightMode: HighlightMode = otkryto ? 'answer' : 'condition';
 
   switch (parametry.method) {
     case 'direct-count':
       return (
-        <OutcomeTiles
+        <Plitki
           outcomes={parametry.outcomes}
           {...(parametry.counts === undefined ? {} : { counts: parametry.counts })}
           {...(parametry.groups === undefined ? {} : { groups: parametry.groups })}
@@ -164,7 +176,7 @@ export function Vizualizatsiya({
       );
     case 'outcome-table':
       return (
-        <OutcomeGrid
+        <Tablitsa
           rows={parametry.rows}
           columns={parametry.columns}
           {...(parametry.rowLabels === undefined ? {} : { rowLabels: parametry.rowLabels })}
