@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { Figurka } from '@/components/tasks/zadanie3/Figurka';
+import { typeset } from '@/lib/tex';
 import { gruppy1 } from '@/components/tasks/planimetriya/Trenazher1Tab';
 import { gruppy9 } from '@/components/tasks/proizvodnaya/Trenazher9Tab';
 import type { Ton } from '@/components/tasks/steklo';
@@ -78,6 +80,28 @@ const SOOTVETSTVIE: Record<string, string> = {
   '3:VIII': 'kombinacii',
 };
 
+/**
+ * Свои миниатюры подтипов, которым досталась бы общая группа. №3 — фигура
+ * прототипа банка, нарисованная движком чертежей (Figurka, как у групп
+ * тренажёра); №7 (хранение 8) — формула, как у групп «Вычислений».
+ * Тон — от группы тренажёра.
+ */
+const FIGURY: Record<string, string> = {
+  '3:I': 'P03-01',
+  '3:II': 'P03-20',
+  '3:III': 'P03-46',
+  '3:IV': 'P03-55',
+  '3:V': 'P03-63',
+  '3:VI': 'P03-92',
+  '3:VII': 'P03-76',
+  '3:VIII': 'P03-85',
+};
+const FORMULY: Record<string, string> = {
+  '8:I': '\\sqrt[n]{a^{m}}',
+  '8:III': '\\sin\\tfrac{7\\pi}{6}',
+  '8:IV': '\\sin 2\\alpha',
+};
+
 export function znakiPodtipov(): Record<string, ZnakPodtipa> {
   const out: Record<string, ZnakPodtipa> = {};
   for (const s of SECTIONS) {
@@ -86,11 +110,19 @@ export function znakiPodtipov(): Record<string, ZnakPodtipa> {
       const id = SOOTVETSTVIE[`${s.egeNumber}:${st.id}`] ?? st.id;
       const g = gruppy.find((x) => x.id === id);
       if (g === undefined) continue;
-      out[`${s.egeNumber}:${st.id}`] = {
-        html: g.znakHtml,
-        ...(g.znak === undefined ? {} : { figura: g.znak }),
-        ton: g.ton,
-      };
+      const klyuch = `${s.egeNumber}:${st.id}`;
+      const figura = FIGURY[klyuch];
+      const formula = FORMULY[klyuch];
+      out[klyuch] =
+        figura !== undefined
+          ? { html: '', figura: <Figurka prototip={figura} />, ton: g.ton }
+          : formula !== undefined
+            ? { html: typeset(`$${formula}$`), ton: g.ton }
+            : {
+                html: g.znakHtml,
+                ...(g.znak === undefined ? {} : { figura: g.znak }),
+                ton: g.ton,
+              };
     }
   }
   return out;
