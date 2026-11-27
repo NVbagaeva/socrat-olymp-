@@ -93,6 +93,47 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+/* Выбор задач опорного блока в мастере. */
+.dz2-vybor__zag {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--color-link, var(--color-accent));
+}
+.dz2-vybor__vse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block: var(--space-2);
+}
+.dz2-vybor__spisok {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dz2-vybor__zadacha {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 8px);
+  min-width: 0;
+}
+.dz2-vybor__nomer {
+  font-weight: 600;
+}
+.dz2-vybor__uslovie {
+  overflow-x: auto;
+  overflow-wrap: anywhere;
+}
+.dz2-vybor__uslovie svg {
+  max-width: 100%;
+  height: auto;
+}
 .dz2-polya {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));

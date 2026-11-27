@@ -34,8 +34,13 @@ export interface ElementKorziny {
   title: string;
   /** Что именно — для показа и для «Повторить ДЗ». */
   spec: Record<string, unknown>;
-  /** Опорные: задачи блока (или выбранные). */
+  /** Опорные: все задачи блока (как собрал «В домашку»). */
   tasks?: ZadachaDz[];
+  /**
+   * Опорные: какие задачи блока идут в ДЗ — task_ref в порядке блока.
+   * Нет поля — все задачи.
+   */
+  vybrany?: string[];
   /** Тренажёр: типы (подтипы генератора), сколько задач в запасе, цель. */
   tipy?: string[];
   zapas?: number;
@@ -55,7 +60,12 @@ export const PREDEL_ELEMENTOV = 30;
 
 export function dobavit(k: Korzina, e: ElementKorziny): Korzina {
   if (k.elementy.some((x) => x.key === e.key)) {
-    return { ...k, elementy: k.elementy.map((x) => (x.key === e.key ? e : x)) };
+    /* Повторное «В домашку» того же блока обновляет задачи, а выбор
+       учителя сохраняет — для задач, которые остались в блоке. */
+    return {
+      ...k,
+      elementy: k.elementy.map((x) => (x.key === e.key ? sVyborom(e, x.vybrany) : x)),
+    };
   }
   if (k.elementy.length >= PREDEL_ELEMENTOV) return k;
   return { ...k, elementy: [...k.elementy, e] };
@@ -82,6 +92,50 @@ export function izmenit(k: Korzina, key: string, patch: Partial<ElementKorziny>)
   return { ...k, elementy: k.elementy.map((x) => (x.key === key ? { ...x, ...patch, key: x.key } : x)) };
 }
 
+/* ── Выбор задач опорного блока ─────────────────────────────────── */
+
+/** Элемент с выбором задач: только те, что есть в блоке; все или ни одной — без поля. */
+function sVyborom(e: ElementKorziny, vybrany: readonly string[] | undefined): ElementKorziny {
+  const { vybrany: _staryy, ...bez } = e;
+  if (vybrany === undefined || e.tasks === undefined) return bez;
+  const est = new Set(vybrany);
+  const ostalis = e.tasks.filter((z) => est.has(z.task_ref)).map((z) => z.task_ref);
+  return ostalis.length === e.tasks.length ? bez : { ...bez, vybrany: ostalis };
+}
+
+/** Задачи элемента, которые идут в ДЗ: выбранные, в порядке блока. */
+export function vybrannye(e: ElementKorziny): ZadachaDz[] {
+  if (e.tasks === undefined) return [];
+  if (e.vybrany === undefined) return e.tasks;
+  const est = new Set(e.vybrany);
+  return e.tasks.filter((z) => est.has(z.task_ref));
+}
+
+/** Отметить или снять задачу блока. */
+export function otmetit(k: Korzina, key: string, taskRef: string, vkl: boolean): Korzina {
+  return {
+    ...k,
+    elementy: k.elementy.map((x) => {
+      if (x.key !== key || x.tasks === undefined) return x;
+      const sejchas = new Set(vybrannye(x).map((z) => z.task_ref));
+      if (vkl) sejchas.add(taskRef);
+      else sejchas.delete(taskRef);
+      const refs = x.tasks.filter((z) => sejchas.has(z.task_ref)).map((z) => z.task_ref);
+      return refs.length === x.tasks.length ? sVyborom(x, undefined) : { ...x, vybrany: refs };
+    }),
+  };
+}
+
+/** Отметить все задачи блока или снять все. */
+export function otmetitVse(k: Korzina, key: string, vkl: boolean): Korzina {
+  return {
+    ...k,
+    elementy: k.elementy.map((x) =>
+      x.key !== key || x.tasks === undefined ? x : vkl ? sVyborom(x, undefined) : { ...x, vybrany: [] },
+    ),
+  };
+}
+
 export function v(k: Korzina, key: string): boolean {
   return k.elementy.some((x) => x.key === key);
 }
@@ -101,6 +155,11 @@ export function razobrat(raw: unknown): Korzina {
           typeof e.title === 'string' &&
           typeof e.task_no === 'number' &&
           ['opornye', 'trenazher', 'kartochki', 'variant', 'teoriya'].includes(e.vid),
+      )
+      .map((e) =>
+        e.vybrany === undefined || (Array.isArray(e.vybrany) && e.vybrany.every((r) => typeof r === 'string'))
+          ? e
+          : sVyborom(e, undefined),
       )
       .slice(0, PREDEL_ELEMENTOV),
   };
@@ -171,7 +230,8 @@ export type OshibkaVydachi =
   | 'srok_proshel'
   | 'srok_ranshe_publikacii'
   | 'reshenia_bez_sroka'
-  | 'cel_bolshe_zapasa';
+  | 'cel_bolshe_zapasa'
+  | 'net_vybrannyh_zadach';
 
 /** Что мешает выдать. Пусто — можно. */
 export function proverit(k: Korzina, n: Nastroyki, now = Date.now()): OshibkaVydachi[] {
@@ -185,6 +245,7 @@ export function proverit(k: Korzina, n: Nastroyki, now = Date.now()): OshibkaVyd
   if (due !== null && pub !== null && Date.parse(due) <= Date.parse(pub)) out.push('srok_ranshe_publikacii');
   if (n.solutions_when === 'after_due' && due === null) out.push('reshenia_bez_sroka');
   if (k.elementy.some((e) => e.vid === 'trenazher' && (e.goal_n ?? 0) > (e.zapas ?? 0))) out.push('cel_bolshe_zapasa');
+  if (k.elementy.some((e) => e.tasks !== undefined && vybrannye(e).length === 0)) out.push('net_vybrannyh_zadach');
   return out;
 }
 
