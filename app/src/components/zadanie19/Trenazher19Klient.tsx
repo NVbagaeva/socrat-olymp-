@@ -1,5 +1,8 @@
 'use client';
 
+import { zhurnalBanka } from '@/lib/trening/zhurnalBanka';
+import { idIz } from '@/lib/zhurnal/model';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Badge, Button, Input } from '@/components/ui';
@@ -247,6 +250,18 @@ function Ekran19({
   });
 
   const z = zadaniya[index];
+  /* Журнал решения задач (lib/zhurnal, этап 4ж): вторая часть — только журнал, тип — метод. */
+  const zapis = useZapisZadachi(
+    z === undefined
+      ? null
+      : zhurnalBanka(
+          '19',
+          { id: z.id, p: kind19(z.metod), text: z.uslovieHtml },
+          'trenazher',
+          idIz(zadaniya.map((x) => x.id).join(',')),
+          String(index),
+        ),
+  );
   if (z === undefined) return null;
   const last = index === zadaniya.length - 1;
 
@@ -279,11 +294,14 @@ function Ekran19({
     const r = proverit16(value, z.otvet);
     if (typeof r === 'object') {
       /* Запись не разобралась: это не ошибка в решении, попытку не считаем. */
+      zapis?.popytka(value, false, 'format');
       setOshibka(r.oshibka);
       return;
     }
     setOshibka(null);
     setChecked(r === 'verno' ? 'right' : 'wrong');
+    zapis?.popytka(value, r === 'verno');
+    if (r === 'verno') zapis?.zakryt(true);
     if (r === 'verno') {
       if (marks[index] === undefined) {
         remember(failed ? 'wrong' : hintOpen ? 'hinted' : 'right');
@@ -297,12 +315,18 @@ function Ekran19({
   }
 
   function reveal() {
+    zapis?.reshenie();
     setSolutionOpen(true);
     if (checked !== 'right' && marks[index] === undefined) remember('revealed');
     if (checked !== 'right') setMarks({ ...marks, [index]: 'hinted' });
   }
 
   function next() {
+    if (checked !== 'right') {
+      if (solutionOpen) zapis?.zakrytKak('revealed');
+      else if (checked === 'wrong') zapis?.zakryt(false);
+      else zapis?.propustit();
+    }
     nachalo.current = elapsed();
     setIndex(index + 1);
     setValue('');
@@ -432,7 +456,13 @@ function Ekran19({
             </Button>
           )}
           {hintOpen || done ? null : (
-            <Button variant="ghost" onClick={() => setHintOpen(true)}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setHintOpen(true);
+                zapis?.shagPodskazki(1);
+              }}
+            >
               {RABOTA_19.podskazka}
             </Button>
           )}
