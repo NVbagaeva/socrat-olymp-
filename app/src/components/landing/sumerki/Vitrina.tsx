@@ -357,6 +357,7 @@ export function Vitrina({
           lid={t.lid}
           punkty={t.punkty}
           knopki={[{ ...t.knopka, glavnaya: true }]}
+          begushchaya
         />
         {posle}
       </div>
