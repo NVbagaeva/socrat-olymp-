@@ -723,3 +723,152 @@
     transform: none;
   }
 }
+
+/* ── Бегущая строка пунктов (Begushchaya в Vitrina.tsx) ───────────
+   Набор карточек и его копия в одной ленте; лента едет от 0 до −50 % —
+   ровно на один набор, поэтому склейка не видна. Зазор — padding-right
+   у каждой карточки (не gap): после последней он тот же, что между
+   остальными. Длительность = число карточек × ширина / скорость,
+   так что скорость не зависит от числа карточек.
+   СКОРОСТЬ — --vit-beg-skorost (px/с, число без единиц). */
+
+.vit-beg {
+  --vit-beg-skorost: 40;
+  --vit-beg-w: 320;
+  --vit-beg-zazor: 12px;
+  grid-area: punkty;
+  min-width: 0;
+  margin: var(--space-6) 0 0;
+  /* Место под кольцо наведения и рамку фокуса — сверху и снизу. */
+  padding-block: 6px;
+  overflow: hidden;
+  overflow: clip;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+.vit-beg__lenta {
+  display: flex;
+  width: max-content;
+  animation: vit-beg calc(var(--n) * var(--vit-beg-w) / var(--vit-beg-skorost) * 1s) linear infinite;
+  will-change: transform;
+}
+@keyframes vit-beg {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+/* Пауза: блок вне экрана, палец на карточке, фокус с клавиатуры, мышь. */
+.vit-beg[data-vne] .vit-beg__lenta,
+.vit-beg[data-palec] .vit-beg__lenta,
+.vit-beg:has(:focus-visible) .vit-beg__lenta {
+  animation-play-state: paused;
+}
+@media (hover: hover) {
+  .vit-beg:hover .vit-beg__lenta {
+    animation-play-state: paused;
+  }
+}
+.vit-beg__nabor {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vit-beg__el {
+  flex: none;
+  display: flex;
+  box-sizing: border-box;
+  width: calc(var(--vit-beg-w) * 1px);
+  padding-right: var(--vit-beg-zazor);
+}
+
+/* Карточки — все в «активном» виде пункта; кольцо — на наведении. */
+.vit-beg .vit-punkt {
+  align-items: start;
+  width: 100%;
+  max-width: none;
+  border-color: var(--glass-edge);
+  background: color-mix(in srgb, var(--lend-steklo) 82%, transparent);
+  -webkit-tap-highlight-color: transparent;
+}
+.vit-beg .vit-punkt.is-aktivnyy {
+  box-shadow: none;
+}
+.vit-beg .vit-punkt__no {
+  background: linear-gradient(135deg, var(--zaliv-1), var(--zaliv-2));
+  color: var(--color-text-inverse);
+  box-shadow: 0 6px 16px -6px var(--svechenie);
+}
+.vit-beg .vit-punkt .vit-punkt__p {
+  display: block;
+  animation: none;
+}
+@media (hover: hover) {
+  .vit-beg .vit-punkt:hover,
+  .vit-beg .vit-punkt.is-aktivnyy:hover {
+    background: color-mix(in srgb, var(--lend-steklo) 82%, transparent);
+    box-shadow:
+      0 0 0 1px var(--kromka),
+      0 10px 26px -14px var(--svechenie);
+  }
+}
+.vit-opisanie.vit-opisanie--net {
+  display: none;
+}
+
+@media (max-width: 1023.98px) {
+  /* Лента — от края до края карточки части. */
+  .vit-beg {
+    margin: var(--space-4) calc(-1 * var(--space-8)) 0;
+  }
+  .vit-beg .vit-punkt__tekst {
+    padding-top: 6px;
+  }
+}
+@media (max-width: 767.98px) {
+  .vit-beg {
+    --vit-beg-w: 296;
+    --vit-beg-zazor: 10px;
+    margin-inline: calc(-1 * var(--space-5));
+  }
+}
+
+/* Без движения: обычная лента с прокруткой и привязкой, без копии. */
+@media (prefers-reduced-motion: reduce) {
+  .vit-beg {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .vit-beg::-webkit-scrollbar {
+    display: none;
+  }
+  .vit-beg__lenta {
+    animation: none;
+    will-change: auto;
+  }
+  .vit-beg__nabor[aria-hidden] {
+    display: none;
+  }
+  .vit-beg__el {
+    scroll-snap-align: start;
+  }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 1023.98px) {
+  .vit-beg {
+    padding-inline: var(--space-8);
+    scroll-padding-inline: var(--space-8);
+  }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 767.98px) {
+  .vit-beg {
+    padding-inline: var(--space-5);
+    scroll-padding-inline: var(--space-5);
+  }
+}

@@ -2,7 +2,15 @@
 
 import { clsx } from 'clsx';
 import Link from 'next/link';
-import { useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FocusEvent,
+  type PointerEvent,
+  type ReactNode,
+} from 'react';
 import { VITRINA, type PunktVitriny, type Snimok } from '@/content/vitrina';
 import { assetUrl } from '@/lib/assetUrl';
 import { Prosmotr, type SlaydProsmotra } from './Prosmotr';
@@ -87,6 +95,117 @@ function Scena({
   );
 }
 
+function Punkt({
+  p,
+  i,
+  aktivnyy,
+  onVybor,
+}: {
+  p: PunktVitriny;
+  i: number;
+  aktivnyy: boolean;
+  onVybor: (i: number) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={clsx('vit-punkt', aktivnyy && 'is-aktivnyy')}
+      aria-pressed={aktivnyy}
+      onClick={() => onVybor(i)}
+    >
+      <span className="vit-punkt__no">{String(i + 1).padStart(2, '0')}</span>
+      <span className="vit-punkt__tekst">
+        <span className="vit-punkt__z">{p.zagolovok}</span>
+        <span className="vit-punkt__p">{p.tekst}</span>
+      </span>
+    </button>
+  );
+}
+
+/**
+ * Пункты бегущей строкой: набор и его копия едут справа налево,
+ * translateX от 0 до −50 % (vitrina.css, .vit-beg). Скорость — в CSS
+ * (--vit-beg-skorost, px/с), длительность — от ширины набора: число
+ * карточек (--n) × ширина карточки. Копия — aria-hidden и inert.
+ * Пауза: наведение, палец на карточке, фокус с клавиатуры, блок вне
+ * экрана (IntersectionObserver). prefers-reduced-motion — обычная
+ * лента с прокруткой, без копии.
+ */
+function Begushchaya({
+  punkty,
+  aktivnyy,
+  onVybor,
+}: {
+  punkty: readonly PunktVitriny[];
+  aktivnyy: number;
+  onVybor: (i: number) => void;
+}) {
+  const ramka = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ramka.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([z]) => {
+      if (z?.isIntersecting) delete el.dataset.vne;
+      else el.dataset.vne = '';
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const palec = (est: boolean) => (e: PointerEvent) => {
+    const el = ramka.current;
+    if (!el || e.pointerType === 'mouse') return;
+    if (est) el.dataset.palec = '';
+    else delete el.dataset.palec;
+  };
+
+  /* Фокус с клавиатуры на карточке за краем: ставим ленту так, чтобы
+     карточка была посередине (лента стоит на паузе — :focus-visible). */
+  const kFokusu = (e: FocusEvent<HTMLLIElement>) => {
+    const el = ramka.current;
+    const lenta = el?.firstElementChild as HTMLElement | null;
+    if (!el || !lenta) return;
+    el.scrollLeft = 0;
+    const anim = lenta.getAnimations?.()[0];
+    const dlit = anim?.effect?.getComputedTiming().duration;
+    if (!anim || typeof dlit !== 'number' || dlit <= 0) return;
+    const r = el.getBoundingClientRect();
+    const k = e.currentTarget.getBoundingClientRect();
+    if (k.left >= r.left && k.right <= r.right) return;
+    const polovina = lenta.scrollWidth / 2;
+    const x = e.currentTarget.offsetLeft - (el.clientWidth - k.width) / 2;
+    const dolya = (((x % polovina) + polovina) % polovina) / polovina;
+    anim.currentTime = dolya * dlit;
+  };
+
+  const nabor = (kopiya: boolean) => (
+    <ol className="vit-beg__nabor" {...(kopiya ? { 'aria-hidden': true, inert: true } : {})}>
+      {punkty.map((p, i) => (
+        <li key={p.id} className="vit-beg__el" onFocus={kopiya ? undefined : kFokusu}>
+          <Punkt p={p} i={i} aktivnyy={!kopiya && i === aktivnyy} onVybor={onVybor} />
+        </li>
+      ))}
+    </ol>
+  );
+
+  return (
+    <div
+      ref={ramka}
+      className="vit-beg"
+      onPointerDown={palec(true)}
+      onPointerUp={palec(false)}
+      onPointerCancel={palec(false)}
+      onPointerLeave={palec(false)}
+    >
+      <div className="vit-beg__lenta" style={{ '--n': punkty.length } as CSSProperties}>
+        {nabor(false)}
+        {nabor(true)}
+      </div>
+    </div>
+  );
+}
+
 function Chast({
   vid,
   metka,
@@ -96,6 +215,7 @@ function Chast({
   punkty,
   knopki,
   kletkaPodpisi,
+  begushchaya = false,
 }: {
   vid: 'gen' | 'trn';
   metka: string;
@@ -105,6 +225,8 @@ function Chast({
   punkty: readonly PunktVitriny[];
   knopki: readonly { tekst: string; href: string; glavnaya: boolean }[];
   kletkaPodpisi?: { bez: string; s: string; podpis: string };
+  /** Пункты — бегущей строкой (Begushchaya), а не вкладками. */
+  begushchaya?: boolean;
 }) {
   const [aktivnyy, setAktivnyy] = useState(0);
   const [kletka, setKletka] = useState(false);
@@ -151,26 +273,20 @@ function Chast({
         />
       </div>
 
-      <ol className="vit-punkty">
-        {punkty.map((p, i) => (
-          <li key={p.id}>
-            <button
-              type="button"
-              className={clsx('vit-punkt', i === aktivnyy && 'is-aktivnyy')}
-              aria-pressed={i === aktivnyy}
-              onClick={() => setAktivnyy(i)}
-            >
-              <span className="vit-punkt__no">{String(i + 1).padStart(2, '0')}</span>
-              <span className="vit-punkt__tekst">
-                <span className="vit-punkt__z">{p.zagolovok}</span>
-                <span className="vit-punkt__p">{p.tekst}</span>
-              </span>
-            </button>
-          </li>
-        ))}
-      </ol>
+      {begushchaya ? (
+        <Begushchaya punkty={punkty} aktivnyy={aktivnyy} onVybor={setAktivnyy} />
+      ) : (
+        <ol className="vit-punkty">
+          {punkty.map((p, i) => (
+            <li key={p.id}>
+              <Punkt p={p} i={i} aktivnyy={i === aktivnyy} onVybor={setAktivnyy} />
+            </li>
+          ))}
+        </ol>
+      )}
       {/* Телефон: пункты — полоса вкладок, описание выбранного — здесь. */}
-      <p className="vit-opisanie" aria-live="polite">
+      {/* В бегущей строке описание — в самих карточках. */}
+      <p className={clsx('vit-opisanie', begushchaya && 'vit-opisanie--net')} aria-live="polite">
         {punkt.tekst}
       </p>
 
@@ -231,6 +347,7 @@ export function Vitrina({
           punkty={g.punkty}
           knopki={g.knopki}
           kletkaPodpisi={g.kletka}
+          begushchaya
         />
         <Chast
           vid="trn"
