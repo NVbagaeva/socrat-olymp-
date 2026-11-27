@@ -17,6 +17,7 @@ import {
   otmetitVse,
   razobrat,
   sdvinut,
+  vybratTipy,
   ubrat,
   type ElementKorziny,
   type Korzina,
@@ -73,6 +74,8 @@ export const korzina = {
   izmenit: (key: string, patch: Partial<ElementKorziny>) => zapisat(izmenit(prochest(), key, patch)),
   otmetit: (key: string, taskRef: string, vkl: boolean) => zapisat(otmetit(prochest(), key, taskRef, vkl)),
   otmetitVse: (key: string, vkl: boolean) => zapisat(otmetitVse(prochest(), key, vkl)),
+  vybratTipy: (key: string, vybor: readonly string[], nazvanie: (n: number, vse: boolean) => string) =>
+    zapisat(vybratTipy(prochest(), key, vybor, nazvanie)),
   zamenit: (k: Korzina) => zapisat(k),
   ochistit: () => zapisat(PUSTAYA_KORZINA),
 };

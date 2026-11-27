@@ -80,6 +80,41 @@ function check(ok, what) {
     'в запрос — только выбранные, позиции подряд');
 }
 
+/* ── Выбор типов тренажёра ──────────────────────────────────────── */
+{
+  const katalog = [
+    { id: 'A', html: 'Тип A', gruppa: 'Г1' },
+    { id: 'B', html: 'Тип B', gruppa: 'Г1' },
+    { id: 'C', html: 'Тип C', gruppa: 'Г2', tipy: ['C1', 'C2'] },
+  ];
+  const tr = { key: 'tr', vid: 'trenazher', task_no: 3, title: 'T', spec: { tipy: ['A', 'C1', 'C2'] }, tipy: ['A', 'C1', 'C2'], zapas: 10, katalog };
+  const nazv = (n, vse) => (vse ? 'все типы' : `типов — ${n}`);
+  check(M.otmechennyeTipy(tr).join() === 'A,C', `без выбора — типы, чьи подтипы все в tipy: ${M.otmechennyeTipy(tr).join()}`);
+  check(M.otmechennyeTipy({ ...tr, tipy: ['A', 'C1'] }).join() === 'A', 'тип с частью подтипов не отмечен');
+  check(M.tipyIzVybora(katalog, ['C', 'A']).join() === 'A,C1,C2', 'подтипы — в порядке каталога, тип → прототипы');
+  let k = M.dobavit(M.PUSTAYA_KORZINA, tr);
+  k = M.vybratTipy(k, 'tr', ['B'], nazv);
+  let e = k.elementy[0];
+  check(e.tipy.join() === 'B' && e.spec.tipy.join() === 'B' && e.title === 'типов — 1' && e.vyborTipov.join() === 'B',
+    `снять два и добавить тип: ${e.tipy.join()} «${e.title}»`);
+  check(e.key === 'tr', 'ключ элемента не меняется');
+  k = M.vybratTipy(k, 'tr', ['A', 'B', 'C', 'чужой'], nazv);
+  e = k.elementy[0];
+  check(e.title === 'все типы' && e.tipy.join() === 'A,B,C1,C2' && e.vyborTipov.join() === 'A,B,C',
+    `отмечены все — «все типы», чужой id отброшен: ${e.vyborTipov.join()}`);
+  const pusto = M.vybratTipy(k, 'tr', [], nazv);
+  const nast = { ...M.NASTROYKI_PO_UMOLCHANIYU, title: 'x', klassy: ['c'] };
+  check(M.proverit(pusto, nast).includes('net_tipov'), 'ни одного типа — выдать нельзя');
+  check(!M.proverit(k, nast).includes('net_tipov'), 'есть типы — можно');
+  const bezKat = { ...tr, katalog: undefined };
+  check(!M.proverit({ v: 1, elementy: [{ ...bezKat, tipy: [] }] }, nast).includes('net_tipov'),
+    'старый элемент без каталога не мешает');
+  check(M.razobrat({ v: 1, elementy: [{ ...tr, katalog: [{ id: 1 }] }] }).elementy[0].katalog === undefined,
+    'неверный каталог из хранилища отброшен');
+  check(M.razobrat({ v: 1, elementy: [{ ...tr, vyborTipov: ['A'] }] }).elementy[0].vyborTipov.join() === 'A',
+    'верный выбор из хранилища сохранён');
+}
+
 /* ── Настройки и время по Москве ───────────────────────────────── */
 {
   check(M.mskVUtc('2026-11-27T18:00') === '2026-11-27T15:00:00.000Z', '18:00 по Москве — 15:00 UTC');

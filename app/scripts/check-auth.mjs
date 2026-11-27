@@ -4269,6 +4269,18 @@ async function runDz2() {
       `ДЗ ${width}: в заголовке блока «задач: ${vsego - 1} из ${vsego}»`,
     );
     const tr = page.locator('.dz2-element').first();
+    /* Тренажёр: «Снять все» и два первых типа — в ДЗ только они. */
+    await tr.locator('.dz2-vybor__zag').click();
+    const tipyGalki = tr.locator('.dz2-vybor__gruppa input[type="checkbox"]');
+    const tipovVsego = await tipyGalki.count();
+    check(tipovVsego > 2, `ДЗ ${width}: у тренажёра список типов (${tipovVsego})`);
+    await tr.locator('.dz2-vybor__vse button').nth(1).click();
+    await tipyGalki.nth(0).check();
+    await tipyGalki.nth(1).check();
+    check(
+      (await tr.locator('.dz2-element__nazvanie').innerText()).includes('типов — 2'),
+      `ДЗ ${width}: название тренажёра — «типов — 2»`,
+    );
     await tr.locator('select').nth(1).selectOption('streak');
     await tr.locator('input[type="number"]').fill('3');
     await page.locator('input[placeholder="ДЗ к пятнице"]').fill(`ДЗ на ${width}`);
@@ -4298,6 +4310,10 @@ async function runDz2() {
           (t) => NORM.test(t.answer) && t.question_html.length > 0 && t.task_ref.length > 0,
         ),
         `ДЗ ${width}: задачи тренажёра с ответами`,
+      );
+      check(
+        t1.spec.tipy.length >= 2 && t1.tasks.every((t) => t1.spec.tipy.includes(t.kind)),
+        `ДЗ ${width}: задачи тренажёра — только отмеченных типов (${[...new Set(t1.tasks.map((t) => t.kind))].join(', ')})`,
       );
       check(
         t2.kind === 'opornye' && t2.tasks.length > 0 && t2.tasks.every((t) => NORM.test(t.answer)),

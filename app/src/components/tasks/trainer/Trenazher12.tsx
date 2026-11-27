@@ -1,6 +1,6 @@
 'use client';
 
-import { VDomashkuTrenazher } from '@/components/dz2/knopki';
+import { VDomashkuTrenazher, katalogIzGrupp } from '@/components/dz2/knopki';
 import { vDomashku12 } from '@/lib/ves12/vDomashku12';
 import { useMemo, type ReactNode } from 'react';
 import { Trenazher } from '@/components/trenazher/Trenazher';
@@ -46,6 +46,11 @@ function perenos12(packed: unknown): TrenPayload | null {
 }
 
 /** Тренажёр №12 на общей панели фильтров: статистика — из прогресса тренажёра. */
+/** Название подтипа без формул — текстом в HTML каталога ДЗ. */
+function ekran(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 export function Trenazher12({
   config,
   refs,
@@ -77,7 +82,18 @@ export function Trenazher12({
           const vse = config.temy.flatMap((t) => t.podtipy.map((p) => p.id)).filter(vDomashku12);
           const tipy = f.tipy.length === 0 ? vse : f.tipy.filter(vDomashku12);
           return tipy.length === 0 ? null : (
-            <VDomashkuTrenazher taskNo={12} tipy={tipy} vse={tipy.length === vse.length} />
+            <VDomashkuTrenazher
+              taskNo={12}
+              tipy={tipy}
+              vse={tipy.length === vse.length}
+              katalog={katalogIzGrupp(
+                config.temy.map((t) => ({
+                  nazvanie: t.title,
+                  tipy: t.podtipy.map((p) => ({ id: p.id, nazvanieHtml: p.titleHtml ?? ekran(p.title) })),
+                })),
+                vDomashku12,
+              )}
+            />
           );
         }}
       />

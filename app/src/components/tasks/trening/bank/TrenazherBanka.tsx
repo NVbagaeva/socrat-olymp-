@@ -39,7 +39,7 @@ import {
 } from '@/lib/trening/bank';
 import type { VyborBanka } from '@/lib/trening/vybor';
 import { activeBookmarks, bookmarks } from '@/lib/zakladki';
-import { VDomashkuTrenazher } from '@/components/dz2/knopki';
+import { VDomashkuTrenazher, katalogIzGrupp } from '@/components/dz2/knopki';
 import { EkranBanka } from './EkranBanka';
 import type { RazdelBanka, ZadachaBanka } from './types';
 import { readUiBanka, type UiBanka } from './ui';
@@ -470,6 +470,7 @@ function Konfigurator<Z extends ZadachaBanka, S>({
                 taskNo={Number(razdel.razdel)}
                 tipy={tipyDz}
                 vse={tipyDz.length === tipyVse.filter((t) => razdel.vDomashku?.(t) ?? true).length}
+                katalog={katalogIzGrupp(gruppy, (t) => razdel.vDomashku?.(t) ?? true)}
               />
             ) : undefined
           }
