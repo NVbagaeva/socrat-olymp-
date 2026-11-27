@@ -15,7 +15,7 @@ import { PROGRESS } from '@/content/progressUchitel';
 import { useSessionUser } from '@/lib/auth/session';
 import type { VariantView } from '@/lib/zhurnal/api';
 import { PROGRESS_HREF, progressUchenikHref, progressZadachaHref } from '@/lib/zhurnal/links';
-import { ISTOCHNIKI_VARIANTA, dataRu, nomerEgeRazdela } from '@/lib/zhurnal/vid';
+import { ISTOCHNIKI_VARIANTA, dataRu, istochnikVarianta, nomerEgeRazdela } from '@/lib/zhurnal/vid';
 import { Vremya, errorCode, param, zhurnalApi } from './common';
 import './progressUchitel.css';
 
@@ -59,9 +59,10 @@ export function ProgressVariant() {
         <Link className="pu-nazad" href={uchitel ? progressUchenikHref(u) : PROGRESS_HREF.statistika}>
           ← {t.nazad}
         </Link>
-        <h1 className="t-h2">{v.title ?? ISTOCHNIKI_VARIANTA[v.source]}</h1>
+        <h1 className="t-h2">{v.title ?? ISTOCHNIKI_VARIANTA[istochnikVarianta(v)]}</h1>
         <p className="t-caption">
-          {v.finished_at === undefined ? '' : dataRu(v.finished_at, true)}
+          {ISTOCHNIKI_VARIANTA[istochnikVarianta(v)] ?? ''}
+          {v.finished_at === undefined ? '' : ` · ${dataRu(v.finished_at, true)}`}
           {v.primary_score !== undefined && v.max_score !== undefined
             ? ` · ${PROGRESS.uchenik.pervichnyy(v.primary_score, v.max_score)}`
             : ''}

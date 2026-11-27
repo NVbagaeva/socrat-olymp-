@@ -57,7 +57,7 @@ export interface ZapisZadachi {
 
 export interface ZapisVarianta {
   id: string;
-  source: 'sobrat' | 'seriya' | 'povyshennye' | 'rabota';
+  source: 'sobrat' | 'seriya' | 'povyshennye' | 'mesyac' | 'rabota';
   set_code: string;
   variant_no?: number;
   title?: string;
