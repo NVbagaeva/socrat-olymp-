@@ -3466,6 +3466,61 @@ async function runZhurnalBanka(mock, errors) {
     }
   }
 
+  /* Тренажёр №12 по типам (TrenazherEkran, этап 4е): неверный ответ — в
+     журнале задача раздела 12 с подтипом; учитель на панели фильтров кладёт
+     тренажёр «В домашку» — только типы, которые знает адаптер. */
+  if (ZHURNAL_RAZDELY.includes(12) && DZ2_RAZDELY.includes(12)) {
+    const ADRES = '/zadaniya/grafiki-funkciy/linear/trenazher/';
+    mock.zhurnal.length = 0;
+    const u = await newPage(mock, 1280, errors);
+    await welcomeSeen(u.context);
+    await login(u.page, uchenik[1280], 'zhurnal-parol-1');
+    await u.page.goto(`${SITE}${ADRES}`, { waitUntil: 'networkidle' });
+    check((await u.page.locator('.dz2-knopka').count()) === 0, 'журнал №12 по типам: ученик не видит «В домашку»');
+    await u.page.getByRole('button', { name: /^Начать тренировку/ }).first().click();
+    await u.page.locator('.tsess__body input.ttask__input').first().waitFor();
+    await u.page.locator('.tsess__body input.ttask__input').first().fill('987654');
+    await u.page.locator('.tsess__body').getByRole('button', { name: 'Проверить', exact: true }).click();
+    const until = Date.now() + 15000;
+    const row = () => mock.zhurnal.find((r) => r.place === 'trenazher' && r.task_no === 12);
+    while (Date.now() < until && (row() === undefined || row().popytki.length === 0)) {
+      await new Promise((done) => setTimeout(done, 250));
+    }
+    const r = row();
+    check(r !== undefined && r.kind.length > 0 && /#0$/.test(r.task_ref) && r.popytki.length === 1 && !r.popytki[0].ok,
+      `журнал №12 по типам: подтип, задача и неверная попытка (${r?.kind}, ${r?.task_ref})`);
+    await u.context.close();
+
+    const { context, page } = await newPage(mock, 1280, errors);
+    await welcomeSeen(context);
+    await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
+    await page.evaluate(() => {
+      for (const k of Object.keys(localStorage)) if (k.includes('dz2')) localStorage.removeItem(k);
+    });
+    await page.goto(`${SITE}${ADRES}`, { waitUntil: 'networkidle' });
+    const knopka = page.locator('.flt .dz2-ryad .dz2-knopka__glavnaya');
+    await knopka.click();
+    await page.waitForSelector('.flt .dz2-ryad .dz2-knopka__glavnaya[aria-pressed="true"]');
+    if (SHOTS !== null) {
+      for (const w of [375, 1280]) {
+        await page.setViewportSize({ width: w, height: w < 500 ? 844 : 900 });
+        await knopka.scrollIntoViewIfNeeded();
+        await page.evaluate(() => document.fonts.ready);
+        await page.screenshot({ path: path.join(SHOTS, `dz2-trenazher12-${w}.png`),
+          style: '.help-fab, .help-fab * { visibility: hidden !important; }' });
+      }
+      await page.setViewportSize({ width: 1280, height: 900 });
+    }
+    const korz = await page.evaluate(() => {
+      for (const k of Object.keys(localStorage)) if (k.includes('dz2') && k.includes('korzin')) return localStorage.getItem(k);
+      return null;
+    });
+    const t12 = (JSON.parse(korz ?? '{}').elementy ?? []).find((e) => e.task_no === 12 && e.vid === 'trenazher');
+    check(t12 !== undefined && t12.tipy.length > 0 && t12.tipy.every((t) => t !== '12Q.A' && t !== '12Q.G'),
+      `ДЗ 4е: тренажёр №12 по типам в корзине (${t12?.tipy?.join(',')})`);
+    await context.close();
+  }
+
   /* Учитель: блоки опорных №1 (чертёж) и №13 (таблица) «В домашку» (этап 4г);
      ученик видит чертёж в условии ДЗ после очистки. */
   if (DZ2_RAZDELY.includes(1) && DZ2_RAZDELY.includes(13)) {

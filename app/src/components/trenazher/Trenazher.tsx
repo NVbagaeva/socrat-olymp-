@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { FiltrPanel } from '@/components/filtry/FiltrPanel';
 import { TrainerSessionHost, type ConfiguratorApi } from '@/components/tasks/session';
 import { ITOGI } from '@/content/trenazherFiltry';
@@ -35,6 +35,8 @@ export interface TrenazherProps<T> {
    * её запись в новый формат. null — не переводится (сбросится).
    */
   perenos?: (packed: unknown) => TrenPayload | null;
+  /** Рядом с «Начать» на панели фильтров: «В домашку» учителя по выбранным фильтрам (этап 4е). */
+  ryadomSoStartom?: (f: Filtr) => ReactNode;
 }
 
 /**
@@ -51,6 +53,7 @@ export function Trenazher<T>({
   backHref,
   ssylki = {},
   perenos,
+  ryadomSoStartom,
 }: TrenazherProps<T>) {
   const startF = useMemo(() => kRazdelu(start ?? NACHALNYY, config), [start, config]);
   /* Фильтр: из ссылки, иначе запомненный для раздела, иначе ярлык или
@@ -203,6 +206,7 @@ export function Trenazher<T>({
               : { resheno: api.parked.solved, vsego: api.parked.total, onResume: api.resume }
           }
           ssylka={() => window.location.href}
+          ryadomSoStartom={ryadomSoStartom?.(f)}
         />
       )}
       screen={({ payload, restored, report, elapsed, finish, toFilters }) => (

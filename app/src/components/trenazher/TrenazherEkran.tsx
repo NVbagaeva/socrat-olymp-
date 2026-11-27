@@ -16,6 +16,8 @@ import {
   type ZadachaSost,
 } from '@/lib/trenazher/sessiya';
 import type { TrenazherConfig, ZadachaRef } from '@/lib/trenazher/types';
+import { zhurnalBanka } from '@/lib/trening/zhurnalBanka';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { SOSTOYANIYA, useZadacha } from './sborka';
 import type { KartochkaRazdela, Shagi } from './types';
 
@@ -72,6 +74,20 @@ export function TrenazherEkran<T>({
   const item = payload.items[pool(index)];
   const ref = item === undefined ? undefined : refs.get(item.k);
   const zadacha = useZadacha(K, payload, pool(index), sost.pohozhaya);
+
+  /* Журнал решения задач (lib/zhurnal, этап 4е): задача — ключ банка и
+     номер «похожей», тип — подтип. Раздел базы («baza-…») не пишется. */
+  const zapis = useZapisZadachi(
+    item === undefined || zadacha === undefined || zadacha === null
+      ? null
+      : zhurnalBanka(
+          config.razdel,
+          { id: `${item.k}#${sost.pohozhaya}`, p: ref?.podtip ?? item.k, text: K.html(zadacha) },
+          'trenazher',
+          payload.seed,
+          String(index),
+        ),
+  );
 
   const podskazki = payload.rezhim === 'podskazki';
   const zakryta = sost.itog === 'right' || sost.itog === 'wrong' || sost.itog === 'hinted';
@@ -135,7 +151,9 @@ export function TrenazherEkran<T>({
   function proverit() {
     if (zadacha === null || zadacha === undefined) return;
     const right = K.proverit(zadacha, sost.v);
+    zapis?.popytka(sost.v, right);
     if (right) {
+      zapis?.zakryt(true);
       /* Ответ после подсказки по шагам — верно, но с подсказкой. */
       zakryt(sost.podskazka ? 'hinted' : 'right', { proverka: 'right' });
       return;
@@ -146,11 +164,13 @@ export function TrenazherEkran<T>({
       return;
     }
     /* Попытки кончились: в режиме с подсказками разбор открывается сам. */
+    zapis?.zakryt(false);
     zakryt('wrong', { proverka: 'wrong', oshibok, razbor: podskazki && K.estRazbor(zadacha) });
   }
 
   function propustit() {
     if (!zakryta) {
+      zapis?.propustit();
       patch({ itog: 'skipped', sek: sekNow() });
       setS(null);
     }
@@ -158,6 +178,7 @@ export function TrenazherEkran<T>({
   }
 
   function pohozhaya() {
+    if (sost.proverka === 'wrong' && !zakryta) zapis?.zakryt(false);
     patch({ ...NOVAYA, pohozhaya: sost.pohozhaya + 1, sek: 0 });
     setS(elapsed());
   }
@@ -322,9 +343,15 @@ export function TrenazherEkran<T>({
             task={zadacha}
             shagi={sost.shagi}
             setShagi={(shagi: Shagi) => patch({ shagi })}
-            onMiss={() => patch({ oshibok: sost.oshibok + 1 })}
+            onMiss={() => {
+              patch({ oshibok: sost.oshibok + 1 });
+              zapis?.oshibkaPodskazki(Object.keys(sost.shagi).length + 1);
+            }}
             onDone={() => {
-              if (!posleShagov) zakryt('hinted');
+              if (!posleShagov) {
+                zapis?.zakryt(true);
+                zakryt('hinted');
+              }
             }}
           />
           {sost.itog === 'hinted' ? (
@@ -345,7 +372,13 @@ export function TrenazherEkran<T>({
             zadacha !== undefined &&
             K.estRazbor(zadacha) &&
             sost.itog !== 'hinted' ? (
-              <Button variant="ghost" onClick={() => patch({ razbor: !sost.razbor })}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  if (!sost.razbor) zapis?.reshenie();
+                  patch({ razbor: !sost.razbor });
+                }}
+              >
                 {sost.razbor ? EKRAN.skrytRazbor : EKRAN.razbor}
               </Button>
             ) : null}
@@ -372,7 +405,10 @@ export function TrenazherEkran<T>({
               <span className="trz-offer">
                 <Button
                   variant="ghost"
-                  onClick={() => patch({ podskazka: true, proverka: null, shagi: {} })}
+                  onClick={() => {
+                    patch({ podskazka: true, proverka: null, shagi: {} });
+                    zapis?.shagPodskazki(1);
+                  }}
                 >
                   {EKRAN.podskazka}
                 </Button>
