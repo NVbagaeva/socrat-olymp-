@@ -35,7 +35,12 @@ import {
   type WorkUi,
 } from '@/lib/variant/online/sessionUi';
 import type { KabinetApi } from '@/lib/kabinet/api';
-import { zapisatResheniyeVarianta } from '@/lib/zhurnal/variant';
+import {
+  zapisatChast2Varianta,
+  zapisatResheniyeVarianta,
+  zapisiChast2,
+  type ResheniyeVarianta,
+} from '@/lib/zhurnal/variant';
 import { kabinetProverka } from '@/lib/variant/online/kabinetProverka';
 import {
   packKabinet,
@@ -356,6 +361,8 @@ function Finished({
     [payload, c2nos, c2st],
   );
   const zapis = useRef<ArchivedWork | null>(null);
+  /* Решение для журнала: к нему дописывается часть 2 после самопроверки. */
+  const zhurnalVarianta = useRef<ResheniyeVarianta | null>(null);
   const answers = useMemo(() => firstAttempts(payload, ui), [payload, ui]);
   const result: ResultData = useMemo(
     () => ({
@@ -422,7 +429,7 @@ function Finished({
         };
         zapis.current = rec;
         /* Журнал решения задач (lib/zhurnal): ученику, который вошёл, при флаге. */
-        zapisatResheniyeVarianta({
+        const reshenie: ResheniyeVarianta = {
           code: payload.code,
           variant: payload.variant,
           mode: payload.mode,
@@ -457,7 +464,9 @@ function Finished({
           startedAt: ui.startedAt,
           finishedAt,
           seconds,
-        });
+        };
+        zhurnalVarianta.current = reshenie;
+        zapisatResheniyeVarianta(reshenie);
         void saveWork(rec).then(() => {
           if (alive) setVolatile(archiveVolatile());
         });
@@ -479,7 +488,12 @@ function Finished({
     const next: ArchivedWork = { ...rec, chast2: { ...c2bally, ui: c2st } };
     zapis.current = next;
     void saveWork(next);
-  }, [c2bally, c2st, check]);
+    /* Часть 2 — в журнал к тому же варианту: учитель видит ответы,
+       сверку и самопроверку по критериям (последняя правка — верная). */
+    if (zhurnalVarianta.current !== null && payload.chast2 !== undefined) {
+      zapisatChast2Varianta(zhurnalVarianta.current, zapisiChast2(payload.chast2, c2st));
+    }
+  }, [c2bally, c2st, check, payload]);
 
   if (failed !== null) {
     return (

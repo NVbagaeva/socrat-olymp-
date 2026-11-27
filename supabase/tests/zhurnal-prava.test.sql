@@ -195,6 +195,35 @@ select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(json
   'title', 'Ежемесячный вариант · Ноябрь 2026', 'started_at', now() - interval '1 minute',
   'finished_at', now(), 'primary_score', 20, 'max_score', 31, 'test_score', 76, 'active_ms', 50000,
   'total_ms', 60000))));
+-- Часть 2 (20261128160000_chast2_v_zhurnale.sql): самопроверка ученика у
+-- варианта. Лишнее отбрасывается, балл выше максимума — не балл; поздняя
+-- самопроверка заменяет прежнюю, вариант без части 2 её не стирает.
+select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(jsonb_build_object(
+  'id', 'e1000000-0000-0000-0000-0000000000e2', 'source', 'mesyac', 'set_code', 'EV-02', 'variant_no', 1,
+  'started_at', now() - interval '1 minute', 'active_ms', 50000, 'total_ms', 60000,
+  'chast2', jsonb_build_array(
+    jsonb_build_object('no', 14, 'shablon', 'r14-trig', 'otvet', 'x=\pi n', 'verno', 'а) πn; б) 2π',
+                       'sverka', 'ne-sovpadaet', 'reshenie', true, 'ball', 1, 'max', 2, 'lishnee', 'x'),
+    jsonb_build_object('no', 16, 'max', 2, 'ball', 7, 'sverka', 'chto-to'),
+    jsonb_build_object('no', 'abc', 'max', 2))))));
+select pg_temp.as_user(:'t1');
+select pg_temp.ok(
+  public.uchitel_variant(:'s1', 'e1000000-0000-0000-0000-0000000000e2') -> 'chast2' =
+    '[{"no": 14, "max": 2, "ball": 1, "otvet": "x=\\pi n", "verno": "а) πn; б) 2π", "sverka": "ne-sovpadaet", "shablon": "r14-trig", "reshenie": true},
+      {"no": 16, "max": 2}]'::jsonb,
+  format('часть 2 у учителя — в проверенном виде: %s',
+         public.uchitel_variant(:'s1', 'e1000000-0000-0000-0000-0000000000e2') -> 'chast2'));
+select pg_temp.as_user(:'s1');
+select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(jsonb_build_object(
+  'id', 'e1000000-0000-0000-0000-0000000000e2', 'source', 'mesyac', 'set_code', 'EV-02',
+  'started_at', now() - interval '1 minute', 'active_ms', 50000, 'total_ms', 60000,
+  'chast2', jsonb_build_array(jsonb_build_object('no', 14, 'max', 2, 'ball', 2))))));
+select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(jsonb_build_object(
+  'id', 'e1000000-0000-0000-0000-0000000000e2', 'source', 'mesyac', 'set_code', 'EV-02',
+  'started_at', now() - interval '1 minute', 'active_ms', 50000, 'total_ms', 60000))));
+select pg_temp.ok((public.moy_variant('e1000000-0000-0000-0000-0000000000e2') -> 'chast2' -> 0 ->> 'ball')::int = 2,
+  'поздняя самопроверка заменяет прежнюю, вариант без части 2 её не стирает');
+
 select pg_temp.fails($q$select public.zhurnal_push(jsonb_build_object('varianty', jsonb_build_array(jsonb_build_object(
   'id', gen_random_uuid(), 'source', 'chto-to', 'set_code', 'X', 'started_at', now(), 'active_ms', 0,
   'total_ms', 0))))$q$, 'varianty_resheniya_source_check');

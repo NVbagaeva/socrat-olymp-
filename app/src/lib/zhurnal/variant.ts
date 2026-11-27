@@ -12,8 +12,11 @@
  * разделов.
  */
 
+import { MAX_BALL } from '@/content/variantOnline/bally';
+import { punktKey, vvodEst, vvodTex, type Chast2Ui } from '@/lib/chast2/sostoyanie';
+import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
 import { urovenZadachi } from '@/lib/zhurnal/uroven';
-import type { ZapisVarianta, ZapisZadachi } from './model';
+import type { ZapisChast2, ZapisVarianta, ZapisZadachi } from './model';
 import { idIz, novayaZapis, sPopytkoy, sShagomPodskazki, zakryta } from './model';
 import { zapisatVariant, zapisatZadachu } from './ochered';
 import { pishetsya } from './zapis';
@@ -117,4 +120,56 @@ export function zapisatResheniyeVarianta(r: ResheniyeVarianta): void {
   const { variant, zadachi } = zapisiVarianta(r);
   zapisatVariant(variant);
   for (const z of zadachi) zapisatZadachu(z);
+}
+
+/* ── Часть 2: самопроверка ученика ─────────────────────────────── */
+
+/**
+ * Часть 2 варианта для журнала: по каждому заданию — ответ по пунктам,
+ * итог «Сверить ответ», открыто ли решение и балл по критериям.
+ * Чистая функция (проверка — scripts/check-zhurnal.mjs).
+ */
+export function zapisiChast2(zadachi: readonly Chast2Zadacha[], st: Chast2Ui): ZapisChast2[] {
+  return zadachi.map((z) => {
+    const kuski: string[] = [];
+    const sverki: string[] = [];
+    z.punkty.forEach((p, i) => {
+      const key = punktKey(z.no, i);
+      const s = st.sverka[key];
+      if (s !== undefined) sverki.push(s);
+      if (p.pole === null) return;
+      const vvod = st.vvod[key] ?? null;
+      if (!vvodEst(vvod)) return;
+      const tex = vvodTex(p.pole, vvod);
+      if (tex !== '') kuski.push(p.bukva === null ? tex : `\\text{${p.bukva})}\\ ${tex}`);
+    });
+    const sverka = sverki.includes('ne-sovpadaet')
+      ? 'ne-sovpadaet'
+      : sverki.includes('uchitel')
+        ? 'uchitel'
+        : sverki.length > 0
+          ? 'sovpadaet'
+          : undefined;
+    const ball = st.ball[z.no];
+    return {
+      no: z.no,
+      shablon: z.shablon.slice(0, 80),
+      ...(kuski.length === 0 ? {} : { otvet: kuski.join(';\\ ').slice(0, 300) }),
+      verno: z.otvet.slice(0, 300),
+      ...(sverka === undefined ? {} : { sverka }),
+      ...(st.reshenie.includes(z.no) ? { reshenie: true } : {}),
+      ...(ball === undefined ? {} : { ball: Math.min(ball, MAX_BALL[z.no]) }),
+      max: MAX_BALL[z.no],
+    };
+  });
+}
+
+/**
+ * Дописать к уже записанному варианту часть 2. Вызывается после итогов
+ * части 1 и при каждой правке самопроверки: в очереди и в базе остаётся
+ * последняя. Варианты, которые не пишутся (нет разделов журнала), — нет.
+ */
+export function zapisatChast2Varianta(r: ResheniyeVarianta, chast2: ZapisChast2[]): void {
+  if (typeof window === 'undefined' || chast2.length === 0 || !r.tasks.some((t) => pishetsya(t.taskNo))) return;
+  zapisatVariant({ ...zapisiVarianta(r).variant, chast2 });
 }

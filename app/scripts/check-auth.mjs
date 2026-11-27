@@ -4006,6 +4006,21 @@ async function runProgress() {
       test_score: 70,
       active_ms: 10000000,
       total_ms: 12000000,
+      /* Часть 2 — самопроверка ученика (миграция 20261128160000_chast2_v_zhurnale.sql). */
+      chast2: [
+        {
+          no: 14,
+          shablon: 'r14-trig',
+          otvet: '\\text{а)}\\ x=\\frac{\\pi}{2}+\\pi n;\\ \\text{б)}\\ \\frac{5\\pi}{2}',
+          verno: 'а) $\\frac{\\pi}{2}+\\pi n$; б) $\\frac{5\\pi}{2}$',
+          sverka: 'sovpadaet',
+          reshenie: true,
+          ball: 2,
+          max: 2,
+        },
+        { no: 15, shablon: 'r15', verno: '$\\sqrt{3}$', sverka: 'ne-sovpadaet', otvet: '2', ball: 1, max: 3 },
+        { no: 18, shablon: 'r18', verno: '$a=2$', max: 4 },
+      ],
     },
   );
   rows.push(
@@ -4120,8 +4135,27 @@ async function runProgress() {
     });
     await page.waitForSelector('.pu-tablica tbody tr');
     check(
-      (await page.locator('.pu-tablica tbody tr').count()) === 2,
+      (await page.locator('.pu-tablica').first().locator('tbody tr').count()) === 2,
       `вариант ${width}: две задачи`,
+    );
+    /* Часть 2: самопроверка ученика по заданиям, номера ЕГЭ-2027. */
+    const ch2 = page.locator('.pu-tablica').nth(1);
+    check(
+      (await ch2.locator('tbody tr').count()) === 3,
+      `вариант ${width}: часть 2 — три задания`,
+    );
+    check(
+      (await ch2.locator('tbody tr').first().innerText()).includes('№13') &&
+        (await ch2.locator('tbody tr').first().locator('.katex').count()) >= 2,
+      `вариант ${width}: часть 2 — №14 хранения как №13, ответы набраны KaTeX`,
+    );
+    check(
+      (await page.locator('text=Часть 2: 3 из 9, оценено заданий 2 из 3').count()) === 1,
+      `вариант ${width}: итог части 2 — 3 из 9, оценено 2 из 3`,
+    );
+    check(
+      (await ch2.locator('tbody tr').nth(2).innerText()).includes('не оценил'),
+      `вариант ${width}: неоценённое задание — «не оценил»`,
     );
     await snap('variant');
 
