@@ -25,22 +25,22 @@ export default function KubShar({ label, tiho, avtofokus }: ZhivoyProps) {
       <svg viewBox="0 0 260 260" aria-hidden="true">
         <defs>
           <radialGradient id={id} cx="35%" cy="28%" r="75%">
-            <stop offset="0%" stopColor="#fff" />
-            <stop offset="25%" stopColor="#deefff" />
-            <stop offset="65%" stopColor="#88baf0" />
-            <stop offset="90%" stopColor="#416aa6" />
-            <stop offset="100%" stopColor="#dbeaff" />
+            <stop offset="0%" stopColor="var(--chertezh-blik)" />
+            <stop offset="25%" stopColor="var(--chertezh-goluboy-svet)" />
+            <stop offset="65%" stopColor="var(--chertezh-setka)" />
+            <stop offset="90%" stopColor="var(--chertezh-liniya)" />
+            <stop offset="100%" stopColor="var(--chertezh-zalivka-siniy)" />
           </radialGradient>
           <linearGradient id={id + '-edge'} x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0%" stopColor="#214c9d" />
-            <stop offset="54%" stopColor="#5089da" />
-            <stop offset="100%" stopColor="#ed984e" />
+            <stop offset="0%" stopColor="var(--chertezh-liniya)" />
+            <stop offset="54%" stopColor="var(--chertezh-siniy)" />
+            <stop offset="100%" stopColor="var(--chertezh-akcent)" />
           </linearGradient>
         </defs>
-        <path d={chasti.skrytye} fill="none" stroke="#88a9d7" strokeWidth="2.5" />
+        <path d={chasti.skrytye} fill="none" stroke="var(--chertezh-setka)" strokeWidth="2.5" />
         <circle cx="130" cy="130" r={radius} fill={`url(#${id})`} />
         {chasti.grani.map((g) => (
-          <path key={g.i} d={g.d} fill={g.n[2] > 0.5 ? '#ffe0b5' : '#83b5f4'} opacity="0.16" />
+          <path key={g.i} d={g.d} fill={g.n[2] > 0.5 ? 'var(--chertezh-akcent-svet)' : 'var(--chertezh-goluboy)'} opacity="0.16" />
         ))}
         <path
           d={chasti.vidimye}
