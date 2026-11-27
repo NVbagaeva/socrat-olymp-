@@ -41,12 +41,17 @@
   font-size: 18px;
 }
 /* Стеклянный круг вокруг картинки — как кольцо шапок разделов. */
+/* Размер — явно, в px: ширина и высота из одной переменной, отступ —
+   её доля. aspect-ratio с отступом в % Safari на iOS считает иначе,
+   и круг сплющивался. */
 .howto-krug {
+  --krug: var(--howto-krug, var(--shapka-media));
   position: relative;
-  width: var(--shapka-media);
-  aspect-ratio: 1;
+  box-sizing: border-box;
+  width: var(--krug);
+  height: var(--krug);
   margin-inline: auto;
-  padding: 7%;
+  padding: calc(var(--krug) * 0.07);
   border-radius: 50%;
   border: 1px solid var(--glass-edge);
   background: var(--glass-bg);
@@ -1080,30 +1085,68 @@
 /* ── Телефон ───────────────────────────────────────────────────── */
 
 @media (max-width: 1023.98px) {
-  /* Шапка: картинка 120 px над заголовком, под ним лид и переключатель. */
-  .howto-shapka {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-3);
+  /* Шапка: кружок слева, заголовок справа от него; ниже — описание во
+     всю ширину и переключатель. Правила общей шапки (shapka.css: сетка
+     с областями t/c/l/m, заголовок прижат к концу, описание в узкой
+     колонке) здесь перекрыты: у этой шапки своя раскладка. */
+  .shapka.howto-shapka {
+    --howto-krug: 104px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'm t'
+      'x x';
+    align-items: center;
+    column-gap: var(--space-4);
+    row-gap: var(--space-4);
     min-height: 0;
   }
+  .shapka.howto-shapka--tekst {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      't'
+      'x';
+  }
   .howto-shapka .shapka__media {
-    order: 0;
-    align-self: flex-start;
+    grid-area: m;
+    align-self: center;
+    width: var(--howto-krug);
+    height: var(--howto-krug);
   }
   .howto-shapka .shapka__title {
-    order: 1;
+    grid-area: t;
+    align-self: center;
+    justify-self: start;
+    margin: 0;
+    text-align: start;
   }
   .howto-shapka .shapka__text {
-    order: 2;
+    grid-area: x;
     display: grid;
+    gap: var(--space-4);
+    min-width: 0;
   }
-  .howto-krug {
-    --shapka-media: 120px;
+  .howto-shapka .shapka__lead {
+    grid-area: auto;
+    align-self: auto;
+    display: block;
+    max-width: none;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-line-clamp: unset;
   }
   .howto-krug .zhk__chip {
     font-size: 11px;
+  }
+}
+/* Самые узкие телефоны: «пользоваться» должно влезть рядом с кружком. */
+@media (max-width: 389.98px) {
+  .shapka.howto-shapka {
+    --howto-krug: 84px;
+    column-gap: var(--space-3);
+  }
+  .howto-shapka .shapka__title {
+    font-size: 21px;
   }
 }
 @media (max-width: 767.98px) {
