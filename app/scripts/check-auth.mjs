@@ -3521,6 +3521,30 @@ async function runZhurnalBanka(mock, errors) {
     await context.close();
   }
 
+  /* Вторая часть, тренажёр №19 (этап 4ж): только журнал — неверный ответ
+     пишется строкой раздела 19 с методом и уровнем «высокий». */
+  if (ZHURNAL_RAZDELY.includes(19)) {
+    mock.zhurnal.length = 0;
+    const u = await newPage(mock, 375, errors);
+    await welcomeSeen(u.context);
+    await login(u.page, uchenik[375], 'zhurnal-parol-1');
+    await u.page.goto(`${SITE}/zadaniya/parametr/trenazher/`, { waitUntil: 'networkidle' });
+    await u.page.locator('.cfg-bar__start').click();
+    await u.page.locator('.z19-ttask .ttask__input').waitFor();
+    await u.page.locator('.z19-ttask .ttask__input').fill('[1; 2]');
+    await u.page.locator('.z19-ttask .ttask__actions button').first().click();
+    const until = Date.now() + 15000;
+    const row = () => mock.zhurnal.find((r) => r.task_no === 19);
+    while (Date.now() < until && (row() === undefined || row().popytki.length === 0)) {
+      await new Promise((done) => setTimeout(done, 250));
+    }
+    const r = row();
+    check(r !== undefined && r.place === 'trenazher' && r.level === 3 && r.kind.length > 0
+      && r.popytki.length === 1 && !r.popytki[0].ok,
+    `журнал №19: тренажёр, метод, высокий уровень и неверная попытка (${r?.kind}, ${r?.level})`);
+    await u.context.close();
+  }
+
   /* Учитель: блоки опорных №1 (чертёж) и №13 (таблица) «В домашку» (этап 4г);
      ученик видит чертёж в условии ДЗ после очистки. */
   if (DZ2_RAZDELY.includes(1) && DZ2_RAZDELY.includes(13)) {

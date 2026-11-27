@@ -1,5 +1,8 @@
 'use client';
 
+import { zhurnalBanka } from '@/lib/trening/zhurnalBanka';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
+import { uslovieA } from '@/lib/zadanie14/tekst';
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import { Callout } from '@/components/ui';
@@ -50,8 +53,22 @@ export function Opornye14({ slug }: { slug: string }) {
   const [i, setI] = useState(0);
   const [sost, setSost] = useState<Record<string, Sostoyanie>>({});
   const progress = opornye14.useProgress();
+  const zz = blok?.zadachi[i];
+  /* Журнал решения задач (lib/zhurnal, этап 4ж): тип — блок; первая
+     задача блока — разбор, её не решают и не пишут. */
+  const zapis = useZapisZadachi(
+    blok === undefined || zz === undefined || i === 0
+      ? null
+      : zhurnalBanka(
+          '14',
+          { id: zz.id, p: blok.id, text: uslovieA(zz) },
+          'opornye',
+          blok.id,
+          zz.id,
+        ),
+  );
   if (blok === undefined) return null;
-  const z = blok.zadachi[i];
+  const z = zz;
   if (z === undefined) return null;
   const s = sost[z.id] ?? NOVOE;
   const obnovit = (p: Partial<Sostoyanie>) => setSost({ ...sost, [z.id]: { ...s, ...p } });
@@ -100,6 +117,14 @@ export function Opornye14({ slug }: { slug: string }) {
                 const itog = proverit14(z, s.vvod);
                 const ok = verno14(itog);
                 obnovit({ itog });
+                if (itog.a === 'pusto' && (itog.b === null || itog.b === 'pusto')) return;
+                zapis?.popytka(
+                  `а) ${s.vvod.serii.filter((x) => x.trim() !== '').join('; ')}${
+                    itog.b === null ? '' : ` б) ${s.vvod.korni}`
+                  }`,
+                  ok,
+                );
+                if (ok) zapis?.zakryt(true);
                 opornye14.recordAttempt({
                   kind: blok.id,
                   taskId: z.id,
@@ -115,7 +140,10 @@ export function Opornye14({ slug }: { slug: string }) {
                 <button
                   type="button"
                   className="btn btn--secondary"
-                  onClick={() => obnovit({ otkryto: 1 })}
+                  onClick={() => {
+                    obnovit({ otkryto: 1 });
+                    zapis?.shagPodskazki(1);
+                  }}
                 >
                   Подсказка
                 </button>
@@ -123,7 +151,10 @@ export function Opornye14({ slug }: { slug: string }) {
               <button
                 type="button"
                 className="btn btn--ghost"
-                onClick={() => obnovit({ reshenie: !s.reshenie })}
+                onClick={() => {
+                  if (!s.reshenie) zapis?.reshenie();
+                  obnovit({ reshenie: !s.reshenie });
+                }}
               >
                 {s.reshenie ? 'Скрыть решение' : 'Показать решение'}
               </button>
@@ -138,8 +169,14 @@ export function Opornye14({ slug }: { slug: string }) {
                 shagi={z.podskazki}
                 otkryto={s.otkryto}
                 mimo={s.mimo}
-                onVerno={() => obnovit({ otkryto: s.otkryto + 1, mimo: [] })}
-                onMimo={(j) => obnovit({ mimo: [...s.mimo, j] })}
+                onVerno={() => {
+                  obnovit({ otkryto: s.otkryto + 1, mimo: [] });
+                  zapis?.shagPodskazki(s.otkryto + 1);
+                }}
+                onMimo={(j) => {
+                  obnovit({ mimo: [...s.mimo, j] });
+                  zapis?.oshibkaPodskazki(s.otkryto);
+                }}
               />
             ) : null}
             {s.reshenie || (s.itog !== null && s.itog.a !== 'pusto') ? <Reshenie14 z={z} /> : null}

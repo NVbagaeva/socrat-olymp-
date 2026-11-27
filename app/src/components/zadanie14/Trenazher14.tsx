@@ -20,6 +20,9 @@ import {
   type Istochnik14,
   type Nastroyki14,
 } from '@/lib/zadanie14/trenazher';
+import { zhurnalBanka } from '@/lib/trening/zhurnalBanka';
+import { idIz } from '@/lib/zhurnal/model';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { Otvet14 } from './Otvet14';
 import { Podskazki14 } from './Podskazki14';
 import { Reshenie14 } from './Reshenie14';
@@ -175,6 +178,19 @@ function Ekran14({
   });
 
   const z = zadachaPoId14(ids[index] ?? '');
+  /* Журнал решения задач (lib/zhurnal, этап 4ж): вторая часть — только
+     журнал. Тип — первый метод; ответ — серии пункта а и корни пункта б. */
+  const zapis = useZapisZadachi(
+    z === undefined
+      ? null
+      : zhurnalBanka(
+          '14',
+          { id: z.id, p: z.metody[0] ?? 'prosteyshie', text: uslovieA(z) },
+          'trenazher',
+          idIz(ids.join(',')),
+          String(index),
+        ),
+  );
   if (z === undefined) return null;
   const last = index === ids.length - 1;
   const zakryta = marks[index] !== undefined;
@@ -197,7 +213,13 @@ function Ekran14({
     const it = proverit14(z, { serii, korni, chislo });
     if (it.a === 'pusto' && (it.b === null || it.b === 'pusto')) return;
     setItog(it);
+    const zapisOtveta = `а) ${serii.filter((x) => x.trim() !== '').join('; ')}${
+      it.b === null ? '' : ` б) ${korni}${chislo === '' ? '' : ` (${chislo})`}`
+    }`;
+    const razobrano = it.a !== 'ne-razobrano' && it.b !== 'ne-razobrano';
+    zapis?.popytka(zapisOtveta, verno14(it), razobrano ? 'answer' : 'format');
     if (verno14(it)) {
+      zapis?.zakryt(true);
       zapisat(
         true,
         !oshibalsya && otkryto === 0 && !reshenie,
@@ -217,6 +239,12 @@ function Ekran14({
   }
 
   function dalshe() {
+    /* Ушёл с задачи: была ошибка — ошибка, решение открыто — с разбором, без ответа — пропуск. */
+    if (!reshena) {
+      if (itog !== null) zapis?.zakryt(false);
+      else if (reshenie) zapis?.zakrytKak('revealed');
+      else zapis?.propustit();
+    }
     if (last) {
       onFinish();
       return;
@@ -266,13 +294,21 @@ function Ekran14({
             onClick={() => {
               setOtkryto(1);
               setOshibalsya(true);
+              zapis?.shagPodskazki(1);
             }}
           >
             Подсказка
           </button>
         ) : null}
         {pokazatReshenie ? null : (
-          <button type="button" className="btn btn--ghost" onClick={() => setReshenie(true)}>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => {
+              setReshenie(true);
+              zapis?.reshenie();
+            }}
+          >
             Показать решение
           </button>
         )}
@@ -292,10 +328,12 @@ function Ekran14({
           onVerno={() => {
             setOtkryto(otkryto + 1);
             setMimo([]);
+            zapis?.shagPodskazki(otkryto + 1);
           }}
           onMimo={(j) => {
             setMimo([...mimo, j]);
             setMisses((n) => n + 1);
+            zapis?.oshibkaPodskazki(otkryto);
           }}
         />
       ) : null}
