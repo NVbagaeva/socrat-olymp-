@@ -109,8 +109,8 @@ export const about = {
     /* Стеклянная лента-росчерк поверх фото (кладёт автор). */
     lenta: {
       file: '/images/about/lenta.png',
-      width: 1254,
-      height: 1254,
+      width: 900,
+      height: 900,
     } satisfies SteklyannayaKartinka,
   },
 
@@ -197,8 +197,8 @@ export const about = {
     /* Стеклянная лента-бесконечность под вводным абзацем (кладёт автор). */
     beskonechnost: {
       file: '/images/about/beskonechnost.png',
-      width: 1821,
-      height: 864,
+      width: 900,
+      height: 427,
     } satisfies SteklyannayaKartinka,
   },
 
