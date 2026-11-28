@@ -334,6 +334,27 @@
   margin-top: var(--space-8);
 }
 
+/* Зима (config/zima.ts, WINTER_MODE). Снег — холст на z-index: -1
+   внутри изолированного первого экрана: под текстом и кнопками, над
+   фоном. Над полосой показателей — место для пингвинов: они стоят на
+   её верхнем краю и не задевают строку над ней. */
+.oa--zima .oa-hero {
+  position: relative;
+  isolation: isolate;
+}
+.oa--zima .oa-pokazateli-ramka {
+  position: relative;
+  margin-top: calc(var(--space-6) + 46px);
+}
+.oa--zima .oa-pokazateli-ramka > .oa-pokazateli {
+  margin-top: 0;
+}
+@media (min-width: 768px) {
+  .oa--zima .oa-pokazateli-ramka {
+    margin-top: calc(var(--space-6) + 60px);
+  }
+}
+
 /* Портрет: скруглённая рамка на синей подложке, за ней — приглушённые
    окружность и парабола. */
 .oa-portret {

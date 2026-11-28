@@ -8,6 +8,9 @@ import { SiteFooter, SiteHeader } from '@/components/layout';
 import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { about, type Illyustraciya, type SteklyannayaKartinka } from '@/content/about';
+import { WINTER_MODE } from '@/config/zima';
+import { Pingviny } from '@/components/zima/Pingviny';
+import { Sneg } from '@/components/zima/Sneg';
 import { Dvizhenie } from './Dvizhenie';
 import { Stsena } from './Stsena';
 import './about.css';
@@ -118,6 +121,19 @@ function Shapka({ metka, title, id }: { metka: string; title: string; id: string
   );
 }
 
+function Pokazateli() {
+  return (
+    <dl className="oa-pokazateli">
+      {hero.pokazateli.map((p) => (
+        <div key={p.podpis}>
+          <dt>{p.podpis}</dt>
+          <dd>{p.chislo}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 /* Порядковый номер для каскада появления (--i в about.css). */
 const poryadok = (i: number) => ({ '--i': i }) as CSSProperties;
 
@@ -128,7 +144,7 @@ export default function AboutPage() {
   const lenta = estFayl(hero.lenta);
   const beskonechnost = estFayl(put.beskonechnost);
   return (
-    <div className="oa">
+    <div className={clsx('oa', WINTER_MODE && 'oa--zima')}>
       {/* Тот же SiteHeader, что и везде; currentHref подсвечивает пункт меню. */}
       <SiteHeader className="site-head--steklo" currentHref="/about/" />
       <Dvizhenie />
@@ -140,6 +156,8 @@ export default function AboutPage() {
       <main className="oa-main">
         {/* ── 1. Первый экран ─────────────────────────────────── */}
         <section className="oa-hero" aria-labelledby="oa-imya">
+          {/* Зимний декор (config/zima.ts): снег по краям первого экрана. */}
+          {WINTER_MODE ? <Sneg /> : null}
           <div className="oa-wrap oa-hero__grid">
             <Stsena lenta={lenta}>
               <img
@@ -164,14 +182,15 @@ export default function AboutPage() {
                 </span>
               </h1>
               <p className="oa-rol">{hero.rol}</p>
-              <dl className="oa-pokazateli">
-                {hero.pokazateli.map((p) => (
-                  <div key={p.podpis}>
-                    <dt>{p.podpis}</dt>
-                    <dd>{p.chislo}</dd>
-                  </div>
-                ))}
-              </dl>
+              {WINTER_MODE ? (
+                /* Пингвины стоят на верхнем краю полосы показателей. */
+                <div className="oa-pokazateli-ramka">
+                  <Pokazateli />
+                  <Pingviny />
+                </div>
+              ) : (
+                <Pokazateli />
+              )}
               <div className="oa-knopki">
                 <a className="btn btn--primary btn--lg" href={hero.actions.glavnaya.href}>
                   {hero.actions.glavnaya.label}

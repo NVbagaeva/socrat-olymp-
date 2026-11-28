@@ -1,0 +1,53 @@
+/* Снег по краям блока (Sneg.tsx). Родителю нужны position: relative и
+   isolation: isolate — тогда холст на z-index: -1 лежит над фоном
+   блока, но под текстом и кнопками. */
+
+.sneg {
+  /* Цвет снежинок — каналы rgb через пробел; сила свечения 0…1. */
+  --sneg-cvet: 140 174 222;
+  --sneg-svechenie: 0;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  /* Середина блока чистая: снег сходит на нет к центру. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 0%,
+    #000 8%,
+    rgb(0 0 0 / 0.35) 22%,
+    transparent 34%,
+    transparent 66%,
+    rgb(0 0 0 / 0.35) 78%,
+    #000 92%,
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    #000 0%,
+    #000 8%,
+    rgb(0 0 0 / 0.35) 22%,
+    transparent 34%,
+    transparent 66%,
+    rgb(0 0 0 / 0.35) 78%,
+    #000 92%,
+    #000 100%
+  );
+}
+
+/* Тёмная тема: белый снег с мягким свечением. */
+@media screen {
+  :root[data-tema='dark']:not([data-sheet-theme]) .sneg {
+    --sneg-cvet: 255 255 255;
+    --sneg-svechenie: 0.7;
+  }
+}
+
+@media print {
+  .sneg {
+    display: none;
+  }
+}
