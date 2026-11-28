@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import type { Model } from '@/lib/solid/model';
 import type { View } from '@/lib/solid/project';
@@ -27,6 +27,27 @@ function zagruzit(): Promise<Dvizhok> {
 const DOLGIY_KADR_MS = 24;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+/* Холст кадров. Первый кадр — из сборки (svg), дальше кадры пишет
+   narisovat прямо в innerHTML. Холст отдельный и мемоизирован: без этого
+   React при любом перерендере (смена шага) заново ставил
+   dangerouslySetInnerHTML, и если кадр с подсветкой успел нарисоваться
+   раньше, его затирал исходный — чертёж оставался без подсветки шага. */
+const Kholst = memo(function Kholst({
+  svg,
+  kholstRef,
+}: {
+  svg: string;
+  kholstRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <div
+      ref={kholstRef}
+      className="z3d__kholst solid-wrap"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+});
 
 export interface ZhivoyChertezh3dProps {
   model: Model;
@@ -149,11 +170,7 @@ export function ZhivoyChertezh3d({
         className="z3d__vid"
         {...(onPovorot === undefined ? {} : { onPovorot })}
       >
-        <div
-          ref={kholst}
-          className="z3d__kholst solid-wrap"
-          dangerouslySetInnerHTML={{ __html: svg }}
-        />
+        <Kholst svg={svg} kholstRef={kholst} />
       </VrashchaemyyChertezh>
 
       {estShagi && !bezNavigatsii ? (

@@ -18,12 +18,20 @@ const PostroitSechenie = lazy(() =>
  * Шаг, который ученик сейчас читает: последний шаг, чей верх поднялся
  * выше линии чтения (чуть ниже закреплённого чертежа). Выше всех шагов —
  * 0, чертёж условия.
+ *
+ * Шаг, выбранный нажатием, главнее линии чтения, пока ученик сам не
+ * прокрутит страницу заметно (больше VYBOR_PX): нажатие подводит кнопку
+ * к экрану, и эта прокрутка иначе сразу перебила бы выбор — короткие
+ * шаги на телефоне все оказываются выше линии, и гас нажатый шаг.
  */
+const VYBOR_PX = 48;
+
 function useShagPoProkrutke(
   spisok: React.RefObject<HTMLOListElement | null>,
   chertezh: React.RefObject<HTMLDivElement | null>,
   vklyucheno: boolean,
   onShag: (n: number) => void,
+  vybor: React.RefObject<number | null>,
 ) {
   useEffect(() => {
     const ol = spisok.current;
@@ -31,6 +39,11 @@ function useShagPoProkrutke(
     let kadr = 0;
     const proverit = () => {
       kadr = 0;
+      const y0 = vybor.current;
+      if (y0 !== null) {
+        if (Math.abs(window.scrollY - y0) <= VYBOR_PX) return;
+        vybor.current = null;
+      }
       const niz = chertezh.current?.getBoundingClientRect().bottom ?? 0;
       /* Линия чтения: под чертежом, но не ниже середины экрана. */
       const liniya = Math.min(Math.max(niz, 0) + 80, window.innerHeight * 0.6);
@@ -53,7 +66,7 @@ function useShagPoProkrutke(
       window.removeEventListener('resize', naProkrutku);
       if (kadr !== 0) window.cancelAnimationFrame(kadr);
     };
-  }, [spisok, chertezh, vklyucheno, onShag]);
+  }, [spisok, chertezh, vklyucheno, onShag, vybor]);
 }
 
 /**
@@ -81,7 +94,9 @@ export function Primer3({
   const chertezh = useRef<HTMLDivElement>(null);
   const mozhnoSechenie = telo(primer.model) !== null;
   /* Чертёж идёт за чтением: шаг, до которого дочитали, построен на нём. */
-  useShagPoProkrutke(spisok, chertezh, primer.shagovChertezha > 0 && !sechenie, setShag);
+  /* Где была прокрутка, когда шаг выбрали нажатием (null — не выбирали). */
+  const vybor = useRef<number | null>(null);
+  useShagPoProkrutke(spisok, chertezh, primer.shagovChertezha > 0 && !sechenie, setShag, vybor);
   const naChertezhe = Math.min(shag, primer.shagovChertezha);
   /* Подписи чертежу не показываются (кнопки шагов — в тексте решения),
      нужно только их число: по нему он понимает, что шаги есть. */
@@ -150,6 +165,7 @@ export function Primer3({
                 title={SHAPKA3.shagKnopka}
                 onClick={() => {
                   setSechenie(false);
+                  vybor.current = window.scrollY;
                   setShag(shag === i + 1 ? 0 : i + 1);
                 }}
               >

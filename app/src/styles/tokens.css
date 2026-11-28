@@ -1464,6 +1464,10 @@
   --oa-byust-ten: rgb(22 50 107 / 0.24);
   --oa-ten-kartinki: rgb(31 95 208 / 0.16);
   --oa-ten-samolyotika: rgb(31 95 208 / 0.14);
+  /* Рукописные строки «Об авторе» в светлой теме: тёмные чернила и
+     светлый блик под ними. */
+  --oa-rukopis-chernila: rgb(22 50 107 / 0.62);
+  --oa-rukopis-blik: rgb(255 255 255 / 0.6);
   /* Рукописные пометки — синие чернила на прозрачном фоне: в светлой
      теме лежат прямо на странице, в тёмной — на светлой подложке. */
   --oa-pometka-fon: transparent;
@@ -1531,6 +1535,8 @@
     --oa-byust-ten: rgb(0 0 0 / 0.55);
     --oa-ten-kartinki: rgb(0 0 0 / 0.4);
     --oa-ten-samolyotika: rgb(0 0 0 / 0.4);
+    /* Кромка рамки портрета: тонкая синяя, не светлая. */
+    --oa-portret-kromka-noch: rgb(79 134 230 / 0.32);
     --oa-pometka-fon: var(--color-podlozhka);
     --oa-pometka-otstup: 10px;
 

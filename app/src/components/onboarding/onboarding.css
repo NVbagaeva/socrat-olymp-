@@ -241,6 +241,19 @@
 .tour-card--sheet .btn {
   min-height: 48px;
 }
+/* Точки шагов — своим рядом над кнопками: в длинном туре (14 шагов)
+   ряд «Назад · точки · Дальше» шире телефона, и «Дальше» уходила за
+   правый край. */
+.tour-card--sheet .tour-card__foot:not(.tour-card__foot--final) {
+  flex-wrap: wrap;
+  row-gap: var(--space-4);
+}
+.tour-card--sheet .tour-card__foot:not(.tour-card__foot--final) .tour-card__dots {
+  order: -1;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 .tour-card--sheet .tour-card__foot--final {
   flex-direction: column-reverse;
   align-items: stretch;

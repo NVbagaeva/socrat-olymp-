@@ -1,13 +1,16 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { clsx } from 'clsx';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { ogStranicy } from '@/lib/og';
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { Illustration } from '@/components/ui/Illustration';
 import { assetUrl } from '@/lib/assetUrl';
 import { about, type Illyustraciya, type SteklyannayaKartinka } from '@/content/about';
+import { WINTER_MODE } from '@/config/zima';
+import { Pingviny } from '@/components/zima/Pingviny';
+import { Sneg } from '@/components/zima/Sneg';
 import { Dvizhenie } from './Dvizhenie';
 import { Stsena } from './Stsena';
 import './about.css';
@@ -30,12 +33,50 @@ function estFayl(k: SteklyannayaKartinka) {
 }
 
 /* Рукописная строка в фоне секции: крупный Caveat с наклоном. Стоит в
-   своей строке сетки (не поверх текста) и срезается краем экрана. */
-function Rukopis({ text, className }: { text: string; className?: string }) {
+   своей строке сетки (не поверх текста), целиком в поле страницы.
+   Кегль считается от ширины блока (cqi в about.css). Строку из слов
+   через « · » на узком блоке последнее слово уходит на вторую строку:
+   «Знания · Опыт» / «Люди». */
+function Rukopis({
+  text,
+  className,
+  children,
+}: {
+  text: string;
+  className?: string;
+  children?: ReactNode;
+}) {
+  const slova = text.split(' · ');
+  const posledneye = slova.length > 1 ? slova.pop() : undefined;
   return (
     <div className={clsx('oa-rukopis', className)} aria-hidden="true">
-      <span>{text}</span>
+      <span className="oa-rukopis__tekst">
+        <span className="oa-rukopis__stroka">{slova.join(' · ')}</span>
+        {posledneye !== undefined ? (
+          <>
+            <span className="oa-rukopis__tochka"> · </span>
+            <span className="oa-rukopis__stroka">{posledneye}</span>
+          </>
+        ) : null}
+        {children}
+      </span>
     </div>
+  );
+}
+
+/* Сердечко «от руки» под «Вместе к большему»: одна линия той же
+   ручкой — цвет строки (currentColor), толщина как у букв Caveat,
+   лёгкая асимметрия и нахлёст у кончика. Символ ♥ не годится: в Caveat
+   его нет, и iOS подставила бы цветной эмодзи. pathLength="1" — для
+   прорисовки линии в about.css. */
+function Serdce() {
+  return (
+    <svg className="oa-serdce" viewBox="0 0 64 60" aria-hidden="true" focusable="false">
+      <path
+        pathLength={1}
+        d="M31.5 52.5C23 45 8.5 35.5 7.2 22.6 6.3 13 13.6 7.2 21.4 8.6c5 .9 8.6 5.2 10.4 10.6 1.6-6.4 6.6-12 13.4-12.2 8.6-.3 13.4 7.6 11.2 16.6-2.6 10.6-12.4 19.4-21.6 28.6l-4.6 4.8"
+      />
+    </svg>
   );
 }
 
@@ -80,6 +121,19 @@ function Shapka({ metka, title, id }: { metka: string; title: string; id: string
   );
 }
 
+function Pokazateli() {
+  return (
+    <dl className="oa-pokazateli">
+      {hero.pokazateli.map((p) => (
+        <div key={p.podpis}>
+          <dt>{p.podpis}</dt>
+          <dd>{p.chislo}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 /* Порядковый номер для каскада появления (--i в about.css). */
 const poryadok = (i: number) => ({ '--i': i }) as CSSProperties;
 
@@ -90,7 +144,7 @@ export default function AboutPage() {
   const lenta = estFayl(hero.lenta);
   const beskonechnost = estFayl(put.beskonechnost);
   return (
-    <div className="oa">
+    <div className={clsx('oa', WINTER_MODE && 'oa--zima')}>
       {/* Тот же SiteHeader, что и везде; currentHref подсвечивает пункт меню. */}
       <SiteHeader className="site-head--steklo" currentHref="/about/" />
       <Dvizhenie />
@@ -102,6 +156,8 @@ export default function AboutPage() {
       <main className="oa-main">
         {/* ── 1. Первый экран ─────────────────────────────────── */}
         <section className="oa-hero" aria-labelledby="oa-imya">
+          {/* Зимний декор (config/zima.ts): снег по краям первого экрана. */}
+          {WINTER_MODE ? <Sneg /> : null}
           <div className="oa-wrap oa-hero__grid">
             <Stsena lenta={lenta}>
               <img
@@ -126,14 +182,15 @@ export default function AboutPage() {
                 </span>
               </h1>
               <p className="oa-rol">{hero.rol}</p>
-              <dl className="oa-pokazateli">
-                {hero.pokazateli.map((p) => (
-                  <div key={p.podpis}>
-                    <dt>{p.podpis}</dt>
-                    <dd>{p.chislo}</dd>
-                  </div>
-                ))}
-              </dl>
+              {WINTER_MODE ? (
+                /* Пингвины стоят на верхнем краю полосы показателей. */
+                <div className="oa-pokazateli-ramka">
+                  <Pokazateli />
+                  <Pingviny />
+                </div>
+              ) : (
+                <Pokazateli />
+              )}
               <div className="oa-knopki">
                 <a className="btn btn--primary btn--lg" href={hero.actions.glavnaya.href}>
                   {hero.actions.glavnaya.label}
@@ -351,7 +408,9 @@ export default function AboutPage() {
                   </a>
                 ))}
               </div>
-              <Rukopis text={svyaz.rukopis} className="oa-rukopis--svyaz" />
+              <Rukopis text={svyaz.rukopis} className="oa-rukopis--svyaz">
+                <Serdce />
+              </Rukopis>
             </div>
           </div>
         </section>

@@ -1,3 +1,5 @@
+import { WINTER_MODE } from '@/config/zima';
+
 /**
  * Волнистый попугайчик. Чистый SVG из слоёв-групп: хвост, тело, крыло,
  * голова (отдельно хохолок и глаз). Нарисован клювом вправо; на
@@ -5,6 +7,9 @@
  * zherdochka.css (.popugaj*): дыхание идёт само, жесты включает
  * Zherdochka через data-zhest. Декоративный — скрыт от скринридеров.
  * Линия лапок — y = 100.
+ *
+ * Зимой (WINTER_MODE, config/zima.ts) на голове новогодний колпак — он
+ * в группе головы и двигается вместе с ней; хохолок прячется под ним.
  */
 export function Popugaj() {
   return (
@@ -145,10 +150,12 @@ export function Popugaj() {
           {/* Голова: поворачивается, наклоняется, изредка чистит грудку. */}
           <g className="popugaj__chistka">
             <g className="popugaj__golova">
-              <g className="popugaj__hoholok" fill="#ffe655">
-                <path d="M54.5 8C53.5 4.5 55.5 2.6 58.3 3c-1 1.6-1 3.2-.4 5z" />
-                <path d="M58.3 7.5c0-3 2-4.2 4.2-3.5-1 1.2-1.2 2.4-.9 4z" fill="#f7d443" />
-              </g>
+              {WINTER_MODE ? null : (
+                <g className="popugaj__hoholok" fill="#ffe655">
+                  <path d="M54.5 8C53.5 4.5 55.5 2.6 58.3 3c-1 1.6-1 3.2-.4 5z" />
+                  <path d="M58.3 7.5c0-3 2-4.2 4.2-3.5-1 1.2-1.2 2.4-.9 4z" fill="#f7d443" />
+                </g>
+              )}
               <path
                 d="M43 26C43 14 51 6 61 6s17 7 17 17c0 9-4 17-12 20s-18-1-21.5-9c-1-3-1.5-5.5-1.5-8z"
                 fill="url(#pg-golova)"
@@ -217,10 +224,116 @@ export function Popugaj() {
                 <circle cx="68.3" cy="18.3" r="1" fill="#fff" />
                 <circle cx="66" cy="21" r="0.45" fill="#fff" opacity="0.8" />
               </g>
+              {WINTER_MODE ? <Kolpak /> : null}
             </g>
           </g>
         </g>
       </g>
     </svg>
+  );
+}
+
+/**
+ * Новогодний колпак: красный конус с мягкими тенями, кончик с помпоном
+ * свешивается назад, к затылку; белая пушистая опушка по линии головы.
+ * Свои координаты: середина опушки — (0, 0), наклон задан снаружи.
+ * Помпон покачивается (zherdochka.css, .kolpak__hvost).
+ */
+function Kolpak() {
+  return (
+    <g className="kolpak" transform="translate(59.6 12.6) rotate(-16)">
+      <defs>
+        <linearGradient id="kp-krasnyy" x1="0" y1="0" x2="1" y2="0.35">
+          <stop offset="0" stopColor="#ff5a5f" />
+          <stop offset="0.45" stopColor="#e3252f" />
+          <stop offset="1" stopColor="#a8121d" />
+        </linearGradient>
+        <linearGradient id="kp-hvost" x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#d71f2a" />
+          <stop offset="1" stopColor="#9c101a" />
+        </linearGradient>
+        <linearGradient id="kp-meh" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="0.6" stopColor="#f3f6fb" />
+          <stop offset="1" stopColor="#d5deea" />
+        </linearGradient>
+        <radialGradient id="kp-pompon" cx="0.38" cy="0.32" r="0.75">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="0.65" stopColor="#f1f4f9" />
+          <stop offset="1" stopColor="#cfd8e6" />
+        </radialGradient>
+      </defs>
+
+      {/* Конус. */}
+      <path
+        d="M-13.4-1.6C-13-9-9.4-16.8-2.6-21.2c4.2-2.8 9.4-2.4 11.4 1.4 2.4 4.8 3.8 11.6 4.6 18.2z"
+        fill="url(#kp-krasnyy)"
+      />
+      {/* Тень на правом боку и складка под свесом. */}
+      <path
+        d="M5.6-21c2.8 4.8 4.8 11.4 5.8 19.4h2c-.8-6.6-2.2-13.4-4.6-18.2-.8-1.4-1.8-1.8-3.2-1.2z"
+        fill="#7d0b14"
+        opacity="0.35"
+      />
+      <path d="M-2.6-21.2c-3 2-5.2 4.4-6.6 7 2.8-2.2 6-3 9.4-2.6z" fill="#6e0912" opacity="0.4" />
+      {/* Блик вдоль левого края. */}
+      <path
+        d="M-10.6-5.4C-10-11-7.4-16.2-3.4-19.4"
+        fill="none"
+        stroke="#ffd2d4"
+        strokeWidth="0.9"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+
+      {/* Свешивающийся кончик с помпоном — качается от макушки. */}
+      <g className="kolpak__hvost">
+        <path
+          d="M-2.4-21.4c-6.6-3.2-14.2-.8-17.6 6.4 1.6.8 3.2.4 4.4-1 3-3.6 7.4-4.6 12.2-2.6z"
+          fill="url(#kp-hvost)"
+        />
+        <path
+          d="M-6-22.4c-4.4-.4-8.8 1.6-11.4 5.2"
+          fill="none"
+          stroke="#ff8a8f"
+          strokeWidth="0.7"
+          strokeLinecap="round"
+          opacity="0.5"
+        />
+        <circle cx="-19.4" cy="-14" r="3.9" fill="url(#kp-pompon)" />
+        <path
+          d="M-21.4-15.4l1 .6M-18.4-16.6l-.4 1M-20.6-12.2l1-.6M-17.6-13.2l-.8.2"
+          fill="none"
+          stroke="#b7c3d6"
+          strokeWidth="0.55"
+          strokeLinecap="round"
+        />
+      </g>
+
+      {/* Пушистая опушка. */}
+      <path
+        d="M-16-3.2c-.6 3.2 1 6.6 4 6.4 2 1.4 5 1.2 6.5.2 2 1.4 5 1.2 6.5 0 2 1.4 5 1.2 6.5 0 2 1.2 5 1 6.5-.4 2.5-.2 3-4 2-6-1.5-1.6-4-1.4-5.5-.6-2-1.4-5-1.4-6.5-.2-2-1.2-5-1.2-6.5 0-2-1.2-5-1.2-6.5 0-2-1.2-5.5-1.2-7 .6z"
+        fill="url(#kp-meh)"
+        stroke="#c3cedd"
+        strokeWidth="0.35"
+      />
+      <path
+        d="M-12.6-.6q1 1 2.2.4M-6.4.2q1 1 2.2.4M-.2 0q1 1 2.2.4M6 .1q1 1 2.2.3M11.6-.6q.8.9 1.9.3"
+        fill="none"
+        stroke="#b9c6d8"
+        strokeWidth="0.55"
+        strokeLinecap="round"
+      />
+
+      {/* Снежинки иногда садятся на колпак и тают (zherdochka.css). */}
+      <circle className="kolpak__snezhinka" cx="4.6" cy="-13.4" r="1.05" fill="#fff" />
+      <circle
+        className="kolpak__snezhinka kolpak__snezhinka--2"
+        cx="-7.4"
+        cy="-8.2"
+        r="0.85"
+        fill="#fff"
+      />
+    </g>
   );
 }

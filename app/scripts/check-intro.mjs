@@ -293,8 +293,11 @@ try {
       }
     }
     const after = await heap();
+    /* Холсты заставки; снег зимнего декора (components/zima/Sneg.tsx,
+       canvas.sneg) — постоянная часть страницы, не заставки. */
     check(
-      (await page.locator(INTRO).count()) === 0 && (await page.locator('canvas').count()) === 0,
+      (await page.locator(INTRO).count()) === 0 &&
+        (await page.locator('canvas:not(.sneg)').count()) === 0,
       'после закрытия нет ни заставки, ни холстов',
     );
     check(after - before < 2500, `куча после закрытия: ${after} КБ (до: ${before} КБ)`);
