@@ -171,8 +171,10 @@ function rootPool(kind) {
 
 /* С чертежа ответ читаться не должен: целая точка в окне — это уже
    не вычисление, а чтение по клеткам. */
-function readable(x, y, win) {
-  return isInt(x) && isInt(y) && inside(num(x), num(y), win, 0);
+function readable(x, y, win, answer) {
+  /* Целый ответ у видимой точки читается по клеткам, даже если другая
+     координата дробная (x = 2,25 → y = 3). Нецелый — нет: его оставляем. */
+  return inside(num(x), num(y), win, 0) && (isInt(answer) || (isInt(x) && isInt(y)));
 }
 
 function queryCandidates(c, win, spec) {
@@ -183,7 +185,8 @@ function queryCandidates(c, win, spec) {
     var y = add(mul(c.k, s), frac(c.y0));
     if (places(x) > 2 || places(y) > 2) { return; }
     if (Math.abs(num(x)) > ANSWER_MAX || Math.abs(num(y)) > ANSWER_MAX) { return; }
-    if (readable(x, y, win)) { return; }
+    var answer = spec.type === 'argument-for' ? x : y;
+    if (readable(x, y, win, answer)) { return; }
     /* Значение запроса не совпадает с ординатой начала: тогда s = 0. */
     if (spec.type === 'value-at') {
       out.push({ type: 'value-at', x0: x, answer: y, root: s });
