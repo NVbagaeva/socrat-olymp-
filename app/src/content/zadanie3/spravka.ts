@@ -56,6 +56,22 @@ export const SHAPKA3 = {
   svernut: 'Свернуть',
   razvernut: 'Показать чертёж',
   shagKnopka: 'Показать шаг на чертеже',
+  /* Построение сечения на чертеже примера. */
+  sechenie: 'Сечение',
+  sechenieDlinno: 'Построить сечение на чертеже',
+  kRazboru: 'К решению',
+  kChertezhu: 'К чертежу задачи',
+};
+
+/** Тексты построения сечения (components/stereo/PostroitSechenie). */
+export const SECHENIE3 = {
+  podskazka: 'Отметьте три точки: вершины или середины рёбер.',
+  otmecheno: (kto: string, eshche: number) =>
+    `Отмечено: ${kto}. ${eshche === 1 ? 'Ещё одна точка' : `Ещё ${eshche} точки`}.`,
+  naOdnoyPryamoy: 'Три точки на одной прямой — плоскость не задана. Выберите другую точку.',
+  gotovo: (vid: string, imya: string) => `Сечение — ${vid} ${imya}.`,
+  sbrosit: 'Сбросить',
+  spisok: 'Точки списком',
 };
 
 export interface Formula3 {
