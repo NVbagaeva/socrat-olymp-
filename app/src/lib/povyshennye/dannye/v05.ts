@@ -132,7 +132,7 @@ export const VARIANT: VariantPV = {
         s: 'z12.koren-koren',
         p: {
           F: [2, 2],
-          b: -5,
+          b: -8,
         },
       },
       {
@@ -809,8 +809,8 @@ export const VARIANT: VariantPV = {
       {
         s: 'z12.koren-koren',
         p: {
-          F: [10, 4],
-          b: -3,
+          F: [3, 2],
+          b: -4,
         },
       },
       {

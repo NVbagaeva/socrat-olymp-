@@ -117,6 +117,18 @@
 .vst-kholst .solid-bukva {
   font-weight: 700;
 }
+/* Тёмная тема — как в разделе №3 (stereo/metodika.css, там этот файл
+   не подключён): ореол подписей и кружки вершин цвета фона чертежа, а
+   не белые. Белый ореол вокруг светло-синих букв сливался с ними, и
+   подписи вершин читались плохо. */
+@media screen {
+  :root[data-tema='dark']:not([data-sheet-theme]) .vst-kholst text[stroke] {
+    stroke: var(--chertezh-fon);
+  }
+  :root[data-tema='dark']:not([data-sheet-theme]) .vst-kholst .solid-vershina {
+    fill: var(--chertezh-fon);
+  }
+}
 
 /* Подсказка-жест: рука ходит вбок, пока фигуру не тронули. */
 .vst-zhest {

@@ -41,6 +41,10 @@
   z-index: -1;
   pointer-events: none;
 }
+/* Снег (components/zima) — в слое фона, над свечением и чертежом. */
+.sm__fon .sm__sneg {
+  z-index: 0;
+}
 .sm__svet {
   position: absolute;
   right: 4%;

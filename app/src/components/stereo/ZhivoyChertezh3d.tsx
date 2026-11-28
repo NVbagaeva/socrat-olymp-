@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import type { Model } from '@/lib/solid/model';
 import type { View } from '@/lib/solid/project';
@@ -28,6 +28,27 @@ const DOLGIY_KADR_MS = 24;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
+/* Холст кадров. Первый кадр — из сборки (svg), дальше кадры пишет
+   narisovat прямо в innerHTML. Холст отдельный и мемоизирован: без этого
+   React при любом перерендере (смена шага) заново ставил
+   dangerouslySetInnerHTML, и если кадр с подсветкой успел нарисоваться
+   раньше, его затирал исходный — чертёж оставался без подсветки шага. */
+const Kholst = memo(function Kholst({
+  svg,
+  kholstRef,
+}: {
+  svg: string;
+  kholstRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <div
+      ref={kholstRef}
+      className="z3d__kholst solid-wrap"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+});
+
 export interface ZhivoyChertezh3dProps {
   model: Model;
   /** Первый кадр, нарисованный на сборке. */
@@ -44,8 +65,6 @@ export interface ZhivoyChertezh3dProps {
   onShag?: (shag: number) => void;
   /** Без своих кнопок шагов: их рисует разбор рядом с текстом решения. */
   bezNavigatsii?: boolean;
-  /** Грузить движок, когда чертёж подходит к экрану, а не по касанию. */
-  gruzitZaranee?: boolean;
   /** Тема движка: «стекло» новых экранов №3 или строгий чертёж (по умолчанию). */
   tema?: Tema;
   /** С какого шага открыть чертёж (внутренний шаг): по умолчанию с условия. */
@@ -68,7 +87,6 @@ export function ZhivoyChertezh3d({
   shag: shagSnaruzhi,
   onShag,
   bezNavigatsii = false,
-  gruzitZaranee = false,
   tema = 'pechat',
   shagSnachala = 0,
   className,
@@ -82,16 +100,6 @@ export function ZhivoyChertezh3d({
   /* Стороны подписей прошлого кадра: при вращении подписи не прыгают. */
   const pamyat = useRef(new Map<string, number>());
   const shagRef = useRef(shagSnachala);
-  /* Последний кадр движка. Холст — div с dangerouslySetInnerHTML (первый
-     кадр со сборки), и React при перерисовке может вернуть в него этот
-     кадр поверх нарисованного шага: тогда шаг пропадает с чертежа. */
-  const nashKadr = useRef<string | null>(null);
-  useLayoutEffect(() => {
-    const node = kholst.current;
-    if (node !== null && nashKadr.current !== null && node.innerHTML !== nashKadr.current) {
-      node.innerHTML = nashKadr.current;
-    }
-  });
   const estShagi = podpisi.length > 1;
   const nShagov = podpisi.length - 1;
 
@@ -115,8 +123,6 @@ export function ZhivoyChertezh3d({
         pamyatPodpisey: pamyat.current,
         ...(estShagi ? { shag: shagRef.current } : {}),
       });
-      /* Как его сериализует браузер: с этим и сравнивается холст. */
-      nashKadr.current = node.innerHTML;
       propusk.current = performance.now() - t0 > DOLGIY_KADR_MS;
     });
   }, [model, estShagi, tema]);
@@ -144,32 +150,6 @@ export function ZhivoyChertezh3d({
     narisovat();
   }
 
-  /* gruzitZaranee: чертёж с шагами подошёл к экрану — движок грузится
-     заранее, и шаг, выбранный в тексте, подсвечивается сразу, а не после
-     загрузки. Без него движок грузится по первому касанию. */
-  useEffect(() => {
-    const el = kholst.current;
-    if (
-      !gruzitZaranee ||
-      nShagov <= 0 ||
-      el === null ||
-      typeof IntersectionObserver === 'undefined'
-    ) {
-      return undefined;
-    }
-    const io = new IntersectionObserver(
-      (zapisi) => {
-        if (zapisi.some((z) => z.isIntersecting)) {
-          io.disconnect();
-          void zagruzit();
-        }
-      },
-      { rootMargin: '300px 0px' },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [gruzitZaranee, nShagov]);
-
   /* Шаг сменили снаружи (кнопка у шага в тексте разбора) — перерисовать. */
   useEffect(() => {
     if (shagSnaruzhi === undefined || shagSnaruzhi === shagRef.current) {
@@ -190,11 +170,7 @@ export function ZhivoyChertezh3d({
         className="z3d__vid"
         {...(onPovorot === undefined ? {} : { onPovorot })}
       >
-        <div
-          ref={kholst}
-          className="z3d__kholst solid-wrap"
-          dangerouslySetInnerHTML={{ __html: svg }}
-        />
+        <Kholst svg={svg} kholstRef={kholst} />
       </VrashchaemyyChertezh>
 
       {estShagi && !bezNavigatsii ? (

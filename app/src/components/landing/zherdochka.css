@@ -128,6 +128,15 @@
   transform-origin: 55px 40px;
 }
 
+/* Колпак (зима): кончик с помпоном качается от макушки. */
+.kolpak__hvost {
+  transform-origin: 100% 12%;
+}
+.kolpak__snezhinka {
+  opacity: 0;
+  transform-origin: 50% 50%;
+}
+
 /* Узкие экраны: колонка одна, свешиваться можно только в поле страницы. */
 @media (max-width: 1023.98px) {
   .zherdochka {
@@ -196,6 +205,21 @@
   .zherdochka[data-zhest='vstryaska'] .zherdochka__prosad,
   .zherdochka[data-zhest='klyov'] .zherdochka__prosad {
     animation: zh-prosad 1s ease-in-out both;
+  }
+  /* Помпон покачивается сам и сильнее — когда птица двигается. */
+  .kolpak__hvost {
+    animation: kolpak-pompon 3s ease-in-out infinite alternate;
+  }
+  .zherdochka[data-zhest] .kolpak__hvost {
+    animation: kolpak-pompon-sil 1.2s ease-in-out both;
+  }
+  /* Изредка на колпак садится снежинка и тает. */
+  .kolpak__snezhinka {
+    animation: kolpak-snezhinka 17s ease-in-out infinite;
+  }
+  .kolpak__snezhinka--2 {
+    animation-duration: 23s;
+    animation-delay: -9s;
   }
   .zherdochka[data-morg] .popugaj__glaz {
     animation: popugaj-morgaet 0.26s ease-in-out both;
@@ -370,5 +394,50 @@
 @keyframes popugaj-morgaet {
   50% {
     transform: scaleY(0.1);
+  }
+}
+
+@keyframes kolpak-pompon {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(5deg);
+  }
+}
+@keyframes kolpak-pompon-sil {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: rotate(12deg);
+  }
+  55% {
+    transform: rotate(-8deg);
+  }
+  80% {
+    transform: rotate(3deg);
+  }
+}
+/* Опускается, лежит, тает; потом долго ничего. */
+@keyframes kolpak-snezhinka {
+  0%,
+  58%,
+  100% {
+    opacity: 0;
+    transform: translateY(-3px) scale(1);
+  }
+  62% {
+    opacity: 0.95;
+    transform: none;
+  }
+  80% {
+    opacity: 0.9;
+    transform: none;
+  }
+  90% {
+    opacity: 0;
+    transform: scale(0.3);
   }
 }

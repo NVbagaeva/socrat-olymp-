@@ -9,15 +9,17 @@
   --oa-ink: var(--navy-900);
   --oa-text: var(--color-text-lead);
   --oa-line: var(--oa-liniya);
-  /* Рукописные строки в фоне: белые поверх голубого градиента. */
-  --oa-rukopis: rgb(255 255 255 / 0.65);
+  /* Рукописные строки: тёмно-синие «чернила» поверх мягкого голубого
+     свечения — белые на светлом фоне не читались. */
+  --oa-rukopis: var(--oa-rukopis-chernila);
   --oa-rukopis-fon: radial-gradient(
     closest-side,
     rgb(31 95 208 / 0.2),
     rgb(31 95 208 / 0.07) 60%,
     transparent
   );
-  --oa-rukopis-ten: 0 1px 1px rgb(31 95 208 / 0.18);
+  --oa-rukopis-ten: 0 1px 0 var(--oa-rukopis-blik);
+  --oa-serdce-ten: drop-shadow(0 1px 0 var(--oa-rukopis-blik));
   /* Чередование тона карточек принципов. */
   --oa-karta-1: rgb(255 255 255 / 0.72);
   --oa-karta-2: rgb(226 237 255 / 0.72);
@@ -45,6 +47,7 @@
     --oa-rukopis: color-mix(in srgb, var(--noch-blue) 11%, transparent);
     --oa-rukopis-fon: none;
     --oa-rukopis-ten: none;
+    --oa-serdce-ten: none;
     --oa-karta-1: rgb(255 255 255 / 0.04);
     --oa-karta-2: rgb(127 176 255 / 0.1);
     --oa-itog-fon: linear-gradient(120deg, rgb(255 150 70 / 0.2), rgb(255 150 70 / 0.07));
@@ -53,7 +56,9 @@
     --oa-lenta-filtr: drop-shadow(0 0 10px rgb(127 176 255 / 0.35));
     --oa-lenta-prozrachnost: 0.9;
     --oa-portret-fon: linear-gradient(160deg, rgb(70 130 255 / 0.22), rgb(70 130 255 / 0.04) 85%);
-    --oa-portret-kromka: rgb(160 195 255 / 0.22);
+    /* Кромка рамки — тонкая и в акцентном синем, не светлая: светлая
+       линия на ночном фоне читалась как белый контур у фото. */
+    --oa-portret-kromka: var(--oa-portret-kromka-noch);
     --oa-final-fon: linear-gradient(135deg, rgb(255 150 70 / 0.14), rgb(70 130 255 / 0.1));
   }
 }
@@ -171,32 +176,51 @@
 }
 
 /* ── Рукописная строка в фоне ────────────────────────────────── */
-/* Стоит в собственной строке сетки, поэтому строк контента не касается;
-   уходит за правый край экрана — часть букв срезана нарочно. Под
-   контентом по z-index, мышь не перехватывает. */
+/* Стоит в собственной строке сетки, поэтому строк контента не касается.
+   Целиком в поле страницы, по центру блока: кегль считается от ширины
+   блока (cqi), с запасом на поля подложки и наклон. Ширина строк
+   Caveat в em: «Знания · Опыт · Люди» — 8,05, «Знания · Опыт» — 5,32,
+   «Вместе к большему» — 6,42; +1,2em полей подложки и ~0,3em на наклон.
+   Под контентом по z-index, мышь не перехватывает. */
 .oa-rukopis {
   position: relative;
   z-index: 0;
+  container-type: inline-size;
+  min-width: 0;
   pointer-events: none;
   user-select: none;
-  white-space: nowrap;
-  margin-right: calc(
-    -1 *
-      var(--oa-vylet, max(var(--space-8), calc((100vw - var(--w-container)) / 2 + var(--space-8))))
-  );
-  overflow: hidden;
+  text-align: center;
 }
-.oa-rukopis span {
+.oa-rukopis__tekst {
   display: inline-block;
+  max-width: 100%;
   padding: 0.25em 0.6em 0.35em;
   background: var(--oa-rukopis-fon);
   font-family: var(--font-hand);
-  font-size: clamp(44px, 6.4vw, 96px);
+  /* Одна строка: 9,6em ≤ ширины блока. */
+  font-size: clamp(32px, 10cqi, 96px);
   line-height: 1.05;
+  white-space: nowrap;
   color: var(--oa-rukopis);
   text-shadow: var(--oa-rukopis-ten);
   transform: rotate(-4deg);
-  transform-origin: left center;
+  transform-origin: center;
+}
+.oa-rukopis__stroka {
+  display: inline;
+}
+/* Узкий блок (телефон): последнее слово — второй строкой, без точки
+   в конце первой. Обе строки по центру. */
+@container (max-width: 419.98px) {
+  .oa-rukopis__tekst {
+    font-size: clamp(32px, 14cqi, 56px);
+  }
+  .oa-rukopis__stroka {
+    display: block;
+  }
+  .oa-rukopis__tochka {
+    display: none;
+  }
 }
 
 /* ── 1. Первый экран ─────────────────────────────────────────── */
@@ -311,6 +335,27 @@
   margin-top: var(--space-8);
 }
 
+/* Зима (config/zima.ts, WINTER_MODE). Снег — холст на z-index: -1
+   внутри изолированного первого экрана: под текстом и кнопками, над
+   фоном. Над полосой показателей — место для пингвинов: они стоят на
+   её верхнем краю и не задевают строку над ней. */
+.oa--zima .oa-hero {
+  position: relative;
+  isolation: isolate;
+}
+.oa--zima .oa-pokazateli-ramka {
+  position: relative;
+  margin-top: calc(var(--space-6) + 46px);
+}
+.oa--zima .oa-pokazateli-ramka > .oa-pokazateli {
+  margin-top: 0;
+}
+@media (min-width: 768px) {
+  .oa--zima .oa-pokazateli-ramka {
+    margin-top: calc(var(--space-6) + 60px);
+  }
+}
+
 /* Портрет: скруглённая рамка на синей подложке, за ней — приглушённые
    окружность и парабола. */
 .oa-portret {
@@ -368,6 +413,9 @@
   max-width: none;
   height: 96%;
   transform: translateX(-50%);
+  /* Низ фото растворяется в подложке рамки — без резкого среза. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
 }
 
 /* Натюрморт у нижних углов рамки: бюст справа смотрит на портрет,
@@ -515,12 +563,13 @@
   pointer-events: none;
 }
 .oa-rukopis--put {
-  --oa-vylet: 0px;
   margin-top: var(--space-6);
-  white-space: normal;
+  text-align: start;
 }
-.oa-rukopis--put span {
-  font-size: clamp(40px, 4.2vw, 60px);
+.oa-rukopis--put .oa-rukopis__tekst {
+  white-space: normal;
+  font-size: clamp(32px, 11cqi, 60px);
+  transform-origin: left center;
 }
 
 /* Лента: ось слева, на ней точки этапов. */
@@ -808,6 +857,38 @@
 .oa-rukopis--svyaz {
   grid-column: 1 / -1;
 }
+/* Сердечко под строкой: по центру, наклон — вместе со строкой и ещё
+   чуть свой. Толщина линии ≈ толщине штриха Caveat (0,07em). */
+.oa-serdce {
+  display: block;
+  width: 0.62em;
+  height: auto;
+  margin: 0.08em auto 0;
+  overflow: visible;
+  transform: rotate(-7deg) translateX(0.04em);
+  filter: var(--oa-serdce-ten);
+}
+.oa-serdce path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 6.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Один раз прорисовывается линией, когда блок появился (Dvizhenie.tsx
+   ставит .is-in). Без скрипта и при reduced-motion — сразу целиком. */
+.oa--js .oa-serdce path {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1.02;
+}
+.oa--js .is-in .oa-serdce path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.55, 0, 0.35, 1) 0.45s;
+}
+/* «Вместе к большему»: 7,9em в строку. */
+.oa-rukopis--svyaz .oa-rukopis__tekst {
+  font-size: clamp(30px, 12.5cqi, 96px);
+}
 
 /* ── Узкий десктоп и ниже: показатели сеткой 2×2 ─────────────── */
 
@@ -900,9 +981,6 @@
     padding: var(--space-5);
     column-gap: var(--space-4);
   }
-  .oa-rukopis {
-    --oa-vylet: 16px;
-  }
   .oa-polza__ill {
     width: 96px;
   }
@@ -951,6 +1029,10 @@
   .oa--js [data-reveal] {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+  .oa--js .oa-serdce path {
+    stroke-dashoffset: 0;
     transition: none;
   }
 }
