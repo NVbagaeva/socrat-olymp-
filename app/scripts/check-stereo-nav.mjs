@@ -571,7 +571,6 @@ for (const size of SIZES) {
       (await tip.locator('.z3-shag.is-on').count()) === 1,
       where('после нажатия на шаг он не выделен'),
     );
-    const svg = await tip.locator('.z3-primer .z3d__kholst').innerHTML();
     const m = r.model();
     const sShagami = [
       ...(m.lines ?? []),
@@ -579,6 +578,28 @@ for (const size of SIZES) {
       ...(m.angles ?? []),
       ...(m.marks ?? []),
     ].some((x) => x.shag === 1);
+    /* Кадр с шагом рисуется после загрузки модуля рендера: круглые тела
+       на медленной машине CI не успевали за 400 мс. Ждём выделение до 3 с. */
+    if (sShagami) {
+      await tip
+        .locator('.z3-primer .z3d__kholst')
+        .evaluate(
+          (el, widths) =>
+            new Promise((done) => {
+              const est = () =>
+                el.innerHTML.includes('data-hl="1"') ||
+                widths.some((x) => el.innerHTML.includes(`stroke-width="${x}"`));
+              if (est()) return done(true);
+              const t0 = performance.now();
+              const tik = () =>
+                est() || performance.now() - t0 > 3000 ? done(true) : setTimeout(tik, 50);
+              tik();
+            }),
+          [HL, HL_HIDDEN, SOLID_THEME.width.hlMarker],
+        )
+        .catch(() => {});
+    }
+    const svg = await tip.locator('.z3-primer .z3d__kholst').innerHTML();
     check(
       !sShagami ||
         [HL, HL_HIDDEN, SOLID_THEME.width.hlMarker].some((x) =>
