@@ -53,7 +53,9 @@
     --oa-lenta-filtr: drop-shadow(0 0 10px rgb(127 176 255 / 0.35));
     --oa-lenta-prozrachnost: 0.9;
     --oa-portret-fon: linear-gradient(160deg, rgb(70 130 255 / 0.22), rgb(70 130 255 / 0.04) 85%);
-    --oa-portret-kromka: rgb(160 195 255 / 0.22);
+    /* Кромка рамки — тонкая и в акцентном синем, не светлая: светлая
+       линия на ночном фоне читалась как белый контур у фото. */
+    --oa-portret-kromka: rgb(79 134 230 / 0.32);
     --oa-final-fon: linear-gradient(135deg, rgb(255 150 70 / 0.14), rgb(70 130 255 / 0.1));
   }
 }
@@ -368,6 +370,9 @@
   max-width: none;
   height: 96%;
   transform: translateX(-50%);
+  /* Низ фото растворяется в подложке рамки — без резкого среза. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
 }
 
 /* Натюрморт у нижних углов рамки: бюст справа смотрит на портрет,
