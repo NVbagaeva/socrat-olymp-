@@ -83,7 +83,6 @@ export function config8(slot: string): GenConfig {
     limits: { variantsMax: 4 },
     /* Рамок теории и разобранных примеров у листа №8 нет. */
     extras: {
-      defaultKind: 'kl',
       kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })),
       theory: false,
       examples: false,

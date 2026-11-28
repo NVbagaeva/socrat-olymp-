@@ -321,7 +321,7 @@ export function defaultExtras(config: GenConfig): GenExtras {
     theory: false,
     examples: 0,
     qr: false,
-    kind: config.extras?.defaultKind ?? null,
+    kind: null,
     date: '',
     teacher: config.sheet.teacher,
     urok: 0,
@@ -438,9 +438,7 @@ export function defaultState(config: GenConfig): GenState {
       zameny: {},
       extras: defaultExtras(config),
     };
-  const state = stateFromPreset(config, preset, source);
-  const kind = config.extras?.defaultKind;
-  return kind === undefined ? state : { ...state, extras: { ...state.extras, kind } };
+  return stateFromPreset(config, preset, source);
 }
 
 /** Включён ли переключатель раздела id (GenConfig.extras.flagi). */

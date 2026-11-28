@@ -40,7 +40,7 @@ export const GENERATOR8_PRESETS: GenPreset[] = [
     variants: 1,
     levels: [1],
     sostav: { S1: 1, S2: 1, S3: 1, S4: 1, S5: 1, S6: 1, S7: 1, S8: 1, S9: 1, S10: 1, S11: 1 },
-    kind: 'dz',
+    kind: 'kl',
   },
   {
     id: 'sr',

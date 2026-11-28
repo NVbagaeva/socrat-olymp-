@@ -117,8 +117,6 @@ export interface GenConfig {
    */
   extras?: {
     kinds: { id: string; title: string }[];
-    /** Вид работы при первом открытии генератора. */
-    defaultKind?: string;
     theory?: boolean;
     /** Подпись памятки, если она стоит не перед каждым типом (№13 — одна рамка в начале). */
     teoriyaNote?: string;
