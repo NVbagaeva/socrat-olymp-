@@ -157,11 +157,7 @@ export function shagKombinatsiya(
   return {
     zagolovok: `Координаты вектора $${vec(resultName)} = ${tex}$`,
     stroki: [
-      vyravnyat(vec(resultName), [
-        tex,
-        `(${coord(0)};\\ ${coord(1)})`,
-        kv(result[0], result[1]),
-      ]),
+      vyravnyat(vec(resultName), [tex, `(${coord(0)};\\ ${coord(1)})`, kv(result[0], result[1])]),
     ],
   };
 }
@@ -195,9 +191,7 @@ export function shagiKombinatsii(
     });
     return kp;
   });
-  shagi.push(
-    shagKombinatsiya(terms, result, resultName, shagi.length > 0 ? gotovye : undefined),
-  );
+  shagi.push(shagKombinatsiya(terms, result, resultName, shagi.length > 0 ? gotovye : undefined));
   return shagi;
 }
 
@@ -231,7 +225,7 @@ export function shagDlina(name: string, p: Tochka, dlinaValue: number): Shag {
     );
     const otr = [x, y].find((v) => v < 0);
     stroki.push(
-      `Длина вектора — гипотенуза, поэтому формула — теорема Пифагора: ${'$'}{${m}^2 = x^2 + y^2}$.` +
+      `Длина вектора — гипотенуза, поэтому формула — теорема Пифагора: $${m}^2 = x^2 + y^2$.` +
         (otr === undefined
           ? ''
           : ` При возведении в квадрат знак пропадает: $${kvadrat(otr)} = ${kvadrat(Math.abs(otr))}$.`),
