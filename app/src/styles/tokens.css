@@ -109,6 +109,25 @@
   --pink-50: #fce8f2;
 }
 
+/* Дерево бросков в теории №4 читается слева направо даже на узких экранах.
+   SVG сохраняет доступные подписи и клики, а визуально поворачивается в
+   горизонтальную схему без изменения содержимого раздела. */
+.m4i-derevo__ramka {
+  overflow: hidden;
+  min-height: 220px;
+}
+.m4i-derevo__svg {
+  transform: rotate(90deg);
+  transform-origin: center;
+  margin: 70px auto;
+}
+.m4i-derevo__svg .m4i-derevo__bukva,
+.m4i-derevo__svg .m4i-list text {
+  transform: rotate(-90deg);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 /* ══════════════════════════════════════════════════════════
    2. СЕМАНТИЧЕСКИЕ ТОКЕНЫ — только их используют компоненты.
    Живут в @theme, поэтому одновременно доступны как var(--color-primary)
