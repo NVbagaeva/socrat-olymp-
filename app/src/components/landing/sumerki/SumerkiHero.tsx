@@ -6,6 +6,8 @@ import { site, startHref } from '@/content/site';
 import type { Level } from '@/lib/level';
 import { PLATNYE, rubli, TARIFY_HREF } from '@/lib/tarify/config';
 import { Chertezh } from './Chertezh';
+import { WINTER_MODE } from '@/config/zima';
+import { Sneg } from '@/components/zima/Sneg';
 import { KristallSPtitsey } from './KristallSPtitsey';
 import './sumerki.css';
 
@@ -63,6 +65,9 @@ export function SumerkiHero({
         <div className="sm__fon" aria-hidden="true">
           <span className="sm__svet" />
           <Chertezh />
+          {/* Зимний декор (config/zima.ts): снег по краям сцены, под
+              текстом и кнопками. */}
+          {WINTER_MODE ? <Sneg className="sm__sneg" /> : null}
         </div>
 
         <div className="sm__in">
