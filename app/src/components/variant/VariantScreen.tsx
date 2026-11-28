@@ -59,6 +59,8 @@ import { BlankiVybor } from '@/components/blanki/BlankiVybor';
 import { BLANKI_TEXT } from '@/content/blanki';
 import { Okno } from './okno/Okno';
 import { Piktogramma } from './okno/Piktogramma';
+import type { ZnakPodtipa } from './okno/znakiPodtipov';
+import { Znak } from '@/components/tasks/steklo';
 import './variant-steklo.css';
 import { VariantPreview } from './VariantPreview';
 import { OnlinePanel, readSettings } from './online/OnlinePanel';
@@ -119,7 +121,12 @@ function sameConfig(a: VariantConfig, b: VariantConfig): boolean {
  * меняется только кнопками «Сформировать», «Перегенерировать»,
  * «заменить» и вводом кода. Все листы печатаются из него же.
  */
-export function VariantScreen() {
+export function VariantScreen({
+  znaki = {},
+}: {
+  /** Стеклянные миниатюры подтипов (okno/znakiPodtipov): `${номер}:${код}` → значок группы. */
+  znaki?: Record<string, ZnakPodtipa>;
+} = {}) {
   const [config, setConfig] = useState<VariantConfig>(defaultConfig);
   const [meta, setMeta] = useState<VariantMeta>(defaultMeta);
   /* Место для решения: не меняет задачи, хранится хвостом кода. */
@@ -908,7 +915,19 @@ export function VariantScreen() {
                         if (!poslednij) toggleSubtype(openInfo.egeNumber, st.id);
                       }}
                     >
-                      <Piktogramma ege={openInfo.egeNumber} id={st.id} />
+                      {(() => {
+                        const z = znaki[`${openInfo.egeNumber}:${st.id}`];
+                        return z === undefined ? (
+                          <Piktogramma ege={openInfo.egeNumber} id={st.id} />
+                        ) : (
+                          <Znak
+                            html={z.html}
+                            figura={z.figura}
+                            ton={z.ton}
+                            className="var-podtip__znak"
+                          />
+                        );
+                      })()}
                       <span className="var-podtip__label">{st.label}</span>
                       <span className="var-podtip__check" aria-hidden="true">
                         <svg viewBox="0 0 24 24">

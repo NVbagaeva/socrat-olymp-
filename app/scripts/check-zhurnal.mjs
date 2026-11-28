@@ -217,6 +217,35 @@ const meta = { id: M.idIz('8|trenazher|r1|0|8.A|s1|base'), task_no: 8, kind: '8.
   check(vse.length === 20 && !vse.includes(6), 'все разделы ЕГЭ-2027 — 20 номеров хранения без №6');
 }
 
+/* ── Часть 2 варианта: самопроверка ученика ───────────────────────── */
+{
+  const V = requireSrc('lib/zhurnal/variant.ts');
+  const z14 = {
+    no: 14, shablon: 'r14-trig', uslovie: '', risunok: null, reshenie: [], razbor: [], kontrol: {},
+    otvet: 'а) $\\pi n$; б) $2\\pi$',
+    punkty: [
+      { bukva: 'а', pole: { vid: 'serii', verno: ['\\pi n'] } },
+      { bukva: 'б', pole: { vid: 'korni', verno: ['2\\pi'] } },
+    ],
+  };
+  const z17 = { ...z14, no: 17, shablon: 'r17', otvet: '5', punkty: [{ bukva: null, pole: null }] };
+  const st = {
+    vvod: { '14.0': ['\\pi n'], '14.1': ['3\\pi', ''] },
+    sverka: { '14.0': 'sovpadaet', '14.1': 'ne-sovpadaet' },
+    reshenie: [14],
+    ball: { 14: 9 },
+    stroka: {},
+  };
+  const [a, b] = V.zapisiChast2([z14, z17], st);
+  check(a.no === 14 && a.shablon === 'r14-trig' && a.otvet === '\\text{а)}\\ x=\\pi n;\\ \\text{б)}\\ 3\\pi',
+    `часть 2: ответ по пунктам в TeX — «${a.otvet}»`);
+  check(a.sverka === 'ne-sovpadaet' && a.reshenie === true && a.verno === z14.otvet,
+    'часть 2: хоть один пункт не совпал — «не совпал», решение открыто, верный ответ');
+  check(a.ball === a.max && a.max === 2, `часть 2: балл не выше максимума (${a.ball} из ${a.max})`);
+  check(b.no === 17 && b.otvet === undefined && b.sverka === undefined && b.ball === undefined && b.reshenie === undefined,
+    'часть 2: задание без ответа и самопроверки — только номер и максимум');
+}
+
 /* ── Показ: номера ЕГЭ-2027, точность, цвет, выгрузка ─────────────── */
 {
   const P = requireSrc('lib/zhurnal/vid.ts');

@@ -21,6 +21,9 @@ function sRisunkom(shagi: Shag[], risunokSvg: string | null): Shag[] {
     0,
     shagi.findIndex((s) => /по рисунку|по проекциям/.test(s.zagolovok ?? '')),
   );
+  if (shagi[k]?.risunok !== undefined) {
+    return shagi;
+  }
   return shagi.map((s, i) => (i === k ? { ...s, risunok: <RisunokSvg svg={risunokSvg} /> } : s));
 }
 

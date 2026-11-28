@@ -28,6 +28,9 @@ import { RAZDELY } from '@/content/struktura';
  */
 export const ZADANIYA = '/zadaniya';
 
+/** Сборщик варианта: href(VARIANT) → /variant/. */
+export const VARIANT = '/variant';
+
 const KOD_PO_NOMERU: ReadonlyMap<string, string> = new Map(
   RAZDELY.map((r) => [String(r.hranenie), r.kod]),
 );

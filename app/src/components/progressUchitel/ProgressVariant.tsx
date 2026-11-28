@@ -10,6 +10,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Card, EmptyState } from '@/components/ui';
+import { Tex } from '@/components/ui/Tex';
 import { NeedLogin } from '@/components/dz/common';
 import { PROGRESS } from '@/content/progressUchitel';
 import { useSessionUser } from '@/lib/auth/session';
@@ -17,6 +18,7 @@ import type { VariantView } from '@/lib/zhurnal/api';
 import { PROGRESS_HREF, progressUchenikHref, progressZadachaHref } from '@/lib/zhurnal/links';
 import { ISTOCHNIKI_VARIANTA, dataRu, istochnikVarianta, nomerEgeRazdela } from '@/lib/zhurnal/vid';
 import { Vremya, errorCode, param, zhurnalApi } from './common';
+import 'katex/dist/katex.min.css';
 import './progressUchitel.css';
 
 const t = PROGRESS.variant;
@@ -104,6 +106,56 @@ export function ProgressVariant() {
           </table>
         </div>
       </Card>
+      {v.chast2 === undefined || v.chast2.length === 0 ? null : <Chast2 zadaniya={v.chast2} />}
     </div>
+  );
+}
+
+/**
+ * Часть 2: ответ ученика по пунктам, верный ответ, сверка и балл, который
+ * ученик поставил себе сам по критериям. Решение он пишет на бумаге —
+ * проверка по фото появится с хранилищем фото (этап 1в).
+ */
+function Chast2({ zadaniya }: { zadaniya: NonNullable<VariantView['chast2']> }) {
+  const oceneno = zadaniya.filter((z) => z.ball !== undefined);
+  const ball = oceneno.reduce((s, z) => s + (z.ball ?? 0), 0);
+  const max = zadaniya.reduce((s, z) => s + z.max, 0);
+  return (
+    <Card title={t.chast2}>
+      <p className="t-caption">{t.chast2Lead}</p>
+      <p>
+        <b>{t.chast2Itog(ball, max, oceneno.length, zadaniya.length)}</b>
+      </p>
+      <div className="pu-karta-wrap">
+        <table className="pu-tablica">
+          <thead>
+            <tr>
+              <th scope="col">{t.zadanie}</th>
+              <th scope="col">{t.otvetUchenika}</th>
+              <th scope="col">{t.vernyy}</th>
+              <th scope="col">{t.sverka}</th>
+              <th scope="col">{t.samoocenka}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {zadaniya.map((z) => (
+              <tr
+                key={z.no}
+                className={z.ball === undefined ? undefined : z.ball === z.max ? 'pu-str--da' : 'pu-str--net'}
+              >
+                <th scope="row">№{nomerEgeRazdela(z.no)}</th>
+                <td>{z.otvet === undefined ? t.netOtveta : <Tex text={`$${z.otvet}$`} />}</td>
+                <td>{z.verno === undefined ? t.netOtveta : <Tex text={z.verno} />}</td>
+                <td>{z.sverka === undefined ? '—' : (t.sverki[z.sverka] ?? '—')}</td>
+                <td>
+                  {z.ball === undefined ? t.neOcenil : `${z.ball} из ${z.max}`}
+                  {z.reshenie === true ? <div className="t-caption">{t.reshenieOtkryto}</div> : null}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
   );
 }

@@ -9,6 +9,7 @@
  * страниц SDK не попадает.
  */
 
+import type { ZapisChast2 } from './model';
 import { getClient } from '@/lib/auth/client';
 
 export type IskhodZhurnala = 'right' | 'hinted' | 'wrong' | 'revealed' | 'skipped' | 'left';
@@ -65,6 +66,8 @@ export interface VariantView {
   active_ms: number;
   total_ms: number;
   zadachi?: ZadachaView[];
+  /** Часть 2 — самопроверка ученика (поля как в журнале, lib/zhurnal/model.ts). */
+  chast2?: ZapisChast2[];
 }
 
 export interface Svodka {

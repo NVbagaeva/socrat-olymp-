@@ -44,15 +44,14 @@ export function kombinatsiya(terms: readonly (readonly [number, string])[]): str
 }
 
 /**
- * Модуль: \left|\,\vphantom{\vec{b}}…\,\right|.
+ * Модуль: \lvert…\rvert — черты обычной высоты.
  *
- * Черты одной высоты у всех модулей раздела: \left|…\right| растёт
- * по содержимому, и |\vec a| выходил ниже, чем |\vec a+\vec b| (у b есть
- * верхний выносной элемент). Невидимая распорка \vphantom{\vec{b}}
- * выравнивает высоту, тонкие пробелы отводят стрелку от черты.
+ * \left|…\right| растёт по содержимому: стрелка над буквой
+ * вытягивала черты выше строки. Фиксированные \lvert, \rvert дают
+ * один размер у всех модулей раздела.
  */
 export function modul(inner: string): string {
-  return `\\left|\\,\\vphantom{\\vec{b}}${inner}\\,\\right|`;
+  return `\\lvert ${inner}\\rvert`;
 }
 
 /** \vec{a}\cdot\vec{b} */
@@ -84,9 +83,9 @@ export function proizvedenie(k: number, x: number): string {
   return `${d(k)}\\cdot${mnozhitel(x)}`;
 }
 
-/** Квадрат числа: 6^2, (-8)^2. */
+/** Квадрат числа: 6^2, (-8)^2, (2{,}7)^2 — у дроби в скобках, иначе читается 2,7². */
 export function kvadrat(x: number): string {
-  return x < 0 ? `(${d(x)})^2` : `${d(x)}^2`;
+  return x < 0 || !Number.isInteger(x) ? `(${d(x)})^2` : `${d(x)}^2`;
 }
 
 /** Градусы: 60^\circ. */

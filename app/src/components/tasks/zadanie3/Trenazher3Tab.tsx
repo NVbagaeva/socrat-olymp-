@@ -7,6 +7,18 @@ import { Figurka } from './Figurka';
 import { Trenazher3 } from './Trenazher3';
 import './zadanie3.css';
 
+/** Группы тренажёра №3: значок, тон, типы. Их же берёт окно подтипов «Собрать вариант». */
+export function gruppy3(): GruppaVybora[] {
+  return GRUPPY3.map((g) => ({
+    id: g.id,
+    nazvanie: g.nazvanie,
+    znakHtml: '',
+    znak: <Figurka prototip={g.znak} />,
+    ton: g.ton,
+    tipy: g.tipy.map((id) => ({ id, nazvanieHtml: typeset(TIPY3[id]?.nazvanie ?? id) })),
+  }));
+}
+
 /**
  * Вкладка «Тренажёр» задания №3 в «Стеклянной сцене»: стартовые режимы,
  * выбор тем (семь групп, 15 типов), экран задачи, итоги. Названия
@@ -15,14 +27,7 @@ import './zadanie3.css';
  * браузере из каталога, данные приезжают файлами прототипов.
  */
 export function Trenazher3Tab({ base }: { base: string }) {
-  const gruppy: GruppaVybora[] = GRUPPY3.map((g) => ({
-    id: g.id,
-    nazvanie: g.nazvanie,
-    znakHtml: '',
-    znak: <Figurka prototip={g.znak} />,
-    ton: g.ton,
-    tipy: g.tipy.map((id) => ({ id, nazvanieHtml: typeset(TIPY3[id]?.nazvanie ?? id) })),
-  }));
+  const gruppy = gruppy3();
   const nazvaniyaTekst = Object.fromEntries(
     Object.entries(TIPY3).map(([id, t]) => [id, texPlain(t.nazvanie)]),
   );
