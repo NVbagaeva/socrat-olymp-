@@ -18,6 +18,7 @@
     transparent
   );
   --oa-rukopis-ten: 0 1px 1px rgb(31 95 208 / 0.18);
+  --oa-serdce-ten: drop-shadow(0 1px 1px rgb(31 95 208 / 0.18));
   /* Чередование тона карточек принципов. */
   --oa-karta-1: rgb(255 255 255 / 0.72);
   --oa-karta-2: rgb(226 237 255 / 0.72);
@@ -45,6 +46,7 @@
     --oa-rukopis: color-mix(in srgb, var(--noch-blue) 11%, transparent);
     --oa-rukopis-fon: none;
     --oa-rukopis-ten: none;
+    --oa-serdce-ten: none;
     --oa-karta-1: rgb(255 255 255 / 0.04);
     --oa-karta-2: rgb(127 176 255 / 0.1);
     --oa-itog-fon: linear-gradient(120deg, rgb(255 150 70 / 0.2), rgb(255 150 70 / 0.07));
@@ -833,6 +835,34 @@
 .oa-rukopis--svyaz {
   grid-column: 1 / -1;
 }
+/* Сердечко под строкой: по центру, наклон — вместе со строкой и ещё
+   чуть свой. Толщина линии ≈ толщине штриха Caveat (0,07em). */
+.oa-serdce {
+  display: block;
+  width: 0.62em;
+  height: auto;
+  margin: 0.08em auto 0;
+  overflow: visible;
+  transform: rotate(-7deg) translateX(0.04em);
+  filter: var(--oa-serdce-ten);
+}
+.oa-serdce path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 6.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Один раз прорисовывается линией, когда блок появился (Dvizhenie.tsx
+   ставит .is-in). Без скрипта и при reduced-motion — сразу целиком. */
+.oa--js .oa-serdce path {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1.02;
+}
+.oa--js .is-in .oa-serdce path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.55, 0, 0.35, 1) 0.45s;
+}
 /* «Вместе к большему»: 7,9em в строку. */
 .oa-rukopis--svyaz .oa-rukopis__tekst {
   font-size: clamp(30px, 12.5cqi, 96px);
@@ -977,6 +1007,10 @@
   .oa--js [data-reveal] {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+  .oa--js .oa-serdce path {
+    stroke-dashoffset: 0;
     transition: none;
   }
 }

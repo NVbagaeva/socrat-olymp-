@@ -61,6 +61,22 @@ function Rukopis({
   );
 }
 
+/* Сердечко «от руки» под «Вместе к большему»: одна линия той же
+   ручкой — цвет строки (currentColor), толщина как у букв Caveat,
+   лёгкая асимметрия и нахлёст у кончика. Символ ♥ не годится: в Caveat
+   его нет, и iOS подставила бы цветной эмодзи. pathLength="1" — для
+   прорисовки линии в about.css. */
+function Serdce() {
+  return (
+    <svg className="oa-serdce" viewBox="0 0 64 60" aria-hidden="true" focusable="false">
+      <path
+        pathLength={1}
+        d="M31.5 52.5C23 45 8.5 35.5 7.2 22.6 6.3 13 13.6 7.2 21.4 8.6c5 .9 8.6 5.2 10.4 10.6 1.6-6.4 6.6-12 13.4-12.2 8.6-.3 13.4 7.6 11.2 16.6-2.6 10.6-12.4 19.4-21.6 28.6l-4.6 4.8"
+      />
+    </svg>
+  );
+}
+
 /* Декоративная картинка: WebP с PNG-фолбэком, размеры заданы заранее. */
 function Kartinka({
   ill,
@@ -373,7 +389,9 @@ export default function AboutPage() {
                   </a>
                 ))}
               </div>
-              <Rukopis text={svyaz.rukopis} className="oa-rukopis--svyaz" />
+              <Rukopis text={svyaz.rukopis} className="oa-rukopis--svyaz">
+                <Serdce />
+              </Rukopis>
             </div>
           </div>
         </section>
