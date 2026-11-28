@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import type { RisunokState } from './OutcomeTiles';
+import labelsLib from '@/lib/graph/labels.js';
 import { Znaki } from './Znaki';
 import {
   chisloVetvi as chislo,
@@ -143,6 +144,34 @@ export function ProbabilityTree({
     }
   }
 
+  /* Подпись развилки стоит сбоку от узла и у крайней ветки может выйти
+     за раскладку («машина опоздала» слева): поле рисунка расширяется под
+     неё, иначе подпись обрезалась бы краем SVG. Жирный выделенного пути —
+     с запасом. */
+  let minX = 0;
+  let maxX = width;
+  branches.forEach((b, i) => {
+    if (!vidnaVetv(b.id)) {
+      return;
+    }
+    const otr = r.otrezki[i];
+    if (otr === undefined) {
+      return;
+    }
+    /* Оценка сверху: кириллица в жирном с запасной гарнитурой — до 0,7 кегля на знак. */
+    const w = Math.max(labelsLib.pointTextWidth(b.label, 14) * 1.12, b.label.length * 10);
+    const list = !detiEst.has(b.id);
+    const [l, rr] = list
+      ? [otr.x2 - w / 2, otr.x2 + w / 2]
+      : otr.x2 < otr.x1
+        ? [otr.x2 - 12 - w, otr.x2 - 12]
+        : [otr.x2 + 12, otr.x2 + 12 + w];
+    minX = Math.min(minX, l - 4);
+    maxX = Math.max(maxX, rr + 4);
+  });
+  const sdvig = Math.ceil(-minX);
+  const shirina = Math.ceil(maxX) + sdvig;
+
   const summa = [...podhodit].reduce((s, id) => s + (proizvedenie.get(id) ?? 0), 0);
   const slagaemye = [...podhodit].map((id) => chislo(proizvedenie.get(id) ?? 0));
 
@@ -150,8 +179,8 @@ export function ProbabilityTree({
     <svg
       data-engine="veroyatnost"
       className={clsx('pr-tree', `pr-is-${state}`, className)}
-      viewBox={`0 0 ${width} ${height}`}
-      width={width}
+      viewBox={`0 0 ${shirina} ${height}`}
+      width={shirina}
       height={height}
       role="img"
       aria-label={
@@ -160,108 +189,113 @@ export function ProbabilityTree({
           `${listya.length} путей`
       }
     >
-      {/* Подписи уровней слева */}
-      {levels === undefined
-        ? null
-        : levels.slice(0, Math.min(vsegoUrovney, urovney ?? vsegoUrovney)).map((label, i) => (
-            <text key={i} className="pr-level" x={PAD_X} y={y(i) - LEVEL_H / 2}>
-              {label}
-            </text>
-          ))}
-
-      {/* Ветки. Рисуются до узлов, чтобы точки легли поверх линий. */}
-      {branches.map((b, i) => {
-        if (!vidnaVetv(b.id)) {
-          return null;
-        }
-        const otr = r.otrezki[i] as (typeof r.otrezki)[number];
-        const metka = r.metki[i] as (typeof r.metki)[number];
-        const { x1: px, y1: py, x2: bx, y2: by } = otr;
-        const list = !detiEst.has(b.id);
-        const vlevo = bx < px;
-        const usilen = naPuti.has(b.id);
-        const priglushen = highlightedPaths !== undefined && !usilen;
-        return (
-          <g
-            key={b.id}
-            className={clsx(
-              'pr-branch',
-              usilen && 'pr-branch--highlighted',
-              priglushen && 'pr-branch--dimmed',
-            )}
-          >
-            <line x1={px} y1={py} x2={bx} y2={by} />
-            {/* Вероятность стоит сбоку от ветки, со стороны её наклона:
-                поверх линии она читалась бы хуже. В заготовке её нет. */}
-            {blank || !sP(b.id) ? null : (
-              <text
-                className="pr-math pr-branch-p"
-                x={metka.x}
-                y={metka.y}
-                textAnchor={metka.anchor}
-              >
-                {metka.text}
+      <g transform={sdvig === 0 ? undefined : `translate(${sdvig} 0)`}>
+        {/* Подписи уровней слева */}
+        {levels === undefined
+          ? null
+          : levels.slice(0, Math.min(vsegoUrovney, urovney ?? vsegoUrovney)).map((label, i) => (
+              <text key={i} className="pr-level" x={PAD_X} y={y(i) - LEVEL_H / 2}>
+                {label}
               </text>
-            )}
-            <circle className="pr-node" cx={bx} cy={by} r="5" />
-            {/* У листа подпись снизу — под ним ничего нет. У развилки
-                снизу расходятся ветки, поэтому подпись уходит вбок. */}
-            <text
-              className={clsx('pr-branch-label', list && leafLabelsMath && 'pr-math pr-leaf-name')}
-              x={list ? bx : bx + (vlevo ? -12 : 12)}
-              y={list ? by + 22 : by + 4}
-              textAnchor={list ? 'middle' : vlevo ? 'end' : 'start'}
+            ))}
+
+        {/* Ветки. Рисуются до узлов, чтобы точки легли поверх линий. */}
+        {branches.map((b, i) => {
+          if (!vidnaVetv(b.id)) {
+            return null;
+          }
+          const otr = r.otrezki[i] as (typeof r.otrezki)[number];
+          const metka = r.metki[i] as (typeof r.metki)[number];
+          const { x1: px, y1: py, x2: bx, y2: by } = otr;
+          const list = !detiEst.has(b.id);
+          const vlevo = bx < px;
+          const usilen = naPuti.has(b.id);
+          const priglushen = highlightedPaths !== undefined && !usilen;
+          return (
+            <g
+              key={b.id}
+              className={clsx(
+                'pr-branch',
+                usilen && 'pr-branch--highlighted',
+                priglushen && 'pr-branch--dimmed',
+              )}
             >
-              {b.label}
+              <line x1={px} y1={py} x2={bx} y2={by} />
+              {/* Вероятность стоит сбоку от ветки, со стороны её наклона:
+                поверх линии она читалась бы хуже. В заготовке её нет. */}
+              {blank || !sP(b.id) ? null : (
+                <text
+                  className="pr-math pr-branch-p"
+                  x={metka.x}
+                  y={metka.y}
+                  textAnchor={metka.anchor}
+                >
+                  {metka.text}
+                </text>
+              )}
+              <circle className="pr-node" cx={bx} cy={by} r="5" />
+              {/* У листа подпись снизу — под ним ничего нет. У развилки
+                снизу расходятся ветки, поэтому подпись уходит вбок. */}
+              <text
+                className={clsx(
+                  'pr-branch-label',
+                  list && leafLabelsMath && 'pr-math pr-leaf-name',
+                )}
+                x={list ? bx : bx + (vlevo ? -12 : 12)}
+                y={list ? by + 22 : by + 4}
+                textAnchor={list ? 'middle' : vlevo ? 'end' : 'start'}
+              >
+                {b.label}
+              </text>
+            </g>
+          );
+        })}
+
+        <circle className="pr-node pr-node--root" cx={koren.x} cy={koren.y} r="6" />
+        {rootLabel === undefined ? null : (
+          <text className="pr-math pr-root-label" x={koren.x} y={koren.y - 13} textAnchor="middle">
+            {rootLabel}
+          </text>
+        )}
+
+        {/* События — овалы вокруг своих листьев, имя под овалом. */}
+        {r.ovaly.map((ov) => (
+          <g key={`ov${ov.name}`} className="pr-event">
+            <ellipse cx={ov.cx} cy={ov.cy} rx={ov.rx} ry={ov.ry} />
+            <text className="pr-math pr-event-name" x={ov.lx} y={ov.ly} textAnchor="middle">
+              {ov.name}
             </text>
           </g>
-        );
-      })}
+        ))}
 
-      <circle className="pr-node pr-node--root" cx={koren.x} cy={koren.y} r="6" />
-      {rootLabel === undefined ? null : (
-        <text className="pr-math pr-root-label" x={koren.x} y={koren.y - 13} textAnchor="middle">
-          {rootLabel}
-        </text>
-      )}
+        {/* Произведения под листьями */}
+        {showProducts
+          ? listya.map((b) => (
+              <text
+                key={`p${b.id}`}
+                className={clsx(
+                  'pr-math pr-leaf',
+                  podhodit.has(b.id) && 'pr-leaf--highlighted',
+                  highlightedPaths !== undefined && !podhodit.has(b.id) && 'pr-leaf--dimmed',
+                )}
+                x={x.get(b.id) ?? 0}
+                y={y(glubina.get(b.id) ?? vsegoUrovney - 1) + 44}
+                textAnchor="middle"
+              >
+                <Znaki text={proizv(proizvedenie.get(b.id) ?? 0)} />
+              </text>
+            ))
+          : null}
 
-      {/* События — овалы вокруг своих листьев, имя под овалом. */}
-      {r.ovaly.map((ov) => (
-        <g key={`ov${ov.name}`} className="pr-event">
-          <ellipse cx={ov.cx} cy={ov.cy} rx={ov.rx} ry={ov.ry} />
-          <text className="pr-math pr-event-name" x={ov.lx} y={ov.ly} textAnchor="middle">
-            {ov.name}
+        {/* Сумма по подходящим путям */}
+        {showSum && highlightedPaths !== undefined ? (
+          <text className="pr-math pr-total" x={width / 2} y={height - 12} textAnchor="middle">
+            {slagaemye.length > 1
+              ? `P = ${slagaemye.join(' + ')} = ${chislo(summa)}`
+              : `P = ${chislo(summa)}`}
           </text>
-        </g>
-      ))}
-
-      {/* Произведения под листьями */}
-      {showProducts
-        ? listya.map((b) => (
-            <text
-              key={`p${b.id}`}
-              className={clsx(
-                'pr-math pr-leaf',
-                podhodit.has(b.id) && 'pr-leaf--highlighted',
-                highlightedPaths !== undefined && !podhodit.has(b.id) && 'pr-leaf--dimmed',
-              )}
-              x={x.get(b.id) ?? 0}
-              y={y(glubina.get(b.id) ?? vsegoUrovney - 1) + 44}
-              textAnchor="middle"
-            >
-              <Znaki text={proizv(proizvedenie.get(b.id) ?? 0)} />
-            </text>
-          ))
-        : null}
-
-      {/* Сумма по подходящим путям */}
-      {showSum && highlightedPaths !== undefined ? (
-        <text className="pr-math pr-total" x={width / 2} y={height - 12} textAnchor="middle">
-          {slagaemye.length > 1
-            ? `P = ${slagaemye.join(' + ')} = ${chislo(summa)}`
-            : `P = ${chislo(summa)}`}
-        </text>
-      ) : null}
+        ) : null}
+      </g>
     </svg>
   );
 }

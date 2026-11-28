@@ -96,3 +96,24 @@
   list-style: disc;
   line-height: 1.5;
 }
+
+/* Скелетон примера, пока решение в пути (PrimerLazy45): полосы шагов
+   и место под рисунок — карточка не прыгает, когда решение приходит. */
+.z45-skelet {
+  display: grid;
+  gap: var(--space-3);
+}
+.z45-skelet__shag {
+  height: 3.2em;
+}
+.z45-skelet__shag--korotkiy {
+  width: 60%;
+}
+.z45-skelet__risunok {
+  height: 160px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .z45-skelet .skeleton {
+    animation: none;
+  }
+}

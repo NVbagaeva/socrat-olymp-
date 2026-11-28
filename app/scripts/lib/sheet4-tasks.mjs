@@ -68,7 +68,7 @@ function lib() {
 /** SVG рисунка по параметрам модели; подсветка — только с решением. */
 export function figureSvg(parametry, podsvetka) {
   const { viz, React, server } = lib();
-  const props = podsvetka ? { parametry, podsvetka } : { parametry };
+  const props = podsvetka ? { parametry, podsvetka, pechat: true } : { parametry, pechat: true };
   return server.renderToStaticMarkup(React.createElement(viz.Vizualizatsiya, props));
 }
 

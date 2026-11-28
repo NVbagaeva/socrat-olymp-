@@ -437,3 +437,141 @@
     text-decoration: underline;
   }
 }
+
+/* ── Таблица и плитки для экрана (Rezinovye.tsx) ────────────────────
+
+   Разметкой, а не SVG: ширина клеток — доля колонки (1fr), кегль — от
+   её ширины (cqi), плитки переносятся, строка счёта рвётся по запятой.
+   Влезает целиком в 320 px; ничего не прячется за overflow. */
+
+.pr-f {
+  container-type: inline-size;
+  /* Ширина — по числу клеток (style в разметке), но не шире колонки. */
+  max-width: 100%;
+  min-width: 0;
+  font-family: var(--font-sans);
+}
+
+.pr-f-grid {
+  display: grid;
+  gap: clamp(1px, 0.6cqi, 3px);
+  align-items: stretch;
+  font-size: clamp(11px, 4.2cqi, 15px);
+  line-height: 1.15;
+}
+.pr-f-grid--dlinnye {
+  font-size: clamp(9px, 3cqi, 13px);
+}
+.pr-f-grid__os {
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: clamp(11px, 3.6cqi, 14px);
+  text-align: center;
+}
+.pr-f-grid__os--stolbcy {
+  padding-bottom: 0.2em;
+}
+/* Подпись строк — вертикально, узкой колонкой. */
+.pr-f-grid__os--stroki {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  align-self: center;
+  justify-self: center;
+  padding-left: 0.15em;
+  white-space: nowrap;
+}
+.pr-f-grid__shapka {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 0.1em 0.25em;
+  color: var(--color-text-secondary);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.pr-f-grid__shapka--stroka {
+  justify-items: end;
+  text-align: right;
+}
+.pr-f-grid__kletka {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0.1em;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.pr-f-grid__kletka.is-blago {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.pr-f-tiles {
+  --pr-gap: clamp(4px, 2cqi, 10px);
+  display: grid;
+  /* Не больше --pr-cols в ряду, не уже самого длинного слова. */
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(
+      max(
+        min(100%, calc(var(--pr-slovo) * 0.62em + 1.4em)),
+        calc((100% - (var(--pr-cols) - 1) * var(--pr-gap)) / var(--pr-cols))
+      ),
+      1fr
+    )
+  );
+  gap: var(--pr-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: clamp(12px, 3.8cqi, 14px);
+}
+.pr-f-tile {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 2.9em;
+  padding: 0.35em 0.4em;
+  border: 1px solid var(--color-border-info);
+  border-radius: 8px;
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+.pr-f-tile.is-blago {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.pr-f-counts {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.4em;
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: clamp(13px, 4cqi, 16px);
+}
+.pr-f-counts__kusok {
+  white-space: nowrap;
+}
+
+.pr-is-correct .pr-f-grid__kletka.is-blago,
+.pr-is-correct .pr-f-tile.is-blago {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+.pr-is-incorrect .pr-f-grid__kletka.is-blago,
+.pr-is-incorrect .pr-f-tile.is-blago {
+  border-color: var(--color-error);
+  background: var(--color-error);
+}
