@@ -502,3 +502,101 @@
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+
+/* ── Построение сечения на чертеже примера ─────────────────────── */
+.z3-primer__panel {
+  flex-wrap: wrap;
+  column-gap: var(--space-3);
+  row-gap: 0;
+}
+.z3-primer__sechenie {
+  min-height: 44px;
+  white-space: nowrap;
+}
+.z3-primer__sechenie[aria-pressed='true'] {
+  color: var(--color-accent-text);
+}
+.z3-sechenie {
+  display: grid;
+  gap: var(--space-2);
+}
+.z3-sechenie__ris .solid-cel {
+  cursor: pointer;
+}
+.z3-sechenie__panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0 var(--space-3);
+}
+.z3-sechenie__status {
+  margin: 0;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--color-accent-text);
+}
+.z3-sechenie__spisok {
+  padding: 0 var(--space-3) var(--space-2);
+}
+.z3-sechenie__spisok > summary {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.z3-sechenie__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  max-height: 30vh;
+  overflow-y: auto;
+}
+.z3-sechenie__tochka {
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-label);
+}
+.z3-sechenie__tochka[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+@media (max-width: 767.98px) {
+  .z3-sechenie svg.solid {
+    max-height: 30vh;
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+}
+@media (max-width: 767.98px) {
+  /* Телефон: подпись шага — строкой сверху, кнопки — рядом под ней,
+     закреплённый чертёж не растёт в высоту. */
+  .z3-primer__panel {
+    justify-content: space-between;
+    padding-block: var(--space-1);
+  }
+  .z3-primer__gde {
+    flex-basis: 100%;
+  }
+  .z3-primer__panel .z3-primer__sechenie,
+  .z3-primer__panel .z3-primer__svernut {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+  }
+  .z3-sechenie__panel {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+  .z3-sechenie__panel .stk-ssylka,
+  .z3-sechenie__spisok > summary {
+    min-height: 36px;
+  }
+}
