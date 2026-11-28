@@ -24,13 +24,17 @@
  * Письма родителям (roditel_zabrat → SMTP → roditel_itog при сбое) — тем
  * же проходом, что и уведомления.
  *
+ * Письма об оплате (docs/oplata-robokassa.md): oplata_tick_konec ставит
+ * «Доступ заканчивается» за 3 дня до конца, oplata_pisma_zabrat →
+ * SMTP → oplata_pisma_itog. «Ответить» — на POCHTA_VOPROSOV.
+ *
  * В базу — ключом service_role через PostgREST внутри сети (rest:3000).
  */
 
 import http from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { otpravit, SmtpError } from './smtp.mjs';
-import { ekran, pismo, pismoRoditelyu, DOKUMENTY, SAYT, ADRESA } from './pisma.mjs';
+import { ekran, pismo, pismoOplaty, pismoRoditelyu, DOKUMENTY, POCHTA_VOPROSOV, SAYT, ADRESA } from './pisma.mjs';
 import { otpravitPush, vapidKlyuchi } from './webpush.mjs';
 
 export function nastroyki(env = process.env) {
@@ -41,6 +45,7 @@ export function nastroyki(env = process.env) {
     sayt: (env.SITE_ORIGIN || 'https://budetege.ru').replace(/\/$/, ''),
     apiDomain: env.API_DOMAIN || 'api.budetege.ru',
     from: env.SMTP_FROM || env.SMTP_USER || 'noreply@budetege.ru',
+    otvet: env.PISMA_REPLY_TO || POCHTA_VOPROSOV,
     smtp: {
       host: env.SMTP_HOST || 'smtp.yandex.ru',
       port,
@@ -134,6 +139,41 @@ export async function prohod(cfg, smtp = otpravit, fetchPush = fetch) {
   }
   itog.push = await prohodPush(cfg, fetchPush);
   itog.roditeli = pochtaEst(cfg) ? await prohodRoditeli(cfg, smtp) : null;
+  itog.oplata = await prohodOplata(cfg, smtp);
+  return itog;
+}
+
+/* ── Письма об оплате (миграция …_oplata.sql) ─────────────────────── */
+
+/** «Заканчивается» в очередь и письма об оплате, которые пора отправить. */
+export async function prohodOplata(cfg, smtp = otpravit) {
+  const itog = { konec: 0, sent: 0, povtor: 0, failed: 0 };
+  try {
+    itog.konec = (await rpc(cfg, 'oplata_tick_konec', {})) ?? 0;
+  } catch (e) {
+    // До миграции функции нет — тихо пропускаем.
+    if (e.status === 404) return null;
+    throw e;
+  }
+  if (!pochtaEst(cfg)) return itog;
+  const pachka = (await rpc(cfg, 'oplata_pisma_zabrat', { p_limit: cfg.pachka })) ?? [];
+  for (const r of pachka) {
+    let rez;
+    const p = pismoOplaty(r, cfg);
+    if (p === null) rez = 'failed';
+    else {
+      try {
+        await smtp(cfg.smtp, { from: cfg.from, to: r.to, raw: p.raw });
+        rez = 'sent';
+      } catch (e) {
+        rez = e instanceof SmtpError && !e.vremennaya ? 'failed' : 'povtor';
+        log('письмо об оплате не ушло:', bezAdresov(e?.message ?? e));
+      }
+    }
+    itog[rez] += 1;
+    await rpc(cfg, 'oplata_pisma_itog', { p_id: r.id, p_rezultat: rez });
+    if (cfg.pauzaMs > 0) await spat(cfg.pauzaMs);
+  }
   return itog;
 }
 
@@ -421,6 +461,10 @@ export function zapustit(cfg = nastroyki()) {
       }
       if (it.sent + it.povtor + it.failed > 0) {
         log(`писем: отправлено ${it.sent}, повтор ${it.povtor}, не ушло ${it.failed}`);
+      }
+      const o = it.oplata;
+      if (o && o.sent + o.povtor + o.failed > 0) {
+        log(`об оплате: отправлено ${o.sent}, повтор ${o.povtor}, не ушло ${o.failed}`);
       }
       const p = it.push;
       if (p && p.sent + p.povtor + p.failed > 0) {

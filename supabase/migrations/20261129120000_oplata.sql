@@ -11,6 +11,9 @@
 --                    уведомления Result URL: заказ оплачен, доступ выдан.
 --                    Повтор уведомления ничего не меняет.
 --   moy_dostup     — действующий платный доступ человека.
+--   oplata_pisma   — очередь писем: «Доступ открыт», «Доступ продлён» и
+--                    «Доступ заканчивается» за 3 дня до конца; отправляет
+--                    рассыльщик (infra/lite/notifier).
 --
 -- Заказы хранятся и после удаления аккаунта (user_id → null): это учёт
 -- полученных денег, а не данные о занятиях.
@@ -64,12 +67,34 @@ create policy oplata_zakazy_svoi on public.oplata_zakazy
   for select to authenticated using (user_id = auth.uid());
 revoke all on sequence public.oplata_zakazy_inv_id_seq from public, anon, authenticated;
 
--- Удалили аккаунт — заказ остаётся, но ни к кому не привязан.
+-- Письма об оплате. Без внешнего ключа по той же причине; при удалении
+-- аккаунта неотправленные письма удаляет триггер oplata_zabyt.
+create table public.oplata_pisma (
+  id bigint generated always as identity primary key,
+  user_id uuid not null,
+  inv_id bigint references public.oplata_zakazy (inv_id),
+  vid text not null check (vid in ('oplachen', 'prodlen', 'konec')),
+  -- Срок доступа, о котором письмо: одно письмо на срок и вид.
+  dostup_do timestamptz not null,
+  status text not null default 'zhdet' check (status in ('zhdet', 'sent', 'failed', 'otmeneno')),
+  popytki int not null default 0,
+  send_after timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  sent_at timestamptz,
+  unique (user_id, vid, dostup_do)
+);
+create index oplata_pisma_ochered on public.oplata_pisma (send_after) where status = 'zhdet';
+alter table public.oplata_pisma enable row level security;
+revoke all on public.oplata_pisma from public, anon, authenticated;
+
+-- Удалили аккаунт — заказ остаётся, но ни к кому не привязан; письма
+-- этому человеку больше не нужны.
 create or replace function public.oplata_zabyt()
 returns trigger language plpgsql security definer set search_path = ''
 as $$
 begin
   update public.oplata_zakazy set user_id = null where user_id = old.id;
+  delete from public.oplata_pisma where user_id = old.id;
   return old;
 end $$;
 revoke execute on function public.oplata_zabyt() from public, anon, authenticated;
@@ -208,6 +233,12 @@ begin
   update public.oplata_zakazy
      set status = 'oplachen', paid_at = now(), dostup_s = v_s, dostup_do = v_do
    where inv_id = z.inv_id;
+  -- Письмо: доступ открыт или (если новый срок продолжает прежний) продлён.
+  if z.user_id is not null then
+    insert into public.oplata_pisma (user_id, inv_id, vid, dostup_do)
+    values (z.user_id, z.inv_id, case when v_s > now() then 'prodlen' else 'oplachen' end, v_do)
+    on conflict do nothing;
+  end if;
   return jsonb_build_object('itog', 'oplachen', 'dostup_do', v_do);
 end $$;
 
@@ -232,3 +263,105 @@ $$;
 
 revoke execute on function public.moy_dostup() from public, anon;
 grant execute on function public.moy_dostup() to authenticated;
+
+/* ── Письма (отправляет рассыльщик, service_role) ──────────────── */
+
+-- «Доступ заканчивается»: за 3 дня до конца последнего срока тарифа.
+-- Не пишется, если срок кончается с концом продаж «До ЕГЭ» (после
+-- экзамена продлевать нечего) или если уже оплачен следующий срок.
+create or replace function public.oplata_tick_konec()
+returns int
+language plpgsql volatile security definer set search_path = ''
+as $$
+declare
+  v_n int;
+  v_ege_konec timestamptz := ((select do_ege from public.tarif_sroki) + 1)::timestamp at time zone 'Europe/Moscow';
+begin
+  insert into public.oplata_pisma (user_id, inv_id, vid, dostup_do, send_after)
+  select distinct on (z.user_id, z.tarif) z.user_id, z.inv_id, 'konec', z.dostup_do, now()
+    from public.oplata_zakazy z
+   where z.status = 'oplachen' and z.user_id is not null
+     and not exists (select 1 from public.oplata_zakazy d
+                      where d.user_id = z.user_id and d.tarif = z.tarif and d.status = 'oplachen'
+                        and d.dostup_do > z.dostup_do)
+     and z.dostup_do > now() and z.dostup_do <= now() + interval '3 days'
+     and (v_ege_konec is null or z.dostup_do < v_ege_konec)
+   order by z.user_id, z.tarif, z.dostup_do desc
+  on conflict do nothing;
+  get diagnostics v_n = row_count;
+  return v_n;
+end $$;
+
+-- Пачка писем к отправке. Каждое взятое письмо откладывается на 15 минут:
+-- если рассыльщик упал, письмо вернётся в очередь само. «Заканчивается»
+-- после оплаты следующего срока отменяется.
+create or replace function public.oplata_pisma_zabrat(p_limit int default 20)
+returns jsonb
+language plpgsql volatile security definer set search_path = ''
+as $$
+declare
+  v jsonb;
+begin
+  update public.oplata_pisma p set status = 'otmeneno'
+   where p.status = 'zhdet' and p.vid = 'konec'
+     and exists (select 1 from public.oplata_zakazy d
+                  join public.oplata_zakazy z on z.inv_id = p.inv_id
+                  where d.user_id = p.user_id and d.tarif = z.tarif and d.status = 'oplachen'
+                    and d.dostup_do > p.dostup_do);
+
+  with vzyat as (
+    select id from public.oplata_pisma
+     where status = 'zhdet' and send_after <= now()
+     order by id
+     limit greatest(1, least(coalesce(p_limit, 20), 100))
+     for update skip locked
+  ), otlozheno as (
+    update public.oplata_pisma p
+       set send_after = now() + interval '15 minutes', popytki = p.popytki + 1
+      from vzyat where p.id = vzyat.id
+    returning p.*
+  )
+  select coalesce(jsonb_agg(jsonb_build_object(
+           'id', o.id,
+           'vid', o.vid,
+           'to', u.email,
+           'tarif', z.tarif,
+           'srok', z.srok,
+           'summa', to_char(z.summa, 'FM999999990.00'),
+           'dostup_do', o.dostup_do,
+           'popytki', o.popytki) order by o.id), '[]'::jsonb)
+    into v
+    from otlozheno o
+    join auth.users u on u.id = o.user_id
+    left join public.oplata_zakazy z on z.inv_id = o.inv_id;
+  return v;
+end $$;
+
+-- Итог отправки: sent; povtor — снова через 5 минут, 30 минут, 2 часа,
+-- после 5 попыток — failed; failed — письмо не уйдёт (адрес отвергнут).
+create or replace function public.oplata_pisma_itog(p_id bigint, p_rezultat text)
+returns void
+language plpgsql volatile security definer set search_path = ''
+as $$
+begin
+  if p_rezultat not in ('sent', 'povtor', 'failed') then
+    raise exception 'bad_rezultat: %', p_rezultat using errcode = 'check_violation';
+  end if;
+  update public.oplata_pisma
+     set status = case
+                    when p_rezultat = 'sent' then 'sent'
+                    when p_rezultat = 'failed' or popytki >= 5 then 'failed'
+                    else 'zhdet' end,
+         sent_at = case when p_rezultat = 'sent' then now() end,
+         send_after = case popytki when 1 then now() + interval '5 minutes'
+                                   when 2 then now() + interval '30 minutes'
+                                   else now() + interval '2 hours' end
+   where id = p_id and status = 'zhdet';
+end $$;
+
+revoke execute on function public.oplata_tick_konec() from public, anon, authenticated;
+revoke execute on function public.oplata_pisma_zabrat(int) from public, anon, authenticated;
+revoke execute on function public.oplata_pisma_itog(bigint, text) from public, anon, authenticated;
+grant execute on function public.oplata_tick_konec() to service_role;
+grant execute on function public.oplata_pisma_zabrat(int) to service_role;
+grant execute on function public.oplata_pisma_itog(bigint, text) to service_role;

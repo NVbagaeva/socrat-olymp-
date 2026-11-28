@@ -177,6 +177,7 @@ function tekstPisma(s, pv) {
   const linii = [...s.abzacy];
   for (const st of s.stroki ?? []) linii.push(`— ${st.nazvanie}: ${st.tekst}. ${st.href}`);
   if (s.knopka) linii.push('', `${s.knopka.tekst}: ${s.knopka.href}`);
+  if (s.posle?.length) linii.push('', ...s.posle);
   linii.push('', '—', `${SAYT}`, pv.pochemu);
   if (pv.nastroyki) linii.push(`Настройки уведомлений: ${pv.nastroyki}`);
   if (pv.otpiska) linii.push(`Отписаться от писем: ${pv.otpiska}`);
@@ -200,6 +201,9 @@ function htmlPisma(s, pv) {
   const knopka = s.knopka
     ? `<p style="margin:20px 0 4px"><a href="${ekran(s.knopka.href)}" style="display:inline-block;padding:12px 22px;border-radius:12px;background:${CVET.siniy};color:#ffffff;font-size:16px;font-weight:600;text-decoration:none">${ekran(s.knopka.tekst)}</a></p>`
     : '';
+  const posle = (s.posle ?? [])
+    .map((t) => `<p style="margin:16px 0 0;font-size:15px;line-height:1.5;color:${CVET.seryy}">${ekran(t)}</p>`)
+    .join('');
   const otp = pv.otpiska
     ? ` · <a href="${ekran(pv.otpiska)}" style="color:${CVET.seryy}">Отписаться от писем</a>`
     : '';
@@ -216,6 +220,7 @@ function htmlPisma(s, pv) {
     abz +
     tabl +
     knopka +
+    posle +
     '</td></tr>' +
     `<tr><td style="padding:16px 4px 0;font-size:13px;line-height:1.5;color:${CVET.seryy}">${ekran(pv.pochemu)}<br>` +
     (pv.nastroyki ? `<a href="${ekran(pv.nastroyki)}" style="color:${CVET.seryy}">Настройки уведомлений</a>${otp}` : '') +
@@ -290,7 +295,7 @@ export function pismoRoditelyu(r, cfg) {
   return mime(s, pv, { to: r.parent_email, id: `roditel-${r.user_id}`, otpiska: null }, cfg);
 }
 
-function mime(s, pv, { to, id, otpiska }, cfg) {
+function mime(s, pv, { to, id, otpiska, otvet = null }, cfg) {
   const tekst = tekstPisma(s, pv);
   const html = htmlPisma(s, pv);
   const granica = `=_${crypto.randomBytes(12).toString('hex')}`;
@@ -298,6 +303,7 @@ function mime(s, pv, { to, id, otpiska }, cfg) {
   const zag = [
     `From: ${zagolovok(SAYT)} <${cfg.from}>`,
     `To: <${to}>`,
+    ...(otvet ? [`Reply-To: <${otvet}>`] : []),
     `Subject: ${zagolovok(s.tema)}`,
     `Date: ${new Date().toUTCString().replace('GMT', '+0000')}`,
     `Message-ID: <${id}-${crypto.randomBytes(6).toString('hex')}@${domen}>`,
@@ -316,4 +322,131 @@ function mime(s, pv, { to, id, otpiska }, cfg) {
     `--${granica}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${base64(html)}` +
     `--${granica}--\r\n`;
   return { tema: s.tema, tekst, html, raw };
+}
+
+/* ── Письма об оплате (docs/oplata-robokassa.md) ──────────────────── */
+
+/**
+ * Адреса страниц сайта в письмах об оплате. Совпадение с константами
+ * сайта (howto.ts, variant.ts, dz/links.ts, onboarding.ts, tarify/href.ts,
+ * legal/prodavets.ts, paths.ts) проверяет check.mjs.
+ */
+export const ADRESA_OPLATY = {
+  kakPolzovatsya: '/kak-polzovatsya/',
+  zadaniya: '/zadaniya/',
+  variantOnlayn: '/variant/onlayn/',
+  kabinet: '/kabinet/',
+  klassy: '/kabinet/klassy/',
+  dzVydat: '/kabinet/dz-vydat/',
+  generator: '/zadaniya/tekstovye-zadachi/generator/',
+  tarify: '/tarify/',
+  oferta: '/oferta/',
+};
+
+/** Почта для вопросов: на неё же уходит «Ответить» (Reply-To). */
+export const POCHTA_VOPROSOV = 'socratic@budetege.ru';
+
+const TARIF = { uchenik: 'Ученик', repetitor: 'Учитель' };
+
+/** «4 990 ₽» — с неразрывными пробелами. */
+export const rubli = (summa) => `${Number(summa).toLocaleString('ru-RU').replace(/\s/g, ' ')} ₽`;
+
+/**
+ * Конец доступа по Москве: ровно полночь — «30 июня 2027 включительно»,
+ * иначе дата и время: «28 декабря 2026, 16:05 (МСК)».
+ */
+export function doKogda(iso) {
+  const d = new Date(iso);
+  const chasti = Object.fromEntries(
+    new Intl.DateTimeFormat('ru-RU', { timeZone: 'Europe/Moscow', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+      .formatToParts(d)
+      .map((p) => [p.type, p.value]),
+  );
+  const data = (x) =>
+    x.toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow', day: 'numeric', month: 'long', year: 'numeric' }).replace(' г.', '');
+  if (chasti.hour === '00' && chasti.minute === '00') return `${data(new Date(d.getTime() - 1000))} включительно`;
+  return `${data(d)}, ${chasti.hour}:${chasti.minute} (МСК)`;
+}
+
+/** Содержание письма об оплате; r — строка oplata_pisma_zabrat. */
+export function soderzhanieOplaty(r, sayt) {
+  const tarif = TARIF[r.tarif];
+  if (!tarif) return null;
+  const uchenik = r.tarif === 'uchenik';
+  const do_ = doKogda(r.dostup_do);
+  const a = (k) => `${sayt}${ADRESA_OPLATY[k]}`;
+  const knopka = uchenik
+    ? { tekst: 'Перейти к занятиям', href: a('zadaniya') }
+    : { tekst: 'Открыть кабинет', href: a('kabinet') };
+  const sNachat = uchenik
+    ? [
+        { nazvanie: 'Как пользоваться сайтом', href: a('kakPolzovatsya'), tekst: 'коротко про теорию, опорные задачи и тренажёр' },
+        { nazvanie: 'Тренажёр', href: a('zadaniya'), tekst: 'теперь без ограничений, с подсказками к каждому шагу' },
+        { nazvanie: 'Варианты онлайн', href: a('variantOnlayn'), tekst: 'все варианты с баллами' },
+        { nazvanie: 'Кабинет', href: a('kabinet'), tekst: 'работа над ошибками, прогресс и история решений' },
+      ]
+    : [
+        { nazvanie: 'Как пользоваться сайтом', href: a('kakPolzovatsya'), tekst: 'коротко про разделы, генератор и классы' },
+        { nazvanie: 'Создать класс', href: a('klassy'), tekst: 'до 30 учеников, они вступают по коду' },
+        { nazvanie: 'Выдать домашнее задание', href: a('dzVydat'), tekst: 'ученики решают его бесплатно, результаты видны в таблице' },
+        { nazvanie: 'Генератор и «Собрать вариант»', href: a('generator'), tekst: 'теперь без ограничений, листы с решениями' },
+      ];
+  const voprosy = `Вопросы и возврат — просто ответь${uchenik ? '' : 'те'} на это письмо или напиши${uchenik ? '' : 'те'} на ${POCHTA_VOPROSOV}. Условия — в оферте: ${a('oferta')}`;
+  const chek = 'Чек об оплате придёт отдельным письмом.';
+  const vhod = uchenik
+    ? 'ничего вводить не нужно, просто заходи на сайт с этой почтой'
+    : 'ничего вводить не нужно, просто войдите на сайт с этой почтой';
+  const bezAvto = 'Автопродления нет: доступ закончится сам, деньги больше не спишутся.';
+  switch (r.vid) {
+    case 'oplachen':
+      return {
+        tema: `Доступ «${tarif}» открыт 🎉`,
+        abzacy: [
+          `Оплата ${rubli(r.summa)} прошла. Тариф «${tarif}» уже работает в ${uchenik ? 'твоём' : 'вашем'} аккаунте: ${vhod}.`,
+          `Действует до ${do_}. ${bezAvto}`,
+          'С чего начать:',
+        ],
+        stroki: sNachat,
+        knopka,
+        posle: [chek, voprosy],
+      };
+    case 'prodlen':
+      return {
+        tema: `Доступ «${tarif}» продлён 🎉`,
+        abzacy: [
+          `Оплата ${rubli(r.summa)} прошла. Тариф «${tarif}» продлён: новый срок продолжает текущий, ни один день не пропадёт.`,
+          `Теперь действует до ${do_}. ${bezAvto}`,
+        ],
+        knopka,
+        posle: [chek, voprosy],
+      };
+    case 'konec':
+      return {
+        tema: `Доступ «${tarif}» заканчивается`,
+        abzacy: [
+          `Тариф «${tarif}» действует до ${do_}. После этого останется бесплатный доступ, а всё решённое сохранится в аккаунте.`,
+          `Продлить можно на странице тарифов: новый срок начнётся с конца текущего, ни один день не пропадёт.`,
+        ],
+        knopka: { tekst: 'Продлить доступ', href: a('tarify') },
+        vazhnoe: true,
+        posle: [voprosy],
+      };
+    default:
+      return null;
+  }
+}
+
+/** Готовое письмо об оплате или null (неизвестный вид или тариф). */
+export function pismoOplaty(r, cfg) {
+  const s = soderzhanieOplaty(r, cfg.sayt);
+  if (s === null) return null;
+  const pv = {
+    pochemu:
+      r.vid === 'konec'
+        ? 'Письмо пришло, потому что на сайте оплачен тариф и его срок подходит к концу.'
+        : 'Письмо пришло, потому что на сайте оплачен тариф.',
+    nastroyki: null,
+    otpiska: null,
+  };
+  return mime(s, pv, { to: r.to, id: `oplata-${r.id}`, otpiska: null, otvet: cfg.otvet ?? POCHTA_VOPROSOV }, cfg);
 }

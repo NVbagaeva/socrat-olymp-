@@ -19,10 +19,10 @@ import http from 'node:http';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ADRESA, pismo, pismoRoditelyu, soderzhanie, srok, zagolovok } from './pisma.mjs';
+import { ADRESA, ADRESA_OPLATY, doKogda, pismo, pismoOplaty, pismoRoditelyu, POCHTA_VOPROSOV, rubli, soderzhanie, soderzhanieOplaty, srok, zagolovok } from './pisma.mjs';
 import { otpravit, SmtpError } from './smtp.mjs';
 import crypto from 'node:crypto';
-import { bezAdresov, klyuchiVapid, obrabotchik, prohod, prohodRoditeli, soderzhaniePush } from './notifier.mjs';
+import { bezAdresov, klyuchiVapid, obrabotchik, prohod, prohodOplata, prohodRoditeli, soderzhaniePush } from './notifier.mjs';
 import { ADRES_PUSH, b64u, izB64u, otpravitPush, vapidKlyuchi, vapidZagolovok, zashifrovat } from './webpush.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -316,7 +316,7 @@ await ok('SMTP: STARTTLS предложен, но не вышел — ошибк
 
 function restServer() {
   const vyzovy = [];
-  const st = { ochered: [], itogi: [], otpiski: [], klyuch: 'service-key', pushOchered: [], vapid: null, pushRez: [], roditeli: [], roditelItog: [], soglasiya: [] };
+  const st = { ochered: [], itogi: [], otpiski: [], klyuch: 'service-key', pushOchered: [], vapid: null, pushRez: [], roditeli: [], roditelItog: [], soglasiya: [], oplataOchered: [], oplataItog: [], konec: 0 };
   const server = http.createServer(async (req, res) => {
     let telo = '';
     for await (const ch of req) telo += ch;
@@ -342,6 +342,12 @@ function restServer() {
     }
     if (imya === 'push_rezultat') {
       st.pushRez.push(args);
+      return json(200, null);
+    }
+    if (imya === 'oplata_tick_konec') return json(200, st.konec);
+    if (imya === 'oplata_pisma_zabrat') return json(200, st.oplataOchered.splice(0, args.p_limit));
+    if (imya === 'oplata_pisma_itog') {
+      st.oplataItog.push(args);
       return json(200, null);
     }
     if (imya === 'roditel_zabrat') return json(200, st.roditeli.splice(0, args.p_limit));
@@ -407,7 +413,7 @@ await ok('проход без почты: тик и push, писем не бер
   rs.st.ochered.push({ ...baza('dz_novoe'), id: 9 });
   const it = await prohod({ ...cfg, smtp: { ...smtpCfg, pass: '', bezVhoda: false }, vapid: { public: 'x', private: 'y' } });
   assert.equal(it.sent, 0);
-  assert.deepEqual(rs.vyzovy.slice(do_).map((v) => v.imya), ['notify_tick_pochta', 'notify_zabrat_push']);
+  assert.deepEqual(rs.vyzovy.slice(do_).map((v) => v.imya), ['notify_tick_pochta', 'notify_zabrat_push', 'oplata_tick_konec']);
   rs.st.ochered.length = 0;
 });
 
@@ -701,6 +707,110 @@ await ok('здоровье', async () => {
   assert.equal((await fetch(`${H}/health`)).status, 200);
   sost.posledniyUspeh = Date.now() - 10 * 60000;
   assert.equal((await fetch(`${H}/health`)).status, 503);
+});
+
+/* ── Письма об оплате ──────────────────────────────────────────── */
+
+const oplata = (extra = {}) => ({
+  id: 41,
+  vid: 'oplachen',
+  to: 'pokupatel@example.test',
+  tarif: 'uchenik',
+  srok: 'd30',
+  summa: '390.00',
+  dostup_do: '2026-12-28T13:05:00Z',
+  popytki: 1,
+  ...extra,
+});
+
+await ok('оплата: адреса в письмах совпадают с сайтом', () => {
+  const chitat = (f) => fs.readFileSync(path.join(ROOT, 'app/src', f), 'utf8');
+  const est = (f, s) => assert.ok(chitat(f).includes(s), `${f}: ${s}`);
+  est('content/howto.ts', `HOWTO_HREF = '${ADRESA_OPLATY.kakPolzovatsya}'`);
+  est('lib/paths.ts', `ZADANIYA = '${ADRESA_OPLATY.zadaniya.replace(/\/$/, '')}'`);
+  est('content/variant.ts', `VARIANT_ONLAYN_HREF = '${ADRESA_OPLATY.variantOnlayn}'`);
+  est('lib/dz/links.ts', `kabinet: '${ADRESA_OPLATY.kabinet}'`);
+  est('lib/dz/links.ts', `klass: '${ADRESA_OPLATY.klassy}'`);
+  est('lib/dz/links.ts', `vydat: '${ADRESA_OPLATY.dzVydat}'`);
+  est('content/onboarding.ts', `GENERATOR_HREF = '${ADRESA_OPLATY.generator}'`);
+  est('lib/tarify/href.ts', `TARIFY_HREF = '${ADRESA_OPLATY.tarify}'`);
+  est('lib/legal/prodavets.ts', `OFERTA_HREF = '${ADRESA_OPLATY.oferta}'`);
+});
+
+await ok('оплата: срок по Москве, «включительно» в полночь, рубли', () => {
+  assert.equal(doKogda('2026-12-28T13:05:00Z'), '28 декабря 2026, 16:05 (МСК)');
+  assert.equal(doKogda('2027-06-30T21:00:00Z'), '30 июня 2027 включительно');
+  assert.equal(rubli('4990.00'), '4 990 ₽');
+  assert.equal(rubli('390.00'), '390 ₽');
+});
+
+await ok('оплата: ученику на «ты», учителю на «вы», без «мы»', () => {
+  for (const vid of ['oplachen', 'prodlen', 'konec']) {
+    const u = soderzhanieOplaty(oplata({ vid }), SAYT);
+    const t = soderzhanieOplaty(oplata({ vid, tarif: 'repetitor', summa: '890.00' }), SAYT);
+    const vse = (x) => [x.tema, ...x.abzacy, ...(x.posle ?? []), ...(x.stroki ?? []).map((s) => s.tekst)].join(' ');
+    for (const x of [u, t]) {
+      assert.ok(!/(^|[\s«])(мы|нас|нам|наш\w*|поздравляем)([\s,.!»]|$)/i.test(vse(x)), `«мы»: ${vse(x)}`);
+      assert.ok(!/\b(оплатил|оплатила|продлил|продлила)\b/i.test(vse(x)), `род: ${vse(x)}`);
+    }
+    assert.ok(!/\b(вашем|войдите|ответьте|напишите)\b/.test(vse(u)), `ученику на «вы»: ${vse(u)}`);
+    assert.ok(!/\b(твоём|заходи|ответь |напиши )/.test(vse(t)), `учителю на «ты»: ${vse(t)}`);
+  }
+  const u = soderzhanieOplaty(oplata(), SAYT);
+  assert.equal(u.tema, 'Доступ «Ученик» открыт 🎉');
+  assert.ok(u.abzacy[0].startsWith('Оплата 390 ₽ прошла. Тариф «Ученик» уже работает в твоём аккаунте'));
+  assert.ok(u.abzacy[1].includes('28 декабря 2026, 16:05 (МСК)') && u.abzacy[1].includes('Автопродления нет'));
+  assert.equal(u.stroki.length, 4);
+  assert.equal(u.knopka.href, `${SAYT}/zadaniya/`);
+  const t = soderzhanieOplaty(oplata({ tarif: 'repetitor', srok: 'ege', summa: '4990.00', dostup_do: '2027-06-30T21:00:00Z' }), SAYT);
+  assert.equal(t.tema, 'Доступ «Учитель» открыт 🎉');
+  assert.ok(t.abzacy[1].startsWith('Действует до 30 июня 2027 включительно.'));
+  assert.ok(t.stroki.some((s) => s.href.endsWith('/kabinet/dz-vydat/')));
+  assert.equal(soderzhanieOplaty(oplata({ vid: 'prodlen' }), SAYT).tema, 'Доступ «Ученик» продлён 🎉');
+  const k = soderzhanieOplaty(oplata({ vid: 'konec' }), SAYT);
+  assert.equal(k.tema, 'Доступ «Ученик» заканчивается');
+  assert.equal(k.knopka.href, `${SAYT}/tarify/`);
+  assert.equal(k.vazhnoe, true);
+  assert.equal(soderzhanieOplaty(oplata({ vid: 'nechto' }), SAYT), null);
+  assert.equal(soderzhanieOplaty(oplata({ tarif: 'vip' }), SAYT), null);
+});
+
+await ok('оплата: письмо — «Ответить» на почту вопросов, без «Отписаться», тема в UTF-8', () => {
+  const p = pismoOplaty(oplata(), { sayt: SAYT, apiDomain: 'api.budetege.ru', from: 'noreply@budetege.ru' });
+  assert.ok(p.raw.includes(`Reply-To: <${POCHTA_VOPROSOV}>\r\n`));
+  assert.equal(POCHTA_VOPROSOV, 'socratic@budetege.ru');
+  assert.ok(!p.raw.includes('List-Unsubscribe'));
+  assert.ok(p.raw.includes('Subject: =?UTF-8?B?'));
+  const [tekst, html] = dekod(p.raw);
+  assert.ok(tekst.includes('Как пользоваться сайтом: коротко') && tekst.includes(`${SAYT}/kak-polzovatsya/`), tekst);
+  assert.ok(tekst.includes('Чек об оплате придёт отдельным письмом.'));
+  assert.ok(tekst.includes(`ответь на это письмо или напиши на ${POCHTA_VOPROSOV}`), tekst);
+  assert.ok(html.includes('Перейти к занятиям') && html.includes('Доступ «Ученик» открыт 🎉'));
+  const svoy = pismoOplaty(oplata(), { sayt: SAYT, from: 'noreply@budetege.ru', otvet: 'drugoy@budetege.ru' });
+  assert.ok(svoy.raw.includes('Reply-To: <drugoy@budetege.ru>'));
+});
+
+await ok('оплата: проход — тик, письма, итоги; без почты только тик', async () => {
+  const do_ = fs1.pisma.length;
+  rs.st.konec = 1;
+  rs.st.oplataOchered.push(
+    oplata({ id: 51, to: 'u1@example.test' }),
+    oplata({ id: 52, to: 'vremenno@example.test', vid: 'prodlen' }),
+    oplata({ id: 53, to: 'net@example.test', vid: 'konec' }),
+    oplata({ id: 54, to: 'u4@example.test', tarif: 'vip' }),
+  );
+  const it = await prohodOplata(cfg);
+  assert.deepEqual(it, { konec: 1, sent: 1, povtor: 1, failed: 0 }, JSON.stringify(it));
+  // Пачка по 2: остальное — следующим проходом (5xx и неизвестный тариф).
+  const it2 = await prohodOplata(cfg);
+  assert.equal(it2.failed, 2);
+  assert.deepEqual(
+    Object.fromEntries(rs.st.oplataItog.map((x) => [x.p_id, x.p_rezultat])),
+    { 51: 'sent', 52: 'povtor', 53: 'failed', 54: 'failed' },
+  );
+  assert.equal(fs1.pisma.length - do_, 1);
+  const bez = await prohodOplata({ ...cfg, smtp: { ...smtpCfg, pass: '', bezVhoda: false } });
+  assert.deepEqual(bez, { konec: 1, sent: 0, povtor: 0, failed: 0 });
 });
 
 hs.close();

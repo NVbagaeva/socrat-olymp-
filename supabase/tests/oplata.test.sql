@@ -135,10 +135,64 @@ select pg_temp.ok(
 select pg_temp.ok(abs(extract(epoch from dostup_do - now() - interval '60 days')) < 60, 'итого 60 дней')
   from public.oplata_zakazy where inv_id = :inv4;
 
-/* ── 4. Удаление аккаунта: заказ остаётся для учёта ─────────────── */
+/* ── 4. Письма: открыт, продлён, заканчивается ───────────────────── */
+
+select pg_temp.ok((select vid from public.oplata_pisma where inv_id = :inv1) = 'oplachen', 'письмо «открыт»');
+select pg_temp.ok((select vid from public.oplata_pisma where inv_id = :inv4) = 'prodlen', 'письмо «продлён»');
+select pg_temp.ok((select vid from public.oplata_pisma where inv_id = :inv2) = 'oplachen', 'письмо ученику 2');
+select pg_temp.ok((select count(*) from public.oplata_pisma where inv_id = :inv1) = 1, 'повтор уведомления — второе письмо');
+
+set role authenticated;
+select pg_temp.as_user(:'s1');
+select pg_temp.fails($q$select public.oplata_pisma_zabrat(10)$q$, 'permission denied');
+select pg_temp.fails($q$select public.oplata_tick_konec()$q$, 'permission denied');
+select pg_temp.fails($q$select * from public.oplata_pisma$q$, 'permission denied');
+reset role;
+
+set role service_role;
+select public.oplata_pisma_zabrat(10) as pachka \gset
+select pg_temp.ok(jsonb_array_length(:'pachka'::jsonb) = 3, 'в пачке 3 письма: ' || :'pachka');
+select pg_temp.ok((:'pachka'::jsonb -> 0 ->> 'to') = 's1@x.ru' and (:'pachka'::jsonb -> 0 ->> 'tarif') = 'uchenik'
+  and (:'pachka'::jsonb -> 0 ->> 'summa') = '390.00', 'строка письма: ' || :'pachka');
+select pg_temp.ok(jsonb_array_length(public.oplata_pisma_zabrat(10)) = 0, 'взятое письмо выдано второй раз');
+select public.oplata_pisma_itog((select id from public.oplata_pisma where inv_id = :inv1), 'sent');
+select public.oplata_pisma_itog((select id from public.oplata_pisma where inv_id = :inv4), 'povtor');
+select pg_temp.fails($q$select public.oplata_pisma_itog(1, 'nu')$q$, 'bad_rezultat');
+reset role;
+select pg_temp.ok((select status from public.oplata_pisma where inv_id = :inv1) = 'sent', 'итог sent');
+select pg_temp.ok((select status = 'zhdet' and send_after > now() + interval '4 minutes'
+  from public.oplata_pisma where inv_id = :inv4), 'повтор через 5 минут');
+
+-- Учителю: срок кончается через 2 дня → «заканчивается», один раз.
+set role service_role;
+select public.oplata_zachest((:'z3'::jsonb ->> 'inv_id')::bigint, 890);
+reset role;
+update public.oplata_zakazy set dostup_do = now() + interval '2 days'
+ where inv_id = (:'z3'::jsonb ->> 'inv_id')::bigint;
+-- Срок «До ЕГЭ» ученика 2 кончается с концом продаж — напоминания нет;
+-- 60 дней ученика 1 — далеко.
+set role service_role;
+select pg_temp.ok(public.oplata_tick_konec() = 1, 'напоминание учителю');
+select pg_temp.ok(public.oplata_tick_konec() = 0, 'напоминание второй раз');
+reset role;
+select pg_temp.ok((select user_id from public.oplata_pisma where vid = 'konec') = :'t1', 'напоминание не тому');
+-- Оплатил следующий срок до отправки — напоминание отменяется.
+set role authenticated;
+select pg_temp.as_user(:'t1');
+select (public.oplata_sozdat('repetitor', 'd30', true) ->> 'inv_id')::bigint as inv5 \gset
+reset role;
+set role service_role;
+select public.oplata_zachest(:inv5, 890);
+select pg_temp.ok(not exists (select 1 from jsonb_array_elements(public.oplata_pisma_zabrat(10)) e
+  where e ->> 'vid' = 'konec'), 'напоминание после продления ушло');
+reset role;
+select pg_temp.ok((select status from public.oplata_pisma where vid = 'konec') = 'otmeneno', 'напоминание не отменено');
+
+/* ── 5. Удаление аккаунта: заказ остаётся для учёта ─────────────── */
 
 delete from auth.users where id = :'s2';
 select pg_temp.ok(user_id is null and status = 'oplachen', 'заказ после удаления аккаунта')
   from public.oplata_zakazy where inv_id = :inv2;
+select pg_temp.ok((select count(*) from public.oplata_pisma where user_id = :'s2') = 0, 'письма удалённому');
 
-do $$ begin raise notice 'ok: оплата — цена, заказ, зачёт, продление, удаление аккаунта'; end $$;
+do $$ begin raise notice 'ok: оплата — цена, заказ, зачёт, продление, письма, удаление аккаунта'; end $$;
