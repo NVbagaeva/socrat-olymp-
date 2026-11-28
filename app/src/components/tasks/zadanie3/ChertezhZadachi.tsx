@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ZhivoyChertezh3d } from '@/components/stereo/ZhivoyChertezh3d';
+import { SSecheniem } from '@/components/stereo/SSecheniem';
 import type { Model } from '@/lib/solid/model';
 
 /**
@@ -60,14 +61,16 @@ export function ChertezhZadachi({ model, alt }: { model: Model; alt: string }) {
     return <div className="z3-chertezh z3-chertezh--zhdyot" role="img" aria-label={alt} />;
   }
   return (
-    <ZhivoyChertezh3d
-      className="z3-chertezh"
-      model={model}
-      svg={kadr.svg}
-      azimuth={kadr.azimuth}
-      elevation={kadr.elevation}
-      podpisi={[]}
-      tema="ekran"
-    />
+    <SSecheniem model={model}>
+      <ZhivoyChertezh3d
+        className="z3-chertezh"
+        model={model}
+        svg={kadr.svg}
+        azimuth={kadr.azimuth}
+        elevation={kadr.elevation}
+        podpisi={[]}
+        tema="ekran"
+      />
+    </SSecheniem>
   );
 }

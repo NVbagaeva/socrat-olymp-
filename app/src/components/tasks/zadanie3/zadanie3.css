@@ -600,3 +600,16 @@
     min-height: 36px;
   }
 }
+
+/* Чертёж задачи с кнопкой «Сечение» (тренажёр, опорные задачи). */
+.z3-s-secheniem {
+  display: grid;
+  gap: var(--space-1);
+}
+.z3-s-secheniem__knopka {
+  justify-self: center;
+  min-height: 44px;
+}
+.z3-s-secheniem__knopka[aria-pressed='true'] {
+  color: var(--color-accent-text);
+}
