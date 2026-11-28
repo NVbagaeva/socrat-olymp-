@@ -14,6 +14,9 @@ const PostroitSechenie = lazy(() =>
   import('@/components/stereo/PostroitSechenie').then((m) => ({ default: m.PostroitSechenie })),
 );
 
+/** Клавиши, которыми листают страницу. */
+const LISTAT = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
+
 /**
  * Шаг, который ученик сейчас читает: последний шаг, чей верх поднялся
  * выше линии чтения (чуть ниже закреплённого чертежа). Выше всех шагов —
@@ -24,7 +27,7 @@ function useShagPoProkrutke(
   chertezh: React.RefObject<HTMLDivElement | null>,
   vklyucheno: boolean,
   onShag: (n: number) => void,
-  ruchnoyDo: React.RefObject<number>,
+  ruchnoy: React.RefObject<boolean>,
 ) {
   useEffect(() => {
     const ol = spisok.current;
@@ -32,9 +35,10 @@ function useShagPoProkrutke(
     let kadr = 0;
     const proverit = () => {
       kadr = 0;
-      /* Шаг только что выбран нажатием: прокрутка, которую вызвало само
-         нажатие (кнопка подъезжает в окно), не перебивает выбор. */
-      if (performance.now() < ruchnoyDo.current) return;
+      /* Шаг выбран нажатием: прокрутка, которую вызвало само нажатие
+         (кнопка подъезжает в окно) или догрузка чертежа, выбор не
+         перебивает — пока ученик сам не начнёт листать. */
+      if (ruchnoy.current) return;
       const niz = chertezh.current?.getBoundingClientRect().bottom ?? 0;
       /* Линия чтения: под чертежом, но не ниже середины экрана. */
       const liniya = Math.min(Math.max(niz, 0) + 80, window.innerHeight * 0.6);
@@ -50,14 +54,24 @@ function useShagPoProkrutke(
     const naProkrutku = () => {
       if (kadr === 0) kadr = window.requestAnimationFrame(proverit);
     };
+    const sam = (e: Event) => {
+      if (e instanceof KeyboardEvent && !LISTAT.has(e.key)) return;
+      ruchnoy.current = false;
+    };
     window.addEventListener('scroll', naProkrutku, { passive: true });
     window.addEventListener('resize', naProkrutku);
+    for (const t of ['wheel', 'touchmove', 'keydown'] as const) {
+      window.addEventListener(t, sam, { passive: true });
+    }
     return () => {
+      for (const t of ['wheel', 'touchmove', 'keydown'] as const) {
+        window.removeEventListener(t, sam);
+      }
       window.removeEventListener('scroll', naProkrutku);
       window.removeEventListener('resize', naProkrutku);
       if (kadr !== 0) window.cancelAnimationFrame(kadr);
     };
-  }, [spisok, chertezh, vklyucheno, onShag, ruchnoyDo]);
+  }, [spisok, chertezh, vklyucheno, onShag, ruchnoy]);
 }
 
 /**
@@ -83,10 +97,10 @@ export function Primer3({
   const [sechenie, setSechenie] = useState(false);
   const spisok = useRef<HTMLOListElement>(null);
   const chertezh = useRef<HTMLDivElement>(null);
-  const ruchnoyDo = useRef(0);
+  const ruchnoy = useRef(false);
   const mozhnoSechenie = telo(primer.model) !== null;
   /* Чертёж идёт за чтением: шаг, до которого дочитали, построен на нём. */
-  useShagPoProkrutke(spisok, chertezh, primer.shagovChertezha > 0 && !sechenie, setShag, ruchnoyDo);
+  useShagPoProkrutke(spisok, chertezh, primer.shagovChertezha > 0 && !sechenie, setShag, ruchnoy);
   const naChertezhe = Math.min(shag, primer.shagovChertezha);
   /* Подписи чертежу не показываются (кнопки шагов — в тексте решения),
      нужно только их число: по нему он понимает, что шаги есть. */
@@ -107,6 +121,7 @@ export function Primer3({
               shag={naChertezhe}
               onShag={() => {}}
               bezNavigatsii
+              gruzitZaranee
               tema="ekran"
             />
           </div>
@@ -154,7 +169,7 @@ export function Primer3({
                 aria-pressed={shag === i + 1}
                 title={SHAPKA3.shagKnopka}
                 onClick={() => {
-                  ruchnoyDo.current = performance.now() + 1000;
+                  ruchnoy.current = true;
                   setSechenie(false);
                   setShag(shag === i + 1 ? 0 : i + 1);
                 }}
