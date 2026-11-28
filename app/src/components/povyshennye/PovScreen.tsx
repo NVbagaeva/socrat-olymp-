@@ -7,6 +7,8 @@ import { StatsView } from '@/components/variant/online/StatsView';
 import { useArchive } from '@/components/variant/online/useArchive';
 import { TESTOVYJ_RABOTY } from '@/content/variantOnline/shkala';
 import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
+import { rememberMe } from '@/lib/auth/session';
+import { usePovPrintAccess } from '@/lib/povyshennye/printAccess';
 import { PRINT_PATH } from '@/lib/variant/handoff';
 import type { ArchivedWork } from '@/lib/variant/online/archive';
 import { reshatHref, workScope, type Mode } from '@/lib/variant/online/link';
@@ -135,6 +137,11 @@ export function PovScreen({ razdel = 'pov' }: { razdel?: keyof typeof RAZDELY_EK
   const [mode, setMode] = useState<Mode>('trening');
   const [otkryt, setOtkryt] = useState<number | null>(null);
   const [pechat, setPechat] = useState(false);
+  const restricted = razdel === 'pov';
+  const canPrint = usePovPrintAccess(
+    restricted && pechat && otkryt !== null ? r.kod(otkryt) : null,
+    works,
+  );
   const [mesto2, setMesto2] = useState(true);
   /* «Чертёж к условию» части 2 на листе ученика: по умолчанию — без чертежа. */
   const [risunki2, setRisunki2] = useState(false);
@@ -319,11 +326,11 @@ export function PovScreen({ razdel = 'pov' }: { razdel?: keyof typeof RAZDELY_EK
               {c.versii.map(({ v }) => (
                 <tr key={v}>
                   <th scope="row">{r.versiya(c.k, v)}</th>
-                  {LISTY.map((l) => (
+                  {LISTY.filter((l) => !restricted || canPrint(l, v)).map((l) => (
                     <td key={l}>
                       <a
                         href={printHref(r, c.k, v, l, mesto2, risunki2)}
-                        target="_blank"
+                        target={restricted && !rememberMe() ? '_self' : '_blank'}
                         rel="noopener"
                         aria-label={`${T.card.printFor(r.versiya(c.k, v))}: ${T.card.sheets[l]}`}
                       >

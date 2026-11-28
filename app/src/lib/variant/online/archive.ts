@@ -30,6 +30,7 @@ export interface ArchivedTask {
 export interface ArchivedWork {
   /** Ключ: код партии | вариант | режим | время завершения. */
   id: string;
+  ownerId?: string;
   code: string;
   variant: number;
   mode: Mode;

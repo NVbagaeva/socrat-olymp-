@@ -8,6 +8,7 @@ import { TrainerSessionHost } from '@/components/tasks/session';
 import { WORK_KINDS } from '@/content/variant';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
 import { naborHref, naborRazdela, naborTitle, naborVersiya } from '@/lib/povyshennye/razdely';
+import { currentUser } from '@/lib/auth/session';
 import { archiveVolatile, saveWork, type ArchivedWork } from '@/lib/variant/online/archive';
 import {
   ONLINE_PATHS,
@@ -408,7 +409,9 @@ function Finished({
         const numbers = payload.tasks.map((t) => t.egeNumber);
         const score = scoreWork(numbers, c.right);
         const finishedAt = Date.now();
+        const ownerId = currentUser()?.id;
         const rec: ArchivedWork = {
+          ...(ownerId ? { ownerId } : {}),
           id: `${payload.code}|${payload.variant}|${payload.mode}|${finishedAt}`,
           code: payload.code,
           variant: payload.variant,

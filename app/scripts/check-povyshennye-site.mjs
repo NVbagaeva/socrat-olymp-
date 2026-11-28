@@ -361,8 +361,76 @@ await mob.locator('.vo-strip__no').nth(8).click();
 await shot(mob, 'versiya-1-2-zadanie-9-telefon');
 
 console.log('4. Листы версии');
-for (const list of ['uchenik', 'uchitel', 'razbor']) {
-  const p = await desk.newPage();
+/* В сборке без входа учительских листов нет. При включённом входе
+   проверяем в браузере ту же печать с профилем учителя из тестовой базы. */
+const { AUTH_UI } = requireSrc('content/auth');
+const authEnabled = !fs
+  .readFileSync(path.join(OUT, 'voyti', 'index.html'), 'utf8')
+  .includes(AUTH_UI.disabled.title);
+const teacher = await browser.newContext();
+await welcomeSeen(teacher);
+async function printAccount(context, role) {
+  await context.addInitScript((role) => {
+    localStorage.setItem(
+      'budetege-auth',
+      JSON.stringify({
+        access_token: 'fixture',
+        refresh_token: 'fixture',
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        user: { id: 'test-' + role, user_metadata: { role } },
+      }),
+    );
+  }, role);
+  await context.route('**/rest/v1/profiles?**', (route) => route.fulfill({ json: [{ role }] }));
+}
+await printAccount(teacher, 'tutor');
+if (authEnabled) {
+  const student = await browser.newContext();
+  await welcomeSeen(student);
+  await printAccount(student, 'student');
+  await student.route('**/rest/v1/varianty_resheniya?**', (route) => {
+    const q = new URL(route.request().url()).searchParams;
+    const ownFinished =
+      q.get('user_id') === 'eq.test-student' &&
+      q.get('set_code') === 'eq.PV-01' &&
+      q.get('finished_at') === 'not.is.null';
+    return route.fulfill({ json: ownFinished ? [{ variant_no: 1 }] : [] });
+  });
+  const list = await student.newPage();
+  await list.goto(`${BASE}/povyshennye/`);
+  await list.getByTestId('pov-open-1').click();
+  await list.getByTestId('pov-print-1').click();
+  const rows = list.locator('.pov-print__table tr');
+  await rows
+    .first()
+    .getByRole('link', { name: /Разбор/ })
+    .waitFor();
+  ok(
+    (await rows.first().locator('a').allTextContents()).join() === 'Ученик,Разбор',
+    'ученик: завершённая версия',
+    'лишние или пропущенные листы',
+  );
+  ok(
+    (await rows.nth(1).locator('a').allTextContents()).join() === 'Ученик',
+    'ученик: соседняя версия',
+    'лишние или пропущенные листы',
+  );
+  await student.close();
+}
+const printContext = (list) => (list === 'uchenik' ? desk : teacher);
+for (const list of ['uchitel', 'vse', 'razbor']) {
+  const guest = await desk.newPage();
+  await guest.goto(`${BASE}/variant/pechat/?kod=PV-01&v=1&list=${list}`);
+  await guest.locator('p[role="status"]').waitFor();
+  ok(
+    (await guest.locator('#sheet-spec, #sheet-pages').count()) === 0,
+    `гость: лист «${list}» закрыт`,
+    'открыт',
+  );
+  await guest.close();
+}
+for (const list of authEnabled ? ['uchenik', 'uchitel', 'razbor'] : ['uchenik']) {
+  const p = await printContext(list).newPage();
   p.on('pageerror', (e) => errors.push(String(e)));
   await p.addInitScript(() => {
     window.print = () => {};
@@ -493,8 +561,8 @@ for (const w of [320, 375]) {
   await ctx.close();
 }
 
-for (const list of ['uchenik', 'uchitel']) {
-  const p = await desk.newPage();
+for (const list of authEnabled ? ['uchenik', 'uchitel'] : ['uchenik']) {
+  const p = await printContext(list).newPage();
   p.on('pageerror', (e) => errors.push(String(e)));
   await p.addInitScript(() => {
     window.print = () => {};
@@ -635,8 +703,8 @@ for (const k of S_CHAST2.filter((x) => x !== 1)) {
   }
   await ctx.close();
 
-  for (const list of ['uchenik', 'uchitel']) {
-    const q = await desk.newPage();
+  for (const list of authEnabled ? ['uchenik', 'uchitel'] : ['uchenik']) {
+    const q = await printContext(list).newPage();
     q.on('pageerror', (e) => errors.push(`${kod} ${list}: ${String(e)}`));
     await q.addInitScript(() => {
       window.print = () => {};

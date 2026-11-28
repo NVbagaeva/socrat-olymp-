@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useArchive } from '@/components/variant/online/useArchive';
+import { povKod, povNomer } from '@/lib/povyshennye/kod';
+import { usePovPrintAccess } from '@/lib/povyshennye/printAccess';
 import { VARIANT_SCREEN, WORK_KINDS } from '@/content/variant';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
@@ -97,6 +100,54 @@ export function VariantPrint() {
   /* Чертежи к условиям части 2 у ученика — только с ch2=1. */
   const risunki2 = query.get('ch2') === '1';
   const versiya = Number.isInteger(vRaw) && vRaw >= 1 ? vRaw : null;
+  const k = povNomer(code);
+  const sheet = (
+    <PrintSheet key={query.toString()} {...{ code, choice, versiya, mesto2, risunki2 }} />
+  );
+  if (k === null || choice === 'uchenik') return sheet;
+  return (
+    <PovPrintGate code={povKod(k)} choice={choice} version={versiya}>
+      {sheet}
+    </PovPrintGate>
+  );
+}
+
+function PovPrintGate({
+  code,
+  choice,
+  version,
+  children,
+}: {
+  code: string;
+  choice: SheetChoice;
+  version: number | null;
+  children: React.ReactNode;
+}) {
+  const works = useArchive();
+  const canPrint = usePovPrintAccess(code, works);
+  if (canPrint(choice, version)) return children;
+  return (
+    <p role="status">
+      {choice === 'razbor'
+        ? 'Разбор доступен после завершения попытки в этой версии варианта.'
+        : 'Этот комплект доступен только учителю.'}
+    </p>
+  );
+}
+
+function PrintSheet({
+  code,
+  choice,
+  versiya,
+  mesto2,
+  risunki2,
+}: {
+  code: string;
+  choice: SheetChoice;
+  versiya: number | null;
+  mesto2: Mesto2;
+  risunki2: boolean;
+}) {
   const [spec, setSpec] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
