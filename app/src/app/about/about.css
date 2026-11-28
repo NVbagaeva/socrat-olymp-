@@ -11,15 +11,15 @@
   --oa-line: var(--oa-liniya);
   /* Рукописные строки: тёмно-синие «чернила» поверх мягкого голубого
      свечения — белые на светлом фоне не читались. */
-  --oa-rukopis: rgb(22 50 107 / 0.62);
+  --oa-rukopis: var(--oa-rukopis-chernila);
   --oa-rukopis-fon: radial-gradient(
     closest-side,
     rgb(31 95 208 / 0.2),
     rgb(31 95 208 / 0.07) 60%,
     transparent
   );
-  --oa-rukopis-ten: 0 1px 0 rgb(255 255 255 / 0.6);
-  --oa-serdce-ten: drop-shadow(0 1px 0 rgb(255 255 255 / 0.6));
+  --oa-rukopis-ten: 0 1px 0 var(--oa-rukopis-blik);
+  --oa-serdce-ten: drop-shadow(0 1px 0 var(--oa-rukopis-blik));
   /* Чередование тона карточек принципов. */
   --oa-karta-1: rgb(255 255 255 / 0.72);
   --oa-karta-2: rgb(226 237 255 / 0.72);
@@ -58,7 +58,7 @@
     --oa-portret-fon: linear-gradient(160deg, rgb(70 130 255 / 0.22), rgb(70 130 255 / 0.04) 85%);
     /* Кромка рамки — тонкая и в акцентном синем, не светлая: светлая
        линия на ночном фоне читалась как белый контур у фото. */
-    --oa-portret-kromka: rgb(79 134 230 / 0.32);
+    --oa-portret-kromka: var(--oa-portret-kromka-noch);
     --oa-final-fon: linear-gradient(135deg, rgb(255 150 70 / 0.14), rgb(70 130 255 / 0.1));
   }
 }
