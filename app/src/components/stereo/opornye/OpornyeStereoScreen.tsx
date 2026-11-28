@@ -14,6 +14,7 @@ import { answerMatches, choiceMatches, openText } from '@/lib/stereo/opornye3/se
 import { IkGalochka, IkInfo, IkLampa, IkNazad, IkVpered, IkZadacha } from '../metodika/Ikonki';
 import { ItogBloka } from './ItogBloka';
 import { NazhmiRisunok, NazhmiVarianty } from './NazhmiChertezh';
+import { SSecheniem } from '../SSecheniem';
 import { PodskazkaShagi } from './PodskazkaShagi';
 import { VDomashkuOpornyeGen } from '@/components/dz2/knopki';
 import { zhurnalBanka } from '@/lib/trening/zhurnalBanka';
@@ -259,7 +260,10 @@ export function OpornyeStereoScreen({
                   proverka={checked}
                 />
               ) : (
-                risunki[index]
+                /* Опорная задача: к чертежу — построение сечения. */
+                <SSecheniem key={task.id} model={task.model}>
+                  {risunki[index]}
+                </SSecheniem>
               )}
             </div>
           </div>

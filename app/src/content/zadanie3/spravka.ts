@@ -60,6 +60,7 @@ export const SHAPKA3 = {
   sechenie: 'Сечение',
   sechenieDlinno: 'Построить сечение на чертеже',
   kRazboru: 'К решению',
+  kChertezhu: 'К чертежу задачи',
 };
 
 /** Тексты построения сечения (components/stereo/PostroitSechenie). */

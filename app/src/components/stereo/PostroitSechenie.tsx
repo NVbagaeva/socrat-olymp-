@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Mark, Model } from '@/lib/solid/model';
 import { ORTHO_AZIMUTH, ORTHO_ELEVATION, orthoAt } from '@/lib/solid/project';
 import { renderSolid } from '@/lib/solid/render';
-import { postroitSechenie, telo, tochkiVybora, vidSecheniya } from '@/lib/solid/sechenie';
+import { postroitSechenie, sImenami, telo, tochkiVybora, vidSecheniya } from '@/lib/solid/sechenie';
 import { SECHENIE3 as T } from '@/content/zadanie3/spravka';
 import { VrashchaemyyChertezh } from './vrashchenie/VrashchaemyyChertezh';
 import type { Vid } from './vrashchenie/useVrashchenie';
@@ -32,7 +32,9 @@ export function mozhnoSechenie(model: Model): boolean {
  * новое сечение с этой точки.
  */
 export function PostroitSechenie({ model }: { model: Model }) {
-  const poly = useMemo(() => telo(model), [model]);
+  /* Тело с подписями вершин: у чертежа без букв они появляются здесь. */
+  const ishodnoe = useMemo(() => telo(model), [model]);
+  const poly = useMemo(() => (ishodnoe === null ? null : sImenami(ishodnoe)), [ishodnoe]);
   const tochki = useMemo(() => (poly === null ? [] : tochkiVybora(poly)), [poly]);
   const [vybrano, setVybrano] = useState<string[]>([]);
   const az0 = model.rakurs?.azimuth ?? ORTHO_AZIMUTH;
@@ -42,9 +44,7 @@ export function PostroitSechenie({ model }: { model: Model }) {
   const kholst = useRef<HTMLDivElement>(null);
   const [pamyat] = useState(() => new Map<string, number>());
 
-  const vybor = vybrano
-    .map((id) => tochki.find((t) => t.id === id))
-    .filter((t) => t !== undefined);
+  const vybor = vybrano.map((id) => tochki.find((t) => t.id === id)).filter((t) => t !== undefined);
   const sech =
     poly !== null && vybor.length === 3
       ? postroitSechenie(poly, vybor[0]!.p, vybor[1]!.p, vybor[2]!.p)
@@ -73,6 +73,7 @@ export function PostroitSechenie({ model }: { model: Model }) {
     }
     const m: Model = {
       ...model,
+      bodies: model.bodies.map((b) => (b === ishodnoe && poly !== null ? poly : b)),
       lines: [],
       angles: [],
       measures: [],
@@ -90,7 +91,7 @@ export function PostroitSechenie({ model }: { model: Model }) {
       vybrano,
       celShirina: Math.max(22, (CEL_PX * naPiksel) / vid.zum),
     });
-  }, [model, sech, imena, vybor, vid, naPiksel, pamyat, tochki, vybrano]);
+  }, [model, ishodnoe, poly, sech, imena, vybor, vid, naPiksel, pamyat, tochki, vybrano]);
 
   useEffect(() => {
     const node = kholst.current;

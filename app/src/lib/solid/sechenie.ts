@@ -31,10 +31,42 @@ const EPS = 1e-7;
 
 /** Первое непрозрачное тело-многогранник модели: в нём и строится сечение. */
 export function telo(model: Model): Polyhedron | null {
-  const p = model.bodies.find(
-    (b): b is Polyhedron => b.kind === 'polyhedron' && b.glass !== true,
-  );
+  const p = model.bodies.find((b): b is Polyhedron => b.kind === 'polyhedron' && b.glass !== true);
   return p ?? null;
+}
+
+const ABC = 'ABCDEFGHKLMN';
+
+/**
+ * Имена вершин для построения сечения у тела без подписей (чертёж
+ * тренажёра без букв): призма — A, B, C… и A1, B1, C1…, если верхнее
+ * основание — сдвиг нижнего; пирамида — основание и S; иначе по
+ * алфавиту. Тело с именами возвращается как есть.
+ */
+export function sImenami(poly: Polyhedron): Polyhedron {
+  if ((poly.names ?? []).some((n) => n !== null && n !== '')) return poly;
+  const v = poly.vertices;
+  const k = v.length;
+  let names: string[];
+  const n = k / 2;
+  const sdvig = Number.isInteger(n) && n >= 3 ? sub(v[n] as Vec3, v[0] as Vec3) : null;
+  const prizma =
+    sdvig !== null &&
+    v.slice(0, n).every((p, i) => length(sub(sub(v[i + n] as Vec3, p), sdvig)) < 1e-6);
+  if (prizma && n <= ABC.length) {
+    names = [...ABC.slice(0, n)].concat([...ABC.slice(0, n)].map((c) => `${c}1`));
+  } else if (k - 1 <= ABC.length && k >= 4) {
+    /* Вершина пирамиды — точка вне плоскости остальных. */
+    const [a, b, c] = v as Vec3[];
+    const nor = cross(sub(b!, a!), sub(c!, a!));
+    const vne = v.map((p) => Math.abs(dot(nor, sub(p, a!))) > 1e-6);
+    const odna = vne.filter(Boolean).length === 1;
+    let i = 0;
+    names = v.map((_, j) => (odna && vne[j] ? 'S' : (ABC[i++] ?? `P${j}`)));
+  } else {
+    names = v.map((_, j) => ABC[j] ?? `P${j + 1}`);
+  }
+  return { ...poly, names };
 }
 
 /** Рёбра многогранника: пары индексов без повторов. */
@@ -123,10 +155,13 @@ export function postroitSechenie(poly: Polyhedron, a: Vec3, b: Vec3, c: Vec3): S
   };
   tochki.sort((x, y) => ugol(x.p) - ugol(y.p));
   /* Вырожденное сечение (все точки на одной прямой — ребро тела). */
-  const pl = tochki.reduce((s, t, i) => {
-    const t2 = tochki[(i + 1) % tochki.length]!;
-    return add(s, cross(sub(t.p, centr), sub(t2.p, centr)));
-  }, [0, 0, 0] as Vec3);
+  const pl = tochki.reduce(
+    (s, t, i) => {
+      const t2 = tochki[(i + 1) % tochki.length]!;
+      return add(s, cross(sub(t.p, centr), sub(t2.p, centr)));
+    },
+    [0, 0, 0] as Vec3,
+  );
   if (length(pl) < tol * razmer) return null;
   /* Название — с первой отмеченной точки и в сторону второй, если она
      соседняя: «ABC₁D₁», а не «D₁ABC₁». */
