@@ -1,64 +1,56 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { sozdat, type Model3d } from '@/components/stereo/kubShar3d';
-import type { ZhivoyProps } from './tip';
+import { useId } from 'react';
+import { blok } from '@/lib/stereo/telo';
 import { ZhivoyKoren } from './obshchee';
-import { useVrashchenie } from './tri';
+import type { ZhivoyProps } from './tip';
+import { risovatTelo, useVrashchenie } from './tri';
 
-/** Ракурс модели, совпадающий с картинкой шапки (kub-shar-560.webp). */
-const KUB_SHAR_AZ = 38;
-const KUB_SHAR_EL = 36;
+const kub = blok([-1, -1, -1], [2, 2, 2]);
 
-/**
- * №3 «Стереометрия»: стеклянный куб с вписанным шаром — та же живая
- * модель, что оживала в прежней обложке (kubShar3d.ts, three.js), в том
- * же ракурсе, что и картинка. Вращение — общее для объёмных чертежей
- * шапки (useVrashchenie): во все стороны мышью, пальцем вбок, с
- * инерцией и медленным авто-вращением.
- *
- * Ракурс ядра стереометрии и камера модели считают азимут в разные
- * стороны: азимут модели — минус азимут ракурса.
- */
 export default function KubShar({ label, tiho, avtofokus }: ZhivoyProps) {
-  const vr = useVrashchenie({ azimut: -KUB_SHAR_AZ, vysota: KUB_SHAR_EL }, tiho);
-  const host = useRef<HTMLDivElement>(null);
-  const model = useRef<Model3d | null>(null);
-  const rakurs = useRef(vr.rakurs);
-
-  useEffect(() => {
-    const node = host.current;
-    if (node === null) return;
-    const m = sozdat(node, -rakurs.current.azimut, rakurs.current.vysota);
-    model.current = m;
-    const ro = new ResizeObserver(() => m.razmer());
-    ro.observe(node);
-    return () => {
-      ro.disconnect();
-      m.ubrat();
-      model.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    rakurs.current = vr.rakurs;
-    model.current?.vid(-vr.rakurs.azimut, vr.rakurs.vysota);
-  }, [vr.rakurs]);
+  const id = useId();
+  const vr = useVrashchenie({ azimut: 38, vysota: 27 }, tiho);
+  const radius = 64;
+  const chasti = risovatTelo(kub, vr.b, radius, [130, 130]);
 
   return (
     <ZhivoyKoren
       label={label}
       avtofokus={avtofokus}
       className="zhv--3d"
-      naStrelku={(d, e) => vr.naStrelku(d, e)}
+      naStrelku={vr.naStrelku}
       {...vr.pointer}
     >
-      <div
-        ref={host}
-        className="zhv-kub"
-        style={{ position: 'absolute', inset: 0 }}
-        aria-hidden="true"
-      />
+      <svg viewBox="0 0 260 260" aria-hidden="true">
+        <defs>
+          <radialGradient id={id} cx="35%" cy="28%" r="75%">
+            <stop offset="0%" stopColor="var(--chertezh-blik)" />
+            <stop offset="25%" stopColor="var(--chertezh-goluboy-svet)" />
+            <stop offset="65%" stopColor="var(--chertezh-setka)" />
+            <stop offset="90%" stopColor="var(--chertezh-liniya)" />
+            <stop offset="100%" stopColor="var(--chertezh-zalivka-siniy)" />
+          </radialGradient>
+          <linearGradient id={id + '-edge'} x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0%" stopColor="var(--chertezh-liniya)" />
+            <stop offset="54%" stopColor="var(--chertezh-siniy)" />
+            <stop offset="100%" stopColor="var(--chertezh-akcent)" />
+          </linearGradient>
+        </defs>
+        <path d={chasti.skrytye} fill="none" stroke="var(--chertezh-setka)" strokeWidth="2.5" />
+        <circle cx="130" cy="130" r={radius} fill={`url(#${id})`} />
+        {chasti.grani.map((g) => (
+          <path key={g.i} d={g.d} fill={g.n[2] > 0.5 ? 'var(--chertezh-akcent-svet)' : 'var(--chertezh-goluboy)'} opacity="0.16" />
+        ))}
+        <path
+          d={chasti.vidimye}
+          fill="none"
+          stroke={`url(#${id}-edge)`}
+          strokeWidth="4"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      </svg>
     </ZhivoyKoren>
   );
 }

@@ -96,3 +96,15 @@
   list-style: disc;
   line-height: 1.5;
 }
+
+.z45-karta .z45-risunok,
+.z45-karta .stk-shag__risunok,
+.z45-karta .z45-vykladka {
+  min-width: 0;
+  overflow: visible;
+}
+.z45-karta .z45-risunok > svg {
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+}

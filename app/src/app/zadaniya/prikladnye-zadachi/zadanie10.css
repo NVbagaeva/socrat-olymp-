@@ -276,8 +276,9 @@
   line-height: 1.55;
 }
 
-.z10-fizika__formula {
-  overflow-x: auto;
+.z10-fizika__formula .katex,
+.z10-fizika__formula .katex-html {
+  white-space: normal;
 }
 
 .z10-fizika__bukvy {

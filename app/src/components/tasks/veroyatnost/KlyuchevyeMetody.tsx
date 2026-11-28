@@ -2,6 +2,7 @@ import type { Zadanie } from '@/content/veroyatnost';
 import { OPORNYE } from '@/content/opornye';
 import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
+import { TEORIYA_METODOV_5 } from '@/content/teoriya-metodov5';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
 import { kartinkaMetoda } from '@/lib/veroyatnost/metody-kartinki';
 import { bank4Pool, bank5Pool, prep4Pool, prep5Pool } from '@/lib/veroyatnost/pool';
@@ -55,16 +56,25 @@ function kartochki(zadanie: Zadanie): KartochkaMetoda[] {
   const opornye = zadanie === 4 ? prep4Pool() : prep5Pool();
   const vBanke = new Map(navykiMetodov(pool, zadanie).map((k) => [k.id, k.count]));
   return metody.map((m) => {
+    const teoriya = zadanie === 5 ? TEORIYA_METODOV_5[m.id] : undefined;
     const blokId = OPORNYE_VMESTO_TRENAZHERA[zadanie][m.id];
     const blok = blokId === undefined ? undefined : opornye.find((b) => b.id === blokId);
     return {
       id: m.id,
       nomer: m.nomer,
+      ...(teoriya && {
+        bloki: {
+          kakUznat: <Tex text={teoriya.kakUznat} />,
+          algoritm: <Tex text={teoriya.algoritm} />,
+          primer: <Tex text={teoriya.primer} />,
+          oshibka: <Tex text={teoriya.oshibka} />,
+        },
+      }),
       nazvanie: m.nazvanie,
       opisanie: m.opisanie,
       formula: m.formula === undefined ? null : <Tex text={`$${m.formula}$`} />,
       ...(kartinkaMetoda(zadanie, m.id) !== undefined
-        ? { kartinka: <KartinkaMetodaImg zadanie={zadanie} id={m.id} /> }
+        ? { kartinka: <KartinkaMetodaImg zadanie={zadanie} eager={m.nomer <= 3} id={m.id} /> }
         : {}),
       /* Тренировка у метода вероятности одна: тренажёр с выбранным
        методом. Подвал окна с одной тренировкой выглядит как раньше. */

@@ -109,6 +109,25 @@
   --pink-50: #fce8f2;
 }
 
+/* Дерево бросков в теории №4 читается слева направо даже на узких экранах.
+   SVG сохраняет доступные подписи и клики, а визуально поворачивается в
+   горизонтальную схему без изменения содержимого раздела. */
+.m4i-derevo__ramka {
+  overflow: hidden;
+  min-height: 220px;
+}
+.m4i-derevo__svg {
+  transform: rotate(90deg);
+  transform-origin: center;
+  margin: 70px auto;
+}
+.m4i-derevo__svg .m4i-derevo__bukva,
+.m4i-derevo__svg .m4i-list text {
+  transform: rotate(-90deg);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 /* ══════════════════════════════════════════════════════════
    2. СЕМАНТИЧЕСКИЕ ТОКЕНЫ — только их используют компоненты.
    Живут в @theme, поэтому одновременно доступны как var(--color-primary)
@@ -1388,6 +1407,14 @@
    приглушён. «Ночная» плашка тарифа (.tf--b) тёмная в обеих темах —
    её цвета одни на обе. */
 :root {
+  /* Иллюстрации и подсветка на странице автора. */
+  --oa-led: #e2edff;
+  --oa-led-blik: #bed7ff;
+  --oa-terrakota: #e07a2f;
+  --oa-oranzh-noch: #ff9646;
+  --oa-siniy-noch: #4682ff;
+  --oa-kromka-noch: #a0c3ff;
+
   /* Плашки тарифов. */
   --tf-blik: rgb(255 255 255 / 0.55);
   --tf-blik-konec: rgb(255 255 255 / 0);

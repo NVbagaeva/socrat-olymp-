@@ -1380,6 +1380,25 @@
   cursor: pointer;
 }
 
+/* Варианты уровня 1 должны читаться целиком внутри карточки. Их четыре
+   столбца делят доступную ширину, а формулы переносятся внутри ячеек. */
+.z13-zap__variant .z13-zap__scroll {
+  overflow-x: hidden;
+}
+.z13-zap__variant .z13-zap__mini {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+.z13-zap__variant .z13-zap__mini th,
+.z13-zap__variant .z13-zap__mini td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.z13-zap__variant .z13-zap__mini td .katex {
+  font-size: clamp(0.9rem, 3vw, 1.15rem);
+}
+
 /* Уровень 2: клетка-кнопка и варианты под таблицей. */
 .z13-zap__vybor {
   min-width: 5.5rem;

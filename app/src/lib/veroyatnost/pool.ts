@@ -419,6 +419,13 @@ export function bezRazborov(pool: Pool): Pool {
   };
 }
 
+/** Для карты берём первый вариант сборника, иначе первый вариант банка. */
+export function variantPrimera(zadanie: 4 | 5, kind: PoolKind): PoolVariant | undefined {
+  const p = (zadanie === 4 ? BANK_4 : BANK_5).find((x) => x.id === kind.id);
+  const n = (p?.varianty.find((v) => v.source === 'sbornik') ?? p?.varianty[0])?.n;
+  return kind.variants.find((v) => v.n === n);
+}
+
 /** Разборы вариантов прототипа; прототипа нет — ошибка сборки. */
 export function razboryVida(pool: Pool, kindId: string): RazboryVida {
   const kind = pool.kinds.find((k) => k.id === kindId);
