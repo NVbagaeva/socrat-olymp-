@@ -173,32 +173,51 @@
 }
 
 /* ── Рукописная строка в фоне ────────────────────────────────── */
-/* Стоит в собственной строке сетки, поэтому строк контента не касается;
-   уходит за правый край экрана — часть букв срезана нарочно. Под
-   контентом по z-index, мышь не перехватывает. */
+/* Стоит в собственной строке сетки, поэтому строк контента не касается.
+   Целиком в поле страницы, по центру блока: кегль считается от ширины
+   блока (cqi), с запасом на поля подложки и наклон. Ширина строк
+   Caveat в em: «Знания · Опыт · Люди» — 8,05, «Знания · Опыт» — 5,32,
+   «Вместе к большему» — 6,42; +1,2em полей подложки и ~0,3em на наклон.
+   Под контентом по z-index, мышь не перехватывает. */
 .oa-rukopis {
   position: relative;
   z-index: 0;
+  container-type: inline-size;
+  min-width: 0;
   pointer-events: none;
   user-select: none;
-  white-space: nowrap;
-  margin-right: calc(
-    -1 *
-      var(--oa-vylet, max(var(--space-8), calc((100vw - var(--w-container)) / 2 + var(--space-8))))
-  );
-  overflow: hidden;
+  text-align: center;
 }
-.oa-rukopis span {
+.oa-rukopis__tekst {
   display: inline-block;
+  max-width: 100%;
   padding: 0.25em 0.6em 0.35em;
   background: var(--oa-rukopis-fon);
   font-family: var(--font-hand);
-  font-size: clamp(44px, 6.4vw, 96px);
+  /* Одна строка: 9,6em ≤ ширины блока. */
+  font-size: clamp(32px, 10cqi, 96px);
   line-height: 1.05;
+  white-space: nowrap;
   color: var(--oa-rukopis);
   text-shadow: var(--oa-rukopis-ten);
   transform: rotate(-4deg);
-  transform-origin: left center;
+  transform-origin: center;
+}
+.oa-rukopis__stroka {
+  display: inline;
+}
+/* Узкий блок (телефон): последнее слово — второй строкой, без точки
+   в конце первой. Обе строки по центру. */
+@container (max-width: 419.98px) {
+  .oa-rukopis__tekst {
+    font-size: clamp(32px, 14cqi, 56px);
+  }
+  .oa-rukopis__stroka {
+    display: block;
+  }
+  .oa-rukopis__tochka {
+    display: none;
+  }
 }
 
 /* ── 1. Первый экран ─────────────────────────────────────────── */
@@ -520,12 +539,13 @@
   pointer-events: none;
 }
 .oa-rukopis--put {
-  --oa-vylet: 0px;
   margin-top: var(--space-6);
-  white-space: normal;
+  text-align: start;
 }
-.oa-rukopis--put span {
-  font-size: clamp(40px, 4.2vw, 60px);
+.oa-rukopis--put .oa-rukopis__tekst {
+  white-space: normal;
+  font-size: clamp(32px, 11cqi, 60px);
+  transform-origin: left center;
 }
 
 /* Лента: ось слева, на ней точки этапов. */
@@ -813,6 +833,10 @@
 .oa-rukopis--svyaz {
   grid-column: 1 / -1;
 }
+/* «Вместе к большему»: 7,9em в строку. */
+.oa-rukopis--svyaz .oa-rukopis__tekst {
+  font-size: clamp(30px, 12.5cqi, 96px);
+}
 
 /* ── Узкий десктоп и ниже: показатели сеткой 2×2 ─────────────── */
 
@@ -904,9 +928,6 @@
   .oa-printsipy li {
     padding: var(--space-5);
     column-gap: var(--space-4);
-  }
-  .oa-rukopis {
-    --oa-vylet: 16px;
   }
   .oa-polza__ill {
     width: 96px;

@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { clsx } from 'clsx';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { ogStranicy } from '@/lib/og';
 import { SiteFooter, SiteHeader } from '@/components/layout';
@@ -30,11 +30,33 @@ function estFayl(k: SteklyannayaKartinka) {
 }
 
 /* Рукописная строка в фоне секции: крупный Caveat с наклоном. Стоит в
-   своей строке сетки (не поверх текста) и срезается краем экрана. */
-function Rukopis({ text, className }: { text: string; className?: string }) {
+   своей строке сетки (не поверх текста), целиком в поле страницы.
+   Кегль считается от ширины блока (cqi в about.css). Строку из слов
+   через « · » на узком блоке последнее слово уходит на вторую строку:
+   «Знания · Опыт» / «Люди». */
+function Rukopis({
+  text,
+  className,
+  children,
+}: {
+  text: string;
+  className?: string;
+  children?: ReactNode;
+}) {
+  const slova = text.split(' · ');
+  const posledneye = slova.length > 1 ? slova.pop() : undefined;
   return (
     <div className={clsx('oa-rukopis', className)} aria-hidden="true">
-      <span>{text}</span>
+      <span className="oa-rukopis__tekst">
+        <span className="oa-rukopis__stroka">{slova.join(' · ')}</span>
+        {posledneye !== undefined ? (
+          <>
+            <span className="oa-rukopis__tochka"> · </span>
+            <span className="oa-rukopis__stroka">{posledneye}</span>
+          </>
+        ) : null}
+        {children}
+      </span>
     </div>
   );
 }
