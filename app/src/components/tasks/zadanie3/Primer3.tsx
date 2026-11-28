@@ -24,6 +24,7 @@ function useShagPoProkrutke(
   chertezh: React.RefObject<HTMLDivElement | null>,
   vklyucheno: boolean,
   onShag: (n: number) => void,
+  ruchnoyDo: React.RefObject<number>,
 ) {
   useEffect(() => {
     const ol = spisok.current;
@@ -31,6 +32,9 @@ function useShagPoProkrutke(
     let kadr = 0;
     const proverit = () => {
       kadr = 0;
+      /* Шаг только что выбран нажатием: прокрутка, которую вызвало само
+         нажатие (кнопка подъезжает в окно), не перебивает выбор. */
+      if (performance.now() < ruchnoyDo.current) return;
       const niz = chertezh.current?.getBoundingClientRect().bottom ?? 0;
       /* Линия чтения: под чертежом, но не ниже середины экрана. */
       const liniya = Math.min(Math.max(niz, 0) + 80, window.innerHeight * 0.6);
@@ -53,7 +57,7 @@ function useShagPoProkrutke(
       window.removeEventListener('resize', naProkrutku);
       if (kadr !== 0) window.cancelAnimationFrame(kadr);
     };
-  }, [spisok, chertezh, vklyucheno, onShag]);
+  }, [spisok, chertezh, vklyucheno, onShag, ruchnoyDo]);
 }
 
 /**
@@ -79,9 +83,10 @@ export function Primer3({
   const [sechenie, setSechenie] = useState(false);
   const spisok = useRef<HTMLOListElement>(null);
   const chertezh = useRef<HTMLDivElement>(null);
+  const ruchnoyDo = useRef(0);
   const mozhnoSechenie = telo(primer.model) !== null;
   /* Чертёж идёт за чтением: шаг, до которого дочитали, построен на нём. */
-  useShagPoProkrutke(spisok, chertezh, primer.shagovChertezha > 0 && !sechenie, setShag);
+  useShagPoProkrutke(spisok, chertezh, primer.shagovChertezha > 0 && !sechenie, setShag, ruchnoyDo);
   const naChertezhe = Math.min(shag, primer.shagovChertezha);
   /* Подписи чертежу не показываются (кнопки шагов — в тексте решения),
      нужно только их число: по нему он понимает, что шаги есть. */
@@ -149,6 +154,7 @@ export function Primer3({
                 aria-pressed={shag === i + 1}
                 title={SHAPKA3.shagKnopka}
                 onClick={() => {
+                  ruchnoyDo.current = performance.now() + 1000;
                   setSechenie(false);
                   setShag(shag === i + 1 ? 0 : i + 1);
                 }}
