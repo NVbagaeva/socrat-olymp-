@@ -357,9 +357,11 @@ export interface KorenKoren {
 export const nod = (x: number, y: number): number => (y === 0 ? Math.abs(x) : nod(y, x % y));
 
 /**
- * f(x) = √(ax) и g(x) = √(x − b) пересекаются в A вне рисунка. По узлам
- * читаются a (по F) и b (по точкам (b + 1; 1), (b + 4; 2)); абсцисса A —
- * из ax = x − b. Подвох — a дробное, ответ на рисунке не прочесть.
+ * f(x) = √(ax) и g(x) = √(x − b) пересекаются в A. По узлам читаются
+ * a (по F) и b (по точкам (b + 4; 2), (b + 9; 3) — не у самого начала
+ * графика, где кривая круто уходит вверх и узел плохо виден); абсцисса
+ * A — из ax = x − b. Целый ответ — только если A за рамкой рисунка:
+ * иначе его читают по клеткам.
  */
 export function korenKoren(p: KorenKoren, pechat: Pechat = {}): GrafikTask {
   const [fx, fy] = p.F;
@@ -380,14 +382,20 @@ export function korenKoren(p: KorenKoren, pechat: Pechat = {}): GrafikTask {
     else hi = c;
   }
   const proverka = (lo + hi) / 2;
-  const G1: T = [b + 1, 1];
-  const G2: T = [b + 4, 2];
+  const G1: T = [b + 4, 2];
+  const G2: T = [b + 9, 3];
   const win = {
     xmin: Math.min(b, 0) - 1,
     xmax: Math.max(fx, G2[0], 4) + 3,
     ymin: -2,
-    ymax: Math.max(fy, 2) + 3,
+    ymax: Math.max(fy, 3) + 3,
   };
+  if (Number.isInteger(otvet) && !zaOknom(otvet, Math.sqrt(a * otvet), win)) {
+    throw new Error(`korenKoren: целый ответ ${otvet} читается по рисунку`);
+  }
+  if ([G1, G2].some(([x, y]) => x === fx && y === fy)) {
+    throw new Error('korenKoren: узел g совпал с узлом f — это точка пересечения');
+  }
   const scene = (uchitel: boolean) => ({
     window: win,
     grid: { step: 1, show: true },
@@ -419,7 +427,7 @@ export function korenKoren(p: KorenKoren, pechat: Pechat = {}): GrafikTask {
       title: 'Коэффициенты',
       lines: [
         `$f(${dec(fx)})=\\sqrt{${dec(fx)}a}=${dec(fy)}$, значит, $${dec(fx)}a=${dec(an)}$, $a=${aTex}$.`,
-        `$g(${dec(G1[0])})=\\sqrt{${dec(G1[0])}-b}=1$, значит, $b=${dec(b)}$; проверка: $g(${dec(G2[0])})=\\sqrt{${dec(G2[0])}${minusB}}=2$.`,
+        `$g(${dec(G1[0])})=\\sqrt{${dec(G1[0])}-b}=2$, значит, $${dec(G1[0])}-b=4$, $b=${dec(b)}$; проверка: $g(${dec(G2[0])})=\\sqrt{${dec(G2[0])}${minusB}}=3$.`,
       ],
     },
     {
@@ -443,7 +451,11 @@ export function korenKoren(p: KorenKoren, pechat: Pechat = {}): GrafikTask {
     },
     {
       question: 'Как найти $b$?',
-      options: [`По точке $${kv(G1)}$: $${dec(G1[0])}-b=1$`, `$b=${dec(G1[0])}$`, `$b=${dec(-b)}$`],
+      options: [
+        `По точке $${kv(G1)}$: $${dec(G1[0])}-b=4$`,
+        `По точке $${kv(G1)}$: $${dec(G1[0])}-b=2$`,
+        `$b=${dec(-b)}$`,
+      ],
       correct: 0,
     },
     {
